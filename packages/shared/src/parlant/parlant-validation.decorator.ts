@@ -38,10 +38,10 @@ import {
   RiskLevel,
   ConversationalValidationError,
   ParlantConversationContext
-} from '../monitoring/parlant-integration.service';
+} from './monitoring/parlant-integration.service';
 
 // Re-export types for external use
-export { ParlantValidationRequest, ConversationalValidationError, RiskLevel };
+export { ParlantValidationRequest, ParlantValidationResponse, ConversationalValidationError, RiskLevel };
 
 // ===== PARLANT VALIDATION METADATA =====
 
@@ -281,8 +281,8 @@ export class ParlantValidationInterceptor implements NestInterceptor {
           if (!validationResult.approved) {
             throw new ConversationalValidationError(
               validationResult.conversationId,
-              validationResult.reasoning,
-              validationResult.suggestedAlternatives,
+              validationResult.reason,
+              [],
               validationResult.confidence,
               this.mapSecurityLevelToRiskLevel(validationConfig.securityLevel)
             );
@@ -475,12 +475,12 @@ export class ParlantValidationInterceptor implements NestInterceptor {
    */
   private mapSecurityLevelToRiskLevel(securityLevel: SecurityLevel): RiskLevel {
     switch (securityLevel) {
-      case SecurityLevel.MINIMAL: return RiskLevel.MINIMAL;
-      case SecurityLevel.LOW: return RiskLevel.LOW;
-      case SecurityLevel.MEDIUM: return RiskLevel.MEDIUM;
-      case SecurityLevel.HIGH: return RiskLevel.HIGH;
-      case SecurityLevel.CRITICAL: return RiskLevel.CRITICAL;
-      default: return RiskLevel.MEDIUM;
+      case SecurityLevel.MINIMAL: return RiskLevel._MINIMAL;
+      case SecurityLevel.LOW: return RiskLevel._LOW;
+      case SecurityLevel.MEDIUM: return RiskLevel._MODERATE;
+      case SecurityLevel.HIGH: return RiskLevel._HIGH;
+      case SecurityLevel.CRITICAL: return RiskLevel._CRITICAL;
+      default: return RiskLevel._MODERATE;
     }
   }
 
@@ -496,7 +496,12 @@ export class ParlantValidationInterceptor implements NestInterceptor {
     securityNotes: string[];
     contactInfo?: string;
   } {
-    const guidance = {
+    const guidance: {
+      nextSteps: string[];
+      alternatives: string[];
+      securityNotes: string[];
+      contactInfo?: string;
+    } = {
       nextSteps: [
         'Review the operation intent and ensure it aligns with business requirements',
         'Verify you have appropriate permissions for this operation',

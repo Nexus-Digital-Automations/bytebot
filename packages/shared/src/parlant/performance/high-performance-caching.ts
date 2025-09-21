@@ -16,13 +16,29 @@ import { EventEmitter } from 'events';
 import { createHash } from 'crypto';
 import { performance } from 'perf_hooks';
 import { LRUCache } from 'lru-cache';
+
+// Type guard utilities for error handling
+function isError(error: unknown): error is Error {
+  return error instanceof Error;
+}
+
+function getErrorMessage(error: unknown): string {
+  if (isError(error)) {
+    return error.message;
+  }
+  if (typeof error === 'string') {
+    return error;
+  }
+  return 'An unknown error occurred';
+}
 import {
   WrapperRegistryManagementService,
   WrapperInfo
 } from '../function-wrapper/core/wrapper-registry-management';
 import {
   ValidationLevel,
-  FunctionCategory
+  FunctionCategory,
+  DataClassification
 } from '../function-wrapper/interfaces/wrapper-types';
 
 /**
@@ -110,7 +126,7 @@ export class HighPerformanceCachingService {
         this.cacheAnalytics.recordAccess(cacheKey, 'L2', 'hit', retrievalTime);
 
         // Promote to L1 cache for faster future access
-        await this.l1Cache.set(cacheKey, l2Result.data, l2Result.ttl);
+        await this.l1Cache.set(cacheKey, l2Result.data, l2Result.metadata.ttl);
 
         return this.enrichCacheResult(l2Result, 'L2', retrievalTime);
       }
@@ -123,8 +139,8 @@ export class HighPerformanceCachingService {
         this.cacheAnalytics.recordAccess(cacheKey, 'L3', 'hit', retrievalTime);
 
         // Promote to L2 and L1 caches
-        await this.l2Cache.set(cacheKey, l3Result.data, l3Result.ttl);
-        await this.l1Cache.set(cacheKey, l3Result.data, Math.min(l3Result.ttl, this.cachingConfig.l1Config.defaultTtl));
+        await this.l2Cache.set(cacheKey, l3Result.data, l3Result.metadata.ttl);
+        await this.l1Cache.set(cacheKey, l3Result.data, Math.min(l3Result.metadata.ttl, this.cachingConfig.l1Config.defaultTtl));
 
         return this.enrichCacheResult(l3Result, 'L3', retrievalTime);
       }
@@ -138,7 +154,7 @@ export class HighPerformanceCachingService {
 
     } catch (error) {
       this.logger.error(`Cache retrieval error for key: ${cacheKey}`, error);
-      this.cacheAnalytics.recordError(cacheKey, 'retrieval', error.message);
+      this.cacheAnalytics.recordError(cacheKey, 'retrieval', error instanceof Error ? error.message : String(error));
       return null;
     }
   }
@@ -259,7 +275,7 @@ export class HighPerformanceCachingService {
         storageResults
       );
 
-      const result: CacheStorageResult = {
+      const storageResult: CacheStorageResult = {
         success: storageResults.every(r => r.success),
         cacheKey,
         strategy: cacheStrategy,
@@ -270,11 +286,11 @@ export class HighPerformanceCachingService {
 
       this.logger.debug(`Cached result for function: ${functionId}, key: ${cacheKey}`);
 
-      return result;
+      return storageResult;
 
     } catch (error) {
       this.logger.error(`Cache storage error for function: ${functionId}`, error);
-      this.cacheAnalytics.recordError(cacheKey, 'storage', error.message);
+      this.cacheAnalytics.recordError(cacheKey, 'storage', error instanceof Error ? error.message : String(error));
 
       return {
         success: false,
@@ -283,7 +299,7 @@ export class HighPerformanceCachingService {
         tierResults: [],
         storageTime: performance.now() - startTime,
         totalSize: 0,
-        error: error.message
+        error: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -364,7 +380,7 @@ export class HighPerformanceCachingService {
         strategy: invalidationStrategy,
         invalidatedKeys: [],
         invalidationTime: performance.now() - startTime,
-        error: error.message
+        error: getErrorMessage(error)
       };
     }
   }
@@ -431,7 +447,8 @@ export class HighPerformanceCachingService {
             hits: l1Metrics.hits,
             misses: l1Metrics.misses,
             averageResponseTime: avgL1ResponseTime,
-            memoryUsage: l1Metrics.memoryUsed,
+            memoryUsed: l1Metrics.memoryUsed,
+            storageUsed: l1Metrics.storageUsed,
             evictions: l1Metrics.evictions,
             compressionRatio: l1Metrics.compressionRatio
           },
@@ -440,7 +457,8 @@ export class HighPerformanceCachingService {
             hits: l2Metrics.hits,
             misses: l2Metrics.misses,
             averageResponseTime: avgL2ResponseTime,
-            memoryUsage: l2Metrics.memoryUsed,
+            memoryUsed: l2Metrics.memoryUsed,
+            storageUsed: l2Metrics.storageUsed,
             evictions: l2Metrics.evictions,
             compressionRatio: l2Metrics.compressionRatio
           },
@@ -449,7 +467,8 @@ export class HighPerformanceCachingService {
             hits: l3Metrics.hits,
             misses: l3Metrics.misses,
             averageResponseTime: avgL3ResponseTime,
-            storageUsage: totalStorageUsed,
+            memoryUsed: l3Metrics.memoryUsed,
+            storageUsed: totalStorageUsed,
             evictions: l3Metrics.evictions,
             compressionRatio: l3Metrics.compressionRatio
           }
@@ -473,7 +492,7 @@ export class HighPerformanceCachingService {
 
     } catch (error) {
       this.logger.error('Failed to collect cache performance metrics', error);
-      throw new CachingError(`Failed to collect metrics: ${error.message}`);
+      throw new CachingError(`Failed to collect metrics: ${getErrorMessage(error)}`);
     }
   }
 
@@ -552,7 +571,7 @@ export class HighPerformanceCachingService {
 
     } catch (error) {
       this.logger.error(`Cache optimization failed: ${optimizationId}`, error);
-      throw new CachingError(`Optimization failed: ${error.message}`);
+      throw new CachingError(`Optimization failed: ${getErrorMessage(error)}`);
     }
   }
 
@@ -611,7 +630,7 @@ export class HighPerformanceCachingService {
 
     } catch (error) {
       this.logger.error(`Cache preloading failed: ${preloadId}`, error);
-      throw new CachingError(`Preloading failed: ${error.message}`);
+      throw new CachingError(`Preloading failed: ${getErrorMessage(error)}`);
     }
   }
 
@@ -682,7 +701,7 @@ export class HighPerformanceCachingService {
 
     } catch (error) {
       this.logger.error(`Failed to generate cache analytics report: ${reportId}`, error);
-      throw new CachingError(`Report generation failed: ${error.message}`);
+      throw new CachingError(`Report generation failed: ${getErrorMessage(error)}`);
     }
   }
 
@@ -976,15 +995,31 @@ export class HighPerformanceCachingService {
     // Generate prioritized recommendations based on analysis
     return opportunities.slice(0, 10).map(opportunity => ({
       id: this.generateRecommendationId(),
-      category: opportunity.category,
+      category: this.mapOpportunityToRecommendationCategory(opportunity.category),
       priority: opportunity.priority,
       title: opportunity.title,
       description: opportunity.description,
       implementation: opportunity.implementation,
-      expectedImpact: opportunity.expectedImpact,
+      expectedImpact: `Hit rate: +${(opportunity.expectedImpact.hitRateImprovement * 100).toFixed(1)}%, Response time: -${opportunity.expectedImpact.responseTimeImprovement}ms`,
       estimatedEffort: opportunity.estimatedEffort,
       riskLevel: opportunity.riskLevel
     }));
+  }
+
+  private mapOpportunityToRecommendationCategory(
+    opportunityCategory: 'hit_rate' | 'response_time' | 'capacity' | 'efficiency'
+  ): 'performance' | 'efficiency' | 'capacity' | 'reliability' {
+    switch (opportunityCategory) {
+      case 'hit_rate':
+      case 'response_time':
+        return 'performance';
+      case 'efficiency':
+        return 'efficiency';
+      case 'capacity':
+        return 'capacity';
+      default:
+        return 'reliability';
+    }
   }
 
   // Utility methods
@@ -1194,7 +1229,7 @@ export class L1MemoryCache {
         size: 0,
         compressionRatio: 1.0,
         responseTime: performance.now() - startTime,
-        error: error.message
+        error: getErrorMessage(error)
       };
     }
   }
@@ -1344,7 +1379,7 @@ export class L2DistributedCache {
         size: 0,
         compressionRatio: 1.0,
         responseTime: performance.now() - startTime,
-        error: error.message
+        error: getErrorMessage(error)
       };
     }
   }
@@ -1465,7 +1500,7 @@ export class L3PersistentCache {
         size: 0,
         compressionRatio: 1.0,
         responseTime: performance.now() - startTime,
-        error: error.message
+        error: getErrorMessage(error)
       };
     }
   }
@@ -1623,7 +1658,7 @@ export class CacheIntelligenceEngine {
   }
 
   private shouldEnableEncryption(wrapperInfo: WrapperInfo, context: CacheContext): boolean {
-    return wrapperInfo.config.metadata?.dataClassification === 'RESTRICTED';
+    return wrapperInfo.config.metadata?.dataClassification === DataClassification.RESTRICTED;
   }
 
   private generateTags(functionId: string, wrapperInfo: WrapperInfo, context: CacheContext): string[] {

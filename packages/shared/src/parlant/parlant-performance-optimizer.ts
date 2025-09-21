@@ -277,7 +277,7 @@ export class ParlantPerformanceOptimizer implements OnModuleInit, OnApplicationS
       id: 'read_only_fast',
       name: 'Read-Only Fast Track',
       securityLevels: [SecurityLevel.LOW, SecurityLevel.MINIMAL],
-      riskLevels: [RiskLevel.MINIMAL, RiskLevel.LOW],
+      riskLevels: [RiskLevel._MINIMAL, RiskLevel._LOW],
       cacheOverride: { ttl: 600000, enabled: true, compression: false }, // 10 minutes
       parallelOverride: { enabled: true, maxConcurrent: 50 },
       timeoutOverride: 2000,
@@ -288,7 +288,7 @@ export class ParlantPerformanceOptimizer implements OnModuleInit, OnApplicationS
       id: 'critical_secure',
       name: 'Critical Security Validation',
       securityLevels: [SecurityLevel.CRITICAL],
-      riskLevels: [RiskLevel.CRITICAL],
+      riskLevels: [RiskLevel._CRITICAL],
       cacheOverride: { ttl: 60000, enabled: false, compression: true }, // 1 minute, no cache
       parallelOverride: { enabled: false, maxConcurrent: 1 },
       timeoutOverride: 10000,
@@ -299,7 +299,7 @@ export class ParlantPerformanceOptimizer implements OnModuleInit, OnApplicationS
       id: 'medium_balanced',
       name: 'Medium Risk Balanced',
       securityLevels: [SecurityLevel.MEDIUM, SecurityLevel.HIGH],
-      riskLevels: [RiskLevel.MEDIUM, RiskLevel.HIGH],
+      riskLevels: [RiskLevel._MODERATE, RiskLevel._HIGH],
       cacheOverride: { ttl: 300000, enabled: true, compression: true }, // 5 minutes
       parallelOverride: { enabled: true, maxConcurrent: 10 },
       timeoutOverride: 5000,
@@ -446,12 +446,11 @@ export class ParlantPerformanceOptimizer implements OnModuleInit, OnApplicationS
    * Select the optimal strategy for the request
    */
   private selectOptimizationStrategy(request: ParlantValidationRequest): OptimizationStrategy {
-    // Find strategy matching security and risk levels
+    // Find strategy matching risk levels (since securityLevel is not available in context)
     for (const strategy of this.optimizationStrategies) {
-      const securityMatch = strategy.securityLevels.includes(request.context.securityLevel as SecurityLevel);
       const riskMatch = strategy.riskLevels.includes(request.riskLevel);
 
-      if (securityMatch && riskMatch) {
+      if (riskMatch) {
         return strategy;
       }
     }
@@ -564,7 +563,6 @@ export class ParlantPerformanceOptimizer implements OnModuleInit, OnApplicationS
     const keyData = {
       functionName: request.functionName,
       userId: request.context.userId,
-      securityLevel: request.context.securityLevel,
       riskLevel: request.riskLevel,
       strategy: strategy.id,
       // Only include parameters for non-critical strategies
@@ -983,6 +981,20 @@ export class ParlantPerformanceOptimizer implements OnModuleInit, OnApplicationS
   private analyzePredictivePatterns(): void {
     // Mock implementation - would analyze actual usage patterns
     this.logger.debug('Analyzing predictive caching patterns');
+  }
+
+  /**
+   * Start batch processing system
+   */
+  private startBatchProcessing(): void {
+    // Initialize batch processing timer
+    setInterval(() => {
+      if (!this.processingBatch && this.validationQueue.length > 0) {
+        this.logger.debug('Triggering scheduled batch processing', {
+          queueSize: this.validationQueue.length
+        });
+      }
+    }, this.config.parallel.batchTimeout);
   }
 
   /**
