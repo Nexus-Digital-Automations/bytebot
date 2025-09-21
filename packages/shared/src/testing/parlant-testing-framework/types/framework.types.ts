@@ -608,7 +608,14 @@ export type AssertionFunction<T = any> = (actual: T) => boolean | Promise<boolea
  * Utility type for test mock functions
  */
 export type MockFunction<TArgs extends unknown[] = any[], TResult = any> =
-  jest.MockedFunction<TestFunction<TArgs, TResult>>;
+  TestFunction<TArgs, TResult> & {
+    mockImplementation(fn: TestFunction<TArgs, TResult>): void;
+    mockReturnValue(value: TResult): void;
+    mockResolvedValue(value: TResult): void;
+    mockRejectedValue(error: any): void;
+    mockClear(): void;
+    mockReset(): void;
+  };
 
 /**
  * Utility type for partial test configuration

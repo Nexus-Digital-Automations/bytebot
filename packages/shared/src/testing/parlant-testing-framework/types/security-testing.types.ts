@@ -17,7 +17,7 @@
  * @author AIgent Testing Framework
  */
 
-import { DatabaseFunction } from './test-framework.types';
+import { DatabaseFunction } from './framework.types';
 
 // ============================================================================
 // Core Security Testing Types

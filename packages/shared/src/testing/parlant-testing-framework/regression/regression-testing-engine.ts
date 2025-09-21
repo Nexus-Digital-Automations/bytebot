@@ -15,7 +15,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter } from 'events';
 import * as fs from 'fs';
 import * as path from 'path';
-import { DatabaseFunction } from '../types/test-framework.types';
+import { DatabaseFunction } from '../types/framework.types';
 import {
   RegressionTestConfig,
   RegressionTestResult,

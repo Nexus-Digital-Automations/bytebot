@@ -19,7 +19,7 @@ import {
   TestFrameworkConfig,
   TestResult,
   TestStatus
-} from '../types/test-framework.types';
+} from '../types/framework.types';
 import {
   PerformanceTestConfig,
   PerformanceTestResult,

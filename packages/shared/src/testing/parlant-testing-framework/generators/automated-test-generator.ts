@@ -23,7 +23,7 @@ import {
   TestSetup,
   TestTeardown,
   TestFrameworkConfig
-} from '../types/test-framework.types';
+} from '../types/framework.types';
 import { PerformanceTestConfig } from '../types/performance-testing.types';
 import { SecurityTestConfig } from '../types/security-testing.types';
 

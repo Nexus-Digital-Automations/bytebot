@@ -23,7 +23,7 @@ import {
   TestCategory,
   DatabaseFunction,
   TestExecutionContext
-} from '../types/test-framework.types';
+} from '../types/framework.types';
 import { PerformanceTestResult } from '../types/performance-testing.types';
 import { SecurityTestResult } from '../types/security-testing.types';
 

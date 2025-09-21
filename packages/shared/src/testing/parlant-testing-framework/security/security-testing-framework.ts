@@ -16,7 +16,7 @@ import { EventEmitter } from 'events';
 import {
   DatabaseFunction,
   TestFrameworkConfig
-} from '../types/test-framework.types';
+} from '../types/framework.types';
 import {
   SecurityTestConfig,
   SecurityTestResult,

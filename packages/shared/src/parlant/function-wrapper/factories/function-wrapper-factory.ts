@@ -140,7 +140,7 @@ export class EnterpriseFunctionWrapperFactory implements FunctionWrapperFactory 
         }
 
         const wrapped = this.createWrapper(func as any, config);
-        results[key as keyof T] = wrapped;
+        results[key as keyof T] = wrapped as WrapFunction<T[keyof T]>;
 
       } catch (error) {
         const wrapperError = new WrapperCreationError(

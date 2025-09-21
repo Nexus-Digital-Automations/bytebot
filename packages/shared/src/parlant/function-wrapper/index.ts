@@ -14,6 +14,25 @@
 // Core Interfaces and Types
 export * from './interfaces/wrapper-types';
 
+// Import runtime enum values for use in function bodies
+import {
+  WrapperConfig,
+  ValidationLevel,
+  FunctionCategory,
+  DataClassification,
+  AnyFunction,
+  WrapFunction,
+  SecurityRiskLevel,
+  ErrorCategory
+} from './interfaces/wrapper-types';
+
+// Import factory for QuickStartHelper
+import { EnterpriseFunctionWrapperFactory } from './factories/function-wrapper-factory';
+
+// Import additional classes for use in function bodies
+import { FunctionSignatureInspector, TypeSafeWrapperCreator } from './core/signature-preserving-wrapper';
+import { WrapperRegistryManagementService } from './core/wrapper-registry-management';
+
 // Core Implementation Components
 export {
   SignaturePreservingWrapper,
@@ -97,7 +116,6 @@ export {
   WrapperPerformanceMonitor,
   WrapperHealthMonitor,
   WrapperLifecycleManager,
-  WrapperStatus,
   RegisteredWrapper,
   WrapperRegistrationMetadata,
   WrapperRegistrationFullMetadata,

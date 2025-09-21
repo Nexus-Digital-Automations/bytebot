@@ -10,7 +10,7 @@
  * @author PARLANT Testing Framework Agent
  */
 
-import { DatabaseFunction } from './test-framework.types';
+import { DatabaseFunction } from './framework.types';
 
 // ============================================================================
 // Core Regression Testing Types

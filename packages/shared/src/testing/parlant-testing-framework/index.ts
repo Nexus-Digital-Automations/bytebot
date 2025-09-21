@@ -59,7 +59,7 @@ export * from './automation/test-automation-scripts';
 export * from './automation/continuous-testing-manager';
 
 // Types and Interfaces
-export * from './types/test-framework.types';
+export * from './types/framework.types';
 export * from './types/test-execution.types';
 export * from './types/performance-testing.types';
 export * from './types/security-testing.types';
@@ -70,7 +70,7 @@ export * from './types/regression-testing.types';
 export { ResourceLimits } from './core/parallel-execution-manager';
 export { DashboardWidget } from './coverage/coverage-reporting-dashboard';
 export { PerformanceTestScenario } from './performance/performance-testing-suite';
-export { PerformanceThresholds } from './types/test-framework.types';
+export { PerformanceThresholds } from './types/framework.types';
 // DataClassification is now exported from './types/security-testing.types'
 export { CoverageDataSource } from './coverage/coverage-analyzer';
 export { AlertSeverity, ComparisonVerdict, FilterType } from './types/performance-testing.types';

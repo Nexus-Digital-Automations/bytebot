@@ -22,7 +22,7 @@ import {
   TestStatus,
   TestCategory,
   ParallelConfig
-} from '../types/test-framework.types';
+} from '../types/framework.types';
 
 /**
  * Parallel execution configuration

@@ -23,7 +23,8 @@ import {
   SecurityRiskLevel,
   ValidationRule,
   WrapperError,
-  ErrorCategory
+  ErrorCategory,
+  WrapperStatus
 } from '../interfaces/wrapper-types';
 import {
   SignaturePreservingWrapper,
@@ -1358,16 +1359,6 @@ export class WrapperLifecycleManager {
 
 // Type Definitions
 
-/**
- * Wrapper status enumeration
- */
-export enum WrapperStatus {
-  ACTIVE = 'active',
-  INACTIVE = 'inactive',
-  ERROR = 'error',
-  DEACTIVATING = 'deactivating',
-  MAINTENANCE = 'maintenance'
-}
 
 /**
  * Registered wrapper information
@@ -1390,7 +1381,7 @@ export interface RegisteredWrapper {
 export interface WrapperRegistrationMetadata {
   readonly registeredBy?: string;
   readonly version?: string;
-  readonly tags?: string[];
+  readonly tags?: readonly string[];
   readonly description?: string;
   readonly environment?: string;
   readonly team?: string;
@@ -1400,7 +1391,7 @@ export interface WrapperRegistrationMetadata {
 /**
  * Full wrapper registration metadata
  */
-export interface WrapperRegistrationFullMetadata extends WrapperRegistrationMetadata {
+export interface WrapperRegistrationFullMetadata extends Omit<WrapperRegistrationMetadata, 'tags' | 'description' | 'version' | 'registeredBy'> {
   readonly registeredAt: Date;
   readonly registeredBy: string;
   readonly version: string;
