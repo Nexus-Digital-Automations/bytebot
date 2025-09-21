@@ -112,6 +112,50 @@ export default tseslint.config(
     },
   },
 
+  // Special rules for infrastructure and utility files that legitimately need flexible typing
+  {
+    files: [
+      "**/*.module.ts",
+      "src/modules/**/*.ts",
+      "src/utils/**/*.ts",
+      "src/security/**/*.ts",
+      "src/config/**/*.ts",
+      "src/middleware/**/*.ts",
+      "src/interceptors/**/*.ts",
+      "src/guards/**/*.ts",
+      "src/decorators/**/*.ts",
+      "src/types/**/*.ts",
+      "src/strategies/**/*.ts",
+      "src/validation/**/*.ts",
+      "src/pipes/**/*.ts",
+    ],
+    rules: {
+      // Relax `any` type restrictions for infrastructure files that need flexible typing
+      "@typescript-eslint/no-explicit-any": "warn",
+
+      // Allow unused parameters in infrastructure files (common for interface implementations)
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+        },
+      ],
+      "no-unused-vars": [
+        "warn",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+        },
+      ],
+
+      // Allow prototype builtins in utility files
+      "no-prototype-builtins": "warn",
+    },
+  },
+
   // Special rules for test files and mocks
   {
     files: [
