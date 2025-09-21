@@ -186,7 +186,7 @@ expect(stats.performance.maxConcurrentSessions).toBe(1000);
   // ===== SESSION MANAGEMENT TESTS =====
 
   describe('Session Management', () => {
-it('should create validation request successfully', async () => {
+    it('should create validation request successfully', () => {
       const _mockContext: ValidationContext = {
         userId: 'test-user-123',
         applicationContext: 'test-app',
@@ -501,7 +501,7 @@ it('should handle invalid message format gracefully', () => {
 
 
 
-    it('should handle connection failures gracefully', async () => {
+    it('should handle connection failures gracefully', () => {
 
   const mockClient = new MockWebSocketClient();// Simulate connection error
       mockClient.readyState = WebSocket.WebSocket.CLOSED;
@@ -743,4 +743,6 @@ describe('Performance Benchmarks', () => {
     expect(totalTime).toBeLessThan(10000); // Complete within 10 seconds
     expect(averageTime).toBeLessThan(200); // Average validation under 200ms
   });
+});
+
 });

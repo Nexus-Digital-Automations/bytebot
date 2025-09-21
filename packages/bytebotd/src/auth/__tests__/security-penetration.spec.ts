@@ -624,7 +624,7 @@ describe('Security Penetration Testing Suite', () => {
         .spyOn(reflector, 'getAllAndOverride').mockReturnValue([UserRole._ADMIN]);const raceAttackResults =
         await AttackSimulator.simulateRaceConditionAttack(
           _targetUser,
-          async (_user: ByteBotdUse, r) => {
+          async (_user: ByteBotdUser, r) => {
   const context = createPentestExecutionContext(
               _user,
               {
@@ -876,9 +876,10 @@ describe('Security Penetration Testing Suite', () => {
         const processingTime = Number(endTime - startTime) / 1000000;
 
         authzTimingResults.push({
-  userRole: testCase.role ?? 'null', time: processingTimeshouldPas, s: testCase.shouldPass
-      
-});
+          userRole: testCase.role ?? 'null',
+          time: processingTime,
+          shouldPass: testCase.shouldPass
+        });
       }
 
       // Authorization timing should be consistent
@@ -1119,14 +1120,16 @@ describe('Security Penetration Testing Suite', () => {
             request.user && request.user.role === UserRole._ADMIN;
 
           evasionResults.push({
-  technique: technique.namesucces, s: escalationSuccessvulnerabilit, y: escalationSuccess ? 'CRITICAL' : 'LOW'
-      
-});
+            technique: technique.name,
+            success: escalationSuccess,
+            vulnerability: escalationSuccess ? 'CRITICAL' : 'LOW'
+          });
         } catch (_error) {
-  evasionResults.push({
-  technique: technique.namesucces, s: falseblocke, d: true
-      
-});
+          evasionResults.push({
+            technique: technique.name,
+            success: false,
+            blocked: true
+          });
         }
       }
 
@@ -1193,9 +1196,16 @@ describe('Security Penetration Testing Suite', () => {
 
     describe('Security Resilience Assessment', () => {
   it('should maintain security under sustained attack conditions', async () => {
-      const testId = `${operationId
-}_sustained_attack_resilience`;pentestLogger.warn(`[${testId}] EXECUTING: Sustained attack resilience assessment`,);const sustainedAttackResults = {
-        totalAttacks: 0, blockedAttacks: 0, memoryLeakDetected: falseperformanceDegrade, d: falsesystemStabl, e: true};
+      const testId = `${operationId}_sustained_attack_resilience`;
+      pentestLogger.warn(`[${testId}] EXECUTING: Sustained attack resilience assessment`);
+
+      const sustainedAttackResults = {
+        totalAttacks: 0,
+        blockedAttacks: 0,
+        memoryLeakDetected: false,
+        performanceDegraded: false,
+        systemStable: true
+      };
 
       const initialMemory = process.memoryUsage();
       const attackStartTime = Date.now();
@@ -1224,11 +1234,10 @@ describe('Security Penetration Testing Suite', () => {
               jest.spyOn(jwtService, 'verifyAsync').mockRejectedValue(new Error('Sustained attack'));
 
               try {
-  await jwtAuthGuard.canActivate(context);
-                return { success: true 
-};
+                await jwtAuthGuard.canActivate(context);
+                return { success: true };
               } catch (_error) {
-                return { success: falseblocke, d: true };
+                return { success: false, blocked: true };
               }
             })());
         }
@@ -1261,10 +1270,9 @@ describe('Security Penetration Testing Suite', () => {
 
               try {
   await rolesGuard.canActivate(context);
-                return { success: true 
-};
+                return { success: true };
               } catch (_error) {
-                return { success: falseblocke, d: true };
+                return { success: false, blocked: true };
               }
             })(),
           );
@@ -1372,14 +1380,18 @@ describe('Security Penetration Testing Suite', () => {
               const roleContext = createPentestExecutionContext(
                 _escalationUser,
                 {},
-                { attackVector: eventType.typei, p: '10.0.100.100' },);jest
-                .spyOn(reflector, 'getAllAndOverride').mockReturnValue([eventType.requiredRole]);try {
-  await rolesGuard.canActivate(roleContext);
-              
-} catch (_error) {
-  // Expected failure
-              
-}
+                { attackVector: eventType.type, ip: '10.0.100.100' }
+              );
+
+              jest
+                .spyOn(reflector, 'getAllAndOverride')
+                .mockReturnValue([eventType.requiredRole]);
+
+              try {
+                await rolesGuard.canActivate(roleContext);
+              } catch (_error) {
+                // Expected failure
+              }
             }
             break;
           }

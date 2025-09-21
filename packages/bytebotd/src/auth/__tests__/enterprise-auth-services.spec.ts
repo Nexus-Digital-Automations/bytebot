@@ -629,10 +629,10 @@ describe('JwtStrategy', () => {
         },
         {
           provide: 'ParlantAuthBridgeService',
-          useValue: parlantAuthBridge
+          useValue: parlantAuthBridge,
         },
-      ]
-      }).compile();
+      ],
+    }).compile();
 
     strategy = module.get<JwtStrategy>(JwtStrategy);
   });
@@ -641,7 +641,7 @@ describe('JwtStrategy', () => {
     jest.clearAllMocks();
   });
 
-    describe('validate', () => {
+  describe('validate', () => {
     it('should validate JWT payload and return user object', async () => {
       // Arrange
       const payload = {
@@ -800,8 +800,8 @@ describe('Authentication Integration', () => {
           provide: 'EnterpriseAuthService',
           useValue: createMockEnterpriseAuthService(),
         },
-      ]
-      }).compile();
+      ],
+    }).compile();
 
     jwtAuthGuard = module.get<JwtAuthGuard>(JwtAuthGuard);
     rolesGuard = module.get<RolesGuard>(RolesGuard);
@@ -867,4 +867,5 @@ describe('Authentication Integration', () => {
     expect(roleResults.every(result => result === true)).toBe(true);
     expect(endTime - startTime).toBeLessThan(2000); // 50 auth cycles in <2s
   });
+
 });

@@ -43,18 +43,33 @@ import {
   ApiBearerAuth,
   ApiHeader,
   ApiParam,
-} from '@nestjs/swagger';import type { Request, Response } from 'express';import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';import { RolesGuard } from '../auth/guards/roles.guard';import { EnterpriseRateLimitGuard } from '../common/guards/rate-limit.guard';import { LoggingInterceptor } from '../common/interceptors/logging.interceptor';// Removed ForVersion import to resolve decorator conflicts// import {
+} from '@nestjs/swagger';
+import type { Request, Response } from 'express';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { EnterpriseRateLimitGuard } from '../common/guards/rate-limit.guard';
+import { LoggingInterceptor } from '../common/interceptors/logging.interceptor';
+// Removed ForVersion import to resolve decorator conflicts
+// import {
 //   ForVersion,
 //   SUPPORTED_API_VERSIONS,
-// } from '../common/versioning/api-version.decorator';import {OperatorOrAdmin,
+// } from '../common/versioning/api-version.decorator';
+import {
+  OperatorOrAdmin,
   CurrentUser,
   ByteBotdUser,
-} from '../auth/decorators/roles.decorator';import {ParlantIntegrationService,
+} from '../auth/decorators/roles.decorator';
+import {
+  ParlantIntegrationService,
   ConversationalValidationError,
   ParlantValidationRequest,
   ParlantValidationResponse,
   RiskLevel,
-} from '../parlant/parlant-integration.service';// ===== ENTERPRISE API TYPES =====/**
+} from '../parlant/parlant-integration.service';
+
+// ===== ENTERPRISE API TYPES =====
+
+/**
  * Enterprise API request wrapper with Parlant context
  */
 export interface EnterpriseApiRequest {
@@ -67,7 +82,9 @@ export interface EnterpriseApiRequest {
   };
 
   /** HTTP method and parameters */
-  httpMethod: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';pathParams?: Record<string, string>;queryParams?: Record<string, unknown>;
+  httpMethod: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+  pathParams?: Record<string, string>;
+  queryParams?: Record<string, unknown>;
   bodyParams?: unknown;
   headers?: Record<string, string>;
 
@@ -77,20 +94,28 @@ export interface EnterpriseApiRequest {
     userIntent?: string;
     conversationHistory?: Array<{
       timestamp: string;
-      speaker: 'USER' | 'ASSISTANT' | 'SYSTEM';message: string;}>;
+      speaker: 'USER' | 'ASSISTANT' | 'SYSTEM';
+      message: string;
+    }>;
     apiUsageContext?: {
       applicationContext: string;
       businessPurpose: string;
       expectedOutcome: string;
-      riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';};};
+      riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+    };
+  };
 
   /** Enterprise request options */
   enterpriseOptions?: {
     bypassCache?: boolean;
     enableMonitoring?: boolean;
-    auditLevel?: 'BASIC' | 'DETAILED' | 'COMPREHENSIVE';timeoutMs?: number;retryPolicy?: {
+    auditLevel?: 'BASIC' | 'DETAILED' | 'COMPREHENSIVE';
+    timeoutMs?: number;
+    retryPolicy?: {
       maxRetries: number;
-      backoffStrategy: 'LINEAR' | 'EXPONENTIAL';};};
+      backoffStrategy: 'LINEAR' | 'EXPONENTIAL';
+    };
+  };
 }
 
 /**
@@ -213,16 +238,27 @@ interface ApiEndpointConfig {
   endpoint: string;
   service: string;
   requiresValidation: boolean;
-  riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';cacheStrategy: 'NONE' | 'SHORT' | 'MEDIUM' | 'LONG';circuitBreaker: CircuitBreakerConfig;complianceLevel: 'BASIC' | 'STANDARD' | 'HIGH' | 'MAXIMUM';}// ===== ENTERPRISE API GATEWAY CONTROLLER =====
+  riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  cacheStrategy: 'NONE' | 'SHORT' | 'MEDIUM' | 'LONG';
+  circuitBreaker: CircuitBreakerConfig;
+  complianceLevel: 'BASIC' | 'STANDARD' | 'HIGH' | 'MAXIMUM';
+}
 
-@ApiTags('Enterprise API Gateway - Parlant-Enhanced Universal API')@Controller('enterprise-api')@UseGuards(JwtAuthGuard, RolesGuard, EnterpriseRateLimitGuard)@UseInterceptors(LoggingInterceptor)
+// ===== ENTERPRISE API GATEWAY CONTROLLER =====
+
+@ApiTags('Enterprise API Gateway - Parlant-Enhanced Universal API')
+@Controller('enterprise-api')
+@UseGuards(JwtAuthGuard, RolesGuard, EnterpriseRateLimitGuard)
+@UseInterceptors(LoggingInterceptor)
 @ApiBearerAuth()
 export class EnterpriseApiGatewayController {
   private readonly logger = new Logger(EnterpriseApiGatewayController.name);
   
   /** Circuit breaker states for different services */
   private circuitBreakers = new Map<string, {
-    state: 'CLOSED' | 'OPEN' | 'HALF_OPEN';failureCount: number;lastFailureTime?: Date;
+    state: 'CLOSED' | 'OPEN' | 'HALF_OPEN';
+    failureCount: number;
+    lastFailureTime?: Date;
     nextRetryTime?: Date;
   }>();
 
@@ -530,12 +566,16 @@ export class EnterpriseApiGatewayController {
           actionDescription: `Execute ${method} API call to /${service}/${endpoint}`,
           context: {
             userId: context.user.id,
-            sessionId: context.headers?.['x-conversation-id'] ?? `api_session${Date.now()}`,agentRole: context.user.role,securityLevel: this.mapUserRoleToSecurityLevel(context.user.role),
+            sessionId: context.headers?.['x-conversation-id'] ?? `api_session${Date.now()}`,
+            agentRole: context.user.role,
+            securityLevel: this.mapUserRoleToSecurityLevel(context.user.role),
             conversationHistory: [],
             metadata: {
               operationId,
               apiEndpoint: `${method} /${service}/${endpoint}`,
-              userAgent: context.request.headers['user-agent'],ipAddress: this.getClientIpAddress(context.request),apiVersion: SUPPORTED_API_VERSIONS.V1,
+              userAgent: context.request.headers['user-agent'],
+              ipAddress: this.getClientIpAddress(context.request),
+              apiVersion: 'v1',
             },
           },
           riskLevel: config.riskLevel as RiskLevel,

@@ -3833,6 +3833,14 @@
       ],
       "completed_at": "2025-09-21T05:05:11.653Z",
       "updated_at": "2025-09-21T05:05:11.653Z"
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-21T05:12:55.763Z",
+      "title": "Fix remaining ESLint parsing errors and unsafe type assignments in bytebotd test files",
+      "description": "Continue the async/await violations fix work by resolving remaining ESLint issues in bytebotd package: 1) Parsing error in enterprise-auth-services.spec.ts line 870 (missing brace), 2) Multiple unsafe type assignment errors in security-penetration.spec.ts involving error types being assigned to ByteBotdUser and other parameters. Complete the TypeScript safety improvements started in previous session.",
+      "category": "error",
+      "id": "error_1758431575763_oaxx3gklgzm"
     }
   ],
   "agents": {
@@ -10383,6 +10391,27 @@
       "workload": 0,
       "maxConcurrentTasks": 5,
       "createdAt": "2025-09-21T04:54:51.595Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758431419925_1_general_eb8e06d7": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-21T05:10:19.927Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-21T05:10:19.927Z",
       "sessionId": null,
       "metadata": {}
     }
