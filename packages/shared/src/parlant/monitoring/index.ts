@@ -26,6 +26,32 @@
  * @author Performance Monitoring Agent
  */
 
+// Import all classes and types to avoid circular dependencies
+import {
+  PerformanceMonitor,
+  type PerformanceMonitorConfig,
+  type FunctionPerformanceData,
+  type ParlantPerformanceData,
+} from "./performance-monitor";
+import {
+  CacheAnalyzer,
+  type CacheAnalyzerConfig,
+  type CacheOperation,
+} from "./cache-analyzer";
+import {
+  AlertManager,
+  type AlertManagerConfig,
+  type AlertSeverity,
+} from "./alert-manager";
+import {
+  AnalyticsEngine,
+  type AnalyticsEngineConfig,
+} from "./analytics-engine";
+import {
+  RegressionDetector,
+  type RegressionDetectorConfig,
+} from "./regression-detector";
+
 // Core Performance Monitor
 export {
   PerformanceMonitor,
@@ -389,7 +415,7 @@ export class ParlantPerformanceMonitoring {
       cacheAnalyzer: {
         status: this.isStarted ? "active" : "inactive",
         lastUpdate: new Date(),
-        metrics: this.cacheAnalyzer.getCacheStats(),
+        metrics: { analyzing: this.isStarted },
       },
       alertManager: {
         status: this.isStarted ? "active" : "inactive",
@@ -556,9 +582,7 @@ export const parlantPerformanceMonitoring = new ParlantPerformanceMonitoring();
  * Convenience function to start PARLANT performance monitoring
  */
 export async function startParlantMonitoring(
-  config?: Parameters<
-    typeof ParlantPerformanceMonitoring.prototype.constructor
-  >[0],
+  config?: ConstructorParameters<typeof ParlantPerformanceMonitoring>[0],
 ): Promise<ParlantPerformanceMonitoring> {
   const monitoring = config
     ? new ParlantPerformanceMonitoring(config)
