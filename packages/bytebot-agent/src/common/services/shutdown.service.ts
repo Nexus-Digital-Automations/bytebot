@@ -318,7 +318,7 @@ export class ShutdownService implements OnModuleDestroy, OnApplicationShutdown {
       this.logger.error('Phase 1 failed: Could not stop new connections', {
         _error: error instanceof Error ? error.message : String(error),
       });
-      throw error;
+      throw new Error(error instanceof Error ? error.message : String(error));
     }
   }
 
@@ -393,7 +393,7 @@ export class ShutdownService implements OnModuleDestroy, OnApplicationShutdown {
       this.logger.error('Phase 2 failed: Error during connection draining', {
         _error: error instanceof Error ? error.message : String(error),
       });
-      throw error;
+      throw new Error(error instanceof Error ? error.message : String(error));
     }
   }
 
@@ -460,7 +460,7 @@ export class ShutdownService implements OnModuleDestroy, OnApplicationShutdown {
       this.logger.error('Phase 3 failed: Error during cleanup task execution', {
         _error: error instanceof Error ? error.message : String(error),
       });
-      throw error;
+      throw new Error(error instanceof Error ? error.message : String(error));
     }
   }
 
@@ -525,7 +525,7 @@ export class ShutdownService implements OnModuleDestroy, OnApplicationShutdown {
       this.logger.error('Phase 4 failed: Final cleanup error', {
         _error: error instanceof Error ? error.message : String(error),
       });
-      throw error;
+      throw new Error(error instanceof Error ? error.message : String(error));
     }
   }
 

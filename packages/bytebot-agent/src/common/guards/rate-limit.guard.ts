@@ -287,7 +287,7 @@ export class RateLimitGuard implements CanActivate {
       const processingTime = Date.now() - startTime;
 
       if (error instanceof HttpException) {
-        throw error;
+        throw error instanceof Error ? error : new Error(String(error));
       }
 
       this.logger.error(`[${operationId}] Rate limiting error`, {

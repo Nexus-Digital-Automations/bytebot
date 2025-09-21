@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import OpenAI, { APIUserAbortError } from 'openai';
 import { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
@@ -89,7 +89,7 @@ export class ProxyService implements BytebotAgentService {
           totalTokens: completion.usage?.total_tokens || 0,
         },
       };
-    } catch (_error: unknown) {
+    } catch (error: unknown) {
       if (error instanceof APIUserAbortError) {
         this.logger.log('Chat Completion API call aborted');
         throw new BytebotAgentInterrupt();
@@ -112,7 +112,7 @@ export class ProxyService implements BytebotAgentService {
         `Error sending message to proxy: ${errorMessage}`,
         errorStack,
       );
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 

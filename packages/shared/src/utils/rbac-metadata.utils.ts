@@ -11,10 +11,8 @@
  */
 
 import "reflect-metadata";
+import { Role, Permission, ResourceType } from "../types/rbac.types";
 import {
-  Role,
-  Permission,
-  ResourceType,
   ROLES_KEY,
   PERMISSIONS_KEY,
   ANY_ROLE_KEY,

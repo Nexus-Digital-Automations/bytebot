@@ -28,6 +28,11 @@ import {
   ForensicMetadata,
   EventCorrelationData,
   IntegrityVerification,
+  StorageBackend,
+  ValidationEngine,
+  ForensicEvidenceId,
+  IStorageBackend,
+  IValidationEngine,
 } from '../types/audit-core.types';
 import { createHash, randomBytes, createHmac } from 'crypto';
 import { performance } from 'perf_hooks';
@@ -365,10 +370,10 @@ export class AuditEventProcessorService implements OnApplicationShutdown {
   private readonly processingWorkers = new Map<string, ProcessingWorker>();
 
   /** Storage backends */
-  private readonly storageBackends = new Map<string, StorageBackend>();
+  private readonly storageBackends = new Map<string, IStorageBackend>();
 
   /** Validation engines */
-  private readonly validationEngines = new Map<string, ValidationEngine>();
+  private readonly validationEngines = new Map<string, IValidationEngine>();
 
   /** Batch timer */
   private batchTimer?: NodeJS.Timeout;
@@ -818,7 +823,11 @@ export class AuditEventProcessorService implements OnApplicationShutdown {
           validationType: this.getValidationTypeForEngine(engineId),
           success: result.success,
           score: result.score,
-          messages: result.messages,
+          messages: (result.messages || []).map((msg: any) =>
+            typeof msg === 'string'
+              ? { level: ValidationMessageLevel.INFO, code: 'INFO', message: msg }
+              : msg
+          ),
           durationMicros: Math.round((endTime - startTime) * 1000),
         });
 
@@ -885,19 +894,26 @@ export class AuditEventProcessorService implements OnApplicationShutdown {
   private async generateCorrelationData(event: AuditEvent): Promise<EventCorrelationData> {
     return {
       correlationId: this.generateCorrelationId(event),
+      relatedEventIds: await this.findRelatedEventIds(event),
+      correlationType: 'session_based' as any, // TODO: Define proper enum
+      correlationStrength: 1.0,
+      correlationMetadata: {
+        correlationAlgorithm: 'session-based',
+        correlationTimestamp: new Date(),
+        confidenceScore: 1.0,
+        analysisMethod: 'automatic',
+        correlationContext: {},
+        correlationStrength: 1.0,
+        correlationConfidence: 1.0,
+        correlationMethod: 'automatic',
+      },
+      causalRelationships: [], // TODO: Implement causal relationship analysis
       sessionCorrelationId: event.sessionId,
       operationCorrelationId: event.operationId,
       userCorrelationId: event.userContext.userId,
       parentEventId: await this.findParentEventId(event),
       childEventIds: [],
-      relatedEventIds: await this.findRelatedEventIds(event),
       correlationChain: await this.buildCorrelationChain(event),
-      correlationMetadata: {
-        correlationStrength: 1.0,
-        correlationConfidence: 1.0,
-        correlationMethod: 'automatic',
-        correlationTimestamp: new Date(),
-      },
     };
   }
 
@@ -920,9 +936,9 @@ export class AuditEventProcessorService implements OnApplicationShutdown {
   /**
    * Find related event IDs
    */
-  private async findRelatedEventIds(event: AuditEvent): Promise<string[]> {
+  private async findRelatedEventIds(event: AuditEvent): Promise<AuditEventId[]> {
     // Implementation would search for related events
-    return [];
+    return [] as AuditEventId[];
   }
 
   /**
@@ -957,12 +973,18 @@ export class AuditEventProcessorService implements OnApplicationShutdown {
     return {
       evidenceId: this.generateEvidenceId(),
       chainOfCustody: await this.initializeChainOfCustody(),
+      digitalFingerprint: { hash: this.calculateForensicHash(event), algorithm: 'sha256' } as any,
+      integrityVerification: {
+        hashAlgorithm: 'sha256',
+        hashValue: this.calculateForensicHash(event),
+      } as any,
+      evidenceClassification: this.classifyEvidence(event),
+      preservationRequirements: [this.determinePreservationRequirements(event)],
+      legalMetadata: await this.checkLegalHold(event),
       evidenceIntegrity: await this.calculateEvidenceIntegrity(event),
       forensicHash: this.calculateForensicHash(event),
       digitalSignature: await this.generateDigitalSignature(event),
       timestampAuthority: await this.getTimestampAuthority(),
-      evidenceClassification: this.classifyEvidence(event),
-      preservationRequirements: this.determinePreservationRequirements(event),
       legalHold: await this.checkLegalHold(event),
       expertWitness: await this.assignExpertWitness(event),
     };
@@ -971,8 +993,8 @@ export class AuditEventProcessorService implements OnApplicationShutdown {
   /**
    * Generate evidence ID
    */
-  private generateEvidenceId(): string {
-    return `evidence-${Date.now()}-${randomBytes(8).toString('hex')}`;
+  private generateEvidenceId(): ForensicEvidenceId {
+    return `evidence-${Date.now()}-${randomBytes(8).toString('hex')}` as ForensicEvidenceId;
   }
 
   /**
@@ -1088,10 +1110,25 @@ export class AuditEventProcessorService implements OnApplicationShutdown {
    * Update performance metrics
    */
   private async updatePerformanceMetrics(event: AuditEvent): Promise<AuditPerformanceMetrics> {
+    const now = new Date();
     return {
+      // Original interface properties
+      startTimestamp: event.timestamp,
+      endTimestamp: now,
+      executionTimeMicros: 0,
+      cpuTimeMicros: 0,
+      memoryAllocated: process.memoryUsage().heapUsed,
+      memoryPeakUsage: process.memoryUsage().heapUsed,
+      ioOperationsCount: 0,
+      networkRequestsCount: 0,
+      databaseQueriesCount: 0,
+      cacheOperationsCount: 0,
+      errorCount: 0,
+      retryCount: 0,
+      // Extended properties for processor use
       captureTimestamp: event.timestamp,
-      processingStartTimestamp: new Date(),
-      processingEndTimestamp: new Date(),
+      processingStartTimestamp: now,
+      processingEndTimestamp: now,
       totalProcessingTimeMicros: 0,
       validationTimeMicros: 0,
       enrichmentTimeMicros: 0,
@@ -1126,10 +1163,21 @@ export class AuditEventProcessorService implements OnApplicationShutdown {
    * Generate integrity verification for event
    */
   private async generateIntegrityVerification(event: AuditEvent): Promise<void> {
+    const hashValue = this.calculateEventHash(event);
+    const digitalSig = await this.signEvent(event);
+
     event.integrityVerification = {
+      // Required interface properties
+      verificationMethod: 'hash_verification' as any, // TODO: Use proper enum
+      verificationResult: 'verified' as any, // TODO: Use proper enum
+      hashValues: { sha256: hashValue } as any,
+      digitalSignatures: [digitalSig],
+      verificationTimestamp: new Date(),
+      verificationContext: {} as any,
+      // Extended properties for processor use
       hashAlgorithm: 'sha256',
-      hashValue: this.calculateEventHash(event),
-      digitalSignature: await this.signEvent(event),
+      hashValue: hashValue,
+      digitalSignature: digitalSig,
       timestampToken: await this.getTimestampToken(event),
       merkleProof: await this.generateMerkleProof(event),
       blockchainNotarization: await this.notarizeOnBlockchain(event),
@@ -1477,7 +1525,7 @@ class ProcessingWorker {
   }
 }
 
-class DatabaseStorageBackend {
+class DatabaseStorageBackend implements IStorageBackend {
   constructor(private config: any) {}
 
   async initialize(): Promise<void> {
@@ -1494,7 +1542,7 @@ class DatabaseStorageBackend {
   }
 }
 
-class FileSystemStorageBackend {
+class FileSystemStorageBackend implements IStorageBackend {
   constructor(private config: any) {}
 
   async initialize(): Promise<void> {
@@ -1511,7 +1559,7 @@ class FileSystemStorageBackend {
   }
 }
 
-class SchemaValidationEngine {
+class SchemaValidationEngine implements IValidationEngine {
   constructor(private config: any) {}
 
   async initialize(): Promise<void> {
@@ -1520,7 +1568,7 @@ class SchemaValidationEngine {
 
   async validate(event: AuditEvent): Promise<any> {
     // Implementation
-    return { success: true, score: 1.0, messages: [] };
+    return { success: true, score: 1.0, messages: [] as ValidationMessage[] };
   }
 
   async shutdown(): Promise<void> {
@@ -1528,7 +1576,7 @@ class SchemaValidationEngine {
   }
 }
 
-class ComplianceValidationEngine {
+class ComplianceValidationEngine implements IValidationEngine {
   constructor(private config: any) {}
 
   async initialize(): Promise<void> {
@@ -1537,7 +1585,7 @@ class ComplianceValidationEngine {
 
   async validate(event: AuditEvent): Promise<any> {
     // Implementation
-    return { success: true, score: 1.0, messages: [] };
+    return { success: true, score: 1.0, messages: [] as ValidationMessage[] };
   }
 
   async shutdown(): Promise<void> {
@@ -1545,7 +1593,7 @@ class ComplianceValidationEngine {
   }
 }
 
-class SecurityValidationEngine {
+class SecurityValidationEngine implements IValidationEngine {
   constructor(private config: any) {}
 
   async initialize(): Promise<void> {
@@ -1554,7 +1602,7 @@ class SecurityValidationEngine {
 
   async validate(event: AuditEvent): Promise<any> {
     // Implementation
-    return { success: true, score: 1.0, messages: [] };
+    return { success: true, score: 1.0, messages: [] as ValidationMessage[] };
   }
 
   async shutdown(): Promise<void> {

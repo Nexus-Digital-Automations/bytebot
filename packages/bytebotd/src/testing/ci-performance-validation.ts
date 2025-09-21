@@ -17,7 +17,17 @@
  * @version 2.0.0
  */
 
-import { performance } from 'perf_hooks';import { EventEmitter } from 'events';import { promises as fs } from 'fs';import { performanceFramework } from './performance-framework';import { loadTestOrchestrator } from './load-testing-scenarios';import { testExecutionValidator } from './test-execution-validator';import { performanceBottleneckAnalyzer } from './performance-bottleneck-analyzer';import { createTestExecutionOptimizer } from './test-execution-optimizer';/*** Performance validation configuration for CI
+import { performance } from 'perf_hooks';
+import { EventEmitter } from 'events';
+import { promises as fs } from 'fs';
+import { performanceFramework } from './performance-framework';
+import { loadTestOrchestrator } from './load-testing-scenarios';
+import { testExecutionValidator } from './test-execution-validator';
+import { performanceBottleneckAnalyzer } from './performance-bottleneck-analyzer';
+import { createTestExecutionOptimizer } from './test-execution-optimizer';
+
+/**
+ * Performance validation configuration for CI
  */
 export interface CIPerformanceConfig {
   readonly enabled: boolean;
@@ -115,7 +125,8 @@ export interface CIPerformanceResult {
   readonly commitHash: string;
   readonly timestamp: number;
   readonly overallStatus: 'passed' | 'failed' | 'warning';
-  readonly testResults: {totalTests: number;
+  readonly testResults: {
+    totalTests: number;
     passedTests: number;
     failedTests: number;
     executionTime: number;
@@ -139,7 +150,9 @@ export interface CIPerformanceResult {
     previousValue: number;
     currentValue: number;
     change: number; // percentage
-    severity: 'critical' | 'high' | 'medium' | 'low';}>;readonly performanceGrade: 'A' | 'B' | 'C' | 'D' | 'F';
+    severity: 'critical' | 'high' | 'medium' | 'low';
+  }>;
+  readonly performanceGrade: 'A' | 'B' | 'C' | 'D' | 'F';
   readonly recommendations: string[];
   readonly artifacts: {
     htmlReport?: string;
@@ -169,11 +182,14 @@ export class CIPerformanceValidator extends EventEmitter {
     buildId: string;
     branch: string;
     commitHash: string;
-    triggerType: 'commit' | 'pull_request' | 'release';}): Promise<CIPerformanceResult> {if (!this.config.enabled) {
+    triggerType: 'commit' | 'pull_request' | 'release';
+  }): Promise<CIPerformanceResult> {
+    if (!this.config.enabled) {
       throw new Error('CI Performance validation is disabled');
     }
 
-    console.log(`🚀 [CI-PERF] Starting performance validation for build ${context.buildId}`);console.log(`📋 [CI-PERF] Context: ${context.branch}@${context.commitHash} (${context.triggerType})`);
+    console.log(`🚀 [CI-PERF] Starting performance validation for build ${context.buildId}`);
+    console.log(`📋 [CI-PERF] Context: ${context.branch}@${context.commitHash} (${context.triggerType})`);
 
     const validationStart = performance.now();
 
@@ -184,7 +200,9 @@ export class CIPerformanceValidator extends EventEmitter {
         branch: context.branch,
         commitHash: context.commitHash,
         timestamp: Date.now(),
-        overallStatus: 'passed',testResults: {totalTests: 0,
+        overallStatus: 'passed',
+        testResults: {
+          totalTests: 0,
           passedTests: 0,
           failedTests: 0,
           executionTime: 0,
@@ -204,14 +222,28 @@ export class CIPerformanceValidator extends EventEmitter {
           memoryOptimization: 0
         },
         regressions: [],
-        performanceGrade: 'A',recommendations: [],artifacts: {}
+        performanceGrade: 'A',
+        recommendations: [],
+        artifacts: {}
       };
 
       // Step 1: Test execution performance validation
-      console.log('🧪 [CI-PERF] Step _1: Validating test execution performance...');const testResults = await this.validateTestExecutionPerformance();// Step 2: Load testing validation
-      console.log('🔄 [CI-PERF] Step _2: Running load test scenarios...');const loadResults = await this.validateLoadTestPerformance();// Step 3: Performance optimization validation
-      console.log('⚡ [CI-PERF] Step _3: Validating performance optimizations...');const optimizationResults = await this.validateOptimizationPerformance();// Step 4: Regression detection
-      console.log('📊 [CI-PERF] Step _4: Detecting performance regressions...');const regressions = await this.detectPerformanceRegressions(context);// Step 5: Performance bottleneck analysis
+      console.log('🧪 [CI-PERF] Step _1: Validating test execution performance...');
+      const testResults = await this.validateTestExecutionPerformance();
+
+      // Step 2: Load testing validation
+      console.log('🔄 [CI-PERF] Step _2: Running load test scenarios...');
+      const loadResults = await this.validateLoadTestPerformance();
+
+      // Step 3: Performance optimization validation
+      console.log('⚡ [CI-PERF] Step _3: Validating performance optimizations...');
+      const optimizationResults = await this.validateOptimizationPerformance();
+
+      // Step 4: Regression detection
+      console.log('📊 [CI-PERF] Step _4: Detecting performance regressions...');
+      const regressions = await this.detectPerformanceRegressions(context);
+
+      // Step 5: Performance bottleneck analysis
       console.log('🔍 [CI-PERF] Step _5: Analyzing performance bottlenecks...');
       const bottleneckAnalysis = await this.analyzePerformanceBottlenecks();
 

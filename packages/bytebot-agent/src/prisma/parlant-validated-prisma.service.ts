@@ -344,7 +344,7 @@ export class ParlantValidatedPrismaService {
         this.auditTrail.push(auditEntry);
       }
 
-      throw error;
+      throw new Error(error instanceof Error ? error.message : String(error));
     }
   }
 
@@ -1162,7 +1162,7 @@ export class ParlantValidatedPrismaService {
         operationId,
       });
 
-      throw error;
+      throw new Error(error instanceof Error ? error.message : String(error));
     }
   }
 

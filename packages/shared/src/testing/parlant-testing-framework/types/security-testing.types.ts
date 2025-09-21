@@ -766,9 +766,9 @@ export interface SecurityFinding {
   /** Evidence */
   evidence: {
     testCase: string;
-    actualResult: any;
-    expectedResult: any;
-    additionalData?: Record<string, any>;
+    actualResult: unknown;
+    expectedResult: unknown;
+    additionalData?: Record<string, unknown>;
   };
 
   /** Impact assessment */
@@ -985,13 +985,13 @@ export interface SecurityAssertion {
   type: 'equals' | 'not_equals' | 'contains' | 'not_contains' | 'matches_pattern' | 'custom';
 
   /** Expected value */
-  expected: any;
+  expected: unknown;
 
   /** Actual value (populated during execution) */
-  actual?: any;
+  actual?: unknown;
 
   /** Custom validation function */
-  customValidator?: (actual: any, expected: any) => boolean;
+  customValidator?: (actual: unknown, expected: unknown) => boolean;
 
   /** Assertion description */
   description: string;
@@ -1011,7 +1011,7 @@ export interface ValidationCriteria {
   validationMethod: 'automated' | 'manual' | 'hybrid';
 
   /** Pass/fail threshold */
-  threshold: any;
+  threshold: number | string | { min?: number; max?: number; percentage?: number };
 
   /** Measurement unit */
   unit?: string;

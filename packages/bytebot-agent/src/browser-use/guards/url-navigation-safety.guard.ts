@@ -936,7 +936,7 @@ export class URLNavigationSafetyGuard implements CanActivate {
   private readonly validationCache = new Map<string, URLSafetyAnalysis>();
 
   /** Threat intelligence cache */
-  private readonly threatCache = new Map<string, any>();
+  private readonly threatCache = new Map<string, { threats: string[]; timestamp: number; riskScore: number }>();
 
   /** Domain reputation cache */
   private readonly reputationCache = new Map<string, any>();

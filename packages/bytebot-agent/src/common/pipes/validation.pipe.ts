@@ -16,6 +16,7 @@ import {
   ArgumentMetadata,
   BadRequestException,
   PayloadTooLargeException,
+  Logger,
 } from '@nestjs/common';
 import { validate, ValidationError } from 'class-validator';
 import { plainToClass } from 'class-transformer';
@@ -87,10 +88,19 @@ const DEFAULT_OPTIONS: GlobalValidationPipeOptions = {
   skipMissingProperties: false,
 };
 
+/**
+ * Union type for all validatable values
+ */
+type ValidatableValue = string | number | boolean | null | undefined | ValidatableObject | ValidatableArray;
+interface ValidatableObject {
+  [key: string]: ValidatableValue;
+}
+interface ValidatableArray extends Array<ValidatableValue> {}
+
 @Injectable()
-export class GlobalValidationPipe implements PipeTransform<any> {
+export class GlobalValidationPipe implements PipeTransform<ValidatableValue, unknown> {
   private readonly logger = new Logger(GlobalValidationPipe.name);
-  private readonly _options: GlobalValidationPipeOptions;
+  private readonly options: GlobalValidationPipeOptions;
 
   constructor(options?: Partial<GlobalValidationPipeOptions>) {
     this.options = { ...DEFAULT_OPTIONS, ...options };
@@ -110,7 +120,7 @@ export class GlobalValidationPipe implements PipeTransform<any> {
    * @param metadata - Argument metadata from NestJS
    * @returns Validated and transformed value
    */
-  async transform(value: any, _metadata: ArgumentMetadata): Promise<any> {
+  async transform(value: ValidatableValue, metadata: ArgumentMetadata): Promise<unknown> {
     const operationId = `validation-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const startTime = Date.now();
 
@@ -142,7 +152,7 @@ export class GlobalValidationPipe implements PipeTransform<any> {
         value !== null &&
         !Array.isArray(value)
       ) {
-        this.validatePayloadSize(value as Record<string, any>, operationId);
+        this.validatePayloadSize(value as ValidatableObject, operationId);
       }
 
       // Perform security threat detection
@@ -211,8 +221,8 @@ export class GlobalValidationPipe implements PipeTransform<any> {
    * @param metatype - The metatype to check
    * @returns True if it's a basic type
    */
-  private isBasicType(metatype: new (...args: any[]) => any): boolean {
-    const basicTypes: (new (...args: any[]) => any)[] = [
+  private isBasicType(metatype: new (...args: unknown[]) => unknown): boolean {
+    const basicTypes: (new (...args: unknown[]) => unknown)[] = [
       String,
       Boolean,
       Number,
@@ -228,7 +238,7 @@ export class GlobalValidationPipe implements PipeTransform<any> {
    * @param operationId - Operation tracking ID
    * @returns Sanitized value
    */
-  private sanitizeBasicValue(value: any, operationId: string): any {
+  private sanitizeBasicValue(value: ValidatableValue, operationId: string): ValidatableValue {
     if (typeof value === 'string' && this.options.enableSanitization) {
       const sanitized = sanitizeInput(value, this.options.sanitizationOptions);
 
@@ -253,7 +263,7 @@ export class GlobalValidationPipe implements PipeTransform<any> {
    * @param operationId - Operation tracking ID
    */
   private validatePayloadSize(
-    value: Record<string, any>,
+    value: ValidatableObject,
     operationId: string,
   ): void {
     try {
@@ -305,7 +315,7 @@ export class GlobalValidationPipe implements PipeTransform<any> {
    * @param value - Value to analyze
    * @param operationId - Operation tracking ID
    */
-  private detectSecurityThreats(value: any, operationId: string): void {
+  private detectSecurityThreats(value: ValidatableValue, operationId: string): void {
     const threats: string[] = [];
 
     // Convert value to string for pattern analysis
@@ -359,7 +369,7 @@ export class GlobalValidationPipe implements PipeTransform<any> {
    * @param operationId - Operation tracking ID
    * @returns Sanitized value
    */
-  private sanitizeValue(value: any, operationId: string): unknown {
+  private sanitizeValue(value: ValidatableValue, operationId: string): unknown {
     const startTime = Date.now();
     let sanitized: unknown;
 
@@ -429,8 +439,8 @@ export class GlobalValidationPipe implements PipeTransform<any> {
    * @param operationId - Operation tracking ID
    */
   private async validateValue(
-    value: any,
-    metatype: new (...args: any[]) => any,
+    value: unknown,
+    metatype: new (...args: unknown[]) => unknown,
     operationId: string,
   ): Promise<void> {
     const startTime = Date.now();
@@ -475,7 +485,7 @@ export class GlobalValidationPipe implements PipeTransform<any> {
    * @param errors - Class-validator errors
    * @returns Formatted error array
    */
-  private formatValidationErrors(errors: ValidationError[]): unknown[] {
+  private formatValidationErrors(errors: ValidationError[]): Array<Record<string, unknown>> {
     return errors.map((error) => ({
       property: error.property,
       value: error.value as unknown,
@@ -496,9 +506,9 @@ export class GlobalValidationPipe implements PipeTransform<any> {
    */
   private logSecurityEvent(
     operationId: string,
-    _error: any,
-    value: any,
-    _metadata: ArgumentMetadata,
+    error: unknown,
+    value: ValidatableValue,
+    metadata: ArgumentMetadata,
   ): void {
     try {
       let eventType = SecurityEventType._VALIDATION_FAILED;

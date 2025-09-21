@@ -55,92 +55,13 @@ import {
   ParlantMonitoringResponse,
 } from "./parlant-monitoring.service";
 import { SecurityLevel as SecurityLevelEnum } from "../types/parlant.types";
+import {
+  ConversationalDashboardResponseDto,
+  PeriodicInsightsResponseDto,
+  MonitoringQueryDto,
+} from "./parlant-monitoring.dto";
 
-/**
- * DTO for natural language monitoring queries
- */
-class MonitoringQueryDto implements Omit<ParlantMonitoringQuery, "timeRange"> {
-  @ApiProperty({
-    description: "Natural language query about monitoring data",
-    example: "How is the API performance over the last hour?",
-  })
-  @IsString()
-  query!: string;
-
-  @ApiProperty({
-    description: "Start time for query range",
-    example: "2024-01-15T10:00:00Z",
-    required: false,
-  })
-  @IsOptional()
-  @IsDateString()
-  startTime?: string;
-
-  @ApiProperty({
-    description: "End time for query range",
-    example: "2024-01-15T11:00:00Z",
-    required: false,
-  })
-  @IsOptional()
-  @IsDateString()
-  endTime?: string;
-
-  @ApiProperty({
-    description: "Specific services to focus on",
-    example: ["auth-service", "task-service"],
-    required: false,
-  })
-  @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  services?: string[];
-
-  @ApiProperty({
-    description: "Security levels to include in analysis",
-    example: ["HIGH", "CRITICAL"],
-    required: false,
-  })
-  @IsOptional()
-  @IsArray()
-  securityLevels?: SecurityLevelEnum[];
-
-  @ApiProperty({
-    description: "Include performance metrics in response",
-    example: true,
-    required: false,
-  })
-  @IsOptional()
-  @IsBoolean()
-  includePerformance?: boolean;
-
-  @ApiProperty({
-    description: "Include validation details in response",
-    example: true,
-    required: false,
-  })
-  @IsOptional()
-  @IsBoolean()
-  includeValidation?: boolean;
-}
-
-/**
- * DTO for follow-up queries using conversation context
- */
-class FollowUpQueryDto {
-  @ApiProperty({
-    description: "Follow-up query",
-    example: "What about security metrics?",
-  })
-  @IsString()
-  query!: string;
-
-  @ApiProperty({
-    description: "Conversation context from previous query",
-    example: "parlant_monitor_1234567890_abc123",
-  })
-  @IsString()
-  conversationContext!: string;
-}
+// Note: MonitoringQueryDto is now imported from parlant-monitoring.dto.ts
 
 /**
  * Parlant Conversational Monitoring Controller
@@ -440,7 +361,7 @@ export class ParlantMonitoringController {
       },
     },
   })
-  async getConversationalDashboard(): Promise<any> {
+  async getConversationalDashboard(): Promise<ConversationalDashboardResponseDto> {
     const operationId = this.generateOperationId();
 
     this.logger.debug(`[${operationId}] Retrieving conversational dashboard`);
@@ -536,7 +457,7 @@ export class ParlantMonitoringController {
   async getPeriodicInsights(
     @Param("period") period: string,
     @Query("focus") focus?: string,
-  ): Promise<any> {
+  ): Promise<PeriodicInsightsResponseDto> {
     const operationId = this.generateOperationId();
 
     this.logger.log(`[${operationId}] Retrieving periodic insights`, {
@@ -547,7 +468,7 @@ export class ParlantMonitoringController {
 
     try {
       // For now, return mock insights structure
-      const insights = {
+      const insights: PeriodicInsightsResponseDto = {
         period,
         focus: focus || "all",
         summary: `Over the last ${period}, your API has maintained good performance with consistent validation approval rates.`,

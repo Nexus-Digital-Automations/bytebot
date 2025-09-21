@@ -251,27 +251,27 @@ export class VersionInterceptor implements NestInterceptor {
     } catch (_error: unknown) {
       const processingTime = Date.now() - startTime;
 
-      if (error instanceof HttpException) {
-        throw error;
+      if (_error instanceof HttpException) {
+        throw _error;
       }
 
-      if (isErrorWithStack(error)) {
+      if (isErrorWithStack(_error)) {
         this.logger.error(`[${operationId}] Version negotiation error`, {
           operationId,
-          _error: error.message,
-          stack: error.stack,
+          _error: _error.message,
+          stack: _error.stack,
           processingTimeMs: processingTime,
         });
       } else {
         this.logger.error(`[${operationId}] Version negotiation error`, {
           operationId,
-          _error: getSafeErrorMessage(error),
+          _error: getSafeErrorMessage(_error),
           processingTimeMs: processingTime,
         });
       }
 
       // Log security event
-      this.logVersionError(request, error, operationId);
+      this.logVersionError(request, _error, operationId);
 
       throw new BadRequestException({
         statusCode: HttpStatus.BAD_REQUEST,

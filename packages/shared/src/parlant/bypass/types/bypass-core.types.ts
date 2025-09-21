@@ -571,7 +571,7 @@ export interface BypassOperationResult {
   success: boolean;
 
   /** Operation result */
-  result?: any;
+  result?: unknown;
 
   /** Error details if failed */
   error?: BypassOperationError;

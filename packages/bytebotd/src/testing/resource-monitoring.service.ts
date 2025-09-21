@@ -18,7 +18,19 @@
  * @version 1.0.0
  */
 
-import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { EventEmitter } from 'events';import { performance } from 'perf_hooks';import * as os from 'os';import * as fs from 'fs/promises';import * as path from 'path';import * as child_process from 'child_process';import { promisify } from 'util';const exec = promisify(child_process.exec);// ===== RESOURCE MONITORING INTERFACES =====
+import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { EventEmitter } from 'events';
+import { performance } from 'perf_hooks';
+import * as os from 'os';
+import * as fs from 'fs/promises';
+import * as path from 'path';
+import * as child_process from 'child_process';
+import { promisify } from 'util';
+
+const exec = promisify(child_process.exec);
+
+// ===== RESOURCE MONITORING INTERFACES =====
 
 /**
  * Comprehensive system resource metrics
@@ -648,13 +660,18 @@ export class ResourceMonitoringService extends EventEmitter implements OnApplica
   constructor(private readonly configService: ConfigService) {
     super();
 
-    this.logger.log(`📊 [RESOURCE] Resource Monitoring Service initialized`);}/**
+    this.logger.log(`📊 [RESOURCE] Resource Monitoring Service initialized`);
+  }
+
+  /**
    * Initialize resource monitoring with configuration
    */
   async initialize(config: ResourceMonitoringConfig): Promise<void> {
     this.config = config;
 
-    this.logger.log(`🚀 [RESOURCE] Initializing resource monitoring`, {testId: config.testId,interval: config.interval,
+    this.logger.log(`🚀 [RESOURCE] Initializing resource monitoring`, {
+      testId: config.testId,
+      interval: config.interval,
       alertingEnabled: config.alerting.enabled,
       storageEnabled: config.storage.enabled,
     });
@@ -680,11 +697,15 @@ export class ResourceMonitoringService extends EventEmitter implements OnApplica
     }
 
     if (this.isMonitoring) {
-      this.logger.warn(`⚠️ [RESOURCE] Monitoring already active`);return;}
+      this.logger.warn(`⚠️ [RESOURCE] Monitoring already active`);
+      return;
+    }
 
     this.isMonitoring = true;
 
-    this.logger.log(`📈 [RESOURCE] Starting resource monitoring`, {testId: this.config.testId,interval: this.config.interval,
+    this.logger.log(`📈 [RESOURCE] Starting resource monitoring`, {
+      testId: this.config.testId,
+      interval: this.config.interval,
     });
 
     // Start periodic metrics collection
@@ -705,7 +726,10 @@ export class ResourceMonitoringService extends EventEmitter implements OnApplica
       return;
     }
 
-    this.logger.log(`🛑 [RESOURCE] Stopping resource monitoring`);this.isMonitoring = false;if (this.monitoringInterval) {
+    this.logger.log(`🛑 [RESOURCE] Stopping resource monitoring`);
+    this.isMonitoring = false;
+
+    if (this.monitoringInterval) {
       clearInterval(this.monitoringInterval);
       this.monitoringInterval = undefined;
     }
@@ -780,7 +804,9 @@ export class ResourceMonitoringService extends EventEmitter implements OnApplica
       return metrics;
 
     } catch (error) {
-      this.logger.error(`❌ [RESOURCE] Failed to collect metrics: ${error instanceof Error ? error.message : String(error)}`, {error: error instanceof Error ? error.message : String(error),stack: error instanceof Error ? error.stack : undefined,
+      this.logger.error(`❌ [RESOURCE] Failed to collect metrics: ${error instanceof Error ? error.message : String(error)}`, {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
       });
 
       throw error;

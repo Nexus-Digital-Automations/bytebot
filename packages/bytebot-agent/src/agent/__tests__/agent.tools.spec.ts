@@ -591,7 +591,7 @@ describe('AgentTools', () => {
     it('should have consistent enum value formats', () => {
       agentTools.forEach((tool) => {
         const properties = tool.input_schema.properties;
-        Object.values(properties).forEach((property: any) => {
+        Object.values(properties).forEach((property: Record<string, unknown>) => {
           if (property.enum) {
             expect(Array.isArray(property.enum)).toBe(true);
             property.enum.forEach((value: any) => {
@@ -606,7 +606,7 @@ describe('AgentTools', () => {
     it('should have consistent nullable property usage', () => {
       agentTools.forEach((tool) => {
         const properties = tool.input_schema.properties;
-        Object.values(properties).forEach((property: any) => {
+        Object.values(properties).forEach((property: Record<string, unknown>) => {
           if (property.nullable !== undefined) {
             expect(typeof property.nullable).toBe('boolean');
           }
@@ -626,8 +626,8 @@ describe('AgentTools', () => {
 
       agentTools.forEach((tool) => {
         const properties = tool.input_schema.properties;
-        Object.values(properties).forEach((property: any) => {
-          expect(validTypes).toContain(property.type);
+        Object.values(properties).forEach((property: Record<string, unknown>) => {
+          expect(validTypes).toContain(property.type as string);
         });
       });
     });
@@ -635,7 +635,7 @@ describe('AgentTools', () => {
     it('should have meaningful descriptions for all properties', () => {
       agentTools.forEach((tool) => {
         const properties = tool.input_schema.properties;
-        Object.values(properties).forEach((property: any) => {
+        Object.values(properties).forEach((property: Record<string, unknown>) => {
           if (property.description) {
             expect(typeof property.description).toBe('string');
             expect(property.description.length).toBeGreaterThan(5);
@@ -647,13 +647,13 @@ describe('AgentTools', () => {
     it('should use consistent format specifications', () => {
       agentTools.forEach((tool) => {
         const properties = tool.input_schema.properties;
-        Object.values(properties).forEach((property: any) => {
+        Object.values(properties).forEach((property: Record<string, unknown>) => {
           if (property.format) {
             expect(typeof property.format).toBe('string');
             // Common formats should be recognized
             const validFormats = ['date-time', 'email', 'uri', 'uuid'];
             if (validFormats.includes(property.format)) {
-              expect(property.type).toBe('string');
+              expect(property.type as string).toBe('string');
             }
           }
         });

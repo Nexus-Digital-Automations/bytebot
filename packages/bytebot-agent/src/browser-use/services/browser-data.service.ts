@@ -21,6 +21,7 @@
 
 import {
   Injectable,
+  Logger,
   NotFoundException,
   BadRequestException,
   InternalServerErrorException,
@@ -683,7 +684,7 @@ export class BrowserDataService {
         this.logger.warn(`Extraction attempt ${attempt} failed:`, error);
 
         if (attempt === this.maxRetries) {
-          throw error;
+          throw error instanceof Error ? error : new Error(String(error));
         }
 
         // Wait before retrying (exponential backoff)

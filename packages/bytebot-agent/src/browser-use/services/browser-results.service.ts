@@ -6,7 +6,7 @@
  * and result analysis features.
  */
 
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as fs from 'fs/promises';
 import * as path from 'path';
@@ -206,7 +206,7 @@ export class BrowserResultsService {
         `Failed to store _result: ${this.getErrorMessage(error)}`,
         this.getErrorStack(error),
       );
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
@@ -357,7 +357,7 @@ export class BrowserResultsService {
         `Failed to search results: ${this.getErrorMessage(error)}`,
         this.getErrorStack(error),
       );
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
@@ -545,7 +545,7 @@ export class BrowserResultsService {
         `Failed to generate analytics: ${this.getErrorMessage(error)}`,
         this.getErrorStack(error),
       );
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 

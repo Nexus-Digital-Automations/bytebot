@@ -253,7 +253,7 @@ export interface FunctionBaselineTest {
   functionName: string;
 
   /** Expected test result */
-  expectedResult: any;
+  expectedResult: unknown;
 
   /** Expected performance metrics */
   expectedPerformance: {
@@ -300,7 +300,7 @@ export interface FunctionTestScenario {
   input: Record<string, any>;
 
   /** Expected output */
-  expectedOutput: any;
+  expectedOutput: unknown;
 
   /** Test conditions */
   conditions: TestCondition[];
@@ -354,7 +354,7 @@ export interface ValidationRule {
     operator: 'EQUALS' | 'NOT_EQUALS' | 'GREATER_THAN' | 'LESS_THAN' | 'CONTAINS' | 'MATCHES_PATTERN';
 
     /** Expected value */
-    expectedValue: any;
+    expectedValue: unknown;
 
     /** Tolerance for numeric comparisons */
     tolerance?: number;
@@ -420,7 +420,7 @@ export interface FunctionRegressionTest {
   testType: 'REGRESSION' | 'SMOKE' | 'SANITY' | 'CRITICAL_PATH';
 
   /** Baseline result reference */
-  baselineResult: any;
+  baselineResult: unknown;
 
   /** Test scenarios */
   testScenarios: FunctionTestScenario[];
@@ -597,7 +597,7 @@ export interface FunctionTestResult {
   duration: number;
 
   /** Test result */
-  result: any;
+  result: unknown;
 
   /** Performance metrics */
   performance: {
@@ -644,10 +644,10 @@ export interface ValidationResult {
   status: 'PASSED' | 'FAILED' | 'SKIPPED';
 
   /** Expected value */
-  expected: any;
+  expected: unknown;
 
   /** Actual value */
-  actual: any;
+  actual: unknown;
 
   /** Error message if validation failed */
   message?: string;
@@ -729,10 +729,10 @@ export interface ChangeDetail {
   description: string;
 
   /** Current value */
-  current: any;
+  current: unknown;
 
   /** Baseline value */
-  baseline: any;
+  baseline: unknown;
 
   /** Change type */
   changeType: 'ADDITION' | 'REMOVAL' | 'MODIFICATION' | 'REORDERING';
@@ -853,10 +853,10 @@ export interface FunctionComparison {
   differences: string[];
 
   /** Current test result */
-  current: any;
+  current: unknown;
 
   /** Baseline test result */
-  baseline: any;
+  baseline: unknown;
 
   /** Change significance */
   significance: 'LOW' | 'MEDIUM' | 'HIGH';
@@ -888,10 +888,10 @@ export interface ComparisonDetail {
   status: 'IDENTICAL' | 'SIMILAR' | 'DIFFERENT' | 'INCOMPARABLE';
 
   /** Current value */
-  current: any;
+  current: unknown;
 
   /** Baseline value */
-  baseline: any;
+  baseline: unknown;
 
   /** Difference description */
   difference?: string;

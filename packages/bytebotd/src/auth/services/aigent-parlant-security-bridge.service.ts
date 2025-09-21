@@ -833,8 +833,14 @@ export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnAppli
   // ===== PRIVATE HELPER METHODS =====
 
   private loadBridgeConfiguration(): AIgentParlantBridgeConfig {
-  return {,
-  redisUrl: (this as any)?.configService.get<string>('REDIS_URL', 'redis://localhost:6379'),sessionTimeoutMs: (this as any)?.configService.get<number>('BRIDGE_SESSION_TIMEOUT_MS', 3600000), // 1 hourmaxConcurrentSessions: (this as any)?.configService.get<number>('BRIDGE_MAX_CONCURRENT_SESSIONS', 10000),emergencyOverrideEnabled: (this as any)?.configService.get<boolean>('BRIDGE_EMERGENCY_OVERRIDE_ENABLED', true),auditAllSessions: (this as any)?.configService.get<boolean>('BRIDGE_AUDIT_ALL_SESSIONS', true),defaultSecurityClassification: (SecurityClassification as any)?.INTERNAL,supportedJwtAlgorithms: [(JwtAlgorithmType as any)?.HS256, (JwtAlgorithmType as any)?.RS256, (JwtAlgorithmType as any)?.ES256, (JwtAlgorithmType as any)?.EdDSA],
+  return {
+  redisUrl: (this as any)?.configService.get<string>('REDIS_URL', 'redis://localhost:6379'),
+      sessionTimeoutMs: (this as any)?.configService.get<number>('BRIDGE_SESSION_TIMEOUT_MS', 3600000), // 1 hour
+      maxConcurrentSessions: (this as any)?.configService.get<number>('BRIDGE_MAX_CONCURRENT_SESSIONS', 10000),
+      emergencyOverrideEnabled: (this as any)?.configService.get<boolean>('BRIDGE_EMERGENCY_OVERRIDE_ENABLED', true),
+      auditAllSessions: (this as any)?.configService.get<boolean>('BRIDGE_AUDIT_ALL_SESSIONS', true),
+      defaultSecurityClassification: (SecurityClassification as any)?.INTERNAL,
+      supportedJwtAlgorithms: [(JwtAlgorithmType as any)?.HS256, (JwtAlgorithmType as any)?.RS256, (JwtAlgorithmType as any)?.ES256, (JwtAlgorithmType as any)?.EdDSA],
       sessionClusteringEnabled: (this as any)?.configService.get<boolean>('BRIDGE_SESSION_CLUSTERING_ENABLED', true),complianceFrameworks: [(ComplianceFramework as any)?.SOX,
         (ComplianceFramework as any)?.GDPR,
         (ComplianceFramework as any)?.HIPAA,
@@ -848,14 +854,15 @@ export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnAppli
   private initializeRoleClassificationMappings(): Map<UserRole, RoleClassificationMapping> {
   const mappings = new Map<UserRole, RoleClassificationMapping>();
 
-    (mappings as any)?.set?.((UserRole as any)?._ADMIN, {,
+    (mappings as any)?.set?.((UserRole as any)?._ADMIN, {
   role: (UserRole as any)?._ADMIN,
       defaultClassification: (SecurityClassification as any)?.CLASSIFIED,
       allowedClassifications: (Object as any)?.values?.(SecurityClassification),
-      maxSessionDuration: 8 * 60 * 60 * 1000, // 8 hours,
+      maxSessionDuration: 8 * 60 * 60 * 1000, // 8 hours
   requiresMultiFactor: true,
       auditLevel: 'COMPREHENSIVE',
-});(mappings as any)?.set?.((UserRole as any)?._OPERATOR, {
+});
+    (mappings as any)?.set?.((UserRole as any)?._OPERATOR, {
   role: (UserRole as any)?._OPERATOR,
       defaultClassification: (SecurityClassification as any)?.CONFIDENTIAL,
       allowedClassifications: [

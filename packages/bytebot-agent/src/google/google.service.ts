@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SecretsService } from '../config/secrets.service';
 import {
@@ -200,7 +200,7 @@ export class GoogleService implements BytebotAgentService {
         googleError.code = googleError.code || 'API_KEY_RETRIEVAL_ERROR';
         throw googleError;
       }
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
@@ -220,7 +220,7 @@ export class GoogleService implements BytebotAgentService {
       // Convert our message content blocks to Anthropic's expected format
       const googleMessages = this.formatMessagesForGoogle(messages);
 
-      const _response: GenerateContentResponse =
+      const response: GenerateContentResponse =
         await google.models.generateContent({
           model,
           contents: googleMessages,
@@ -262,7 +262,7 @@ export class GoogleService implements BytebotAgentService {
           totalTokens: response.usageMetadata?.totalTokenCount ?? 0,
         },
       };
-    } catch (_error: unknown) {
+    } catch (error: unknown) {
       if (error instanceof Error && error.message.includes('AbortError')) {
         throw new BytebotAgentInterrupt();
       }
@@ -454,7 +454,7 @@ export class GoogleService implements BytebotAgentService {
    * @private
    */
   private isValidGenerateContentResponse(
-    _response: GenerateContentResponse,
+    response: GenerateContentResponse,
   ): response is ValidatedGenerateContentResponse {
     return (
       response &&

@@ -250,7 +250,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
         error instanceof HttpException ||
         error instanceof ForbiddenException
       ) {
-        throw error;
+        throw error instanceof Error ? error : new Error(String(error));
       }
 
       throw new UnauthorizedException('Authentication required');

@@ -35,11 +35,20 @@ import {
   ComplianceStatus,
   ComplianceCheck,
   ComplianceViolation,
+  ComplianceRiskAssessment,
   DataCategory,
   SensitiveDataType,
   RetentionRequirement,
   PrivacyRequirement,
   BreachNotificationRequirement,
+  ExecutiveSummary,
+  ComplianceAssessment,
+  ComplianceEvidencePackage,
+  ComplianceRecommendation,
+  ComplianceActionPlan,
+  ReportAppendix,
+  ReportSignature,
+  ComplianceCertification,
 } from '../types/compliance-forensic.types';
 import { createHash, randomBytes } from 'crypto';
 import { performance } from 'perf_hooks';

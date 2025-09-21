@@ -554,7 +554,7 @@ export enum ScheduleFrequency {
  */
 export interface ScheduleCondition {
   readonly type: ConditionType;
-  readonly value: any;
+  readonly value: unknown;
   readonly operator: ConditionOperator;
 }
 
@@ -637,7 +637,7 @@ export enum TriggerEvent {
 export interface TriggerCondition {
   readonly field: string;
   readonly operator: ConditionOperator;
-  readonly value: any;
+  readonly value: unknown;
 }
 
 /**
@@ -734,8 +734,8 @@ export interface WidgetPosition {
 export interface DashboardFilter {
   readonly field: string;
   readonly type: FilterType;
-  readonly values: any[];
-  readonly defaultValue?: any;
+  readonly values: unknown[];
+  readonly defaultValue?: unknown;
 }
 
 /**

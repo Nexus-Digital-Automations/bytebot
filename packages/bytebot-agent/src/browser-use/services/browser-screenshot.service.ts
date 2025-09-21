@@ -6,7 +6,7 @@
  * with optimization, annotation, and comparison capabilities.
  */
 
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as fs from 'fs/promises';
 import * as path from 'path';
@@ -667,7 +667,7 @@ export class BrowserScreenshotService {
       this.logger.error(
         `Screenshot comparison failed: ${comparisonError.message}`,
       );
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 

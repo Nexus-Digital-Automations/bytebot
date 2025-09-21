@@ -300,8 +300,9 @@ describe('RolesGuard - Advanced Security Tests', () => {
       );
     });
 
-    it('should prevent concurrent role modification attacks'async () => {
-      const testId = `${operationId}_concurrent_role_modification`;securityLogger.info(`[${testId}] Testing concurrent role modification attack prevention`,
+    it('should prevent concurrent role modification attacks', async () => {
+      const testId = `${operationId}_concurrent_role_modification`;
+      securityLogger.info(`[${testId}] Testing concurrent role modification attack prevention`,
       );
 
       const user: ByteBotdUser = {
@@ -327,11 +328,12 @@ describe('RolesGuard - Advanced Security Tests', () => {
 
         try {
   const _result = await guard.canActivate(context);
-          return { success: trueinde, x: index 
-};
+          return { success: true, index: index };
         } catch (error) {
-  return {,
-  success: falseinde, x: indexerro, r: (error as Error).message
+  return {
+  success: false,
+            index: index,
+            error: (error as Error).message
 };
         }
       });
@@ -349,9 +351,9 @@ describe('RolesGuard - Advanced Security Tests', () => {
   });
 
     describe('Permission Bypass Attack Prevention', () => {
-  it('should prevent permission array manipulation'async () => {
-      const testId = `${operationId
-}_permission_manipulation`;securityLogger.info(`[${testId}] Testing permission array manipulation prevention`,
+  it('should prevent permission array manipulation', async () => {
+      const testId = `${operationId}_permission_manipulation`;
+      securityLogger.info(`[${testId}] Testing permission array manipulation prevention`,
       );
 
       const user: ByteBotdUser = {
@@ -385,8 +387,9 @@ describe('RolesGuard - Advanced Security Tests', () => {
       securityLogger.warn(`[${testId}] Permission manipulation attack blocked`);
     });
 
-    it('should prevent permission spoofing through object injection'async () => {
-      const testId = `${operationId}_permission_spoofing`;securityLogger.info(`[${testId}] Testing permission spoofing attack prevention`,
+    it('should prevent permission spoofing through object injection', async () => {
+      const testId = `${operationId}_permission_spoofing`;
+      securityLogger.info(`[${testId}] Testing permission spoofing attack prevention`,
       );
 
       const spoofedUser: unknown = {

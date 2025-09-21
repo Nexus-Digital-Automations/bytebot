@@ -169,7 +169,7 @@ describe('Module Integration Tests', () => {
         '❌ [CLEANUP] Error during test environment cleanup:',
         error,
       );
-      throw error;
+      throw new Error(error instanceof Error ? error.message : String(error));
     }
   });
 
@@ -206,7 +206,7 @@ describe('Module Integration Tests', () => {
         '❌ [TEST-RESET] Error during test environment reset:',
         error,
       );
-      throw error;
+      throw new Error(error instanceof Error ? error.message : String(error));
     }
   });
 

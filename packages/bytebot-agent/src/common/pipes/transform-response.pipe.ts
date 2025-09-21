@@ -5,9 +5,9 @@
  * Ensures consistent response structure across all endpoints.
  */
 
-import { Injectable, PipeTransform, ArgumentMetadata } from '@nestjs/common';
+import { Injectable, PipeTransform, ArgumentMetadata, Logger } from '@nestjs/common';
 
-export interface StandardizedResponse<T = any> {
+export interface StandardizedResponse<T = unknown> {
   success: boolean;
   data?: T;
   message?: string;
@@ -24,7 +24,7 @@ export interface StandardizedResponse<T = any> {
 export class TransformResponsePipe implements PipeTransform {
   private readonly logger = new Logger(TransformResponsePipe.name);
 
-  transform(value: any, _metadata: ArgumentMetadata): any {
+  transform(value: unknown, metadata: ArgumentMetadata): unknown {
     // Skip transformation for certain types
     if (metadata.type !== 'body' && metadata.type !== 'query') {
       return value;
@@ -35,7 +35,7 @@ export class TransformResponsePipe implements PipeTransform {
       return value;
     }
 
-    this.logger.debug(`Transforming response _data: ${metadata.type}`);
+    this.logger.debug(`Transforming response data: ${metadata.type}`);
 
     return value; // Return as-is for now, transformation happens in interceptor
   }

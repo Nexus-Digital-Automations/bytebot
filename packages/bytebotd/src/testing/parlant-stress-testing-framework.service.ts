@@ -27,20 +27,33 @@
  * @author PARLANT Performance Testing Agent
  */
 
-import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { EventEmitter2 } from '@nestjs/event-emitter';import { Cron, CronExpression } from '@nestjs/schedule';import { performance } from 'perf_hooks';import { randomUUID } from 'crypto';// ===== STRESS TESTING INTERFACES =====/**
+import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Cron, CronExpression } from '@nestjs/schedule';
+import { performance } from 'perf_hooks';
+import { randomUUID } from 'crypto';
+
+// ===== STRESS TESTING INTERFACES =====
+
+/**
  * Conversational session state for stress testing
  */
 interface ConversationalSession {
   readonly sessionId: string;
   readonly userId: string;
   readonly startTime: number;
-  readonly agentRole: 'assistant' | 'user';conversationTurns: number;lastActivityTime: number;
+  readonly agentRole: 'assistant' | 'user';
+  conversationTurns: number;
+  lastActivityTime: number;
   totalValidations: number;
   responseTimeHistory: number[];
   cacheHitCount: number;
   cacheMissCount: number;
   errorCount: number;
-  status: 'active' | 'degraded' | 'failed' | 'completed';memoryUsage: number;connectionId?: string;
+  status: 'active' | 'degraded' | 'failed' | 'completed';
+  memoryUsage: number;
+  connectionId?: string;
 }
 
 /**
@@ -82,7 +95,10 @@ interface StressTestMetrics {
   readonly errorRate: number;
   readonly connectionPoolUtilization: number;
   readonly systemHealthScore: number; // 0-100
-  readonly performanceGrade: 'A' | 'B' | 'C' | 'D' | 'F';}/**
+  readonly performanceGrade: 'A' | 'B' | 'C' | 'D' | 'F';
+}
+
+/**
  * Stress test results and analysis
  */
 interface StressTestResults {

@@ -250,7 +250,7 @@ export class BatchJobValidationPipe implements PipeTransform {
       context.warnings.push(\n        `Batch contains ${dataIntensiveJobs} data-intensive operations - may require significant memory`,\n      );\n    }
   return Promise.resolve();\n  }\n\n  /**
  * Format validation errors into readable messages\n   */
-  private formatValidationErrors(errors: any[]): string[] {
+  private formatValidationErrors(errors: Array<{ constraints?: Record<string, string>; children?: Array<{ constraints?: Record<string, string>; children?: unknown[] }> }>): string[] {
     const messages: string[] = [];
   errors.forEach((error) => {
       if (error.constraints) {

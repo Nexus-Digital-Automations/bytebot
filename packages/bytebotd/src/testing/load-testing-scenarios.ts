@@ -18,7 +18,14 @@
  * @version 2.0.0
  */
 
-import { Test, TestingModule } from '@nestjs/testing';import { INestApplication } from '@nestjs/common';import { performanceFramework, PerformanceTestConfig } from './performance-framework';import { Server } from 'http';import request from 'supertest';/*** Load test scenario definition
+import { Test, TestingModule } from '@nestjs/testing';
+import { INestApplication } from '@nestjs/common';
+import { performanceFramework, PerformanceTestConfig } from './performance-framework';
+import { Server } from 'http';
+import request from 'supertest';
+
+/**
+ * Load test scenario definition
  */
 export interface LoadTestScenario {
   readonly name: string;
@@ -67,18 +74,34 @@ export class ModuleLoadTestingOrchestrator {
    */
   private readonly loadScenarios: LoadTestScenario[] = [
     {
-      name: 'Authentication Module Load Test',description: 'Validates auth service performance under concurrent authentication requests',module: 'auth',virtualUsers: 50,requestsPerUser: 20,
+      name: 'Authentication Module Load Test',
+      description: 'Validates auth service performance under concurrent authentication requests',
+      module: 'auth',
+      virtualUsers: 50,
+      requestsPerUser: 20,
       rampUpTime: 10,
       sustainTime: 30,
-      endpoints: ['/auth/login', '/auth/verify', '/auth/refresh'],expectedRps: 100,maxResponseTime: 500,
+      endpoints: ['/auth/login', '/auth/verify', '/auth/refresh'],
+      expectedRps: 100,
+      maxResponseTime: 500,
       maxErrorRate: 2,
-      requiredResources: ['AuthService', 'JwtService', 'UserRepository']},{
-      name: 'Computer-Use Service Stress Test',description: 'Tests computer-use service under heavy automation workload',module: 'computer-use',virtualUsers: 25,requestsPerUser: 10,
+      requiredResources: ['AuthService', 'JwtService', 'UserRepository']
+    },
+    {
+      name: 'Computer-Use Service Stress Test',
+      description: 'Tests computer-use service under heavy automation workload',
+      module: 'computer-use',
+      virtualUsers: 25,
+      requestsPerUser: 10,
       rampUpTime: 15,
       sustainTime: 60,
-      endpoints: ['/computer-use/screenshot', '/computer-use/click', '/computer-use/type'],expectedRps: 30,maxResponseTime: 2000,
+      endpoints: ['/computer-use/screenshot', '/computer-use/click', '/computer-use/type'],
+      expectedRps: 30,
+      maxResponseTime: 2000,
       maxErrorRate: 5,
-      requiredResources: ['ComputerUseService', 'NutService']},{
+      requiredResources: ['ComputerUseService', 'NutService']
+    },
+    {
       name: 'Input Tracking Realtime Load Test',description: 'Validates realtime input tracking under concurrent monitoring',module: 'input-tracking',virtualUsers: 100,requestsPerUser: 50,
       rampUpTime: 5,
       sustainTime: 45,

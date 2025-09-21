@@ -20,6 +20,7 @@
 
 import {
   Injectable,
+  Logger,
   NotFoundException,
   BadRequestException,
   InternalServerErrorException,
@@ -342,7 +343,7 @@ export class BrowserDomService {
       return browserState;
     } catch (error) {
       this.logger.error(`Navigation failed for session ${sessionId}:`, error);
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
@@ -414,7 +415,7 @@ export class BrowserDomService {
       return response;
     } catch (error) {
       this.logger.error(`Click failed for session ${sessionId}:`, error);
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
@@ -484,7 +485,7 @@ export class BrowserDomService {
       return response;
     } catch (error) {
       this.logger.error(`Typing failed for session ${sessionId}:`, error);
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
@@ -545,7 +546,7 @@ export class BrowserDomService {
       return browserState;
     } catch (error) {
       this.logger.error(`Scroll failed for session ${sessionId}:`, error);
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
@@ -633,7 +634,7 @@ export class BrowserDomService {
         `Failed to get browser state for session ${sessionId}:`,
         error,
       );
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
@@ -700,7 +701,7 @@ export class BrowserDomService {
         this.logger.warn(`Command attempt ${attempt} failed:`, error);
 
         if (attempt === maxRetries) {
-          throw error;
+          throw error instanceof Error ? error : new Error(String(error));
         }
 
         // Wait before retrying (exponential backoff)
@@ -978,7 +979,7 @@ export class BrowserDomService {
       return response;
     } catch (error) {
       this.logger.error(`Type text failed for session ${sessionId}:`, error);
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
@@ -1056,7 +1057,7 @@ export class BrowserDomService {
         `Click element failed for session ${sessionId}:`,
         error,
       );
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
@@ -1197,7 +1198,7 @@ export class BrowserDomService {
         `Wait for element failed for session ${sessionId}:`,
         error,
       );
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 

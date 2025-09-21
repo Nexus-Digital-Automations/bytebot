@@ -442,7 +442,7 @@ import { Test, TestingModule } from '@nestjs/testing';import { HttpStatus, INest
       const response = await request(app.getHttpServer())
         .get('/browser-orchestration/agents/status').query({ capability }).expect(HttpStatus.OK);
 
-      expect(response.body.agentDetails.every((agent: any) =>
+      expect(response.body.agentDetails.every((agent: { capabilities: string[] }) =>
         agent.capabilities.includes(capability)
       )).toBe(true);
     });

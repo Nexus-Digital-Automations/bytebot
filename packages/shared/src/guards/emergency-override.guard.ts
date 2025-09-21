@@ -77,7 +77,6 @@ export interface EmergencyOverrideConfig {
   auditLogging: boolean;
 }
 
-
 @Injectable()
 export class EmergencyOverrideGuard implements CanActivate {
   private readonly logger = new Logger(EmergencyOverrideGuard.name);
@@ -134,7 +133,9 @@ export class EmergencyOverrideGuard implements CanActivate {
         "emergency.override.enabled",
         false,
       ),
-      overrideToken: this._configService.get<string>("emergency.override.token"),
+      overrideToken: this._configService.get<string>(
+        "emergency.override.token",
+      ),
       maxDurationMinutes: this._configService.get<number>(
         "emergency.override.maxDuration",
         60,

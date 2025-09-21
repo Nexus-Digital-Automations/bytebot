@@ -108,7 +108,7 @@ interface SecurityEvent {
   ipAddress: string;
   userAgent: string;
   endpoint: string;
-  details: Record<string, any>;
+  details: Record<string, unknown>;
   action: 'allow' | 'deny' | 'challenge' | 'lockout';
   riskScore: number;
 }
@@ -139,10 +139,10 @@ interface AuthenticatedRequest extends Request {
 export class EnterpriseAuthGuard implements CanActivate {
   private readonly logger = new Logger('EnterpriseAuthGuard');
   private readonly secretKey: string;
-  private readonly sessionStore = new Map<string, any>();
-  private readonly rateLimitStore = new Map<string, any>();
+  private readonly sessionStore = new Map<string, Record<string, unknown>>();
+  private readonly rateLimitStore = new Map<string, { count: number; resetTime: number; violations: number }>();
   private readonly securityEvents: SecurityEvent[] = [];
-  private readonly deviceStore = new Map<string, any>();
+  private readonly deviceStore = new Map<string, Record<string, unknown>>();
 
   // Security configurations
   private readonly maxConcurrentSessions = 5;
@@ -251,7 +251,7 @@ export class EnterpriseAuthGuard implements CanActivate {
         userAgent: request.get('User-Agent'),
       });
 
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
@@ -322,7 +322,7 @@ export class EnterpriseAuthGuard implements CanActivate {
           throw new UnauthorizedException('Invalid token signature');
         }
       }
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
@@ -827,7 +827,7 @@ export class EnterpriseAuthGuard implements CanActivate {
     );
   }
 
-  private getViolationTypeFromError(_error: any): SecurityViolationType {
+  private getViolationTypeFromError(error: unknown): SecurityViolationType {
     if (error instanceof UnauthorizedException) {
       if (error.message.includes('expired')) {
         return SecurityViolationType.EXPIRED_TOKEN;
@@ -841,7 +841,7 @@ export class EnterpriseAuthGuard implements CanActivate {
   }
 
   private getSecuritySeverity(
-    _error: any,
+    error: unknown,
   ): 'low' | 'medium' | 'high' | 'critical' {
     if (error instanceof ForbiddenException) {
       return 'high';

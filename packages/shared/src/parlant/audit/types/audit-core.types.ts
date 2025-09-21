@@ -1459,6 +1459,66 @@ export interface AuditPerformanceMetrics {
 
   /** Retry count */
   retryCount: number;
+
+  /** Capture timestamp */
+  captureTimestamp: Date;
+
+  /** Processing start timestamp */
+  processingStartTimestamp: Date;
+
+  /** Processing end timestamp */
+  processingEndTimestamp: Date;
+
+  /** Total processing time in microseconds */
+  totalProcessingTimeMicros: number;
+
+  /** Validation time in microseconds */
+  validationTimeMicros: number;
+
+  /** Enrichment time in microseconds */
+  enrichmentTimeMicros: number;
+
+  /** Storage time in microseconds */
+  storageTimeMicros: number;
+
+  /** Compression time in microseconds */
+  compressionTimeMicros: number;
+
+  /** Encryption time in microseconds */
+  encryptionTimeMicros: number;
+
+  /** Network latency in microseconds */
+  networkLatencyMicros: number;
+
+  /** Disk I/O time in microseconds */
+  diskIoTimeMicros: number;
+
+  /** Memory usage in bytes */
+  memoryUsageBytes: number;
+
+  /** CPU usage in microseconds */
+  cpuUsageMicros: number;
+
+  /** Resource utilization */
+  resourceUtilization: {
+    cpuPercent: number;
+    memoryPercent: number;
+    diskPercent: number;
+    networkPercent: number;
+  };
+
+  /** Performance impact assessment */
+  performanceImpact: {
+    systemImpact: string;
+    userImpact: string;
+    businessImpact: string;
+  };
+
+  /** Optimization opportunities */
+  optimizationOpportunities: string[];
+
+  /** Performance alerts */
+  performanceAlerts: string[];
 }
 
 // ===========================
@@ -1621,6 +1681,24 @@ export interface ForensicMetadata {
 
   /** Legal metadata */
   legalMetadata: LegalMetadata;
+
+  /** Evidence integrity assessment */
+  evidenceIntegrity: IntegrityVerification;
+
+  /** Forensic hash */
+  forensicHash: string;
+
+  /** Digital signature */
+  digitalSignature: DigitalSignature | null;
+
+  /** Timestamp authority */
+  timestampAuthority: string | null;
+
+  /** Legal hold status */
+  legalHold: boolean | { status: boolean; reason: string; startDate: Date; endDate?: Date };
+
+  /** Expert witness assignment */
+  expertWitness: { name: string; credentials: string; contact: string; assignmentDate: Date } | null;
 }
 
 /**
@@ -1814,6 +1892,24 @@ export interface EventCorrelationData {
 
   /** Causal relationships */
   causalRelationships: CausalRelationship[];
+
+  /** Session correlation identifier */
+  sessionCorrelationId: AuditSessionId;
+
+  /** Operation correlation identifier */
+  operationCorrelationId: DatabaseOperationId;
+
+  /** User correlation identifier */
+  userCorrelationId: string;
+
+  /** Parent event identifier */
+  parentEventId?: string;
+
+  /** Child event identifiers */
+  childEventIds: AuditEventId[];
+
+  /** Correlation chain */
+  correlationChain: string[];
 }
 
 /**
@@ -1847,6 +1943,15 @@ export interface CorrelationMetadata {
 
   /** Correlation context */
   correlationContext: Record<string, unknown>;
+
+  /** Correlation strength */
+  correlationStrength: number;
+
+  /** Correlation confidence */
+  correlationConfidence: number;
+
+  /** Correlation method */
+  correlationMethod: string;
 }
 
 /**
@@ -1905,6 +2010,35 @@ export interface IntegrityVerification {
 
   /** Verification context */
   verificationContext: VerificationContext;
+
+  /** Hash algorithm used */
+  hashAlgorithm: string;
+
+  /** Hash value */
+  hashValue: string;
+
+  /** Digital signature */
+  digitalSignature: DigitalSignature | null;
+
+  /** Timestamp token */
+  timestampToken: string | { token: string; authority: string; timestamp: Date } | null;
+
+  /** Merkle proof */
+  merkleProof: string[] | { path: string[]; root: string; leaf: string } | null;
+
+  /** Blockchain notarization */
+  blockchainNotarization: { transactionHash: string; blockNumber: number; network: string; timestamp: Date } | null;
+
+  /** Integrity level */
+  integrityLevel: string;
+
+  /** Verification metadata */
+  verificationMetadata: {
+    verificationTimestamp: Date;
+    verificationMethod: string;
+    verificationStrength: string;
+    verificationCertificate: string;
+  };
 }
 
 /**
@@ -2190,6 +2324,9 @@ export interface AuditSecurityContext {
 
   /** Security recommendations */
   securityRecommendations: string[];
+
+  /** Sensitivity level */
+  sensitivityLevel?: string;
 }
 
 /**
@@ -5421,6 +5558,184 @@ export interface ErrorEscalationRule {
 
   /** Max escalations */
   maxEscalations: number;
+}
+
+// ===========================
+// ADDITIONAL CONFIGURATION INTERFACES
+// ===========================
+
+/**
+ * Compliance configuration
+ */
+export interface ComplianceConfig {
+  /** Enable compliance checking */
+  enabled: boolean;
+
+  /** Compliance frameworks */
+  frameworks: string[];
+
+  /** Strict mode */
+  strictMode: boolean;
+
+  /** Auto-reporting */
+  autoReporting: boolean;
+
+  /** Compliance officer contact */
+  officerContact: string;
+
+  /** Audit frequency days */
+  auditFrequencyDays: number;
+}
+
+/**
+ * Forensic configuration
+ */
+export interface ForensicConfig {
+  /** Enable forensic mode */
+  enabled: boolean;
+
+  /** Evidence preservation level */
+  preservationLevel: string;
+
+  /** Chain of custody requirements */
+  chainOfCustodyRequired: boolean;
+
+  /** Digital signature requirement */
+  digitalSignatureRequired: boolean;
+
+  /** Expert witness assignment */
+  expertWitnessRequired: boolean;
+
+  /** Evidence retention years */
+  retentionYears: number;
+}
+
+/**
+ * Monitoring configuration
+ */
+export interface MonitoringConfig {
+  /** Enable monitoring */
+  enabled: boolean;
+
+  /** Monitoring interval milliseconds */
+  intervalMs: number;
+
+  /** Alert thresholds */
+  alertThresholds: Record<string, number>;
+
+  /** Metrics collection enabled */
+  metricsEnabled: boolean;
+
+  /** Performance tracking */
+  performanceTracking: boolean;
+
+  /** Health check frequency */
+  healthCheckFrequencyMs: number;
+}
+
+/**
+ * Anomaly detection configuration
+ */
+export interface AnomalyDetectionConfig {
+  /** Enable anomaly detection */
+  enabled: boolean;
+
+  /** Detection algorithms */
+  algorithms: string[];
+
+  /** Sensitivity threshold */
+  sensitivityThreshold: number;
+
+  /** Learning mode enabled */
+  learningMode: boolean;
+
+  /** Baseline window hours */
+  baselineWindowHours: number;
+
+  /** Alert on anomaly */
+  alertOnAnomaly: boolean;
+}
+
+/**
+ * Threat intelligence configuration
+ */
+export interface ThreatIntelligenceConfig {
+  /** Enable threat intelligence */
+  enabled: boolean;
+
+  /** Intelligence sources */
+  sources: string[];
+
+  /** Update frequency hours */
+  updateFrequencyHours: number;
+
+  /** Threat scoring enabled */
+  threatScoringEnabled: boolean;
+
+  /** Auto-blocking threats */
+  autoBlockThreats: boolean;
+
+  /** Integration APIs */
+  integrationApis: string[];
+}
+
+/**
+ * Incident response configuration
+ */
+export interface IncidentResponseConfig {
+  /** Enable incident response */
+  enabled: boolean;
+
+  /** Response teams */
+  responseTeams: string[];
+
+  /** Escalation matrix */
+  escalationMatrix: Record<string, string[]>;
+
+  /** Auto-response enabled */
+  autoResponseEnabled: boolean;
+
+  /** Response timeout minutes */
+  responseTimeoutMinutes: number;
+
+  /** Communication channels */
+  communicationChannels: string[];
+}
+
+// ===========================
+// OPERATIONAL INTERFACES
+// ===========================
+
+/**
+ * Storage backend operational interface for class implementations
+ */
+export interface IStorageBackend {
+  /** Initialize the storage backend */
+  initialize(): Promise<void>;
+
+  /** Store an audit event */
+  store(event: AuditEvent): Promise<string>;
+
+  /** Shutdown the storage backend */
+  shutdown(): Promise<void>;
+}
+
+/**
+ * Validation engine operational interface for class implementations
+ */
+export interface IValidationEngine {
+  /** Initialize the validation engine */
+  initialize(): Promise<void>;
+
+  /** Validate an audit event */
+  validate(event: AuditEvent): Promise<{
+    success: boolean;
+    score: number;
+    messages: string[];
+  }>;
+
+  /** Shutdown the validation engine */
+  shutdown(): Promise<void>;
 }
 
 // Export additional types from compliance-forensic.types

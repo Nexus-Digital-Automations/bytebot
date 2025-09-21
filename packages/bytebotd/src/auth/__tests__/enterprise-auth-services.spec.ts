@@ -300,7 +300,7 @@ describe('JwtAuthGuard', () => {
 
     it('should audit authentication events', async () => {
   // Arrange
-      const mockUser = {,
+      const mockUser = {
   id: 'user-123',
         email: 'test@example.com',
         roles: ['admin'],
@@ -373,7 +373,8 @@ describe('JwtAuthGuard', () => {
 // ===== ROLES GUARD TESTS =====
 
 describe('RolesGuard', () => {
-  let guard: RolesGuard;let reflector: jest.Mocked<Reflector>;
+  let guard: RolesGuard;
+  let reflector: jest.Mocked<Reflector>;
   let mockLogger: jest.Mocked<Logger>;
   let parlantAuthBridge: jest.Mocked<ParlantAuthBridgeService>;
 

@@ -236,7 +236,7 @@ export class CircuitBreakerService {
         Date.now() - startTime,
         operationId,
       );
-      throw error;
+      throw new Error(error instanceof Error ? error.message : String(error));
     }
   }
 

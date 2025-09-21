@@ -58,7 +58,7 @@ import {
   ConversationContext,
   ParlantValidationInterceptor
 
-} from '@bytebot/shared/src/parlant/parlant-validation.decorator';
+} from '@bytebot/shared/src/parlant/parlant-validation.decorator';import { ConversationContextParameter } from '@bytebot/shared/src/types/conversation-context.types';
 
 // Authentication and Authorization;
 
@@ -224,7 +224,7 @@ export interface DatabaseAnalyticsDto {
   async executeQuery(
     @Query('query') query: string,@Query('limit') limit?: number,@Query('offset') offset?: number,
     @CurrentUser() user: ByteBotdUser,
-    @ConversationContext() conversationContext?: any,
+    @ConversationContext() conversationContext?: ConversationContextParameter,
   ): Promise<{
   data: unknown[];
     totalRows: number;
@@ -304,7 +304,7 @@ export interface DatabaseAnalyticsDto {
   @ApiOperation({
     summary: 'Get table schema',description: 'Retrieve schema information for specified database table'})@ApiParam({ name: 'tableName', description: 'Name of the table' })async getTableSchema(@Param('tableName') tableName: string,
     @CurrentUser() user: ByteBotdUser,
-    @ConversationContext() conversationContext?: any,
+    @ConversationContext() conversationContext?: ConversationContextParameter,
   ): Promise<{
   tableName: string;
     columns: unknown[];
@@ -388,7 +388,7 @@ export interface DatabaseAnalyticsDto {
   async executeModification(
     @Body() modificationDto: DatabaseModificationDto,
     @CurrentUser() user: ByteBotdUser,
-    @ConversationContext() conversationContext?: any,
+    @ConversationContext() conversationContext?: ConversationContextParameter,
   ): Promise<{
   success: boolean;
     affectedRows: number;
@@ -490,7 +490,7 @@ export interface DatabaseAnalyticsDto {
   async executeSchemaChange(
     @Body() schemaDto: DatabaseSchemaDto,
     @CurrentUser() user: ByteBotdUser,
-    @ConversationContext() conversationContext?: any,
+    @ConversationContext() conversationContext?: ConversationContextParameter,
   ): Promise<{
   success: boolean;
     migrationId: string;
@@ -571,7 +571,7 @@ export interface DatabaseAnalyticsDto {
   async createBackup(
     @Body() backupDto: DatabaseBackupDto,
     @CurrentUser() user: ByteBotdUser,
-    @ConversationContext() conversationContext?: any,
+    @ConversationContext() conversationContext?: ConversationContextParameter,
   ): Promise<{
   success: boolean;
     backupId: string;
@@ -615,7 +615,7 @@ export interface DatabaseAnalyticsDto {
   async getAnalytics(
     @Query() analyticsDto: DatabaseAnalyticsDto,
     @CurrentUser() user: ByteBotdUser,
-    @ConversationContext() conversationContext?: any,
+    @ConversationContext() conversationContext?: ConversationContextParameter,
   ): Promise<{
   timeRange: string;
     performance: unknown;

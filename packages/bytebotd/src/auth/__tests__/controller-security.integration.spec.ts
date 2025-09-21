@@ -488,7 +488,7 @@ describe('Controller Security Integration Tests', () => {
             res.json(controller.createResource(req.user, req.body));
           
 } else {
-  res.status(403).json({,
+  res.status(403).json({
   error: 'Resource creation requires operator authentication'
       
 });}
@@ -503,7 +503,7 @@ describe('Controller Security Integration Tests', () => {
             res.json(controller.deleteResource(req.user, req.params.id));
           
 } else {
-  res.status(400).json({,
+  res.status(400).json({
   error: 'Admin authentication and resource ID required'
       
 });}
@@ -515,15 +515,16 @@ describe('Controller Security Integration Tests', () => {
       .post('/api/upload', (req: SafeRequestre, s: SafeRespons, e) => {
   const middleware = checkRole(UserRole._OPERATOR);middleware(req, res, () => {
           // Simulate file upload
-          const mockFile: SafeFile = {,
-  originalname: (req.headers['x-filename'] as string) ?? 'unknown', size:parseInt((req.headers['content-length'] as string) ?? '0') ?? 0,
+          const mockFile: SafeFile = {
+  originalname: (req.headers['x-filename'] as string) ?? 'unknown',
+            size: parseInt((req.headers['content-length'] as string) ?? '0') ?? 0,
 };
 
   if (req.user) {
   res.json(controller.uploadFile(req.user, mockFile));
           
 } else {
-  res.status(403).json({,
+  res.status(403).json({
   error: 'File upload requires operator authentication'
       
 });}
@@ -538,7 +539,7 @@ describe('Controller Security Integration Tests', () => {
             res.json(
               controller.searchUsers(req.user, (req.query.q as string) ?? ''));
 } else {
-  res.status(403).json({,
+  res.status(403).json({
   error: 'User search requires operator authentication'
       
 });

@@ -230,7 +230,7 @@ export class CircuitBreakerAuthGuard implements CanActivate {
     } catch (error) {
       // Record authentication failure
       this.recordFailure(operationId, error as Error, ipAddress, userAgent);
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     } finally {
       // Cleanup concurrent request tracking
       if (this.metrics.state === CircuitBreakerState.HALF_OPEN) {

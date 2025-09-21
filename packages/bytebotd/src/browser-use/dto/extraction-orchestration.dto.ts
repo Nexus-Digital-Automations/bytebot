@@ -24,6 +24,129 @@ import {
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
+// ===== TYPE DEFINITIONS =====
+
+export interface SourceMetadata {
+  category?: string;
+  priority?: number;
+  lastUpdated?: Date;
+  reliability?: number;
+  [key: string]: unknown;
+}
+
+export interface NormalizationRule {
+  type: 'lowercase' | 'trim' | 'replace' | 'transform';
+  pattern?: string;
+  replacement?: string;
+  transformer?: string;
+}
+
+export interface TransformationFunction {
+  name: string;
+  parameters: Record<string, unknown>;
+  returnType: string;
+}
+
+export interface OperationMetadata {
+  userId?: string;
+  sessionId?: string;
+  requestId?: string;
+  tags?: string[];
+  [key: string]: unknown;
+}
+
+export interface FilterValue {
+  operator: 'equals' | 'contains' | 'greater_than' | 'less_than' | 'in' | 'between';
+  value: string | number | boolean | (string | number | boolean)[];
+}
+
+export interface AggregationFunction {
+  type: 'sum' | 'average' | 'count' | 'min' | 'max' | 'group_by';
+  field: string;
+  parameters?: Record<string, unknown>;
+}
+
+export interface FieldConstraint {
+  type: 'required' | 'optional' | 'format' | 'range' | 'enum';
+  validation?: string | number | boolean | unknown[];
+  errorMessage?: string;
+}
+
+export interface QualityRule {
+  name: string;
+  threshold: number;
+  operator: 'greater_than' | 'less_than' | 'equals';
+  field: string;
+}
+
+export interface SpamDetectionRule {
+  type: 'keyword' | 'pattern' | 'frequency' | 'machine_learning';
+  threshold: number;
+  patterns?: string[];
+  keywords?: string[];
+}
+
+export interface FormatValidationRule {
+  type: 'email' | 'url' | 'phone' | 'date' | 'number' | 'regex';
+  pattern?: string;
+  allowEmpty?: boolean;
+}
+
+export interface AggregatedDataResult {
+  groups: Record<string, unknown[]>;
+  summary: Record<string, number>;
+  metadata: Record<string, unknown>;
+}
+
+export interface AnalyticsData {
+  trends: Record<string, number[]>;
+  patterns: Record<string, unknown>;
+  correlations: Record<string, number>;
+  insights: string[];
+}
+
+export interface InsightsData {
+  recommendations: string[];
+  opportunities: string[];
+  risks: string[];
+  actionItems: string[];
+}
+
+export interface SchemaValidationResult {
+  valid: boolean;
+  errors: string[];
+  warnings: string[];
+  fieldResults: Record<string, boolean>;
+}
+
+export interface QualityAssessmentResult {
+  score: number;
+  metrics: Record<string, number>;
+  issues: string[];
+  suggestions: string[];
+}
+
+export interface ContentValidationResult {
+  valid: boolean;
+  spamScore: number;
+  formatErrors: string[];
+  contentIssues: string[];
+}
+
+export interface DuplicateDetectionResult {
+  duplicateCount: number;
+  uniqueCount: number;
+  duplicateGroups: Record<string, string[]>;
+  similarityMatrix: number[][];
+}
+
+export interface StatisticalAnalysisResult {
+  distribution: Record<string, number>;
+  outliers: unknown[];
+  correlations: Record<string, number>;
+  significance: Record<string, number>;
+}
+
 // Enums
 export enum ExportFormat {
   JSON = 'json',
@@ -151,7 +274,7 @@ export class ValidationConfig {
   dataTypes?: Record<string, string>;
 
   @ApiPropertyOptional({ description: 'Custom validation rules' })@IsOptional()@IsObject()
-  customRules?: Record<string, any>;
+  customRules?: Record<string, QualityRule>;
 }
 
 export class AggregationStrategyConfig {
@@ -164,7 +287,7 @@ export class AggregationStrategyConfig {
   validation?: ValidationConfig;
 
   @ApiPropertyOptional({ description: 'Custom aggregation settings' })@IsOptional()@IsObject()
-  customAggregation?: Record<string, any>;
+  customAggregation?: Record<string, AggregationFunction>;
 }
 
 export class ExportOptions {
@@ -200,7 +323,7 @@ export class SourceConfig {
   priority?: number;
 
   @ApiPropertyOptional({ description: 'Source-specific metadata' })@IsOptional()@IsObject()
-  metadata?: Record<string, any>;
+  metadata?: Record<string, OperationMetadata>;
 }
 
 export class CorrelationConfig {
@@ -224,10 +347,10 @@ export class TransformationConfig {
   fieldMapping?: Record<string, string>;
 
   @ApiPropertyOptional({ description: 'Data normalization rules' })@IsOptional()@IsObject()
-  normalization?: Record<string, any>;
+  normalization?: Record<string, NormalizationRule>;
 
   @ApiPropertyOptional({ description: 'Custom transformation functions' })@IsOptional()@IsObject()
-  customTransformations?: Record<string, any>;
+  customTransformations?: Record<string, TransformationFunction>;
 }
 
 // Request DTOs
@@ -255,7 +378,7 @@ export class DistributedScrapingRequestDto {
   exportOptions?: ExportOptions;
 
   @ApiPropertyOptional({ description: 'Custom metadata for the operation' })@IsOptional()@IsObject()
-  metadata?: Record<string, any>;
+  metadata?: Record<string, OperationMetadata>;
 }
 
 export class MultiSourceExtractionRequestDto {
@@ -278,7 +401,7 @@ export class MultiSourceExtractionRequestDto {
   exportOptions?: ExportOptions;
 
   @ApiPropertyOptional({ description: 'Operation metadata' })@IsOptional()@IsObject()
-  metadata?: Record<string, any>;
+  metadata?: Record<string, OperationMetadata>;
 }
 
 export class FilterConfig {
@@ -303,7 +426,7 @@ export class FilterConfig {
   };
 
   @ApiPropertyOptional({ description: 'Custom filter criteria' })@IsOptional()@IsObject()
-  custom?: Record<string, any>;
+  custom?: Record<string, FilterValue>;
 }
 
 export class PaginationOptions {
@@ -333,7 +456,7 @@ export class SortingOptions {
   includeTimeSeries?: boolean;
 
   @ApiPropertyOptional({ description: 'Custom aggregation functions' })@IsOptional()@IsObject()
-  customAggregations?: Record<string, any>;
+  customAggregations?: Record<string, AggregationFunction>;
 }
 
 export class AggregatedResultsRequestDto {
@@ -369,7 +492,7 @@ export class SchemaValidationConfig {
   optional?: Record<string, string>;
 
   @ApiPropertyOptional({ description: 'Field constraints' })@IsOptional()@IsObject()
-  constraints?: Record<string, any>;
+  constraints?: Record<string, FieldConstraint>;
 }
 
 export class QualityRulesConfig {
@@ -384,7 +507,7 @@ export class QualityRulesConfig {
   minAccuracy?: number;
 
   @ApiPropertyOptional({ description: 'Custom quality rules' })@IsOptional()@IsObject()
-  customRules?: Record<string, any>;
+  customRules?: Record<string, QualityRule>;
 }
 
 export class ContentValidationConfig {
@@ -392,10 +515,10 @@ export class ContentValidationConfig {
   enabled?: boolean;
 
   @ApiPropertyOptional({ description: 'Spam detection rules' })@IsOptional()@IsObject()
-  spamDetection?: Record<string, any>;
+  spamDetection?: Record<string, SpamDetectionRule>;
 
   @ApiPropertyOptional({ description: 'Content format validation' })@IsOptional()@IsObject()
-  formatValidation?: Record<string, any>;
+  formatValidation?: Record<string, FormatValidationRule>;
 }
 
 export class DuplicateDetectionConfig {
@@ -449,7 +572,7 @@ export class DataValidationConfigDto {
 
 export class DataValidationRequestDto {
   @ApiProperty({ description: 'Data to validate' })@IsArray()@ArrayMinSize(1)
-  data!: any[];
+  data!: Record<string, unknown>[];
 
   @ApiProperty({ description: 'Validation configuration' })@ValidateNested()@Type(() => DataValidationConfigDto)
   validationConfig!: DataValidationConfigDto;
@@ -492,7 +615,7 @@ export class PaginationInfo {
   @ApiProperty({ description: 'Current page number', example: 1 })page!: number;@ApiProperty({ description: 'Total number of pages', example: 10 })totalPages!: number;@ApiProperty({ description: 'Has next page', example: true })hasNext!: boolean;@ApiProperty({ description: 'Has previous page', example: false })hasPrevious!: boolean;}
 
 export class AggregatedResultsResponseDto {
-  @ApiProperty({ description: 'Operation success status', example: true })success!: boolean;@ApiProperty({ description: 'Unique operation identifier', example: 'agg_results_12345' })operationId!: string;@ApiProperty({ description: 'Total results available', example: 5000 })totalResults!: number;@ApiProperty({ description: 'Number of filtered results', example: 1200 })filteredResults!: number;@ApiProperty({ description: 'Aggregated data results' })aggregatedData!: any;@ApiProperty({ description: 'Analytics and insights' })analytics!: any;@ApiProperty({ description: 'Generated insights and recommendations' })insights!: any;@ApiProperty({ description: 'Quality metrics for the results' })qualityMetrics!: DataQualityMetrics;@ApiProperty({ description: 'Pagination information' })pagination!: PaginationInfo;@ApiPropertyOptional({ description: 'Export information if requested' })exportInfo?: ExportInfo;@ApiProperty({ description: 'Results retrieval timestamp' })retrievedAt!: Date;}
+  @ApiProperty({ description: 'Operation success status', example: true })success!: boolean;@ApiProperty({ description: 'Unique operation identifier', example: 'agg_results_12345' })operationId!: string;@ApiProperty({ description: 'Total results available', example: 5000 })totalResults!: number;@ApiProperty({ description: 'Number of filtered results', example: 1200 })filteredResults!: number;@ApiProperty({ description: 'Aggregated data results' })aggregatedData!: AggregatedDataResult;@ApiProperty({ description: 'Analytics and insights' })analytics!: AnalyticsData;@ApiProperty({ description: 'Generated insights and recommendations' })insights!: InsightsData;@ApiProperty({ description: 'Quality metrics for the results' })qualityMetrics!: DataQualityMetrics;@ApiProperty({ description: 'Pagination information' })pagination!: PaginationInfo;@ApiPropertyOptional({ description: 'Export information if requested' })exportInfo?: ExportInfo;@ApiProperty({ description: 'Results retrieval timestamp' })retrievedAt!: Date;}
 
 export class AgentStatus {
   @ApiProperty({ description: 'Agent identifier', example: 'agent_001' })agentId!: string;@ApiProperty({ description: 'Current agent status', enum: AgentStatus })status!: AgentStatus;@ApiProperty({ description: 'Current load percentage (0-100)', example: 75 })load!: number;@ApiPropertyOptional({ description: 'Current task description' })currentTask?: string;}
@@ -508,10 +631,10 @@ export class ExtractionProgressDto {
 
 // Data Validation Response DTOs
 export class ValidationResults {
-  @ApiPropertyOptional({ description: 'Schema validation results' })schema?: any;@ApiPropertyOptional({ description: 'Quality assessment results' })quality?: any;@ApiPropertyOptional({ description: 'Content validation results' })content?: any;@ApiPropertyOptional({ description: 'Duplicate detection results' })duplicates?: any;@ApiPropertyOptional({ description: 'Statistical analysis results' })statistics?: any;}
+  @ApiPropertyOptional({ description: 'Schema validation results' })schema?: SchemaValidationResult;@ApiPropertyOptional({ description: 'Quality assessment results' })quality?: QualityAssessmentResult;@ApiPropertyOptional({ description: 'Content validation results' })content?: ContentValidationResult;@ApiPropertyOptional({ description: 'Duplicate detection results' })duplicates?: DuplicateDetectionResult;@ApiPropertyOptional({ description: 'Statistical analysis results' })statistics?: StatisticalAnalysisResult;}
 
 export class DataValidationResponseDto {
-  @ApiProperty({ description: 'Validation success status', example: true })success!: boolean;@ApiProperty({ description: 'Unique operation identifier', example: 'data_val_12345' })operationId!: string;@ApiProperty({ description: 'Number of items validated', example: 1000 })validatedItemCount!: number;@ApiProperty({ description: 'Overall quality score (0-1)', example: 0.85 })qualityScore!: number;@ApiProperty({ description: 'Detailed validation results' })validationResults!: ValidationResults;@ApiPropertyOptional({ description: 'Transformed data if requested' })transformedData?: any[];@ApiProperty({ description: 'Validation recommendations' })recommendations!: string[];@ApiProperty({ description: 'Processing time in milliseconds', example: 15000 })processingTimeMs!: number;@ApiPropertyOptional({ description: 'Export information if requested' })exportInfo?: ExportInfo;@ApiProperty({ description: 'Validation completion timestamp' })validatedAt!: Date;}
+  @ApiProperty({ description: 'Validation success status', example: true })success!: boolean;@ApiProperty({ description: 'Unique operation identifier', example: 'data_val_12345' })operationId!: string;@ApiProperty({ description: 'Number of items validated', example: 1000 })validatedItemCount!: number;@ApiProperty({ description: 'Overall quality score (0-1)', example: 0.85 })qualityScore!: number;@ApiProperty({ description: 'Detailed validation results' })validationResults!: ValidationResults;@ApiPropertyOptional({ description: 'Transformed data if requested' })transformedData?: Record<string, unknown>[];@ApiProperty({ description: 'Validation recommendations' })recommendations!: string[];@ApiProperty({ description: 'Processing time in milliseconds', example: 15000 })processingTimeMs!: number;@ApiPropertyOptional({ description: 'Export information if requested' })exportInfo?: ExportInfo;@ApiProperty({ description: 'Validation completion timestamp' })validatedAt!: Date;}
 
 // System Statistics DTOs
 export class AgentMetrics {

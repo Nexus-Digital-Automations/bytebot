@@ -365,13 +365,25 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
 
       const context = createMockExecutionContext(
         {
-          authorization: 'Bearer invalid-token',},false,
-        'protected-route','192.168.1.100',);(
-        jest.spyOn(reflector, 'getAllAndOverride')).mockReturnValue(false);(
-        jest.spyOn(jwtService, 'verifyAsync')).mockRejectedValue(new Error('Invalid token'));// Simulate multiple rapid authentication failuresconst attempts = Array(10)
+          authorization: 'Bearer invalid-token',
+        },
+        false,
+        'protected-route',
+        '192.168.1.100',
+      );
+
+      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
+      jest.spyOn(jwtService, 'verifyAsync').mockRejectedValue(new Error('Invalid token'));
+
+      // Simulate multiple rapid authentication failures
+      const attempts = Array(10)
         .fill(null)
-        .map(() => guard.canActivate(context).catch(() => 'failed'));const results = await Promise.all(attempts);const failedAttempts = results.filter(
-        (result) => result === 'failed').length;
+        .map(() => guard.canActivate(context).catch(() => 'failed'));
+
+      const results = await Promise.all(attempts);
+      const failedAttempts = results.filter(
+        (result) => result === 'failed'
+      ).length;
 
       // All should fail as expected
       expect(failedAttempts).toBe(10);
@@ -383,25 +395,25 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
   });
 
     describe('Injection and XSS Prevention', () => {
-  it('should sanitize JWT _payload to prevent XSS attacks'async () => {
-      const testId = `${operationId
-}_xss_prevention`;securityLogger.info(`[${testId}] Testing XSS prevention in JWT _payload`);
+  it('should sanitize JWT _payload to prevent XSS attacks', async () => {
+      const testId = `${operationId}_xss_prevention`;
+      securityLogger.info(`[${testId}] Testing XSS prevention in JWT _payload`);
 
       const xssPayload = {
-  sub: '<script>alert("XSS")</script>",
-      email: '<img src=x onerror=alert("XSS")>@test.com",
+  sub: '<script>alert("XSS")</script>',
+      email: '<img src=x onerror=alert("XSS")>@test.com',
         role: 'viewer',
-      name: 'javascript: alert("XSS")", exp: Math.floor(Date.now() / 1000) + 3600,
+      name: 'javascript: alert("XSS")',
+        exp: Math.floor(Date.now() / 1000) + 3600,
       
 };
 
       const context = createMockExecutionContext({
   authorization: 'Bearer xss-token'
       
-});(
-        jest.spyOn(reflector, 'getAllAndOverride')).mockReturnValue(false);(
-        jest.spyOn(jwtService'verifyAsync')
-      ).mockResolvedValue(xssPayload);
+});
+        jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
+        jest.spyOn(jwtService, 'verifyAsync').mockResolvedValue(xssPayload);
 
       const result = await guard.canActivate(context);
       const request = context.switchToHttp().getRequest() as MockRequest;
@@ -415,8 +427,9 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
       securityLogger.info(`[${testId}] XSS _payload sanitized successfully`);
     });
 
-    it('should prevent SQL injection through JWT claims'async () => {
-      const testId = `${operationId}_sql_injection_prevention`;securityLogger.info(`[${testId}] Testing SQL injection prevention in JWT claims`,
+    it('should prevent SQL injection through JWT claims', async () => {
+      const testId = `${operationId}_sql_injection_prevention`;
+      securityLogger.info(`[${testId}] Testing SQL injection prevention in JWT claims`,
       );
 
       const sqlInjectionPayload = {

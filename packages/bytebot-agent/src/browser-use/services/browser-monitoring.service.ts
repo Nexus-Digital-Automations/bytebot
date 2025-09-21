@@ -6,7 +6,7 @@
  * service health checks, resource usage tracking, and performance monitoring.
  */
 
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   BrowserMonitoringResponseDto,
@@ -556,7 +556,7 @@ export class BrowserMonitoringService {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(`Failed to get performance metrics: ${errorMessage}`);
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
@@ -606,7 +606,7 @@ export class BrowserMonitoringService {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(`Failed to get system metrics: ${errorMessage}`);
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 

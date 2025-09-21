@@ -255,7 +255,7 @@ export class MessagesService {
         action: 'create',
       });
 
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
@@ -334,7 +334,7 @@ export class MessagesService {
         action: 'findEvery',
       });
 
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
@@ -441,7 +441,7 @@ export class MessagesService {
         action: 'findAll',
       });
 
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
@@ -687,7 +687,7 @@ export class MessagesService {
         action: 'findProcessedMessages',
       });
 
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 

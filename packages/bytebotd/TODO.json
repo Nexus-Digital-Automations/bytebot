@@ -3273,12 +3273,24 @@
       "id": "test_1758355080827_w5doie42afl"
     },
     {
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2025-09-20T07:58:04.574Z",
       "title": "Eliminate non-null assertions and implement proper type safety",
       "description": "Remove forbidden non-null assertion operators and replace with proper type guards, optional chaining, and null checks for type safety",
       "category": "error",
-      "id": "error_1758355084573_kbbvnmw1yt"
+      "id": "error_1758355084573_kbbvnmw1yt",
+      "assigned_agent": "dev_session_1758409747951_1_general_6eb90f20",
+      "started_at": "2025-09-20T23:31:49.498Z",
+      "claimed_by": "dev_session_1758409747951_1_general_6eb90f20",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758409747951_1_general_6eb90f20",
+          "role": "primary",
+          "assignedAt": "2025-09-20T23:31:49.498Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
     },
     {
       "status": "in_progress",
@@ -3406,13 +3418,25 @@
       "updated_at": "2025-09-20T22:27:40.540Z"
     },
     {
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2025-09-20T15:11:53.224Z",
       "title": "CRITICAL: Fix 248 ESLint parsing errors blocking TypeScript compilation",
       "description": "EMERGENCY: 248 ESLint parsing errors must be fixed before TypeScript can compile. These syntax errors include: Expression expected, Declaration expected, Missing comma/semicolon, Unterminated statements, Property assignment issues. Affects core modules: auth, common, database, websocket. Must be resolved first before any TypeScript type errors can be properly addressed.",
       "category": "error",
       "priority": "normal",
-      "id": "error_1758381113223_q8l51jit95k"
+      "id": "error_1758381113223_q8l51jit95k",
+      "assigned_agent": "dev_session_1758411814604_1_general_6975b84d",
+      "started_at": "2025-09-20T23:50:47.680Z",
+      "claimed_by": "dev_session_1758411814604_1_general_6975b84d",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758411814604_1_general_6975b84d",
+          "role": "primary",
+          "assignedAt": "2025-09-20T23:50:47.680Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
     },
     {
       "status": "pending",

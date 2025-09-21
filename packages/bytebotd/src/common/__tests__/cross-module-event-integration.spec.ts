@@ -467,10 +467,13 @@ it('should handle event processing failures gracefully', async () => {
 
 
 it('should implement dead letter queue for failed events', async () => {
-const correlationId = generateCorrelationId();const deadLetterEvents: EventRecord[] = [];
+const correlationId = generateCorrelationId();
+      const deadLetterEvents: EventRecord[] = [];
 
       // Setup dead letter queue listener
-      context.eventEmitter.on('dlq.event.failed', (payload: EventPayload) => deadLetterEvents.push({eventId: 'dlq-test',
+      context.eventEmitter.on('dlq.event.failed', (payload: EventPayload) => {
+        deadLetterEvents.push({
+          eventId: 'dlq-test',
       eventName: 'dlq.event.failed',
       source: 'dead-letter-queue',
       target: 'dlq',

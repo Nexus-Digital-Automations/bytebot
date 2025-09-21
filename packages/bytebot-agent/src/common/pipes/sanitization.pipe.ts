@@ -15,6 +15,7 @@ import {
   Injectable,
   ArgumentMetadata,
   BadRequestException,
+  Logger,
 } from '@nestjs/common';
 import {
   sanitizeInput,
@@ -173,12 +174,21 @@ const SANITIZATION_STRATEGIES: Record<
   },
 };
 
-@Injectable()
-export class SanitizationPipe implements PipeTransform<any> {
-  private readonly logger = new Logger(SanitizationPipe.name);
-  private readonly _options: SanitizationPipeOptions;
+/**
+ * Union type for all sanitizable values
+ */
+type SanitizableValue = string | number | boolean | null | undefined | SanitizableObject | SanitizableArray;
+interface SanitizableObject {
+  [key: string]: SanitizableValue;
+}
+interface SanitizableArray extends Array<SanitizableValue> {}
 
-  constructor(_options: Partial<SanitizationPipeOptions> = {}) {
+@Injectable()
+export class SanitizationPipe implements PipeTransform<SanitizableValue, unknown> {
+  private readonly logger = new Logger(SanitizationPipe.name);
+  private readonly options: SanitizationPipeOptions;
+
+  constructor(options: Partial<SanitizationPipeOptions> = {}) {
     this.options = {
       defaultStrategy: SanitizationStrategy.MODERATE,
       fieldRules: [],
@@ -203,7 +213,7 @@ export class SanitizationPipe implements PipeTransform<any> {
    * @param metadata - Argument metadata
    * @returns Sanitized value
    */
-  transform(value: any, _metadata: ArgumentMetadata): any {
+  transform(value: SanitizableValue, metadata: ArgumentMetadata): unknown {
     const operationId = `sanitization-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const startTime = Date.now();
 
@@ -268,7 +278,7 @@ export class SanitizationPipe implements PipeTransform<any> {
       // Log security event
       this.logSecurityEvent(operationId, error, value, metadata);
 
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
@@ -277,7 +287,7 @@ export class SanitizationPipe implements PipeTransform<any> {
    * @param value - Value to analyze
    * @param operationId - Operation tracking ID
    */
-  private detectThreats(value: any, operationId: string): void {
+  private detectThreats(value: SanitizableValue, operationId: string): void {
     const threats: string[] = [];
     const stringValue = this.valueToString(value);
 
@@ -331,7 +341,7 @@ export class SanitizationPipe implements PipeTransform<any> {
    * @param operationId - Operation tracking ID
    * @returns Sanitized value
    */
-  private sanitizeInput(value: any, operationId: string): any {
+  private sanitizeInput(value: SanitizableValue, operationId: string): unknown {
     if (typeof value === 'string') {
       return this.sanitizeString(value, null, operationId);
     }
@@ -417,7 +427,7 @@ export class SanitizationPipe implements PipeTransform<any> {
    * @param operationId - Operation tracking ID
    * @returns Sanitized object
    */
-  private sanitizeObject(value: any, operationId: string): unknown {
+  private sanitizeObject(value: SanitizableValue, operationId: string): unknown {
     if (Array.isArray(value)) {
       return value.map((item, index) => {
         if (typeof item === 'string') {
@@ -425,7 +435,7 @@ export class SanitizationPipe implements PipeTransform<any> {
         } else if (typeof item === 'object' && item !== null) {
           return this.sanitizeObject(item, operationId);
         }
-        return item as unknown;
+        return item;
       });
     }
 
@@ -437,7 +447,7 @@ export class SanitizationPipe implements PipeTransform<any> {
     let fieldsProcessed = 0;
     let fieldsModified = 0;
 
-    for (const [key, val] of Object.entries(value as Record<string, unknown>)) {
+    for (const [key, val] of Object.entries(value as SanitizableObject)) {
       fieldsProcessed++;
 
       if (typeof val === 'string') {
@@ -517,7 +527,7 @@ export class SanitizationPipe implements PipeTransform<any> {
    * @param value - Value to convert
    * @returns String representation
    */
-  private valueToString(value: any): string {
+  private valueToString(value: SanitizableValue): string {
     if (typeof value === 'string') {
       return value;
     }
@@ -534,7 +544,7 @@ export class SanitizationPipe implements PipeTransform<any> {
    * @param value - Value to measure
    * @returns Size in bytes
    */
-  private getValueSize(value: any): number {
+  private getValueSize(value: SanitizableValue): number {
     try {
       return new Blob([JSON.stringify(value)]).size;
     } catch {
@@ -551,9 +561,9 @@ export class SanitizationPipe implements PipeTransform<any> {
    */
   private logSecurityEvent(
     operationId: string,
-    _error: any,
-    value: any,
-    _metadata: ArgumentMetadata,
+    error: unknown,
+    value: SanitizableValue,
+    metadata: ArgumentMetadata,
   ): void {
     try {
       let eventType = SecurityEventType._VALIDATION_FAILED;

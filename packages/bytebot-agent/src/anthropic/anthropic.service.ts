@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SecretsService } from '../config/secrets.service';
 import Anthropic, { APIUserAbortError } from '@anthropic-ai/sdk';
@@ -78,7 +78,7 @@ export class AnthropicService implements BytebotAgentService {
           _error: error instanceof Error ? error.message : String(error),
         },
       );
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
@@ -147,7 +147,7 @@ export class AnthropicService implements BytebotAgentService {
         `Error sending message to Anthropic: ${error instanceof Error ? error.message : String(error)}`,
         error instanceof Error ? error.stack : undefined,
       );
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 

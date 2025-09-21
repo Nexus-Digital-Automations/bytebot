@@ -57,7 +57,7 @@ describe('Browser-Use Integration Tests', () => {
     })
       .overrideProvider(ConfigService)
       .useValue({
-        get: jest.fn((key: string, defaultValue?: any) => {
+        get: jest.fn((key: string, defaultValue?: string | number | boolean | Record<string, unknown>) => {
           const mockConfig = {
             NODE_ENV: 'test',
             DATABASE_URL: 'postgresql://test:test@localhost:5432/test_db',

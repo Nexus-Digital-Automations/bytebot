@@ -53,6 +53,7 @@ import {
   HttpCode,
   HttpException,
   Headers,
+  Logger,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -1166,7 +1167,7 @@ export class BrowserUseController {
           `[correlationId: ${correlationId}]`,
         (error as Error)?.stack,
       );
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
@@ -1300,7 +1301,7 @@ export class BrowserUseController {
         `Health check failed: ${(error as Error)?.message || 'Unknown error'} [correlationId: ${correlationId}]`,
         (error as Error)?.stack,
       );
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
@@ -1388,15 +1389,15 @@ export class BrowserUseController {
       };
     } catch (_error: unknown) {
       const errorMessage =
-        error instanceof Error ? error.message : JSON.stringify(error);
-      const errorStack = error instanceof Error ? error.stack : undefined;
+        _error instanceof Error ? _error.message : JSON.stringify(_error);
+      const errorStack = _error instanceof Error ? _error.stack : undefined;
 
       this.logger.error(
         `Failed to retrieve performance metrics: ${errorMessage} ` +
           `[correlationId: ${correlationId}]`,
         errorStack,
       );
-      throw error;
+      throw _error instanceof Error ? _error : new Error(errorMessage);
     }
   }
 

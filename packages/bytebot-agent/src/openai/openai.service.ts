@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SecretsService } from '../config/secrets.service';
 import OpenAI, { APIUserAbortError } from 'openai';
@@ -75,7 +75,7 @@ export class OpenAIService implements BytebotAgentService {
       this.logger.error(`[${operationId}] Failed to retrieve OpenAI API key`, {
         _error: error instanceof Error ? error.message : String(error),
       });
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
@@ -121,7 +121,7 @@ export class OpenAIService implements BytebotAgentService {
           totalTokens: response.usage?.total_tokens || 0,
         },
       };
-    } catch (_error: unknown) {
+    } catch (error: unknown) {
       console.log('error', error);
       const errorName = error instanceof Error ? error.name : 'Unknown';
       console.log('error name', errorName);
@@ -146,7 +146,7 @@ export class OpenAIService implements BytebotAgentService {
         `Error sending message to OpenAI: ${errorMessage}`,
         errorStack,
       );
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
@@ -300,7 +300,7 @@ export class OpenAIService implements BytebotAgentService {
   }
 
   private formatOpenAIResponse(
-    _response: OpenAI.Responses.ResponseOutputItem[],
+    response: OpenAI.Responses.ResponseOutputItem[],
   ): MessageContentBlock[] {
     const contentBlocks: MessageContentBlock[] = [];
 

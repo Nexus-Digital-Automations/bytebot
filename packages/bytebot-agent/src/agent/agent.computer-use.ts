@@ -380,7 +380,7 @@ async function moveMouse(input: { coordinates: Coordinates }): Promise<void> {
     });
   } catch (error) {
     console.error('Error in move_mouse action:', error);
-    throw error;
+    throw error instanceof Error ? error : new Error(String(error));
   }
 }
 
@@ -405,7 +405,7 @@ async function traceMouse(input: {
     });
   } catch (error) {
     console.error('Error in trace_mouse action:', error);
-    throw error;
+    throw error instanceof Error ? error : new Error(String(error));
   }
 }
 
@@ -434,7 +434,7 @@ async function clickMouse(input: {
     });
   } catch (error) {
     console.error('Error in click_mouse action:', error);
-    throw error;
+    throw error instanceof Error ? error : new Error(String(error));
   }
 }
 
@@ -461,7 +461,7 @@ async function pressMouse(input: {
     });
   } catch (error) {
     console.error('Error in press_mouse action:', error);
-    throw error;
+    throw error instanceof Error ? error : new Error(String(error));
   }
 }
 
@@ -488,7 +488,7 @@ async function dragMouse(input: {
     });
   } catch (error) {
     console.error('Error in drag_mouse action:', error);
-    throw error;
+    throw error instanceof Error ? error : new Error(String(error));
   }
 }
 
@@ -517,7 +517,7 @@ async function scroll(input: {
     });
   } catch (error) {
     console.error('Error in scroll action:', error);
-    throw error;
+    throw error instanceof Error ? error : new Error(String(error));
   }
 }
 
@@ -540,7 +540,7 @@ async function typeKeys(input: {
     });
   } catch (error) {
     console.error('Error in type_keys action:', error);
-    throw error;
+    throw error instanceof Error ? error : new Error(String(error));
   }
 }
 
@@ -563,7 +563,7 @@ async function pressKeys(input: {
     });
   } catch (error) {
     console.error('Error in press_keys action:', error);
-    throw error;
+    throw error instanceof Error ? error : new Error(String(error));
   }
 }
 
@@ -586,7 +586,7 @@ async function typeText(input: {
     });
   } catch (error) {
     console.error('Error in type_text action:', error);
-    throw error;
+    throw error instanceof Error ? error : new Error(String(error));
   }
 }
 
@@ -605,7 +605,7 @@ async function pasteText(input: { text: string }): Promise<void> {
     });
   } catch (error) {
     console.error('Error in paste_text action:', error);
-    throw error;
+    throw error instanceof Error ? error : new Error(String(error));
   }
 }
 
@@ -624,7 +624,7 @@ async function wait(input: { duration: number }): Promise<void> {
     });
   } catch (error) {
     console.error('Error in wait action:', error);
-    throw error;
+    throw error instanceof Error ? error : new Error(String(error));
   }
 }
 
@@ -649,7 +649,7 @@ async function cursorPosition(): Promise<Coordinates> {
     return { x: data.x, y: data.y };
   } catch (error) {
     console.error('Error in cursor_position action:', error);
-    throw error;
+    throw error instanceof Error ? error : new Error(String(error));
   }
 }
 
@@ -684,7 +684,7 @@ async function screenshot(): Promise<string> {
     return data.image; // Base64 encoded image
   } catch (error) {
     console.error('Error in screenshot action:', error);
-    throw error;
+    throw error instanceof Error ? error : new Error(String(error));
   }
 }
 
@@ -703,7 +703,7 @@ async function application(input: { application: string }): Promise<void> {
     });
   } catch (error) {
     console.error('Error in application action:', error);
-    throw error;
+    throw error instanceof Error ? error : new Error(String(error));
   }
 }
 

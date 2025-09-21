@@ -52,7 +52,7 @@ import {ApiTags,
   ValidationMode,
   ConversationContext,
   ParlantValidationInterceptor
-} from '@bytebot/shared/src/parlant/parlant-validation.decorator';
+} from '@bytebot/shared/src/parlant/parlant-validation.decorator';\nimport { ConversationContextParameter } from '@bytebot/shared/src/types/conversation-context.types';
 
 // Authentication and Authorization
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -258,7 +258,7 @@ credentials?: Record<string, unknown>;};
   async getAllSettings(
     @Query('category') category?: string,@Query('environment') environment?: string,@Query('includeSecrets') includeSecrets?: boolean,
     @CurrentUser() user: ByteBotdUser,
-    @ConversationContext() conversationContext?: any,
+    @ConversationContext() conversationContext?: ConversationContextParameter,
   ): Promise<{
     settings: Record<string, unknown>;
     metadata: {
@@ -304,7 +304,7 @@ credentials?: Record<string, unknown>;};
     summary: 'Get configuration setting',
       description: 'Retrieve specific configuration setting by key'})@ApiParam({ name: 'key', description: 'Configuration key' })async getSetting(@Param('key') key: string,
     @CurrentUser() user: ByteBotdUser,
-    @ConversationContext() conversationContext?: any,
+    @ConversationContext() conversationContext?: ConversationContextParameter,
   ): Promise<{
     key: string;
     value: unknown;
@@ -379,7 +379,7 @@ credentials?: Record<string, unknown>;};
     @Param('key') key: string,
     @Body() settingDto: ConfigurationSettingDto,
     @CurrentUser() user: ByteBotdUser,
-    @ConversationContext() conversationContext?: any,
+    @ConversationContext() conversationContext?: ConversationContextParameter,
   ): Promise<{
     success: boolean;
     key: string;
@@ -478,7 +478,7 @@ credentials?: Record<string, unknown>;};
       description: 'Update security policy configuration with critical validation requirements'})@ApiParam({ name: 'policyName', description: 'Security policy name' })async updateSecurityConfiguration(@Param('policyName') policyName: string,
     @Body() securityDto: SecurityConfigurationDto,
     @CurrentUser() user: ByteBotdUser,
-    @ConversationContext() conversationContext?: any,
+    @ConversationContext() conversationContext?: ConversationContextParameter,
   ): Promise<{
     success: boolean;
     policyName: string;
@@ -559,7 +559,7 @@ credentials?: Record<string, unknown>;};
     @Param('namespace') namespace: string,
     @Body() systemDto: SystemConfigurationDto,
     @CurrentUser() user: ByteBotdUser,
-    @ConversationContext() conversationContext?: any,
+    @ConversationContext() conversationContext?: ConversationContextParameter,
   ): Promise<{
     success: boolean;
     namespace: string;
@@ -606,7 +606,7 @@ _${Math.random().toString(36).substring(7)}`;
     @Param('name') name: string,
     @Body() integrationDto: IntegrationConfigurationDto,
     @CurrentUser() user: ByteBotdUser,
-    @ConversationContext() conversationContext?: any,
+    @ConversationContext() conversationContext?: ConversationContextParameter,
   ): Promise<{
     success: boolean;
     integrationName: string;
@@ -651,7 +651,7 @@ _${Math.random().toString(36).substring(7)}`;
       description: 'Retrieve change history for configuration setting'})async getConfigurationHistory(
     @Param('key') key: string,@Query('limit') limit: number = 50,
     @CurrentUser() user: ByteBotdUser,
-    @ConversationContext() conversationContext?: any,
+    @ConversationContext() conversationContext?: ConversationContextParameter,
   ): Promise<{
     key: string;
     changes: Array<{
@@ -699,7 +699,7 @@ _${Math.random().toString(36).substring(7)}`;
     @Param('changeId') changeId: string,
     @Body() rollbackJustification: { justification: string },
     @CurrentUser() user: ByteBotdUser,
-    @ConversationContext() conversationContext?: any,
+    @ConversationContext() conversationContext?: ConversationContextParameter,
   ): Promise<{
     success: boolean;
     changeId: string;

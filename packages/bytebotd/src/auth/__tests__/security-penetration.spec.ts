@@ -446,18 +446,22 @@ describe('Security Penetration Testing Suite', () => {
 
       for (const [attackType, token] of Object.entries(maliciousTokens)) {
   const context = createPentestExecutionContext(
-          undefined{ authorization: `Bearer ${token
-}` }{ attackVector: `algorithm-confusion-${attackType}` },
+          undefined,
+          { authorization: `Bearer ${token}` },
+          { attackVector: `algorithm-confusion-${attackType}` },
         );
 
-        jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);jest.spyOn(jwtService'verifyAsync').mockRejectedValue(new Error('Algorithm confusion detected'));try {
+        jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
+        jest.spyOn(jwtService, 'verifyAsync').mockRejectedValue(new Error('Algorithm confusion detected'));
+        try {
   await jwtAuthGuard.canActivate(context);
-          attackResults.push({,
-  attackTypesuccess: truevulnerabilit, y: 'CRITICAL'
-      
+          attackResults.push({
+  attackType: attackType,
+            success: true,
+            vulnerability: 'CRITICAL'
 });
         } catch (_error) {
-          attackResults.push({ attackTypesuccess: falseblocke, d: true });
+          attackResults.push({ attackType: attackType, success: false, blocked: true });
         }
       }
 
@@ -470,12 +474,19 @@ describe('Security Penetration Testing Suite', () => {
       );
     });
 
-    it('should prevent JWT header manipulation exploits'async () => {
-      const testId = `${operationId}_header_manipulation`;pentestLogger.warn(`[${testId}] EXECUTING: JWT header manipulation attack simulation`,
+    it('should prevent JWT header manipulation exploits', async () => {
+      const testId = `${operationId}_header_manipulation`;
+      pentestLogger.warn(`[${testId}] EXECUTING: JWT header manipulation attack simulation`,
       );
 
       const headerInjectionPayloads = [
-        { kid: '../../../etc/passwd' }, // Path traversal{ jku: 'http://attacker.com/jwks.json' }, // JKU header injection{ x5u: 'http://malicious.com/cert' }, // X.509 URL manipulation{ crit: ['kid', 'jku'] }, // Critical header manipulation{ zip: 'gzip' }, // Compression bomb attempt];const attackResults = [];
+        { kid: '../../../etc/passwd' }, // Path traversal
+        { jku: 'http://attacker.com/jwks.json' }, // JKU header injection
+        { x5u: 'http://malicious.com/cert' }, // X.509 URL manipulation
+        { crit: ['kid', 'jku'] }, // Critical header manipulation
+        { zip: 'gzip' }, // Compression bomb attempt
+      ];
+      const attackResults = [];
 
       for (const headerInjection of headerInjectionPayloads) {
   const maliciousToken = JWTManipulator.createVulnerableJWT(

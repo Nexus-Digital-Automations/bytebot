@@ -242,7 +242,7 @@ export class BrowserSecurityGuard implements CanActivate {
     request: Request,
     requestId: string,
     handler: Function,
-    controller: any,
+    controller: Record<string, unknown>,
   ): Promise<BrowserSecurityContext> {
     // Extract metadata from decorators
     const securityLevel = this.reflector.getAllAndOverride<BrowserSecurityLevel>(
@@ -283,7 +283,7 @@ export class BrowserSecurityGuard implements CanActivate {
     };
   }
 
-  private isPublicEndpoint(handler: Function, controller: any): boolean {
+  private isPublicEndpoint(handler: Function, controller: Record<string, unknown>): boolean {
     return this.reflector.getAllAndOverride<boolean>(BROWSER_PUBLIC_KEY, [
       handler,
       controller,
@@ -354,7 +354,7 @@ export class BrowserSecurityGuard implements CanActivate {
     user: BrowserUser,
     context: BrowserSecurityContext,
     handler: Function,
-    controller: any,
+    controller: Record<string, unknown>,
   ): Promise<void> {
     // Check required roles
     const requiredRoles = this.reflector.getAllAndOverride<UserRole[]>(
@@ -423,7 +423,7 @@ export class BrowserSecurityGuard implements CanActivate {
   private async validateRateLimit(
     context: BrowserSecurityContext,
     handler: Function,
-    controller: any,
+    controller: Record<string, unknown>,
   ): Promise<void> {
     const rateLimitConfig = context.rateLimit;
 

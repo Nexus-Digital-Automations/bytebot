@@ -18,6 +18,7 @@
 
 import {
   Injectable,
+  Logger,
   BadRequestException,
   NotFoundException,
 } from '@nestjs/common';
@@ -101,7 +102,7 @@ export class SummariesService {
    * @param data Summary creation request with validation
    * @returns Promise<SummaryAnalysis> Summary with analysis metrics
    */
-  async create(_data: CreateSummaryRequest): Promise<SummaryAnalysis> {
+  async create(data: CreateSummaryRequest): Promise<SummaryAnalysis> {
     const operationId = randomUUID();
     const startTime = performance.now();
 
@@ -130,12 +131,12 @@ export class SummariesService {
       const summary = await this.executeWithRetry(
         () =>
           this.prisma.summary.create({
-            _data: {
+            data: {
               taskId: data.taskId,
               content: data.content,
               ...(data.parentId ? { parentId: data.parentId } : {}),
               ...(data.metadata
-                ? { _metadata: data.metadata as Prisma.InputJsonValue }
+                ? { metadata: data.metadata as Prisma.InputJsonValue }
                 : {}),
             },
           }),
@@ -146,7 +147,7 @@ export class SummariesService {
 
       const processingTime = performance.now() - startTime;
 
-      const _result: SummaryAnalysis = {
+      const result: SummaryAnalysis = {
         ...summary,
         operationId,
         contentMetrics,
@@ -170,7 +171,7 @@ export class SummariesService {
       });
 
       return result;
-    } catch (_error: unknown) {
+    } catch (error: unknown) {
       const processingTime = performance.now() - startTime;
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
@@ -187,7 +188,7 @@ export class SummariesService {
         action: 'create',
       });
 
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
@@ -240,7 +241,7 @@ export class SummariesService {
       });
 
       return summary;
-    } catch (_error: unknown) {
+    } catch (error: unknown) {
       const processingTime = performance.now() - startTime;
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
@@ -257,7 +258,7 @@ export class SummariesService {
         action: 'findLatest',
       });
 
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
@@ -297,7 +298,7 @@ export class SummariesService {
       const databaseResponseTime = performance.now() - databaseStartTime;
       const processingTime = performance.now() - startTime;
 
-      const _result: SummaryRetrievalResult = {
+      const result: SummaryRetrievalResult = {
         summaries,
         operationId,
         totalCount: summaries.length,
@@ -319,7 +320,7 @@ export class SummariesService {
       });
 
       return result;
-    } catch (_error: unknown) {
+    } catch (error: unknown) {
       const processingTime = performance.now() - startTime;
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
@@ -336,7 +337,7 @@ export class SummariesService {
         action: 'findAll',
       });
 
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
@@ -397,7 +398,7 @@ export class SummariesService {
       });
 
       return summary;
-    } catch (_error: unknown) {
+    } catch (error: unknown) {
       const processingTime = performance.now() - startTime;
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
@@ -414,7 +415,7 @@ export class SummariesService {
         action: 'findById',
       });
 
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
@@ -423,7 +424,7 @@ export class SummariesService {
    * @private
    */
   private validateSummaryData(
-    _data: CreateSummaryRequest,
+    data: CreateSummaryRequest,
     operationId: string,
   ): void {
     this.logger.debug('Validating summary data', {
@@ -536,9 +537,9 @@ export class SummariesService {
         }
 
         return result;
-      } catch (_error: unknown) {
+      } catch (error: unknown) {
         lastError =
-          error instanceof Error ? _error : new Error('Unknown database error');
+          error instanceof Error ? error : new Error('Unknown database error');
 
         if (attempt === this.retryConfig.maxAttempts) {
           this.logger.error(

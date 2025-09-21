@@ -443,7 +443,7 @@ describe('[APPLICATION_NAME] E2E Tests - Enterprise Test Suite', () => {
         _error: error instanceof Error ? error.message : 'Unknown error',
         stage: 'overall-setup',
       });
-      throw error;
+      throw new Error(error instanceof Error ? error.message : String(error));
     }
   }, TEST_TIMEOUT);
 
@@ -468,7 +468,7 @@ describe('[APPLICATION_NAME] E2E Tests - Enterprise Test Suite', () => {
       logTestExecution('TEARDOWN_ERROR', {
         _error: error instanceof Error ? error.message : 'Unknown error',
       });
-      throw error;
+      throw new Error(error instanceof Error ? error.message : String(error));
     }
   }, TEST_TIMEOUT);
 

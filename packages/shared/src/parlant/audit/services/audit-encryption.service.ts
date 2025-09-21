@@ -27,6 +27,10 @@ import {
   AuditEventId,
   AuditEventSeverity,
   IntegrityVerification,
+  EncryptionPerformanceSettings,
+  EncryptionComplianceSettings,
+  HsmConfig,
+  QuantumResistantSettings,
 } from '../types/audit-core.types';
 import { createCipheriv, createDecipheriv, randomBytes, createHash, createHmac, createSign, createVerify } from 'crypto';
 import { performance } from 'perf_hooks';

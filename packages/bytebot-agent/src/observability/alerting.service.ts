@@ -19,9 +19,9 @@
  * @version 1.0.0 - Enterprise Implementation
  */
 
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { OnEvent } from '@nestjs/event-emitter';
+import { OnEvent, EventEmitter2 } from '@nestjs/event-emitter';
 import { MetricsService } from '../metrics/metrics.service';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -79,7 +79,7 @@ export interface Alert {
   description: string;
   source: string;
   tags: Record<string, string>;
-  _metadata: Record<string, any>;
+  metadata: Record<string, any>;
   triggeredAt: Date;
   acknowledgedAt?: Date;
   resolvedAt?: Date;
@@ -227,7 +227,7 @@ export class AlertingService implements OnModuleInit {
       this.logger.error(
         `[${operationId}] Failed to initialize alerting: ${errorMessage}`,
       );
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
@@ -397,7 +397,7 @@ export class AlertingService implements OnModuleInit {
     title: string,
     description: string,
     source: string,
-    _metadata: Record<string, any> = {},
+    metadata: Record<string, any> = {},
     correlationId?: string,
   ): Promise<string> {
     const operationId = this.generateOperationId();
@@ -920,7 +920,7 @@ export class AlertingService implements OnModuleInit {
    * Handle security events
    */
   @OnEvent('security.event')
-  async handleSecurityEvent(_event: Record<string, unknown>): Promise<void> {
+  async handleSecurityEvent(event: Record<string, unknown>): Promise<void> {
     const eventType = typeof event.type === 'string' ? event.type : 'unknown';
     const eventSeverity =
       typeof event.severity === 'string' ? event.severity : 'medium';
@@ -940,7 +940,7 @@ export class AlertingService implements OnModuleInit {
    * Handle security threats
    */
   @OnEvent('security.threat')
-  async handleSecurityThreat(_event: Record<string, unknown>): Promise<void> {
+  async handleSecurityThreat(event: Record<string, unknown>): Promise<void> {
     const eventType = typeof event.type === 'string' ? event.type : 'unknown';
     const eventMitigation =
       typeof event.mitigation === 'string'

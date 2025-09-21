@@ -42,13 +42,19 @@ import {
   ForensicMetadata,
   EventCorrelationData,
   IntegrityVerification,
+  ComplianceConfig,
+  ForensicConfig,
+  MonitoringConfig,
+  AnomalyDetectionConfig,
+  ThreatIntelligenceConfig,
+  IncidentResponseConfig,
 } from '../types/audit-core.types';
 import {
   ComplianceFramework,
   DataCategory,
   SensitiveDataType,
 } from '../types/compliance-forensic.types';
-import { RiskLevel, SecurityLevel } from '../../types/parlant.types';
+import { RiskLevel, SecurityLevel } from '../../../types/parlant.types';
 import { createHash, randomBytes, createHmac } from 'crypto';
 
 // ===========================

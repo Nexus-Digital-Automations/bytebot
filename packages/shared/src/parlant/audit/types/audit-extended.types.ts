@@ -20,6 +20,7 @@ import {
   SensitiveDataType,
   RiskLevel,
 } from './audit-core.types';
+import { ParlantValidationResponse } from '../../types/parlant.types';
 
 // ===========================
 // AUDIT PARLANT RESPONSE
@@ -30,7 +31,7 @@ import {
  */
 export interface AuditParlantResponse {
   /** Original response */
-  originalResponse: any; // ParlantValidationResponse from parlant.types
+  originalResponse: ParlantValidationResponse;
 
   /** Response processing */
   responseProcessing: ResponseProcessing;
@@ -85,7 +86,7 @@ export interface ProcessingStep {
   status: ProcessingStepStatus;
 
   /** Step result */
-  result: any;
+  result: unknown;
 
   /** Step metadata */
   metadata: Record<string, unknown>;
@@ -268,7 +269,7 @@ export interface DecisionFactor {
   weight: number;
 
   /** Factor value */
-  value: any;
+  value: string | number | boolean | object;
 
   /** Factor influence */
   influence: InfluenceLevel;

@@ -91,7 +91,7 @@ import { Test, TestingModule } from '@nestjs/testing';import { INestApplication,
           .expect(HttpStatus.OK);
 
         expect(Array.isArray(response.body)).toBe(true);
-        response.body.forEach((session: any) => {
+        response.body.forEach((session: { status: BrowserSessionStatus }) => {
           expect(session.status).toBe(BrowserSessionStatus.ACTIVE);
         });
       });
@@ -146,7 +146,7 @@ import { Test, TestingModule } from '@nestjs/testing';import { INestApplication,
           .expect(HttpStatus.OK);
 
         expect(Array.isArray(response.body)).toBe(true);
-        response.body.forEach((task: any) => {
+        response.body.forEach((task: { status: BrowserTaskStatus; priority: BrowserTaskPriority }) => {
           expect(task.status).toBe(BrowserTaskStatus.COMPLETED);
         });
       });

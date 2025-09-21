@@ -19,6 +19,7 @@ import {
   CanActivate,
   ExecutionContext,
   ForbiddenException,
+  Logger,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { UserRole, Permission, User } from '@prisma/client';
@@ -73,7 +74,7 @@ export class RolesGuard implements CanActivate {
    * @returns boolean - Whether the request is authorized
    * @throws ForbiddenException - When user lacks required permissions
    */
-  canActivate(_context: ExecutionContext): boolean {
+  canActivate(context: ExecutionContext): boolean {
     const operationId = `roles-guard-${Date.now()}`;
     const startTime = Date.now();
 
@@ -187,7 +188,7 @@ export class RolesGuard implements CanActivate {
 
       if (error instanceof ForbiddenException) {
         // Re-throw authorization errors without modification
-        throw error;
+        throw error instanceof Error ? error : new Error(String(error));
       }
 
       // Log unexpected errors
@@ -297,7 +298,7 @@ export class RolesGuard implements CanActivate {
    * @returns string - Client IP address
    * @private
    */
-  private getClientIpAddress(_request: AuthenticatedRequest): string {
+  private getClientIpAddress(request: AuthenticatedRequest): string {
     return (
       (request.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
       (request.headers['x-real-ip'] as string) ||
@@ -315,7 +316,7 @@ export class RolesGuard implements CanActivate {
    * @returns string - Route identifier
    * @private
    */
-  private getRouteInfo(_context: ExecutionContext): string {
+  private getRouteInfo(context: ExecutionContext): string {
     const handler = context.getHandler().name;
     const controller = context.getClass().name;
     return `${controller}.${handler}`;

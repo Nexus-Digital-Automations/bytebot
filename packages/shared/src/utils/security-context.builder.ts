@@ -16,9 +16,20 @@ import { Request } from "express";
 interface SecurityRequest extends Request {
   user?: {
     id?: string;
+    sub?: string;
+    username?: string;
     email?: string;
     roles?: string[];
-    sessionCreatedAt?: number;
+    permissions?: string[];
+    department?: string;
+    title?: string;
+    attributes?: Record<string, unknown>;
+    mfaEnabled?: boolean;
+    lastAuthTime?: unknown;
+    sessionCreatedAt?: unknown;
+    sessionExpiresAt?: unknown;
+    timezone?: string;
+    country?: string;
     iat?: number;
     [key: string]: unknown;
   };
@@ -28,13 +39,13 @@ interface SecurityRequest extends Request {
     [key: string]: unknown;
   };
   sessionID?: string;
-  params?: Record<string, string>;
 }
 import {
   SecurityContext,
   UserContext,
   RequestContext,
   Role,
+  Permission,
   ResourceType,
 } from "../types/rbac.types";
 
@@ -157,26 +168,26 @@ export class SecurityContextBuilder {
     }
 
     return {
-      id: user.id || user.sub || "unknown",
-      username: user.username || user.email || "unknown",
-      roles: user.roles || [Role._USER],
-      permissions: user.permissions || [],
+      id: (user.id as string) || (user.sub as string) || "unknown",
+      username: (user.username as string) || (user.email as string) || "unknown",
+      roles: (user.roles as Role[]) || [Role._USER],
+      permissions: (user.permissions as Permission[]) || [],
       metadata: {
-        department: user.department,
-        title: user.title,
-        attributes: user.attributes || {},
-        mfaEnabled: user.mfaEnabled || false,
+        department: user.department as string | undefined,
+        title: user.title as string | undefined,
+        attributes: (user.attributes as Record<string, unknown>) || {},
+        mfaEnabled: (user.mfaEnabled as boolean) || false,
         lastAuthTime: user.lastAuthTime
-          ? new Date(user.lastAuthTime)
+          ? new Date(user.lastAuthTime as string | number | Date)
           : undefined,
         sessionCreatedAt: user.sessionCreatedAt
-          ? new Date(user.sessionCreatedAt)
+          ? new Date(user.sessionCreatedAt as string | number | Date)
           : new Date(),
         sessionExpiresAt: user.sessionExpiresAt
-          ? new Date(user.sessionExpiresAt)
+          ? new Date(user.sessionExpiresAt as string | number | Date)
           : undefined,
-        timezone: user.timezone,
-        country: user.country,
+        timezone: user.timezone as string | undefined,
+        country: user.country as string | undefined,
       },
     };
   }
@@ -255,7 +266,7 @@ export class SecurityContextBuilder {
    * Extract resource ID from request
    */
   private extractResourceId(request: Request): string | undefined {
-    const params = (request as SecurityRequest).params;
+    const params = request.params;
     return params?.id || params?.resourceId || undefined;
   }
 
@@ -340,7 +351,7 @@ export class SecurityContextBuilder {
     const createdTime =
       typeof sessionCreatedAt === "number"
         ? new Date(sessionCreatedAt * 1000)
-        : new Date(sessionCreatedAt);
+        : new Date(sessionCreatedAt as string | number | Date);
 
     const ageMs = Date.now() - createdTime.getTime();
     return Math.floor(ageMs / (1000 * 60)); // Convert to minutes
@@ -374,7 +385,7 @@ export class SecurityContextBuilder {
     // This could integrate with GeoIP services in production
     const geoInfo = this.extractGeoInfo(request);
     if (geoInfo) {
-      (context as Record<string, unknown>).geo = geoInfo;
+      (context as unknown as Record<string, unknown>).geo = geoInfo;
     }
   }
 
@@ -392,7 +403,7 @@ export class SecurityContextBuilder {
       anomalies: this.detectAnomalies(context, request),
     };
 
-    (context as Record<string, unknown>).sessionAnalysis = sessionAnalysis;
+    (context as unknown as Record<string, unknown>).sessionAnalysis = sessionAnalysis;
   }
 
   /**

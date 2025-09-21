@@ -8,6 +8,7 @@
 
 import {
   Injectable,
+  Logger,
   NotFoundException,
   ConflictException,
 } from '@nestjs/common';
@@ -311,7 +312,7 @@ export class BrowserSessionService {
         code: 'CLOSE_ERROR',
         timestamp: new Date(),
       };
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 

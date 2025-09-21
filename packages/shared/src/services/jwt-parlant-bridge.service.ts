@@ -920,4 +920,171 @@ export class JwtParlantBridgeService
       this.logger.error("Failed to flush audit events", error);
     }
   }
+
+  /**
+   * Get health status of the JWT-Parlant Bridge Service
+   */
+  async getHealthStatus(): Promise<{
+    status: "healthy" | "degraded" | "unhealthy";
+    components: Record<string, { status: string; lastChecked: Date; details?: any }>;
+    metrics: {
+      activeSessions: number;
+      emergencyOverrides: number;
+      auditEventsPending: number;
+      uptimeSeconds: number;
+    };
+    timestamp: Date;
+  }> {
+    const healthCheckStart = Date.now();
+    const timestamp = new Date();
+
+    // Initialize health status
+    let overallStatus: "healthy" | "degraded" | "unhealthy" = "healthy";
+    const components: Record<string, { status: string; lastChecked: Date; details?: any }> = {};
+
+    try {
+      // Check Redis connection
+      try {
+        await this.redisClient.ping();
+        components.redis = {
+          status: "healthy",
+          lastChecked: timestamp,
+          details: {
+            connected: true,
+            responseTimeMs: Date.now() - healthCheckStart,
+          },
+        };
+      } catch (error) {
+        components.redis = {
+          status: "unhealthy",
+          lastChecked: timestamp,
+          details: {
+            connected: false,
+            error: error instanceof Error ? error.message : String(error),
+          },
+        };
+        overallStatus = "degraded";
+      }
+
+      // Check Parlant API connection
+      try {
+        const parlantStart = Date.now();
+        await this.parlantClient.get("/health");
+        components.parlantApi = {
+          status: "healthy",
+          lastChecked: timestamp,
+          details: {
+            connected: true,
+            responseTimeMs: Date.now() - parlantStart,
+          },
+        };
+      } catch (error) {
+        components.parlantApi = {
+          status: "degraded",
+          lastChecked: timestamp,
+          details: {
+            connected: false,
+            error: error instanceof Error ? error.message : String(error),
+            fallbackMode: true,
+          },
+        };
+        // Parlant API failure is degraded, not unhealthy, as we have fallback mode
+        if (overallStatus === "healthy") {
+          overallStatus = "degraded";
+        }
+      }
+
+      // Check JWT configuration
+      try {
+        let jwtConfigValid = true;
+        for (const algorithm of this.JWT_ALGORITHMS) {
+          try {
+            await this.getJwtSecret(algorithm);
+          } catch (error) {
+            jwtConfigValid = false;
+            break;
+          }
+        }
+
+        components.jwtConfiguration = {
+          status: jwtConfigValid ? "healthy" : "degraded",
+          lastChecked: timestamp,
+          details: {
+            supportedAlgorithms: this.JWT_ALGORITHMS,
+            allConfigured: jwtConfigValid,
+          },
+        };
+
+        if (!jwtConfigValid && overallStatus !== "unhealthy") {
+          overallStatus = "degraded";
+        }
+      } catch (error) {
+        components.jwtConfiguration = {
+          status: "unhealthy",
+          lastChecked: timestamp,
+          details: {
+            error: error instanceof Error ? error.message : String(error),
+          },
+        };
+        overallStatus = "unhealthy";
+      }
+
+      // Check session management
+      components.sessionManagement = {
+        status: "healthy",
+        lastChecked: timestamp,
+        details: {
+          activeSessions: this.sessionBridges.size,
+          emergencyOverrides: this.emergencyOverrides.size,
+          auditEventsPending: this.auditEvents.length,
+        },
+      };
+
+      // Calculate metrics
+      const metrics = {
+        activeSessions: this.sessionBridges.size,
+        emergencyOverrides: this.emergencyOverrides.size,
+        auditEventsPending: this.auditEvents.length,
+        uptimeSeconds: Math.floor(process.uptime()),
+      };
+
+      const healthCheck = {
+        status: overallStatus,
+        components,
+        metrics,
+        timestamp,
+      };
+
+      this.logger.debug("Health check completed", {
+        status: overallStatus,
+        checkDurationMs: Date.now() - healthCheckStart,
+        activeSessions: metrics.activeSessions,
+        emergencyOverrides: metrics.emergencyOverrides,
+      });
+
+      return healthCheck;
+    } catch (error) {
+      this.logger.error("Health check failed", error);
+
+      return {
+        status: "unhealthy",
+        components: {
+          healthCheck: {
+            status: "unhealthy",
+            lastChecked: timestamp,
+            details: {
+              error: error instanceof Error ? error.message : String(error),
+            },
+          },
+        },
+        metrics: {
+          activeSessions: this.sessionBridges.size,
+          emergencyOverrides: this.emergencyOverrides.size,
+          auditEventsPending: this.auditEvents.length,
+          uptimeSeconds: Math.floor(process.uptime()),
+        },
+        timestamp,
+      };
+    }
+  }
 }

@@ -88,7 +88,7 @@ export interface DatabaseFunctionParameter {
   readonly required: boolean;
   readonly description: string;
   readonly validation?: ParameterValidation;
-  readonly defaultValue?: any;
+  readonly defaultValue?: unknown;
 }
 
 /**
@@ -98,7 +98,7 @@ export interface ParameterValidation {
   readonly minLength?: number;
   readonly maxLength?: number;
   readonly pattern?: string;
-  readonly allowedValues?: any[];
+  readonly allowedValues?: unknown[];
   readonly customValidator?: string;
 }
 
@@ -145,8 +145,8 @@ export interface TestTeardown {
  */
 export interface TestAssertion {
   readonly type: 'EQUALS' | 'NOT_EQUALS' | 'CONTAINS' | 'NOT_CONTAINS' | 'RESPONSE_TIME' | 'STATUS_CODE' | 'CUSTOM';
-  readonly expected: any;
-  readonly actual?: any;
+  readonly expected: unknown;
+  readonly actual?: unknown;
   readonly description: string;
   readonly customAssertion?: string;
 }
@@ -232,8 +232,8 @@ export interface TestResult {
 export interface AssertionResult {
   readonly description: string;
   readonly passed: boolean;
-  readonly expected: any;
-  readonly actual: any;
+  readonly expected: unknown;
+  readonly actual: unknown;
   readonly error?: string;
 }
 
@@ -479,7 +479,7 @@ export interface ColumnSchema {
   readonly name: string;
   readonly type: string;
   readonly nullable: boolean;
-  readonly defaultValue?: any;
+  readonly defaultValue?: unknown;
   readonly isPrimaryKey: boolean;
   readonly isForeignKey: boolean;
   readonly references?: string;

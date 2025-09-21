@@ -53,7 +53,7 @@ export class PrismaService
       this.logger.log('Prisma service initialized successfully');
     } catch (error) {
       this.logger.error('Failed to initialize Prisma service', error);
-      throw error;
+      throw new Error(error instanceof Error ? error.message : String(error));
     }
   }
 

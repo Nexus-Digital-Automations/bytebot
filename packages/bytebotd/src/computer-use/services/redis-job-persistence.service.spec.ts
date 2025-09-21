@@ -27,10 +27,10 @@ import { Test, TestingModule } from '@nestjs/testing';import { ConfigService } f
  * Mock Redis Cluster Cache Service for testing
  */
 class MockRedisClusterCacheService {
-  private storage = new Map<string, any>();
+  private storage = new Map<string, unknown>();
   private operationLatency = 5; // 5ms simulated latency
 
-  async get<T>(key: string, options?: any): Promise<CacheOperationResult<T>> {
+  async get<T>(key: string, options?: Record<string, unknown>): Promise<CacheOperationResult<T>> {
     await this.simulateLatency();
 
     const data = this.storage.get(key);
@@ -46,7 +46,7 @@ class MockRedisClusterCacheService {
     };
   }
 
-  async set<T>(key: string, value: T, options?: any): Promise<CacheOperationResult<void>> {
+  async set<T>(key: string, value: T, options?: Record<string, unknown>): Promise<CacheOperationResult<void>> {
     await this.simulateLatency();
 
     this.storage.set(key, value);
@@ -128,9 +128,9 @@ function createTestJobData(overrides: Partial<RedisJobData> = {}): RedisJobData 
 /**
  * Create test configuration
  */
-function createTestConfig(): any {
+function createTestConfig(): jest.Mocked<ConfigService> {
   return {
-    get: jest.fn((key: string, defaultValue?: any) => {
+    get: jest.fn((key: string, defaultValue?: string | number | boolean | Record<string, unknown>) => {
       const config = {
         REDIS_JOB_PERSISTENCE_ENABLED: true,
         REDIS_JOB_KEY_PREFIX: 'test_job',REDIS_JOB_DEFAULT_TTL: 86400,REDIS_JOB_INDEXING_ENABLED: true,
@@ -153,7 +153,7 @@ function createTestConfig(): any {
 // ===== TEST SUITE =====
 
 describe('RedisJobPersistenceService', () => {let service: RedisJobPersistenceService;let mockRedisCache: MockRedisClusterCacheService;
-  let mockConfigService: any;
+  let mockConfigService: jest.Mocked<ConfigService>;
 
   beforeEach(async () => {
     mockRedisCache = new MockRedisClusterCacheService();
@@ -350,7 +350,7 @@ describe('RedisJobPersistenceService', () => {let service: RedisJobPersistenceSe
       expect(result.data).toBeGreaterThanOrEqual(0);
     });
 
-    it('should handle cleanup when indexing is disabled', async () => {// Mock indexing disabledmockConfigService.get.mockImplementation((key: string, defaultValue?: any) => {
+    it('should handle cleanup when indexing is disabled', async () => {// Mock indexing disabledmockConfigService.get.mockImplementation((key: string, defaultValue?: string | number | boolean | Record<string, unknown>) => {
         if (key === 'REDIS_JOB_INDEXING_ENABLED') return false;return createTestConfig().get(key, defaultValue);});
 
       const result = await service.cleanupExpiredJobs();
@@ -441,7 +441,7 @@ describe('RedisJobPersistenceService', () => {let service: RedisJobPersistenceSe
 
   // ===== CONFIGURATION VALIDATION =====
 
-  describe('Configuration Validation', () => {it('should use default configuration values', () => {const defaultConfig = createTestConfig();expect(defaultConfig.get('REDIS_JOB_PERSISTENCE_ENABLED')).toBe(true);expect(defaultConfig.get('REDIS_JOB_INDEXING_ENABLED')).toBe(true);expect(defaultConfig.get('REDIS_JOB_COMPRESSION_THRESHOLD')).toBe(1024);});it('should handle disabled persistence', async () => {// Mock persistence disabledmockConfigService.get.mockImplementation((key: string, defaultValue?: any) => {
+  describe('Configuration Validation', () => {it('should use default configuration values', () => {const defaultConfig = createTestConfig();expect(defaultConfig.get('REDIS_JOB_PERSISTENCE_ENABLED')).toBe(true);expect(defaultConfig.get('REDIS_JOB_INDEXING_ENABLED')).toBe(true);expect(defaultConfig.get('REDIS_JOB_COMPRESSION_THRESHOLD')).toBe(1024);});it('should handle disabled persistence', async () => {// Mock persistence disabledmockConfigService.get.mockImplementation((key: string, defaultValue?: string | number | boolean | Record<string, unknown>) => {
         if (key === 'REDIS_JOB_PERSISTENCE_ENABLED') return false;return createTestConfig().get(key, defaultValue);});
 
       // Since service is already initialized, we would need to reinitialize

@@ -1055,4 +1055,202 @@ export class RbacSecurityContextService
            context.riskAssessment.overall === SecurityRiskLevel.CRITICAL ||
            context.emergencyContext.overrideActive;
   }
+
+  /**
+   * Get health status of the RBAC Security Context Service
+   */
+  async getHealthStatus(): Promise<{
+    status: "healthy" | "degraded" | "unhealthy";
+    components: Record<string, { status: string; lastChecked: Date; details?: any }>;
+    metrics: {
+      loadedPolicies: number;
+      permissionMatrixSize: number;
+      accessControlEntries: number;
+      behavioralBaselines: number;
+      uptimeSeconds: number;
+    };
+    timestamp: Date;
+  }> {
+    const healthCheckStart = Date.now();
+    const timestamp = new Date();
+
+    // Initialize health status
+    let overallStatus: "healthy" | "degraded" | "unhealthy" = "healthy";
+    const components: Record<string, { status: string; lastChecked: Date; details?: any }> = {};
+
+    try {
+      // Check security policies
+      try {
+        const policiesStatus = this.securityPolicies.size > 0 ? "healthy" : "degraded";
+        components.securityPolicies = {
+          status: policiesStatus,
+          lastChecked: timestamp,
+          details: {
+            loadedPolicies: this.securityPolicies.size,
+            defaultEnforcementMode: this.DEFAULT_ENFORCEMENT_MODE,
+            defaultRiskThreshold: this.DEFAULT_RISK_THRESHOLD,
+          },
+        };
+
+        if (policiesStatus === "degraded" && overallStatus === "healthy") {
+          overallStatus = "degraded";
+        }
+      } catch (error) {
+        components.securityPolicies = {
+          status: "unhealthy",
+          lastChecked: timestamp,
+          details: {
+            error: error instanceof Error ? error.message : String(error),
+          },
+        };
+        overallStatus = "unhealthy";
+      }
+
+      // Check permission matrix
+      try {
+        const matrixSize = Object.keys(this.permissionMatrix).length;
+        const matrixStatus = matrixSize > 0 ? "healthy" : "degraded";
+
+        components.permissionMatrix = {
+          status: matrixStatus,
+          lastChecked: timestamp,
+          details: {
+            matrixSize,
+            lastBuilt: timestamp,
+          },
+        };
+
+        if (matrixStatus === "degraded" && overallStatus === "healthy") {
+          overallStatus = "degraded";
+        }
+      } catch (error) {
+        components.permissionMatrix = {
+          status: "unhealthy",
+          lastChecked: timestamp,
+          details: {
+            error: error instanceof Error ? error.message : String(error),
+          },
+        };
+        overallStatus = "unhealthy";
+      }
+
+      // Check access control entries
+      try {
+        components.accessControlEntries = {
+          status: "healthy",
+          lastChecked: timestamp,
+          details: {
+            entriesCount: this.accessControlEntries.length,
+            lastUpdated: timestamp,
+          },
+        };
+      } catch (error) {
+        components.accessControlEntries = {
+          status: "unhealthy",
+          lastChecked: timestamp,
+          details: {
+            error: error instanceof Error ? error.message : String(error),
+          },
+        };
+        overallStatus = "unhealthy";
+      }
+
+      // Check behavioral analysis
+      try {
+        const behavioralStatus = this.BEHAVIORAL_ANALYSIS_ENABLED ? "healthy" : "disabled";
+        components.behavioralAnalysis = {
+          status: behavioralStatus,
+          lastChecked: timestamp,
+          details: {
+            enabled: this.BEHAVIORAL_ANALYSIS_ENABLED,
+            baselines: this.behavioralBaselines.size,
+            lastAnalysis: timestamp,
+          },
+        };
+      } catch (error) {
+        components.behavioralAnalysis = {
+          status: "unhealthy",
+          lastChecked: timestamp,
+          details: {
+            error: error instanceof Error ? error.message : String(error),
+          },
+        };
+        overallStatus = "unhealthy";
+      }
+
+      // Check configuration service
+      try {
+        const configValid = this.configService !== undefined;
+        components.configuration = {
+          status: configValid ? "healthy" : "unhealthy",
+          lastChecked: timestamp,
+          details: {
+            serviceAvailable: configValid,
+            checkDurationMs: Date.now() - healthCheckStart,
+          },
+        };
+
+        if (!configValid) {
+          overallStatus = "unhealthy";
+        }
+      } catch (error) {
+        components.configuration = {
+          status: "unhealthy",
+          lastChecked: timestamp,
+          details: {
+            error: error instanceof Error ? error.message : String(error),
+          },
+        };
+        overallStatus = "unhealthy";
+      }
+
+      // Calculate metrics
+      const metrics = {
+        loadedPolicies: this.securityPolicies.size,
+        permissionMatrixSize: Object.keys(this.permissionMatrix).length,
+        accessControlEntries: this.accessControlEntries.length,
+        behavioralBaselines: this.behavioralBaselines.size,
+        uptimeSeconds: Math.floor(process.uptime()),
+      };
+
+      const healthCheck = {
+        status: overallStatus,
+        components,
+        metrics,
+        timestamp,
+      };
+
+      this.logger.debug("RBAC health check completed", {
+        status: overallStatus,
+        checkDurationMs: Date.now() - healthCheckStart,
+        loadedPolicies: metrics.loadedPolicies,
+        permissionMatrixSize: metrics.permissionMatrixSize,
+      });
+
+      return healthCheck;
+    } catch (error) {
+      this.logger.error("RBAC health check failed", error);
+
+      return {
+        status: "unhealthy",
+        components: {
+          healthCheck: {
+            status: "unhealthy",
+            lastChecked: timestamp,
+            details: {
+              error: error instanceof Error ? error.message : String(error),
+            },
+          },
+        },
+        metrics: {
+          loadedPolicies: this.securityPolicies.size,
+          permissionMatrixSize: Object.keys(this.permissionMatrix).length,
+          accessControlEntries: this.accessControlEntries.length,
+          behavioralBaselines: this.behavioralBaselines.size,
+          uptimeSeconds: Math.floor(process.uptime()),
+        },
+        timestamp,
+      };
+    }
+  }
 }

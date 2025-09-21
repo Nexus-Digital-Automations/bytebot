@@ -483,7 +483,7 @@ export class SanitizationInterceptor implements NestInterceptor {
               _error: error instanceof Error ? error.message : String(error),
             },
           );
-          throw error;
+          throw error instanceof Error ? error : new Error(String(error));
         }
       });
     }
@@ -513,7 +513,7 @@ export class SanitizationInterceptor implements NestInterceptor {
               _error: error instanceof Error ? error.message : String(error),
             },
           );
-          throw error;
+          throw error instanceof Error ? error : new Error(String(error));
         }
       }
 

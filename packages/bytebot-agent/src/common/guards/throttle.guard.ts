@@ -245,7 +245,7 @@ export class AdvancedThrottleGuard extends ThrottlerGuard {
         error instanceof HttpException ||
         error instanceof ThrottlerException
       ) {
-        throw error;
+        throw error instanceof Error ? error : new Error(String(error));
       }
 
       const errorMessage =

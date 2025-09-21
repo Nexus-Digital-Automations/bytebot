@@ -17,13 +17,18 @@
  * @version 2.0.0
  */
 
-import { performance, PerformanceObserver, PerformanceEntry } from 'perf_hooks';import { EventEmitter } from 'events';import { promises as fs } from 'fs';/*** Performance bottleneck definition
+import { performance, PerformanceObserver, PerformanceEntry } from 'perf_hooks';
+import { EventEmitter } from 'events';
+import { promises as fs } from 'fs';
+
+/** Performance bottleneck definition
  */
 export interface PerformanceBottleneck {
   readonly id: string;
   readonly type: 'cpu' | 'memory' | 'io' | 'network' | 'concurrency' | 'algorithm';
   readonly severity: 'critical' | 'high' | 'medium' | 'low';
-  readonly location: {file: string;
+  readonly location: {
+    file: string;
     function: string;
     line?: number;
   };
@@ -46,8 +51,12 @@ export interface PerformanceBottleneck {
     evidence: string[];
   };
   readonly recommendations: Array<{
-    priority: 'immediate' | 'high' | 'medium' | 'low';action: string;expectedImprovement: number; // percentage
-    effort: 'low' | 'medium' | 'high';implementation: string;}>;
+    priority: 'immediate' | 'high' | 'medium' | 'low';
+    action: string;
+    expectedImprovement: number; // percentage
+    effort: 'low' | 'medium' | 'high';
+    implementation: string;
+  }>;
   readonly detectedAt: number;
 }
 
@@ -62,7 +71,8 @@ export interface ProfilingSession {
   readonly samplesCollected: number;
   readonly bottlenecksDetected: PerformanceBottleneck[];
   readonly performanceGrade: 'A' | 'B' | 'C' | 'D' | 'F';
-  readonly overallImpact: {executionTimeImpact: number;
+  readonly overallImpact: {
+    executionTimeImpact: number;
     memoryImpact: number;
     reliabilityImpact: number;
   };
@@ -122,8 +132,11 @@ export class PerformanceBottleneckAnalyzer extends EventEmitter {
       entries.forEach(entry => this.analyzePerformanceEntry(entry));
     });
 
-    this.performanceObserver.observe({ 
-      entryTypes: ['measure', 'mark', 'function', 'gc'] });// Start resource monitoring
+    this.performanceObserver.observe({
+      entryTypes: ['measure', 'mark', 'function', 'gc']
+    });
+
+    // Start resource monitoring
     this.startResourceMonitoring();
   }
 
@@ -147,7 +160,9 @@ export class PerformanceBottleneckAnalyzer extends EventEmitter {
       duration: 0,
       samplesCollected: 0,
       bottlenecksDetected: [],
-      performanceGrade: 'A',overallImpact: {executionTimeImpact: 0,
+      performanceGrade: 'A',
+      overallImpact: {
+        executionTimeImpact: 0,
         memoryImpact: 0,
         reliabilityImpact: 0
       },
@@ -159,14 +174,18 @@ export class PerformanceBottleneckAnalyzer extends EventEmitter {
     // Clear previous snapshots for this session
     this.resourceSnapshots.length = 0;
 
-    this.emit('profilingStarted', { sessionId });return sessionId;}
+    this.emit('profilingStarted', { sessionId });
+    return sessionId;
+  }
 
   /**
    * Stop performance profiling session
    */
   public stopProfiling(): ProfilingSession | null {
     if (!this.isProfileActive || !this.currentSessionId) {
-      console.warn('⚠️ [ANALYZER] No active profiling session to stop');return null;}
+      console.warn('⚠️ [ANALYZER] No active profiling session to stop');
+      return null;
+    }
 
     const sessionId = this.currentSessionId;
     const session = this.profilingSessions.get(sessionId);
@@ -176,7 +195,9 @@ export class PerformanceBottleneckAnalyzer extends EventEmitter {
       return null;
     }
 
-    console.log(`🛑 [ANALYZER] Stopping performance profiling session: ${sessionId}`);const endTime = performance.now();const duration = endTime - session.startTime;
+    console.log(`🛑 [ANALYZER] Stopping performance profiling session: ${sessionId}`);
+    const endTime = performance.now();
+    const duration = endTime - session.startTime;
 
     // Collect all bottlenecks detected during this session
     const sessionBottlenecks = Array.from(this.detectedBottlenecks.values())
@@ -203,7 +224,11 @@ export class PerformanceBottleneckAnalyzer extends EventEmitter {
     this.isProfileActive = false;
     this.currentSessionId = null;
 
-    console.log(`📊 [ANALYZER] Profiling session completed:`);console.log(`  Duration: ${duration.toFixed(2)}ms`);console.log(`  Bottlenecks detected: ${sessionBottlenecks.length}`);console.log(`  Performance grade: ${performanceGrade}`);console.log(`  Optimization potential: ${optimizationPotential.toFixed(1)}%`);
+    console.log(`📊 [ANALYZER] Profiling session completed:`);
+    console.log(`  Duration: ${duration.toFixed(2)}ms`);
+    console.log(`  Bottlenecks detected: ${sessionBottlenecks.length}`);
+    console.log(`  Performance grade: ${performanceGrade}`);
+    console.log(`  Optimization potential: ${optimizationPotential.toFixed(1)}%`);
 
     this.emit('profilingStopped', { sessionId, session: updatedSession });
     return updatedSession;
@@ -217,17 +242,24 @@ export class PerformanceBottleneckAnalyzer extends EventEmitter {
     functionCode: () => Promise<any> | any,
     context: { file?: string; line?: number } = {}
   ): Promise<PerformanceBottleneck[]> {
-    console.log(`🔬 [ANALYZER] Analyzing function: ${functionName}`);const analysisId = `analysis${Date.now()}${Math.random().toString(36).substr(2, 9)}`;const startTime = performance.now();const initialMemory = process.memoryUsage();
+    console.log(`🔬 [ANALYZER] Analyzing function: ${functionName}`);
+    const analysisId = `analysis${Date.now()}${Math.random().toString(36).substr(2, 9)}`;
+    const startTime = performance.now();
+    const initialMemory = process.memoryUsage();
     const initialCpu = process.cpuUsage();
 
     const detectedBottlenecks: PerformanceBottleneck[] = [];
 
     try {
       // Mark function start
-      performance.mark(`${functionName}_start`);// Execute function with monitoringconst result = await functionCode();
+      performance.mark(`${functionName}_start`);
+
+      // Execute function with monitoring
+      const result = await functionCode();
 
       // Mark function end
-      performance.mark(`${functionName}_end`);performance.measure(`${functionName}_execution`, `${functionName}_start`, `${functionName}_end`);
+      performance.mark(`${functionName}_end`);
+      performance.measure(`${functionName}_execution`, `${functionName}_start`, `${functionName}_end`);
 
       const endTime = performance.now();
       const finalMemory = process.memoryUsage();
@@ -252,10 +284,24 @@ export class PerformanceBottleneckAnalyzer extends EventEmitter {
 
       detectedBottlenecks.push(...bottlenecks);
 
-      console.log(`📈 [ANALYZER] Function analysis completed: ${functionName}`);console.log(`  Execution time: ${executionTime.toFixed(2)}ms`);console.log(`  Memory increase: ${(memoryIncrease / 1024 / 1024).toFixed(2)}MB`);console.log(`  CPU time: ${cpuTime.toFixed(2)}ms`);console.log(`  Bottlenecks detected: ${bottlenecks.length}`);return detectedBottlenecks;} catch (error) {
-      console.error(`❌ [ANALYZER] Function analysis failed for ${functionName}:`, error);// Create error bottleneckconst errorBottleneck: PerformanceBottleneck = {
+      console.log(`📈 [ANALYZER] Function analysis completed: ${functionName}`);
+      console.log(`  Execution time: ${executionTime.toFixed(2)}ms`);
+      console.log(`  Memory increase: ${(memoryIncrease / 1024 / 1024).toFixed(2)}MB`);
+      console.log(`  CPU time: ${cpuTime.toFixed(2)}ms`);
+      console.log(`  Bottlenecks detected: ${bottlenecks.length}`);
+      return detectedBottlenecks;
+    } catch (error) {
+      console.error(`❌ [ANALYZER] Function analysis failed for ${functionName}:`, error);
+
+      // Create error bottleneck
+      const errorBottleneck: PerformanceBottleneck = {
         id: `error${analysisId}`,
-        type: 'algorithm',severity: 'critical',location: {file: context.file || 'unknown',function: functionName,line: context.line
+        type: 'algorithm',
+        severity: 'critical',
+        location: {
+          file: context.file || 'unknown',
+          function: functionName,
+          line: context.line
         },
         metrics: {
           executionTime: performance.now() - startTime,
@@ -265,13 +311,24 @@ export class PerformanceBottleneckAnalyzer extends EventEmitter {
           networkRequests: 0
         },
         impact: {
-          description: 'Function execution failed with error',affectedTests: [functionName],performanceDegradation: 100,
+          description: 'Function execution failed with error',
+          affectedTests: [functionName],
+          performanceDegradation: 100,
           resourceWaste: 100
         },
         rootCause: {
-          category: 'execution_error',description: 'Function threw an exception during execution',evidence: [error instanceof Error ? error.message : String(error)]},
+          category: 'execution_error',
+          description: 'Function threw an exception during execution',
+          evidence: [error instanceof Error ? error.message : String(error)]
+        },
         recommendations: [{
-          priority: 'immediate',action: 'Fix function implementation to handle errors properly',expectedImprovement: 100,effort: 'medium',implementation: 'Debug and fix the underlying cause of the error'}],detectedAt: startTime
+          priority: 'immediate',
+          action: 'Fix function implementation to handle errors properly',
+          expectedImprovement: 100,
+          effort: 'medium',
+          implementation: 'Debug and fix the underlying cause of the error'
+        }],
+        detectedAt: startTime
       };
 
       detectedBottlenecks.push(errorBottleneck);
@@ -291,7 +348,10 @@ export class PerformanceBottleneckAnalyzer extends EventEmitter {
       status: 'passed' | 'failed' | 'skipped';
     }>
   ): Promise<PerformanceBottleneck[]> {
-    console.log(`🧪 [ANALYZER] Analyzing test suite: ${suiteName}`);const bottlenecks: PerformanceBottleneck[] = [];// Analyze overall suite performance
+    console.log(`🧪 [ANALYZER] Analyzing test suite: ${suiteName}`);
+    const bottlenecks: PerformanceBottleneck[] = [];
+
+    // Analyze overall suite performance
     const totalExecutionTime = testResults.reduce((sum, test) => sum + test.executionTime, 0);
     const averageTestTime = totalExecutionTime / testResults.length;
     const totalMemoryUsage = testResults.reduce((sum, test) => sum + test.memoryUsage, 0);
@@ -301,7 +361,8 @@ export class PerformanceBottleneckAnalyzer extends EventEmitter {
     slowTests.forEach(test => {
       const bottleneck: PerformanceBottleneck = {
         id: `slow_test${suiteName}${test.testName}`,
-        type: 'algorithm',severity: test.executionTime > 5000 ? 'critical' : 'high',
+        type: 'algorithm',
+        severity: test.executionTime > 5000 ? 'critical' : 'high',
         location: {
           file: suiteName,
           function: test.testName
@@ -320,9 +381,14 @@ export class PerformanceBottleneckAnalyzer extends EventEmitter {
           resourceWaste: 50
         },
         rootCause: {
-          category: 'slow_execution',description: 'Test execution time exceeds acceptable thresholds',
+          category: 'slow_execution',
+          description: 'Test execution time exceeds acceptable thresholds',
           evidence: [
-            `Execution time: ${test.executionTime}ms`,`Suite average: ${averageTestTime.toFixed(2)}ms`,`Slowdown factor: ${(test.executionTime / averageTestTime).toFixed(1)}x`]},
+            `Execution time: ${test.executionTime}ms`,
+            `Suite average: ${averageTestTime.toFixed(2)}ms`,
+            `Slowdown factor: ${(test.executionTime / averageTestTime).toFixed(1)}x`
+          ]
+        },
         recommendations: this.generateTestOptimizationRecommendations(test),
         detectedAt: Date.now()
       };
@@ -337,7 +403,8 @@ export class PerformanceBottleneckAnalyzer extends EventEmitter {
     memoryIntensiveTests.forEach(test => {
       const bottleneck: PerformanceBottleneck = {
         id: `memory_intensive${suiteName}${test.testName}`,
-        type: 'memory',severity: test.memoryUsage > 100 * 1024 * 1024 ? 'high' : 'medium', // 100MB threshold
+        type: 'memory',
+        severity: test.memoryUsage > 100 * 1024 * 1024 ? 'high' : 'medium', // 100MB threshold
         location: {
           file: suiteName,
           function: test.testName
@@ -356,13 +423,19 @@ export class PerformanceBottleneckAnalyzer extends EventEmitter {
           resourceWaste: ((test.memoryUsage - avgMemoryPerTest) / avgMemoryPerTest) * 100
         },
         rootCause: {
-          category: 'memory_usage',description: 'Test memory consumption exceeds normal patterns',
+          category: 'memory_usage',
+          description: 'Test memory consumption exceeds normal patterns',
           evidence: [
-            `Memory usage: ${(test.memoryUsage / 1024 / 1024).toFixed(2)}MB`,`Suite average: ${(avgMemoryPerTest / 1024 / 1024).toFixed(2)}MB`
+            `Memory usage: ${(test.memoryUsage / 1024 / 1024).toFixed(2)}MB`,
+            `Suite average: ${(avgMemoryPerTest / 1024 / 1024).toFixed(2)}MB`
           ]
         },
         recommendations: [{
-          priority: 'medium',action: 'Optimize memory usage in test',expectedImprovement: 40,effort: 'medium',implementation: 'Review test data structures and implement proper cleanup'
+          priority: 'medium',
+          action: 'Optimize memory usage in test',
+          expectedImprovement: 40,
+          effort: 'medium',
+          implementation: 'Review test data structures and implement proper cleanup'
         }],
         detectedAt: Date.now()
       };
@@ -375,7 +448,10 @@ export class PerformanceBottleneckAnalyzer extends EventEmitter {
       this.detectedBottlenecks.set(bottleneck.id, bottleneck);
     });
 
-    console.log(`📊 [ANALYZER] Test suite analysis completed: ${suiteName}`);console.log(`  Bottlenecks detected: ${bottlenecks.length}`);console.log(`  Slow tests: ${slowTests.length}`);console.log(`  Memory-intensive tests: ${memoryIntensiveTests.length}`);
+    console.log(`📊 [ANALYZER] Test suite analysis completed: ${suiteName}`);
+    console.log(`  Bottlenecks detected: ${bottlenecks.length}`);
+    console.log(`  Slow tests: ${slowTests.length}`);
+    console.log(`  Memory-intensive tests: ${memoryIntensiveTests.length}`);
 
     return bottlenecks;
   }
@@ -437,7 +513,11 @@ export class PerformanceBottleneckAnalyzer extends EventEmitter {
     // Create optimization roadmap
     const optimizationRoadmap = this.createOptimizationRoadmap(allBottlenecks);
 
-    console.log(`📋 [ANALYZER] Bottleneck report generated:`);console.log(`  Total bottlenecks: ${totalBottlenecks}`);console.log(`  Critical bottlenecks: ${criticalBottlenecks}`);console.log(`  Potential execution time savings: ${potentialExecutionTimeSavings.toFixed(2)}ms`);console.log(`  Potential memory savings: ${(potentialMemorySavings / 1024 / 1024).toFixed(2)}MB`);
+    console.log(`📋 [ANALYZER] Bottleneck report generated:`);
+    console.log(`  Total bottlenecks: ${totalBottlenecks}`);
+    console.log(`  Critical bottlenecks: ${criticalBottlenecks}`);
+    console.log(`  Potential execution time savings: ${potentialExecutionTimeSavings.toFixed(2)}ms`);
+    console.log(`  Potential memory savings: ${(potentialMemorySavings / 1024 / 1024).toFixed(2)}MB`);
 
     return {
       summary: {
@@ -462,10 +542,14 @@ export class PerformanceBottleneckAnalyzer extends EventEmitter {
     this.detectedBottlenecks.clear();
     this.profilingSessions.clear();
     this.resourceSnapshots.length = 0;
-    console.log('🧹 [ANALYZER] Cleared all bottleneck data');}/**
+    console.log('🧹 [ANALYZER] Cleared all bottleneck data');
+  }
+
+  /**
    * Get bottlenecks by severity
    */
-  public getBottlenecksBySeverity(severity: 'critical' | 'high' | 'medium' | 'low'): PerformanceBottleneck[] {return Array.from(this.detectedBottlenecks.values()).filter(bottleneck => bottleneck.severity === severity)
+  public getBottlenecksBySeverity(severity: 'critical' | 'high' | 'medium' | 'low'): PerformanceBottleneck[] {
+    return Array.from(this.detectedBottlenecks.values()).filter(bottleneck => bottleneck.severity === severity)
       .sort((a, b) => b.impact.performanceDegradation - a.impact.performanceDegradation);
   }
 
@@ -497,7 +581,10 @@ export class PerformanceBottleneckAnalyzer extends EventEmitter {
       // Slow execution detected
       const bottleneck: PerformanceBottleneck = {
         id: `slow_measure${entry.name}${Date.now()}`,
-        type: 'algorithm',severity: entry.duration > 5000 ? 'critical' : 'high',location: {file: 'unknown',
+        type: 'algorithm',
+        severity: entry.duration > 5000 ? 'critical' : 'high',
+        location: {
+          file: 'unknown',
           function: entry.name
         },
         metrics: {
@@ -514,11 +601,18 @@ export class PerformanceBottleneckAnalyzer extends EventEmitter {
           resourceWaste: 30
         },
         rootCause: {
-          category: 'slow_execution',description: 'Performance measure exceeded acceptable duration',
+          category: 'slow_execution',
+          description: 'Performance measure exceeded acceptable duration',
           evidence: [`Duration: ${entry.duration.toFixed(2)}ms`]
         },
         recommendations: [{
-          priority: 'high',action: 'Optimize execution path',expectedImprovement: 50,effort: 'medium',implementation: 'Profile and optimize the slow code path'}],detectedAt: entry.startTime
+          priority: 'high',
+          action: 'Optimize execution path',
+          expectedImprovement: 50,
+          effort: 'medium',
+          implementation: 'Profile and optimize the slow code path'
+        }],
+        detectedAt: entry.startTime
       };
 
       this.detectedBottlenecks.set(bottleneck.id, bottleneck);
@@ -542,7 +636,10 @@ export class PerformanceBottleneckAnalyzer extends EventEmitter {
     if (metrics.cpuTime > 1000) { // More than 1 second of CPU time
       bottlenecks.push({
         id: `cpu${metrics.functionName}${Date.now()}`,
-        type: 'cpu',severity: metrics.cpuTime > 5000 ? 'critical' : 'high',location: metrics.location,metrics: {
+        type: 'cpu',
+        severity: metrics.cpuTime > 5000 ? 'critical' : 'high',
+        location: metrics.location,
+        metrics: {
           executionTime: metrics.executionTime,
           memoryUsage: metrics.memoryIncrease,
           cpuUsage: metrics.cpuTime,
@@ -550,15 +647,22 @@ export class PerformanceBottleneckAnalyzer extends EventEmitter {
           networkRequests: 0
         },
         impact: {
-          description: 'High CPU usage detected',affectedTests: [metrics.functionName],performanceDegradation: Math.min(100, (metrics.cpuTime / 1000) * 20),
+          description: 'High CPU usage detected',
+          affectedTests: [metrics.functionName],
+          performanceDegradation: Math.min(100, (metrics.cpuTime / 1000) * 20),
           resourceWaste: 40
         },
         rootCause: {
-          category: 'cpu_intensive',description: 'Function consumes excessive CPU resources',
+          category: 'cpu_intensive',
+          description: 'Function consumes excessive CPU resources',
           evidence: [`CPU time: ${metrics.cpuTime.toFixed(2)}ms`]
         },
         recommendations: [{
-          priority: 'high',action: 'Optimize CPU-intensive operations',expectedImprovement: 60,effort: 'medium',implementation: 'Profile CPU usage and optimize algorithmic complexity'
+          priority: 'high',
+          action: 'Optimize CPU-intensive operations',
+          expectedImprovement: 60,
+          effort: 'medium',
+          implementation: 'Profile CPU usage and optimize algorithmic complexity'
         }],
         detectedAt: Date.now()
       });
@@ -568,7 +672,10 @@ export class PerformanceBottleneckAnalyzer extends EventEmitter {
     if (metrics.memoryIncrease > 50 * 1024 * 1024) { // More than 50MB
       bottlenecks.push({
         id: `memory${metrics.functionName}${Date.now()}`,
-        type: 'memory',severity: metrics.memoryIncrease > 200 * 1024 * 1024 ? 'critical' : 'high',location: metrics.location,metrics: {
+        type: 'memory',
+        severity: metrics.memoryIncrease > 200 * 1024 * 1024 ? 'critical' : 'high',
+        location: metrics.location,
+        metrics: {
           executionTime: metrics.executionTime,
           memoryUsage: metrics.memoryIncrease,
           cpuUsage: metrics.cpuTime,
@@ -576,15 +683,24 @@ export class PerformanceBottleneckAnalyzer extends EventEmitter {
           networkRequests: 0
         },
         impact: {
-          description: 'High memory usage detected',affectedTests: [metrics.functionName],performanceDegradation: 30,
+          description: 'High memory usage detected',
+          affectedTests: [metrics.functionName],
+          performanceDegradation: 30,
           resourceWaste: Math.min(100, (metrics.memoryIncrease / (100 * 1024 * 1024)) * 50)
         },
         rootCause: {
-          category: 'memory_intensive',description: 'Function allocates excessive memory',
+          category: 'memory_intensive',
+          description: 'Function allocates excessive memory',
           evidence: [`Memory increase: ${(metrics.memoryIncrease / 1024 / 1024).toFixed(2)}MB`]
         },
         recommendations: [{
-          priority: 'medium',action: 'Optimize memory usage',expectedImprovement: 50,effort: 'medium',implementation: 'Review data structures and implement memory pooling'}],detectedAt: Date.now()
+          priority: 'medium',
+          action: 'Optimize memory usage',
+          expectedImprovement: 50,
+          effort: 'medium',
+          implementation: 'Review data structures and implement memory pooling'
+        }],
+        detectedAt: Date.now()
       });
     }
 
@@ -595,17 +711,31 @@ export class PerformanceBottleneckAnalyzer extends EventEmitter {
    * Generate test optimization recommendations
    */
   private generateTestOptimizationRecommendations(test: any): Array<{
-    priority: 'immediate' | 'high' | 'medium' | 'low';action: string;expectedImprovement: number;
-    effort: 'low' | 'medium' | 'high';implementation: string;}> {
+    priority: 'immediate' | 'high' | 'medium' | 'low';
+    action: string;
+    expectedImprovement: number;
+    effort: 'low' | 'medium' | 'high';
+    implementation: string;
+  }> {
     const recommendations = [];
 
     if (test.executionTime > 5000) {
       recommendations.push({
-        priority: 'immediate' as const,action: 'Optimize test execution time',expectedImprovement: 70,effort: 'medium' as const,implementation: 'Implement mocking for external dependencies and reduce test scope'});}
+        priority: 'immediate' as const,
+        action: 'Optimize test execution time',
+        expectedImprovement: 70,
+        effort: 'medium' as const,
+        implementation: 'Implement mocking for external dependencies and reduce test scope'
+      });}
 
     if (test.memoryUsage > 100 * 1024 * 1024) {
       recommendations.push({
-        priority: 'high' as const,action: 'Reduce memory usage in test',expectedImprovement: 50,effort: 'medium' as const,implementation: 'Optimize test data and implement proper cleanup'});}
+        priority: 'high' as const,
+        action: 'Reduce memory usage in test',
+        expectedImprovement: 50,
+        effort: 'medium' as const,
+        implementation: 'Optimize test data and implement proper cleanup'
+      });}
 
     return recommendations;
   }
@@ -666,7 +796,10 @@ export class PerformanceBottleneckAnalyzer extends EventEmitter {
   } {
     const executionTimeImpact = bottlenecks.length > 0 ? bottlenecks.reduce((sum, b) => sum + b.impact.performanceDegradation, 0) / bottlenecks.length : 0;
     const memoryImpact = bottlenecks.length > 0 ? bottlenecks.reduce((sum, b) => sum + b.impact.resourceWaste, 0) / bottlenecks.length : 0;
-    const reliabilityImpact = bottlenecks.filter(b => b.severity === 'critical').length * 25;return {executionTimeImpact,
+    const reliabilityImpact = bottlenecks.filter(b => b.severity === 'critical').length * 25;
+
+    return {
+      executionTimeImpact,
       memoryImpact,
       reliabilityImpact: Math.min(100, reliabilityImpact)
     };
@@ -678,7 +811,18 @@ export class PerformanceBottleneckAnalyzer extends EventEmitter {
   private calculatePerformanceGrade(
     bottlenecks: PerformanceBottleneck[],
     impact: { executionTimeImpact: number; memoryImpact: number; reliabilityImpact: number }
-  ): 'A' | 'B' | 'C' | 'D' | 'F' {const criticalCount = bottlenecks.filter(b => b.severity === 'critical').length;const averageImpact = (impact.executionTimeImpact + impact.memoryImpact + impact.reliabilityImpact) / 3;if (criticalCount > 0 || averageImpact > 50) return 'F';if (averageImpact > 30) return 'D';if (averageImpact > 20) return 'C';if (averageImpact > 10) return 'B';return 'A';}/**
+  ): 'A' | 'B' | 'C' | 'D' | 'F' {
+    const criticalCount = bottlenecks.filter(b => b.severity === 'critical').length;
+    const averageImpact = (impact.executionTimeImpact + impact.memoryImpact + impact.reliabilityImpact) / 3;
+
+    if (criticalCount > 0 || averageImpact > 50) return 'F';
+    if (averageImpact > 30) return 'D';
+    if (averageImpact > 20) return 'C';
+    if (averageImpact > 10) return 'B';
+    return 'A';
+  }
+
+  /**
    * Calculate optimization potential
    */
   private calculateOptimizationPotential(bottlenecks: PerformanceBottleneck[]): number {
@@ -728,20 +872,36 @@ export class PerformanceBottleneckAnalyzer extends EventEmitter {
     expectedImprovement: number;
     effort: string;
   }> {
-    const criticalBottlenecks = bottlenecks.filter(b => b.severity === 'critical');const highBottlenecks = bottlenecks.filter(b => b.severity === 'high');const otherBottlenecks = bottlenecks.filter(b => b.severity === 'medium' || b.severity === 'low');const roadmap = [];if (criticalBottlenecks.length > 0) {
+    const criticalBottlenecks = bottlenecks.filter(b => b.severity === 'critical');
+    const highBottlenecks = bottlenecks.filter(b => b.severity === 'high');
+    const otherBottlenecks = bottlenecks.filter(b => b.severity === 'medium' || b.severity === 'low');
+    const roadmap = [];
+
+    if (criticalBottlenecks.length > 0) {
       roadmap.push({
         phase: 1,
-        description: 'Address critical performance bottlenecks',actions: criticalBottlenecks.map(b => b.recommendations[0]?.action || 'Fix critical issue').slice(0, 3),expectedImprovement: 60,effort: 'high'});}
+        description: 'Address critical performance bottlenecks',
+        actions: criticalBottlenecks.map(b => b.recommendations[0]?.action || 'Fix critical issue').slice(0, 3),
+        expectedImprovement: 60,
+        effort: 'high'
+      });}
 
     if (highBottlenecks.length > 0) {
       roadmap.push({
         phase: 2,
-        description: 'Optimize high-impact performance issues',actions: highBottlenecks.map(b => b.recommendations[0]?.action || 'Optimize performance').slice(0, 5),expectedImprovement: 30,effort: 'medium'});}
+        description: 'Optimize high-impact performance issues',
+        actions: highBottlenecks.map(b => b.recommendations[0]?.action || 'Optimize performance').slice(0, 5),
+        expectedImprovement: 30,
+        effort: 'medium'
+      });}
 
     if (otherBottlenecks.length > 0) {
       roadmap.push({
         phase: 3,
-        description: 'Fine-tune remaining performance opportunities',actions: otherBottlenecks.map(b => b.recommendations[0]?.action || 'Minor optimization').slice(0, 3),expectedImprovement: 15,effort: 'low'
+        description: 'Fine-tune remaining performance opportunities',
+        actions: otherBottlenecks.map(b => b.recommendations[0]?.action || 'Minor optimization').slice(0, 3),
+        expectedImprovement: 15,
+        effort: 'low'
       });
     }
 

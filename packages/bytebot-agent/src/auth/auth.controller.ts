@@ -40,7 +40,7 @@ import {
   ValidationMode,
   ConversationContext,
   ParlantValidationInterceptor,
-} from '@bytebot/shared/src/parlant/parlant-validation.decorator';
+} from '@bytebot/shared/src/parlant/parlant-validation.decorator';\nimport { ConversationContextParameter } from '@bytebot/shared/src/types/conversation-context.types';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import type { AuthenticatedRequest } from './guards/jwt-auth.guard';
@@ -143,7 +143,7 @@ export class AuthController {
   async login(
     @Body() loginDto: LoginDto,
     @Request() _request: AuthenticatedRequest,
-    @ConversationContext() conversationContext?: any,
+    @ConversationContext() conversationContext?: ConversationContextParameter,
   ): Promise<TokenPair> {
     const operationId = `auth-login-controller-${Date.now()}`;
     const startTime = Date.now();
@@ -185,7 +185,7 @@ export class AuthController {
         ipAddress: this.getClientIpAddress(request),
       });
 
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
@@ -273,7 +273,7 @@ export class AuthController {
   })
   async register(
     @Body() registerDto: RegisterDto,
-    @ConversationContext() conversationContext?: any,
+    @ConversationContext() conversationContext?: ConversationContextParameter,
   ): Promise<{ message: string; user: Omit<User, 'passwordHash'> }> {
     const operationId = `auth-register-controller-${Date.now()}`;
     const startTime = Date.now();
@@ -315,7 +315,7 @@ export class AuthController {
         registrationTimeMs: registrationTime,
       });
 
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
@@ -396,7 +396,7 @@ export class AuthController {
         refreshTimeMs: refreshTime,
       });
 
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
@@ -544,7 +544,7 @@ export class AuthController {
   async changePassword(
     @Body() changePasswordDto: ChangePasswordDto,
     @CurrentUser() user: User,
-    @ConversationContext() conversationContext?: any,
+    @ConversationContext() conversationContext?: ConversationContextParameter,
   ): Promise<{ message: string }> {
     const operationId = `auth-change-password-controller-${Date.now()}`;
     const startTime = Date.now();
@@ -580,7 +580,7 @@ export class AuthController {
         changeTimeMs: changeTime,
       });
 
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
@@ -633,7 +633,7 @@ export class AuthController {
   })
   getProfile(
     @CurrentUser() user: User,
-    @ConversationContext() conversationContext?: any,
+    @ConversationContext() conversationContext?: ConversationContextParameter,
   ): Omit<User, 'passwordHash'> {
     const operationId = `auth-profile-controller-${Date.now()}`;
 

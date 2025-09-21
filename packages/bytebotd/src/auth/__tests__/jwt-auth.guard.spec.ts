@@ -49,12 +49,12 @@ function isJwtPayload(payload: unknown): payload is JwtPayload {
   );
 }
 
-function isStringOrUndefined(value: unknow, n): value is string | undefined {
+function isStringOrUndefined(value: unknown): value is string | undefined {
   return typeof value === 'string' || value === undefined;
 
 }
 
-function isHttpContext(context: unknow, n): context is { getRequest: () => unknown } {
+function isHttpContext(context: unknown): context is { getRequest: () => unknown } {
   return (
     typeof context === 'object' &&
     context !== null &&
@@ -82,7 +82,7 @@ type _MockJwtService = {
 };
 
 type _MockConfigService = {
-  get: jest.MockedFunction<(key: strin, g) => string | undefined>;
+  get: jest.MockedFunction<(key: string) => string | undefined>;
 
 };
 
@@ -119,7 +119,7 @@ class MockJwtAuthGuard {
   ) {
 }
 
-  async canActivate(context: ExecutionContex, t): Promise<boolean> {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
   const isPublic = this.reflector.getAllAndOverride<boolean>('_isPublic', [context.getHandler(),context.getClass(),
     ]);
 
@@ -170,7 +170,7 @@ class MockJwtAuthGuard {
 }
       throw new UnauthorizedException('Invalid authentication token');}}
 
-  private extractTokenFromHeader(request: AuthenticatedReques, t): string | undefined {
+  private extractTokenFromHeader(request: AuthenticatedRequest): string | undefined {
   const authHeader = request.headers?.authorization;
     if (!isStringOrUndefined(authHeader) || !authHeader) {
       return undefined;
@@ -207,7 +207,7 @@ describe('JwtAuthGuard', () => {
       getHandler: jest.fn(),
       getClass: jest.fn(),
       getArgs: jest.fn().mockReturnValue([mockRequest, {}, jest.fn()]),
-      getArgByIndex: jest.fn().mockImplementation(<T = unknown>(index: numbe, r): T => {
+      getArgByIndex: jest.fn().mockImplementation(<T = unknown>(index: number): T => {
         const args = [mockRequest, {}, jest.fn()];
         return args[index] as T;
       }),
@@ -325,7 +325,7 @@ describe('JwtAuthGuard', () => {
 
       const result = await guard.canActivate(context);
       expect(result).toBe(true);
-      expect(jwtService.verifyAsync).toHaveBeenCalledWith(validToken{
+      expect(jwtService.verifyAsync).toHaveBeenCalledWith(validToken, {
   secret: 'test-jwt-secret'
       
 });
@@ -333,8 +333,9 @@ describe('JwtAuthGuard', () => {
       console.log(`[${testId}] Valid Bearer token extraction test completed`);
     });
 
-    it('should reject malformed Authorization header'async () => {
-      const testId = `${operationId}_token_extraction_malformed`;console.log(
+    it('should reject malformed Authorization header', async () => {
+      const testId = `${operationId}_token_extraction_malformed`;
+      console.log(
 
       );
       const context = createMockExecutionContext({
@@ -351,8 +352,9 @@ describe('JwtAuthGuard', () => {
       );
     });
 
-    it('should reject missing Authorization header'async () => {
-      const testId = `${operationId}_token_extraction_missing`;console.log(
+    it('should reject missing Authorization header', async () => {
+      const testId = `${operationId}_token_extraction_missing`;
+      console.log(
 
       );
       const context = createMockExecutionContext({});
@@ -363,8 +365,9 @@ describe('JwtAuthGuard', () => {
       );
     });
 
-    it('should reject empty Bearer token'async () => {
-      const testId = `${operationId}_token_extraction_empty`;console.log(
+    it('should reject empty Bearer token', async () => {
+      const testId = `${operationId}_token_extraction_empty`;
+      console.log(
 
       );
       const context = createMockExecutionContext({

@@ -819,10 +819,10 @@ describe('OpenAI Tools', () => {
         expect(schema.properties).toBeDefined();
 
         // Validate property definitions
-        Object.values(schema.properties).forEach((property: any) => {
+        Object.values(schema.properties).forEach((property: Record<string, unknown>) => {
           expect(property).toHaveProperty('type');
           expect(['string', 'number', 'boolean', 'array', 'object']).toContain(
-            property.type,
+            property.type as string,
           );
         });
 
@@ -844,10 +844,10 @@ describe('OpenAI Tools', () => {
         expect(schema.properties).toBeDefined();
 
         // Validate property definitions
-        Object.values(schema.properties).forEach((property: any) => {
+        Object.values(schema.properties).forEach((property: Record<string, unknown>) => {
           expect(property).toHaveProperty('type');
           expect(['string', 'number', 'boolean', 'array', 'object']).toContain(
-            property.type,
+            property.type as string,
           );
         });
 

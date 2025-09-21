@@ -17,7 +17,14 @@
  * @version 2.0.0
  */
 
-import { spawn, ChildProcess } from 'child_process';import { promises as _fs } from 'fs';import { performance } from 'perf_hooks';import { EventEmitter } from 'events';import { performanceFramework } from './performance-framework';/*** Test suite execution metrics
+import { spawn, ChildProcess } from 'child_process';
+import { promises as _fs } from 'fs';
+import { performance } from 'perf_hooks';
+import { EventEmitter } from 'events';
+import { performanceFramework } from './performance-framework';
+
+/**
+ * Test suite execution metrics
  */
 export interface TestSuiteMetrics {
   readonly suiteName: string;
@@ -82,7 +89,12 @@ export interface PerformanceValidationResult {
   readonly reliabilityScore: number;
   readonly parallelizationEffectiveness: number;
   readonly performanceGrade: 'A' | 'B' | 'C' | 'D' | 'F';
-  readonly bottlenecks: Array<{type: 'execution_time' | 'memory_usage' | 'reliability' | 'concurrency';description: string;impact: 'high' | 'medium' | 'low';recommendation: string;}>;
+  readonly bottlenecks: Array<{
+    type: 'execution_time' | 'memory_usage' | 'reliability' | 'concurrency';
+    description: string;
+    impact: 'high' | 'medium' | 'low';
+    recommendation: string;
+  }>;
   readonly optimizationOpportunities: string[];
   readonly regressions: Array<{
     test: string;
@@ -106,14 +118,18 @@ export class TestExecutionValidator extends EventEmitter {
    */
   public async validateTestExecution(config: TestExecutionConfig): Promise<PerformanceValidationResult> {
     console.log('🔍 [VALIDATOR] Starting test execution performance validation...');
-    console.log(`📋 [VALIDATOR] Config: pattern=${config.testPattern}, workers=${config.maxWorkers}`);const validationStart = performance.now();const initialMemory = process.memoryUsage();
+    console.log(`📋 [VALIDATOR] Config: pattern=${config.testPattern}, workers=${config.maxWorkers}`);
+    const validationStart = performance.now();
+    const initialMemory = process.memoryUsage();
 
     const suiteMetrics: Map<string, TestSuiteMetrics> = new Map();
 
     try {
       // Execute test suites with performance monitoring
       const testSuites = await this.discoverTestSuites(config.testPattern);
-      console.log(`📊 [VALIDATOR] Discovered ${testSuites.length} test suites`);for (const suitePath of testSuites) {const metrics = await this.executeTestSuiteWithMetrics(suitePath, config);
+      console.log(`📊 [VALIDATOR] Discovered ${testSuites.length} test suites`);
+      for (const suitePath of testSuites) {
+        const metrics = await this.executeTestSuiteWithMetrics(suitePath, config);
         suiteMetrics.set(suitePath, metrics);
         
         // Store metrics for historical tracking
@@ -122,13 +138,18 @@ export class TestExecutionValidator extends EventEmitter {
 
       // Validate concurrent test execution
       const concurrencyMetrics = await this.validateConcurrentExecution(testSuites, config);
-      console.log(`🔀 [VALIDATOR] Concurrency validation completed`);// Analyze overall performanceconst validationResult = this.analyzePerformanceResults(
+      console.log(`🔀 [VALIDATOR] Concurrency validation completed`);
+
+      // Analyze overall performance
+      const validationResult = this.analyzePerformanceResults(
         suiteMetrics,
         concurrencyMetrics,
         performance.now() - validationStart
       );
 
-      console.log(`📈 [VALIDATOR] Validation completed - Grade: ${validationResult.performanceGrade}`);console.log(`⏱️ [VALIDATOR] Total execution time: ${validationResult.overallExecutionTime.toFixed(2)}ms`);console.log(`🧠 [VALIDATOR] Memory efficiency: ${validationResult.memoryEfficiency.toFixed(2)}%`);
+      console.log(`📈 [VALIDATOR] Validation completed - Grade: ${validationResult.performanceGrade}`);
+      console.log(`⏱️ [VALIDATOR] Total execution time: ${validationResult.overallExecutionTime.toFixed(2)}ms`);
+      console.log(`🧠 [VALIDATOR] Memory efficiency: ${validationResult.memoryEfficiency.toFixed(2)}%`);
 
       return validationResult;
 

@@ -5623,6 +5623,53 @@
       "createdAt": "2025-09-20T06:51:36.423Z",
       "sessionId": null,
       "metadata": {}
+    },
+    "dev_session_1758408855953_1_general_b9f044af": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-20T22:54:15.954Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-20T22:54:15.954Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758408856086_1_general_26d43519": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-20T23:02:30.385Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-20T22:54:16.087Z",
+      "sessionId": null,
+      "metadata": {
+        "renewedAt": "2025-09-20T23:02:30.385Z",
+        "renewalReason": "Agent reinitialization requested"
+      },
+      "lastRenewal": "2025-09-20T23:02:30.385Z",
+      "renewalCount": 1
     }
   },
   "settings": {

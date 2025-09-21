@@ -225,7 +225,7 @@ export class AuthMiddleware implements NestMiddleware {
       }
 
       if (error instanceof UnauthorizedException) {
-        throw error;
+        throw error instanceof Error ? error : new Error(String(error));
       }
 
       throw new UnauthorizedException('Authentication middleware error');

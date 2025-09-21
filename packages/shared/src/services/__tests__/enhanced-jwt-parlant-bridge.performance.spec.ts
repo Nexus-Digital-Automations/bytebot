@@ -42,7 +42,7 @@ describe("EnhancedJwtParlantBridgeService Performance Tests", () => {
         {
           provide: ConfigService,
           useValue: {
-            get: jest.fn((key: string, defaultValue?: any) => {
+            get: jest.fn((key: string, defaultValue?: string | number | boolean | Record<string, unknown>) => {
               switch (key) {
                 case "JWT_SECRET":
                   return testJwtSecret;

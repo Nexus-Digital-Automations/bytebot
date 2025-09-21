@@ -16,10 +16,21 @@ import {
   AuditEventSeverity,
   SensitiveDataType,
   RiskLevel,
+  ComplianceStatus,
+  ComplianceCheck,
+  ComplianceViolation,
+  ComplianceRiskAssessment,
 } from './audit-core.types';
 
 // Re-export commonly used types
-export { SensitiveDataType, RiskLevel };
+export {
+  SensitiveDataType,
+  RiskLevel,
+  ComplianceStatus,
+  ComplianceCheck,
+  ComplianceViolation,
+  ComplianceRiskAssessment,
+};
 
 // ===========================
 // COMPLIANCE METADATA
@@ -1540,6 +1551,2472 @@ export enum RightExceptionType {
   VITAL_INTERESTS = 'vital_interests',
   ARCHIVAL_PURPOSES = 'archival_purposes',
   SCIENTIFIC_RESEARCH = 'scientific_research',
+}
+
+// ===========================
+// EXECUTIVE SUMMARY & COMPLIANCE ASSESSMENT TYPES
+// ===========================
+
+/**
+ * Executive summary for compliance reports
+ */
+export interface ExecutiveSummary {
+  /** Summary identifier */
+  summaryId: string;
+
+  /** Report period covered */
+  reportPeriod: {
+    startDate: Date;
+    endDate: Date;
+  };
+
+  /** Overall compliance score */
+  overallComplianceScore: number;
+
+  /** Key findings summary */
+  keyFindings: ExecutiveFinding[];
+
+  /** Critical violations */
+  criticalViolations: ViolationSummary[];
+
+  /** Risk assessment summary */
+  riskAssessmentSummary: RiskSummary;
+
+  /** Improvement recommendations */
+  improvementRecommendations: RecommendationSummary[];
+
+  /** Regulatory status */
+  regulatoryStatus: RegulatoryStatusSummary;
+
+  /** Financial impact assessment */
+  financialImpactAssessment: FinancialImpactSummary;
+
+  /** Next steps and timeline */
+  nextStepsTimeline: NextStepsSummary;
+}
+
+/**
+ * Executive finding
+ */
+export interface ExecutiveFinding {
+  /** Finding identifier */
+  findingId: string;
+
+  /** Finding category */
+  category: ExecutiveFindingCategory;
+
+  /** Finding severity */
+  severity: AuditEventSeverity;
+
+  /** Brief description */
+  briefDescription: string;
+
+  /** Business impact */
+  businessImpact: string;
+
+  /** Recommended action */
+  recommendedAction: string;
+
+  /** Priority level */
+  priority: ExecutivePriority;
+}
+
+/**
+ * Executive finding categories
+ */
+export enum ExecutiveFindingCategory {
+  COMPLIANCE_GAP = 'compliance_gap',
+  SECURITY_VULNERABILITY = 'security_vulnerability',
+  PROCESS_IMPROVEMENT = 'process_improvement',
+  REGULATORY_CHANGE = 'regulatory_change',
+  RISK_MITIGATION = 'risk_mitigation',
+  OPERATIONAL_EFFICIENCY = 'operational_efficiency',
+}
+
+/**
+ * Executive priority levels
+ */
+export enum ExecutivePriority {
+  IMMEDIATE = 'immediate',
+  HIGH = 'high',
+  MEDIUM = 'medium',
+  LOW = 'low',
+  MONITOR = 'monitor',
+}
+
+/**
+ * Violation summary
+ */
+export interface ViolationSummary {
+  /** Framework */
+  framework: ComplianceFramework;
+
+  /** Violation count */
+  violationCount: number;
+
+  /** Severity distribution */
+  severityDistribution: Record<string, number>;
+
+  /** Most critical violation */
+  mostCriticalViolation: string;
+
+  /** Estimated remediation effort */
+  estimatedRemediationEffort: RemediationEffort;
+}
+
+/**
+ * Remediation effort
+ */
+export interface RemediationEffort {
+  /** Effort level */
+  effortLevel: EffortLevel;
+
+  /** Estimated hours */
+  estimatedHours: number;
+
+  /** Estimated cost */
+  estimatedCost: number;
+
+  /** Required resources */
+  requiredResources: string[];
+
+  /** Timeline estimate */
+  timelineEstimate: TimelineEstimate;
+}
+
+/**
+ * Effort levels
+ */
+export enum EffortLevel {
+  MINIMAL = 'minimal',
+  LOW = 'low',
+  MODERATE = 'moderate',
+  HIGH = 'high',
+  EXTENSIVE = 'extensive',
+}
+
+/**
+ * Timeline estimate
+ */
+export interface TimelineEstimate {
+  /** Minimum days */
+  minimumDays: number;
+
+  /** Maximum days */
+  maximumDays: number;
+
+  /** Confidence level */
+  confidenceLevel: number;
+
+  /** Dependencies */
+  dependencies: string[];
+}
+
+/**
+ * Risk summary
+ */
+export interface RiskSummary {
+  /** Overall risk rating */
+  overallRiskRating: RiskLevel;
+
+  /** High risk areas */
+  highRiskAreas: string[];
+
+  /** Risk trend */
+  riskTrend: RiskTrend;
+
+  /** Risk mitigation status */
+  mitigationStatus: MitigationStatus;
+}
+
+/**
+ * Risk trends
+ */
+export enum RiskTrend {
+  IMPROVING = 'improving',
+  STABLE = 'stable',
+  DETERIORATING = 'deteriorating',
+  VOLATILE = 'volatile',
+}
+
+/**
+ * Mitigation status
+ */
+export enum MitigationStatus {
+  ON_TRACK = 'on_track',
+  BEHIND_SCHEDULE = 'behind_schedule',
+  AT_RISK = 'at_risk',
+  CRITICAL = 'critical',
+}
+
+/**
+ * Recommendation summary
+ */
+export interface RecommendationSummary {
+  /** Recommendation category */
+  category: RecommendationCategory;
+
+  /** Recommendation count */
+  recommendationCount: number;
+
+  /** Priority distribution */
+  priorityDistribution: Record<ExecutivePriority, number>;
+
+  /** Expected impact */
+  expectedImpact: ExpectedImpact;
+}
+
+/**
+ * Recommendation categories
+ */
+export enum RecommendationCategory {
+  POLICY_UPDATE = 'policy_update',
+  PROCESS_IMPROVEMENT = 'process_improvement',
+  TECHNOLOGY_ENHANCEMENT = 'technology_enhancement',
+  TRAINING_DEVELOPMENT = 'training_development',
+  RISK_MITIGATION = 'risk_mitigation',
+  COMPLIANCE_ALIGNMENT = 'compliance_alignment',
+}
+
+/**
+ * Expected impact
+ */
+export interface ExpectedImpact {
+  /** Compliance score improvement */
+  complianceScoreImprovement: number;
+
+  /** Risk reduction */
+  riskReduction: number;
+
+  /** Cost avoidance */
+  costAvoidance: number;
+
+  /** Efficiency gain */
+  efficiencyGain: number;
+}
+
+/**
+ * Regulatory status summary
+ */
+export interface RegulatoryStatusSummary {
+  /** Frameworks assessed */
+  frameworksAssessed: ComplianceFramework[];
+
+  /** Compliance percentage by framework */
+  complianceByFramework: Record<string, number>;
+
+  /** Regulatory changes pending */
+  pendingRegulatoryChanges: RegulatoryChange[];
+
+  /** Audit readiness status */
+  auditReadinessStatus: AuditReadinessLevel;
+}
+
+/**
+ * Regulatory change
+ */
+export interface RegulatoryChange {
+  /** Change identifier */
+  changeId: string;
+
+  /** Framework affected */
+  frameworkAffected: ComplianceFramework;
+
+  /** Change description */
+  changeDescription: string;
+
+  /** Effective date */
+  effectiveDate: Date;
+
+  /** Impact assessment */
+  impactAssessment: string;
+
+  /** Preparation status */
+  preparationStatus: PreparationStatus;
+}
+
+/**
+ * Preparation status
+ */
+export enum PreparationStatus {
+  NOT_STARTED = 'not_started',
+  IN_PROGRESS = 'in_progress',
+  COMPLETED = 'completed',
+  DEFERRED = 'deferred',
+}
+
+/**
+ * Audit readiness levels
+ */
+export enum AuditReadinessLevel {
+  FULLY_READY = 'fully_ready',
+  MOSTLY_READY = 'mostly_ready',
+  PARTIALLY_READY = 'partially_ready',
+  NOT_READY = 'not_ready',
+}
+
+/**
+ * Financial impact summary
+ */
+export interface FinancialImpactSummary {
+  /** Total compliance cost */
+  totalComplianceCost: number;
+
+  /** Cost breakdown */
+  costBreakdown: CostBreakdown;
+
+  /** Cost savings identified */
+  costSavingsIdentified: number;
+
+  /** Return on investment */
+  returnOnInvestment: number;
+
+  /** Budget variance */
+  budgetVariance: BudgetVariance;
+}
+
+/**
+ * Cost breakdown
+ */
+export interface CostBreakdown {
+  /** Personnel costs */
+  personnelCosts: number;
+
+  /** Technology costs */
+  technologyCosts: number;
+
+  /** External services */
+  externalServices: number;
+
+  /** Training costs */
+  trainingCosts: number;
+
+  /** Audit and assessment costs */
+  auditAssessmentCosts: number;
+
+  /** Remediation costs */
+  remediationCosts: number;
+}
+
+/**
+ * Budget variance
+ */
+export interface BudgetVariance {
+  /** Planned budget */
+  plannedBudget: number;
+
+  /** Actual spending */
+  actualSpending: number;
+
+  /** Variance amount */
+  varianceAmount: number;
+
+  /** Variance percentage */
+  variancePercentage: number;
+
+  /** Variance explanation */
+  varianceExplanation: string;
+}
+
+/**
+ * Next steps summary
+ */
+export interface NextStepsSummary {
+  /** Immediate actions */
+  immediateActions: ActionItem[];
+
+  /** Short-term initiatives */
+  shortTermInitiatives: Initiative[];
+
+  /** Long-term strategic goals */
+  longTermStrategicGoals: StrategicGoal[];
+
+  /** Key milestones */
+  keyMilestones: Milestone[];
+}
+
+/**
+ * Action item
+ */
+export interface ActionItem {
+  /** Action identifier */
+  actionId: string;
+
+  /** Action description */
+  description: string;
+
+  /** Responsible party */
+  responsibleParty: string;
+
+  /** Due date */
+  dueDate: Date;
+
+  /** Priority */
+  priority: ExecutivePriority;
+
+  /** Dependencies */
+  dependencies: string[];
+}
+
+/**
+ * Initiative
+ */
+export interface Initiative {
+  /** Initiative identifier */
+  initiativeId: string;
+
+  /** Initiative name */
+  name: string;
+
+  /** Initiative description */
+  description: string;
+
+  /** Success criteria */
+  successCriteria: string[];
+
+  /** Timeline */
+  timeline: TimelineEstimate;
+
+  /** Resource requirements */
+  resourceRequirements: ResourceRequirement[];
+}
+
+/**
+ * Resource requirement
+ */
+export interface ResourceRequirement {
+  /** Resource type */
+  resourceType: ResourceType;
+
+  /** Quantity required */
+  quantityRequired: number;
+
+  /** Duration needed */
+  durationNeeded: number;
+
+  /** Skills required */
+  skillsRequired: string[];
+}
+
+/**
+ * Resource types
+ */
+export enum ResourceType {
+  PERSONNEL = 'personnel',
+  BUDGET = 'budget',
+  TECHNOLOGY = 'technology',
+  EXTERNAL_EXPERTISE = 'external_expertise',
+  TRAINING = 'training',
+}
+
+/**
+ * Strategic goal
+ */
+export interface StrategicGoal {
+  /** Goal identifier */
+  goalId: string;
+
+  /** Goal statement */
+  goalStatement: string;
+
+  /** Success metrics */
+  successMetrics: SuccessMetric[];
+
+  /** Target completion date */
+  targetCompletionDate: Date;
+
+  /** Strategic alignment */
+  strategicAlignment: string;
+}
+
+/**
+ * Success metric
+ */
+export interface SuccessMetric {
+  /** Metric name */
+  metricName: string;
+
+  /** Current value */
+  currentValue: number;
+
+  /** Target value */
+  targetValue: number;
+
+  /** Measurement frequency */
+  measurementFrequency: string;
+
+  /** Data source */
+  dataSource: string;
+}
+
+/**
+ * Milestone
+ */
+export interface Milestone {
+  /** Milestone identifier */
+  milestoneId: string;
+
+  /** Milestone name */
+  milestoneName: string;
+
+  /** Milestone description */
+  description: string;
+
+  /** Target date */
+  targetDate: Date;
+
+  /** Success criteria */
+  successCriteria: string[];
+
+  /** Deliverables */
+  deliverables: string[];
+}
+
+/**
+ * Compliance assessment
+ */
+export interface ComplianceAssessment {
+  /** Assessment identifier */
+  assessmentId: string;
+
+  /** Assessment date */
+  assessmentDate: Date;
+
+  /** Assessment scope */
+  assessmentScope: AssessmentScope;
+
+  /** Framework assessments */
+  frameworkAssessments: FrameworkAssessment[];
+
+  /** Overall compliance rating */
+  overallComplianceRating: ComplianceRating;
+
+  /** Assessment methodology */
+  assessmentMethodology: AssessmentMethodology;
+
+  /** Key findings */
+  keyFindings: AssessmentFinding[];
+
+  /** Recommendations */
+  recommendations: AssessmentRecommendation[];
+
+  /** Next assessment date */
+  nextAssessmentDate: Date;
+}
+
+/**
+ * Assessment scope
+ */
+export interface AssessmentScope {
+  /** Organizational units */
+  organizationalUnits: string[];
+
+  /** Systems assessed */
+  systemsAssessed: string[];
+
+  /** Processes assessed */
+  processesAssessed: string[];
+
+  /** Time period assessed */
+  timePeriodAssessed: {
+    startDate: Date;
+    endDate: Date;
+  };
+
+  /** Exclusions */
+  exclusions: string[];
+}
+
+/**
+ * Framework assessment
+ */
+export interface FrameworkAssessment {
+  /** Framework */
+  framework: ComplianceFramework;
+
+  /** Compliance score */
+  complianceScore: number;
+
+  /** Controls assessed */
+  controlsAssessed: ControlAssessment[];
+
+  /** Gaps identified */
+  gapsIdentified: ComplianceGap[];
+
+  /** Improvement trend */
+  improvementTrend: ImprovementTrend;
+}
+
+/**
+ * Control assessment
+ */
+export interface ControlAssessment {
+  /** Control identifier */
+  controlId: string;
+
+  /** Control name */
+  controlName: string;
+
+  /** Control effectiveness */
+  controlEffectiveness: ControlEffectiveness;
+
+  /** Implementation status */
+  implementationStatus: ImplementationStatus;
+
+  /** Testing results */
+  testingResults: TestingResult[];
+
+  /** Deficiencies identified */
+  deficienciesIdentified: ControlDeficiency[];
+}
+
+/**
+ * Control effectiveness levels
+ */
+export enum ControlEffectiveness {
+  EFFECTIVE = 'effective',
+  PARTIALLY_EFFECTIVE = 'partially_effective',
+  INEFFECTIVE = 'ineffective',
+  NOT_TESTED = 'not_tested',
+}
+
+/**
+ * Testing result
+ */
+export interface TestingResult {
+  /** Test identifier */
+  testId: string;
+
+  /** Test type */
+  testType: TestType;
+
+  /** Test result */
+  testResult: TestResult;
+
+  /** Sample size */
+  sampleSize: number;
+
+  /** Exceptions found */
+  exceptionsFound: number;
+
+  /** Test conclusion */
+  testConclusion: string;
+}
+
+/**
+ * Test types
+ */
+export enum TestType {
+  WALKTHROUGH = 'walkthrough',
+  INSPECTION = 'inspection',
+  REPERFORMANCE = 'reperformance',
+  OBSERVATION = 'observation',
+  INQUIRY = 'inquiry',
+}
+
+/**
+ * Test results
+ */
+export enum TestResult {
+  PASSED = 'passed',
+  FAILED = 'failed',
+  PASSED_WITH_EXCEPTIONS = 'passed_with_exceptions',
+  INCONCLUSIVE = 'inconclusive',
+}
+
+/**
+ * Control deficiency
+ */
+export interface ControlDeficiency {
+  /** Deficiency identifier */
+  deficiencyId: string;
+
+  /** Deficiency type */
+  deficiencyType: DeficiencyType;
+
+  /** Severity */
+  severity: DeficiencySeverity;
+
+  /** Description */
+  description: string;
+
+  /** Root cause */
+  rootCause: string;
+
+  /** Potential impact */
+  potentialImpact: string;
+
+  /** Remediation plan */
+  remediationPlan: RemediationPlan;
+}
+
+/**
+ * Deficiency types
+ */
+export enum DeficiencyType {
+  DESIGN_DEFICIENCY = 'design_deficiency',
+  OPERATING_DEFICIENCY = 'operating_deficiency',
+  COMBINATION = 'combination',
+}
+
+/**
+ * Deficiency severity
+ */
+export enum DeficiencySeverity {
+  MATERIAL_WEAKNESS = 'material_weakness',
+  SIGNIFICANT_DEFICIENCY = 'significant_deficiency',
+  CONTROL_DEFICIENCY = 'control_deficiency',
+}
+
+/**
+ * Remediation plan
+ */
+export interface RemediationPlan {
+  /** Plan identifier */
+  planId: string;
+
+  /** Remediation actions */
+  remediationActions: RemediationAction[];
+
+  /** Target completion date */
+  targetCompletionDate: Date;
+
+  /** Responsible party */
+  responsibleParty: string;
+
+  /** Progress tracking */
+  progressTracking: ProgressTracking;
+}
+
+/**
+ * Remediation action
+ */
+export interface RemediationAction {
+  /** Action identifier */
+  actionId: string;
+
+  /** Action description */
+  actionDescription: string;
+
+  /** Action type */
+  actionType: RemediationActionType;
+
+  /** Due date */
+  dueDate: Date;
+
+  /** Status */
+  status: RemediationActionStatus;
+
+  /** Progress percentage */
+  progressPercentage: number;
+}
+
+/**
+ * Remediation action types
+ */
+export enum RemediationActionType {
+  POLICY_UPDATE = 'policy_update',
+  PROCESS_CHANGE = 'process_change',
+  SYSTEM_ENHANCEMENT = 'system_enhancement',
+  TRAINING = 'training',
+  STAFF_AUGMENTATION = 'staff_augmentation',
+}
+
+/**
+ * Remediation action status
+ */
+export enum RemediationActionStatus {
+  NOT_STARTED = 'not_started',
+  IN_PROGRESS = 'in_progress',
+  COMPLETED = 'completed',
+  DELAYED = 'delayed',
+  CANCELLED = 'cancelled',
+}
+
+/**
+ * Progress tracking
+ */
+export interface ProgressTracking {
+  /** Overall progress percentage */
+  overallProgressPercentage: number;
+
+  /** Milestones achieved */
+  milestonesAchieved: number;
+
+  /** Total milestones */
+  totalMilestones: number;
+
+  /** Last update date */
+  lastUpdateDate: Date;
+
+  /** Status summary */
+  statusSummary: string;
+}
+
+/**
+ * Compliance gap
+ */
+export interface ComplianceGap {
+  /** Gap identifier */
+  gapId: string;
+
+  /** Gap description */
+  gapDescription: string;
+
+  /** Affected controls */
+  affectedControls: string[];
+
+  /** Risk level */
+  riskLevel: RiskLevel;
+
+  /** Remediation priority */
+  remediationPriority: ExecutivePriority;
+
+  /** Estimated effort */
+  estimatedEffort: RemediationEffort;
+}
+
+/**
+ * Improvement trend
+ */
+export interface ImprovementTrend {
+  /** Trend direction */
+  trendDirection: TrendDirection;
+
+  /** Rate of improvement */
+  rateOfImprovement: number;
+
+  /** Historical data points */
+  historicalDataPoints: TrendDataPoint[];
+
+  /** Projected future score */
+  projectedFutureScore: number;
+}
+
+/**
+ * Trend directions
+ */
+export enum TrendDirection {
+  IMPROVING = 'improving',
+  STABLE = 'stable',
+  DECLINING = 'declining',
+}
+
+/**
+ * Trend data point
+ */
+export interface TrendDataPoint {
+  /** Assessment date */
+  assessmentDate: Date;
+
+  /** Compliance score */
+  complianceScore: number;
+
+  /** Notable changes */
+  notableChanges: string[];
+}
+
+/**
+ * Compliance rating
+ */
+export interface ComplianceRating {
+  /** Overall score */
+  overallScore: number;
+
+  /** Rating level */
+  ratingLevel: RatingLevel;
+
+  /** Framework scores */
+  frameworkScores: Record<string, number>;
+
+  /** Confidence level */
+  confidenceLevel: number;
+
+  /** Rating methodology */
+  ratingMethodology: string;
+}
+
+/**
+ * Rating levels
+ */
+export enum RatingLevel {
+  EXCELLENT = 'excellent',
+  GOOD = 'good',
+  SATISFACTORY = 'satisfactory',
+  NEEDS_IMPROVEMENT = 'needs_improvement',
+  POOR = 'poor',
+}
+
+/**
+ * Assessment methodology
+ */
+export interface AssessmentMethodology {
+  /** Methodology name */
+  methodologyName: string;
+
+  /** Assessment standards */
+  assessmentStandards: string[];
+
+  /** Sampling approach */
+  samplingApproach: SamplingApproach;
+
+  /** Testing procedures */
+  testingProcedures: string[];
+
+  /** Evidence requirements */
+  evidenceRequirements: string[];
+}
+
+/**
+ * Assessment finding
+ */
+export interface AssessmentFinding {
+  /** Finding identifier */
+  findingId: string;
+
+  /** Finding type */
+  findingType: FindingType;
+
+  /** Severity */
+  severity: AuditEventSeverity;
+
+  /** Framework reference */
+  frameworkReference: string;
+
+  /** Finding description */
+  findingDescription: string;
+
+  /** Evidence */
+  evidence: string[];
+
+  /** Impact assessment */
+  impactAssessment: string;
+
+  /** Management response */
+  managementResponse?: string;
+}
+
+/**
+ * Finding types
+ */
+export enum FindingType {
+  COMPLIANCE_VIOLATION = 'compliance_violation',
+  CONTROL_DEFICIENCY = 'control_deficiency',
+  PROCESS_IMPROVEMENT = 'process_improvement',
+  BEST_PRACTICE = 'best_practice',
+  OBSERVATION = 'observation',
+}
+
+/**
+ * Assessment recommendation
+ */
+export interface AssessmentRecommendation {
+  /** Recommendation identifier */
+  recommendationId: string;
+
+  /** Recommendation category */
+  category: RecommendationCategory;
+
+  /** Priority */
+  priority: ExecutivePriority;
+
+  /** Recommendation text */
+  recommendationText: string;
+
+  /** Implementation guidance */
+  implementationGuidance: string[];
+
+  /** Expected benefits */
+  expectedBenefits: string[];
+
+  /** Implementation timeline */
+  implementationTimeline: TimelineEstimate;
+
+  /** Resource requirements */
+  resourceRequirements: ResourceRequirement[];
+}
+
+/**
+ * Compliance evidence package
+ */
+export interface ComplianceEvidencePackage {
+  /** Package identifier */
+  packageId: string;
+
+  /** Collection date */
+  collectionDate: Date;
+
+  /** Evidence items */
+  evidenceItems: ComplianceEvidenceItem[];
+
+  /** Chain of custody */
+  chainOfCustody: ChainOfCustodyRecord[];
+
+  /** Integrity verification */
+  integrityVerification: IntegrityVerification;
+
+  /** Legal admissibility */
+  legalAdmissibility: LegalAdmissibilityAssessment;
+
+  /** Retention requirements */
+  retentionRequirements: RetentionRequirement[];
+}
+
+/**
+ * Compliance evidence item
+ */
+export interface ComplianceEvidenceItem {
+  /** Evidence identifier */
+  evidenceId: string;
+
+  /** Evidence type */
+  evidenceType: EvidenceType;
+
+  /** Source system */
+  sourceSystem: string;
+
+  /** Collection method */
+  collectionMethod: string;
+
+  /** File path or reference */
+  fileReference: string;
+
+  /** Hash value */
+  hashValue: string;
+
+  /** Metadata */
+  metadata: EvidenceMetadata;
+
+  /** Relevance assessment */
+  relevanceAssessment: RelevanceAssessment;
+}
+
+/**
+ * Evidence metadata
+ */
+export interface EvidenceMetadata {
+  /** File size */
+  fileSize: number;
+
+  /** Creation date */
+  creationDate: Date;
+
+  /** Last modified date */
+  lastModifiedDate: Date;
+
+  /** File format */
+  fileFormat: string;
+
+  /** Encoding */
+  encoding: string;
+
+  /** Digital signature */
+  digitalSignature?: string;
+}
+
+/**
+ * Relevance assessment
+ */
+export interface RelevanceAssessment {
+  /** Relevance score */
+  relevanceScore: number;
+
+  /** Relevance criteria */
+  relevanceCriteria: string[];
+
+  /** Quality assessment */
+  qualityAssessment: EvidenceQuality;
+
+  /** Completeness assessment */
+  completenessAssessment: CompletenessLevel;
+}
+
+/**
+ * Evidence quality levels
+ */
+export enum EvidenceQuality {
+  HIGH = 'high',
+  MEDIUM = 'medium',
+  LOW = 'low',
+  QUESTIONABLE = 'questionable',
+}
+
+/**
+ * Completeness levels
+ */
+export enum CompletenessLevel {
+  COMPLETE = 'complete',
+  SUBSTANTIALLY_COMPLETE = 'substantially_complete',
+  PARTIALLY_COMPLETE = 'partially_complete',
+  INCOMPLETE = 'incomplete',
+}
+
+/**
+ * Chain of custody record
+ */
+export interface ChainOfCustodyRecord {
+  /** Record identifier */
+  recordId: string;
+
+  /** Custodian */
+  custodian: string;
+
+  /** Transfer date */
+  transferDate: Date;
+
+  /** Transfer reason */
+  transferReason: string;
+
+  /** Transfer method */
+  transferMethod: string;
+
+  /** Integrity verification */
+  integrityVerified: boolean;
+
+  /** Digital signature */
+  digitalSignature: string;
+}
+
+/**
+ * Integrity verification
+ */
+export interface IntegrityVerification {
+  /** Verification method */
+  verificationMethod: IntegrityVerificationMethod;
+
+  /** Verification timestamp */
+  verificationTimestamp: Date;
+
+  /** Verification result */
+  verificationResult: VerificationResult;
+
+  /** Hash algorithm used */
+  hashAlgorithm: string;
+
+  /** Verification details */
+  verificationDetails: string;
+}
+
+/**
+ * Integrity verification methods
+ */
+export enum IntegrityVerificationMethod {
+  HASH_COMPARISON = 'hash_comparison',
+  DIGITAL_SIGNATURE = 'digital_signature',
+  BLOCKCHAIN_VERIFICATION = 'blockchain_verification',
+  TIMESTAMP_VERIFICATION = 'timestamp_verification',
+}
+
+/**
+ * Verification results
+ */
+export enum VerificationResult {
+  VERIFIED = 'verified',
+  FAILED = 'failed',
+  INCONCLUSIVE = 'inconclusive',
+}
+
+/**
+ * Legal admissibility assessment
+ */
+export interface LegalAdmissibilityAssessment {
+  /** Admissibility status */
+  admissibilityStatus: AdmissibilityStatus;
+
+  /** Legal standards met */
+  legalStandardsMet: string[];
+
+  /** Potential challenges */
+  potentialChallenges: string[];
+
+  /** Authentication requirements */
+  authenticationRequirements: string[];
+
+  /** Foundation requirements */
+  foundationRequirements: string[];
+}
+
+/**
+ * Admissibility status
+ */
+export enum AdmissibilityStatus {
+  ADMISSIBLE = 'admissible',
+  CONDITIONALLY_ADMISSIBLE = 'conditionally_admissible',
+  NOT_ADMISSIBLE = 'not_admissible',
+  UNDER_REVIEW = 'under_review',
+}
+
+/**
+ * Compliance recommendation
+ */
+export interface ComplianceRecommendation {
+  /** Recommendation identifier */
+  recommendationId: string;
+
+  /** Recommendation type */
+  recommendationType: ComplianceRecommendationType;
+
+  /** Priority level */
+  priorityLevel: ExecutivePriority;
+
+  /** Recommendation title */
+  title: string;
+
+  /** Detailed description */
+  detailedDescription: string;
+
+  /** Business justification */
+  businessJustification: string;
+
+  /** Implementation steps */
+  implementationSteps: ImplementationStep[];
+
+  /** Resource requirements */
+  resourceRequirements: ResourceRequirement[];
+
+  /** Timeline */
+  timeline: TimelineEstimate;
+
+  /** Success metrics */
+  successMetrics: SuccessMetric[];
+
+  /** Risk mitigation */
+  riskMitigation: string[];
+
+  /** Cost-benefit analysis */
+  costBenefitAnalysis: CostBenefitAnalysis;
+}
+
+/**
+ * Compliance recommendation types
+ */
+export enum ComplianceRecommendationType {
+  IMMEDIATE_ACTION = 'immediate_action',
+  SHORT_TERM_IMPROVEMENT = 'short_term_improvement',
+  LONG_TERM_STRATEGIC = 'long_term_strategic',
+  PROCESS_OPTIMIZATION = 'process_optimization',
+  TECHNOLOGY_ENHANCEMENT = 'technology_enhancement',
+  POLICY_UPDATE = 'policy_update',
+}
+
+/**
+ * Implementation step
+ */
+export interface ImplementationStep {
+  /** Step identifier */
+  stepId: string;
+
+  /** Step order */
+  stepOrder: number;
+
+  /** Step description */
+  stepDescription: string;
+
+  /** Responsible party */
+  responsibleParty: string;
+
+  /** Prerequisites */
+  prerequisites: string[];
+
+  /** Deliverables */
+  deliverables: string[];
+
+  /** Duration estimate */
+  durationEstimate: number;
+
+  /** Dependencies */
+  dependencies: string[];
+}
+
+/**
+ * Compliance action plan
+ */
+export interface ComplianceActionPlan {
+  /** Plan identifier */
+  planId: string;
+
+  /** Plan name */
+  planName: string;
+
+  /** Plan description */
+  planDescription: string;
+
+  /** Plan objectives */
+  planObjectives: string[];
+
+  /** Action items */
+  actionItems: ComplianceActionItem[];
+
+  /** Timeline overview */
+  timelineOverview: TimelineOverview;
+
+  /** Resource allocation */
+  resourceAllocation: ResourceAllocation;
+
+  /** Risk assessment */
+  riskAssessment: PlanRiskAssessment;
+
+  /** Success criteria */
+  successCriteria: PlanSuccessCriteria[];
+
+  /** Monitoring and reporting */
+  monitoringReporting: MonitoringReportingPlan;
+}
+
+/**
+ * Compliance action item
+ */
+export interface ComplianceActionItem {
+  /** Action identifier */
+  actionId: string;
+
+  /** Action title */
+  actionTitle: string;
+
+  /** Action description */
+  actionDescription: string;
+
+  /** Action category */
+  actionCategory: ActionCategory;
+
+  /** Priority */
+  priority: ExecutivePriority;
+
+  /** Assigned to */
+  assignedTo: string;
+
+  /** Due date */
+  dueDate: Date;
+
+  /** Status */
+  status: ActionItemStatus;
+
+  /** Progress percentage */
+  progressPercentage: number;
+
+  /** Dependencies */
+  dependencies: string[];
+
+  /** Deliverables */
+  deliverables: ActionDeliverable[];
+
+  /** Resource requirements */
+  resourceRequirements: ResourceRequirement[];
+}
+
+/**
+ * Action categories
+ */
+export enum ActionCategory {
+  POLICY_DEVELOPMENT = 'policy_development',
+  PROCESS_IMPROVEMENT = 'process_improvement',
+  SYSTEM_IMPLEMENTATION = 'system_implementation',
+  TRAINING_DELIVERY = 'training_delivery',
+  DOCUMENTATION_UPDATE = 'documentation_update',
+  RISK_MITIGATION = 'risk_mitigation',
+}
+
+/**
+ * Action item status
+ */
+export enum ActionItemStatus {
+  NOT_STARTED = 'not_started',
+  IN_PROGRESS = 'in_progress',
+  ON_HOLD = 'on_hold',
+  COMPLETED = 'completed',
+  CANCELLED = 'cancelled',
+  DEFERRED = 'deferred',
+}
+
+/**
+ * Action deliverable
+ */
+export interface ActionDeliverable {
+  /** Deliverable identifier */
+  deliverableId: string;
+
+  /** Deliverable name */
+  deliverableName: string;
+
+  /** Deliverable type */
+  deliverableType: DeliverableType;
+
+  /** Due date */
+  dueDate: Date;
+
+  /** Status */
+  status: DeliverableStatus;
+
+  /** Quality criteria */
+  qualityCriteria: string[];
+
+  /** Acceptance criteria */
+  acceptanceCriteria: string[];
+}
+
+/**
+ * Deliverable types
+ */
+export enum DeliverableType {
+  DOCUMENT = 'document',
+  SYSTEM = 'system',
+  PROCESS = 'process',
+  TRAINING_MATERIAL = 'training_material',
+  REPORT = 'report',
+  CERTIFICATION = 'certification',
+}
+
+/**
+ * Deliverable status
+ */
+export enum DeliverableStatus {
+  PENDING = 'pending',
+  IN_DEVELOPMENT = 'in_development',
+  UNDER_REVIEW = 'under_review',
+  APPROVED = 'approved',
+  DELIVERED = 'delivered',
+  REJECTED = 'rejected',
+}
+
+/**
+ * Timeline overview
+ */
+export interface TimelineOverview {
+  /** Plan start date */
+  planStartDate: Date;
+
+  /** Plan end date */
+  planEndDate: Date;
+
+  /** Major phases */
+  majorPhases: PlanPhase[];
+
+  /** Critical path */
+  criticalPath: string[];
+
+  /** Key milestones */
+  keyMilestones: Milestone[];
+}
+
+/**
+ * Plan phase
+ */
+export interface PlanPhase {
+  /** Phase identifier */
+  phaseId: string;
+
+  /** Phase name */
+  phaseName: string;
+
+  /** Phase description */
+  phaseDescription: string;
+
+  /** Start date */
+  startDate: Date;
+
+  /** End date */
+  endDate: Date;
+
+  /** Phase objectives */
+  phaseObjectives: string[];
+
+  /** Phase deliverables */
+  phaseDeliverables: string[];
+}
+
+/**
+ * Resource allocation
+ */
+export interface ResourceAllocation {
+  /** Total budget allocated */
+  totalBudgetAllocated: number;
+
+  /** Budget by category */
+  budgetByCategory: Record<string, number>;
+
+  /** Personnel allocation */
+  personnelAllocation: PersonnelAllocation[];
+
+  /** Technology resources */
+  technologyResources: TechnologyResource[];
+
+  /** External services */
+  externalServices: ExternalService[];
+}
+
+/**
+ * Personnel allocation
+ */
+export interface PersonnelAllocation {
+  /** Role */
+  role: string;
+
+  /** Skill requirements */
+  skillRequirements: string[];
+
+  /** Effort percentage */
+  effortPercentage: number;
+
+  /** Duration */
+  duration: number;
+
+  /** Cost */
+  cost: number;
+}
+
+/**
+ * Technology resource
+ */
+export interface TechnologyResource {
+  /** Resource name */
+  resourceName: string;
+
+  /** Resource type */
+  resourceType: TechnologyResourceType;
+
+  /** Specifications */
+  specifications: Record<string, unknown>;
+
+  /** Cost */
+  cost: number;
+
+  /** Procurement timeline */
+  procurementTimeline: number;
+}
+
+/**
+ * Technology resource types
+ */
+export enum TechnologyResourceType {
+  SOFTWARE_LICENSE = 'software_license',
+  HARDWARE = 'hardware',
+  CLOUD_SERVICE = 'cloud_service',
+  SECURITY_TOOL = 'security_tool',
+  MONITORING_TOOL = 'monitoring_tool',
+}
+
+/**
+ * External service
+ */
+export interface ExternalService {
+  /** Service name */
+  serviceName: string;
+
+  /** Service provider */
+  serviceProvider: string;
+
+  /** Service type */
+  serviceType: ExternalServiceType;
+
+  /** Service description */
+  serviceDescription: string;
+
+  /** Cost */
+  cost: number;
+
+  /** Contract duration */
+  contractDuration: number;
+}
+
+/**
+ * External service types
+ */
+export enum ExternalServiceType {
+  CONSULTING = 'consulting',
+  AUDIT_SERVICES = 'audit_services',
+  TRAINING_SERVICES = 'training_services',
+  LEGAL_SERVICES = 'legal_services',
+  TECHNOLOGY_SERVICES = 'technology_services',
+}
+
+/**
+ * Plan risk assessment
+ */
+export interface PlanRiskAssessment {
+  /** Overall risk level */
+  overallRiskLevel: RiskLevel;
+
+  /** Risk factors */
+  riskFactors: PlanRiskFactor[];
+
+  /** Mitigation strategies */
+  mitigationStrategies: RiskMitigationStrategy[];
+
+  /** Contingency plans */
+  contingencyPlans: ContingencyPlan[];
+}
+
+/**
+ * Plan risk factor
+ */
+export interface PlanRiskFactor {
+  /** Risk identifier */
+  riskId: string;
+
+  /** Risk description */
+  riskDescription: string;
+
+  /** Risk category */
+  riskCategory: PlanRiskCategory;
+
+  /** Probability */
+  probability: RiskProbability;
+
+  /** Impact */
+  impact: RiskImpact;
+
+  /** Risk score */
+  riskScore: number;
+}
+
+/**
+ * Plan risk categories
+ */
+export enum PlanRiskCategory {
+  RESOURCE_RISK = 'resource_risk',
+  TIMELINE_RISK = 'timeline_risk',
+  TECHNICAL_RISK = 'technical_risk',
+  STAKEHOLDER_RISK = 'stakeholder_risk',
+  COMPLIANCE_RISK = 'compliance_risk',
+  EXTERNAL_RISK = 'external_risk',
+}
+
+/**
+ * Risk mitigation strategy
+ */
+export interface RiskMitigationStrategy {
+  /** Strategy identifier */
+  strategyId: string;
+
+  /** Risk addressed */
+  riskAddressed: string;
+
+  /** Mitigation approach */
+  mitigationApproach: MitigationApproach;
+
+  /** Implementation actions */
+  implementationActions: string[];
+
+  /** Effectiveness assessment */
+  effectivenessAssessment: EffectivenessAssessment;
+}
+
+/**
+ * Mitigation approaches
+ */
+export enum MitigationApproach {
+  AVOID = 'avoid',
+  MITIGATE = 'mitigate',
+  TRANSFER = 'transfer',
+  ACCEPT = 'accept',
+  MONITOR = 'monitor',
+}
+
+/**
+ * Effectiveness assessment
+ */
+export interface EffectivenessAssessment {
+  /** Effectiveness level */
+  effectivenessLevel: EffectivenessLevel;
+
+  /** Residual risk level */
+  residualRiskLevel: RiskLevel;
+
+  /** Monitoring requirements */
+  monitoringRequirements: string[];
+}
+
+/**
+ * Effectiveness levels
+ */
+export enum EffectivenessLevel {
+  HIGHLY_EFFECTIVE = 'highly_effective',
+  EFFECTIVE = 'effective',
+  MODERATELY_EFFECTIVE = 'moderately_effective',
+  MINIMALLY_EFFECTIVE = 'minimally_effective',
+  INEFFECTIVE = 'ineffective',
+}
+
+/**
+ * Contingency plan
+ */
+export interface ContingencyPlan {
+  /** Plan identifier */
+  planId: string;
+
+  /** Trigger conditions */
+  triggerConditions: string[];
+
+  /** Response actions */
+  responseActions: string[];
+
+  /** Resource requirements */
+  resourceRequirements: ResourceRequirement[];
+
+  /** Activation criteria */
+  activationCriteria: string[];
+}
+
+/**
+ * Plan success criteria
+ */
+export interface PlanSuccessCriteria {
+  /** Criteria identifier */
+  criteriaId: string;
+
+  /** Criteria description */
+  criteriaDescription: string;
+
+  /** Measurement method */
+  measurementMethod: string;
+
+  /** Target value */
+  targetValue: number;
+
+  /** Current value */
+  currentValue: number;
+
+  /** Progress indicator */
+  progressIndicator: ProgressIndicator;
+}
+
+/**
+ * Progress indicator
+ */
+export interface ProgressIndicator {
+  /** Indicator type */
+  indicatorType: ProgressIndicatorType;
+
+  /** Current status */
+  currentStatus: ProgressStatus;
+
+  /** Trend */
+  trend: ProgressTrend;
+
+  /** Last update */
+  lastUpdate: Date;
+}
+
+/**
+ * Progress indicator types
+ */
+export enum ProgressIndicatorType {
+  PERCENTAGE_COMPLETE = 'percentage_complete',
+  MILESTONE_ACHIEVED = 'milestone_achieved',
+  DELIVERABLE_COMPLETED = 'deliverable_completed',
+  METRIC_IMPROVEMENT = 'metric_improvement',
+}
+
+/**
+ * Progress status
+ */
+export enum ProgressStatus {
+  ON_TRACK = 'on_track',
+  AT_RISK = 'at_risk',
+  BEHIND_SCHEDULE = 'behind_schedule',
+  AHEAD_OF_SCHEDULE = 'ahead_of_schedule',
+}
+
+/**
+ * Progress trends
+ */
+export enum ProgressTrend {
+  IMPROVING = 'improving',
+  STABLE = 'stable',
+  DECLINING = 'declining',
+}
+
+/**
+ * Monitoring and reporting plan
+ */
+export interface MonitoringReportingPlan {
+  /** Monitoring frequency */
+  monitoringFrequency: MonitoringFrequency;
+
+  /** Reporting schedule */
+  reportingSchedule: ReportingSchedule;
+
+  /** Key performance indicators */
+  keyPerformanceIndicators: KeyPerformanceIndicator[];
+
+  /** Stakeholder communication */
+  stakeholderCommunication: StakeholderCommunication[];
+
+  /** Escalation procedures */
+  escalationProcedures: EscalationProcedure[];
+}
+
+/**
+ * Monitoring frequency
+ */
+export enum MonitoringFrequency {
+  DAILY = 'daily',
+  WEEKLY = 'weekly',
+  BI_WEEKLY = 'bi_weekly',
+  MONTHLY = 'monthly',
+  QUARTERLY = 'quarterly',
+}
+
+/**
+ * Reporting schedule
+ */
+export interface ReportingSchedule {
+  /** Regular reports */
+  regularReports: RegularReport[];
+
+  /** Ad-hoc reports */
+  adHocReports: AdHocReport[];
+
+  /** Dashboard updates */
+  dashboardUpdates: DashboardUpdate[];
+}
+
+/**
+ * Regular report
+ */
+export interface RegularReport {
+  /** Report name */
+  reportName: string;
+
+  /** Report frequency */
+  reportFrequency: ReportingFrequency;
+
+  /** Recipients */
+  recipients: string[];
+
+  /** Content elements */
+  contentElements: string[];
+}
+
+/**
+ * Ad-hoc report
+ */
+export interface AdHocReport {
+  /** Report trigger */
+  reportTrigger: string;
+
+  /** Report recipients */
+  reportRecipients: string[];
+
+  /** Report content */
+  reportContent: string[];
+
+  /** Delivery method */
+  deliveryMethod: string;
+}
+
+/**
+ * Dashboard update
+ */
+export interface DashboardUpdate {
+  /** Update frequency */
+  updateFrequency: MonitoringFrequency;
+
+  /** Metrics displayed */
+  metricsDisplayed: string[];
+
+  /** Access permissions */
+  accessPermissions: string[];
+}
+
+/**
+ * Key performance indicator
+ */
+export interface KeyPerformanceIndicator {
+  /** KPI identifier */
+  kpiId: string;
+
+  /** KPI name */
+  kpiName: string;
+
+  /** KPI description */
+  kpiDescription: string;
+
+  /** Measurement unit */
+  measurementUnit: string;
+
+  /** Target value */
+  targetValue: number;
+
+  /** Current value */
+  currentValue: number;
+
+  /** Data source */
+  dataSource: string;
+
+  /** Calculation method */
+  calculationMethod: string;
+}
+
+/**
+ * Stakeholder communication
+ */
+export interface StakeholderCommunication {
+  /** Stakeholder group */
+  stakeholderGroup: string;
+
+  /** Communication frequency */
+  communicationFrequency: MonitoringFrequency;
+
+  /** Communication method */
+  communicationMethod: CommunicationMethod;
+
+  /** Information shared */
+  informationShared: string[];
+}
+
+/**
+ * Communication methods
+ */
+export enum CommunicationMethod {
+  EMAIL = 'email',
+  MEETING = 'meeting',
+  DASHBOARD = 'dashboard',
+  REPORT = 'report',
+  PRESENTATION = 'presentation',
+}
+
+/**
+ * Escalation procedure
+ */
+export interface EscalationProcedure {
+  /** Escalation trigger */
+  escalationTrigger: string;
+
+  /** Escalation level */
+  escalationLevel: EscalationLevel;
+
+  /** Escalation contacts */
+  escalationContacts: string[];
+
+  /** Response timeline */
+  responseTimeline: number;
+
+  /** Escalation actions */
+  escalationActions: string[];
+}
+
+/**
+ * Escalation levels
+ */
+export enum EscalationLevel {
+  LEVEL_1 = 'level_1',
+  LEVEL_2 = 'level_2',
+  LEVEL_3 = 'level_3',
+  EXECUTIVE = 'executive',
+}
+
+/**
+ * Report appendix
+ */
+export interface ReportAppendix {
+  /** Appendix identifier */
+  appendixId: string;
+
+  /** Appendix title */
+  appendixTitle: string;
+
+  /** Appendix type */
+  appendixType: AppendixType;
+
+  /** Content description */
+  contentDescription: string;
+
+  /** File references */
+  fileReferences: FileReference[];
+
+  /** Page count */
+  pageCount: number;
+
+  /** Access restrictions */
+  accessRestrictions: string[];
+}
+
+/**
+ * Appendix types
+ */
+export enum AppendixType {
+  SUPPORTING_DOCUMENTATION = 'supporting_documentation',
+  DETAILED_ANALYSIS = 'detailed_analysis',
+  TECHNICAL_SPECIFICATIONS = 'technical_specifications',
+  LEGAL_REFERENCES = 'legal_references',
+  EVIDENCE_CATALOG = 'evidence_catalog',
+  GLOSSARY = 'glossary',
+}
+
+/**
+ * File reference
+ */
+export interface FileReference {
+  /** File identifier */
+  fileId: string;
+
+  /** File name */
+  fileName: string;
+
+  /** File path */
+  filePath: string;
+
+  /** File type */
+  fileType: string;
+
+  /** File size */
+  fileSize: number;
+
+  /** Creation date */
+  creationDate: Date;
+
+  /** Hash value */
+  hashValue: string;
+}
+
+/**
+ * Report signature
+ */
+export interface ReportSignature {
+  /** Signature identifier */
+  signatureId: string;
+
+  /** Signatory information */
+  signatoryInformation: SignatoryInformation;
+
+  /** Signature type */
+  signatureType: SignatureType;
+
+  /** Signature timestamp */
+  signatureTimestamp: Date;
+
+  /** Digital signature */
+  digitalSignature: string;
+
+  /** Signature validation */
+  signatureValidation: SignatureValidation;
+}
+
+/**
+ * Signatory information
+ */
+export interface SignatoryInformation {
+  /** Signatory name */
+  signatoryName: string;
+
+  /** Signatory title */
+  signatoryTitle: string;
+
+  /** Organization */
+  organization: string;
+
+  /** Professional credentials */
+  professionalCredentials: string[];
+
+  /** Authority to sign */
+  authorityToSign: string;
+
+  /** Contact information */
+  contactInformation: ContactInformation;
+}
+
+/**
+ * Contact information
+ */
+export interface ContactInformation {
+  /** Email address */
+  emailAddress: string;
+
+  /** Phone number */
+  phoneNumber: string;
+
+  /** Office address */
+  officeAddress: string;
+
+  /** Alternative contact */
+  alternativeContact?: string;
+}
+
+/**
+ * Signature types
+ */
+export enum SignatureType {
+  DIGITAL_SIGNATURE = 'digital_signature',
+  ELECTRONIC_SIGNATURE = 'electronic_signature',
+  WET_SIGNATURE = 'wet_signature',
+  NOTARIZED_SIGNATURE = 'notarized_signature',
+}
+
+/**
+ * Signature validation
+ */
+export interface SignatureValidation {
+  /** Validation status */
+  validationStatus: ValidationStatus;
+
+  /** Validation method */
+  validationMethod: SignatureValidationMethod;
+
+  /** Validation timestamp */
+  validationTimestamp: Date;
+
+  /** Certificate information */
+  certificateInformation: CertificateInformation;
+
+  /** Validation details */
+  validationDetails: string;
+}
+
+/**
+ * Validation status
+ */
+export enum ValidationStatus {
+  VALID = 'valid',
+  INVALID = 'invalid',
+  EXPIRED = 'expired',
+  REVOKED = 'revoked',
+  UNKNOWN = 'unknown',
+}
+
+/**
+ * Signature validation methods
+ */
+export enum SignatureValidationMethod {
+  PKI_VALIDATION = 'pki_validation',
+  CERTIFICATE_AUTHORITY = 'certificate_authority',
+  TRUSTED_TIMESTAMPING = 'trusted_timestamping',
+  BIOMETRIC_VERIFICATION = 'biometric_verification',
+}
+
+/**
+ * Certificate information
+ */
+export interface CertificateInformation {
+  /** Certificate serial number */
+  certificateSerialNumber: string;
+
+  /** Issuer */
+  issuer: string;
+
+  /** Subject */
+  subject: string;
+
+  /** Valid from */
+  validFrom: Date;
+
+  /** Valid to */
+  validTo: Date;
+
+  /** Certificate status */
+  certificateStatus: CertificateStatus;
+}
+
+/**
+ * Certificate status
+ */
+export enum CertificateStatus {
+  ACTIVE = 'active',
+  EXPIRED = 'expired',
+  REVOKED = 'revoked',
+  SUSPENDED = 'suspended',
+}
+
+/**
+ * Compliance certification
+ */
+export interface ComplianceCertification {
+  /** Certification identifier */
+  certificationId: string;
+
+  /** Certification type */
+  certificationType: ComplianceCertificationType;
+
+  /** Certifying body */
+  certifyingBody: CertifyingBody;
+
+  /** Certification scope */
+  certificationScope: CertificationScope;
+
+  /** Certification date */
+  certificationDate: Date;
+
+  /** Validity period */
+  validityPeriod: CertificationValidityPeriod;
+
+  /** Certification conditions */
+  certificationConditions: CertificationCondition[];
+
+  /** Surveillance requirements */
+  surveillanceRequirements: SurveillanceRequirement[];
+
+  /** Certification evidence */
+  certificationEvidence: CertificationEvidence[];
+}
+
+/**
+ * Compliance certification types
+ */
+export enum ComplianceCertificationType {
+  ISO_27001 = 'iso_27001',
+  SOC_2 = 'soc_2',
+  PCI_DSS = 'pci_dss',
+  HIPAA = 'hipaa',
+  GDPR = 'gdpr',
+  FedRAMP = 'fedramp',
+  CUSTOM = 'custom',
+}
+
+/**
+ * Certifying body
+ */
+export interface CertifyingBody {
+  /** Body name */
+  bodyName: string;
+
+  /** Accreditation number */
+  accreditationNumber: string;
+
+  /** Accrediting authority */
+  accreditingAuthority: string;
+
+  /** Contact information */
+  contactInformation: ContactInformation;
+
+  /** Scope of accreditation */
+  scopeOfAccreditation: string[];
+}
+
+/**
+ * Certification scope
+ */
+export interface CertificationScope {
+  /** Scope description */
+  scopeDescription: string;
+
+  /** Systems covered */
+  systemsCovered: string[];
+
+  /** Processes covered */
+  processesCovered: string[];
+
+  /** Locations covered */
+  locationsCovered: string[];
+
+  /** Exclusions */
+  exclusions: string[];
+}
+
+/**
+ * Certification validity period
+ */
+export interface CertificationValidityPeriod {
+  /** Issue date */
+  issueDate: Date;
+
+  /** Expiry date */
+  expiryDate: Date;
+
+  /** Renewal requirements */
+  renewalRequirements: RenewalRequirement[];
+
+  /** Surveillance schedule */
+  surveillanceSchedule: SurveillanceSchedule;
+}
+
+/**
+ * Renewal requirement
+ */
+export interface RenewalRequirement {
+  /** Requirement type */
+  requirementType: RenewalRequirementType;
+
+  /** Requirement description */
+  requirementDescription: string;
+
+  /** Due date */
+  dueDate: Date;
+
+  /** Completion status */
+  completionStatus: CompletionStatus;
+}
+
+/**
+ * Renewal requirement types
+ */
+export enum RenewalRequirementType {
+  DOCUMENTATION_UPDATE = 'documentation_update',
+  SYSTEM_ASSESSMENT = 'system_assessment',
+  STAFF_TRAINING = 'staff_training',
+  PROCESS_REVIEW = 'process_review',
+  MANAGEMENT_REVIEW = 'management_review',
+}
+
+/**
+ * Completion status
+ */
+export enum CompletionStatus {
+  NOT_STARTED = 'not_started',
+  IN_PROGRESS = 'in_progress',
+  COMPLETED = 'completed',
+  OVERDUE = 'overdue',
+}
+
+/**
+ * Surveillance schedule
+ */
+export interface SurveillanceSchedule {
+  /** Surveillance frequency */
+  surveillanceFrequency: SurveillanceFrequency;
+
+  /** Next surveillance date */
+  nextSurveillanceDate: Date;
+
+  /** Surveillance scope */
+  surveillanceScope: string[];
+
+  /** Surveillance methods */
+  surveillanceMethods: SurveillanceMethod[];
+}
+
+/**
+ * Surveillance frequency
+ */
+export enum SurveillanceFrequency {
+  ANNUAL = 'annual',
+  BI_ANNUAL = 'bi_annual',
+  QUARTERLY = 'quarterly',
+  MONTHLY = 'monthly',
+  CONTINUOUS = 'continuous',
+}
+
+/**
+ * Surveillance methods
+ */
+export enum SurveillanceMethod {
+  ON_SITE_AUDIT = 'on_site_audit',
+  REMOTE_AUDIT = 'remote_audit',
+  DOCUMENT_REVIEW = 'document_review',
+  SYSTEM_MONITORING = 'system_monitoring',
+  STAKEHOLDER_INTERVIEW = 'stakeholder_interview',
+}
+
+/**
+ * Certification condition
+ */
+export interface CertificationCondition {
+  /** Condition identifier */
+  conditionId: string;
+
+  /** Condition type */
+  conditionType: ConditionType;
+
+  /** Condition description */
+  conditionDescription: string;
+
+  /** Compliance deadline */
+  complianceDeadline: Date;
+
+  /** Verification requirements */
+  verificationRequirements: string[];
+
+  /** Status */
+  status: ConditionStatus;
+}
+
+/**
+ * Condition types
+ */
+export enum ConditionType {
+  MANDATORY_IMPROVEMENT = 'mandatory_improvement',
+  RECOMMENDED_IMPROVEMENT = 'recommended_improvement',
+  MONITORING_REQUIREMENT = 'monitoring_requirement',
+  REPORTING_REQUIREMENT = 'reporting_requirement',
+  TRAINING_REQUIREMENT = 'training_requirement',
+}
+
+/**
+ * Condition status
+ */
+export enum ConditionStatus {
+  PENDING = 'pending',
+  IN_PROGRESS = 'in_progress',
+  COMPLETED = 'completed',
+  OVERDUE = 'overdue',
+  WAIVED = 'waived',
+}
+
+/**
+ * Surveillance requirement
+ */
+export interface SurveillanceRequirement {
+  /** Requirement identifier */
+  requirementId: string;
+
+  /** Surveillance type */
+  surveillanceType: SurveillanceType;
+
+  /** Frequency */
+  frequency: SurveillanceFrequency;
+
+  /** Scope */
+  scope: string[];
+
+  /** Methods */
+  methods: SurveillanceMethod[];
+
+  /** Reporting requirements */
+  reportingRequirements: string[];
+}
+
+/**
+ * Surveillance types
+ */
+export enum SurveillanceType {
+  COMPLIANCE_MONITORING = 'compliance_monitoring',
+  PERFORMANCE_MONITORING = 'performance_monitoring',
+  INCIDENT_MONITORING = 'incident_monitoring',
+  CHANGE_MONITORING = 'change_monitoring',
+  RISK_MONITORING = 'risk_monitoring',
+}
+
+/**
+ * Certification evidence
+ */
+export interface CertificationEvidence {
+  /** Evidence identifier */
+  evidenceId: string;
+
+  /** Evidence type */
+  evidenceType: CertificationEvidenceType;
+
+  /** Evidence description */
+  evidenceDescription: string;
+
+  /** File reference */
+  fileReference: FileReference;
+
+  /** Verification status */
+  verificationStatus: EvidenceVerificationStatus;
+
+  /** Retention period */
+  retentionPeriod: number;
+}
+
+/**
+ * Certification evidence types
+ */
+export enum CertificationEvidenceType {
+  AUDIT_REPORT = 'audit_report',
+  CERTIFICATE = 'certificate',
+  ASSESSMENT_DOCUMENTATION = 'assessment_documentation',
+  CORRECTIVE_ACTION_EVIDENCE = 'corrective_action_evidence',
+  SURVEILLANCE_REPORT = 'surveillance_report',
+}
+
+/**
+ * Evidence verification status
+ */
+export enum EvidenceVerificationStatus {
+  VERIFIED = 'verified',
+  PENDING_VERIFICATION = 'pending_verification',
+  VERIFICATION_FAILED = 'verification_failed',
+  NOT_REQUIRED = 'not_required',
 }
 
 // Continue with remaining types...

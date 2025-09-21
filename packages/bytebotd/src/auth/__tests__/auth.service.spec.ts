@@ -686,7 +686,7 @@ describe('AuthService', () => {
       console.log(`[${testId}] Empty credentials handling test completed`);
     });
 
-    it('should handle null/undefined inputs'async () => {
+    it('should handle null/undefined inputs', async () => {
       const testId = `${operationId}_edge_null_inputs`;console.log(`[${testId}] Testing null/undefined input handling`);
       await expect(service.login(null as unknown as LoginDto),
       ).rejects.toThrow();

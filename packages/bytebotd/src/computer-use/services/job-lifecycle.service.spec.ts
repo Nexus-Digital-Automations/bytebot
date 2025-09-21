@@ -67,7 +67,7 @@ describe('JobLifecycleService', () => {let service: JobLifecycleService;let stat
         {
           provide: ConfigService,
           useValue: {
-            get: jest.fn((key: string, defaultValue?: any) => {
+            get: jest.fn((key: string, defaultValue?: string | number | boolean | Record<string, unknown>) => {
               const config = {
                 REDIS_HOST: 'localhost',REDIS_PORT: 6379,REDIS_PASSWORD: undefined,
                 REDIS_DB: 0,

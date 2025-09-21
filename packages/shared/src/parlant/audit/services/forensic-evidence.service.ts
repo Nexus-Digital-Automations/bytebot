@@ -28,9 +28,96 @@ import {
   ForensicEvidenceId,
   AuditEventSeverity,
   ForensicMetadata,
+  ChainOfCustodyEntry,
+  LegalMetadata,
+  DigitalSignature,
 } from '../types/audit-core.types';
+import {
+  EvidenceItem,
+} from '../types/audit-extended.types';
 import { createHash, randomBytes, createHmac, createSign, createVerify } from 'crypto';
 import { performance } from 'perf_hooks';
+
+// ===========================
+// MISSING TYPE DEFINITIONS
+// ===========================
+
+/**
+ * Evidence collection method
+ */
+export enum EvidenceCollectionMethod {
+  AUTOMATED = 'automated',
+  MANUAL = 'manual',
+  HYBRID = 'hybrid',
+  REAL_TIME = 'real_time',
+  BATCH = 'batch',
+}
+
+/**
+ * Evidence integrity verification
+ */
+export interface EvidenceIntegrityVerification {
+  verificationMethod: string;
+  hashAlgorithm: string;
+  hashValue: string;
+  verificationTimestamp: Date;
+  integrityStatus: string;
+}
+
+/**
+ * Preservation metadata
+ */
+export interface PreservationMetadata {
+  preservationMethod: string;
+  retentionPeriod: string;
+  storageLocation: string;
+  accessControls: string[];
+  preservationTimestamp: Date;
+}
+
+/**
+ * Expert witness assignment
+ */
+export interface ExpertWitnessAssignment {
+  expertId: string;
+  expertName: string;
+  qualification: string;
+  assignmentDate: Date;
+  responsibilities: string[];
+}
+
+/**
+ * Collection tool
+ */
+export interface CollectionTool {
+  toolId: string;
+  toolName: string;
+  version: string;
+  licenseInfo: string;
+  validationStatus: string;
+}
+
+/**
+ * Collection certification
+ */
+export interface CollectionCertification {
+  certificationId: string;
+  issuingAuthority: string;
+  validFrom: Date;
+  validUntil: Date;
+  certificationLevel: string;
+}
+
+/**
+ * Collection quality metrics
+ */
+export interface CollectionQualityMetrics {
+  completenessScore: number;
+  integrityScore: number;
+  accuracyScore: number;
+  timelinessScore: number;
+  overallQualityScore: number;
+}
 
 // ===========================
 // FORENSIC EVIDENCE INTERFACES

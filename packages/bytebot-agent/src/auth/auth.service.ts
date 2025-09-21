@@ -200,7 +200,7 @@ export class AuthService {
 
       if (error instanceof UnauthorizedException) {
         // Re-throw authorization errors without modification
-        throw error;
+        throw error instanceof Error ? error : new Error(String(error));
       }
 
       // Log unexpected errors
@@ -333,7 +333,7 @@ export class AuthService {
         error instanceof BadRequestException
       ) {
         // Re-throw validation errors without modification
-        throw error;
+        throw error instanceof Error ? error : new Error(String(error));
       }
 
       // Log unexpected errors
@@ -442,7 +442,7 @@ export class AuthService {
 
       if (error instanceof UnauthorizedException) {
         // Re-throw authorization errors without modification
-        throw error;
+        throw error instanceof Error ? error : new Error(String(error));
       }
 
       // Log unexpected errors
@@ -635,7 +635,7 @@ export class AuthService {
         error instanceof NotFoundException
       ) {
         // Re-throw validation errors without modification
-        throw error;
+        throw error instanceof Error ? error : new Error(String(error));
       }
 
       // Log unexpected errors

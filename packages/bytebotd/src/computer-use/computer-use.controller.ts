@@ -27,7 +27,7 @@ import {
   ValidationMode,
   ConversationContext,
   ParlantValidationInterceptor
-} from '@bytebot/shared/src/parlant/parlant-validation.decorator';import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';import { RolesGuard } from '../auth/guards/roles.guard';import {OperatorOrAdmin,
+} from '@bytebot/shared/src/parlant/parlant-validation.decorator';\nimport { ConversationContextParameter } from '@bytebot/shared/src/types/conversation-context.types';\nimport { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';import { RolesGuard } from '../auth/guards/roles.guard';import {OperatorOrAdmin,
   CurrentUser,
   ByteBotdUser,
 } from '../auth/decorators/roles.decorator';import { ComputerUseService } from './computer-use.service';import { AsyncJobService } from './async-job.service';import { EnhancedAsyncJobService } from './enhanced-async-job.service';import { ComputerActionValidationPipe } from './dto/computer-action-validation.pipe';import { BatchJobValidationPipe } from './pipes/batch-job-validation.pipe';import { ComputerActionDto } from './dto/computer-action.dto';import {JobSubmissionResponseDto,
@@ -1063,7 +1063,7 @@ type ComputerActionResponse =
   async action(
     @Body(new ComputerActionValidationPipe()) params: ComputerActionDto,
     @CurrentUser() user: ByteBotdUser,
-    @ConversationContext() conversationContext?: any,
+    @ConversationContext() conversationContext?: ConversationContextParameter,
   ): Promise<ComputerActionResponse> {
     // Generate unique operation ID for tracking this action request
     const operationId = `action${Date.now()}${Math.random().toString(36).substring(7)}`;

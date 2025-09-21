@@ -2644,10 +2644,70 @@
       "updated_at": "2025-09-18T00:12:07.925Z",
       "archived_at": "2025-09-18T00:12:07.932Z",
       "archive_version": "2.0.0"
+    },
+    {
+      "id": "error_1757389319302_r2nwsfpgw",
+      "title": "CRITICAL: Fix TypeScript build errors in shared package",
+      "description": "Multiple TypeScript compilation errors blocking build process in compliance-framework.service.ts. Properties like PUBLIC, INTERNAL, CONFIDENTIAL, RESTRICTED and eventEmitter not found - need to fix property access issues preventing successful build.",
+      "priority": "normal",
+      "category": "error",
+      "status": "completed",
+      "dependencies": [],
+      "important_files": [
+        "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/shared/src/audit/compliance/compliance-framework.service.ts"
+      ],
+      "success_criteria": [],
+      "estimate": "",
+      "requires_research": false,
+      "subtasks": [],
+      "created_at": "2025-09-09T03:41:59.302Z",
+      "auto_research_created": false,
+      "assigned_agent": "dev_session_1758409747951_1_general_6eb90f20",
+      "started_at": "2025-09-20T23:23:17.578Z",
+      "claimed_by": "dev_session_1758409747951_1_general_6eb90f20",
+      "agent_assignment_history": [
+        {
+          "agentId": "development_session_1757388350560_1_general_e66b76dd",
+          "role": "primary",
+          "assignedAt": "2025-09-09T03:42:20.434Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        },
+        {
+          "agent": "development_session_1757388350560_1_general_e66b76dd",
+          "action": "auto_unassign_stale",
+          "timestamp": "2025-09-18T05:42:01.446Z",
+          "reason": "Agent became stale (inactive >13080 minutes)"
+        },
+        {
+          "agentId": "dev_session_1758222907823_1_general_43b1ae5f",
+          "role": "primary",
+          "assignedAt": "2025-09-18T19:16:41.243Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        },
+        {
+          "agent": "dev_session_1758222907823_1_general_43b1ae5f",
+          "action": "auto_unassign_stale",
+          "timestamp": "2025-09-18T19:45:09.417Z",
+          "reason": "Agent became stale (inactive >30 minutes)"
+        },
+        {
+          "agentId": "dev_session_1758409747951_1_general_6eb90f20",
+          "role": "primary",
+          "assignedAt": "2025-09-20T23:23:17.578Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-20T23:29:19.310Z",
+      "updated_at": "2025-09-20T23:29:19.310Z",
+      "archived_at": "2025-09-20T23:29:19.314Z",
+      "archive_version": "2.0.0"
     }
   ],
-  "total_completed": 72,
+  "total_completed": 73,
   "last_completion": "2025-09-13T05:08:39.544Z",
   "created_at": "2025-09-11T09:00:29.533Z",
-  "last_archived": "2025-09-18T00:12:07.932Z"
+  "last_archived": "2025-09-20T23:29:19.314Z"
 }

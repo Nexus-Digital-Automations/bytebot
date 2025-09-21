@@ -16,7 +16,12 @@
  * @service BrowserUseService
  */
 
-import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  OnModuleInit,
+  OnModuleDestroy,
+} from '@nestjs/common';
 /**
  * Browser configuration interface for type safety
  */
@@ -837,7 +842,7 @@ export class BrowserUseService implements OnModuleInit, OnModuleDestroy {
     } catch (_error: unknown) {
       browserProcess.status = 'error';
       this.logger.error(`Command failed for process ${processId}:`, error);
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 

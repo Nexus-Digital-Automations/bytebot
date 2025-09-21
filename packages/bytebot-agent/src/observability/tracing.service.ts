@@ -19,7 +19,12 @@
  * @version 1.0.0 - Enterprise Implementation
  */
 
-import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  OnModuleInit,
+  OnModuleDestroy,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { MetricsService } from '../metrics/metrics.service';
 import { v4 as uuidv4 } from 'uuid';
@@ -171,7 +176,7 @@ export class TracingService implements OnModuleInit, OnModuleDestroy {
         'initialization_error',
       );
 
-      throw error;
+      throw error instanceof Error ? error : new Error(String(error));
     }
   }
 
@@ -285,7 +290,7 @@ export class TracingService implements OnModuleInit, OnModuleDestroy {
    */
   setSpanError(
     spanId: string,
-    _error: Error | string,
+    error: Error | string,
     tags: Record<string, any> = {},
   ): void {
     const operationId = this.generateOperationId();
