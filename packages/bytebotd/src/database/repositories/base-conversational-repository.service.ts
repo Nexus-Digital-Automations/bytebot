@@ -162,7 +162,13 @@ export abstract class BaseConversationalRepositoryService<T extends BaseEntity> 
         error: errorMessage,
         context: operationContext,
       });
-      throw error;
+
+      // Ensure we only throw Error objects
+      if (error instanceof Error) {
+        throw error;
+      } else {
+        throw new Error(`Failed to find all ${this.getEntityType()} entities: ${errorMessage}`);
+      }
     }
   }
 
@@ -215,7 +221,13 @@ export abstract class BaseConversationalRepositoryService<T extends BaseEntity> 
         error: errorMessage,
         context: operationContext,
       });
-      throw error;
+
+      // Ensure we only throw Error objects
+      if (error instanceof Error) {
+        throw error;
+      } else {
+        throw new Error(`Failed to create ${this.getEntityType()} entity: ${errorMessage}`);
+      }
     }
   }
 
