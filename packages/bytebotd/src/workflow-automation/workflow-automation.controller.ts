@@ -12,25 +12,49 @@ import {
   Param,
   Delete,
   Query,
-} from '@nestjs/common';import {ApiOperation,
+} from '@nestjs/common';
+
+import {
+  ApiOperation,
   ApiResponse,
   ApiBearerAuth,
   ApiTags,
   ApiParam,
   ApiQuery,
-} from '@nestjs/swagger';import { EnterpriseRateLimitGuard } from '../common/guards/rate-limit.guard';import { SecuritySanitizationPipes } from '../common/pipes/security-sanitization.pipe';import { LoggingInterceptor } from '../common/interceptors/logging.interceptor';import {ForVersion,
+} from '@nestjs/swagger';
+
+import { EnterpriseRateLimitGuard } from '../common/guards/rate-limit.guard';
+import { SecuritySanitizationPipes } from '../common/pipes/security-sanitization.pipe';
+import { LoggingInterceptor } from '../common/interceptors/logging.interceptor';
+import {
+  ForVersion,
   SUPPORTED_API_VERSIONS,
-} from '../common/versioning/api-version.decorator';import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';import { RolesGuard } from '../auth/guards/roles.guard';import {OperatorOrAdmin,
+} from '../common/versioning/api-version.decorator';
+
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import {
+  OperatorOrAdmin,
   CurrentUser,
   ByteBotdUser,
-} from '../auth/decorators/roles.decorator';import { WorkflowAutomationService } from './workflow-automation.service';import {WorkflowDto,
+} from '../auth/decorators/roles.decorator';
+
+import { WorkflowAutomationService } from './workflow-automation.service';
+import {
+  WorkflowDto,
   WorkflowExecutionDto,
   WorkflowStepType,
   WorkflowExecutionMode
-} from './dto/workflow.dto';import {WorkflowExecutionResponseDto,
+} from './dto/workflow.dto';
+
+import {
+  WorkflowExecutionResponseDto,
   WorkflowValidationResultDto,
   WorkflowExecutionListDto
-} from './dto/workflow-response.dto';/*** Workflow Automation Controller
+} from './dto/workflow-response.dto';
+
+/**
+ * Workflow Automation Controller
  *
  * Provides enterprise-grade APIs for automated workflow orchestration including:
  * - Multi-step workflow execution with conditional logic
