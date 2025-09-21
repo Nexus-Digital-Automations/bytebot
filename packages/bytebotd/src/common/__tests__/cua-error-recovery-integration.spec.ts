@@ -681,7 +681,7 @@ return isLowRisk;
       let connectionAttempts = 0;
 
       // Mock MCP connection failures then recovery
-      const originalMoveMouse = context.mcpTools.moveMouse.bind(context.mcpTools);
+      const originalMoveMouse = context.mcpTools.moveMouse.bind(context.mcpTools) as (params: MouseMoveParams) => Promise<McpToolResponse>;
       const mouseMoveSpy = jest.spyOn(context.mcpTools, 'moveMouse');
       mouseMoveSpy.mockImplementation(async (params: MouseMoveParams): Promise<McpToolResponse> => {
         connectionAttempts++;
@@ -913,7 +913,7 @@ return; // Successful cache operation
       functionParams: {
 
     },actionDescription: 'test',
-      context: {} as ValidationContext,riskLevel: RiskLevel.LOW,
+      context: {} as ValidationContext,riskLevel: RiskLevel._LOW,
                 operationId: 'test',});}
         });
         

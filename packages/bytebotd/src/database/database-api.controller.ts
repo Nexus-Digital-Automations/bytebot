@@ -58,7 +58,8 @@ import {
   ConversationContext,
   ParlantValidationInterceptor
 
-} from '@bytebot/shared/src/parlant/parlant-validation.decorator';import { ConversationContextParameter } from '@bytebot/shared/src/types/conversation-context.types';
+} from '@bytebot/shared/src/parlant/parlant-validation.decorator';
+import { ConversationContextParameter, ConversationContext as ConversationContextType } from '@bytebot/shared/src/types/conversation-context.types';
 
 // Authentication and Authorization;
 
@@ -243,9 +244,9 @@ export interface DatabaseAnalyticsDto {
       limit,
       offset,
       userId: user.id,
-      conversationId: conversationContext?.conversationId,
+      conversationId: (conversationContext as ConversationContextType | undefined)?.conversationId,
       validationApproved: true
-    
+
 });
 
     try {
@@ -321,8 +322,8 @@ export interface DatabaseAnalyticsDto {
   operationId,
       tableName,
       userId: user.id,
-      conversationId: conversationContext?.conversationId
-    
+      conversationId: (conversationContext as ConversationContextType | undefined)?.conversationId
+
 });
 
     // Mock implementation - would integrate with actual database schema inspection
@@ -407,10 +408,10 @@ export interface DatabaseAnalyticsDto {
       operation: modificationDto.operation,
       justification: modificationDto.justification,
       userId: user.id,
-      conversationId: conversationContext?.conversationId,
+      conversationId: (conversationContext as ConversationContextType | undefined)?.conversationId,
       validationApproved: true,
-      securityLevel: conversationContext?.securityContext?.accessLevel ?? SecurityLevel.MEDIUM
-    
+      securityLevel: (conversationContext as ConversationContextType | undefined)?.securityContext?.accessLevel ?? SecurityLevel.MEDIUM
+
 });
 
     try {
@@ -522,9 +523,9 @@ export interface DatabaseAnalyticsDto {
       description: schemaDto.description,
       reversible: schemaDto.reversible,
       userId: user.id,
-      conversationId: conversationContext?.conversationId,
+      conversationId: (conversationContext as ConversationContextType | undefined)?.conversationId,
       validationApproved: true
-    
+
 });
 
     try {
@@ -603,8 +604,8 @@ export interface DatabaseAnalyticsDto {
   operationId,type: backupDto.type,
       encrypt: backupDto.encrypt,
       userId: user.id,
-      conversationId: conversationContext?.conversationId
-    
+      conversationId: (conversationContext as ConversationContextType | undefined)?.conversationId
+
 });
 
     // Mock backup implementation
@@ -648,8 +649,8 @@ export interface DatabaseAnalyticsDto {
   operationId,
       timeRange: analyticsDto.timeRange,
       userId: user.id,
-      conversationId: conversationContext?.conversationId
-    
+      conversationId: (conversationContext as ConversationContextType | undefined)?.conversationId
+
 });
 
     return {

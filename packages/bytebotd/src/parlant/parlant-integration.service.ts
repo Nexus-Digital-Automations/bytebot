@@ -22,6 +22,9 @@ import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import WebSocket from 'ws';
 import { RiskLevel } from '@bytebot/shared';
 
+// Re-export for external use
+export { RiskLevel };
+
 // ===== PARLANT INTEGRATION INTERFACES =====
 
 /**

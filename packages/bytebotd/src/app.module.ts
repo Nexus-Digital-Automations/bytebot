@@ -26,7 +26,7 @@ import { AutomationTestingModule } from './automation-testing/automation-testing
 import { BrowserUseModule } from './browser-use/browser-use.module';
 import { BrowserModule } from './browser/browser.module';
 import { ParlantAuthModule, createEnvironmentConfig } from '../../shared/src/modules/parlant-auth.module';
-import { HighPerformanceParlantModule } from '../../../src/modules/high-performance-parlant.module';
+import { HighPerformanceParlantModule } from '../../../../src/modules/high-performance-parlant.module';
 
 @Module({
   imports: [
@@ -84,7 +84,7 @@ import { HighPerformanceParlantModule } from '../../../src/modules/high-performa
     HealthModule, // Enterprise health monitoring with Kubernetes support
     MetricsModule, // Prometheus metrics collection
     ParlantModule, // MAXIMUM IMPLEMENTATION - Parlant conversational AI validation for ALL functions
-    HighPerformanceParlantModule.forRoot(), // High-performance PARLANT integration with monitoring and optimization
+    HighPerformanceParlantModule, // High-performance PARLANT integration with monitoring and optimization
     EnterpriseApiModule, // MAXIMUM IMPLEMENTATION - Enterprise API Gateway with universal Parlant validation
     // Automation API Modules - Comprehensive form automation and data extraction capabilities
     FormAutomationModule, // Form field detection, auto-filling, validation, and submission

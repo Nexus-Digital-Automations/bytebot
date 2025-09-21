@@ -446,7 +446,7 @@ let testModule: TestingModule;
       context.performanceMonitor.startMonitoring(500);
 
       // Create diverse computer use operations
-      const operations = [
+      const operations: (() => Promise<unknown>)[] = [
         () => context.computerUseService.action({ action: 'move_mouse', coordinates: { x: Math.random() * 1000, y: Math.random() * 1000 } }),() => context.computerUseService.action({ action: 'click_mouse', coordinates: { x: 100, y: 200 }, button: 'left', clickCount: 1 }),() => context.computerUseService.action({ action: 'cursor_position' }),() => context.computerUseService.action({ action: 'screenshot' }),() => context.mcpTools.moveMouse({ coordinates: { x: Math.random() * 500, y: Math.random() * 500 } }),() => context.mcpTools.clickMouse({ coordinates: { x: 200, y: 300 }, button: 'left', clickCount: 1 }),() => context.mcpTools.typeText({ text: 'performance test' }),() => context.mcpTools.cursorPosition(),];
 
       const loadResults = await context.loadGenerator.generateConcurrentLoad(operations, testConfig);
@@ -521,7 +521,7 @@ let testModule: TestingModule;
         () => context.computerUseService.action({ action: 'move_mouse', coordinates: { x: 300, y: 400 } }),() => context.computerUseService.action({ action: 'screenshot' }),
         
         // MCP tool operations
-        () => context.mcpTools.moveMouse({ coordinates: { x: 150, y: 250 } }),
+        () => context.mcpTools.moveMouse({ coordinates: { x: 150, y: 250 } }) as Promise<unknown>,
         () => context.mcpTools.screenshot(),
         () => context.mcpTools.typeText({ text: `perf-${Math.random().toString(36).substring(7)}` }),
         
@@ -580,7 +580,7 @@ let testModule: TestingModule;
 
   describe('Latency Performance Tests', () => {
 it('should maintain low latency for critical operations', async () => {
-      const criticalOperations = [{ name: 'cursor_position', operation: () => context.computerUseService.action({ action: 'cursor_position' }), maxLatency: 50 },{ name: 'move_mouse', operation: () => context.computerUseService.action({ action: 'move_mouse', coordinates: { x: 100, y: 200 } }), maxLatency: 100 },{ name: 'mcp_cursor_position', operation: () => context.mcpTools.cursorPosition(), maxLatency: 75 },{ name: 'mcp_move_mouse', operation: () => context.mcpTools.moveMouse({ coordinates: { x: 150, y: 250 } }), maxLatency: 150 },
+      const criticalOperations = [{ name: 'cursor_position', operation: () => context.computerUseService.action({ action: 'cursor_position' }) as Promise<unknown>, maxLatency: 50 },{ name: 'move_mouse', operation: () => context.computerUseService.action({ action: 'move_mouse', coordinates: { x: 100, y: 200 } }) as Promise<unknown>, maxLatency: 100 },{ name: 'mcp_cursor_position', operation: () => context.mcpTools.cursorPosition() as Promise<unknown>, maxLatency: 75 },{ name: 'mcp_move_mouse', operation: () => context.mcpTools.moveMouse({ coordinates: { x: 150, y: 250 } }) as Promise<unknown>, maxLatency: 150 },
       ];
 
       const testId = generateTestId();
@@ -712,12 +712,12 @@ it('should handle extreme concurrent load', async () => {
 
       const stressOperation = () => {
         // Randomly select operation type to create varied load
-        const operations = [
+        const operations: (() => Promise<unknown>)[] = [
           () => context.computerUseService.action({ action: 'move_mouse', coordinates: { x: Math.random() * 1000, y: Math.random() * 1000 } }),() => context.computerUseService.action({ action: 'cursor_position' }),() => context.mcpTools.moveMouse({ coordinates: { x: Math.random() * 500, y: Math.random() * 500 } }),() => context.mcpTools.cursorPosition(),
         ];
         
         const selectedOperation = operations[Math.floor(Math.random() * operations.length)];
-        return selectedOperation();
+        return selectedOperation() as Promise<unknown>;
       };
 
       const stressResults = await context.loadGenerator.generateStressLoad(
@@ -839,7 +839,7 @@ _users`,
 
         context.performanceMonitor.startMonitoring(500);
 
-        const operations = [
+        const operations: (() => Promise<unknown>)[] = [
           () => context.computerUseService.action({ action: 'move_mouse', coordinates: { x: 200, y: 300 } }),() => context.computerUseService.action({ action: 'cursor_position' }),() => context.mcpTools.moveMouse({ coordinates: { x: 100, y: 150 } }),() => context.mcpTools.cursorPosition(),
         ];
 

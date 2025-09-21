@@ -19,7 +19,14 @@
  */
 
 // Primary MCP module export
-export * from './bytebot-mcp.module';// MCP tools and utilitiesexport * from './computer-use.tools';export * from './compressor';// Explicitly export all types for better compatibilityexport type {
+export * from './bytebot-mcp.module';
+
+// MCP tools and utilities
+export * from './computer-use.tools';
+export * from './compressor';
+
+// Explicitly export all types for better compatibility
+export type {
   CompressionOptions,
   CompressionResult,
   McpToolResponse,

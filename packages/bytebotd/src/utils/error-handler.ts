@@ -63,7 +63,11 @@ export interface ErrorLogContext {
  * Error logging levels
  */
 export enum LogLevel {
-  DEBUG = 'debug',INFO = 'info',WARN = 'warn',ERROR = 'error',FATAL = 'fatal',
+  DEBUG = 'debug',
+  INFO = 'info',
+  WARN = 'warn',
+  ERROR = 'error',
+  FATAL = 'fatal',
 }
 
 /**
@@ -81,16 +85,17 @@ export interface ErrorLogger {
  * Default console logger implementation
  */
 export const defaultLogger: ErrorLogger = {
-  debug: (message: string, context?: Record<string, unknown>) =>
+  debug: (message: string, context?: Record<string, unknown>): void =>
     console.debug(`[DEBUG] ${message}`, context ?? ''),
-  info: (message: string, context?: Record<string, unknown>) =>
+  info: (message: string, context?: Record<string, unknown>): void =>
     console.info(`[INFO] ${message}`, context ?? ''),
-  warn: (message: string, context?: Record<string, unknown>) =>
+  warn: (message: string, context?: Record<string, unknown>): void =>
     console.warn(`[WARN] ${message}`, context ?? ''),
-  error: (message: string, context?: Record<string, unknown>) =>
+  error: (message: string, context?: Record<string, unknown>): void =>
     console.error(`[ERROR] ${message}`, context ?? ''),
-  fatal: (message: string, context?: Record<string, unknown>) =>
-    console.error(`[FATAL] ${message}`, context ?? ''),};/**
+  fatal: (message: string, context?: Record<string, unknown>): void =>
+    console.error(`[FATAL] ${message}`, context ?? ''),
+};/**
  * Global error handler configuration
  */
 export interface ErrorHandlerConfig {
@@ -138,19 +143,24 @@ export class ErrorHandler {
     const fullContext: ErrorLogContext = {
       operationId,
       timestamp: new Date(),
-      service: 'unknown',operation: 'unknown',
+      service: 'unknown',
+      operation: 'unknown',
       ...context,
     };
 
     try {
-      this.config.logger.debug(`Starting operation: ${fullContext.operation}`, {operationId,service: fullContext.service,
+      this.config.logger.debug(`Starting operation: ${fullContext.operation}`, {
+        operationId,
+        service: fullContext.service,
       });
 
       const result = await operation();
 
       const duration = Date.now() - startTime;
       this.config.logger.debug(
-        `Operation completed successfully: ${fullContext.operation}`,{ operationId, duration, service: fullContext.service },);
+        `Operation completed successfully: ${fullContext.operation}`,
+        { operationId, duration, service: fullContext.service },
+      );
 
       return { success: true, data: result };
     } catch (error) {
@@ -181,13 +191,16 @@ export class ErrorHandler {
     const fullContext: ErrorLogContext = {
       operationId,
       timestamp: new Date(),
-      service: 'unknown',operation: 'unknown',
+      service: 'unknown',
+      operation: 'unknown',
       ...context,
     };
 
     try {
       this.config.logger.debug(
-        `Starting sync operation: ${fullContext.operation}`,{ operationId, service: fullContext.service },);
+        `Starting sync operation: ${fullContext.operation}`,
+        { operationId, service: fullContext.service },
+      );
 
       const result = operation();
 
@@ -223,11 +236,15 @@ export class ErrorHandler {
       return error;
     }
 
-    // If it's a standard Error instance, transform itif (error instanceof Error) {return this.transformStandardError(error, context);
+    // If it's a standard Error instance, transform it
+    if (error instanceof Error) {
+      return this.transformStandardError(error, context);
     }
 
     // Handle primitive types and unknown objects
-    return ErrorFactory.system.serviceUnavailable('Unknown service', {originalError: error,errorType: typeof error,
+    return ErrorFactory.system.serviceUnavailable('Unknown service', {
+      originalError: error,
+      errorType: typeof error,
       context,
     });
   }
@@ -245,7 +262,10 @@ export class ErrorHandler {
 
     // Check for common error patterns and transform accordingly
     if (
-      errorName === 'UnauthorizedException' ||errorMessage.includes('unauthorized')) {return ErrorFactory.authentication.unauthorized({
+      errorName === 'UnauthorizedException' ||
+      errorMessage.includes('unauthorized')
+    ) {
+      return ErrorFactory.authentication.unauthorized({
         originalError: error,
         stack: errorStack,
         context,
@@ -253,7 +273,10 @@ export class ErrorHandler {
     }
 
     if (
-      errorName === 'ForbiddenException' ||errorMessage.includes('forbidden')) {return ErrorFactory.authorization.forbidden(undefined, undefined, {
+      errorName === 'ForbiddenException' ||
+      errorMessage.includes('forbidden')
+    ) {
+      return ErrorFactory.authorization.forbidden(undefined, undefined, {
         originalError: error,
         stack: errorStack,
         context,
@@ -261,7 +284,10 @@ export class ErrorHandler {
     }
 
     if (
-      errorName === 'ValidationError' ||errorMessage.includes('validation')) {return ErrorFactory.validation.invalidInput(
+      errorName === 'ValidationError' ||
+      errorMessage.includes('validation')
+    ) {
+      return ErrorFactory.validation.invalidInput(
         undefined,
         undefined,
         undefined,
@@ -273,33 +299,47 @@ export class ErrorHandler {
       );
     }
 
-    if (errorName === 'TokenExpiredError' || errorMessage.includes('expired')) {return ErrorFactory.authentication.tokenExpired({originalError: error,
-        stack: errorStack,
-        context,
-      });
-    }
-
-    if (errorName === 'JsonWebTokenError' || errorMessage.includes('jwt')) {return ErrorFactory.authentication.tokenInvalid({originalError: error,
-        stack: errorStack,
-        context,
-      });
-    }
-
-    if (
-      errorMessage.includes('rate limit') ||errorMessage.includes('too many requests')) {return ErrorFactory.security.rateLimitExceeded(undefined, 'medium', {originalError: error,stack: errorStack,
-        context,
-      });
-    }
-
-    if (
-      errorMessage.includes('database') ||errorMessage.includes('connection')) {return ErrorFactory.system.database(undefined, true, {
+    if (errorName === 'TokenExpiredError' || errorMessage.includes('expired')) {
+      return ErrorFactory.authentication.tokenExpired({
         originalError: error,
         stack: errorStack,
         context,
       });
     }
 
-    if (errorMessage.includes('network') || errorMessage.includes('timeout')) {return ErrorFactory.system.network(undefined, {originalError: error,
+    if (errorName === 'JsonWebTokenError' || errorMessage.includes('jwt')) {
+      return ErrorFactory.authentication.tokenInvalid({
+        originalError: error,
+        stack: errorStack,
+        context,
+      });
+    }
+
+    if (
+      errorMessage.includes('rate limit') ||
+      errorMessage.includes('too many requests')
+    ) {
+      return ErrorFactory.security.rateLimitExceeded(undefined, 'medium', {
+        originalError: error,
+        stack: errorStack,
+        context,
+      });
+    }
+
+    if (
+      errorMessage.includes('database') ||
+      errorMessage.includes('connection')
+    ) {
+      return ErrorFactory.system.database(undefined, true, {
+        originalError: error,
+        stack: errorStack,
+        context,
+      });
+    }
+
+    if (errorMessage.includes('network') || errorMessage.includes('timeout')) {
+      return ErrorFactory.system.network(undefined, {
+        originalError: error,
         stack: errorStack,
         context,
       });
@@ -435,7 +475,15 @@ export class ErrorHandler {
    */
   private getLogLevelFromSeverity(severity: string): LogLevel {
     switch (severity.toLowerCase()) {
-      case 'low':return LogLevel.INFO;case 'medium':return LogLevel.WARN;case 'high':return LogLevel.ERROR;case 'critical':return LogLevel.FATAL;default:
+      case 'low':
+        return LogLevel.INFO;
+      case 'medium':
+        return LogLevel.WARN;
+      case 'high':
+        return LogLevel.ERROR;
+      case 'critical':
+        return LogLevel.FATAL;
+      default:
         return LogLevel.ERROR;
     }
   }
@@ -476,7 +524,10 @@ export class ErrorHandler {
 
     for (const [key, value] of Object.entries(obj)) {
       if (this.config.sensitiveFieldPattern.test(key)) {
-        sanitized[key] = '[REDACTED]';} else if (value && typeof value === 'object' && !Array.isArray(value)) {sanitized[key] = this.sanitizeObject(value as Record<string, unknown>);} else {
+        sanitized[key] = '[REDACTED]';
+      } else if (value && typeof value === 'object' && !Array.isArray(value)) {
+        sanitized[key] = this.sanitizeObject(value as Record<string, unknown>);
+      } else {
         sanitized[key] = value;
       }
     }

@@ -75,10 +75,10 @@ resolve();
     return this.connectionPromise;
   }
 
-  async sendMessage(message: Partial<ConversationalMessage>): Promise<void>  {
+  sendMessage(message: Partial<ConversationalMessage>): void {
   if (!this.ws || !this.connected) {
       throw new Error('WebSocket not connected');
-    
+
 }
 
     const fullMessage: ConversationalMessage = {
@@ -91,7 +91,7 @@ _${Math.random().toString(36).substring(7)}`,sessionId: `test_session_${Date.now
         requiresAck: false,
         compression: false,
         routingHints: [],
-      
+
 },
       ...message,
     } as ConversationalMessage;
@@ -127,11 +127,11 @@ _${Math.random().toString(36).substring(7)}`,sessionId: `test_session_${Date.now
   
 }
 
-  async disconnect(): Promise<void>  {
+  disconnect(): void {
   if (this.ws) {
       this.ws.close();
       this.connected = false;
-    
+
 }
   }
 
@@ -204,7 +204,7 @@ _${Math.random().toString(36).substring(7)}`;const request: ValidationRequestMes
 },
     };
 
-    await this.client.sendMessage(request);
+    this.client.sendMessage(request);
 
     // Step 2: Wait for validation response
     const response = await this.client.waitForMessage(
@@ -232,7 +232,7 @@ _${Math.random().toString(36).substring(7)}`;const request: ValidationRequestMes
         routingHints: ['confirmation'],
 },};
 
-    await this.client.sendMessage(confirmation);
+    this.client.sendMessage(confirmation);
 
     // Step 4: Wait for confirmation result
     const result = await this.client.waitForMessage(
@@ -335,13 +335,13 @@ describe('WebSocket Integration Tests', () => {
   afterAll(async () => {
   // Cleanup all clients
     if (testClient) {
-      await testClient.disconnect();
-    
+      testClient.disconnect();
+
 }
 
   for(const client of multipleClients) {
-  await client.disconnect();
-    
+  client.disconnect();
+
 }
 
     // Shutdown services
@@ -356,10 +356,10 @@ describe('WebSocket Integration Tests', () => {
   
 });
 
-  afterEach(async () => {
+  afterEach(() => {
   if (testClient?.isConnected()) {
-      await testClient.disconnect();
-    
+      testClient.disconnect();
+
 }
   });
 
@@ -367,18 +367,18 @@ describe('WebSocket Integration Tests', () => {
 
   describe('Connection and Session Management', () => {
 
-  it('should establish WebSocket connection successfully', async () => {
+  it('should establish WebSocket connection successfully', () => {
     // Note: This test requires actual WebSocket server to be running
     // For unit testing, we'll verify the service configuration
       const stats = conversationalService.getServerStatistics();
       expect(stats.performance.maxConcurrentSessions).toBe(1000);
       expect(stats.performance.targetLatency).toBe(50);
-    
+
 });
 
 
 
-    it('should handle session lifecycle events', async () => {
+    it('should handle session lifecycle events', () => {
 
   // Test session creation and trackingconst initialStats = conversationalService.getServerStatistics();
       expect(initialStats.server.activeSessions).toBe(0);
@@ -388,7 +388,7 @@ describe('WebSocket Integration Tests', () => {
       // 2. Verify session created
       // 3. Disconnect client
       // 4. Verify session cleaned up
-    
+
 });
   });
 
@@ -437,7 +437,7 @@ describe('WebSocket Integration Tests', () => {
     ];
 
     testActions.forEach((action, _index) => {
-      it(`should complete validation workflow for ${action.actionType}`, async () => {
+      it(`should complete validation workflow for ${action.actionType}`, () => {
         // Mock test for validation workflow
         const validationRequest = {
           actionType: action.actionType,
@@ -460,7 +460,7 @@ expect(processingTime).toBeLessThan(200); // Performance requirement
 
 
 
-    it('should handle conditional approvals', async () => {
+    it('should handle conditional approvals', () => {
       const conditionalAction: ValidationAction = {
         actionType: 'data_export',
         parameters: { format: 'csv', destination: 'external' },
@@ -471,7 +471,7 @@ expect(processingTime).toBeLessThan(200); // Performance requirement
       dataAccess: true,
       stateChanges: false,
           userInteraction: true,
-        
+
 } as ActionImpact,
       };
 
@@ -486,7 +486,7 @@ expect(requiresApproval).toBe(true);
   // ===== REAL-TIME STREAMING TESTS =====
 
   describe('Real-time Progress Streaming', () => {
-    it('should stream progress updates during validation', async () => {
+    it('should stream progress updates during validation', () => {
       const mockProgressUpdates = [
         { stage: 'init', progress: 0, status: 'pending' },
         { stage: 'analysis', progress: 25, status: 'active' },
@@ -500,7 +500,7 @@ expect(requiresApproval).toBe(true);
       for (const update of mockProgressUpdates) {
   expect(update.progress).toBeGreaterThanOrEqual(currentProgress);
         currentProgress = update.progress;
-      
+
 }
 
   expect(currentProgress).toBe(100);
@@ -508,7 +508,7 @@ expect(requiresApproval).toBe(true);
 
 
 
-    it('should handle streaming interruption and recovery', async () => {
+    it('should handle streaming interruption and recovery', () => {
 
       // Test recovery from interrupted streaming
       const interruptedStream = [
@@ -559,7 +559,7 @@ expect(requiresApproval).toBe(true);
 
 
 
-    it('should maintain sub-50ms message delivery under load', async () => {
+    it('should maintain sub-50ms message delivery under load', () => {
 
   const messageCount = 1000;
   const deliveryTimes: number[] = [];
@@ -644,7 +644,7 @@ expect(requiresApproval).toBe(true);
 
 
 
-    it('should handle malformed messages', async () => {
+    it('should handle malformed messages', () => {
       const malformedMessages = [
         ' invalid json',
         '{"type": "unknown"}',

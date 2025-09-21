@@ -3893,12 +3893,24 @@
       "updated_at": "2025-09-21T05:30:42.274Z"
     },
     {
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2025-09-21T05:21:03.760Z",
       "title": "Fix remaining TypeScript violations across all bytebotd modules",
       "description": "Complete final cleanup of TypeScript ESLint violations, fix import/export formatting, resolve parsing errors, and validate final state",
       "category": "error",
-      "id": "error_1758432063759_owrwa3hs9y9"
+      "id": "error_1758432063759_owrwa3hs9y9",
+      "assigned_agent": "dev_session_1758434226672_1_general_6e73e9e5",
+      "started_at": "2025-09-21T05:58:05.950Z",
+      "claimed_by": "dev_session_1758434226672_1_general_6e73e9e5",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758434226672_1_general_6e73e9e5",
+          "role": "primary",
+          "assignedAt": "2025-09-21T05:58:05.950Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
     },
     {
       "status": "pending",
@@ -10766,6 +10778,27 @@
       "workload": 0,
       "maxConcurrentTasks": 5,
       "createdAt": "2025-09-21T05:27:31.646Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758434226672_1_general_6e73e9e5": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-21T05:57:06.674Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-21T05:57:06.674Z",
       "sessionId": null,
       "metadata": {}
     }

@@ -228,7 +228,7 @@ describe("TaskUtils", () => {
     ];
 
     it("fetches task messages successfully", async () => {
-      mockFetch.mockResolvedValueOnce(createMockResponse({ messages: mockMessages }));
+      mockFetch.mockResolvedValueOnce(createMockResponse(mockMessages));
 
       const result = await fetchTaskMessages("task-123");
 
@@ -237,7 +237,7 @@ describe("TaskUtils", () => {
     });
 
     it("fetches messages with pagination options", async () => {
-      mockFetch.mockResolvedValueOnce(createMockResponse({ messages: mockMessages }));
+      mockFetch.mockResolvedValueOnce(createMockResponse(mockMessages));
 
       const result = await fetchTaskMessages("task-123", {
         limit: 20,
@@ -292,7 +292,7 @@ describe("TaskUtils", () => {
     it("handles JSON parsing errors", async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: () => {
+        json: (): Promise<never> => {
           throw new Error("Invalid JSON");
         },
       } as unknown as Response);
@@ -323,7 +323,7 @@ describe("TaskUtils", () => {
     ];
 
     it("fetches processed messages successfully", async () => {
-      mockFetch.mockResolvedValueOnce(createMockResponse({ groupedMessages: mockGroupedMessages }));
+      mockFetch.mockResolvedValueOnce(createMockResponse(mockGroupedMessages));
 
       const result = await fetchTaskProcessedMessages("task-123");
 
@@ -334,7 +334,7 @@ describe("TaskUtils", () => {
     });
 
     it("fetches processed messages with options", async () => {
-      mockFetch.mockResolvedValueOnce(createMockResponse({ groupedMessages: mockGroupedMessages }));
+      mockFetch.mockResolvedValueOnce(createMockResponse(mockGroupedMessages));
 
       const result = await fetchTaskProcessedMessages("task-123", {
         limit: API_TIMEOUT_MS,
@@ -376,7 +376,7 @@ describe("TaskUtils", () => {
     };
 
     it("fetches task by ID successfully", async () => {
-      mockFetch.mockResolvedValueOnce(createMockResponse({ task: mockTask }));
+      mockFetch.mockResolvedValueOnce(createMockResponse(mockTask));
 
       const result = await fetchTaskById("task-123");
 
@@ -440,7 +440,7 @@ describe("TaskUtils", () => {
     };
 
     it("successfully takes over a task", async () => {
-      mockFetch.mockResolvedValueOnce(createMockResponse({ task: mockUpdatedTask }));
+      mockFetch.mockResolvedValueOnce(createMockResponse(mockUpdatedTask));
 
       const result = await takeOverTask("task-123");
 
@@ -494,7 +494,7 @@ describe("TaskUtils", () => {
     };
 
     it("successfully resumes a task", async () => {
-      mockFetch.mockResolvedValueOnce(createMockResponse({ task: mockResumedTask }));
+      mockFetch.mockResolvedValueOnce(createMockResponse(mockResumedTask));
 
       const result = await resumeTask("task-123");
 
@@ -541,7 +541,7 @@ describe("TaskUtils", () => {
     };
 
     it("successfully cancels a task", async () => {
-      mockFetch.mockResolvedValueOnce(createMockResponse({ task: mockCancelledTask }));
+      mockFetch.mockResolvedValueOnce(createMockResponse(mockCancelledTask));
 
       const result = await cancelTask("task-123");
 
@@ -654,7 +654,7 @@ describe("TaskUtils", () => {
     it("handles malformed server responses gracefully", async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: () => {
+        json: (): Promise<never> => {
           throw new Error("Malformed JSON");
         },
       } as unknown as Response);
@@ -726,7 +726,7 @@ describe("TaskUtils", () => {
     it("handles empty API responses", async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: () => ({}),
+        json: (): Promise<Record<string, never>> => Promise.resolve({}),
       } as Response);
 
       const result = await fetchTaskMessages("task-123");
@@ -741,10 +741,11 @@ describe("TaskUtils", () => {
     });
 
     it("handles API responses with missing fields", async () => {
-      mockFetch.mockResolvedValueOnce(createMockResponse({ task: { id: "task-123" } })); // Missing required fields
+      const partialTask = { id: "task-123" } as Partial<Task>;
+      mockFetch.mockResolvedValueOnce(createMockResponse(partialTask)); // Missing required fields
 
       const result = await fetchTaskById("task-123");
-      expect(result).toEqual({ id: "task-123" }); // Should return partial data
+      expect(result).toEqual(partialTask); // Should return partial data
     });
   });
 });
@@ -795,7 +796,7 @@ export const TaskUtilsTestUtils = {
       mockFetch.mockResolvedValueOnce({
         ok: response.ok ?? true,
         status: response.status ?? HTTP_OK,
-        json: () => response.data,
+        json: (): Promise<unknown> => Promise.resolve(response.data),
       } as Response);
     });
   },

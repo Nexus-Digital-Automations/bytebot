@@ -25,14 +25,20 @@
  * @version 2.0.0 - PARLANT MAXIMUM INTEGRATION
  */
 
-import { Injectable, Logger } from '@nestjs/common';import {register,
+import { Injectable, Logger } from '@nestjs/common';
+import {
+  register,
   collectDefaultMetrics,
   Counter,
   Histogram,
   Gauge,
-} from 'prom-client';import {ParlantHealthMetricsValidationService,
+} from 'prom-client';
+import {
+  ParlantHealthMetricsValidationService,
   MetricsOperationType,
-} from '../parlant/services/parlant-health-metrics-validation.service';/*** Metrics collection service for Prometheus integration
+} from '../parlant/services/parlant-health-metrics-validation.service';
+
+/** Metrics collection service for Prometheus integration
  */
 @Injectable()
 export class BytebotMetricsService {
@@ -142,33 +148,98 @@ export class BytebotMetricsService {
     });
 
     this.computerUseErrors = new Counter({
-      name: 'bytebot_computer_use_errors_total',help: 'Total number of computer-use operation errors',labelNames: ['operation_type', 'error_type'],});// Initialize WebSocket Metrics
+      name: 'bytebot_computer_use_errors_total',
+      help: 'Total number of computer-use operation errors',
+      labelNames: ['operation_type', 'error_type'],
+    });
+
+    // Initialize WebSocket Metrics
     this.websocketConnections = new Gauge({
-      name: 'bytebot_websocket_connections',help: 'Number of active WebSocket connections',labelNames: ['connection_type'],});this.websocketMessages = new Counter({
-      name: 'bytebot_websocket_messages_total',help: 'Total number of WebSocket messages',labelNames: ['direction', 'message_type'],});// Initialize Database Metrics
+      name: 'bytebot_websocket_connections',
+      help: 'Number of active WebSocket connections',
+      labelNames: ['connection_type'],
+    });
+
+    this.websocketMessages = new Counter({
+      name: 'bytebot_websocket_messages_total',
+      help: 'Total number of WebSocket messages',
+      labelNames: ['direction', 'message_type'],
+    });
+
+    // Initialize Database Metrics
     this.databaseConnections = new Gauge({
-      name: 'bytebot_database_connections',help: 'Number of active database connections',labelNames: ['database', 'state'],});this.databaseQueryDuration = new Histogram({
-      name: 'bytebot_database_query_duration_seconds',help: 'Database query duration in seconds',labelNames: ['operation', 'table'],buckets: [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1, 2, 5],});
+      name: 'bytebot_database_connections',
+      help: 'Number of active database connections',
+      labelNames: ['database', 'state'],
+    });
+
+    this.databaseQueryDuration = new Histogram({
+      name: 'bytebot_database_query_duration_seconds',
+      help: 'Database query duration in seconds',
+      labelNames: ['operation', 'table'],
+      buckets: [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1, 2, 5],
+    });
 
     this.databaseErrors = new Counter({
-      name: 'bytebot_database_errors_total',help: 'Total number of database errors',labelNames: ['operation', 'error_type'],});// Initialize Cache Metrics
+      name: 'bytebot_database_errors_total',
+      help: 'Total number of database errors',
+      labelNames: ['operation', 'error_type'],
+    });
+
+    // Initialize Cache Metrics
     this.cacheOperationsTotal = new Counter({
-      name: 'bytebot_cache_operations_total',help: 'Total number of cache operations',labelNames: ['operation', 'result'],});this.cacheOperationDuration = new Histogram({
-      name: 'bytebot_cache_operation_duration_seconds',help: 'Cache operation duration in seconds',labelNames: ['operation', 'result'],buckets: [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1],});
+      name: 'bytebot_cache_operations_total',
+      help: 'Total number of cache operations',
+      labelNames: ['operation', 'result'],
+    });
+
+    this.cacheOperationDuration = new Histogram({
+      name: 'bytebot_cache_operation_duration_seconds',
+      help: 'Cache operation duration in seconds',
+      labelNames: ['operation', 'result'],
+      buckets: [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1],
+    });
 
     this.cacheHitRate = new Gauge({
-      name: 'bytebot_cache_hit_rate',help: 'Cache hit rate percentage',labelNames: ['namespace'],});// Initialize Compression Metrics
+      name: 'bytebot_cache_hit_rate',
+      help: 'Cache hit rate percentage',
+      labelNames: ['namespace'],
+    });
+
+    // Initialize Compression Metrics
     this.compressionOperationsTotal = new Counter({
-      name: 'bytebot_compression_operations_total',help: 'Total number of compression operations',labelNames: ['algorithm', 'result'],});this.compressionRatio = new Histogram({
-      name: 'bytebot_compression_ratio',help: 'Compression ratio (compressed_size / original_size)',labelNames: ['algorithm'],buckets: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],});
+      name: 'bytebot_compression_operations_total',
+      help: 'Total number of compression operations',
+      labelNames: ['algorithm', 'result'],
+    });
+
+    this.compressionRatio = new Histogram({
+      name: 'bytebot_compression_ratio',
+      help: 'Compression ratio (compressed_size / original_size)',
+      labelNames: ['algorithm'],
+      buckets: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
+    });
 
     this.compressionDuration = new Histogram({
-      name: 'bytebot_compression_duration_seconds',help: 'Compression operation duration in seconds',labelNames: ['algorithm'],buckets: [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1],});
+      name: 'bytebot_compression_duration_seconds',
+      help: 'Compression operation duration in seconds',
+      labelNames: ['algorithm'],
+      buckets: [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1],
+    });
 
     // Initialize System Metrics
     this.memoryUsage = new Gauge({
-      name: 'bytebot_memory_usage_bytes',help: 'Memory usage in bytes',labelNames: ['type'],});this.cpuUsage = new Gauge({
-      name: 'bytebot_cpu_usage_percent',help: 'CPU usage percentage',});// Start periodic system metrics collection
+      name: 'bytebot_memory_usage_bytes',
+      help: 'Memory usage in bytes',
+      labelNames: ['type'],
+    });
+
+    this.cpuUsage = new Gauge({
+      name: 'bytebot_cpu_usage_percent',
+      help: 'CPU usage percentage',
+    });
+
+    // Start periodic system metrics collection
     this.startSystemMetricsCollection();
 
     this.logger.log('Metrics Service initialized - All metrics registered');
@@ -180,7 +251,11 @@ export class BytebotMetricsService {
    * @returns Prometheus metrics string
    */
   async getPrometheusMetrics(): Promise<string> {
-    const operationId = `prometheus${Date.now()}`;this.logger.debug(`[${operationId}] Collecting Prometheus metrics`);try {// Update system metrics before export
+    const operationId = `prometheus${Date.now()}`;
+    this.logger.debug(`[${operationId}] Collecting Prometheus metrics`);
+
+    try {
+      // Update system metrics before export
       this.updateSystemMetrics();
 
       const metrics = await register.metrics();
@@ -351,7 +426,10 @@ export class BytebotMetricsService {
    * @param jobType Type of job cancelled
    */
   recordJobCancellation(jobType: string): void {
-    this.taskProcessingTotal.labels(jobType, 'cancelled').inc();this.logger.debug('Job cancellation metrics recorded', {jobType,});
+    this.taskProcessingTotal.labels(jobType, 'cancelled').inc();
+    this.logger.debug('Job cancellation metrics recorded', {
+      jobType,
+    });
   }
 
   /**
@@ -363,7 +441,9 @@ export class BytebotMetricsService {
    */
   recordComputerUseOperation(
     operationType: string,
-    status: 'success' | 'error',duration: number,): void {
+    status: 'success' | 'error',
+    duration: number,
+  ): void {
     const durationSeconds = duration / 1000;
 
     this.computerUseOperationsTotal.labels(operationType, status).inc();
@@ -371,7 +451,9 @@ export class BytebotMetricsService {
       .labels(operationType, status)
       .observe(durationSeconds);
 
-    this.logger.debug('Computer-use operation metrics recorded', {operationType,status,
+    this.logger.debug('Computer-use operation metrics recorded', {
+      operationType,
+      status,
       durationMs: duration,
     });
   }
@@ -385,7 +467,9 @@ export class BytebotMetricsService {
   recordComputerUseError(operationType: string, errorType: string): void {
     this.computerUseErrors.labels(operationType, errorType).inc();
 
-    this.logger.debug('Computer-use error recorded', {operationType,errorType,
+    this.logger.debug('Computer-use error recorded', {
+      operationType,
+      errorType,
     });
   }
 
@@ -442,9 +526,13 @@ export class BytebotMetricsService {
       const validation = await this.parlantValidationService.validateMetricsOperation(
         MetricsOperationType.DATABASE_METRICS,
         {
-          operation: 'database_query_metrics',dbOperation: operation,table,
+          operation: 'database_query_metrics',
+          dbOperation: operation,
+          table,
           duration,
-          sensitivityLevel: 'MEDIUM',},{ userId: 'system', userRole: 'metrics_service' },
+          sensitivityLevel: 'MEDIUM',
+        },
+        { userId: 'system', userRole: 'metrics_service' },
       );
 
       if (!validation.approved) {
@@ -465,7 +553,9 @@ export class BytebotMetricsService {
         .labels(operation, table)
         .observe(durationSeconds);
 
-      this.logger.debug('Database query metrics recorded with Parlant validation', {operationId,operation,
+      this.logger.debug('Database query metrics recorded with Parlant validation', {
+        operationId,
+        operation,
         table,
         durationMs: duration,
         conversationId: validation.conversationId,
@@ -492,7 +582,9 @@ export class BytebotMetricsService {
   recordDatabaseError(operation: string, errorType: string): void {
     this.databaseErrors.labels(operation, errorType).inc();
 
-    this.logger.debug('Database error recorded', {operation,errorType,
+    this.logger.debug('Database error recorded', {
+      operation,
+      errorType,
     });
   }
 
@@ -505,7 +597,9 @@ export class BytebotMetricsService {
    */
   recordCacheOperation(
     operation: string,
-    result: 'hit' | 'miss' | 'success' | 'error',duration: number,): void {
+    result: 'hit' | 'miss' | 'success' | 'error',
+    duration: number,
+  ): void {
     const durationSeconds = duration / 1000;
 
     this.cacheOperationsTotal.labels(operation, result).inc();
@@ -513,7 +607,9 @@ export class BytebotMetricsService {
       .labels(operation, result)
       .observe(durationSeconds);
 
-    this.logger.debug('Cache operation metrics recorded', {operation,result,
+    this.logger.debug('Cache operation metrics recorded', {
+      operation,
+      result,
       durationMs: duration,
     });
   }
@@ -544,10 +640,14 @@ export class BytebotMetricsService {
   ): void {
     const durationSeconds = duration / 1000;
     const ratio = originalSize > 0 ? compressedSize / originalSize : 1;
-    const result = ratio < 1 ? 'success' : 'skipped';this.compressionOperationsTotal.labels(algorithm, result).inc();this.compressionRatio.labels(algorithm).observe(ratio);
+    const result = ratio < 1 ? 'success' : 'skipped';
+    this.compressionOperationsTotal.labels(algorithm, result).inc();
+    this.compressionRatio.labels(algorithm).observe(ratio);
     this.compressionDuration.labels(algorithm).observe(durationSeconds);
 
-    this.logger.debug('Compression metrics recorded', {algorithm,originalSize,
+    this.logger.debug('Compression metrics recorded', {
+      algorithm,
+      originalSize,
       compressedSize,
       ratio: ratio.toFixed(3),
       durationMs: duration,
@@ -558,7 +658,10 @@ export class BytebotMetricsService {
    * Start periodic system metrics collection
    */
   private startSystemMetricsCollection(): void {
-    this.logger.debug('Starting periodic system metrics collection');// Update system metrics every 15 secondssetInterval(() => {
+    this.logger.debug('Starting periodic system metrics collection');
+
+    // Update system metrics every 15 seconds
+    setInterval(() => {
       this.updateSystemMetrics();
     }, 15000);
   }
@@ -570,7 +673,13 @@ export class BytebotMetricsService {
     try {
       const memoryUsage = process.memoryUsage();
 
-      this.memoryUsage.labels('rss').set(memoryUsage.rss);this.memoryUsage.labels('heapTotal').set(memoryUsage.heapTotal);this.memoryUsage.labels('heapUsed').set(memoryUsage.heapUsed);this.memoryUsage.labels('external').set(memoryUsage.external);// CPU usage would require additional system monitoring// For now, we'll skip CPU metrics to avoid complexity
+      this.memoryUsage.labels('rss').set(memoryUsage.rss);
+      this.memoryUsage.labels('heapTotal').set(memoryUsage.heapTotal);
+      this.memoryUsage.labels('heapUsed').set(memoryUsage.heapUsed);
+      this.memoryUsage.labels('external').set(memoryUsage.external);
+
+      // CPU usage would require additional system monitoring
+      // For now, we'll skip CPU metrics to avoid complexity
     } catch (_error) {
       const errorMessage =
         _error instanceof Error ? _error.message : 'Unknown error';
@@ -600,7 +709,9 @@ export class BytebotMetricsService {
         requestsPerSecond: Math.floor(Math.random() * 300), // Mock RPS
       };
     } catch (error) {
-      this.logger.error('Failed to get system metrics', error);return {cpuUsage: 0,
+      this.logger.error('Failed to get system metrics', error);
+      return {
+        cpuUsage: 0,
         memoryUsage: 0,
         activeConnections: 0,
         requestsPerSecond: 0,
