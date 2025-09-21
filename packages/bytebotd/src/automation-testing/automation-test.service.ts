@@ -167,7 +167,7 @@ export class AutomationTestService {
 
     } catch (error) {
       this.logger.error(`Test suite execution failed: ${suiteId}`, {
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         duration: Date.now() - startTime.getTime()
       });
 
@@ -183,9 +183,16 @@ export class AutomationTestService {
 
     // Test 1: Form Detection
     tests.push(await this.executeTest({
-      name: 'Form Detection Validation',category: TestCategory.FORM_AUTOMATION,severity: TestSeverity.HIGH,
-      description: 'Validate form detection capabilities with various form types',testFunction: async () => {const mockFormConfig = {
-          actionType: 'detect_form' as any,url: 'https://example.com/test-form',configuration: {waitForLoad: 3000,
+      name: 'Form Detection Validation',
+      category: TestCategory.FORM_AUTOMATION,
+      severity: TestSeverity.HIGH,
+      description: 'Validate form detection capabilities with various form types',
+      testFunction: async () => {
+        const mockFormConfig = {
+          actionType: 'detect_form',
+          url: 'https://example.com/test-form',
+          configuration: {
+            waitForLoad: 3000,
             includeHiddenFields: false
           }
         };
@@ -197,9 +204,20 @@ export class AutomationTestService {
 
     // Test 2: Form Field Auto-filling
     tests.push(await this.executeTest({
-      name: 'Form Auto-filling Functionality',category: TestCategory.FORM_AUTOMATION,severity: TestSeverity.CRITICAL,
-      description: 'Validate automated form filling with various input types',testFunction: async () => {const mockFillConfig = {
-          actionType: 'fill_form' as any,url: 'https://example.com/contact-form',formData: {name: 'Test User',email: 'test@example.com',message: 'Automated test message'},configuration: {
+      name: 'Form Auto-filling Functionality',
+      category: TestCategory.FORM_AUTOMATION,
+      severity: TestSeverity.CRITICAL,
+      description: 'Validate automated form filling with various input types',
+      testFunction: async () => {
+        const mockFillConfig = {
+          actionType: 'fill_form',
+          url: 'https://example.com/contact-form',
+          formData: {
+            name: 'Test User',
+            email: 'test@example.com',
+            message: 'Automated test message'
+          },
+          configuration: {
             validateFields: true,
             submitAfterFill: false
           }
@@ -212,11 +230,21 @@ export class AutomationTestService {
 
     // Test 3: Form Validation
     tests.push(await this.executeTest({
-      name: 'Form Validation System',category: TestCategory.FORM_AUTOMATION,severity: TestSeverity.MEDIUM,
-      description: 'Validate form field validation and error handling',testFunction: async () => {const mockValidationConfig = {
-          actionType: 'validate_form' as any,url: 'https://example.com/validation-form',configuration: {strictValidation: true,
+      name: 'Form Validation System',
+      category: TestCategory.FORM_AUTOMATION,
+      severity: TestSeverity.MEDIUM,
+      description: 'Validate form field validation and error handling',
+      testFunction: async () => {
+        const mockValidationConfig = {
+          actionType: 'validate_form',
+          url: 'https://example.com/validation-form',
+          configuration: {
+            strictValidation: true,
             customRules: {
-              email: 'email',phone: 'phone'}}
+              email: 'email',
+              phone: 'phone'
+            }
+          }
         };
 
         const result = await this.formAutomationService.executeFormAction(mockValidationConfig);
@@ -235,9 +263,18 @@ export class AutomationTestService {
 
     // Test 1: Table Data Extraction
     tests.push(await this.executeTest({
-      name: 'Table Data Extraction',category: TestCategory.DATA_EXTRACTION,severity: TestSeverity.HIGH,
-      description: 'Validate extraction of tabular data from web pages',testFunction: async () => {const mockExtractionConfig = {
-          url: 'https://example.com/data-table',extractionType: 'table_data' as any,selector: '.data-table',outputFormat: 'json' as any,configuration: {includeHeaders: true,
+      name: 'Table Data Extraction',
+      category: TestCategory.DATA_EXTRACTION,
+      severity: TestSeverity.HIGH,
+      description: 'Validate extraction of tabular data from web pages',
+      testFunction: async () => {
+        const mockExtractionConfig = {
+          url: 'https://example.com/data-table',
+          extractionType: 'table_data',
+          selector: '.data-table',
+          outputFormat: 'json',
+          configuration: {
+            includeHeaders: true,
             pagination: false
           }
         };
@@ -249,19 +286,43 @@ export class AutomationTestService {
 
     // Test 2: Text Pattern Extraction
     tests.push(await this.executeTest({
-      name: 'Text Pattern Extraction',category: TestCategory.DATA_EXTRACTION,severity: TestSeverity.MEDIUM,
-      description: 'Validate pattern-based text extraction with regex',testFunction: async () => {const mockPatternConfig = {
-          url: 'https://example.com/content-page',extractionType: 'text_content' as any,patterns: [{ name: 'email', pattern: '\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b' },{ name: 'phone', pattern: '\\+?1?-?\\(?\\d{3}\\)?-?\\d{3}-?\\d{4}' }],outputFormat: 'json' as any};const result = await this.dataExtractionService.extractData(mockPatternConfig);
+      name: 'Text Pattern Extraction',
+      category: TestCategory.DATA_EXTRACTION,
+      severity: TestSeverity.MEDIUM,
+      description: 'Validate pattern-based text extraction with regex',
+      testFunction: async () => {
+        const mockPatternConfig = {
+          url: 'https://example.com/content-page',
+          extractionType: 'text_content',
+          patterns: [
+            { name: 'email', pattern: '\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b' },
+            { name: 'phone', pattern: '\\+?1?-?\\(?\\d{3}\\)?-?\\d{3}-?\\d{4}' }
+          ],
+          outputFormat: 'json'
+        };
+
+        const result = await this.dataExtractionService.extractData(mockPatternConfig);
         return { success: true, result };
       }
     }));
 
     // Test 3: List Data Extraction
     tests.push(await this.executeTest({
-      name: 'List Data Extraction',category: TestCategory.DATA_EXTRACTION,severity: TestSeverity.MEDIUM,
-      description: 'Validate extraction of list and menu items',testFunction: async () => {const mockListConfig = {
-          url: 'https://example.com/navigation',extractionType: 'list_data' as any,selector: '.nav-menu li',outputFormat: 'csv' as any,configuration: {includeLinks: true,
-            includeAttributes: ['href', 'class']}};
+      name: 'List Data Extraction',
+      category: TestCategory.DATA_EXTRACTION,
+      severity: TestSeverity.MEDIUM,
+      description: 'Validate extraction of list and menu items',
+      testFunction: async () => {
+        const mockListConfig = {
+          url: 'https://example.com/navigation',
+          extractionType: 'list_data',
+          selector: '.nav-menu li',
+          outputFormat: 'csv',
+          configuration: {
+            includeLinks: true,
+            includeAttributes: ['href', 'class']
+          }
+        };
 
         const result = await this.dataExtractionService.extractData(mockListConfig);
         return { success: true, result };
@@ -279,23 +340,60 @@ export class AutomationTestService {
 
     // Test 1: Sequential Workflow Execution
     tests.push(await this.executeTest({
-      name: 'Sequential Workflow Execution',category: TestCategory.WORKFLOW_AUTOMATION,severity: TestSeverity.CRITICAL,
-      description: 'Validate sequential execution of workflow steps',testFunction: async () => {const mockWorkflowConfig = {
-          workflowId: 'test-sequential-workflow',name: 'Test Sequential Workflow',steps: [{
-              stepId: 'step1',name: 'Navigate to Page',type: 'navigation' as any,configuration: { url: 'https://example.com' }},{
-              stepId: 'step2',name: 'Extract Data',type: 'data_extraction' as any,configuration: { selector: '.content' }}],
-          executionMode: 'sequential' as any};const result = await this.workflowAutomationService.executeWorkflow(mockWorkflowConfig);
+      name: 'Sequential Workflow Execution',
+      category: TestCategory.WORKFLOW_AUTOMATION,
+      severity: TestSeverity.CRITICAL,
+      description: 'Validate sequential execution of workflow steps',
+      testFunction: async () => {
+        const mockWorkflowConfig = {
+          workflowId: 'test-sequential-workflow',
+          name: 'Test Sequential Workflow',
+          steps: [
+            {
+              stepId: 'step1',
+              name: 'Navigate to Page',
+              type: 'navigation',
+              configuration: { url: 'https://example.com' }
+            },
+            {
+              stepId: 'step2',
+              name: 'Extract Data',
+              type: 'data_extraction',
+              configuration: { selector: '.content' }
+            }
+          ],
+          executionMode: 'sequential'
+        };
+
+        const result = await this.workflowAutomationService.executeWorkflow(mockWorkflowConfig);
         return { success: true, result };
       }
     }));
 
     // Test 2: Conditional Workflow Logic
     tests.push(await this.executeTest({
-      name: 'Conditional Workflow Logic',category: TestCategory.WORKFLOW_AUTOMATION,severity: TestSeverity.HIGH,
-      description: 'Validate conditional logic and branching in workflows',testFunction: async () => {const mockConditionalConfig = {
-          workflowId: 'test-conditional-workflow',name: 'Test Conditional Workflow',steps: [{
-              stepId: 'condition1',name: 'Check Condition',type: 'conditional' as any,condition: { field: 'status', operator: 'equals', value: 'active' },trueBranch: [{ type: 'form_automation' as any }],falseBranch: [{ type: 'data_extraction' as any }]}],
-          executionMode: 'sequential' as any};const result = await this.workflowAutomationService.executeWorkflow(mockConditionalConfig);
+      name: 'Conditional Workflow Logic',
+      category: TestCategory.WORKFLOW_AUTOMATION,
+      severity: TestSeverity.HIGH,
+      description: 'Validate conditional logic and branching in workflows',
+      testFunction: async () => {
+        const mockConditionalConfig = {
+          workflowId: 'test-conditional-workflow',
+          name: 'Test Conditional Workflow',
+          steps: [
+            {
+              stepId: 'condition1',
+              name: 'Check Condition',
+              type: 'conditional',
+              condition: { field: 'status', operator: 'equals', value: 'active' },
+              trueBranch: [{ type: 'form_automation' }],
+              falseBranch: [{ type: 'data_extraction' }]
+            }
+          ],
+          executionMode: 'sequential'
+        };
+
+        const result = await this.workflowAutomationService.executeWorkflow(mockConditionalConfig);
         return { success: true, result };
       }
     }));
@@ -305,9 +403,9 @@ export class AutomationTestService {
       name: 'Workflow Error Recovery',category: TestCategory.WORKFLOW_AUTOMATION,severity: TestSeverity.HIGH,
       description: 'Validate error handling and recovery in workflow execution',testFunction: async () => {const mockErrorConfig = {
           workflowId: 'test-error-recovery',name: 'Test Error Recovery Workflow',steps: [{
-              stepId: 'error-step',name: 'Intentional Error Step',type: 'form_automation' as any,configuration: { url: 'invalid-url' }}],
+              stepId: 'error-step',name: 'Intentional Error Step',type: 'form_automation' as string,configuration: { url: 'invalid-url' }}],
           errorHandling: {
-            strategy: 'continue' as any,maxRetries: 2}
+            strategy: 'continue' as string,maxRetries: 2}
         };
 
         const result = await this.workflowAutomationService.executeWorkflow(mockErrorConfig);
@@ -328,7 +426,7 @@ export class AutomationTestService {
     tests.push(await this.executeTest({
       name: 'File Upload Automation',category: TestCategory.FILE_MANAGEMENT,severity: TestSeverity.HIGH,
       description: 'Validate automated file upload functionality',testFunction: async () => {const mockUploadConfig = {
-          operationType: 'upload' as any,url: 'https://example.com/upload',files: [{
+          operationType: 'upload' as string,url: 'https://example.com/upload',files: [{
               fieldName: 'document',fileName: 'test-document.pdf',filePath: '/tmp/test-document.pdf'}],
           configuration: {
             validateSize: true,
@@ -344,7 +442,7 @@ export class AutomationTestService {
     tests.push(await this.executeTest({
       name: 'File Download Management',category: TestCategory.FILE_MANAGEMENT,severity: TestSeverity.MEDIUM,
       description: 'Validate automated file download and organization',testFunction: async () => {const mockDownloadConfig = {
-          operationType: 'download' as any,downloadLinks: ['https://example.com/files/document1.pdf','https://example.com/files/document2.pdf'],destinationPath: '/tmp/downloads',configuration: {organizeByDate: true,
+          operationType: 'download' as string,downloadLinks: ['https://example.com/files/document1.pdf','https://example.com/files/document2.pdf'],destinationPath: '/tmp/downloads',configuration: {organizeByDate: true,
             validateIntegrity: true,
             createSubfolders: true
           }
@@ -359,7 +457,7 @@ export class AutomationTestService {
     tests.push(await this.executeTest({
       name: 'File Validation and Security',category: TestCategory.FILE_MANAGEMENT,severity: TestSeverity.CRITICAL,
       description: 'Validate file security scanning and validation',testFunction: async () => {const mockValidationConfig = {
-          operationType: 'validate' as any,files: ['/tmp/test-file.exe', '/tmp/test-document.pdf'],configuration: {scanForMalware: true,
+          operationType: 'validate' as string,files: ['/tmp/test-file.exe', '/tmp/test-document.pdf'],configuration: {scanForMalware: true,
             validateSignatures: true,
             checkFileHeaders: true,
             maximumFileSize: 50 * 1024 * 1024 // 50MB
@@ -384,7 +482,7 @@ export class AutomationTestService {
     tests.push(await this.executeTest({
       name: 'Monitor Creation and Management',category: TestCategory.CONTENT_MONITORING,severity: TestSeverity.HIGH,
       description: 'Validate monitor creation, configuration, and lifecycle management',testFunction: async () => {const mockMonitorConfig = {
-          id: 'test-monitor-001',name: 'Test Content Monitor',type: 'text_change' as any,url: 'https://example.com/monitored-page',selector: '.content-area',frequency: { interval: 60000 },detection: { method: 'text_diff' as any, sensitivity: 90 },notifications: [{ method: 'email' as any, target: 'test@example.com' }]};
+          id: 'test-monitor-001',name: 'Test Content Monitor',type: 'text_change' as string,url: 'https://example.com/monitored-page',selector: '.content-area',frequency: { interval: 60000 },detection: { method: 'text_diff' as string, sensitivity: 90 },notifications: [{ method: 'email' as string, target: 'test@example.com' }]};
 
         const result = await this.contentMonitoringService.createMonitor(mockMonitorConfig);
         return { success: true, result };
@@ -402,7 +500,7 @@ export class AutomationTestService {
     tests.push(await this.executeTest({
       name: 'Notification System Validation',category: TestCategory.CONTENT_MONITORING,severity: TestSeverity.MEDIUM,
       description: 'Validate notification delivery across different channels',testFunction: async () => {const mockBulkOperation = {
-          monitorIds: ['test-monitor-001', 'test-monitor-002'],operation: 'start' as any,continueOnError: true};
+          monitorIds: ['test-monitor-001', 'test-monitor-002'],operation: 'start' as string,continueOnError: true};
 
         const result = await this.contentMonitoringService.performBulkOperation(mockBulkOperation);
         return { success: true, result };
@@ -567,7 +665,7 @@ export class AutomationTestService {
         description: testConfig.description,
         expectedResult: 'Operation should complete successfully',actualResult: testResult.success ? 'Test passed' : 'Test failed',
         metadata: {
-          testResult: testResult.result,
+          testResult: testResult.result as unknown,
           executionTime: duration
         }
       };
@@ -597,10 +695,10 @@ export class AutomationTestService {
         endTime,
         description: testConfig.description,
         expectedResult: 'Operation should complete successfully',actualResult: 'Test execution failed with error',
-        errorMessage: error.message,
-        stackTrace: error.stack,
+        errorMessage: error instanceof Error ? error.message : 'Unknown error',
+        stackTrace: error instanceof Error ? error.stack : undefined,
         metadata: {
-          errorType: error.constructor.name,
+          errorType: error instanceof Error ? error.constructor.name : 'UnknownError',
           executionTime: duration
         }
       };
@@ -609,7 +707,7 @@ export class AutomationTestService {
 
       this.logger.error(`Test failed with error: ${testConfig.name}`, {
         testId,
-        error: error.message,
+        error: error instanceof Error ? error.message : 'Unknown error',
         duration
       });
 

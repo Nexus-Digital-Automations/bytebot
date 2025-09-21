@@ -262,9 +262,10 @@ describe('Compliance Validation Testing Suite', () => {
             .get('/api/security/policies');
 
           if (policyResponse.status === 200) {
-            expect(policyResponse.body.policies).toBeDefined();
-            expect(Array.isArray(policyResponse.body.policies)).toBeTruthy();
-            expect(policyResponse.body.policies.length).toBeGreaterThan(0);
+            const responseBody = policyResponse.body as { policies?: unknown[] };
+            expect(responseBody.policies).toBeDefined();
+            expect(Array.isArray(responseBody.policies)).toBeTruthy();
+            expect(responseBody.policies?.length ?? 0).toBeGreaterThan(0);
           } else {
             // Policy endpoint doesn't exist - this is a compliance gap
             expect(policyResponse.status).toBe(404);
@@ -297,8 +298,9 @@ describe('Compliance Validation Testing Suite', () => {
             .query({ action: 'user_creation' });
 
           if (auditResponse.status === 200) {
-            expect(auditResponse.body.logs).toBeDefined();
-            expect(Array.isArray(auditResponse.body.logs)).toBeTruthy();
+            const responseBody = auditResponse.body as { logs?: unknown[] };
+            expect(responseBody.logs).toBeDefined();
+            expect(Array.isArray(responseBody.logs)).toBeTruthy();
           }
         }
       );
@@ -345,7 +347,8 @@ describe('Compliance Validation Testing Suite', () => {
             .set('Authorization', `Bearer ${token}`);
 
           if (accessResponse.status === 200) {
-            expect(accessResponse.body.personalData).toBeDefined();
+            const responseBody = accessResponse.body as { personalData?: unknown };
+            expect(responseBody.personalData).toBeDefined();
           }
 
           // Test right to erasure (Article 17)
@@ -361,7 +364,8 @@ describe('Compliance Validation Testing Suite', () => {
             .set('Authorization', `Bearer ${token}`);
 
           if (portabilityResponse.status === 200) {
-            expect(portabilityResponse.body.exportData).toBeDefined();
+            const responseBody = portabilityResponse.body as { exportData?: unknown };
+            expect(responseBody.exportData).toBeDefined();
           }
         }
       );
@@ -384,7 +388,8 @@ describe('Compliance Validation Testing Suite', () => {
             });
 
           if (consentResponse.status === 200) {
-            expect(consentResponse.body.consentUpdated).toBeTruthy();
+            const responseBody = consentResponse.body as { consentUpdated?: boolean };
+            expect(responseBody.consentUpdated).toBeTruthy();
           }
 
           // Test consent history
@@ -393,8 +398,9 @@ describe('Compliance Validation Testing Suite', () => {
             .set('Authorization', `Bearer ${token}`);
 
           if (historyResponse.status === 200) {
-            expect(historyResponse.body.consentHistory).toBeDefined();
-            expect(Array.isArray(historyResponse.body.consentHistory)).toBeTruthy();
+            const responseBody = historyResponse.body as { consentHistory?: unknown[] };
+            expect(responseBody.consentHistory).toBeDefined();
+            expect(Array.isArray(responseBody.consentHistory)).toBeTruthy();
           }
         }
       );
@@ -418,8 +424,9 @@ describe('Compliance Validation Testing Suite', () => {
             });
 
           if (breachResponse.status === 201) {
-            expect(breachResponse.body.breachId).toBeDefined();
-            expect(breachResponse.body.notificationRequired).toBeDefined();
+            const responseBody = breachResponse.body as { breachId?: string; notificationRequired?: boolean };
+            expect(responseBody.breachId).toBeDefined();
+            expect(responseBody.notificationRequired).toBeDefined();
           }
         }
       );
@@ -438,8 +445,9 @@ describe('Compliance Validation Testing Suite', () => {
             .get('/api/security/officer');
 
           if (securityOfficerResponse.status === 200) {
-            expect(securityOfficerResponse.body.securityOfficer).toBeDefined();
-            expect(securityOfficerResponse.body.contact).toBeDefined();
+            const responseBody = securityOfficerResponse.body as { securityOfficer?: unknown; contact?: unknown };
+            expect(responseBody.securityOfficer).toBeDefined();
+            expect(responseBody.contact).toBeDefined();
           }
 
           // Test workforce training records
@@ -447,7 +455,8 @@ describe('Compliance Validation Testing Suite', () => {
             .get('/api/security/training/records');
 
           if (trainingResponse.status === 200) {
-            expect(trainingResponse.body.trainingRecords).toBeDefined();
+            const responseBody = trainingResponse.body as { trainingRecords?: unknown };
+            expect(responseBody.trainingRecords).toBeDefined();
           }
         }
       );
@@ -463,7 +472,8 @@ describe('Compliance Validation Testing Suite', () => {
             .get('/api/security/facility/access');
 
           if (facilityResponse.status === 200) {
-            expect(facilityResponse.body.accessControls).toBeDefined();
+            const responseBody = facilityResponse.body as { accessControls?: unknown };
+            expect(responseBody.accessControls).toBeDefined();
           }
 
           // Test workstation use controls
@@ -471,7 +481,8 @@ describe('Compliance Validation Testing Suite', () => {
             .get('/api/security/workstation/controls');
 
           if (workstationResponse.status === 200) {
-            expect(workstationResponse.body.workstationControls).toBeDefined();
+            const responseBody = workstationResponse.body as { workstationControls?: unknown };
+            expect(responseBody.workstationControls).toBeDefined();
           }
         }
       );
@@ -490,8 +501,9 @@ describe('Compliance Validation Testing Suite', () => {
             .set('Authorization', `Bearer ${token}`);
 
           if (phiResponse.status === 200) {
-            expect(phiResponse.body.accessLogged).toBeTruthy();
-            expect(phiResponse.body.encryptionApplied).toBeTruthy();
+            const responseBody = phiResponse.body as { accessLogged?: boolean; encryptionApplied?: boolean };
+            expect(responseBody.accessLogged).toBeTruthy();
+            expect(responseBody.encryptionApplied).toBeTruthy();
           } else {
             expect([401, 403, 404]).toContain(phiResponse.status);
           }
@@ -502,7 +514,8 @@ describe('Compliance Validation Testing Suite', () => {
             .set('Authorization', `Bearer ${token}`);
 
           if (auditResponse.status === 200) {
-            expect(auditResponse.body.auditLogs).toBeDefined();
+            const responseBody = auditResponse.body as { auditLogs?: unknown };
+            expect(responseBody.auditLogs).toBeDefined();
           }
         }
       );
@@ -521,8 +534,9 @@ describe('Compliance Validation Testing Suite', () => {
             .get('/api/security/firewall/status');
 
           if (firewallResponse.status === 200) {
-            expect(firewallResponse.body.firewallEnabled).toBeTruthy();
-            expect(firewallResponse.body.defaultDeny).toBeTruthy();
+            const responseBody = firewallResponse.body as { firewallEnabled?: boolean; defaultDeny?: boolean };
+            expect(responseBody.firewallEnabled).toBeTruthy();
+            expect(responseBody.defaultDeny).toBeTruthy();
           }
 
           // Test default password changes
@@ -530,7 +544,8 @@ describe('Compliance Validation Testing Suite', () => {
             .get('/api/security/defaults/status');
 
           if (defaultsResponse.status === 200) {
-            expect(defaultsResponse.body.defaultsChanged).toBeTruthy();
+            const responseBody = defaultsResponse.body as { defaultsChanged?: boolean };
+            expect(responseBody.defaultsChanged).toBeTruthy();
           }
         }
       );
@@ -554,8 +569,9 @@ describe('Compliance Validation Testing Suite', () => {
             });
 
           if (cardDataResponse.status === 200) {
-            expect(cardDataResponse.body.encryptionApplied).toBeTruthy();
-            expect(cardDataResponse.body.dataRedacted).toBeTruthy();
+            const responseBody = cardDataResponse.body as { encryptionApplied?: boolean; dataRedacted?: boolean };
+            expect(responseBody.encryptionApplied).toBeTruthy();
+            expect(responseBody.dataRedacted).toBeTruthy();
           }
 
           // Test secure transmission
@@ -564,7 +580,8 @@ describe('Compliance Validation Testing Suite', () => {
             .set('Authorization', `Bearer ${token}`);
 
           if (transmissionResponse.status === 200) {
-            expect(transmissionResponse.body.secureTransmission).toBeTruthy();
+            const responseBody = transmissionResponse.body as { secureTransmission?: boolean };
+            expect(responseBody.secureTransmission).toBeTruthy();
           }
         }
       );
@@ -598,7 +615,8 @@ describe('Compliance Validation Testing Suite', () => {
             .set('Authorization', `Bearer ${paymentToken}`);
 
           if (identificationResponse.status === 200) {
-            expect(identificationResponse.body.uniqueId).toBeDefined();
+            const responseBody = identificationResponse.body as { uniqueId?: string };
+            expect(responseBody.uniqueId).toBeDefined();
           }
         }
       );
@@ -617,9 +635,10 @@ describe('Compliance Validation Testing Suite', () => {
             .get('/api/security/policy/iso27001');
 
           if (policyResponse.status === 200) {
-            expect(policyResponse.body.policy).toBeDefined();
-            expect(policyResponse.body.lastUpdated).toBeDefined();
-            expect(policyResponse.body.approvedBy).toBeDefined();
+            const responseBody = policyResponse.body as { policy?: unknown; lastUpdated?: unknown; approvedBy?: unknown };
+            expect(responseBody.policy).toBeDefined();
+            expect(responseBody.lastUpdated).toBeDefined();
+            expect(responseBody.approvedBy).toBeDefined();
           }
         }
       );
@@ -638,8 +657,9 @@ describe('Compliance Validation Testing Suite', () => {
             .set('Authorization', `Bearer ${adminToken}`);
 
           if (riskResponse.status === 200) {
-            expect(riskResponse.body.riskAssessment).toBeDefined();
-            expect(riskResponse.body.riskRegister).toBeDefined();
+            const responseBody = riskResponse.body as { riskAssessment?: unknown; riskRegister?: unknown };
+            expect(responseBody.riskAssessment).toBeDefined();
+            expect(responseBody.riskRegister).toBeDefined();
           }
 
           // Test risk treatment
@@ -648,7 +668,8 @@ describe('Compliance Validation Testing Suite', () => {
             .set('Authorization', `Bearer ${adminToken}`);
 
           if (treatmentResponse.status === 200) {
-            expect(treatmentResponse.body.riskTreatment).toBeDefined();
+            const responseBody = treatmentResponse.body as { riskTreatment?: unknown };
+            expect(responseBody.riskTreatment).toBeDefined();
           }
         }
       );
@@ -667,8 +688,9 @@ describe('Compliance Validation Testing Suite', () => {
             .get('/api/security/assets/inventory');
 
           if (assetsResponse.status === 200) {
-            expect(assetsResponse.body.assets).toBeDefined();
-            expect(Array.isArray(assetsResponse.body.assets)).toBeTruthy();
+            const responseBody = assetsResponse.body as { assets?: unknown[] };
+            expect(responseBody.assets).toBeDefined();
+            expect(Array.isArray(responseBody.assets)).toBeTruthy();
           }
 
           // Test business environment
@@ -676,7 +698,8 @@ describe('Compliance Validation Testing Suite', () => {
             .get('/api/security/business/environment');
 
           if (environmentResponse.status === 200) {
-            expect(environmentResponse.body.businessEnvironment).toBeDefined();
+            const responseBody = environmentResponse.body as { businessEnvironment?: unknown };
+            expect(responseBody.businessEnvironment).toBeDefined();
           }
         }
       );
@@ -692,7 +715,8 @@ describe('Compliance Validation Testing Suite', () => {
             .get('/api/security/access/controls');
 
           if (accessResponse.status === 200) {
-            expect(accessResponse.body.accessControls).toBeDefined();
+            const responseBody = accessResponse.body as { accessControls?: unknown };
+            expect(responseBody.accessControls).toBeDefined();
           }
 
           // Test data security
@@ -700,7 +724,8 @@ describe('Compliance Validation Testing Suite', () => {
             .get('/api/security/data/protection');
 
           if (dataSecurityResponse.status === 200) {
-            expect(dataSecurityResponse.body.dataProtection).toBeDefined();
+            const responseBody = dataSecurityResponse.body as { dataProtection?: unknown };
+            expect(responseBody.dataProtection).toBeDefined();
           }
         }
       );
@@ -719,7 +744,8 @@ describe('Compliance Validation Testing Suite', () => {
             .set('Authorization', `Bearer ${adminToken}`);
 
           if (detectionResponse.status === 200) {
-            expect(detectionResponse.body.detectionCapabilities).toBeDefined();
+            const responseBody = detectionResponse.body as { detectionCapabilities?: unknown };
+            expect(responseBody.detectionCapabilities).toBeDefined();
           }
 
           // Test incident response
@@ -728,7 +754,8 @@ describe('Compliance Validation Testing Suite', () => {
             .set('Authorization', `Bearer ${adminToken}`);
 
           if (responseResponse.status === 200) {
-            expect(responseResponse.body.responseCapabilities).toBeDefined();
+            const responseBody = responseResponse.body as { responseCapabilities?: unknown };
+            expect(responseBody.responseCapabilities).toBeDefined();
           }
 
           // Test recovery procedures
@@ -737,7 +764,8 @@ describe('Compliance Validation Testing Suite', () => {
             .set('Authorization', `Bearer ${adminToken}`);
 
           if (recoveryResponse.status === 200) {
-            expect(recoveryResponse.body.recoveryProcedures).toBeDefined();
+            const responseBody = recoveryResponse.body as { recoveryProcedures?: unknown };
+            expect(responseBody.recoveryProcedures).toBeDefined();
           }
         }
       );
@@ -756,9 +784,10 @@ describe('Compliance Validation Testing Suite', () => {
             .get('/api/compliance/alignment');
 
           if (alignmentResponse.status === 200) {
-            expect(alignmentResponse.body.standards).toBeDefined();
-            expect(alignmentResponse.body.commonControls).toBeDefined();
-            expect(alignmentResponse.body.gapAnalysis).toBeDefined();
+            const responseBody = alignmentResponse.body as { standards?: unknown; commonControls?: unknown; gapAnalysis?: unknown };
+            expect(responseBody.standards).toBeDefined();
+            expect(responseBody.commonControls).toBeDefined();
+            expect(responseBody.gapAnalysis).toBeDefined();
           }
 
           // Validate that security controls address multiple standards
@@ -766,7 +795,8 @@ describe('Compliance Validation Testing Suite', () => {
             .get('/api/security/controls/mapping');
 
           if (controlsResponse.status === 200) {
-            expect(controlsResponse.body.controlMappings).toBeDefined();
+            const responseBody = controlsResponse.body as { controlMappings?: unknown };
+            expect(responseBody.controlMappings).toBeDefined();
           }
         }
       );
@@ -789,10 +819,11 @@ describe('Compliance Validation Testing Suite', () => {
             });
 
           if (reportResponse.status === 200) {
-            expect(reportResponse.body.complianceReport).toBeDefined();
-            expect(reportResponse.body.complianceStatus).toBeDefined();
-            expect(reportResponse.body.violations).toBeDefined();
-            expect(reportResponse.body.recommendations).toBeDefined();
+            const responseBody = reportResponse.body as { complianceReport?: unknown; complianceStatus?: unknown; violations?: unknown; recommendations?: unknown };
+            expect(responseBody.complianceReport).toBeDefined();
+            expect(responseBody.complianceStatus).toBeDefined();
+            expect(responseBody.violations).toBeDefined();
+            expect(responseBody.recommendations).toBeDefined();
           }
         }
       );

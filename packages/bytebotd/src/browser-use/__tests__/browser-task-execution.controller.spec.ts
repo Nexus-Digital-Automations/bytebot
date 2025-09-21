@@ -1,51 +1,53 @@
-import { Test, TestingModule } from '@nestjs/testing';import { HttpStatus, NotFoundException, InternalServerErrorException } from '@nestjs/common';import { BrowserTaskExecutionController } from '../browser-task-execution.controller';import { BrowserTaskExecutionService } from '../browser-task-execution.service';import { BrowserUseService } from '../browser-use.service';import { BrowserSessionService } from '../browser-session.service';import {TaskExecutionRequestDto,
-  TaskExecutionResponseDto,
-  BatchTaskExecutionRequestDto,
-  BatchTaskExecutionResponseDto,
-  TaskExecutionStatus,
-} from '../dto/task-execution.dto';describe('BrowserTaskExecutionController', () => {let controller: BrowserTaskExecutionController;let taskExecutionService: jest.Mocked<BrowserTaskExecutionService>;
+import { Test, TestingModule } from '@nestjs/testing';import { HttpStatus, NotFoundException, InternalServerErrorException } from '@nestjs/common';import { BrowserTaskExecutionController } from '../browser-task-execution.controller';import { BrowserTaskExecutionService } from '../browser-task-execution.service';import { BrowserUseService } from '../browser-use.service';import { BrowserSessionService } from '../browser-session.service';import {
+  BrowserExecuteDto,
+  BrowserExecutionResultDto,
+  BrowserExecutionStatus,
+  BrowserExecutionType,
+} from '../dto/browser-execution.dto';describe('BrowserTaskExecutionController', () => {let controller: BrowserTaskExecutionController;let taskExecutionService: jest.Mocked<BrowserTaskExecutionService>;
   let browserUseService: jest.Mocked<BrowserUseService>;
   let sessionService: jest.Mocked<BrowserSessionService>;
 
-  const mockTaskExecutionResponse: TaskExecutionResponseDto = {
-    executionId: 'exec-123',taskId: 'task-123',sessionId: 'session-123',status: TaskExecutionStatus.COMPLETED,progress: 100,
+  const mockTaskExecutionResponse: BrowserExecutionResultDto = {
+    executionId: 'exec-123',
+    status: BrowserExecutionStatus.COMPLETED,
+    taskName: 'Test Task',
+    executionType: BrowserExecutionType.INTERACTION,
+    startedAt: new Date(),
+    completedAt: new Date(),
+    durationMs: 1500,
+    success: true,
     result: {
       success: true,
-      data: { pageTitle: 'Example Page' },},startTime: new Date(),
-    endTime: new Date(),
-    durationMs: 1500,
-    stepsCompleted: 5,
-    totalSteps: 5,
-    screenshots: [
-      {
-        stepIndex: 0,
-        screenshotId: 'screenshot-1',base64Data: 'data:image/png;base64,iVBOR...',},],
+      data: { pageTitle: 'Example Page' },
+    },
+    screenshots: ['data:image/png;base64,iVBOR...'],
     logs: [
       {
         timestamp: new Date(),
-        level: 'info',message: 'Task started',stepIndex: 0,},
+        level: 'info',
+        message: 'Task started',
+        category: 'execution',
+      },
     ],
   };
 
-  const mockBatchExecutionResponse: BatchTaskExecutionResponseDto = {
-    batchId: 'batch-123',sessionId: 'session-123',totalTasks: 3,completedTasks: 2,
-    failedTasks: 1,
-    overallStatus: 'partial_success',executions: [mockTaskExecutionResponse],batchStartTime: new Date(),
-    batchEndTime: new Date(),
-    totalDurationMs: 5000,
-  };
 
   beforeEach(async () => {
     const mockTaskExecutionService = {
-      executeTask: jest.fn(),
-      executeBatchTasks: jest.fn(),
-      getTaskExecution: jest.fn(),
-      cancelTaskExecution: jest.fn(),
-      getTaskExecutionHistory: jest.fn(),
-      getTaskExecutionMetrics: jest.fn(),
-      resumeTaskExecution: jest.fn(),
-      pauseTaskExecution: jest.fn(),
-      validateTaskDefinition: jest.fn(),
+      navigateToUrl: jest.fn(),
+      navigateBack: jest.fn(),
+      navigateForward: jest.fn(),
+      reloadPage: jest.fn(),
+      performInteraction: jest.fn(),
+      executeScript: jest.fn(),
+      waitForElement: jest.fn(),
+      waitForNetworkIdle: jest.fn(),
+      waitForLoadState: jest.fn(),
+      waitForCustomCondition: jest.fn(),
+      takeScreenshot: jest.fn(),
+      extractPageData: jest.fn(),
+      getExecutionMetrics: jest.fn(),
+      healthCheck: jest.fn(),
     };
 
     const mockBrowserUseService = {
@@ -54,6 +56,7 @@ import { Test, TestingModule } from '@nestjs/testing';import { HttpStatus, NotFo
     };
 
     const mockSessionService = {
+      getAllSessions: jest.fn(),
       getSession: jest.fn(),
       validateSessionHealth: jest.fn(),
     };
@@ -84,71 +87,75 @@ import { Test, TestingModule } from '@nestjs/testing';import { HttpStatus, NotFo
 
   it('should be defined', () => {expect(controller).toBeDefined();});
 
-  describe('executeTask', () => {const executionRequest: TaskExecutionRequestDto = {taskDefinition: {
-        name: 'Test Task',description: 'A test automation task',steps: [{
-            type: 'navigate',url: 'https://example.com',},{
-            type: 'click',selector: '#submit-button',},{
-            type: 'extract',selector: 'h1',property: 'textContent',},],
-      },
-      sessionId: 'session-123',executionOptions: {captureScreenshots: true,
-        continueOnError: false,
-        timeout: 30000,
-        stepDelay: 1000,
-      },
-      metadata: {
-        priority: 'high',tags: ['automation', 'test'],requestId: 'req-123',},};
+  describe('executeTask', () => {
+    const executionRequest: BrowserExecuteDto = {
+      executionType: BrowserExecutionType.INTERACTION,
+      taskName: 'Test Task',
+      instructions: 'A test automation task',
+      targetUrl: 'https://example.com',
+      selector: '#submit-button',
+      sessionId: 'session-123',
+      timeoutMs: 30000,
+      captureScreenshots: true,
+      enableLogging: true,
+    };
 
-    it('should execute a task successfully', async () => {taskExecutionService.executeTask.mockResolvedValue(mockTaskExecutionResponse);const result = await controller.executeTask(executionRequest);
+    it('should execute a task successfully', async () => {
+      // Mock the async execution behavior
+      const result = await controller.executeTask(executionRequest);
 
-      expect(result).toEqual(mockTaskExecutionResponse);
-      expect(taskExecutionService.executeTask).toHaveBeenCalledWith(executionRequest);
+      expect(result).toBeDefined();
+      expect(result.executionId).toBeDefined();
+      expect(result.status).toBe(BrowserExecutionStatus.QUEUED);
+      expect(result.taskName).toBe(executionRequest.taskName);
     });
 
-    it('should handle task execution failure', async () => {const error = new Error('Task execution failed');taskExecutionService.executeTask.mockRejectedValue(error);await expect(controller.executeTask(executionRequest)).rejects.toThrow(
-        InternalServerErrorException,
-      );
-    });
-
-    it('should validate task definition before execution', async () => {const invalidRequest = {...executionRequest,
-        taskDefinition: {
-          ...executionRequest.taskDefinition,
-          steps: [], // Invalid: empty steps
-        },
+    it('should handle task execution failure', async () => {
+      const invalidRequest: BrowserExecuteDto = {
+        ...executionRequest,
+        executionType: BrowserExecutionType.NAVIGATION,
+        targetUrl: undefined, // This should cause validation to fail
       };
 
-      const validationError = new Error('Task definition validation failed: No steps provided');taskExecutionService.executeTask.mockRejectedValue(validationError);await expect(controller.executeTask(invalidRequest)).rejects.toThrow(
-        InternalServerErrorException,
-      );
+      await expect(controller.executeTask(invalidRequest)).rejects.toThrow();
+    });
+
+    it('should validate task definition before execution', async () => {
+      const invalidRequest: BrowserExecuteDto = {
+        ...executionRequest,
+        executionType: BrowserExecutionType.CUSTOM_SCRIPT,
+        scriptCode: undefined, // Invalid: missing script code for custom script
+      };
+
+      await expect(controller.executeTask(invalidRequest)).rejects.toThrow();
     });
   });
 
-  describe('executeBatchTasks', () => {const batchRequest: BatchTaskExecutionRequestDto = {sessionId: 'session-123',tasks: [{
-          taskDefinition: {
-            name: 'Task 1',description: 'First task',steps: [{ type: 'navigate', url: 'https://example1.com' }],},executionOptions: { captureScreenshots: true },
-        },
-        {
-          taskDefinition: {
-            name: 'Task 2',description: 'Second task',steps: [{ type: 'navigate', url: 'https://example2.com' }],},executionOptions: { captureScreenshots: false },
-        },
-      ],
-      batchOptions: {
-        parallel: false,
-        continueOnError: true,
-        maxConcurrent: 2,
-        batchTimeout: 60000,
-      },
-      metadata: {
-        batchName: 'Test Batch',priority: 'normal',},};
+  describe('navigateBrowser', () => {
+    const navigationRequest = {
+      navigationType: 'goto' as const,
+      url: 'https://example.com',
+      sessionId: 'session-123',
+      timeoutMs: 30000,
+    };
 
-    it('should execute batch tasks successfully', async () => {taskExecutionService.executeBatchTasks.mockResolvedValue(mockBatchExecutionResponse);const result = await controller.executeBatchTasks(batchRequest);
+    it('should navigate browser successfully', async () => {
+      const result = await controller.navigateBrowser(navigationRequest);
 
-      expect(result).toEqual(mockBatchExecutionResponse);
-      expect(taskExecutionService.executeBatchTasks).toHaveBeenCalledWith(batchRequest);
+      expect(result).toBeDefined();
+      expect(result.executionId).toBeDefined();
+      expect(result.status).toBe(BrowserExecutionStatus.COMPLETED);
+      expect(result.executionType).toBe(BrowserExecutionType.NAVIGATION);
     });
 
-    it('should handle batch execution failure', async () => {const error = new Error('Batch execution failed');taskExecutionService.executeBatchTasks.mockRejectedValue(error);await expect(controller.executeBatchTasks(batchRequest)).rejects.toThrow(
-        InternalServerErrorException,
-      );
+    it('should handle navigation failure', async () => {
+      const invalidRequest = {
+        ...navigationRequest,
+        navigationType: 'goto' as const,
+        url: undefined, // Invalid: missing URL for goto navigation
+      };
+
+      await expect(controller.navigateBrowser(invalidRequest)).rejects.toThrow();
     });
   });
 

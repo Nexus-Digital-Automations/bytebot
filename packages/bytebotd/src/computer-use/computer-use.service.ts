@@ -36,7 +36,9 @@ import {
   WriteFileAction,
   ReadFileAction,
 } from '@bytebot/shared';
-    // ===== ENTERPRISE-GRADE TYPE DEFINITIONS =====/**
+    // ===== ENTERPRISE-GRADE TYPE DEFINITIONS =====
+
+/**
  * Comprehensive error interface for structured error handling
  * Provides detailed error context for debugging and monitoring
  */

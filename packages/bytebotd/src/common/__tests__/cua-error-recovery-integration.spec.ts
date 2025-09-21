@@ -635,14 +635,16 @@ return isLowRisk;
       };
 
       const result = await context.retryManager.executeWithRetry(
-        (): Promise<ValidationResponse> => context.parlantIntegrationService.validateFunctionExecution({
-          functionName: 'test',
-          functionParams: {},
-          actionDescription: 'test',
-          context: mockValidationContext,
-          riskLevel: RiskLevel._LOW,
-          operationId: 'test',
-        }),
+        (): Promise<ValidationResponse> => {
+          return context.parlantIntegrationService.validateFunctionExecution({
+            functionName: 'test',
+            functionParams: {},
+            actionDescription: 'test',
+            context: mockValidationContext,
+            riskLevel: RiskLevel._LOW,
+            operationId: 'test',
+          });
+        },
         {
   maxAttempts: scenario.maxRetryAttempts,
           baseDelay: 500,
@@ -681,7 +683,11 @@ return isLowRisk;
       let connectionAttempts = 0;
 
       // Mock MCP connection failures then recovery
-      const originalMoveMouse = context.mcpTools.moveMouse.bind(context.mcpTools) as (params: MouseMoveParams) => Promise<McpToolResponse>;
+      const originalMoveMouse = async (params: MouseMoveParams): Promise<McpToolResponse> => {
+        const tools = context.mcpTools as ComputerUseTools;
+        const result: McpToolResponse = await tools.moveMouse(params);
+        return result;
+      };
       const mouseMoveSpy = jest.spyOn(context.mcpTools, 'moveMouse');
       mouseMoveSpy.mockImplementation(async (params: MouseMoveParams): Promise<McpToolResponse> => {
         connectionAttempts++;
@@ -694,7 +700,11 @@ return isLowRisk;
 
       const result = await context.circuitBreakerService.executeWithCircuitBreaker(
         'McpService',
-        (): Promise<McpToolResponse> => context.mcpTools.moveMouse({ coordinates: { x: 150, y: 250 } })
+        async (): Promise<McpToolResponse> => {
+          const tools = context.mcpTools as ComputerUseTools;
+          const result: McpToolResponse = await tools.moveMouse({ coordinates: { x: 150, y: 250 } });
+          return result;
+        }
       );
 
       const endTime = Date.now();

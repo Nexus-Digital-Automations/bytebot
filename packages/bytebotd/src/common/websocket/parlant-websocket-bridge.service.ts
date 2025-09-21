@@ -15,7 +15,8 @@
 import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as WebSocket from 'ws';
-import {createSafeWebSocketServer,
+import {
+  createSafeWebSocketServer,
   createSecureVerifyCallback,
   SafeWebSocketServerOptions,
   WebSocketVerificationInfo,

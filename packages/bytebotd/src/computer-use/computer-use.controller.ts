@@ -36,7 +36,9 @@ import {
   ValidationMode,
   ConversationContext,
   ParlantValidationInterceptor
-} from '@bytebot/shared/src/parlant/parlant-validation.decorator';\nimport { ConversationContextParameter } from '@bytebot/shared/src/types/conversation-context.types';\nimport { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+} from '@bytebot/shared/src/parlant/parlant-validation.decorator';
+import { ConversationContextParameter } from '@bytebot/shared/src/types/conversation-context.types';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import {OperatorOrAdmin,
   CurrentUser,
@@ -60,7 +62,8 @@ import {BatchJobSubmissionDto,
   JobAnalyticsDto,
   JobProgressUpdateDto,
 } from './dto/batch-job.dto';
-    // Define interfaces for proper error handlinginterface ErrorWithMessage {
+    // Define interfaces for proper error handling
+interface ErrorWithMessage {
   message: string;
 }
 
@@ -725,12 +728,12 @@ type ComputerActionResponse =
       customRules: [
         {
           name: 'destructive_action_validation',
-  condition: 'action_type in ["file_delete", "system_shutdown", "process_kill"]",
+          condition: 'action_type in ["file_delete", "system_shutdown", "process_kill"]',
   action: 'REQUIRE_CONFIRMATION',
   priority: 10},
         {
           name: 'network_action_validation',
-  condition: 'action_type in ["network_request", "download_file"]",
+          condition: 'action_type in ["network_request", "download_file"]',
   action: 'REQUIRE_CONFIRMATION',
           priority: 8
         }
@@ -1178,27 +1181,27 @@ type ComputerActionResponse =
       customRules: [
         {
           name: 'screenshot_action_validation',
-  condition: 'action === "screenshot"",
+          condition: 'action === "screenshot"',
   action: 'APPROVE',
   priority: 2},
         {
           name: 'file_write_validation',
-  condition: 'action === "write_file"",
+          condition: 'action === "write_file"',
   action: 'REQUIRE_CONFIRMATION',
   priority: 9},
         {
           name: 'mouse_click_validation',
-  condition: 'action === "click"",
+          condition: 'action === "click"',
   action: 'REQUIRE_CONFIRMATION',
   priority: 7},
         {
           name: 'keyboard_input_validation',
-  condition: 'action === "type"",
+          condition: 'action === "type"',
   action: 'REQUIRE_CONFIRMATION',
   priority: 8},
         {
           name: 'application_launch_validation',
-  condition: 'action === "launch_app"",
+          condition: 'action === "launch_app"',
   action: 'REQUIRE_CONFIRMATION',
           priority: 9
         }

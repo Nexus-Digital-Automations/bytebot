@@ -370,11 +370,7 @@ export class JwtParlantAuthGuard implements CanActivate {
     this.checkRateLimit(request, validationContext, operationId);
 
     // Behavioral analysis
-    this.performBehavioralAnalysis(
-      request,
-      validationContext,
-      operationId,
-    );
+    this.performBehavioralAnalysis(request, validationContext, operationId);
   }
 
   /**

@@ -20,7 +20,7 @@
  *
  * @author Claude Code
  * @version 2.0.0
- */;
+ */
 
 import { Injectable, Logger, OnModuleInit, OnApplicationShutdown } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';

@@ -1,21 +1,44 @@
-import { Test, TestingModule } from '@nestjs/testing';import { INestApplication, HttpStatus } from '@nestjs/common';import { ConfigModule } from '@nestjs/config';import * as request from 'supertest';import { BrowserUseModule } from '../browser-use.module';import { ParlantModule } from '../../parlant/parlant.module';import { SecurityModule } from '../../common/security/security.module';import { AuthModule } from '../../auth/auth.module';import { HealthModule } from '../../health/health.module';import { MetricsModule } from '../../metrics/metrics.module';import {CreateBrowserSessionDto,
+import { Test, TestingModule } from '@nestjs/testing';
+import { INestApplication, HttpStatus } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import * as request from 'supertest';
+import { BrowserUseModule } from '../browser-use.module';
+import { ParlantModule } from '../../parlant/parlant.module';
+import { SecurityModule } from '../../common/security/security.module';
+import { AuthModule } from '../../auth/auth.module';
+import { HealthModule } from '../../health/health.module';
+import { MetricsModule } from '../../metrics/metrics.module';
+import {
+  CreateBrowserSessionDto,
   BrowserSessionStatus
-} from '../dto/browser-session.dto';import {CreateBrowserTaskDto,
+} from '../dto/browser-session.dto';
+import {
+  CreateBrowserTaskDto,
   BrowserTaskPriority,
   BrowserTaskStatus
-} from '../dto/browser-task.dto';import {TaskExecutionRequestDto,
+} from '../dto/browser-task.dto';
+import {
+  TaskExecutionRequestDto,
   TaskExecutionStatus
-} from '../dto/task-execution.dto';import {ScreenshotCaptureDto,
+} from '../dto/task-execution.dto';
+import {
+  ScreenshotCaptureDto,
   ScreenshotFormat,
   ScreenshotType
-} from '../dto/screenshot.dto';describe('Browser Automation E2E Workflows', () => {let app: INestApplication;let authToken: string;
+} from '../dto/screenshot.dto';
+
+describe('Browser Automation E2E Workflows', () => {
+  let app: INestApplication;
+  let authToken: string;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [
         ConfigModule.forRoot({
           isGlobal: true,
-          envFilePath: '.env.test',}),SecurityModule,
+          envFilePath: '.env.test',
+        }),
+        SecurityModule,
         AuthModule,
         HealthModule,
         MetricsModule,
@@ -241,12 +264,21 @@ import { Test, TestingModule } from '@nestjs/testing';import { INestApplication,
     });
   });
 
-  describe('Multi-Tab Parallel Processing Workflow', () => {let sessionId: string;const tabIds: string[] = [];
+  describe('Multi-Tab Parallel Processing Workflow', () => {
+    let sessionId: string;
+    const tabIds: string[] = [];
 
-    it('should handle multi-tab parallel processing', async () => {// Step 1: Create sessionconst createSessionDto: CreateBrowserSessionDto = {
-        name: 'E2E Multi-Tab Session',headless: true,viewportWidth: 1280,
+    it('should handle multi-tab parallel processing', async () => {
+      // Step 1: Create session
+      const createSessionDto: CreateBrowserSessionDto = {
+        name: 'E2E Multi-Tab Session',
+        headless: true,
+        viewportWidth: 1280,
         viewportHeight: 720,
-        initialUrls: ['https://example.com'],};const sessionResponse = await request(app.getHttpServer())
+        initialUrls: ['https://example.com'],
+      };
+
+      const sessionResponse = await request(app.getHttpServer())
         .post('/browser-use/sessions').set('Authorization', `Bearer ${authToken}`)
         .send(createSessionDto)
         .expect(HttpStatus.CREATED);
@@ -316,7 +348,10 @@ import { Test, TestingModule } from '@nestjs/testing';import { INestApplication,
         );
 
         if (failedTasks.length > 0) {
-          throw new Error(`Some tasks failed: ${failedTasks.map(t => t.body.error).join(`, ')}`);}if (completedTasks.length === taskIdList.length) {
+          throw new Error(`Some tasks failed: ${failedTasks.map(t => t.body.error).join(', ')}`);
+        }
+
+        if (completedTasks.length === taskIdList.length) {
           allTasksCompleted = true;
         }
 
@@ -348,8 +383,15 @@ import { Test, TestingModule } from '@nestjs/testing';import { INestApplication,
     });
   });
 
-  describe('Error Recovery and Resilience Workflow', () => {let sessionId: string;it('should demonstrate error recovery and resilience', async () => {// Step 1: Create sessionconst createSessionDto: CreateBrowserSessionDto = {
-        name: 'E2E Error Recovery Session',headless: true,viewportWidth: 1280,
+  describe('Error Recovery and Resilience Workflow', () => {
+    let sessionId: string;
+
+    it('should demonstrate error recovery and resilience', async () => {
+      // Step 1: Create session
+      const createSessionDto: CreateBrowserSessionDto = {
+        name: 'E2E Error Recovery Session',
+        headless: true,
+        viewportWidth: 1280,
         viewportHeight: 720,
       };
 
@@ -479,15 +521,21 @@ import { Test, TestingModule } from '@nestjs/testing';import { INestApplication,
     });
   });
 
-  describe('Performance and Metrics Workflow', () => {it('should collect and validate performance metrics', async () => {// Step 1: Get initial metricsconst initialMetricsResponse = await request(app.getHttpServer())
-        .get('/browser-use/tasks/metrics/summary').set('Authorization', `Bearer ${authToken}`)
+  describe('Performance and Metrics Workflow', () => {
+    it('should collect and validate performance metrics', async () => {
+      // Step 1: Get initial metrics
+      const initialMetricsResponse = await request(app.getHttpServer())
+        .get('/browser-use/tasks/metrics/summary')
+        .set('Authorization', `Bearer ${authToken}`)
         .expect(HttpStatus.OK);
 
       const initialMetrics = initialMetricsResponse.body.data;
 
       // Step 2: Execute multiple tasks to generate metrics data
       const sessionDto: CreateBrowserSessionDto = {
-        name: 'Metrics Collection Session',headless: true,viewportWidth: 1280,
+        name: 'Metrics Collection Session',
+        headless: true,
+        viewportWidth: 1280,
         viewportHeight: 720,
       };
 

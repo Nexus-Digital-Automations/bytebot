@@ -62,7 +62,7 @@ class MockAuthController {
       return {
         accessToken: 'mock-jwt-token',
         refreshToken: 'mock-refresh-token',
-        user: { id: '1', email: 'admin@bytebot.ai', role: UserRole._ADMIN },
+        user: { id: '1', email: 'admin@bytebot.ai', role: UserRole._ADMIN as string },
         expiresIn: 900,
       };
     }
@@ -138,19 +138,19 @@ class MockAuthService implements MockAuthServiceInterface {
         id: '1',
         sub: '1',
         email: 'admin@bytebot.ai',
-        role: UserRole._ADMIN,
+        role: UserRole._ADMIN as string,
       },
       'operator-token': {
         id: '2',
         sub: '2',
         email: 'operator@bytebot.ai',
-        role: UserRole._OPERATOR,
+        role: UserRole._OPERATOR as string,
       },
       'viewer-token': {
         id: '3',
         sub: '3',
         email: 'viewer@bytebot.ai',
-        role: UserRole._VIEWER,
+        role: UserRole._VIEWER as string,
       },
     };
     return validTokens[token] ?? null;

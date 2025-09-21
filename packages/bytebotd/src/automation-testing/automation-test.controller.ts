@@ -96,7 +96,8 @@ export class AutomationTestController {
       return response;
 
     } catch (error) {
-      this.logger.error('Failed to execute comprehensive test suite', {error: error.message,duration: Date.now() - startTime
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error('Failed to execute comprehensive test suite', {error: errorMessage,duration: Date.now() - startTime
       });
       throw error;
     }
@@ -125,10 +126,14 @@ export class AutomationTestController {
     this.logger.log(`Executing tests for category: ${category}`);
 
     try {
-      // For this implementation, we'll execute the full suite and filter by categoryconst fullSuiteResult = await this.automationTestService.executeComprehensiveTestSuite();// Filter tests by category
+      // For this implementation, we'll execute the full suite and filter by category
+      const fullSuiteResult = await this.automationTestService.executeComprehensiveTestSuite();
+
+      // Filter tests by category
       const categoryTests = fullSuiteResult.tests.filter(test => test.category === category);
 
-      const passedTests = categoryTests.filter(t => t.status === 'passed').length;const failedTests = categoryTests.filter(t => t.status === 'failed').length;
+      const passedTests = categoryTests.filter(t => t.status === 'passed').length;
+      const failedTests = categoryTests.filter(t => t.status === 'failed').length;
       const successRate = categoryTests.length > 0 ? (passedTests / categoryTests.length) * 100 : 0;
 
       const response = {
@@ -164,8 +169,9 @@ export class AutomationTestController {
       return response;
 
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(`Failed to execute tests for category: ${category}`, {
-        error: error.message,
+        error: errorMessage,
         duration: Date.now() - startTime
       });
       throw error;
@@ -175,16 +181,32 @@ export class AutomationTestController {
   /**
    * Get test suite results by ID
    */
-  @Get('results/suite/:suiteId')@ApiOperation({summary: 'Get test suite results',description: 'Retrieves detailed results for a specific test suite execution'})@ApiParam({
-    name: 'suiteId',description: 'Test suite ID',example: 'suite_1704454800_abc123'})@ApiResponse({
+  @Get('results/suite/:suiteId')
+  @ApiOperation({
+    summary: 'Get test suite results',
+    description: 'Retrieves detailed results for a specific test suite execution'
+  })
+  @ApiParam({
+    name: 'suiteId',
+    description: 'Test suite ID',
+    example: 'suite_1704454800_abc123'
+  })
+  @ApiResponse({
     status: HttpStatus.OK,
-    description: 'Test suite results retrieved successfully'})@ApiResponse({
+    description: 'Test suite results retrieved successfully'
+  })
+  @ApiResponse({
     status: HttpStatus.NOT_FOUND,
-    description: 'Test suite not found'})async getTestSuiteResults(
+    description: 'Test suite not found'
+  })
+  getTestSuiteResults(
     @Param('suiteId') suiteId: string
-  ): Promise<any> {
+  ): any {
     const startTime = Date.now();
-    this.logger.log(`Getting test suite results: ${suiteId}`);try {const suiteResult = this.automationTestService.getTestSuiteResult(suiteId);
+    this.logger.log(`Getting test suite results: ${suiteId}`);
+
+    try {
+      const suiteResult = this.automationTestService.getTestSuiteResult(suiteId);
 
       if (!suiteResult) {
         return {
@@ -211,8 +233,9 @@ export class AutomationTestController {
       return response;
 
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(`Failed to get test suite results: ${suiteId}`, {
-        error: error.message,
+        error: errorMessage,
         duration: Date.now() - startTime
       });
       throw error;
@@ -222,29 +245,75 @@ export class AutomationTestController {
   /**
    * Get all test suite results with pagination
    */
-  @Get('results/suites')@ApiOperation({summary: 'Get all test suite results',description: 'Retrieves all test suite results with pagination and filtering options'})@ApiQuery({
-    name: 'page',type: Number,required: false,
-    description: 'Page number for pagination',example: 1})
+  @Get('results/suites')
+  @ApiOperation({
+    summary: 'Get all test suite results',
+    description: 'Retrieves all test suite results with pagination and filtering options'
+  })
   @ApiQuery({
-    name: 'pageSize',type: Number,required: false,
-    description: 'Number of results per page',example: 10})
+    name: 'page',
+    type: Number,
+    required: false,
+    description: 'Page number for pagination',
+    example: 1
+  })
   @ApiQuery({
-    name: 'status',type: String,required: false,
-    description: 'Filter by overall success status',example: 'passed'})@ApiResponse({
+    name: 'pageSize',
+    type: Number,
+    required: false,
+    description: 'Number of results per page',
+    example: 10
+  })
+  @ApiQuery({
+    name: 'status',
+    type: String,
+    required: false,
+    description: 'Filter by overall success status',
+    example: 'passed'
+  })
+  @ApiResponse({
     status: HttpStatus.OK,
-    description: 'Test suite results retrieved successfully',schema: {type: 'object',properties: {success: { type: 'boolean', example: true },data: {type: 'object',properties: {suites: {
-              type: 'array',items: {type: 'object',properties: {suiteId: { type: 'string', example: 'suite_1704454800_abc123' },name: { type: 'string', example: 'Comprehensive Automation Test Suite' },totalTests: { type: 'number', example: 25 },successRate: { type: 'number', example: 92.0 },duration: { type: 'number', example: 15000 },executedAt: { type: 'string', example: '2024-01-15T10:30:00.000Z' }}}
+    description: 'Test suite results retrieved successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean', example: true },
+        data: {
+          type: 'object',
+          properties: {
+            suites: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  suiteId: { type: 'string', example: 'suite_1704454800_abc123' },
+                  name: { type: 'string', example: 'Comprehensive Automation Test Suite' },
+                  totalTests: { type: 'number', example: 25 },
+                  successRate: { type: 'number', example: 92.0 },
+                  duration: { type: 'number', example: 15000 },
+                  executedAt: { type: 'string', example: '2024-01-15T10:30:00.000Z' }
+                }
+              }
             },
             pagination: {
-              type: 'object',properties: {page: { type: 'number', example: 1 },pageSize: { type: 'number', example: 10 },totalResults: { type: 'number', example: 5 },totalPages: { type: 'number', example: 1 }}}
+              type: 'object',
+              properties: {
+                page: { type: 'number', example: 1 },
+                pageSize: { type: 'number', example: 10 },
+                totalResults: { type: 'number', example: 5 },
+                totalPages: { type: 'number', example: 1 }
+              }
+            }
           }
         }
       }
     }
   })
-  async getAllTestSuiteResults(
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number = 1,@Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number = 10,@Query('status') status?: string
-  ): Promise<any> {
+  getAllTestSuiteResults(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number = 1,
+    @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize: number = 10,
+    @Query('status') status?: string
+  ): any {
     const startTime = Date.now();
     this.logger.log(`Getting all test suite results`, { page, pageSize, status });
 
@@ -305,7 +374,8 @@ export class AutomationTestController {
       return response;
 
     } catch (error) {
-      this.logger.error('Failed to get all test suite results', {error: error.message,duration: Date.now() - startTime
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error('Failed to get all test suite results', {error: errorMessage,duration: Date.now() - startTime
       });
       throw error;
     }
@@ -345,11 +415,13 @@ export class AutomationTestController {
         : 0;
 
       // Calculate statistics by category
-      const byCategory: any = {};
+      const byCategory: Record<string, { totalTests: number; successRate: number; averageExecutionTime: number }> = {};
       Object.values(TestCategory).forEach(category => {
         const categoryTests = allTests.filter(t => t.category === category);
         if (categoryTests.length > 0) {
-          const categoryPassed = categoryTests.filter(t => t.status === 'passed').length;byCategory[category] = {totalTests: categoryTests.length,
+          const categoryPassed = categoryTests.filter(t => t.status === 'passed').length;
+          byCategory[category] = {
+            totalTests: categoryTests.length,
             successRate: (categoryPassed / categoryTests.length) * 100,
             averageExecutionTime: categoryTests.reduce((sum, test) => sum + test.duration, 0) / categoryTests.length
           };
@@ -358,14 +430,23 @@ export class AutomationTestController {
 
       // Generate trends (simplified)
       const trends = {
-        successRateTrend: overallSuccessRate > 90 ? 'good' : overallSuccessRate > 75 ? 'average' : 'needs_improvement',executionTimeTrend: averageExecutionTime < 2000 ? 'fast' : averageExecutionTime < 5000 ? 'acceptable' : 'slow',testVolumeGrowth: 15.5 // Mock data};
+        successRateTrend: overallSuccessRate > 90 ? 'good' : overallSuccessRate > 75 ? 'average' : 'needs_improvement',
+        executionTimeTrend: averageExecutionTime < 2000 ? 'fast' : averageExecutionTime < 5000 ? 'acceptable' : 'slow',
+        testVolumeGrowth: 15.5 // Mock data
+      };
 
       // Generate recommendations
       const recommendations: string[] = [];
       if (overallSuccessRate < 95) {
-        recommendations.push('Consider improving test reliability and addressing failing tests');}if (averageExecutionTime > 3000) {
-        recommendations.push('Optimize test execution time for better CI/CD integration');}if (totalTestsExecuted < 50) {
-        recommendations.push('Increase test coverage across all automation modules');}if (recommendations.length === 0) {
+        recommendations.push('Consider improving test reliability and addressing failing tests');
+      }
+      if (averageExecutionTime > 3000) {
+        recommendations.push('Optimize test execution time for better CI/CD integration');
+      }
+      if (totalTestsExecuted < 50) {
+        recommendations.push('Increase test coverage across all automation modules');
+      }
+      if (recommendations.length === 0) {
         recommendations.push('Test suite is performing well. Consider adding edge case scenarios.');
       }
 
@@ -397,7 +478,8 @@ export class AutomationTestController {
       return response;
 
     } catch (error) {
-      this.logger.error('Failed to get test analytics', {error: error.message,duration: Date.now() - startTime
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error('Failed to get test analytics', {error: errorMessage,duration: Date.now() - startTime
       });
       throw error;
     }
@@ -444,14 +526,15 @@ export class AutomationTestController {
       return response;
 
     } catch (error) {
-      this.logger.error('Health check failed', {error: error.message,duration: Date.now() - startTime
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error('Health check failed', {error: errorMessage,duration: Date.now() - startTime
       });
 
       return {
         success: false,
         data: {
           status: 'unhealthy',
-          error: error.message,
+          error: errorMessage,
           timestamp: new Date().toISOString()
         },
         metadata: {

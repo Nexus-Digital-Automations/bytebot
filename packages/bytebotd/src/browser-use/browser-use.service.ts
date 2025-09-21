@@ -812,7 +812,11 @@ async def main():
         await session.navigate(${JSON.stringify(url)})
         
         print("Navigation completed successfully")await session.close()except Exception as e:
-        print(_f"Navigation failed: {e}")raise eif _name__ == "__main__":asyncio.run(main())
+        print(f"Navigation failed: {e}")
+        raise e
+
+if __name__ == "__main__":
+    asyncio.run(main())
 ";}
 
   private generateClickScript(_sessionId: string, selector: string): string {
@@ -825,14 +829,24 @@ async def main():
     try:
         session = BrowserSession()
         await session.start()
-        
+
         # Click element
-        element = await session.page.query_selector(${JSON.stringify(selector)})
+        element = await session.page.query_selector("${selector}")
         if element:
             await element.click()
-            print("Click completed successfully")else:raise Exception(f"Element not found: {${JSON.stringify(selector)}}")await session.close()except Exception as e:
-        print(_f"Click failed: {e}")raise eif _name__ == "__main__":asyncio.run(main())
-";}
+            print("Click completed successfully")
+        else:
+            raise Exception(f"Element not found: ${selector}")
+
+        await session.close()
+    except Exception as e:
+        print(f"Click failed: {e}")
+        raise e
+
+if __name__ == "__main__":
+    asyncio.run(main())
+`;
+  }
 
   private generateTypeScript(
     sessionId: string,
@@ -848,14 +862,24 @@ async def main():
     try:
         session = BrowserSession()
         await session.start()
-        
+
         # Type text into element
-        element = await session.page.query_selector(${JSON.stringify(selector)})
+        element = await session.page.query_selector("${selector}")
         if element:
-            await element.fill(${JSON.stringify(text)})
-            print("Type completed successfully")else:raise Exception(f"Element not found: {${JSON.stringify(selector)}}")await session.close()except Exception as e:
-        print(_f"Type failed: {e}")raise eif _name__ == "__main__":asyncio.run(main())
-";}
+            await element.fill("${text}")
+            print("Type completed successfully")
+        else:
+            raise Exception(f"Element not found: ${selector}")
+
+        await session.close()
+    except Exception as e:
+        print(f"Type failed: {e}")
+        raise e
+
+if __name__ == "__main__":
+    asyncio.run(main())
+`;
+  }
 
   private generateScreenshotScript(
     sessionId: string,
@@ -873,14 +897,26 @@ async def main():
         
         # Capture screenshot
         screenshot = await session.page.screenshot(
-            path=${filepath ? JSON.stringify(filepath) : 'None'},full_page=${(config as ScreenshotOptions)?.fullPage ?? false},quality=${(config as ScreenshotOptions)?.quality ?? 85},
-            type=${JSON.stringify((config as ScreenshotOptions)?.format ?? 'png')})if not ${filepath ? 'True' : 'False'}:
+            path="${filepath || 'None'}",
+            full_page=${(config as ScreenshotOptions)?.fullPage ?? false},
+            quality=${(config as ScreenshotOptions)?.quality ?? 85},
+            type="${(config as ScreenshotOptions)?.format ?? 'png'}"
+        )
+
+        if not ${filepath ? 'True' : 'False'}:
             # Return base64 if no file path
             import base64
             print(base64.b64encode(screenshot).decode())
         else:
-            print("Screenshot saved successfully")await session.close()except Exception as e:
-        print(_f"Screenshot failed: {e}")raise eif _name__ == "__main__":asyncio.run(main())
+            print("Screenshot saved successfully")
+
+        await session.close()
+    except Exception as e:
+        print(f"Screenshot failed: {e}")
+        raise e
+
+if __name__ == "__main__":
+    asyncio.run(main())
 ";}
 
   private generateExtractionScript(
@@ -898,20 +934,36 @@ async def main():
         await session.start()
         
         # Extract data
-        if ${selector ? 'True' : 'False'}:elements = await session.page.query_selector_all(${JSON.stringify(selector ?? '')})data = []for element in elements:
+        if ${selector ? 'True' : 'False'}:
+            elements = await session.page.query_selector_all("${selector ?? ''}")
+            data = []
+            for element in elements:
                 text_content = await element.text_content()
                 inner_html = await element.inner_html()
                 data.append({
-                    'text': text_content,'html': inner_html})else:
+                    'text': text_content,
+                    'html': inner_html
+                })
+        else:
             # Extract all text from page
-            text_content = await session.page.text_content('body')data = {'pageText': text_content}result = {'data': data,'elementsCount': len(data) if isinstance(data, list) else 1,'selectors': [${JSON.stringify(selector ?? 'body')}]
+            text_content = await session.page.text_content('body')
+            data = {'pageText': text_content}
+
+        result = {
+            'data': data,
+            'elementsCount': len(data) if isinstance(data, list) else 1,
+            'selectors': ["${selector ?? 'body'}"]
         }
         
         print(json.dumps(result))
         await session.close()
         
     except Exception as e:
-        print(_f"Extraction failed: {e}")raise eif _name__ == "__main__":asyncio.run(main())
+        print(f"Extraction failed: {e}")
+        raise e
+
+if __name__ == "__main__":
+    asyncio.run(main())
 ";
   }
 

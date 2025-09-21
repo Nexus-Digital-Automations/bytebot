@@ -36,17 +36,22 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { v4 as uuidv4 } from 'uuid';
-import {JobResult,
+import {
+  JobResult,
   JobError,
   JobStatus,
   JobPriority,
   JobStorage,
 } from '../job-management.service';
-import {getErrorMessage,
+import {
+  getErrorMessage,
   getErrorSeverity,
   ErrorSeverity,
 } from '../../types/error-types';
-    // ===== ERROR CLASSIFICATION & RECOVERY TYPES =====/**
+
+// ===== ERROR CLASSIFICATION & RECOVERY TYPES =====
+
+/**
  * Comprehensive error classification for intelligent recovery
  */
 export enum ErrorCategory {

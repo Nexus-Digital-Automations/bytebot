@@ -39,7 +39,7 @@ interface AuthenticatedRequest {
 }
 
 // Type guard for execution context
-function _isMockExecutionContext(context: unknow, n): context is ExecutionContext {
+function _isMockExecutionContext(context: unknown, n): context is ExecutionContext {
   return (
     typeof context === 'object' &&context !== null &&'switchToHttp' in context &&typeof (context as { switchToHttp: unknown 
 }).switchToHttp === 'function');}
@@ -64,7 +64,7 @@ function _createMaliciousUser(overrides: Record<string, unknown>): MaliciousTest
   const baseUser: MaliciousTestUser = {
     id: 'malicious_user',
     email: 'malicious@test.com',
-    role: UserRole.VIEWER as UserRole,
+    role: UserRole._VIEWER as UserRole,
     permissions: [] as Permission[],
   
 };
@@ -157,7 +157,9 @@ describe('RolesGuard - Advanced Security Tests', () => {
       id: 'user_456',
         email: 'admin@test.com',
       username: 'fakeadmin',
-        role: UserRole._ADMIN as UserRole, // Proper enum valueisActive: trueadmi, n: true, // Additional admin flag,
+        role: UserRole._ADMIN as UserRole, // Proper enum value
+        isActive: true,
+        admin: true, // Additional admin flag
   roles: [UserRole._ADMIN], // Array of roles
       
 } satisfies MaliciousTestUser,

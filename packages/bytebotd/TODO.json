@@ -3451,12 +3451,24 @@
       ]
     },
     {
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2025-09-20T15:58:00.316Z",
       "title": "Deploy 5 concurrent agents for ESLint parsing error fixes in bytebotd test files",
       "description": "Fix all syntax errors across multiple test files in bytebotd package - deploy concurrent agents to handle 5 files simultaneously",
       "category": "error",
-      "id": "error_1758383880316_0av96bx9s0ka"
+      "id": "error_1758383880316_0av96bx9s0ka",
+      "assigned_agent": "dev_session_1758437211105_1_general_5f94c3f7",
+      "started_at": "2025-09-21T06:48:24.477Z",
+      "claimed_by": "dev_session_1758437211105_1_general_5f94c3f7",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758437211105_1_general_5f94c3f7",
+          "role": "primary",
+          "assignedAt": "2025-09-21T06:48:24.477Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
     },
     {
       "status": "pending",
@@ -3955,6 +3967,165 @@
       "id": "error_1758432467248_3c7yp9k8zfw",
       "completed_at": "2025-09-21T05:33:15.217Z",
       "updated_at": "2025-09-21T05:33:15.217Z"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-21T06:38:17.609Z",
+      "title": "Fix ESLint violations in bytebotd automation testing files",
+      "description": "Fix critical ESLint violations in automation testing files: 1) Parsing error missing comma in automation-test.controller.ts line 364, 2) Multiple @typescript-eslint/no-unsafe-assignment violations in automation-test.service.ts (25+ instances of unsafe any value assignments). Ensure type safety and proper TypeScript compliance.",
+      "category": "error",
+      "priority": "normal",
+      "id": "error_1758436697609_k8ukkfv64f",
+      "assigned_agent": "dev_session_1758436552903_1_general_4297bcea",
+      "started_at": "2025-09-21T06:38:33.755Z",
+      "claimed_by": "dev_session_1758436552903_1_general_4297bcea",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758436552903_1_general_4297bcea",
+          "role": "primary",
+          "assignedAt": "2025-09-21T06:38:33.755Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-21T06:41:41.426Z",
+      "updated_at": "2025-09-21T06:41:41.426Z"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-21T06:42:07.944Z",
+      "title": "Fix remaining 70 ESLint violations in bytebotd automation testing files",
+      "description": "Fix remaining TypeScript ESLint violations: 1) 45+ @typescript-eslint/no-unsafe-assignment violations in automation-test.controller.ts involving unsafe error type assignments, unsafe member access, and any value assignments, 2) 7+ @typescript-eslint/require-await violations for async functions without await expressions, 3) Multiple unsafe call and member access violations. Focus on proper error typing, type guards, and async/await compliance.",
+      "category": "error",
+      "priority": "normal",
+      "id": "error_1758436927944_yo6olbd9glg",
+      "assigned_agent": "dev_session_1758436552903_1_general_4297bcea",
+      "started_at": "2025-09-21T06:42:24.677Z",
+      "claimed_by": "dev_session_1758436552903_1_general_4297bcea",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758436552903_1_general_4297bcea",
+          "role": "primary",
+          "assignedAt": "2025-09-21T06:42:24.677Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-21T06:45:12.169Z",
+      "updated_at": "2025-09-21T06:45:12.169Z"
+    },
+    {
+      "status": "in_progress",
+      "created_at": "2025-09-21T06:45:31.187Z",
+      "title": "Fix final 31 ESLint violations in bytebotd automation testing files",
+      "description": "Fix remaining TypeScript ESLint violations focusing on type safety: 1) Unsafe error type assignments requiring proper instanceof Error checks and type guards, 2) Unsafe member access on any values requiring proper type assertions or interfaces, 3) Unsafe call operations needing type validation. Target files: automation-test.controller.ts and automation-test.service.ts. Implement proper error handling patterns and TypeScript strict compliance.",
+      "category": "error",
+      "priority": "normal",
+      "id": "error_1758437131186_8vlmiambqsw",
+      "assigned_agent": "dev_session_1758436552903_1_general_4297bcea",
+      "started_at": "2025-09-21T06:45:49.065Z",
+      "claimed_by": "dev_session_1758436552903_1_general_4297bcea",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758436552903_1_general_4297bcea",
+          "role": "primary",
+          "assignedAt": "2025-09-21T06:45:49.065Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-21T06:50:10.093Z",
+      "title": "Fix ESLint parsing error in browser-automation-integration.spec.ts at line 177",
+      "description": "Fix the ESLint parsing error where colon is expected at line 177 in browser automation integration test file. Identify and fix the missing colon or property definition syntax issue.",
+      "category": "error",
+      "id": "error_1758437410093_g31qeit36b",
+      "completed_at": "2025-09-21T06:52:16.970Z",
+      "updated_at": "2025-09-21T06:52:16.970Z"
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-21T06:50:11.926Z",
+      "title": "Fix ESLint parsing error in browser-automation-e2e.spec.ts at line 247",
+      "description": "Fix the ESLint parsing error where semicolon is expected at line 247 in /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/browser-use/__tests__/browser-automation-e2e.spec.ts. Read the file, identify the syntax issue, and fix the missing semicolon or statement termination problem to ensure proper TypeScript syntax compliance.",
+      "category": "error",
+      "id": "error_1758437411925_1es103grhn8i"
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-21T06:50:12.722Z",
+      "title": "Fix TypeScript unsafe assignment violations in browser-task-execution.controller.spec.ts",
+      "description": "Fix unsafe error type assignments, unsafe member access, and unsafe argument passing on lines 119, 143, 149, 155. Implement proper error handling patterns and type safety measures.",
+      "category": "error",
+      "id": "error_1758437412722_p0ehkabz2ti"
+    },
+    {
+      "status": "in_progress",
+      "created_at": "2025-09-21T06:50:13.350Z",
+      "title": "Fix TypeScript unsafe assignment violations in browser-task-execution.controller.spec.ts",
+      "description": "Fix the first 10 TypeScript unsafe assignment violations in lines 11, 101, 107, 112-114. Focus on unsafe error type assignments, unsafe member access on error types, and unsafe call operations. Add proper type guards, type assertions, or fix the underlying type issues.",
+      "category": "error",
+      "id": "error_1758437413349_ol62kxe37h",
+      "assigned_agent": "dev_session_1758437393118_1_general_2c71649f",
+      "started_at": "2025-09-21T06:50:36.927Z",
+      "claimed_by": "dev_session_1758437393118_1_general_2c71649f",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758437393118_1_general_2c71649f",
+          "role": "primary",
+          "assignedAt": "2025-09-21T06:50:36.927Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-21T16:39:03.351Z",
+      "title": "Fix @typescript-eslint/no-unsafe-return violations in TypeScript files",
+      "description": "Systematically fix @typescript-eslint/no-unsafe-return violations by adding explicit return type annotations, proper return value typing, and type assertions. Focus on shared package and bytebotd package files.",
+      "category": "error",
+      "id": "error_1758472743351_bu8zbng1tjj",
+      "completed_at": "2025-09-21T16:54:08.207Z",
+      "updated_at": "2025-09-21T16:54:08.207Z"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-21T16:39:03.534Z",
+      "title": "Fix @typescript-eslint/no-unsafe-call violations in TypeScript files",
+      "description": "Identify and fix @typescript-eslint/no-unsafe-call violations by adding proper function typing, type guards before function calls, and explicit function signatures. Focus on shared package and bytebotd package files.",
+      "category": "error",
+      "id": "error_1758472743534_cy0fbs80b69",
+      "completed_at": "2025-09-21T16:48:07.260Z",
+      "updated_at": "2025-09-21T16:48:07.260Z"
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-21T16:39:03.827Z",
+      "title": "Fix @typescript-eslint/no-unsafe-argument violations",
+      "description": "Fix unsafe argument violations in TypeScript files by adding proper parameter typing, type guards before function calls, and safe argument passing. Focus on shared package and bytebotd package files.",
+      "category": "error",
+      "id": "error_1758472743827_gds5rmlbuyp"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-21T16:39:04.094Z",
+      "title": "Fix @typescript-eslint/no-unsafe-assignment violations in TypeScript files",
+      "description": "Fix @typescript-eslint/no-unsafe-assignment violations by replacing any types with proper typing, adding type guards, and using proper type assertions. Focus on shared package and bytebotd package files. Apply fixes systematically: identify violation locations, add proper type annotations, replace any with specific types, add type guards where needed.",
+      "category": "error",
+      "id": "error_1758472744094_ti9aldvx7l8",
+      "completed_at": "2025-09-21T16:45:42.006Z",
+      "updated_at": "2025-09-21T16:45:42.006Z"
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-21T16:39:04.606Z",
+      "title": "Fix @typescript-eslint/no-unsafe-member-access violations in TypeScript files",
+      "description": "Focus on safe property access patterns, proper type checking before member access, and type guards. Work on shared package and bytebotd package files. Apply fixes systematically: identify unsafe member accesses, add type guards, use optional chaining where appropriate, add proper type annotations for object properties.",
+      "category": "error",
+      "id": "error_1758472744606_6z9ua04dp1i"
     }
   ],
   "agents": {
@@ -10799,6 +10970,216 @@
       "workload": 0,
       "maxConcurrentTasks": 5,
       "createdAt": "2025-09-21T05:57:06.674Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758437211105_1_general_5f94c3f7": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-21T06:46:51.106Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-21T06:46:51.106Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758437390113_1_general_31c418f6": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-21T06:49:50.114Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-21T06:49:50.114Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758437390410_1_general_1c3c477e": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-21T06:49:50.411Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-21T06:49:50.411Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758437391043_1_general_fa12d56d": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-21T06:49:51.045Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-21T06:49:51.045Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758437393118_1_general_2c71649f": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-21T06:49:53.124Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-21T06:49:53.125Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758472725865_1_general_e27ccb8d": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-21T16:38:45.867Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-21T16:38:45.867Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758472725933_1_general_4a142bf5": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-21T16:38:45.934Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-21T16:38:45.934Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758472726030_1_general_f40452ef": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-21T16:38:46.032Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-21T16:38:46.032Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758472726159_1_general_16f3509c": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-21T16:38:46.160Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-21T16:38:46.160Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758472726254_1_general_185b4bd8": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-21T16:38:46.255Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-21T16:38:46.255Z",
       "sessionId": null,
       "metadata": {}
     }

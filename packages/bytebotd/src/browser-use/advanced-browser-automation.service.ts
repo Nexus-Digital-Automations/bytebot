@@ -288,8 +288,15 @@ export class AdvancedBrowserAutomationService {
 
     process.stdout?.on('data', (data) => {
       try {
-        const metrics = JSON.parse(data.toString());
-        monitoringSession.metricsBuffer.push(metrics);
+        const dataString = (data as Buffer).toString();
+        const metrics = JSON.parse(dataString);
+
+        // Type guard to ensure metrics matches BrowserPerformanceMetricsDto structure
+        if (this.isValidBrowserPerformanceMetrics(metrics)) {
+          monitoringSession.metricsBuffer.push(metrics as BrowserPerformanceMetricsDto);
+        } else {
+          this.logger.warn('Received invalid performance metrics structure');
+        }
       } catch (error) {
         this.logger.warn('Failed to parse performance metrics from Python script');
       }
@@ -496,7 +503,14 @@ export class AdvancedBrowserAutomationService {
     if (installConfig.source === 'local-file' && extensionFile) {
       extensionId = uuidv4();
       extensionPath = path.join(this.extensionsDir, `${extensionId}.zip`);
-      await fs.writeFile(extensionPath, extensionFile.buffer);
+
+      // Ensure buffer is valid before writing
+      if (extensionFile.buffer && Buffer.isBuffer(extensionFile.buffer)) {
+        const safeBuffer = extensionFile.buffer as Buffer;
+        await fs.writeFile(extensionPath, safeBuffer);
+      } else {
+        throw new BadRequestException('Invalid extension file buffer');
+      }
     } else if (installConfig.source === 'chrome-web-store' && installConfig.extensionId) {
       extensionId = installConfig.extensionId;
       // Download from Chrome Web Store (implementation would be needed)
@@ -880,5 +894,23 @@ describe('${recordingSession.recordingName}', () => {
     this.browserProfileSessions.clear();
     this.recordingSessions.clear();
     this.webSocketConnections.clear();
+  }
+
+  /**
+   * Type guard to validate if an object matches BrowserPerformanceMetricsDto structure
+   */
+  private isValidBrowserPerformanceMetrics(obj: any): obj is BrowserPerformanceMetricsDto {
+    return (
+      typeof obj === 'object' &&
+      obj !== null &&
+      typeof obj.sessionId === 'string' &&
+      obj.timestamp instanceof Date &&
+      typeof obj.navigationTiming === 'object' &&
+      obj.navigationTiming !== null &&
+      typeof obj.navigationTiming.domContentLoaded === 'number' &&
+      typeof obj.navigationTiming.loadComplete === 'number' &&
+      typeof obj.navigationTiming.firstPaint === 'number' &&
+      typeof obj.navigationTiming.firstContentfulPaint === 'number'
+    );
   }
 }

@@ -447,7 +447,31 @@ let testModule: TestingModule;
 
       // Create diverse computer use operations
       const operations: (() => Promise<unknown>)[] = [
-        () => context.computerUseService.action({ action: 'move_mouse', coordinates: { x: Math.random() * 1000, y: Math.random() * 1000 } }),() => context.computerUseService.action({ action: 'click_mouse', coordinates: { x: 100, y: 200 }, button: 'left', clickCount: 1 }),() => context.computerUseService.action({ action: 'cursor_position' }),() => context.computerUseService.action({ action: 'screenshot' }),() => context.mcpTools.moveMouse({ coordinates: { x: Math.random() * 500, y: Math.random() * 500 } }),() => context.mcpTools.clickMouse({ coordinates: { x: 200, y: 300 }, button: 'left', clickCount: 1 }),() => context.mcpTools.typeText({ text: 'performance test' }),() => context.mcpTools.cursorPosition(),];
+        async (): Promise<unknown> => {
+          return await context.computerUseService.action({ action: 'move_mouse', coordinates: { x: Math.random() * 1000, y: Math.random() * 1000 } });
+        },
+        async (): Promise<unknown> => {
+          return await context.computerUseService.action({ action: 'click_mouse', coordinates: { x: 100, y: 200 }, button: 'left', clickCount: 1 });
+        },
+        async (): Promise<unknown> => {
+          return await context.computerUseService.action({ action: 'cursor_position' });
+        },
+        async (): Promise<unknown> => {
+          return await context.computerUseService.action({ action: 'screenshot' });
+        },
+        async (): Promise<unknown> => {
+          return await (context.mcpTools as ComputerUseTools).moveMouse({ coordinates: { x: Math.random() * 500, y: Math.random() * 500 } });
+        },
+        async (): Promise<unknown> => {
+          return await (context.mcpTools as ComputerUseTools).clickMouse({ coordinates: { x: 200, y: 300 }, button: 'left', clickCount: 1 });
+        },
+        async (): Promise<unknown> => {
+          return await (context.mcpTools as ComputerUseTools).typeText({ text: 'performance test' });
+        },
+        async (): Promise<unknown> => {
+          return await (context.mcpTools as ComputerUseTools).cursorPosition();
+        },
+      ];
 
       const loadResults = await context.loadGenerator.generateConcurrentLoad(operations, testConfig);
       const endTime = Date.now();
@@ -713,7 +737,18 @@ it('should handle extreme concurrent load', async () => {
       const stressOperation = () => {
         // Randomly select operation type to create varied load
         const operations: (() => Promise<unknown>)[] = [
-          () => context.computerUseService.action({ action: 'move_mouse', coordinates: { x: Math.random() * 1000, y: Math.random() * 1000 } }),() => context.computerUseService.action({ action: 'cursor_position' }),() => context.mcpTools.moveMouse({ coordinates: { x: Math.random() * 500, y: Math.random() * 500 } }),() => context.mcpTools.cursorPosition(),
+          async (): Promise<unknown> => {
+            return await context.computerUseService.action({ action: 'move_mouse', coordinates: { x: Math.random() * 1000, y: Math.random() * 1000 } });
+          },
+          async (): Promise<unknown> => {
+            return await context.computerUseService.action({ action: 'cursor_position' });
+          },
+          async (): Promise<unknown> => {
+            return await (context.mcpTools as ComputerUseTools).moveMouse({ coordinates: { x: Math.random() * 500, y: Math.random() * 500 } });
+          },
+          async (): Promise<unknown> => {
+            return await (context.mcpTools as ComputerUseTools).cursorPosition();
+          },
         ];
         
         const selectedOperation = operations[Math.floor(Math.random() * operations.length)];
@@ -840,7 +875,18 @@ _users`,
         context.performanceMonitor.startMonitoring(500);
 
         const operations: (() => Promise<unknown>)[] = [
-          () => context.computerUseService.action({ action: 'move_mouse', coordinates: { x: 200, y: 300 } }),() => context.computerUseService.action({ action: 'cursor_position' }),() => context.mcpTools.moveMouse({ coordinates: { x: 100, y: 150 } }),() => context.mcpTools.cursorPosition(),
+          async (): Promise<unknown> => {
+            return await context.computerUseService.action({ action: 'move_mouse', coordinates: { x: 200, y: 300 } });
+          },
+          async (): Promise<unknown> => {
+            return await context.computerUseService.action({ action: 'cursor_position' });
+          },
+          async (): Promise<unknown> => {
+            return await (context.mcpTools as ComputerUseTools).moveMouse({ coordinates: { x: 100, y: 150 } });
+          },
+          async (): Promise<unknown> => {
+            return await (context.mcpTools as ComputerUseTools).cursorPosition();
+          },
         ];
 
         const loadResults = await context.loadGenerator.generateConcurrentLoad(operations, testConfig);

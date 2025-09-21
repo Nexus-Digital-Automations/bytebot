@@ -18,7 +18,7 @@
  */
 
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, Logger, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import request from 'supertest';
 import * as jwt from 'jsonwebtoken';
@@ -376,7 +376,7 @@ export class SecurityTestFramework {
    */
   validateSecurityHeaders(response: any): SecurityVulnerability[] {
     const vulnerabilities: SecurityVulnerability[] = [];
-    const headers = response.headers;
+    const headers = (response as { headers?: Record<string, string> }).headers ?? {};
 
     const requiredHeaders = {
       'x-frame-options': 'Missing X-Frame-Options header',
@@ -459,7 +459,7 @@ export class SecurityTestFramework {
   private analyzeError(error: any): SecurityVulnerability[] {
     const vulnerabilities: SecurityVulnerability[] = [];
 
-    if (error.message?.includes('unauthorized')) {
+    if ((error as { message?: string }).message?.includes('unauthorized')) {
       vulnerabilities.push({
         id: this.generateVulnerabilityId(),
         type: 'AUTHENTICATION_FAILURE',
@@ -568,8 +568,9 @@ export class SecurityTestUtils {
    * Validate response structure
    */
   static validateResponseStructure(response: any, expectedStructure: any): boolean {
+    const responseObj = response as Record<string, unknown>;
     for (const [key, type] of Object.entries(expectedStructure)) {
-      if (typeof response[key] !== type) {
+      if (typeof responseObj[key] !== type) {
         return false;
       }
     }

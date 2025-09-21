@@ -5417,10 +5417,108 @@
       "updated_at": "2025-09-21T05:33:15.217Z",
       "archived_at": "2025-09-21T05:33:15.223Z",
       "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-21T06:38:17.609Z",
+      "title": "Fix ESLint violations in bytebotd automation testing files",
+      "description": "Fix critical ESLint violations in automation testing files: 1) Parsing error missing comma in automation-test.controller.ts line 364, 2) Multiple @typescript-eslint/no-unsafe-assignment violations in automation-test.service.ts (25+ instances of unsafe any value assignments). Ensure type safety and proper TypeScript compliance.",
+      "category": "error",
+      "priority": "normal",
+      "id": "error_1758436697609_k8ukkfv64f",
+      "assigned_agent": "dev_session_1758436552903_1_general_4297bcea",
+      "started_at": "2025-09-21T06:38:33.755Z",
+      "claimed_by": "dev_session_1758436552903_1_general_4297bcea",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758436552903_1_general_4297bcea",
+          "role": "primary",
+          "assignedAt": "2025-09-21T06:38:33.755Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-21T06:41:41.426Z",
+      "updated_at": "2025-09-21T06:41:41.426Z",
+      "archived_at": "2025-09-21T06:41:41.433Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-21T06:42:07.944Z",
+      "title": "Fix remaining 70 ESLint violations in bytebotd automation testing files",
+      "description": "Fix remaining TypeScript ESLint violations: 1) 45+ @typescript-eslint/no-unsafe-assignment violations in automation-test.controller.ts involving unsafe error type assignments, unsafe member access, and any value assignments, 2) 7+ @typescript-eslint/require-await violations for async functions without await expressions, 3) Multiple unsafe call and member access violations. Focus on proper error typing, type guards, and async/await compliance.",
+      "category": "error",
+      "priority": "normal",
+      "id": "error_1758436927944_yo6olbd9glg",
+      "assigned_agent": "dev_session_1758436552903_1_general_4297bcea",
+      "started_at": "2025-09-21T06:42:24.677Z",
+      "claimed_by": "dev_session_1758436552903_1_general_4297bcea",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758436552903_1_general_4297bcea",
+          "role": "primary",
+          "assignedAt": "2025-09-21T06:42:24.677Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-21T06:45:12.169Z",
+      "updated_at": "2025-09-21T06:45:12.169Z",
+      "archived_at": "2025-09-21T06:45:12.176Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-21T06:50:10.093Z",
+      "title": "Fix ESLint parsing error in browser-automation-integration.spec.ts at line 177",
+      "description": "Fix the ESLint parsing error where colon is expected at line 177 in browser automation integration test file. Identify and fix the missing colon or property definition syntax issue.",
+      "category": "error",
+      "id": "error_1758437410093_g31qeit36b",
+      "completed_at": "2025-09-21T06:52:16.970Z",
+      "updated_at": "2025-09-21T06:52:16.970Z",
+      "archived_at": "2025-09-21T06:52:16.977Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-21T16:39:04.094Z",
+      "title": "Fix @typescript-eslint/no-unsafe-assignment violations in TypeScript files",
+      "description": "Fix @typescript-eslint/no-unsafe-assignment violations by replacing any types with proper typing, adding type guards, and using proper type assertions. Focus on shared package and bytebotd package files. Apply fixes systematically: identify violation locations, add proper type annotations, replace any with specific types, add type guards where needed.",
+      "category": "error",
+      "id": "error_1758472744094_ti9aldvx7l8",
+      "completed_at": "2025-09-21T16:45:42.006Z",
+      "updated_at": "2025-09-21T16:45:42.006Z",
+      "archived_at": "2025-09-21T16:45:42.020Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-21T16:39:03.534Z",
+      "title": "Fix @typescript-eslint/no-unsafe-call violations in TypeScript files",
+      "description": "Identify and fix @typescript-eslint/no-unsafe-call violations by adding proper function typing, type guards before function calls, and explicit function signatures. Focus on shared package and bytebotd package files.",
+      "category": "error",
+      "id": "error_1758472743534_cy0fbs80b69",
+      "completed_at": "2025-09-21T16:48:07.260Z",
+      "updated_at": "2025-09-21T16:48:07.260Z",
+      "archived_at": "2025-09-21T16:48:07.267Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-21T16:39:03.351Z",
+      "title": "Fix @typescript-eslint/no-unsafe-return violations in TypeScript files",
+      "description": "Systematically fix @typescript-eslint/no-unsafe-return violations by adding explicit return type annotations, proper return value typing, and type assertions. Focus on shared package and bytebotd package files.",
+      "category": "error",
+      "id": "error_1758472743351_bu8zbng1tjj",
+      "completed_at": "2025-09-21T16:54:08.207Z",
+      "updated_at": "2025-09-21T16:54:08.207Z",
+      "archived_at": "2025-09-21T16:54:08.216Z",
+      "archive_version": "2.0.0"
     }
   ],
-  "total_completed": 175,
+  "total_completed": 181,
   "last_completion": "2025-09-13T17:42:38.813Z",
   "created_at": "2025-09-06T03:52:57.066Z",
-  "last_archived": "2025-09-21T05:33:15.223Z"
+  "last_archived": "2025-09-21T16:54:08.216Z"
 }

@@ -118,9 +118,10 @@ describe('Threat Simulation Testing Suite', () => {
               })
               .expect(res => {
                 expect([400, 401, 422]).toContain(res.status);
-                expect(res.body.message).not.toContain('users');
-                expect(res.body.message).not.toContain('password');
-                expect(res.body.message).not.toContain('database');
+                const responseBody = res.body as { message?: string };
+                expect(responseBody.message).not.toContain('users');
+                expect(responseBody.message).not.toContain('password');
+                expect(responseBody.message).not.toContain('database');
               });
           }
         }
@@ -142,8 +143,9 @@ describe('Threat Simulation Testing Suite', () => {
               .expect(res => {
                 expect([200, 400, 422]).toContain(res.status);
                 if (res.status === 200) {
-                  expect(res.body.results).toBeDefined();
-                  expect(Array.isArray(res.body.results)).toBeTruthy();
+                  const responseBody = res.body as { results?: unknown[] };
+                  expect(responseBody.results).toBeDefined();
+                  expect(Array.isArray(responseBody.results)).toBeTruthy();
                 }
               });
           }
@@ -169,9 +171,10 @@ describe('Threat Simulation Testing Suite', () => {
               })
               .expect(res => {
                 expect([201, 400, 422]).toContain(res.status);
-                if (res.body.error) {
-                  expect(res.body.error).not.toContain('database');
-                  expect(res.body.error).not.toContain('SQL');
+                const responseBody = res.body as { error?: string };
+                if (responseBody.error) {
+                  expect(responseBody.error).not.toContain('database');
+                  expect(responseBody.error).not.toContain('SQL');
                 }
               });
           }
@@ -200,9 +203,10 @@ describe('Threat Simulation Testing Suite', () => {
               .expect(res => {
                 expect([201, 400, 422]).toContain(res.status);
                 if (res.status === 201) {
-                  expect(res.body.content).not.toContain('<script>');
-                  expect(res.body.content).not.toContain('javascript:');
-                  expect(res.body.content).not.toContain('onerror=');
+                  const responseBody = res.body as { content?: string };
+                  expect(responseBody.content).not.toContain('<script>');
+                  expect(responseBody.content).not.toContain('javascript:');
+                  expect(responseBody.content).not.toContain('onerror=');
                 }
               });
           }
@@ -249,8 +253,9 @@ describe('Threat Simulation Testing Suite', () => {
               .expect(res => {
                 expect([200, 400, 422]).toContain(res.status);
                 if (res.status === 200) {
-                  expect(res.body.displayName).not.toContain('<script>');
-                  expect(res.body.bio).not.toContain('javascript:');
+                  const responseBody = res.body as { displayName?: string; bio?: string };
+                  expect(responseBody.displayName).not.toContain('<script>');
+                  expect(responseBody.bio).not.toContain('javascript:');
                 }
               });
           }
@@ -306,7 +311,8 @@ describe('Threat Simulation Testing Suite', () => {
           // Validate CSRF protection
           if (validResponse.status === 200 && invalidResponse.status === 403) {
             // CSRF protection is working correctly
-            expect(invalidResponse.body.message).toMatch(/csrf|token/i);
+            const responseBody = invalidResponse.body as { message?: string };
+            expect(responseBody.message).toMatch(/csrf|token/i);
           } else if (validResponse.status === 404) {
             // Endpoint doesn't exist - that's also valid
             expect(invalidResponse.status).toBe(404);
@@ -335,9 +341,10 @@ describe('Threat Simulation Testing Suite', () => {
               })
               .expect(res => {
                 expect([200, 400, 422]).toContain(res.status);
-                if (res.body.error) {
-                  expect(res.body.error).not.toContain('/etc/passwd');
-                  expect(res.body.error).not.toContain('root:');
+                const responseBody = res.body as { error?: string };
+                if (responseBody.error) {
+                  expect(responseBody.error).not.toContain('/etc/passwd');
+                  expect(responseBody.error).not.toContain('root:');
                 }
               });
           }
@@ -362,9 +369,10 @@ describe('Threat Simulation Testing Suite', () => {
               })
               .expect(res => {
                 expect([200, 400, 403, 422]).toContain(res.status);
-                if (res.body.output) {
-                  expect(res.body.output).not.toContain('root:');
-                  expect(res.body.output).not.toContain('/etc/');
+                const responseBody = res.body as { output?: string };
+                if (responseBody.output) {
+                  expect(responseBody.output).not.toContain('root:');
+                  expect(responseBody.output).not.toContain('/etc/');
                 }
               });
           }
@@ -446,7 +454,8 @@ describe('Threat Simulation Testing Suite', () => {
 
           if (response.status === 200) {
             // Session ID should be regenerated after successful login
-            const sessionCookie = response.headers['set-cookie']?.find(cookie =>
+            const headers = response.headers as { 'set-cookie'?: string[] };
+            const sessionCookie = headers['set-cookie']?.find((cookie: string) =>
               cookie.includes('sessionId=')
             );
 
@@ -515,9 +524,10 @@ describe('Threat Simulation Testing Suite', () => {
               .expect(res => {
                 expect([200, 400, 422]).toContain(res.status);
                 if (res.status === 200) {
-                  expect(res.body.response).not.toContain('SYSTEM:');
-                  expect(res.body.response).not.toContain('DEBUG MODE');
-                  expect(res.body.response).not.toContain('system prompt');
+                  const responseBody = res.body as { response?: string };
+                  expect(responseBody.response).not.toContain('SYSTEM:');
+                  expect(responseBody.response).not.toContain('DEBUG MODE');
+                  expect(responseBody.response).not.toContain('system prompt');
                 }
               });
           }
@@ -549,8 +559,9 @@ describe('Threat Simulation Testing Suite', () => {
             .expect(res => {
               expect([200, 400, 422]).toContain(res.status);
               if (res.status === 200) {
-                expect(res.body.userRole).not.toBe('admin');
-                expect(res.body.permissions).not.toContain('admin:*');
+                const responseBody = res.body as { userRole?: string; permissions?: string[] };
+                expect(responseBody.userRole).not.toBe('admin');
+                expect(responseBody.permissions).not.toContain('admin:*');
               }
             });
         }
@@ -575,7 +586,8 @@ describe('Threat Simulation Testing Suite', () => {
             .set('Authorization', `Bearer ${noneToken}`)
             .expect(401);
 
-          expect(response.body.message).toMatch(/invalid|unauthorized|algorithm/i);
+          const responseBody = response.body as { message?: string };
+          expect(responseBody.message).toMatch(/invalid|unauthorized|algorithm/i);
         }
       );
     });
@@ -625,10 +637,11 @@ describe('Threat Simulation Testing Suite', () => {
               .send(input)
               .expect(res => {
                 expect([400, 401]).toContain(res.status);
-                expect(res.body.message).not.toContain('database');
-                expect(res.body.message).not.toContain('table');
-                expect(res.body.message).not.toContain('column');
-                expect(res.body.message).not.toContain('SQL');
+                const responseBody = res.body as { message?: string };
+                expect(responseBody.message).not.toContain('database');
+                expect(responseBody.message).not.toContain('table');
+                expect(responseBody.message).not.toContain('column');
+                expect(responseBody.message).not.toContain('SQL');
               });
           }
         }

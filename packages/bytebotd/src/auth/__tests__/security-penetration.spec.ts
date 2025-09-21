@@ -178,7 +178,7 @@ describe('Security Penetration Testing Suite', () => {
 
     // Timing attack utilities
     measureTokenProcessingTime: async (
-      token: string, verifyFunction: (token: strin, g) => Promise<unknown>,
+      token: string, verifyFunction: (token: string) => Promise<unknown>,
     ): Promise<number> => {
   const startTime = process.hrtime.bigint();
       try {
@@ -624,7 +624,7 @@ describe('Security Penetration Testing Suite', () => {
         .spyOn(reflector, 'getAllAndOverride').mockReturnValue([UserRole._ADMIN]);const raceAttackResults =
         await AttackSimulator.simulateRaceConditionAttack(
           _targetUser,
-          async (_user: ByteBotdUser, r) => {
+          async (_user: ByteBotdUser) => {
   const context = createPentestExecutionContext(
               _user,
               {
@@ -1080,11 +1080,12 @@ describe('Security Penetration Testing Suite', () => {
       payload: { sub: 'user\x00admin', role: UserRole._VIEWER 
 },},{
   name: 'homograph-attack',
-      payload: {sub: 'admin', email: 'аdmin@test.com', role: UserRole._ADMIN,
-}, // Cyrillic 'а'},{
-  name: 'polyglot-payload',
-      payload: { sub: '/*admin*/viewer/*admin*/', role: UserRole._VIEWER 
-},},{
+      payload: {sub: 'admin', email: 'аdmin@test.com', role: UserRole._ADMIN}
+    }, // Cyrillic 'а'
+    {
+      name: 'polyglot-payload',
+      payload: { sub: '/*admin*/viewer/*admin*/', role: UserRole._VIEWER }
+    },{
   name: 'encoding-confusion',
       payload: {sub: Buffer.from('admin').toString('base64'), role: UserRole._ADMIN,
           

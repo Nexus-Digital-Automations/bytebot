@@ -168,11 +168,21 @@ POST /content-monitoring/monitors
             mediaSrc: ["'self'", 'blob:'],
             frameSrc: ["'self'", 'http://localhost:*'], // Allow framing for VNC
             frameAncestors: [
-              "'self'','http://localhost:*','https://localhost:*',
+              "'self'", "'http://localhost:*'", "'https://localhost:*'"
             ],
-            baseUri: ["'self'"],formAction: ["'self'"],
-            upgradeInsecureRequests: environment === 'production' ? [] : null,},reportOnly: environment === 'development',},crossOriginEmbedderPolicy: false, // Disabled for WebSocket compatibility
-        crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },crossOriginResourcePolicy: { policy: 'cross-origin' },dnsPrefetchControl: { allow: false },frameguard: { action: 'sameorigin' }, // Allow framing for VNC viewerhidePoweredBy: true,hsts:
+            baseUri: ["'self'"],
+            formAction: ["'self'"],
+            upgradeInsecureRequests: environment === 'production' ? [] : null,
+          },
+          reportOnly: environment === 'development',
+        },
+        crossOriginEmbedderPolicy: false, // Disabled for WebSocket compatibility
+        crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
+        crossOriginResourcePolicy: { policy: 'cross-origin' },
+        dnsPrefetchControl: { allow: false },
+        frameguard: { action: 'sameorigin' }, // Allow framing for VNC viewer
+        hidePoweredBy: true,
+        hsts:
           environment === 'production'? {maxAge: 31536000, // 1 year
                 includeSubDomains: true,
                 preload: true,
@@ -182,7 +192,9 @@ POST /content-monitoring/monitors
         noSniff: true,
         originAgentCluster: true,
         permittedCrossDomainPolicies: false,
-        referrerPolicy: { policy: 'strict-origin-when-cross-origin' },xssFilter: true,// Note: expectCt has been removed in helmet v8.1.0
+        referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+        xssFilter: true,
+        // Note: expectCt has been removed in helmet v8.1.0
         // Note: permissionsPolicy is not directly supported by helmet v8.1.0
       }),
     );
@@ -253,16 +265,37 @@ POST /content-monitoring/monitors
     );
 
     const wsProxy = createProxyMiddleware({
-      target: 'http://localhost:6080',ws: true,changeOrigin: true,
-      pathRewrite: { '^/websockify': '/' },});app.use('/websockify', express.raw({ type: '*/*' }), wsProxy);const server = (await app.listen(9990)) as Server;// Selective upgrade routing with proper typing
+      target: 'http://localhost:6080',
+      ws: true,
+      changeOrigin: true,
+      pathRewrite: { '^/websockify': '/' },
+    });
+
+    app.use('/websockify', express.raw({ type: '*/*' }), wsProxy);
+
+    const server = (await app.listen(9990)) as Server;
+
+    // Selective upgrade routing with proper typing
     server.on(
-      'upgrade',(req: IncomingMessage, socket: Socket, head: Buffer) => {if (req.url?.startsWith('/websockify')) {// Type-safe upgrade handling - http-proxy-middleware expects a Socket from 'net'if (wsProxy && typeof wsProxy.upgrade === 'function') {// Safe type assertion: socket parameter is guaranteed to be Socket from 'net' modulewsProxy.upgrade(req, socket, head);} else {
-            logger.warn('WebSocket proxy upgrade method not available');}}
+      'upgrade',
+      (req: IncomingMessage, socket: Socket, head: Buffer) => {
+        if (req.url?.startsWith('/websockify')) {
+          // Type-safe upgrade handling - http-proxy-middleware expects a Socket from 'net'
+          if (wsProxy && typeof wsProxy.upgrade === 'function') {
+            // Safe type assertion: socket parameter is guaranteed to be Socket from 'net' module
+            wsProxy.upgrade(req, socket, head);
+          } else {
+            logger.warn('WebSocket proxy upgrade method not available');
+          }
+        }
         // else let Socket.IO/Nest handle it by not hijacking the socket
       },
     );
 
-    logger.log('Application bootstrap completed successfully');logger.log('Server listening on port 9990');} catch (error) {logger.error(
+    logger.log('Application bootstrap completed successfully');
+    logger.log('Server listening on port 9990');
+  } catch (error) {
+    logger.error(
       'Failed to bootstrap application',
       error instanceof Error ? error.stack : String(error),
     );

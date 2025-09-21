@@ -289,10 +289,12 @@ export class JobCancellationController {
       // Convert date string to Date object if provided
       const processedCriteria = { ...bulkRequest.criteria };
       if (processedCriteria.olderThan) {
-        processedCriteria.olderThan = new Date(processedCriteria.olderThan);
-        if (isNaN(processedCriteria.olderThan.getTime())) {
+        const dateValue = new Date(processedCriteria.olderThan);
+        const timeValue = dateValue.getTime();
+        if (isNaN(timeValue)) {
           throw new BadRequestException('Invalid olderThan date format');
         }
+        processedCriteria.olderThan = dateValue;
       }
 
       const request: BulkCancellationRequest = {

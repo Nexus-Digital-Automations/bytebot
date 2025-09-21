@@ -78,7 +78,7 @@ describe('JWT Security Testing Suite', () => {
           expect(typeof token).toBe('string');
           expect(token.split('.').length).toBe(3);
 
-          const decoded = jwt.decode(token) as any;
+          const decoded = jwt.decode(token) as { userId?: string; username?: string; role?: string; iss?: string };
           expect(decoded.userId).toBe(payload.userId);
           expect(decoded.username).toBe(payload.username);
           expect(decoded.role).toBe(payload.role);
@@ -102,7 +102,8 @@ describe('JWT Security Testing Suite', () => {
             .set('Authorization', `Bearer ${expiredToken}`)
             .expect(401);
 
-          expect(response.body.message).toContain('expired');
+          const responseBody = response.body as { message?: string };
+          expect(responseBody.message).toContain('expired');
         }
       );
     });
@@ -124,8 +125,9 @@ describe('JWT Security Testing Suite', () => {
             .send({ token: shortLivedToken });
 
           if (refreshResponse.status === 200) {
-            expect(refreshResponse.body.accessToken).toBeDefined();
-            expect(refreshResponse.body.refreshToken).toBeDefined();
+            const responseBody = refreshResponse.body as { accessToken?: string; refreshToken?: string };
+            expect(responseBody.accessToken).toBeDefined();
+            expect(responseBody.refreshToken).toBeDefined();
           } else {
             // If refresh endpoint doesn't exist, that's also a valid security finding
             expect(refreshResponse.status).toBe(404);
@@ -179,7 +181,8 @@ describe('JWT Security Testing Suite', () => {
             .set('Authorization', `Bearer ${invalidSignatureToken}`)
             .expect(401);
 
-          expect(response.body.message).toMatch(/invalid|unauthorized|signature/i);
+          const responseBody = response.body as { message?: string };
+          expect(responseBody.message).toMatch(/invalid|unauthorized|signature/i);
         }
       );
     });
@@ -197,7 +200,8 @@ describe('JWT Security Testing Suite', () => {
             .set('Authorization', `Bearer ${noneAlgorithmToken}`)
             .expect(401);
 
-          expect(response.body.message).toMatch(/invalid|unauthorized|algorithm/i);
+          const responseBody = response.body as { message?: string };
+          expect(responseBody.message).toMatch(/invalid|unauthorized|algorithm/i);
         }
       );
     });
@@ -215,7 +219,8 @@ describe('JWT Security Testing Suite', () => {
             .set('Authorization', `Bearer ${tamperedToken}`)
             .expect(401);
 
-          expect(response.body.message).toMatch(/invalid|unauthorized|signature/i);
+          const responseBody = response.body as { message?: string };
+          expect(responseBody.message).toMatch(/invalid|unauthorized|signature/i);
         }
       );
     });
@@ -294,7 +299,8 @@ describe('JWT Security Testing Suite', () => {
             .set('Authorization', `Bearer ${shortToken}`)
             .expect(401);
 
-          expect(expiredResponse.body.message).toMatch(/expired|invalid/i);
+          const responseBody = expiredResponse.body as { message?: string };
+          expect(responseBody.message).toMatch(/expired|invalid/i);
         }
       );
     });
@@ -331,7 +337,7 @@ describe('JWT Security Testing Suite', () => {
           };
 
           const token = securityFramework.generateTestJWT(payload);
-          const decoded = jwt.decode(token) as any;
+          const decoded = jwt.decode(token) as { iat?: number; exp?: number; iss?: string; password?: unknown; secret?: unknown; apiKey?: unknown };
 
           // Validate standard claims are present
           expect(decoded.iat).toBeDefined();
@@ -354,7 +360,7 @@ describe('JWT Security Testing Suite', () => {
           const payload = { userId: '123', username: 'testuser' };
           const token = securityFramework.generateTestJWT(payload);
 
-          const header = JSON.parse(Buffer.from(token.split('.')[0], 'base64url').toString());
+          const header = JSON.parse(Buffer.from(token.split('.')[0], 'base64url').toString()) as { typ?: string; alg?: string; secret?: unknown; key?: unknown };
 
           // Validate header structure
           expect(header.typ).toBe('JWT');
@@ -409,7 +415,7 @@ describe('JWT Security Testing Suite', () => {
           });
 
           // Validate header compliance
-          const header = JSON.parse(Buffer.from(parts[0], 'base64url').toString());
+          const header = JSON.parse(Buffer.from(parts[0], 'base64url').toString()) as { typ?: string; alg?: string };
           expect(header.typ).toBe('JWT');
           expect(header.alg).toMatch(/^(HS256|HS384|HS512|RS256|RS384|RS512|ES256|ES384|ES512)$/);
         }

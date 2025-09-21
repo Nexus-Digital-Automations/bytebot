@@ -24,18 +24,54 @@ import {
   Logger,
   HttpException,
   HttpStatus,
-} from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { ParlantIntegrationService, ParlantConversationContext, RiskLevel } from '../parlant/parlant-integration.service';/*** Error categories for classification
+} from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { ParlantIntegrationService, ParlantConversationContext, RiskLevel } from '../parlant/parlant-integration.service';
+
+/*** Error categories for classification
  */
 export enum BrowserErrorCategory {
-  AUTHENTICATION = 'authentication',AUTHORIZATION = 'authorization',VALIDATION = 'validation',RATE_LIMITING = 'rate_limiting',SECURITY_VIOLATION = 'security_violation',BUSINESS_LOGIC = 'business_logic',TECHNICAL = 'technical',EXTERNAL_SERVICE = 'external_service',BROWSER_ENGINE = 'browser_engine',TIMEOUT = 'timeout',RESOURCE_EXHAUSTION = 'resource_exhaustion',CONFIGURATION = 'configuration',}/**
+  AUTHENTICATION = 'authentication',
+  AUTHORIZATION = 'authorization',
+  VALIDATION = 'validation',
+  RATE_LIMITING = 'rate_limiting',
+  SECURITY_VIOLATION = 'security_violation',
+  BUSINESS_LOGIC = 'business_logic',
+  TECHNICAL = 'technical',
+  EXTERNAL_SERVICE = 'external_service',
+  BROWSER_ENGINE = 'browser_engine',
+  TIMEOUT = 'timeout',
+  RESOURCE_EXHAUSTION = 'resource_exhaustion',
+  CONFIGURATION = 'configuration',
+}
+
+/**
  * Error severity levels
  */
 export enum ErrorSeverity {
-  LOW = 'low',MEDIUM = 'medium',HIGH = 'high',CRITICAL = 'critical',}/**
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high',
+  CRITICAL = 'critical',
+}
+
+/**
  * Security incident types
  */
 export enum SecurityIncidentType {
-  BRUTE_FORCE_ATTACK = 'brute_force_attack',INJECTION_ATTEMPT = 'injection_attempt',XSS_ATTEMPT = 'xss_attempt',UNAUTHORIZED_ACCESS = 'unauthorized_access',PRIVILEGE_ESCALATION = 'privilege_escalation',DATA_EXFILTRATION = 'data_exfiltration',SUSPICIOUS_BEHAVIOR = 'suspicious_behavior',MALICIOUS_PAYLOAD = 'malicious_payload',RATE_LIMIT_ABUSE = 'rate_limit_abuse',SESSION_HIJACKING = 'session_hijacking',}/**
+  BRUTE_FORCE_ATTACK = 'brute_force_attack',
+  INJECTION_ATTEMPT = 'injection_attempt',
+  XSS_ATTEMPT = 'xss_attempt',
+  UNAUTHORIZED_ACCESS = 'unauthorized_access',
+  PRIVILEGE_ESCALATION = 'privilege_escalation',
+  DATA_EXFILTRATION = 'data_exfiltration',
+  SUSPICIOUS_BEHAVIOR = 'suspicious_behavior',
+  MALICIOUS_PAYLOAD = 'malicious_payload',
+  RATE_LIMIT_ABUSE = 'rate_limit_abuse',
+  SESSION_HIJACKING = 'session_hijacking',
+}
+
+/**
  * Error context for comprehensive tracking
  */
 interface BrowserErrorContext {
@@ -48,8 +84,8 @@ interface BrowserErrorContext {
   method: string;
   timestamp: Date;
   stackTrace?: string;
-  requestData?: any;
-  responseData?: any;
+  requestData?: unknown;
+  responseData?: unknown;
   securityLevel?: string;
   riskLevel?: string;
 }
@@ -107,7 +143,9 @@ interface ErrorRecoveryStrategy {
   automatic: boolean;
   retryable: boolean;
   maxRetries?: number;
-  backoffStrategy?: 'linear' | 'exponential' | 'fixed';fallbackAction?: string;userNotification: boolean;
+  backoffStrategy?: 'linear' | 'exponential' | 'fixed';
+  fallbackAction?: string;
+  userNotification: boolean;
   escalationRequired: boolean;
 }
 

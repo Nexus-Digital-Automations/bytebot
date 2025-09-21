@@ -2704,10 +2704,178 @@
       "updated_at": "2025-09-20T23:29:19.310Z",
       "archived_at": "2025-09-20T23:29:19.314Z",
       "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-20T06:39:48.740Z",
+      "title": "TypeScript Safety Specialist - bytebot-agent-cc Critical Violations",
+      "description": "Fix 32 critical errors and 124 warnings in bytebot-agent-cc package. Focus on TypeScript strict mode violations, unsafe type operations, error handling type safety, Prisma type safety, and null/undefined guards. Target files: src/tasks/tasks.service.ts (21 errors, 78 warnings), src/messages/messages.service.ts (8 errors, 10 warnings), src/agent/agent.scheduler.ts (1 error, 20 warnings)",
+      "category": "error",
+      "id": "error_1758350388739_tf6rtvfj2m",
+      "assigned_agent": "dev_session_1758469849476_1_general_7418f3b2",
+      "started_at": "2025-09-21T15:51:30.871Z",
+      "claimed_by": "dev_session_1758469849476_1_general_7418f3b2",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758469849476_1_general_7418f3b2",
+          "role": "primary",
+          "assignedAt": "2025-09-21T15:51:30.871Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-21T15:55:26.641Z",
+      "updated_at": "2025-09-21T15:55:26.641Z",
+      "archived_at": "2025-09-21T15:55:26.645Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-21T01:15:57.817Z",
+      "title": "Fix @typescript-eslint/require-await violations in validation modules",
+      "description": "Fix async functions without await statements in TypeScript validation and module files, focusing on enterprise-validation.module.ts and related validation logic",
+      "category": "error",
+      "id": "error_1758417357817_i8dfvrdxi2a",
+      "assigned_agent": "dev_session_1758469849476_1_general_7418f3b2",
+      "started_at": "2025-09-21T15:57:12.459Z",
+      "claimed_by": "dev_session_1758469849476_1_general_7418f3b2",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758469849476_1_general_7418f3b2",
+          "role": "primary",
+          "assignedAt": "2025-09-21T15:57:12.459Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-21T16:02:57.158Z",
+      "updated_at": "2025-09-21T16:02:57.158Z",
+      "archived_at": "2025-09-21T16:02:57.162Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-21T01:15:58.655Z",
+      "title": "Fix @typescript-eslint/require-await violations in TypeScript function wrapper files",
+      "description": "Fix @typescript-eslint/require-await violations in parameter-capture-validation.ts, signature-preserving-wrapper.ts, and return-value-processing.ts. Focus on functions marked as async that dont contain any await statements while preserving wrapper functionality and signature compatibility.",
+      "category": "error",
+      "id": "error_1758417358655_c6rpvztq6k5",
+      "assigned_agent": "dev_session_1758469849476_1_general_7418f3b2",
+      "started_at": "2025-09-21T16:03:42.779Z",
+      "claimed_by": "dev_session_1758469849476_1_general_7418f3b2",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758469849476_1_general_7418f3b2",
+          "role": "primary",
+          "assignedAt": "2025-09-21T16:03:42.779Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-21T16:10:16.087Z",
+      "updated_at": "2025-09-21T16:10:16.087Z",
+      "archived_at": "2025-09-21T16:10:16.089Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-21T01:15:59.179Z",
+      "title": "Fix @typescript-eslint/require-await violations in TypeScript guard files",
+      "description": "Remove async keyword from functions without await statements in jwt-parlant-auth.guard.ts, enterprise-security.guard.ts, rbac-authorization.guard.ts, and enhanced-parlant-auth.guard.ts",
+      "category": "error",
+      "id": "error_1758417359179_klo4c4drmoe",
+      "assigned_agent": "dev_session_1758471105117_1_general_5648800a",
+      "started_at": "2025-09-21T16:12:47.773Z",
+      "claimed_by": "dev_session_1758471105117_1_general_5648800a",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758471105117_1_general_5648800a",
+          "role": "primary",
+          "assignedAt": "2025-09-21T16:12:47.773Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-21T16:19:15.063Z",
+      "updated_at": "2025-09-21T16:19:15.063Z",
+      "archived_at": "2025-09-21T16:19:15.067Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-21T16:20:28.501Z",
+      "title": "Apply ESLint autofix to resolve require-await violations in parlant service files",
+      "description": "Use npx eslint --fix on parlant-huginn-bridge.service.ts and parlant-context-correlation.service.ts to resolve require-await violations. Report success if autofix resolves all violations, or document exact violations needing manual intervention.",
+      "category": "error",
+      "id": "error_1758471628501_z5ij5jtydm",
+      "completed_at": "2025-09-21T16:23:29.392Z",
+      "updated_at": "2025-09-21T16:23:29.392Z",
+      "archived_at": "2025-09-21T16:23:29.396Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-21T16:20:28.940Z",
+      "title": "Apply ESLint autofix to resolve require-await violations in parlant-enhanced-auth.service.ts",
+      "description": "Use ESLint autofix command to resolve require-await violations in parlant-enhanced-auth.service.ts file. Apply npx eslint --fix on this specific file first, then document results and any remaining violations.",
+      "category": "error",
+      "id": "error_1758471628940_eqwdyogjmck",
+      "assigned_agent": "dev_session_1758471611753_1_general_20291068",
+      "started_at": "2025-09-21T16:20:47.482Z",
+      "claimed_by": "dev_session_1758471611753_1_general_20291068",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758471611753_1_general_20291068",
+          "role": "primary",
+          "assignedAt": "2025-09-21T16:20:47.482Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-21T16:24:12.651Z",
+      "updated_at": "2025-09-21T16:24:12.651Z",
+      "archived_at": "2025-09-21T16:24:12.654Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-21T16:20:28.588Z",
+      "title": "Apply ESLint autofix for require-await violations in service files",
+      "description": "Use npx eslint --fix to resolve require-await violations in security-monitoring.service.ts and compliance-dashboard.service.ts. Document exact remaining violations if autofix does not resolve all issues.",
+      "category": "error",
+      "id": "error_1758471628588_zjp8f4rv97g",
+      "completed_at": "2025-09-21T16:24:30.018Z",
+      "updated_at": "2025-09-21T16:24:30.018Z",
+      "archived_at": "2025-09-21T16:24:30.020Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-21T01:15:59.377Z",
+      "title": "Fix @typescript-eslint/require-await violations in TypeScript service files",
+      "description": "Fix async functions without await statements in 5 service files: parlant-huginn-bridge.service.ts, security-monitoring.service.ts, compliance-dashboard.service.ts, parlant-context-correlation.service.ts, parlant-enhanced-auth.service.ts",
+      "category": "error",
+      "id": "error_1758417359377_to6ymxyg9vm",
+      "assigned_agent": "dev_session_1758471516803_1_general_754497b0",
+      "started_at": "2025-09-21T16:19:35.920Z",
+      "claimed_by": "dev_session_1758471516803_1_general_754497b0",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758471516803_1_general_754497b0",
+          "role": "primary",
+          "assignedAt": "2025-09-21T16:19:35.920Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-21T16:29:02.219Z",
+      "updated_at": "2025-09-21T16:29:02.219Z",
+      "archived_at": "2025-09-21T16:29:02.222Z",
+      "archive_version": "2.0.0"
     }
   ],
-  "total_completed": 73,
+  "total_completed": 81,
   "last_completion": "2025-09-13T05:08:39.544Z",
   "created_at": "2025-09-11T09:00:29.533Z",
-  "last_archived": "2025-09-20T23:29:19.314Z"
+  "last_archived": "2025-09-21T16:29:02.222Z"
 }

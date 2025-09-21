@@ -91,13 +91,13 @@ let ParlantEnhancedAuthService = ParlantEnhancedAuthService_1 = class ParlantEnh
             requiresConversation: authContext.riskAssessment.requiresConversation,
         });
         try {
-            const requiresConversation = await this.shouldRequireConversationalValidation(authContext);
+            const requiresConversation = this.shouldRequireConversationalValidation(authContext);
             if (!requiresConversation) {
                 return this.performStandardAuthentication(credentials, authContext);
             }
             const validationRequest = await this.createAuthenticationValidationRequest(operationId, credentials, authContext);
             const validationResponse = await this.parlantService.validateFunctionExecution(validationRequest);
-            const authResult = await this.processValidationResponse(validationResponse, credentials, authContext);
+            const authResult = this.processValidationResponse(validationResponse, credentials, authContext);
             const processingTime = Date.now() - startTime;
             this.logger.log(`[${operationId}] Conversational authentication completed`, {
                 operationId,
@@ -144,7 +144,7 @@ let ParlantEnhancedAuthService = ParlantEnhancedAuthService_1 = class ParlantEnh
         const validationRequest = await this.createHighRiskValidationRequest(operationId, credentials, authContext);
         const validationResponse = await this.parlantService.validateFunctionExecution(validationRequest);
         if (validationResponse.approved) {
-            await this.implementAdditionalSecurityMeasures(authContext);
+            this.implementAdditionalSecurityMeasures(authContext);
         }
         return this.processValidationResponse(validationResponse, credentials, authContext);
     }
@@ -230,7 +230,7 @@ let ParlantEnhancedAuthService = ParlantEnhancedAuthService_1 = class ParlantEnh
                 remainingAttempts: 0,
             };
         }
-        const isValid = await this.validateMFAResponse(challenge, response);
+        const isValid = this.validateMFAResponse(challenge, response);
         challenge.attempts++;
         if (isValid) {
             challenge.verified = true;
@@ -242,10 +242,10 @@ let ParlantEnhancedAuthService = ParlantEnhancedAuthService_1 = class ParlantEnh
             conversationId: challenge.conversationId,
         };
     }
-    async assessAuthenticationRisk(authContext) {
+    assessAuthenticationRisk(authContext) {
         const riskFactors = [];
         let totalRiskScore = 0;
-        if (await this.isUnusualLocation(authContext.requestMetadata.ipAddress)) {
+        if (this.isUnusualLocation(authContext.requestMetadata.ipAddress)) {
             riskFactors.push({
                 type: RiskFactorType.UNUSUAL_LOCATION,
                 score: 30,
@@ -271,16 +271,21 @@ let ParlantEnhancedAuthService = ParlantEnhancedAuthService_1 = class ParlantEnh
         }
         totalRiskScore = riskFactors.reduce((sum, factor) => sum + factor.score, 0);
         let riskLevel;
-        if (totalRiskScore >= 80)
+        if (totalRiskScore >= 80) {
             riskLevel = parlant_types_1.RiskLevel._CRITICAL;
-        else if (totalRiskScore >= 60)
+        }
+        else if (totalRiskScore >= 60) {
             riskLevel = parlant_types_1.RiskLevel._HIGH;
-        else if (totalRiskScore >= 40)
+        }
+        else if (totalRiskScore >= 40) {
             riskLevel = parlant_types_1.RiskLevel._MODERATE;
-        else if (totalRiskScore >= 20)
+        }
+        else if (totalRiskScore >= 20) {
             riskLevel = parlant_types_1.RiskLevel._LOW;
-        else
+        }
+        else {
             riskLevel = parlant_types_1.RiskLevel._MINIMAL;
+        }
         return {
             overallRiskScore: totalRiskScore,
             riskFactors,
@@ -289,7 +294,7 @@ let ParlantEnhancedAuthService = ParlantEnhancedAuthService_1 = class ParlantEnh
             assessedAt: new Date(),
         };
     }
-    async shouldRequireConversationalValidation(authContext) {
+    shouldRequireConversationalValidation(authContext) {
         if (authContext.riskAssessment.overallRiskScore >= 60) {
             return true;
         }
@@ -405,7 +410,7 @@ let ParlantEnhancedAuthService = ParlantEnhancedAuthService_1 = class ParlantEnh
             updatedAt: new Date(),
         };
     }
-    async processValidationResponse(response, credentials, authContext) {
+    processValidationResponse(response, credentials, authContext) {
         const result = {
             success: false,
             conversationContext: undefined,
@@ -420,17 +425,17 @@ let ParlantEnhancedAuthService = ParlantEnhancedAuthService_1 = class ParlantEnh
         };
         if (response.approved) {
             result.success = true;
-            result.tokens = await this.generateAuthenticationTokens(authContext);
+            result.tokens = this.generateAuthenticationTokens(authContext);
         }
         else {
             result.error = response.reason;
         }
         return result;
     }
-    async performStandardAuthentication(credentials, authContext) {
+    performStandardAuthentication(credentials, authContext) {
         return {
             success: true,
-            tokens: await this.generateAuthenticationTokens(authContext),
+            tokens: this.generateAuthenticationTokens(authContext),
             requiredActions: [],
             metadata: {
                 standardAuth: true,
@@ -438,7 +443,7 @@ let ParlantEnhancedAuthService = ParlantEnhancedAuthService_1 = class ParlantEnh
             },
         };
     }
-    async generateAuthenticationTokens(authContext) {
+    generateAuthenticationTokens(authContext) {
         return {
             accessToken: `access-token-${Date.now()}`,
             refreshToken: `refresh-token-${Date.now()}`,
@@ -478,7 +483,7 @@ let ParlantEnhancedAuthService = ParlantEnhancedAuthService_1 = class ParlantEnh
             headers: {},
         };
     }
-    async isUnusualLocation(ipAddress) {
+    isUnusualLocation(ipAddress) {
         return false;
     }
     isUnusualTime(timestamp) {
@@ -514,7 +519,7 @@ let ParlantEnhancedAuthService = ParlantEnhancedAuthService_1 = class ParlantEnh
             },
         };
     }
-    async implementAdditionalSecurityMeasures(authContext) {
+    implementAdditionalSecurityMeasures(authContext) {
         this.logger.log("Implementing additional security measures for high-risk authentication", {
             userId: authContext.userId,
             riskScore: authContext.riskAssessment.overallRiskScore,
@@ -533,7 +538,7 @@ let ParlantEnhancedAuthService = ParlantEnhancedAuthService_1 = class ParlantEnh
         }
         return [];
     }
-    async validateMFAResponse(challenge, response) {
+    validateMFAResponse(challenge, response) {
         return response.length > 0;
     }
 };

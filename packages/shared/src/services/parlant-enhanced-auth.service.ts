@@ -421,7 +421,7 @@ export class ParlantEnhancedAuthService {
     try {
       // Step 1: Assess if conversational validation is required
       const requiresConversation =
-        await this.shouldRequireConversationalValidation(authContext);
+        this.shouldRequireConversationalValidation(authContext);
 
       if (!requiresConversation) {
         // Standard authentication flow
@@ -441,7 +441,7 @@ export class ParlantEnhancedAuthService {
         await this.parlantService.validateFunctionExecution(validationRequest);
 
       // Step 4: Process validation result
-      const authResult = await this.processValidationResponse(
+      const authResult = this.processValidationResponse(
         validationResponse,
         credentials,
         authContext,
@@ -542,7 +542,7 @@ export class ParlantEnhancedAuthService {
 
     // Additional security measures for high-risk authentication
     if (validationResponse.approved) {
-      await this.implementAdditionalSecurityMeasures(authContext);
+      this.implementAdditionalSecurityMeasures(authContext);
     }
 
     return this.processValidationResponse(
@@ -728,7 +728,7 @@ export class ParlantEnhancedAuthService {
     }
 
     // Validate the response
-    const isValid = await this.validateMFAResponse(challenge, response);
+    const isValid = this.validateMFAResponse(challenge, response);
 
     // Update challenge
     challenge.attempts++;
@@ -756,14 +756,14 @@ export class ParlantEnhancedAuthService {
    * @param authContext - Authentication context
    * @returns Promise<RiskAssessment> - Risk assessment result
    */
-  private async assessAuthenticationRisk(
+  private assessAuthenticationRisk(
     authContext: ConversationalAuthContext,
-  ): Promise<RiskAssessment> {
+  ): RiskAssessment {
     const riskFactors: RiskFactor[] = [];
     let totalRiskScore = 0;
 
     // Analyze various risk factors
-    if (await this.isUnusualLocation(authContext.requestMetadata.ipAddress)) {
+    if (this.isUnusualLocation(authContext.requestMetadata.ipAddress)) {
       riskFactors.push({
         type: RiskFactorType.UNUSUAL_LOCATION,
         score: 30,
@@ -795,11 +795,11 @@ export class ParlantEnhancedAuthService {
 
     // Determine risk level
     let riskLevel: RiskLevel;
-    if (totalRiskScore >= 80) riskLevel = RiskLevel._CRITICAL;
-    else if (totalRiskScore >= 60) riskLevel = RiskLevel._HIGH;
-    else if (totalRiskScore >= 40) riskLevel = RiskLevel._MODERATE;
-    else if (totalRiskScore >= 20) riskLevel = RiskLevel._LOW;
-    else riskLevel = RiskLevel._MINIMAL;
+    if (totalRiskScore >= 80) {riskLevel = RiskLevel._CRITICAL;}
+    else if (totalRiskScore >= 60) {riskLevel = RiskLevel._HIGH;}
+    else if (totalRiskScore >= 40) {riskLevel = RiskLevel._MODERATE;}
+    else if (totalRiskScore >= 20) {riskLevel = RiskLevel._LOW;}
+    else {riskLevel = RiskLevel._MINIMAL;}
 
     return {
       overallRiskScore: totalRiskScore,
@@ -817,9 +817,9 @@ export class ParlantEnhancedAuthService {
    * @param authContext - Authentication context
    * @returns Promise<boolean> - Whether conversation is required
    */
-  private async shouldRequireConversationalValidation(
+  private shouldRequireConversationalValidation(
     authContext: ConversationalAuthContext,
-  ): Promise<boolean> {
+  ): boolean {
     // Always require conversation for high-risk scenarios
     if (authContext.riskAssessment.overallRiskScore >= 60) {
       return true;
@@ -1012,11 +1012,11 @@ export class ParlantEnhancedAuthService {
    * @param authContext - Authentication context
    * @returns Promise<ConversationalAuthResult> - Authentication result
    */
-  private async processValidationResponse(
+  private processValidationResponse(
     response: ParlantValidationResponse,
     credentials: Record<string, unknown>,
     authContext: ConversationalAuthContext,
-  ): Promise<ConversationalAuthResult> {
+  ): ConversationalAuthResult {
     const result: ConversationalAuthResult = {
       success: false,
       conversationContext: undefined, // response.conversationContext not available in parlant-integration.types
@@ -1033,7 +1033,7 @@ export class ParlantEnhancedAuthService {
     if (response.approved) {
       // Authentication approved - perform actual authentication
       result.success = true;
-      result.tokens = await this.generateAuthenticationTokens(authContext);
+      result.tokens = this.generateAuthenticationTokens(authContext);
     } else {
       // Authentication denied
       result.error = response.reason;
@@ -1051,15 +1051,15 @@ export class ParlantEnhancedAuthService {
    * @param authContext - Authentication context
    * @returns Promise<ConversationalAuthResult> - Authentication result
    */
-  private async performStandardAuthentication(
+  private performStandardAuthentication(
     credentials: Record<string, unknown>,
     authContext: ConversationalAuthContext,
-  ): Promise<ConversationalAuthResult> {
+  ): ConversationalAuthResult {
     // Implementation would call existing standard authentication service
     // For now, return a mock successful result
     return {
       success: true,
-      tokens: await this.generateAuthenticationTokens(authContext),
+      tokens: this.generateAuthenticationTokens(authContext),
       requiredActions: [],
       metadata: {
         standardAuth: true,
@@ -1074,9 +1074,9 @@ export class ParlantEnhancedAuthService {
    * @param authContext - Authentication context
    * @returns Promise<TokenPair> - Generated tokens
    */
-  private async generateAuthenticationTokens(
+  private generateAuthenticationTokens(
     authContext: ConversationalAuthContext,
-  ): Promise<TokenPair> {
+  ): TokenPair {
     // Implementation would generate actual JWT tokens
     // For now, return mock tokens
     return {
@@ -1145,7 +1145,7 @@ export class ParlantEnhancedAuthService {
   }
 
   // Additional helper methods...
-  private async isUnusualLocation(ipAddress?: string): Promise<boolean> {
+  private isUnusualLocation(ipAddress?: string): boolean {
     // Implementation would check against user's historical locations
     return false;
   }
@@ -1193,9 +1193,9 @@ export class ParlantEnhancedAuthService {
     } as unknown as ParlantConversationContext;
   }
 
-  private async implementAdditionalSecurityMeasures(
+  private implementAdditionalSecurityMeasures(
     authContext: ConversationalAuthContext,
-  ): Promise<void> {
+  ): void {
     // Implementation would add additional security measures for high-risk auth
     this.logger.log(
       "Implementing additional security measures for high-risk authentication",
@@ -1223,10 +1223,10 @@ export class ParlantEnhancedAuthService {
     return [];
   }
 
-  private async validateMFAResponse(
+  private validateMFAResponse(
     challenge: MFAChallenge,
     response: string,
-  ): Promise<boolean> {
+  ): boolean {
     // Implementation would validate MFA response based on method
     return response.length > 0; // Mock validation
   }

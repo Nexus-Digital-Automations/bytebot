@@ -658,16 +658,28 @@ export class BrowserOrchestrationController implements OnModuleInit, OnModuleDes
   }
 
   private handlePythonProgressUpdate(orchestrationId: string, update: any): void {
-    if (update.status) {
-      const status = this.mapPythonStatusToOrchestrationStatus(update.status);
+    if (update.status && typeof update.status === 'string') {
+      const statusString = update.status as string;
+      const status = this.mapPythonStatusToOrchestrationStatus(statusString);
       this.updateOrchestrationStatus(orchestrationId, status, {
         successfulTasks: update.successful_tasks || 0,
         failedTasks: update.failed_tasks || 0,
       });
     }
 
-    if (update.progress) {
-      this.broadcastProgressUpdate(orchestrationId, update.progress);
+    if (update.progress && typeof update.progress === 'object' && update.progress !== null) {
+      // Type guard to ensure progress has required properties
+      const progress = update.progress;
+      if (typeof progress.completedTasks === 'number' &&
+          typeof progress.totalTasks === 'number' &&
+          typeof progress.percentage === 'number') {
+        const typedProgress: { completedTasks: number; totalTasks: number; percentage: number } = {
+          completedTasks: progress.completedTasks,
+          totalTasks: progress.totalTasks,
+          percentage: progress.percentage
+        };
+        this.broadcastProgressUpdate(orchestrationId, typedProgress);
+      }
     }
   }
 

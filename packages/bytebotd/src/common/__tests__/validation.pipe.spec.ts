@@ -985,7 +985,13 @@ const startTime = Date.now();
       // Execute multiple failing validations
       const promises = Array(10)
         .fill(null)
-        .map(() => pipe.transform(invalidData, metadata).catch(() => 'error' as const));const results = await Promise.all(promises);const executionTime = Date.now() - startTime;
+        .map((): Promise<unknown> => {
+          return Promise.resolve()
+            .then((): unknown => pipe.transform(invalidData, metadata))
+            .catch((): string => 'error' as const);
+        });
+      const results = await Promise.all(promises);
+      const executionTime = Date.now() - startTime;
 
       expect(results.every((result: unknown) => result === 'error')).toBe(true);
       expect(executionTime).toBeLessThan(500); // Should fail fast

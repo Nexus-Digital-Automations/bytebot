@@ -10,7 +10,11 @@
  * @security-focus Critical
  */
 
-import { Injectable, Logger } from '@nestjs/common';import { Observable, from, of, throwError, timer, concat, defer } from 'rxjs';import { retryWhen, delay, take, mergeMap, catchError, tap, concatMap, switchMap } from 'rxjs/operators';import {OrchestrationError,
+import { Injectable, Logger } from '@nestjs/common';
+import { Observable, from, of, throwError, timer, concat, defer } from 'rxjs';
+import { retryWhen, delay, take, mergeMap, catchError, tap, concatMap, switchMap } from 'rxjs/operators';
+import {
+  OrchestrationError,
   OrchestrationErrorType,
   OrchestrationErrorCategory,
   OrchestrationErrorSeverity,
@@ -24,7 +28,9 @@ import { Injectable, Logger } from '@nestjs/common';import { Observable, from, o
   ResourceAllocationError,
   AggregationError,
   OrchestrationErrorAnalyzer,
-} from './orchestration-errors';/*** Recovery operation result interface
+} from './orchestration-errors';
+
+/*** Recovery operation result interface
  */
 export interface RecoveryOperationResult {
   readonly success: boolean;
