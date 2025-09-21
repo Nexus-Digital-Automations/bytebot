@@ -166,8 +166,8 @@ describe('JwtAuthGuard', () => {
           provide: 'ParlantAuthBridgeService',
           useValue: parlantAuthBridge
         },
-      ]
-      }).compile();
+      ],
+    }).compile();
 
     guard = module.get<JwtAuthGuard>(JwtAuthGuard);
   });
@@ -375,6 +375,7 @@ describe('JwtAuthGuard', () => {
       expect(endTime - startTime).toBeLessThan(500); // 10 concurrent auths in <500ms
     });
   });
+});
 
 // ===== ROLES GUARD TESTS =====
 
@@ -417,8 +418,8 @@ describe('RolesGuard', () => {
           provide: 'ParlantAuthBridgeService',
           useValue: parlantAuthBridge
         },
-      ]
-      }).compile();
+      ],
+    }).compile();
 
     guard = module.get<RolesGuard>(RolesGuard);
   });

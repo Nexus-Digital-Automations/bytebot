@@ -43,7 +43,8 @@ import {ApiTags,
   ApiSecurity
 } from '@nestjs/swagger';
 
-// PARLANT Validation Integrationimport {
+// PARLANT Validation Integration
+import {
   ParlantCritical,
   ParlantSecure,
   ParlantValidated,
