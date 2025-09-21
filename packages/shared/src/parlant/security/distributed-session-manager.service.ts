@@ -727,7 +727,7 @@ export class DistributedSessionManagerService implements OnModuleInit, OnModuleD
     const errors: string[] = [];
 
     // Validate authentication result
-    if (!request.authenticationResult?.success) {
+    if (!request.authenticationResult?.confidenceScore) {
       errors.push("Valid authentication result required");
     }
 

@@ -359,7 +359,7 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
     const startTime = performance.now();
     const correlationId = uuidv4();
 
-    this.logger.info("Starting conversational authentication", {
+    this.logger.log("Starting conversational authentication", {
       correlationId,
       userId: authRequest.userProfile?.userId,
       authenticationLevel: authRequest.authenticationLevel,
@@ -436,7 +436,7 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
         duration: totalDuration
       });
 
-      this.logger.info("Conversational authentication completed", {
+      this.logger.log("Conversational authentication completed", {
         correlationId,
         success: validationResult.success,
         duration: totalDuration,
