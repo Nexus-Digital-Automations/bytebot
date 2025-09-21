@@ -181,7 +181,7 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
   protected transformEntity(
     entity: UserEntity,
     context?: UserOperationContext,
-  ): UserEntity {
+  ): Promise<UserEntity> {
     // Create a copy to avoid modifying the original
     const transformed = { ...entity };
 
@@ -198,7 +198,7 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
       redacted: context?.userRole !== 'system',
     });
 
-    return transformed;
+    return Promise.resolve(transformed);
   }
 
   // ===== USER-SPECIFIC VALIDATION METHODS =====
