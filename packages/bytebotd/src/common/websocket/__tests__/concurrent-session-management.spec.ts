@@ -57,13 +57,11 @@ interface ValidationResponsePayload {
   reasoning: string;
   conversationId: string;
   requiresUserConfirmation: boolean;
-  metadata: {;
-  processingTime: number;
-  sessionId: string;
+  metadata: {
+    processingTime: number;
+    sessionId: string;
     userId: string;
-  
-
-};
+  };
 }
 
 /**
@@ -127,9 +125,11 @@ class TestSession extends EventEmitter {
 
   async connect(): Promise<void>  {
   return new Promise((resolve, reject) => {
-      this.ws = new WebSocket.WebSocket(this.url, {,
-  headers: {
-          'X-Session-ID': this.sessionId,'X-User-ID': this.userId,'X-Device-ID': this.deviceId,
+      this.ws = new WebSocket.WebSocket(this.url, {
+        headers: {
+          'X-Session-ID': this.sessionId,
+          'X-User-ID': this.userId,
+          'X-Device-ID': this.deviceId,
         
 },
       });
@@ -146,9 +146,15 @@ resolve();
 });
 
       this.ws.on('message', (data: WebSocket.RawData) => {
-  try {const message = JSON.parse(Buffer.from(data as Buffer).toString('utf8')) as ConversationalMessage;this.sessionState.messagesReceived.push(message);this.sessionState.messageCount++;
+        try {
+          const message = JSON.parse(Buffer.from(data as Buffer).toString('utf8')) as ConversationalMessage;
+          this.sessionState.messagesReceived.push(message);
+          this.sessionState.messageCount++;
           this.sessionState.lastActivity = Date.now();
-          this.emit('message', message);// Track validationsif (message.type === ConversationalMessageType.VALIDATION_RESPONSE) {
+          this.emit('message', message);
+
+          // Track validations
+          if (message.type === ConversationalMessageType.VALIDATION_RESPONSE) {
             this.sessionState.validations.set(message.payload.validationId, message.payload);
           
 }
@@ -198,7 +204,7 @@ reject(error);
   async startValidation(action: ValidationAction): Promise<string>  {
   const validationId = randomUUID();
 
-    const validationRequest: ValidationRequestMessage = {,
+    const validationRequest: ValidationRequestMessage = {
   type: ConversationalMessageType.VALIDATION_REQUEST,
       messageId: randomUUID(),
       sessionId: this.sessionId,
@@ -292,7 +298,7 @@ reject(error);
 class ConcurrentSessionManager {
   private sessions = new Map<string, TestSession>();
   private userSessions = new Map<string, string[]>(); // userId -> sessionIds[]
-  private metrics = {,
+  private metrics = {
   totalSessions: 0,
     activeSessions: 0,
     successfulConnections: 0,
@@ -306,10 +312,11 @@ class ConcurrentSessionManager {
 
   async createSession(userId: string, deviceId?: string): Promise<TestSession>  {
   const sessionId = randomUUID();
-    const actualDeviceId = deviceId ?? `device_${Date.now()
-}
-_${Math.random().toString(36).substring(7)}`;
-    const session = new TestSession(sessionId, userId, actualDeviceId, 'ws://localhost:8185');// Track user sessionsif (!this.userSessions.has(userId)) {
+    const actualDeviceId = deviceId ?? `device_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const session = new TestSession(sessionId, userId, actualDeviceId, 'ws://localhost:8185');
+
+    // Track user sessions
+    if (!this.userSessions.has(userId)) {
   this.userSessions.set(userId, []);
     
 }
@@ -317,13 +324,18 @@ _${Math.random().toString(36).substring(7)}`;
 
     // Set up session event handlers
     session.on('connected', () => {
-  this.metrics.activeSessions++;this.metrics.successfulConnections++;
+      this.metrics.activeSessions++;
+      this.metrics.successfulConnections++;
     
 });
 
-    session.on('disconnected', () => {this.metrics.activeSessions--;});
+    session.on('disconnected', () => {
+      this.metrics.activeSessions--;
+    });
 
-    session.on('error', () => {this.metrics.failedConnections++;});
+    session.on('error', () => {
+      this.metrics.failedConnections++;
+    });
 
     this.sessions.set(sessionId, session);
     this.metrics.totalSessions++;
@@ -376,10 +388,9 @@ break;
     return sessions;
   }
 
-  async testSessionIsolation(sessions: TestSession[]): Promise< {
-  isolationIntegrity: number;
-  violations: Array<{ sessionId: string; violation: string; details: IsolationViolationDetails 
-}>;
+  async testSessionIsolation(sessions: TestSession[]): Promise<{
+    isolationIntegrity: number;
+    violations: Array<{ sessionId: string; violation: string; details: IsolationViolationDetails }>;
   }> {
     const violations: Array<{ sessionId: string; violation: string; details: IsolationViolationDetails }> = [];
     let totalTests = 0;
@@ -428,7 +439,7 @@ break;
             );
 
             if (hasOtherMessage) {
-              violations.push({,
+              violations.push({
   sessionId: session.sessionId,
                 violation: 'cross_session_data_leak',
       details: {receivedData: otherUniqueData,
@@ -454,7 +465,7 @@ break;
           passedTests++;
         
 } else {
-  violations.push({,
+          violations.push({
   sessionId: session.sessionId,
             violation: 'session_id_mismatch',
       details: {expectedSessionId: session.sessionId,
@@ -474,22 +485,20 @@ break;
     return { isolationIntegrity, violations };
   }
 
-  async performConcurrentValidations(sessions: TestSession[]): Promise< {
-  completedValidations: number;
-  failedValidations: number;
+  async performConcurrentValidations(sessions: TestSession[]): Promise<{
+    completedValidations: number;
+    failedValidations: number;
     averageValidationTime: number;
-  concurrencyIssues: number;
-  
-}> {
+    concurrencyIssues: number;
+  }> {
   const validationPromises: Promise<ValidationResult>[] = [];
-    const validationResults: Array<{ sessionId: string; success: boolean; duration: number 
-}> = [];
+    const validationResults: Array<{ sessionId: string; success: boolean; duration: number }> = [];
 
     // Start concurrent validations
     for (let i = 0; i < sessions.length; i++) {
   const session = sessions[i];
       if (session.isConnected()) {
-        const testAction: ValidationAction = {,
+        const testAction: ValidationAction = {
   actionType: `concurrent_validation_${i
 }`,parameters: { sessionId: session.sessionId, index: i },expectedOutcome: `Validation ${i} completed`,
           reversible: true,
@@ -627,14 +636,14 @@ describe('Concurrent Session Management Tests', () => {
 
   const TEST_PORT = 8185;
 
-  beforeAll(async () => 
+  beforeAll(async () => {
     jest.setTimeout(180000); // 3 minutes for concurrent session tests
 
-    module = await Test.createTestingModule({,
+    module = await Test.createTestingModule({
   providers: [
         ConversationalWebSocketBridgeService,
         ParlantWebSocketIntegrationService,
-        {,
+        {
   provide: ConfigService,
           useValue: mockConfigService,
         
@@ -696,7 +705,7 @@ const deviceId = req.headers['x-device-id'] as string || 'unknown';
 
             case ConversationalMessageType.STATUS_UPDATE: {
               // Echo back the status update with session confirmation
-              const statusResponse: ConversationalMessage = {,
+              const statusResponse: ConversationalMessage = {
   messageId: randomUUID(),
                 sessionId,
                 timestamp: Date.now(),
@@ -722,7 +731,7 @@ const deviceId = req.headers['x-device-id'] as string || 'unknown';
 
             default: {
   // Send acknowledgment for other message types
-              const ackMessage: ConversationalMessage = {,
+              const ackMessage: ConversationalMessage = {
   messageId: randomUUID(),
                 sessionId,
                 timestamp: Date.now(),
@@ -792,7 +801,7 @@ const deviceId = req.headers['x-device-id'] as string || 'unknown';
 
       // Simulate validation processing
       setTimeout(() => {
-  const response: ConversationalMessage = {,
+  const response: ConversationalMessage = {
   type: ConversationalMessageType.VALIDATION_RESPONSE,
           messageId: randomUUID(),
           sessionId: sessionInfo.sessionId,
@@ -855,7 +864,9 @@ const deviceId = req.headers['x-device-id'] as string || 'unknown';
 
   describe('Concurrent Session Creation', () => {
 
-  it('should create and manage 100 concurrent sessions successfully', async () => const sessionCount = 100;const sessions = await sessionManager.createConcurrentSessions(sessionCount, 'multiple');
+  it('should create and manage 100 concurrent sessions successfully', async () => {
+    const sessionCount = 100;
+    const sessions = await sessionManager.createConcurrentSessions(sessionCount, 'multiple');
 expect(sessions.length).toBe(sessionCount);const connectedSessions = sessions.filter(session => session.isConnected());
       const metrics = sessionManager.getMetrics();
 
@@ -961,7 +972,10 @@ ms`,averageSuccessRate: `${(averageSuccessRate * 100).toFixed(2)}%`,
 
   describe('Session Isolation and Data Integrity', () => {
 
-  it('should maintain perfect session isolation across concurrent sessions', async () => const sessionCount = 50;const sessions = await sessionManager.createConcurrentSessions(sessionCount, 'multiple');const connectedSessions = sessions.filter(session => session.isConnected());
+  it('should maintain perfect session isolation across concurrent sessions', async () => {
+    const sessionCount = 50;
+    const sessions = await sessionManager.createConcurrentSessions(sessionCount, 'multiple');
+    const connectedSessions = sessions.filter(session => session.isConnected());
 expect(connectedSessions.length).toBeGreaterThan(sessionCount * 0.9);
 
       // Test session isolation
@@ -1071,7 +1085,9 @@ ms`,concurrencyIssues: validationResults.concurrencyIssues,
 
   describe('Multi-user Session Management', () => {
 
-  it('should handle multiple sessions per user correctly', async () => const usersCount = 10;const sessionsPerUser = 5;
+  it('should handle multiple sessions per user correctly', async () => {
+    const usersCount = 10;
+    const sessionsPerUser = 5;
       const sessions: TestSession[] = [];
 
       // Create multiple sessions for each user
@@ -1185,7 +1201,11 @@ ms`,concurrencyIssues: validationResults.concurrencyIssues,
 
   describe('Resource Management and Cleanup', () => {
 
-  it('should manage memory usage efficiently across sessions', async () => const sessionCount = 100;const sessions = await sessionManager.createConcurrentSessions(sessionCount, 'mixed');const connectedSessions = sessions.filter(session => session.isConnected());// Generate some activity in each session
+  it('should manage memory usage efficiently across sessions', async () => {
+    const sessionCount = 100;
+    const sessions = await sessionManager.createConcurrentSessions(sessionCount, 'mixed');
+    const connectedSessions = sessions.filter(session => session.isConnected());
+    // Generate some activity in each session
       for (const session of connectedSessions) {
         // Send multiple messages to build up session state
         for (let i = 0; i < 10; i++) {
