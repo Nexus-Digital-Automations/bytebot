@@ -74,7 +74,7 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
 
       try {
         // Step 1: Capture execution context
-        const userContext = await wrapper.captureUserContext();
+        const userContext = wrapper.captureUserContext();
         const validationContext = wrapper.createValidationContext(
           functionName,
           args,
@@ -115,7 +115,7 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
         );
 
         // Step 5: Generate audit trail
-        const auditTrail = await wrapper.generateAuditTrail(
+        const auditTrail = wrapper.generateAuditTrail(
           executionId,
           functionName,
           args,
@@ -126,7 +126,7 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
         );
 
         // Step 6: Log successful execution
-        await wrapper.logSuccessfulExecution(
+        wrapper.logSuccessfulExecution(
           executionId,
           functionName,
           executionMetadata,
@@ -214,7 +214,7 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
    *
    * @returns User context for validation
    */
-  private async captureUserContext(): Promise<UserContext> {
+  private captureUserContext(): UserContext {
     // TODO: Integrate with actual authentication service
     // For now, return mock context - will be replaced with real implementation
     return {
@@ -274,7 +274,7 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
     try {
       // TODO: Integrate with actual PARLANT service
       // For now, simulate validation based on configuration
-      const approved = await this.simulateParlantValidation(context);
+      const approved = this.simulateParlantValidation(context);
       const executionTime = Date.now() - startTime;
 
       const conversationContext: ConversationContext = {
@@ -344,7 +344,7 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
    * @param context - Validation context
    * @returns Approval decision
    */
-  private async simulateParlantValidation(context: ValidationContext): Promise<boolean> {
+  private simulateParlantValidation(context: ValidationContext): boolean {
     // Simulate different validation levels
     switch (this.config.validationLevel) {
       case ValidationLevel.CRITICAL:
@@ -479,11 +479,11 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
     };
 
     // Create audit trail
-    const auditTrail = await this.generateAuditTrail(
+    const auditTrail = this.generateAuditTrail(
       executionId,
       this.config.functionId,
       [],
-      await this.captureUserContext(),
+      this.captureUserContext(),
       validationResult,
       functionResult,
       startTime
@@ -533,11 +533,11 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
       metadata: { error: error.message }
     };
 
-    const auditTrail = await this.generateAuditTrail(
+    const auditTrail = this.generateAuditTrail(
       executionId,
       this.config.functionId,
       [],
-      await this.captureUserContext(),
+      this.captureUserContext(),
       validationResult,
       null,
       startTime
@@ -575,7 +575,7 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
    * @param startTime - Execution start time
    * @returns Audit trail
    */
-  private async generateAuditTrail(
+  private generateAuditTrail(
     executionId: string,
     functionName: string,
     args: any[],
@@ -583,7 +583,7 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
     validationResult: ValidationResult,
     result: any,
     startTime: number
-  ): Promise<AuditTrail> {
+  ): AuditTrail {
     const endTime = new Date();
     const startTimeDate = new Date(startTime);
 
@@ -776,12 +776,12 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
    * @param metadata - Execution metadata
    * @param auditTrail - Audit trail
    */
-  private async logSuccessfulExecution(
+  private logSuccessfulExecution(
     executionId: string,
     functionName: string,
     metadata: ExecutionMetadata,
     auditTrail: AuditTrail
-  ): Promise<void> {
+  ): void {
     this.logger.log(`Function execution successful: ${functionName}`, {
       executionId,
       totalTime: metadata.totalExecutionTime,
