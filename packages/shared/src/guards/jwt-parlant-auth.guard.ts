@@ -289,7 +289,7 @@ export class JwtParlantAuthGuard implements CanActivate {
       }
 
       // Perform Parlant conversational validation
-      await this.performParlantValidation(
+      this.performParlantValidation(
         validationContext,
         authMetadata,
         requestMetadata,
@@ -308,11 +308,11 @@ export class JwtParlantAuthGuard implements CanActivate {
   /**
    * Perform Parlant conversational validation
    */
-  private async performParlantValidation(
+  private performParlantValidation(
     validationContext: unknown,
     authMetadata: AuthMetadata,
     _requestMetadata: unknown,
-  ): Promise<void> {
+  ): void {
     // In a real implementation, this would interact with Parlant
     // to perform conversational validation based on the security level
 
@@ -359,7 +359,7 @@ export class JwtParlantAuthGuard implements CanActivate {
     // Check session validity
     if (validationContext.security?.environment?.securityLevel === "critical") {
       // Additional checks for critical security level
-      await this.performCriticalSecurityChecks(
+      this.performCriticalSecurityChecks(
         request,
         validationContext,
         operationId,
@@ -367,10 +367,10 @@ export class JwtParlantAuthGuard implements CanActivate {
     }
 
     // Rate limiting check
-    await this.checkRateLimit(request, validationContext, operationId);
+    this.checkRateLimit(request, validationContext, operationId);
 
     // Behavioral analysis
-    await this.performBehavioralAnalysis(
+    this.performBehavioralAnalysis(
       request,
       validationContext,
       operationId,
@@ -380,11 +380,11 @@ export class JwtParlantAuthGuard implements CanActivate {
   /**
    * Perform critical security checks
    */
-  private async performCriticalSecurityChecks(
+  private performCriticalSecurityChecks(
     request: SecurityRequest,
     validationContext: ValidationContext,
     operationId: string,
-  ): Promise<void> {
+  ): void {
     // MFA verification for critical operations
     if (!validationContext.user.metadata?.mfaEnabled) {
       this.logger.warn(`[${operationId}] Critical operation without MFA`, {
@@ -416,11 +416,11 @@ export class JwtParlantAuthGuard implements CanActivate {
   /**
    * Check rate limiting
    */
-  private async checkRateLimit(
+  private checkRateLimit(
     request: SecurityRequest,
     validationContext: ValidationContext,
     operationId: string,
-  ): Promise<void> {
+  ): void {
     // Implement rate limiting logic
     // This would typically use Redis to track request counts
     const userId = validationContext.user.id;
@@ -441,11 +441,11 @@ export class JwtParlantAuthGuard implements CanActivate {
   /**
    * Perform behavioral analysis
    */
-  private async performBehavioralAnalysis(
+  private performBehavioralAnalysis(
     request: SecurityRequest,
     validationContext: ValidationContext,
     operationId: string,
-  ): Promise<void> {
+  ): void {
     // Implement behavioral analysis
     // Check for unusual patterns, times, locations, etc.
 
