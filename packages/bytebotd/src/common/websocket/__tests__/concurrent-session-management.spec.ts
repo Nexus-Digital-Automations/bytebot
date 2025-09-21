@@ -1067,13 +1067,12 @@ expect(connectedSessions.length).toBeGreaterThan(sessionCount * 0.9);
       // Perform concurrent validations
       const validationResults = await sessionManager.performConcurrentValidations(connectedSessions);
 
-      console.log('Concurrent Validation Results:', ,
+      console.log('Concurrent Validation Results:', {
   totalSessions: connectedSessions.length,
         completedValidations: validationResults.completedValidations,
         failedValidations: validationResults.failedValidations,
-        averageValidationTime: `${validationResults.averageValidationTime.toFixed(2)
-}
-ms`,concurrencyIssues: validationResults.concurrencyIssues,
+        averageValidationTime: `${validationResults.averageValidationTime.toFixed(2)}ms`,
+        concurrencyIssues: validationResults.concurrencyIssues,
       successRate: `${((validationResults.completedValidations / connectedSessions.length) * 100).toFixed(2)}%`,
       });
 
@@ -1143,9 +1142,8 @@ ms`,concurrencyIssues: validationResults.concurrencyIssues,
       const userSessions: TestSession[] = [];
 
       // Create sessions for same user on different devices
-      for (let i = 0; i < deviceCount; i++) 
-        const session = await sessionManager.createSession(userId, `device-${i
-}`);
+      for (let i = 0; i < deviceCount; i++) {
+        const session = await sessionManager.createSession(userId, `device-${i}`);
         await session.connect();
         userSessions.push(session);
       }
@@ -1155,7 +1153,10 @@ ms`,concurrencyIssues: validationResults.concurrencyIssues,
 
       // Send sync message from first device
       const syncData = {
-        userPreferences: { theme: 'dark', language: 'en' },applicationState: { lastAction: 'file_read', timestamp: Date.now() },syncId: randomUUID(),};
+        userPreferences: { theme: 'dark', language: 'en' },
+        applicationState: { lastAction: 'file_read', timestamp: Date.now() },
+        syncId: randomUUID(),
+      };
 
       const syncMessage: SessionSyncMessage = {
   type: ConversationalMessageType.SESSION_SYNC,
@@ -1213,8 +1214,9 @@ ms`,concurrencyIssues: validationResults.concurrencyIssues,
         for (let i = 0; i < 10; i++) {
           await session.sendMessage({
   type: ConversationalMessageType.STATUS_UPDATE,
-            payload: { activityIndex: i, largeData: 'x'.repeat(1000) 
-}, // 1KB per message});}
+            payload: { activityIndex: i, largeData: 'x'.repeat(1000) }, // 1KB per message
+          });
+        }
       }
 
       // Wait for message processing
@@ -1257,10 +1259,9 @@ expect(initialMetrics.activeSessions).toBeGreaterThan(sessionCount * 0.9);
 
       // Disconnect half the sessions
       const sessionsToDisconnect = sessions.slice(0, Math.floor(sessions.length / 2));
-      for (const session of sessionsToDisconnect) 
+      for (const session of sessionsToDisconnect) {
         await session.disconnect();
-      
-}
+      }
 
       // Wait for cleanup
       await new Promise(resolve => setTimeout(resolve, 1000));
