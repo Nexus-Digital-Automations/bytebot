@@ -22,7 +22,10 @@ import {
   StructuredDataExtractionResponseDto,
   XPathExtractionResponseDto,
   BatchExtractionResponseDto,
-} from './dto/data-extraction.dto';/*** Data Extraction Service
+} from './dto/data-extraction.dto';
+
+/**
+ * Data Extraction Service
  *
  * Comprehensive service for extracting various types of data from web pages
  * including text, tables, links, images, structured data, and XPath queries.
@@ -1166,12 +1169,19 @@ asyncio.run(extract_xpath())
             }
           });
 
-          childProcess.on('error', async (error) => {// Cleanup script filetry {
+          childProcess.on('error', async (error) => {
+            // Cleanup script file
+            try {
               await fs.unlink(scriptFile);
             } catch (cleanupError) {
-              this.logger.warn('Failed to cleanup script file', cleanupError);}resolve({
+              this.logger.warn('Failed to cleanup script file', cleanupError);
+            }
+
+            resolve({
               success: false,
-              output: '',error: error instanceof Error ? error.message : String(error),});
+              output: '',
+              error: error instanceof Error ? error.message : String(error),
+            });
           });
         })
         .catch((error) => {

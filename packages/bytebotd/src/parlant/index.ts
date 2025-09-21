@@ -174,13 +174,30 @@ export const PARLANT_CONSTANTS = {
  * Parlant integration version information
  */
 export const PARLANT_VERSION = {
-  version: '1.0.0',implementation: 'MAXIMUM',features: ['Function-level conversational validation','Enterprise-grade audit trails','Real-time risk assessment','Performance optimization with caching','Multi-level security validation','Context-aware intent analysis',],compatibility: {
-    aiAgent: '>=1.0.0',nestjs: '>=9.0.0',typescript: '>=4.5.0',},buildDate: new Date().toISOString(),
+  version: '1.0.0',
+  implementation: 'MAXIMUM',
+  features: [
+    'Function-level conversational validation',
+    'Enterprise-grade audit trails',
+    'Real-time risk assessment',
+    'Performance optimization with caching',
+    'Multi-level security validation',
+    'Context-aware intent analysis',
+  ],
+  compatibility: {
+    aiAgent: '>=1.0.0',
+    nestjs: '>=9.0.0',
+    typescript: '>=4.5.0',
+  },
+  buildDate: new Date().toISOString(),
 } as const;
 
 // ===== DEFAULT EXPORT =====
 
-import { ParlantIntegrationService, ConversationalValidationError } from './parlant-integration.service';import { ParlantValidatedComputerUseService } from './parlant-validated-computer-use.service';import { ParlantComputerUseController } from './parlant-computer-use.controller';import { ParlantModule } from './parlant.module';
+import { ParlantIntegrationService, ConversationalValidationError } from './parlant-integration.service';
+import { ParlantValidatedComputerUseService } from './parlant-validated-computer-use.service';
+import { ParlantComputerUseController } from './parlant-computer-use.controller';
+import { ParlantModule } from './parlant.module';
 
 /**
  * Default export with all Parlant integration components

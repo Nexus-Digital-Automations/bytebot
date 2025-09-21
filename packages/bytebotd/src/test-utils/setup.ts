@@ -142,7 +142,9 @@ global.testUtils = {
       await new Promise((resolve) => setTimeout(resolve, 100));
     }
     if (!condition()) {
-      throw new Error(`Timeout waiting for condition after ${timeout}ms`);}},
+      throw new Error(`Timeout waiting for condition after ${timeout}ms`);
+    }
+  },
 
   // Utility to generate unique test IDs
   generateTestId: (prefix: string): string => {
