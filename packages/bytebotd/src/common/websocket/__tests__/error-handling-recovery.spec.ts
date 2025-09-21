@@ -888,13 +888,20 @@ ms` : 'N/A',})),});
 
     it('should trigger circuit breaker after repeated failures', async () => {
 
-  const client = new ResilientWebSocketClient('ws://localhost:99998',  // Invalid URLautoReconnect: true,
+  const client = new ResilientWebSocketClient('ws://localhost:99998', { // Invalid URL
+      autoReconnect: true,
       maxReconnectionAttempts: 10,
-        circuitBreakerEnabled: true,
-        clientId: 'circuit-breaker-test',
-});const circuitBreakerEvents: string[] = [];
+      circuitBreakerEnabled: true,
+      clientId: 'circuit-breaker-test',
+    });
+    const circuitBreakerEvents: string[] = [];
 
-      client.on('circuit-breaker-opened', () => circuitBreakerEvents.push('opened'));client.on('circuit-breaker-closed', () => circuitBreakerEvents.push('closed'));client.on('connection-failure', () => circuitBreakerEvents.push('failure'));// Attempt connections repeatedly to trigger circuit breakerfor (let i = 0; i < 6; i++) {
+      client.on('circuit-breaker-opened', () => circuitBreakerEvents.push('opened'));
+      client.on('circuit-breaker-closed', () => circuitBreakerEvents.push('closed'));
+      client.on('connection-failure', () => circuitBreakerEvents.push('failure'));
+
+      // Attempt connections repeatedly to trigger circuit breaker
+      for (let i = 0; i < 6; i++) {
   try {
           await client.connect();
         
@@ -991,16 +998,19 @@ expect(circuitBreakerEvents).toContain('opened');await client.disconnect();});
 
       expect(messageEvents.filter(e => e.type === 'queued').length).toBeGreaterThan(0);
 expect(messageEvents.filter(e => e.type === 'processing').length).toBeGreaterThan(0);
-expect(client.getQueueSize()).toBeLessThanOrEqual(1); // Should process most/all queued messagesawait client.disconnect();
+expect(client.getQueueSize()).toBeLessThanOrEqual(1); // Should process most/all queued messages
+      await client.disconnect();
     });
 
 
 
     it('should handle message loss gracefully with delivery confirmation', async () => {
 
-  const client = new ResilientWebSocketClient(TEST_URL, autoReconnect: true,
+  const client = new ResilientWebSocketClient(TEST_URL, {
+        autoReconnect: true,
         clientId: 'message-loss-test',
-});await client.connect();
+      });
+      await client.connect();
 
       const sentMessages: ConversationalMessage[] = [];
       const receivedResponses: any[] = [];
@@ -1194,13 +1204,29 @@ x` : 'N/A',responsesReceived: responsesReceived.length,});
   // ===== MALFORMED MESSAGE HANDLING =====
 
   describe('Malformed Message Handling', () => {
-it('should handle malformed messages without crashing', async () => { const client = new ResilientWebSocketClient(TEST_URL, {clientId: 'malformed-test',});await client.connect();
+it('should handle malformed messages without crashing', async () => {
+      const client = new ResilientWebSocketClient(TEST_URL, {
+        clientId: 'malformed-test',
+      });
+      await client.connect();
 
       const malformedMessages = [
-        '{ invalid json','{"type": "unknown_type"}','{"messageId": null}",'{"messageId": "valid", "invalidField": }",'not json at all','','{"messageId": "valid", "sessionId": "test", "timestamp": "invalid_timestamp"}',];const errorEvents: any[] = [];
+        '{ invalid json',
+        '{"type": "unknown_type"}',
+        '{"messageId": null}',
+        '{"messageId": "valid", "invalidField": }',
+        'not json at all',
+        '',
+        '{"messageId": "valid", "sessionId": "test", "timestamp": "invalid_timestamp"}',
+      ];
+      const errorEvents: any[] = [];
       const responseEvents: any[] = [];
 
-      client.on('error', (error) => errorEvents.push(error));client.on('message', (response) => responseEvents.push(response));// Send malformed messages directly to WebSocketfor (let i = 0; i < malformedMessages.length; i++) {
+      client.on('error', (error) => errorEvents.push(error));
+      client.on('message', (response) => responseEvents.push(response));
+
+      // Send malformed messages directly to WebSocket
+      for (let i = 0; i < malformedMessages.length; i++) {
   const malformedData = malformedMessages[i];
 
         try {
@@ -1212,7 +1238,9 @@ it('should handle malformed messages without crashing', async () => { const clie
 
           await new Promise(resolve => setTimeout(resolve, 200));
         } catch (error) {
-          errorEvents.push({ type: 'send_error', error: error.message, data: malformedData });}}
+          errorEvents.push({ type: 'send_error', error: error.message, data: malformedData });
+        }
+      }
 
       // Send valid message to ensure connection still works
       await client.sendMessage({
@@ -1221,14 +1249,14 @@ it('should handle malformed messages without crashing', async () => { const clie
       timestamp: Date.now(),
       sequence: 1,
         type: ConversationalMessageType.STATUS_UPDATE,
-        payload: { validAfterMalformed: true 
-},
+        payload: { validAfterMalformed: true },
         metadata: {
-  priority: 'normal',
-      requiresAck: false,
-      compression: false,
+          priority: 'normal',
+          requiresAck: false,
+          compression: false,
           routingHints: ['malformed-test'],
-},});
+        },
+      });
 
       await new Promise(resolve => setTimeout(resolve, 2000));
 
@@ -1252,17 +1280,32 @@ it('should handle malformed messages without crashing', async () => { const clie
 
   describe('Network Interruption and Recovery', () => {
 
-  it('should recover from network partition scenarios', async () => { const client = new ResilientWebSocketClient(TEST_URL, {autoReconnect: true,
+  it('should recover from network partition scenarios', async () => {
+      const client = new ResilientWebSocketClient(TEST_URL, {
+        autoReconnect: true,
         queueMessages: true,
         maxReconnectionAttempts: 8,
         clientId: 'partition-test',
-});await client.connect();
+      });
+      await client.connect();
 
       const recoveryEvents: any[] = [];
       let recoveryStartTime = 0;
       let recoveryEndTime = 0;
 
-      client.on('disconnected', () => {recoveryStartTime = Date.now();recoveryEvents.push({ type: 'disconnected', timestamp: recoveryStartTime });});client.on('recovery-success', (event) => {recoveryEndTime = Date.now();recoveryEvents.push({ type: 'recovery_success', timestamp: recoveryEndTime, ...event });});client.on('reconnection-scheduled', (event) => {recoveryEvents.push({ type: 'reconnection_scheduled', timestamp: Date.now(), ...event });});// Simulate network partition
+      client.on('disconnected', () => {
+        recoveryStartTime = Date.now();
+        recoveryEvents.push({ type: 'disconnected', timestamp: recoveryStartTime });
+      });
+      client.on('recovery-success', (event) => {
+        recoveryEndTime = Date.now();
+        recoveryEvents.push({ type: 'recovery_success', timestamp: recoveryEndTime, ...event });
+      });
+      client.on('reconnection-scheduled', (event) => {
+        recoveryEvents.push({ type: 'reconnection_scheduled', timestamp: Date.now(), ...event });
+      });
+
+      // Simulate network partition
       console.log('Simulating network partition...');
       faultSimulator.simulateNetworkPartition(3000); // 3 second partition
 
@@ -1299,10 +1342,8 @@ ms`,recoveryEvents: recoveryEvents.length,
         queueSizeAfterRecovery: client.getQueueSize(),
         recoveryMetrics: {
   successfulRecoveries: recoveryMetrics.successfulRecoveries,
-          averageRecoveryTime: `${recoveryMetrics.averageRecoveryTime.toFixed(0)
-}
-ms`,maxRecoveryTime: `${recoveryMetrics.maxRecoveryTime.toFixed(0)}
-ms`,
+          averageRecoveryTime: `${recoveryMetrics.averageRecoveryTime.toFixed(0)}ms`,
+          maxRecoveryTime: `${recoveryMetrics.maxRecoveryTime.toFixed(0)}ms`,
         },
         target: '<5000ms recovery',
       });

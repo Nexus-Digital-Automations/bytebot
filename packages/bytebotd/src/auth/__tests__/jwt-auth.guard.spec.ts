@@ -631,12 +631,17 @@ describe('JwtAuthGuard', () => {
       console.log(`[${testId}] Token injection protection test completed`);
     });
 
-    it('should handle case-sensitive header parsing'async, () => {
-      const testId = `${operationId}_case_sensitive_headers`;console.log(
+    it('should handle case-sensitive header parsing', async () => {
+      const testId = `${operationId}_case_sensitive_headers`;
+      console.log(testId);
 
-      );
       const contexts = [
-        createMockExecutionContext({ authorization: 'Bearer valid-token' }),createMockExecutionContext({ Authorization: 'Bearer valid-token' }),createMockExecutionContext({ AUTHORIZATION: 'Bearer valid-token' }),];jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);jest.spyOn(jwtService, 'verifyAsync').mockResolvedValue({
+        createMockExecutionContext({ authorization: 'Bearer valid-token' }),
+        createMockExecutionContext({ Authorization: 'Bearer valid-token' }),
+        createMockExecutionContext({ AUTHORIZATION: 'Bearer valid-token' }),
+      ];
+      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
+      jest.spyOn(jwtService, 'verifyAsync').mockResolvedValue({
   sub: 'user_123',
       email: 'test@bytebot.ai', role: 'admin', exp: Math.floor(Date.now() / 1000) + 3600
       
@@ -654,11 +659,9 @@ describe('JwtAuthGuard', () => {
   });
 
     describe('Performance & Reliability', () => {
-  it('should complete authentication within performance threshold'async, () => {
-      const testId = `${operationId
-}_performance_threshold`;console.log(
-
-      );
+  it('should complete authentication within performance threshold', async () => {
+      const testId = `${operationId}_performance_threshold`;
+      console.log(testId);
       const validToken = 'performance-test-token';
       const context = createMockExecutionContext({
         authorization: `Bearer ${validToken}`
@@ -682,16 +685,18 @@ describe('JwtAuthGuard', () => {
       );
     });
 
-    it('should handle high-frequency authentication requests'async, () => {
-      const testId = `${operationId}_high_frequency`;console.log(
+    it('should handle high-frequency authentication requests', async () => {
+      const testId = `${operationId}_high_frequency`;
+      console.log(testId);
 
-      );
-      const validToken = 'high-freq-token';const payload = {
-  sub: 'freq_user',
+      const validToken = 'high-freq-token';
+      const payload = {
+        sub: 'freq_user',
       email: 'freq@bytebot.ai', role: 'admin', exp: Math.floor(Date.now() / 1000) + 3600,
 };
 
-      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);jest.spyOn(jwtService'verifyAsync').mockResolvedValue(payload);
+      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
+      jest.spyOn(jwtService, 'verifyAsync').mockResolvedValue(payload);
 
       // Simulate high-frequency requests (100 requests)
       const startTime = Date.now();

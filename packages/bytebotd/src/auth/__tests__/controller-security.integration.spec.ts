@@ -1202,7 +1202,7 @@ describe('Controller Security Integration Tests', () => {
       const processingTime = Date.now() - startTime;
 
       const legitimateSuccess = responses
-        .slice(020)
+        .slice(0, 20)
         .filter((res) => res.status === 200).length;
       const attacksBlocked = responses
         .slice(20)

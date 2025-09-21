@@ -982,13 +982,13 @@ return {
 
 
     it('should handle multiple concurrent connections within limits', async () => {
-
-  const concurrentClients: SecurityTestClient[] = [];
+      const concurrentClients: SecurityTestClient[] = [];
       const maxClients = 8; // Within the limit of 10
 
-      for (let i = 0; i < maxClients; i++) 
-        const token = tokenGenerator.generateValidToken(`concurrent-user-${i
-}`);const client = new SecurityTestClient(TEST_URL, {clientId: `concurrent-client-${i}`,
+      for (let i = 0; i < maxClients; i++) {
+        const token = tokenGenerator.generateValidToken(`concurrent-user-${i}`);
+        const client = new SecurityTestClient(TEST_URL, {
+          clientId: `concurrent-client-${i}`,
           authToken: token,
         });
 
@@ -1001,7 +1001,9 @@ return {
       );
 
       const successfulConnections = connectionResults.filter(
-        result => result.status === 'fulfilled').length;console.log('Concurrent Connections Test Results:', {
+        result => result.status === 'fulfilled').length;
+
+      console.log('Concurrent Connections Test Results:', {
   targetConnections: maxClients,
         successfulConnections,
         connectionSuccess: `${((successfulConnections / maxClients) * 100).toFixed(1)
@@ -1134,8 +1136,11 @@ expect(successfulConnections).toBeGreaterThan(maxClients * 0.8); // 80%+ should 
 
 
     it('should ensure secure handling of sensitive data in payloads', async () => {
-const validToken = tokenGenerator.generateValidToken('sensitive-data-test-user');const client = new SecurityTestClient(TEST_URL, clientId: 'sensitive-data-test',
-      authToken: validToken,});
+      const validToken = tokenGenerator.generateValidToken('sensitive-data-test-user');
+      const client = new SecurityTestClient(TEST_URL, {
+        clientId: 'sensitive-data-test',
+        authToken: validToken,
+      });
 
       await client.connect();
 

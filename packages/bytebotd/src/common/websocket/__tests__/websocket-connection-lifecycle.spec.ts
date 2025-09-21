@@ -1303,9 +1303,9 @@ expect(client.isConnected()).toBe(true);
 
   // ===== HEARTBEAT AND KEEPALIVE TESTS =====
 
-  describe('Heartbeat and Keepalive Mechanisms', () => 
+  describe('Heartbeat and Keepalive Mechanisms', () => {
 
-  it('should maintain connection health with heartbeat monitoring', async () => {
+    it('should maintain connection health with heartbeat monitoring', async () => {
     const client = new ConnectionLifecycleTestClient(TEST_URL, 'heartbeat_client', {
       heartbeatInterval: 2000, // 2 seconds for testing
       heartbeatTimeout: 5000,
@@ -1350,7 +1350,8 @@ expect(client.isConnected()).toBe(true);
 
     it('should detect heartbeat timeouts and trigger recovery', async () => {
 
-  const client = new ConnectionLifecycleTestClient(TEST_URL, 'heartbeat_timeout_client', heartbeatInterval: 1000,
+  const client = new ConnectionLifecycleTestClient(TEST_URL, 'heartbeat_timeout_client', {
+      heartbeatInterval: 1000,
       heartbeatTimeout: 3000,
         autoReconnectOnHeartbeatTimeout: true,
       
@@ -1441,9 +1442,10 @@ expect(client.isConnected()).toBe(true);
 
     it('should respect maximum reconnection attempts', async () => {
 
-  const client = new ConnectionLifecycleTestClient('ws://invalid-host:9999', 'max_reconnect_client', autoReconnect: true,
+  const client = new ConnectionLifecycleTestClient('ws://invalid-host:9999', 'max_reconnect_client', {
+      autoReconnect: true,
       maxReconnectionAttempts: 2,
-        reconnectionBaseDelay: 100,
+      reconnectionBaseDelay: 100,
       
 });
 
@@ -1502,10 +1504,10 @@ MB`,
 
     it('should test connection lifecycle resilience across pool', async () => {
 
-  // Ensure pool is establishedif (connectionPool.getActiveConnectionCount() < 50) 
+      // Ensure pool is established
+      if (connectionPool.getActiveConnectionCount() < 50) {
         await connectionPool.establishConnectionPool();
-      
-}
+      }
 
       const resilienceResult = await connectionPool.testConnectionLifecycleResilience();
 
@@ -1562,9 +1564,13 @@ ms`,
 
 
     it('should reject connections with invalid authentication', async () => {
-const client = new ConnectionLifecycleTestClient(TEST_URL, 'invalid_auth_client', authentication: {method: 'jwt',
-      token: 'invalid-token',
-      userId: 'unauthorized-user',},authenticationTimeout: 3000,
+      const client = new ConnectionLifecycleTestClient(TEST_URL, 'invalid_auth_client', {
+        authentication: {
+          method: 'jwt',
+          token: 'invalid-token',
+          userId: 'unauthorized-user',
+        },
+        authenticationTimeout: 3000,
       });
 
       let authenticationFailed = false;
@@ -1597,10 +1603,12 @@ const client = new ConnectionLifecycleTestClient(TEST_URL, 'invalid_auth_client'
 
     it('should validate WSS encryption when required', async () => {
 
-  // Note: This test requires SSL/TLS setup which may not be available in test environment// The test validates the encryption validation logic exists
+      // Note: This test requires SSL/TLS setup which may not be available in test environment
+      // The test validates the encryption validation logic exists
 
-      const client = new ConnectionLifecycleTestClient(TEST_URL, 'wss_validation_client', requireWss: false, // Set to false for testing without SSL
-});
+      const client = new ConnectionLifecycleTestClient(TEST_URL, 'wss_validation_client', {
+        requireWss: false, // Set to false for testing without SSL
+      });
 
       await client.connect();
 
@@ -1617,7 +1625,7 @@ const client = new ConnectionLifecycleTestClient(TEST_URL, 'invalid_auth_client'
 
   describe('Resource Leak Detection and Prevention', () => {
 
-  it('should detect and prevent memory leaks', async () => 
+    it('should detect and prevent memory leaks', async () => {
       const initialMemory = process.memoryUsage().heapUsed;
 
       // Create and destroy multiple connections to test for leaks

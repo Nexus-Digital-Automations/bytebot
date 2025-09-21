@@ -641,8 +641,14 @@ this.updateStats();
    */
   private normalizeUrlForStats(url: string | undefined): string {
     if (!url) return '';
-const normalizedUrl = url as string;const basePath = normalizedUrl.split('?')[0] ?? '';
-return basePath.replace(/\/\d+/g, '/:id') // Replace IDs.replace(/\/[a-f0-9-]{36}/g, '/:uuid'); // Replace UUIDs}/**
+
+    const normalizedUrl = url as string;
+    const basePath = normalizedUrl.split('?')[0] ?? '';
+    return basePath.replace(/\/\d+/g, '/:id') // Replace IDs
+      .replace(/\/[a-f0-9-]{36}/g, '/:uuid'); // Replace UUIDs
+  }
+
+  /**
    * Update overall cache statistics
    */
   private updateStats(): void {

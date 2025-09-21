@@ -418,55 +418,87 @@ describe('ConversationalDatabaseService', () => {
 }) as unknown,
         })
       );
-      expect(mockRepository.delete).toHaveBeenCalledWith('delete-id-1');// Check that backup was createdconst backupStatus = service.getBackupStatus();
+      expect(mockRepository.delete).toHaveBeenCalledWith('delete-id-1');
+
+      // Check that backup was created
+      const backupStatus = service.getBackupStatus();
       expect(backupStatus.totalBackups).toBeGreaterThan(0);
     });
 
     it('should reject delete operation without proper authorization', async () => {
-  // ArrangeparlantService.validateOperation.mockResolvedValue({
-  approved: false,
-        conversationId: 'conv-delete-456',reason: 'Insufficient permissions for delete operation',
-});// Act & Assert
+      // Arrange
+      parlantService.validateOperation.mockResolvedValue({
+        approved: false,
+        conversationId: 'conv-delete-456',
+        reason: 'Insufficient permissions for delete operation',
+      });
+
+      // Act & Assert
       await expect(
-        service.delete(mockRepository, 'delete-id-1', {userId: 'user-123',userRole: 'user',})).rejects.toThrow(ConversationalValidationError);
+        service.delete(mockRepository, 'delete-id-1', {
+          userId: 'user-123',
+          userRole: 'user',
+        })
+      ).rejects.toThrow(ConversationalValidationError);
       expect(mockRepository.delete).not.toHaveBeenCalled();
     });
 
     it('should handle multi-party approval rejection', async () => {
-  // ArrangeparlantService.validateOperation.mockResolvedValue({
-  approved: true,
+      // Arrange
+      parlantService.validateOperation.mockResolvedValue({
+        approved: true,
         conversationId: 'conv-delete-789',
-});mockRepository.findById.mockResolvedValue(deleteEntity);
+      });
+      mockRepository.findById.mockResolvedValue(deleteEntity);
 
       // Act & Assert - User role doesn't have admin/system privileges
       await expect(
-        service.delete(mockRepository, 'delete-id-1', {userId: 'user-123',userRole: 'user',confirmDeletion: true,})
+        service.delete(mockRepository, 'delete-id-1', {
+          userId: 'user-123',
+          userRole: 'user',
+          confirmDeletion: true,
+        })
       ).rejects.toThrow(ConversationalValidationError);
     });
   });
 
   // ===== BULK OPERATIONS TESTS =====
 
-  describe('bulkCreate', () => {const bulkData = [{ name: 'Bulk Entity 1', email: 'bulk1@example.com', status: 'active' },{ name: 'Bulk Entity 2', email: 'bulk2@example.com', status: 'active' },{ name: 'Bulk Entity 3', email: 'bulk3@example.com', status: 'active' },
+  describe('bulkCreate', () => {
+    const bulkData = [
+      { name: 'Bulk Entity 1', email: 'bulk1@example.com', status: 'active' },
+      { name: 'Bulk Entity 2', email: 'bulk2@example.com', status: 'active' },
+      { name: 'Bulk Entity 3', email: 'bulk3@example.com', status: 'active' },
     ];
 
     const createdEntities: TestEntity[] = bulkData.map((data, index) => ({
       id: `bulk-id-${index + 1}`,
-      createdAt: '2024-01-01T00:00:00Z',updatedAt: '2024-01-01T00:00:00Z',version: 1,...data,
+      createdAt: '2024-01-01T00:00:00Z',
+      updatedAt: '2024-01-01T00:00:00Z',
+      version: 1,
+      ...data,
     }));
 
     it('should successfully perform bulk create with validation', async () => {
-  // ArrangeparlantService.validateOperation.mockResolvedValue({
-  approved: true,
-        conversationId: 'conv-bulk-create-123',reason: 'Bulk create operation approved',
-});mockRepository.create
+      // Arrange
+      parlantService.validateOperation.mockResolvedValue({
+        approved: true,
+        conversationId: 'conv-bulk-create-123',
+        reason: 'Bulk create operation approved',
+      });
+      mockRepository.create
         .mockResolvedValueOnce(createdEntities[0])
         .mockResolvedValueOnce(createdEntities[1])
         .mockResolvedValueOnce(createdEntities[2]);
 
       // Act
       const result = await service.bulkCreate(mockRepository, bulkData, {
-        userId: 'admin-123',userRole: 'admin',businessPurpose: 'Bulk import entities',});// Assert
+        userId: 'admin-123',
+        userRole: 'admin',
+        businessPurpose: 'Bulk import entities',
+      });
+
+      // Assert
       expect(result).toEqual(createdEntities);
       expect(parlantService.validateOperation).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -479,28 +511,48 @@ describe('ConversationalDatabaseService', () => {
     });
 
     it('should reject bulk create with insufficient permissions', async () => {
-  // ArrangeparlantService.validateOperation.mockResolvedValue({
-  approved: false,
-        conversationId: 'conv-bulk-create-456',reason: 'Insufficient permissions for bulk operations',
-});// Act & Assert
+      // Arrange
+      parlantService.validateOperation.mockResolvedValue({
+        approved: false,
+        conversationId: 'conv-bulk-create-456',
+        reason: 'Insufficient permissions for bulk operations',
+      });
+
+      // Act & Assert
       await expect(
         service.bulkCreate(mockRepository, bulkData, {
-          userId: 'user-123',userRole: 'user',})).rejects.toThrow(ConversationalValidationError);
+          userId: 'user-123',
+          userRole: 'user',
+        })
+      ).rejects.toThrow(ConversationalValidationError);
       expect(mockRepository.create).not.toHaveBeenCalled();
     });
   });
 
-  describe('bulkDelete', () => {const deleteFilter = { status: 'inactive' };it('should successfully perform bulk delete with enhanced protection', async () => {
-  // ArrangeparlantService.validateOperation.mockResolvedValue({
-  approved: true,
-        conversationId: 'conv-bulk-delete-123',reason: 'Bulk delete operation approved with enhanced protection',
-});mockRepository.count.mockResolvedValue(5);
+  describe('bulkDelete', () => {
+    const deleteFilter = { status: 'inactive' };
+
+    it('should successfully perform bulk delete with enhanced protection', async () => {
+      // Arrange
+      parlantService.validateOperation.mockResolvedValue({
+        approved: true,
+        conversationId: 'conv-bulk-delete-123',
+        reason: 'Bulk delete operation approved with enhanced protection',
+      });
+      mockRepository.count.mockResolvedValue(5);
       mockRepository.findAll.mockResolvedValue([
-        { id: '1', name: 'Entity 1', status: 'inactive' } as TestEntity,{ id: '2', name: 'Entity 2', status: 'inactive' } as TestEntity,]);mockRepository.delete.mockResolvedValue(true);
+        { id: '1', name: 'Entity 1', status: 'inactive' } as TestEntity,
+        { id: '2', name: 'Entity 2', status: 'inactive' } as TestEntity,
+      ]);
+      mockRepository.delete.mockResolvedValue(true);
 
       // Act
       const result = await service.bulkDelete(mockRepository, deleteFilter, {
-        userId: 'admin-123',userRole: 'admin',businessPurpose: 'Clean up inactive entities',confirmBulkDeletion: true,});
+        userId: 'admin-123',
+        userRole: 'admin',
+        businessPurpose: 'Clean up inactive entities',
+        confirmBulkDeletion: true,
+      });
 
       // Assert
       expect(result).toBe(2); // Number of entities deleted
@@ -515,27 +567,47 @@ describe('ConversationalDatabaseService', () => {
     });
 
     it('should reject bulk delete without confirmation', async () => {
-  // ArrangeparlantService.validateOperation.mockResolvedValue({
-  approved: false,
-        conversationId: 'conv-bulk-delete-456',reason: 'Bulk delete requires explicit confirmation',
-});// Act & Assert
+      // Arrange
+      parlantService.validateOperation.mockResolvedValue({
+        approved: false,
+        conversationId: 'conv-bulk-delete-456',
+        reason: 'Bulk delete requires explicit confirmation',
+      });
+
+      // Act & Assert
       await expect(
         service.bulkDelete(mockRepository, deleteFilter, {
-          userId: 'admin-123',userRole: 'admin',})).rejects.toThrow(ConversationalValidationError);
+          userId: 'admin-123',
+          userRole: 'admin',
+        })
+      ).rejects.toThrow(ConversationalValidationError);
     });
   });
 
   // ===== CACHING TESTS =====
 
   describe('Caching', () => {const testEntity: TestEntity = {id: 'cache-test-1',createdAt: '2024-01-01T00:00:00Z',updatedAt: '2024-01-01T00:00:00Z',version: 1,name: 'Cache Test Entity',email: 'cache@example.com',status: 'active',};it('should cache validation results for low-risk operations', async () => {
-  // ArrangeparlantService.validateOperation.mockResolvedValue({
-  approved: true,
-        conversationId: 'conv-cache-123',reason: 'Low risk operation approved',
-});mockRepository.findById.mockResolvedValue(testEntity);
+      // Arrange
+      parlantService.validateOperation.mockResolvedValue({
+        approved: true,
+        conversationId: 'conv-cache-123',
+        reason: 'Low risk operation approved',
+      });
+      mockRepository.findById.mockResolvedValue(testEntity);
 
       // Act - First call
-      await service.findById(mockRepository, 'cache-test-1', {userId: 'user-123',userRole: 'user',});// Act - Second call with same parameters
-      await service.findById(mockRepository, 'cache-test-1', {userId: 'user-123',userRole: 'user',});// Assert - Parlant validation should only be called once due to caching
+      await service.findById(mockRepository, 'cache-test-1', {
+        userId: 'user-123',
+        userRole: 'user',
+      });
+
+      // Act - Second call with same parameters
+      await service.findById(mockRepository, 'cache-test-1', {
+        userId: 'user-123',
+        userRole: 'user',
+      });
+
+      // Assert - Parlant validation should only be called once due to caching
       expect(parlantService.validateOperation).toHaveBeenCalledTimes(1);
       expect(mockRepository.findById).toHaveBeenCalledTimes(2);
 

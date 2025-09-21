@@ -649,8 +649,11 @@ const queuedMessages: Array<{ messageId: string; timestamp: number }> = [];
     it('should handle buffer overflow with drop_oldest strategy', async () => {
 const sessionId = 'test_session_buffer_002';
 const droppedMessages: string[]  =  [];
-    service.on('message_dropped', (event) => if (event.reason === 'buffer_overflow_oldest') {droppedMessages.push(event.messageId);}
-      });
+    service.on('message_dropped', (event) => {
+      if (event.reason === 'buffer_overflow_oldest') {
+        droppedMessages.push(event.messageId);
+      }
+    });
 
       // Create buffer with small capacity for testing
       const buffer = service.createMessageBuffer(sessionId);
@@ -687,17 +690,20 @@ expect(buffer.highWaterMark).toBe(Math.floor(buffer.capacity * 0.8));
 
   // ===== TIMEOUT AND RETRY MECHANISM TESTS =====
 
-  describe('Timeout and Retry Mechanism Testing', () => 
-  it('should schedule retries for failed message deliveries', async () => {
+  describe('Timeout and Retry Mechanism Testing', () => {
+    it('should schedule retries for failed message deliveries', async () => {
     const sessionId = 'test_session_retry_001';
 const retriedMessages: string[]  =  [];
-    service.on('message_retry_scheduled', (event) => {retriedMessages.push(event.messageId);});
+    service.on('message_retry_scheduled', (event) => {
+      retriedMessages.push(event.messageId);
+    });
 
       // Create message that will fail delivery
       const message = TestMessageFactory.createTestMessage(
         ConversationalMessageType.VALIDATION_REQUEST,
         sessionId,
-        'high',1);
+        'high',
+        1);
 
       service.addMessageToPriorityQueue(message);
 
@@ -715,7 +721,9 @@ const retriedMessages: string[]  =  [];
     it('should move messages to dead letter queue after max retries', async () => {
 const sessionId = 'test_session_retry_002';
 const deadLetterMessages: string[]  =  [];
-    service.on('message_dead_letter', (event) => deadLetterMessages.push(event.messageId);});
+    service.on('message_dead_letter', (event) => {
+      deadLetterMessages.push(event.messageId);
+    });
 
       // Create multiple messages to increase chance of failures
       const messageCount = 50;
@@ -723,7 +731,8 @@ const deadLetterMessages: string[]  =  [];
   const message = TestMessageFactory.createTestMessage(
           ConversationalMessageType.HEARTBEAT,
           sessionId,
-          'low', // Low priority has fewer retriesi);
+          'low', // Low priority has fewer retries
+          i);
         service.addMessageToPriorityQueue(message);
       
 }
@@ -742,12 +751,14 @@ const deadLetterMessages: string[]  =  [];
 
     it('should implement exponential backoff for retries', async () => {
 
-  // This test verifies the exponential backoff calculationconst retryDelays: number[] = [];
+  // This test verifies the exponential backoff calculation
+      const retryDelays: number[] = [];
 
       // Mock the private method by calling service methods that trigger retries
       const sessionId = 'test_session_retry_003';
-service.on('message_retry_scheduled', (event) => retryDelays.push(event.retryDelay);
-});
+      service.on('message_retry_scheduled', (event) => {
+        retryDelays.push(event.retryDelay);
+      });
 
       // Create messages that will likely fail and trigger retries
       const messageCount = 20;
@@ -832,8 +843,7 @@ const validationId = 'validation_parlant_test_002';
         2
       );
 
-      (validationResponse as  messageId: string 
-}).messageId = `validation_response_${validationId}`;
+      (validationResponse as { messageId: string }).messageId = `validation_response_${validationId}`;
 
       const messages = [validationRequest, validationResponse];
 
@@ -861,10 +871,9 @@ const operationId = 'operation_parlant_test_003';
         TestMessageFactory.createProgressUpdateMessage(sessionId, operationId, progress, index + 1)
       );
 
-      for (const update of progressUpdates) 
+      for (const update of progressUpdates) {
         service.validateMessageSequence(update);
-      
-}
+      }
 
       // Validate general conversation flow
       const conversationId = `conv_${sessionId}`;
@@ -883,9 +892,8 @@ const operationId = 'operation_parlant_test_003';
       const flowValidations: ConversationFlowValidation[] = [];
 
       // Create multiple concurrent validation flows
-      for (let i = 1; i <= validationCount; i++) 
-        const validationId = `validation_concurrent_${i
-}`;
+      for (let i = 1; i <= validationCount; i++) {
+        const validationId = `validation_concurrent_${i}`;
 
         const validationRequest = TestMessageFactory.createValidationRequestMessage(sessionId, validationId, i * 10);
         const userConfirmation = TestMessageFactory.createUserConfirmationMessage(sessionId, validationId, true, i * 10 + 1);
@@ -897,7 +905,7 @@ const operationId = 'operation_parlant_test_003';
         flowValidations.push(flowValidation);
       }
 
-  expect(flowValidations).toHaveLength(validationCount);
+      expect(flowValidations).toHaveLength(validationCount);
       expect(flowValidations.every(flow => flow.integrityScore > 0.5)).toBe(true);
     });
   });

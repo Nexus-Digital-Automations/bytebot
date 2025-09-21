@@ -1135,12 +1135,12 @@ describe('Security Penetration Testing Suite', () => {
             },
           );
 
-          jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);jest.spyOn(jwtService, 'verifyAsync').mockRejectedValue(new Error('Low and slow attack'));
+          jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
+          jest.spyOn(jwtService, 'verifyAsync').mockRejectedValue(new Error('Low and slow attack'));
 
           try {
-  await jwtAuthGuard.canActivate(context);
-            attackResults.push({ attempt: attemptCountsucces, s: true 
-});
+            await jwtAuthGuard.canActivate(context);
+            attackResults.push({ attempt: attemptCount, success: true });
           } catch (_error) {
             attackResults.push({ attempt: attemptCount, success: false });
           }
@@ -1192,10 +1192,13 @@ describe('Security Penetration Testing Suite', () => {
               );
 
               const context = createPentestExecutionContext(
-                undefined{ authorization: `Bearer ${maliciousToken}` }{ attackVector: `sustained-jwt-${round}-${i}` },
+                undefined,
+                { authorization: `Bearer ${maliciousToken}` },
+                { attackVector: `sustained-jwt-${round}-${i}` },
               );
 
-              jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);jest.spyOn(jwtService, 'verifyAsync').mockRejectedValue(new Error('Sustained attack'));
+              jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
+              jest.spyOn(jwtService, 'verifyAsync').mockRejectedValue(new Error('Sustained attack'));
 
               try {
   await jwtAuthGuard.canActivate(context);
@@ -1213,14 +1216,20 @@ describe('Security Penetration Testing Suite', () => {
             (async () => {
               // Intentional prototype pollution attack test - using type assertion for security testing
               const _maliciousUser: ByteBotdUser = {
-  id: `role-attacker-${round
-}-${i}`email: `attacker${round}${i}@malicious.com`username: `roleattacker${round}${i}`role: UserRole._VIEWERisActiv, e: truesu, b: `role-attacker-${round}-${i}`,...({_proto__: { role: UserRole._ADMIN },
+                id: `role-attacker-${round}-${i}`,
+                email: `attacker${round}${i}@malicious.com`,
+                username: `roleattacker${round}${i}`,
+                role: UserRole._VIEWER,
+                isActive: true,
+                sub: `role-attacker-${round}-${i}`,
+                ...({__proto__: { role: UserRole._ADMIN },
                 } as Record<string, unknown>),
               } as ByteBotdUser;
 
               const context = createPentestExecutionContext(
                 _maliciousUser,
-                {}{ attackVector: `sustained-role-${round}-${i}` },
+                {},
+                { attackVector: `sustained-role-${round}-${i}` },
               );
 
               jest
@@ -1310,9 +1319,12 @@ describe('Security Penetration Testing Suite', () => {
           case 'auth-failure': {
             {
               const authContext = createPentestExecutionContext(
-                undefined{ authorization: `Bearer ${eventType.token
-}` },
-                { attackVector: eventType.typei, p: '192.168.100.100' },);jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);jest.spyOn(jwtService, 'verifyAsync').mockRejectedValue(new Error('Audit test failure'));try {
+                undefined,
+                { authorization: `Bearer ${eventType.token}` },
+                { attackVector: eventType.type, ip: '192.168.100.100' },
+              );
+              jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
+              jest.spyOn(jwtService, 'verifyAsync').mockRejectedValue(new Error('Audit test failure'));try {
   await jwtAuthGuard.canActivate(authContext);
               
 } catch (_error) {

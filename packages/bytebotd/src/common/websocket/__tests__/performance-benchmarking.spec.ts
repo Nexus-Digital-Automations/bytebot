@@ -1181,14 +1181,15 @@ expect(finalResult.memoryPerConnection).toBeLessThan(2); // <2MB per connection 
       const resourceAnalysis = resourceMonitor.getResourceAnalysis();
 
       console.log('Compression Performance Results:', {
-  messageCount,
-        averageMessageSize: `${(results.averageMessageSize / 1024).toFixed(2)
-} KB`,totalDataTransferred: `${(results.totalDataTransferred / 1024 / 1024).toFixed(2)} MB`,messagesPerSecond: Math.floor(results.messagesPerSecond),
-      averageLatency: `${results.averageLatency.toFixed(2)}
-ms`,
+        messageCount,
+        averageMessageSize: `${(results.averageMessageSize / 1024).toFixed(2)} KB`,
+        totalDataTransferred: `${(results.totalDataTransferred / 1024 / 1024).toFixed(2)} MB`,
+        messagesPerSecond: Math.floor(results.messagesPerSecond),
+        averageLatency: `${results.averageLatency.toFixed(2)}ms`,
         compressionBenefit: 'Enabled',
         resourceUsage: {
-          cpu: `${resourceAnalysis.cpu.average.toFixed(1)}%`,memory: `${resourceAnalysis.memory.average.toFixed(1)} MB`,
+          cpu: `${resourceAnalysis.cpu.average.toFixed(1)}%`,
+          memory: `${resourceAnalysis.memory.average.toFixed(1)} MB`,
         },
       });
 

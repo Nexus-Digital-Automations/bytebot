@@ -319,10 +319,9 @@ describe('JwtAuthGuard', () => {
         'JWT_AUTH_SUCCESS',
         'user-123',
         expect.objectContaining({
-  timestamp: expect.any(Date) as Date,
+          timestamp: expect.any(Date) as Date,
           sessionId: 'parlant-session-123'
-        
-})
+        })
       );
     });
   });
@@ -330,13 +329,11 @@ describe('JwtAuthGuard', () => {
     describe('performance characteristics', () => {
   it('should complete authentication within performance targets', async () => {
       // Arrange
-      const mockUser = { id: 'user-123', email: 'test@example.com' 
-};
+      const mockUser = { id: 'user-123', email: 'test@example.com' };
       jwtService.verify.mockReturnValue(mockUser);
       parlantAuthBridge.syncParlantSession.mockResolvedValue({
-  sessionId: 'parlant-session-123'
-      
-});
+        sessionId: 'parlant-session-123'
+      });
       const context = createMockExecutionContext();
 
       // Act

@@ -443,16 +443,16 @@ export class SecuritySanitizationPipe implements PipeTransform<unknown> {
 
       // Scan array elements
       obj.forEach((item, _index) => {
-  this.recursiveSecurityScan(
+        this.recursiveSecurityScan(
           item,
-          `${path
-}[${_index}]`,
+          `${path}[${_index}]`,
           threats,
           depth + 1,
         );
       });
     } else if (obj && typeof obj === 'object') {
-  // Check object property countconst propCount = Object.keys(obj).length;
+      // Check object property count
+      const propCount = Object.keys(obj).length;
       if (propCount > 200) {
         threats.push({
   type: 'SIZE_VIOLATION',
@@ -489,8 +489,7 @@ export class SecuritySanitizationPipe implements PipeTransform<unknown> {
       /(\.\.[\\/]|\.\.%2f|\.\.%5c)/gi,
 
       // Template injection patterns
-      /(\{\{.*?\
-}\}|\[\[.*?\]\])/gi,
+      /(\{\{.*?\}\}|\[\[.*?\]\])/gi,
 
       // Server-side template injection
       /(<%.*?%>|\${.*?})/gi,

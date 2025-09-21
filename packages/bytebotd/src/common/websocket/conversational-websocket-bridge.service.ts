@@ -1577,23 +1577,26 @@ _${this.generateId()}`;
 
     // Notify all clients of shutdown
     await this.broadcastToAllSessions({
-  type: ConversationalMessageType.SESSION_END,
+      type: ConversationalMessageType.SESSION_END,
       timestamp: Date.now(),
       payload: {
-  reason: 'server_shutdown',
-      message: 'Server is shutting down',
-},metadata: {
-  priority: 'critical',
-      requiresAck: false,
-      compression: false,
+        reason: 'server_shutdown',
+        message: 'Server is shutting down',
+      },
+      metadata: {
+        priority: 'critical',
+        requiresAck: false,
+        compression: false,
         routingHints: ['shutdown'],
-},});
+      },
+    });
 
     // Close all client connections gracefully
     this.clients.forEach((client, _clientId) => {
-  if (client.readyState === WebSocket.WebSocket.OPEN) {
+      if (client.readyState === WebSocket.WebSocket.OPEN) {
         client.close(1000, 'Server shutting down');
-}});
+      }
+    });
 
     // Close the WebSocket server
     if (this.webSocketServer) {

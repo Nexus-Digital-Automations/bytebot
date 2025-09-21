@@ -305,7 +305,17 @@ return this.config.compressibleTypes.has(baseType);}
   private selectCompressionAlgorithm(request: Request): CompressionAlgorithm {
     const acceptEncoding = request.get('Accept-Encoding') ?? '';
 
-// Priority order: brotli (best compression) → gzip (widely supported) → deflateif (acceptEncoding.includes('br')) {return 'brotli';} else if (acceptEncoding.includes('gzip')) {return 'gzip';} else if (acceptEncoding.includes('deflate')) {return 'deflate';} else {return 'identity';}}
+    // Priority order: brotli (best compression) → gzip (widely supported) → deflate
+    if (acceptEncoding.includes('br')) {
+      return 'brotli';
+    } else if (acceptEncoding.includes('gzip')) {
+      return 'gzip';
+    } else if (acceptEncoding.includes('deflate')) {
+      return 'deflate';
+    } else {
+      return 'identity';
+    }
+  }
 
   /**
    * Apply compression using specified algorithm
