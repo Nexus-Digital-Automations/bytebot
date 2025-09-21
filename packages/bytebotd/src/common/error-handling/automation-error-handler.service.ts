@@ -211,22 +211,22 @@ export class AutomationErrorHandlerService {
 
       return result;
 
-    } catch (error: any) {
-  const errorMessage = error instanceof Error ? error.message : String(error);
+    } catch (error: unknown) {
+      const safeError = error instanceof Error ? error : new Error(String(error));
+      const errorMessage = safeError.message;
       this.logger.warn(`Operation failed, attempting recovery: ${operationName}`, {
         operationId,
         error: errorMessage
       });
 
       const errorContext = {
-  ...context,
+        ...context,
         operationId,
         operationName,
         attemptTime: new Date().toISOString()
-      
-};
+      };
 
-      const handlingResult = await this.handleError?.(error, errorContext, recoveryConfig);
+      const handlingResult = await this.handleError?.(safeError, errorContext, recoveryConfig);
 
       if (handlingResult.success && handlingResult.result !== undefined) {
   return handlingResult.result as T;
@@ -234,7 +234,7 @@ export class AutomationErrorHandlerService {
 }
 
       // If recovery failed, throw enhanced error
-      const errorToThrow = handlingResult.finalError ?? (error as Error);
+      const errorToThrow = handlingResult.finalError ?? safeError;
       throw this.createEnhancedError?.(
         errorToThrow,
         operationName,
