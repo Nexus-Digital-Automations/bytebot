@@ -48,6 +48,10 @@ type JestExpectedType<T> = T;
 const expectAnyDate = (): JestExpectedType<Date> => expect.any(Date) as Date;
 const expectAnyString = (): JestExpectedType<string> => expect.any(String) as string;
 const expectAnyNumber = (): JestExpectedType<number> => expect.any(Number) as number;
+const expectObjectContaining = <T extends object>(obj: Partial<T>): JestExpectedType<T> =>
+  expect.objectContaining(obj) as T;
+const expectStringContaining = (str: string): JestExpectedType<string> =>
+  expect.stringContaining(str) as string;
 
 // Mock external modules
 jest.mock('fs/promises');
@@ -477,7 +481,7 @@ describe('ComputerUseService', () => {
         expect(mockNutService.screendump).toHaveBeenCalled();
         expect(result).toMatchObject({
           image: fakeImageBuffer.toString('base64'),
-          metadata: expect.objectContaining({
+          metadata: expectObjectContaining({
             captureTime: expectAnyDate(),
             operationId: expectAnyString(),
             format: 'png',
@@ -542,7 +546,7 @@ describe('ComputerUseService', () => {
   application: 'desktop',};await service.action(action);
 
         expect(mockSpawn).toHaveBeenCalledWith(
-          'sudo',['-u', 'user', 'wmctrl', '-k', 'on'],expect.objectContaining({env: expect.objectContaining({ DISPLAY: ':0.0' }),
+          'sudo',['-u', 'user', 'wmctrl', '-k', 'on'],expectObjectContaining({env: expectObjectContaining({ DISPLAY: ':0.0' }),
   stdio: 'ignore',
   detached: true,}),
         );
@@ -562,7 +566,7 @@ describe('ComputerUseService', () => {
         await service.action(action);
 
         expect(mockSpawn).toHaveBeenCalledWith(
-          'sudo',['-u', 'user', 'nohup', 'firefox-esr'],expect.objectContaining({env: expect.objectContaining({ DISPLAY: ':0.0' }),
+          'sudo',['-u', 'user', 'nohup', 'firefox-esr'],expectObjectContaining({env: expectObjectContaining({ DISPLAY: ':0.0' }),
   stdio: 'ignore',
   detached: true,}),
         );
@@ -623,7 +627,7 @@ describe('write_file action', () => {it('should write file successfully', async 
     const result = await service.action(action);
       expect(result).toMatchObject({
           success: true,
-          message: expect.stringContaining('File written successfully'),
+          message: expectStringContaining('File written successfully'),
   path: '/home/user/test.txt',
           size: expectAnyNumber(),
           operationId: expectAnyString(),
@@ -768,7 +772,7 @@ describe('write_file action', () => {it('should write file successfully', async 
   operationId: 'operation_123',
           timestamp: expectAnyDate(),
   context: { contextKey: 'contextValue' },
-  stack: expect.stringContaining('Error: Original error'),
+          stack: expectStringContaining('Error: Original error'),
   originalError: originalError,});
       });
 
