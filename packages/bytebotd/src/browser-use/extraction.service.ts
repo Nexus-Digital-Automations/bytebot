@@ -588,13 +588,18 @@ async def extract_text():
 
             except Exception as e:
                 # Log selector error but continue with other selectors
-                sys.stderr.write(f"Error extracting selector {selector}: {str(e)}\n")continueprint(json.dumps(extracted_data))
+                sys.stderr.write(f"Error extracting selector {selector}: {str(e)}\n")
+                continue
+
+        print(json.dumps(extracted_data))
 
     except Exception as e:
-        sys.stderr.write(f"Text extraction error: {str(e)}\n")sys.exit(1)
+        sys.stderr.write(f"Text extraction error: {str(e)}\n")
+        sys.exit(1)
 
 asyncio.run(extract_text())
 `;
+  }
 
   /**
    * Generate Python script for table extraction

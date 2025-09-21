@@ -357,7 +357,7 @@ export class RetryManagerService {
     context = {
       app,
       computerUseService: testModule.get<ComputerUseService>(ComputerUseService),
-      mcpTools: testModule.get<ComputerUseTools>(ComputerUseTools),
+      mcpTools: testModule.get<ComputerUseTools>(ComputerUseTools) as ComputerUseTools,
       parlantValidatedService: testModule.get<ParlantValidatedComputerUseService>(ParlantValidatedComputerUseService),
       parlantIntegrationService: testModule.get<ParlantIntegrationService>(ParlantIntegrationService),
       enterpriseApiController: testModule.get<EnterpriseApiGatewayController>(EnterpriseApiGatewayController),
@@ -368,8 +368,8 @@ export class RetryManagerService {
       eventEmitter: testModule.get<EventEmitter2>(EventEmitter2),
       circuitBreakerService: testModule.get<CircuitBreakerService>(CircuitBreakerService),
       retryManager: testModule.get<RetryManagerService>(RetryManagerService),
-    
-};
+
+} as ErrorRecoveryContext;
   });
 
   afterAll(async () => {
@@ -691,10 +691,9 @@ return isLowRisk;
 
       // Mock MCP connection failures then recovery
       const originalMoveMouse = async (params: MouseMoveParams): Promise<McpToolResponse> => {
-        const tools = context.mcpTools as ComputerUseTools;
-        return tools.moveMouse(params);
+        return context.mcpTools.moveMouse(params);
       };
-      const mouseMoveSpy = jest.spyOn(context.mcpTools as ComputerUseTools, 'moveMouse');
+      const mouseMoveSpy = jest.spyOn(context.mcpTools, 'moveMouse');
       mouseMoveSpy.mockImplementation(async (params: MouseMoveParams): Promise<McpToolResponse> => {
         connectionAttempts++;
         if (connectionAttempts <= 3) {
@@ -707,8 +706,7 @@ return isLowRisk;
       const result = await context.circuitBreakerService.executeWithCircuitBreaker(
         'McpService',
         async (): Promise<McpToolResponse> => {
-          const tools = context.mcpTools as ComputerUseTools;
-          return tools.moveMouse({ coordinates: { x: 150, y: 250 } });
+          return context.mcpTools.moveMouse({ coordinates: { x: 150, y: 250 } });
         }
       );
 
