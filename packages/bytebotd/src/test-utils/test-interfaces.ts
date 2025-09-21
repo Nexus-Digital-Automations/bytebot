@@ -9,10 +9,16 @@
  * @coverage Comprehensive test type safety
  */
 
-import { Request, Response, NextFunction } from 'express';import { JwtPayload } from 'jsonwebtoken';import { UserRole } from '@bytebot/shared';// =============================================================================// Core User and Authentication Types
+import { Request, Response, NextFunction } from 'express';
+import { JwtPayload } from 'jsonwebtoken';
+import { UserRole } from '@bytebot/shared';
+
+// =============================================================================
+// Core User and Authentication Types
 // =============================================================================
 
 // UserRole is imported from shared types to ensure consistency
+export { UserRole };
 
 /**
  * JWT payload interface with complete user information

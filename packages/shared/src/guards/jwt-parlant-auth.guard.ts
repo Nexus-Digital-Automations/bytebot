@@ -161,7 +161,7 @@ export class JwtParlantAuthGuard implements CanActivate {
         validationContext.security?.riskAssessment?.factors || [];
 
       // Perform additional security checks
-      await this.performSecurityChecks(
+      this.performSecurityChecks(
         request,
         validationContext,
         authMetadata,
@@ -224,8 +224,11 @@ export class JwtParlantAuthGuard implements CanActivate {
     }
 
     // Check cookies
-    if (request.cookies?.access_token) {
-      return request.cookies.access_token;
+    if (request.cookies && typeof request.cookies === 'object' && 'access_token' in request.cookies) {
+      const accessToken = (request.cookies as Record<string, unknown>).access_token;
+      if (typeof accessToken === 'string') {
+        return accessToken;
+      }
     }
 
     return null;
@@ -344,12 +347,12 @@ export class JwtParlantAuthGuard implements CanActivate {
   /**
    * Perform additional security checks
    */
-  private async performSecurityChecks(
+  private performSecurityChecks(
     request: SecurityRequest,
     validationContext: ValidationContext,
     authMetadata: AuthMetadata,
     operationId: string,
-  ): Promise<void> {
+  ): void {
     // Check for emergency override if allowed
     if (authMetadata.allowEmergencyOverride) {
       // Check for active emergency override
