@@ -346,7 +346,10 @@ export class ParlantAuthModule {
               },
             };
           },
-          inject: (options.inject || []) as (InjectionToken | OptionalFactoryDependency)[],
+          inject: (options.inject || []) as (
+            | InjectionToken
+            | OptionalFactoryDependency
+          )[],
         }),
 
         // Cache module with async configuration
@@ -363,7 +366,10 @@ export class ParlantAuthModule {
               max: 1000,
             };
           },
-          inject: (options.inject || []) as (InjectionToken | OptionalFactoryDependency)[],
+          inject: (options.inject || []) as (
+            | InjectionToken
+            | OptionalFactoryDependency
+          )[],
         }),
       ],
       providers: [
@@ -374,7 +380,10 @@ export class ParlantAuthModule {
         {
           provide: "PARLANT_AUTH_OPTIONS",
           useFactory: options.useFactory || (() => ({})),
-          inject: (options.inject || []) as (InjectionToken | OptionalFactoryDependency)[],
+          inject: (options.inject || []) as (
+            | InjectionToken
+            | OptionalFactoryDependency
+          )[],
         },
 
         // Core services
@@ -396,7 +405,10 @@ export class ParlantAuthModule {
             const mergedOptions = { ...DEFAULT_OPTIONS, ...parlantOptions };
             return mergedOptions.riskAssessment?.thresholds;
           },
-          inject: (options.inject || []) as (InjectionToken | OptionalFactoryDependency)[],
+          inject: (options.inject || []) as (
+            | InjectionToken
+            | OptionalFactoryDependency
+          )[],
         },
 
         {
@@ -408,7 +420,10 @@ export class ParlantAuthModule {
             const mergedOptions = { ...DEFAULT_OPTIONS, ...parlantOptions };
             return mergedOptions.mfa;
           },
-          inject: (options.inject || []) as (InjectionToken | OptionalFactoryDependency)[],
+          inject: (options.inject || []) as (
+            | InjectionToken
+            | OptionalFactoryDependency
+          )[],
         },
 
         {
@@ -420,7 +435,10 @@ export class ParlantAuthModule {
             const mergedOptions = { ...DEFAULT_OPTIONS, ...parlantOptions };
             return mergedOptions.conversation;
           },
-          inject: (options.inject || []) as (InjectionToken | OptionalFactoryDependency)[],
+          inject: (options.inject || []) as (
+            | InjectionToken
+            | OptionalFactoryDependency
+          )[],
         },
       ],
       exports: [
