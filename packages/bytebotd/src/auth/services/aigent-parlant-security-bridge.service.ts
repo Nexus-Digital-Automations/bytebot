@@ -837,7 +837,7 @@ export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnAppli
    * Type-safe wrapper for parlant validation calls to ensure proper TypeScript type resolution
    */
   private async validateWithParlant(request: ParlantValidationRequest): Promise<ParlantValidationResponse> {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return
+     
     return await this.parlantService.validateFunctionExecution(request);
   }
 

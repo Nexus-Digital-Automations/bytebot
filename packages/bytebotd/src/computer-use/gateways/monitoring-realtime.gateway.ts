@@ -44,7 +44,13 @@ import {
   OnGatewayInit,
   OnGatewayConnection,
   OnGatewayDisconnect,
-} from '@nestjs/websockets';import { Logger } from '@nestjs/common';import { Server, Socket } from 'socket.io';import { OnEvent } from '@nestjs/event-emitter';import { JobMonitoringService } from '../services/job-monitoring.service';/*** Client subscription configuration
+} from '@nestjs/websockets';
+import { Logger } from '@nestjs/common';
+import { Server, Socket } from 'socket.io';
+import { OnEvent } from '@nestjs/event-emitter';
+import { JobMonitoringService } from '../services/job-monitoring.service';
+
+/*** Client subscription configuration
  */
 interface SubscriptionConfig {
   channels: string[];
@@ -84,7 +90,8 @@ interface RealTimeMetricsUpdate {
 }
 
 @WebSocketGateway({
-  namespace: '/monitoring',cors: {origin: '*', // Configure appropriately for productioncredentials: true,},
+  namespace: '/monitoring',
+  cors: {origin: '*', // Configure appropriately for productioncredentials: true,},
   transports: ['websocket', 'polling'],})export class MonitoringRealtimeGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
@@ -125,7 +132,8 @@ interface RealTimeMetricsUpdate {
 
     // Initialize client with default subscription
     const defaultSubscription: SubscriptionConfig = {
-      channels: ['dashboard', 'alerts'],updateFrequency: 5000, // 5 seconds defaultfilters: {
+      channels: ['dashboard', 'alerts'],
+  updateFrequency: 5000, // 5 seconds defaultfilters: {
         severity: ['medium', 'high', 'critical'],},};
 
     const connectedClient: ConnectedClient = {
@@ -165,7 +173,8 @@ interface RealTimeMetricsUpdate {
     this.connectedClients.delete(clientId);
 
     // Emit disconnection event for monitoring
-    this.emitToAdmins('client_disconnected', {clientId,timestamp: new Date(),
+    this.emitToAdmins('client_disconnected', {clientId,
+  timestamp: new Date(),
       totalClients: this.connectedClients.size,
       sessionDuration: clientInfo ? Date.now() - clientInfo.lastUpdate.getTime() : 0,
     });
@@ -198,7 +207,8 @@ interface RealTimeMetricsUpdate {
     this.startClientUpdateStream(clientId);
 
     // Acknowledge configuration update
-    client.emit('subscription_configured', {success: true,config: connectedClient.subscriptions,
+    client.emit('subscription_configured', {success: true,
+  config: connectedClient.subscriptions,
       timestamp: new Date(),
     });
   }
@@ -235,11 +245,13 @@ interface RealTimeMetricsUpdate {
 
       client.emit('metrics_response', {type: request.type,data,
         timestamp: new Date(),
-        requestId: request.type + '_' + Date.now(),});} catch (error) {
+        requestId: request.type + '_' + Date.now(),});
+} catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(`Metrics request failed for client ${clientId}: ${errorMessage}`);
 
-      client.emit('metrics_error', {type: request.type,error: errorMessage,
+      client.emit('metrics_error', {type: request.type,
+  error: errorMessage,
         timestamp: new Date(),
       });
     }
@@ -272,7 +284,8 @@ interface RealTimeMetricsUpdate {
       team: auth.team,
     });
 
-    client.emit('authenticated', {success: true,user: connectedClient.userInfo,
+    client.emit('authenticated', {success: true,
+  user: connectedClient.userInfo,
       timestamp: new Date(),
     });
   }
@@ -282,7 +295,8 @@ interface RealTimeMetricsUpdate {
    */
   @OnEvent('job.metrics.recorded')handleJobMetricsUpdate(payload: { operationId: string; metrics: any; timestamp: Date }): void {const metricsUpdate: RealTimeMetricsUpdate = {
       timestamp: payload.timestamp,
-      type: 'job_execution',data: {jobId: payload.metrics.jobId,
+      type: 'job_execution',
+  data: {jobId: payload.metrics.jobId,
         jobType: payload.metrics.jobType,
         status: payload.metrics.status,
         executionTime: payload.metrics.executionTime,
@@ -290,15 +304,19 @@ interface RealTimeMetricsUpdate {
         priority: payload.metrics.priority,
       },
       metadata: {
-        source: 'job_monitoring_service',category: 'performance',},};
+        source: 'job_monitoring_service',
+  category: 'performance',},};
 
     this.cacheMetricsUpdate('job_metrics', metricsUpdate);this.broadcastToSubscribers('job_execution', metricsUpdate);}/**
    * Event listener for system metrics updates
    */
   @OnEvent('system.metrics.updated')handleSystemMetricsUpdate(payload: { metrics: any; timestamp: Date }): void {const metricsUpdate: RealTimeMetricsUpdate = {
       timestamp: payload.timestamp,
-      type: 'system_metrics',data: payload.metrics,metadata: {
-        source: 'system_monitor',category: 'infrastructure',},};
+      type: 'system_metrics',
+  data: payload.metrics,
+  metadata: {
+        source: 'system_monitor',
+  category: 'infrastructure',},};
 
     this.cacheMetricsUpdate('system_metrics', metricsUpdate);this.broadcastToSubscribers('dashboard', metricsUpdate);}/**
    * Event listener for alert notifications
@@ -313,17 +331,21 @@ interface RealTimeMetricsUpdate {
   }): void {
     const alertUpdate: RealTimeMetricsUpdate = {
       timestamp: alert.timestamp,
-      type: 'alert',data: {alertId: alert.alertId,
+      type: 'alert',
+  data: {alertId: alert.alertId,
         name: alert.alertName,
         message: alert.message,
         metrics: alert.metrics,
         recommendations: alert.recommendations,
       },
       metadata: {
-        source: 'alert_system',severity: alert.severity,category: 'alert',},};
+        source: 'alert_system',
+  severity: alert.severity,
+  category: 'alert',},};
 
     this.cacheAlertUpdate(alertUpdate);
-    this.broadcastToSubscribers('alerts', alertUpdate);// Send high-priority alerts to all connected clients regardless of subscriptionif (alert.severity === 'critical' || alert.severity === 'high') {this.server.emit('priority_alert', alertUpdate);}}
+    this.broadcastToSubscribers('alerts', alertUpdate);
+    // Send high-priority alerts to all connected clients regardless of subscriptionif (alert.severity === 'critical' || alert.severity === 'high') {this.server.emit('priority_alert', alertUpdate);}}
 
   /**
    * Event listener for SLA violations
@@ -335,11 +357,16 @@ interface RealTimeMetricsUpdate {
   }): void {
     const slaUpdate: RealTimeMetricsUpdate = {
       timestamp: payload.timestamp,
-      type: 'alert',data: {type: 'sla_violation',jobId: payload.jobId,violations: payload.violations,
+      type: 'alert',
+  data: {type: 'sla_violation',
+  jobId: payload.jobId,
+  violations: payload.violations,
         metrics: payload.metrics,
       },
       metadata: {
-        source: 'sla_monitor',severity: 'high',category: 'sla',},};
+        source: 'sla_monitor',
+  severity: 'high',
+  category: 'sla',},};
 
     this.cacheAlertUpdate(slaUpdate);
     this.broadcastToSubscribers('alerts', slaUpdate);}/**
@@ -354,7 +381,8 @@ interface RealTimeMetricsUpdate {
   }): void {
     const healthUpdate: RealTimeMetricsUpdate = {
       timestamp: payload.timestamp,
-      type: 'health_update',data: {capacity: payload.capacity,
+      type: 'health_update',
+  data: {capacity: payload.capacity,
         business: {
           ...payload.business,
           userActivityPatterns: Object.fromEntries(payload.business.userActivityPatterns || new Map()),
@@ -364,20 +392,25 @@ interface RealTimeMetricsUpdate {
         recommendations: payload.recommendations,
       },
       metadata: {
-        source: 'health_monitor',category: 'health',},};
+        source: 'health_monitor',
+  category: 'health',},};
 
     this.cacheMetricsUpdate('health_report', healthUpdate);this.broadcastToSubscribers('health', healthUpdate);}/**
    * Start global metrics streaming
    */
   private startGlobalMetricsStream(): void {
-    this.logger.debug('Starting global metrics streaming');// Stream dashboard metrics every 30 secondssetInterval(async () => {
+    this.logger.debug('Starting global metrics streaming');
+    // Stream dashboard metrics every 30 secondssetInterval(async () => {
       try {
         const dashboardData = await this.jobMonitoringService.getDashboardMetrics();
 
         const metricsUpdate: RealTimeMetricsUpdate = {
           timestamp: new Date(),
-          type: 'system_metrics',data: dashboardData,metadata: {
-            source: 'global_stream',category: 'dashboard',},};
+          type: 'system_metrics',
+  data: dashboardData,
+  metadata: {
+            source: 'global_stream',
+  category: 'dashboard',},};
 
         this.cacheMetricsUpdate('dashboard_global', metricsUpdate);this.broadcastToSubscribers('dashboard', metricsUpdate);} catch (error) {this.logger.error('Global metrics stream error:', error);}}, 30000); // 30 seconds
 
@@ -388,8 +421,11 @@ interface RealTimeMetricsUpdate {
 
         const capacityUpdate: RealTimeMetricsUpdate = {
           timestamp: new Date(),
-          type: 'capacity_update',data: capacityData,metadata: {
-            source: 'capacity_stream',category: 'capacity',},};
+          type: 'capacity_update',
+  data: capacityData,
+  metadata: {
+            source: 'capacity_stream',
+  category: 'capacity',},};
 
         this.cacheMetricsUpdate('capacity_global', capacityUpdate);this.broadcastToSubscribers('capacity', capacityUpdate);} catch (error) {this.logger.error('Capacity metrics stream error:', error);}}, 300000); // 5 minutes
   }
@@ -410,7 +446,8 @@ interface RealTimeMetricsUpdate {
       this.cleanupStaleConnections();
 
       // Emit health status to admin clients
-      this.emitToAdmins('gateway_health', {timestamp: new Date(),connectedClients: connectedCount,
+      this.emitToAdmins('gateway_health', {timestamp: new Date(),
+  connectedClients: connectedCount,
         activeStreams,
         cacheSize: this.metricsCache.size,
         status: 'healthy',
@@ -464,13 +501,15 @@ interface RealTimeMetricsUpdate {
       .slice(-10); // Last 10 metrics
 
     recentMetrics.forEach(metric => {
-      client.emit('cached_metrics', metric);});// Send recent alerts
+      client.emit('cached_metrics', metric);});
+    // Send recent alerts
     const recentAlerts = this.alertsCache
       .filter(alert => Date.now() - alert.timestamp.getTime() < 3600000) // Last hour
       .slice(-5); // Last 5 alerts
 
     recentAlerts.forEach(alert => {
-      client.emit('cached_alert', alert);});}
+      client.emit('cached_alert', alert);});
+}
 
   /**
    * Send personalized update to client
@@ -587,7 +626,8 @@ interface RealTimeMetricsUpdate {
   private cleanupStaleConnections(): void {
     const staleThreshold = 10 * 60 * 1000; // 10 minutes
     const now = Date.now();
-    const staleClients: string[] = [];
+
+        const staleClients: string[] = [];
 
     for (const [clientId, client] of this.connectedClients) {
       if (now - client.lastUpdate.getTime() > staleThreshold) {

@@ -17,12 +17,23 @@
  * @version 1.0.0
  */
 
-import { Injectable, Logger } from '@nestjs/common';import { v4 as _uuidv4 } from 'uuid';import {JobStatus,
+import { Injectable, Logger } from '@nestjs/common';
+import { v4 as _uuidv4 } from 'uuid';
+import {
+  JobStatus,
   JobPriority,
   JobSubmissionResponseDto,
   JobStatusResponseDto,
   JobResultResponseDto,
-} from './dto/async-job.dto';import { ComputerActionDto } from './dto/computer-action.dto';import { ComputerUseService } from './computer-use.service';import { CacheService } from '../cache/cache.service';import { MetricsService } from '../metrics/metrics.service';import { JobMonitoringService } from './services/job-monitoring.service';/*** Internal job data structure for queue management
+} from './dto/async-job.dto';
+import { ComputerActionDto } from './dto/computer-action.dto';
+import { ComputerUseService } from './computer-use.service';
+import { CacheService } from '../cache/cache.service';
+import { MetricsService } from '../metrics/metrics.service';
+import { JobMonitoringService } from './services/job-monitoring.service';
+
+/**
+ * Internal job data structure for queue management
  */
 interface JobData {
   jobId: string;
@@ -105,7 +116,10 @@ export class AsyncJobService {
     if (options.useCache) {
       const cachedResult = await this.getCachedResult(action);
       if (cachedResult) {
-        this.logger.log(`Cache hit for job ${jobId}, returning cached result`);// Create completed job from cacheconst cachedJob: JobData = {
+        this.logger.log(`Cache hit for job ${jobId}, returning cached result`);
+
+        // Create completed job from cache
+        const cachedJob: JobData = {
           jobId,
           status: JobStatus.COMPLETED,
           priority: options.priority ?? JobPriority.NORMAL,
@@ -350,7 +364,8 @@ export class AsyncJobService {
     queueItem.resolve(null);
 
     this.logger.log(
-      `Job ${queueItem.jobData.jobId} added to queue (priority: ${queueItem.jobData.priority}, position: ${insertIndex === -1 ? this.queue.length : insertIndex + 1})`,);// Start processing if not already running
+      `Job ${queueItem.jobData.jobId} added to queue (priority: ${queueItem.jobData.priority}, position: ${insertIndex === -1 ? this.queue.length : insertIndex + 1})`,);
+    // Start processing if not already running
     if (!this.isProcessing) {
       this.processQueue();
     }
@@ -393,7 +408,8 @@ export class AsyncJobService {
     const startTime = Date.now();
 
     try {
-      this.logger.log(`Starting job execution: ${jobData.jobId}`);// Update job statusjobData.status = JobStatus.IN_PROGRESS;
+      this.logger.log(`Starting job execution: ${jobData.jobId}`);
+    // Update job statusjobData.status = JobStatus.IN_PROGRESS;
       jobData.startedAt = new Date();
       jobData.progress = 10;
 
@@ -444,7 +460,8 @@ export class AsyncJobService {
       const executionTime = Date.now() - startTime;
 
       this.logger.error(
-        `Job ${jobData.jobId} failed: ${errorMessage} (${executionTime}ms)`,);// Check if we should retry
+        `Job ${jobData.jobId} failed: ${errorMessage} (${executionTime}ms)`,);
+    // Check if we should retry
       if (jobData.retryCount < jobData.maxRetries) {
         jobData.retryCount++;
         jobData.status = JobStatus.PENDING;
@@ -484,7 +501,9 @@ export class AsyncJobService {
         startedAt: jobData.startedAt,
         completedAt: jobData.completedAt,
         retryCount: jobData.retryCount,
-        errorType: 'execution_failure',errorMessage: errorMessage,metadata: jobData.metadata,
+        errorType: 'execution_failure',
+  errorMessage: errorMessage,
+  metadata: jobData.metadata,
       });
     }
   }

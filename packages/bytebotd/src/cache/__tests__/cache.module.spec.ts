@@ -20,7 +20,19 @@
  * @version 1.0.0
  */
 
-import { Test, TestingModule } from '@nestjs/testing';import { CACHE_MANAGER } from '@nestjs/cache-manager';import { Logger } from '@nestjs/common';import { Cache } from 'cache-manager';import { CacheModule } from '../cache.module';import { CacheService } from '../cache.service';import { CacheKeyGenerator } from '../cache-key.generator';import { MetricsService } from '../../metrics/metrics.service';// Mock the redis store importjest.mock('cache-manager-redis-store', () => ({_esModule: true,default: jest.fn(),
+import { Test, TestingModule } from '@nestjs/testing';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Logger } from '@nestjs/common';
+import { Cache } from 'cache-manager';
+import { CacheModule } from '../cache.module';
+import { CacheService } from '../cache.service';
+import { CacheKeyGenerator } from '../cache-key.generator';
+import { MetricsService } from '../../metrics/metrics.service';
+
+// Mock the redis store import
+jest.mock('cache-manager-redis-store', () => ({
+  __esModule: true,
+  default: jest.fn(),
 }));
 
 // Mock environment variables helper

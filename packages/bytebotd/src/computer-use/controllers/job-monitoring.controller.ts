@@ -35,12 +35,14 @@ import {
   Logger,
   HttpException,
   HttpStatus,
-} from '@nestjs/common';import {ApiTags,
+} from '@nestjs/common';
+import {ApiTags,
   ApiOperation,
   ApiResponse,
   ApiQuery,
   ApiBearerAuth,
-} from '@nestjs/swagger';import { JobMonitoringService } from '../services/job-monitoring.service';/*** Dashboard metrics response DTO
+} from '@nestjs/swagger';
+import { JobMonitoringService } from '../services/job-monitoring.service';/*** Dashboard metrics response DTO
  */
 export class DashboardMetricsResponseDto {
   realTime: {
@@ -200,9 +202,11 @@ export class MetricsExportResponseDto {
    *
    * @returns Comprehensive dashboard data with real-time metrics
    */
-  @Get('dashboard')@ApiOperation({summary: 'Get Real-time Dashboard Metrics',description: 'Retrieve comprehensive real-time metrics for operations dashboard including job statistics, SLA compliance, system health, and trend analysis.',})@ApiResponse({
+  @Get('dashboard')@ApiOperation({summary: 'Get Real-time Dashboard Metrics',
+  description: 'Retrieve comprehensive real-time metrics for operations dashboard including job statistics, SLA compliance, system health, and trend analysis.',})@ApiResponse({
     status: 200,
-    description: 'Dashboard metrics retrieved successfully',type: DashboardMetricsResponseDto,})
+    description: 'Dashboard metrics retrieved successfully',
+  type: DashboardMetricsResponseDto,})
   @ApiResponse({
     status: 500,
     description: 'Internal server error while retrieving dashboard metrics',
@@ -223,7 +227,8 @@ export class MetricsExportResponseDto {
       this.logger.error(`[${operationId}] Dashboard metrics retrieval failed: ${errorMessage}`);
       throw new HttpException(
         {
-          message: 'Failed to retrieve dashboard metrics',error: errorMessage,operationId,
+          message: 'Failed to retrieve dashboard metrics',
+  error: errorMessage,operationId,
         },
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
@@ -235,7 +240,8 @@ export class MetricsExportResponseDto {
    *
    * @returns Capacity metrics with scaling recommendations
    */
-  @Get('metrics/capacity')@ApiOperation({summary: 'Get Capacity Planning Metrics',description: 'Retrieve capacity planning metrics including current utilization, growth trends, and auto-scaling recommendations for optimal resource allocation.',})@ApiResponse({
+  @Get('metrics/capacity')@ApiOperation({summary: 'Get Capacity Planning Metrics',
+  description: 'Retrieve capacity planning metrics including current utilization, growth trends, and auto-scaling recommendations for optimal resource allocation.',})@ApiResponse({
     status: 200,
     description: 'Capacity metrics retrieved successfully',
     type: CapacityMetricsResponseDto,
@@ -256,7 +262,8 @@ export class MetricsExportResponseDto {
       this.logger.error(`[${operationId}] Capacity metrics retrieval failed: ${errorMessage}`);
       throw new HttpException(
         {
-          message: 'Failed to retrieve capacity metrics',error: errorMessage,operationId,
+          message: 'Failed to retrieve capacity metrics',
+  error: errorMessage,operationId,
         },
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
@@ -268,7 +275,8 @@ export class MetricsExportResponseDto {
    *
    * @returns Business metrics with analytics and recommendations
    */
-  @Get('metrics/business')@ApiOperation({summary: 'Get Business Intelligence Metrics',description: 'Retrieve business intelligence metrics including user activity patterns, cost optimization opportunities, and performance recommendations.',})@ApiResponse({
+  @Get('metrics/business')@ApiOperation({summary: 'Get Business Intelligence Metrics',
+  description: 'Retrieve business intelligence metrics including user activity patterns, cost optimization opportunities, and performance recommendations.',})@ApiResponse({
     status: 200,
     description: 'Business metrics retrieved successfully',
     type: BusinessMetricsResponseDto,
@@ -297,7 +305,8 @@ export class MetricsExportResponseDto {
       this.logger.error(`[${operationId}] Business metrics retrieval failed: ${errorMessage}`);
       throw new HttpException(
         {
-          message: 'Failed to retrieve business metrics',error: errorMessage,operationId,
+          message: 'Failed to retrieve business metrics',
+  error: errorMessage,operationId,
         },
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
@@ -309,7 +318,8 @@ export class MetricsExportResponseDto {
    *
    * @returns Detailed health report with recommendations
    */
-  @Get('health')@ApiOperation({summary: 'Get System Health Report',description: 'Retrieve comprehensive system health report including component health scores, recommendations, and predictive insights for proactive maintenance.',})@ApiResponse({
+  @Get('health')@ApiOperation({summary: 'Get System Health Report',
+  description: 'Retrieve comprehensive system health report including component health scores, recommendations, and predictive insights for proactive maintenance.',})@ApiResponse({
     status: 200,
     description: 'Health report generated successfully',
     type: HealthReportResponseDto,
@@ -380,7 +390,8 @@ export class MetricsExportResponseDto {
       this.logger.error(`[${operationId}] Health report generation failed: ${errorMessage}`);
       throw new HttpException(
         {
-          message: 'Failed to generate health report',error: errorMessage,operationId,
+          message: 'Failed to generate health report',
+  error: errorMessage,operationId,
         },
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
@@ -392,10 +403,14 @@ export class MetricsExportResponseDto {
    *
    * @returns Metrics in multiple formats for external monitoring systems
    */
-  @Get('export/prometheus')@ApiOperation({summary: 'Export Prometheus Metrics',description: 'Export comprehensive metrics in Prometheus format for integration with external monitoring and alerting systems.',})@ApiResponse({
+  @Get('export/prometheus')@ApiOperation({summary: 'Export Prometheus Metrics',
+  description: 'Export comprehensive metrics in Prometheus format for integration with external monitoring and alerting systems.',})@ApiResponse({
     status: 200,
-    description: 'Prometheus metrics exported successfully',type: String,schema: {
-      type: 'string',example: '# HELP bytebot_job_execution_total Total number of job executions\n# TYPE bytebot_job_execution_total counter\
+    description: 'Prometheus metrics exported successfully',
+  type: String,
+  schema: {
+      type: 'string',
+  example: '# HELP bytebot_job_execution_total Total number of job executions\n# TYPE bytebot_job_execution_total counter\
 bytebot_job_execution_total{status="completed"} 150\n',
     },
   })
@@ -410,7 +425,8 @@ bytebot_job_execution_total{status="completed"} 150\n',
       this.logger.error(`[${operationId}] Prometheus metrics export failed: ${errorMessage}`);
       throw new HttpException(
         {
-          message: 'Failed to export Prometheus metrics',error: errorMessage,operationId,
+          message: 'Failed to export Prometheus metrics',
+  error: errorMessage,operationId,
         },
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
@@ -422,7 +438,8 @@ bytebot_job_execution_total{status="completed"} 150\n',
    *
    * @returns Complete metrics export including Prometheus, Grafana, and business intelligence data
    */
-  @Get('export/complete')@ApiOperation({summary: 'Export Complete Metrics Package',description: 'Export comprehensive metrics package including Prometheus metrics, Grafana dashboard data, and business intelligence insights for complete monitoring integration.',})@ApiResponse({
+  @Get('export/complete')@ApiOperation({summary: 'Export Complete Metrics Package',
+  description: 'Export comprehensive metrics package including Prometheus metrics, Grafana dashboard data, and business intelligence insights for complete monitoring integration.',})@ApiResponse({
     status: 200,
     description: 'Complete metrics export generated successfully',
     type: MetricsExportResponseDto,
@@ -453,7 +470,8 @@ bytebot_job_execution_total{status="completed"} 150\n',
       this.logger.error(`[${operationId}] Complete metrics export failed: ${errorMessage}`);
       throw new HttpException(
         {
-          message: 'Failed to export complete metrics',error: errorMessage,operationId,
+          message: 'Failed to export complete metrics',
+  error: errorMessage,operationId,
         },
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
@@ -466,8 +484,13 @@ bytebot_job_execution_total{status="completed"} 150\n',
    * @param timeRange Time range for statistics (1h, 24h, 7d, 30d)
    * @returns Real-time job execution statistics
    */
-  @Get('stats/jobs')@ApiOperation({summary: 'Get Real-time Job Statistics',description: 'Retrieve real-time job execution statistics with configurable time range for detailed performance analysis.',})@ApiQuery({
-    name: 'timeRange',required: false,description: 'Time range for statistics',enum: ['1h', '24h', '7d', '30d'],example: '24h',})@ApiResponse({
+  @Get('stats/jobs')@ApiOperation({summary: 'Get Real-time Job Statistics',
+  description: 'Retrieve real-time job execution statistics with configurable time range for detailed performance analysis.',})@ApiQuery({
+    name: 'timeRange',
+  required: false,
+  description: 'Time range for statistics',
+  enum: ['1h', '24h', '7d', '30d'],
+  example: '24h',})@ApiResponse({
     status: 200,
     description: 'Job statistics retrieved successfully',})async getJobStatistics(
     @Query('timeRange') timeRange: '1h' | '24h' | '7d' | '30d' = '24h'
@@ -532,7 +555,8 @@ bytebot_job_execution_total{status="completed"} 150\n',
       this.logger.error(`[${operationId}] Job statistics retrieval failed: ${errorMessage}`);
       throw new HttpException(
         {
-          message: 'Failed to retrieve job statistics',error: errorMessage,operationId,
+          message: 'Failed to retrieve job statistics',
+  error: errorMessage,operationId,
         },
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
@@ -547,29 +571,55 @@ bytebot_job_execution_total{status="completed"} 150\n',
     capacityData: CapacityMetricsResponseDto,
     businessData: BusinessMetricsResponseDto,
     healthScore: number
-  ): HealthReportResponseDto['recommendations'] {const recommendations: HealthReportResponseDto['recommendations'] = [];// Critical health recommendationsif (healthScore < 60) {
+  ): HealthReportResponseDto['recommendations'] {const recommendations: HealthReportResponseDto['recommendations'] = [];
+    // Critical health recommendationsif (healthScore < 60) {
       recommendations.push({
-        category: 'critical',priority: 'critical',title: 'Critical System Health',description: 'System health is critically low requiring immediate attention',action: 'Review all system components and implement immediate remediation measures',});}
+        category: 'critical',
+  priority: 'critical',
+  title: 'Critical System Health',
+  description: 'System health is critically low requiring immediate attention',
+  action: 'Review all system components and implement immediate remediation measures',});
+}
 
     // Memory pressure recommendations
     if (dashboardData.realTime.memoryPressure > 80) {
       recommendations.push({
-        category: 'performance',priority: 'high',title: 'High Memory Pressure',description: 'System memory usage is critically high',action: 'Scale memory resources or optimize memory-intensive operations',});}
+        category: 'performance',
+  priority: 'high',
+  title: 'High Memory Pressure',
+  description: 'System memory usage is critically high',
+  action: 'Scale memory resources or optimize memory-intensive operations',});
+}
 
     // Queue depth recommendations
     if (dashboardData.realTime.queueDepth > 50) {
       recommendations.push({
-        category: 'capacity',priority: 'high',title: 'High Queue Depth',description: 'Job queue is backing up with high depth',action: 'Increase worker pool size or optimize job processing efficiency',});}
+        category: 'capacity',
+  priority: 'high',
+  title: 'High Queue Depth',
+  description: 'Job queue is backing up with high depth',
+  action: 'Increase worker pool size or optimize job processing efficiency',});
+}
 
     // SLA compliance recommendations
     if (dashboardData.slaCompliance.overallSLAScore < 90) {
       recommendations.push({
-        category: 'sla',priority: 'medium',title: 'SLA Compliance Below Target',description: 'Overall SLA compliance is below the 90% target',action: 'Review job execution times and optimize critical path operations',});}
+        category: 'sla',
+  priority: 'medium',
+  title: 'SLA Compliance Below Target',
+  description: 'Overall SLA compliance is below the 90% target',
+  action: 'Review job execution times and optimize critical path operations',});
+}
 
     // Worker utilization recommendations
     if (capacityData.utilization.averageWorkerUtilization > 85) {
       recommendations.push({
-        category: 'capacity',priority: 'medium',title: 'High Worker Utilization',description: 'Worker pool utilization is approaching capacity limits',action: 'Consider scaling worker pool to handle increased load',});}
+        category: 'capacity',
+  priority: 'medium',
+  title: 'High Worker Utilization',
+  description: 'Worker pool utilization is approaching capacity limits',
+  action: 'Consider scaling worker pool to handle increased load',});
+}
 
     // Business optimization recommendations
     businessData.performanceRecommendations.forEach((rec) => {
@@ -591,7 +641,8 @@ bytebot_job_execution_total{status="completed"} 150\n',
   private generatePredictiveInsights(
     capacityData: CapacityMetricsResponseDto,
     businessData: BusinessMetricsResponseDto
-  ): HealthReportResponseDto['predictiveInsights'] {const expectedBottlenecks: string[] = [];const capacityRecommendations: string[] = [];
+  ): HealthReportResponseDto['predictiveInsights'] {const expectedBottlenecks: string[] = [];
+    const capacityRecommendations: string[] = [];
     const optimizationOpportunities: string[] = [];
 
     // Predict bottlenecks based on trends
@@ -603,7 +654,8 @@ bytebot_job_execution_total{status="completed"} 150\n',
     // Capacity scaling recommendations
     if (capacityData.utilization.peakWorkerUtilization > 90) {
       capacityRecommendations.push(`Scale worker pool to ${capacityData.recommendations.optimalWorkerCount} workers`);}capacityRecommendations.push(
-      `Predicted capacity needs: ${capacityData.recommendations.predictedCapacityNeeds.nextDay} jobs/day`);// Optimization opportunities
+      `Predicted capacity needs: ${capacityData.recommendations.predictedCapacityNeeds.nextDay} jobs/day`);
+    // Optimization opportunities
     businessData.costOptimizationOpportunities.forEach((opp) => {
       optimizationOpportunities.push(`${opp.description} (Potential savings: ${opp.potentialSavings})`);});if (businessData.averageJobsPerHour > 0) {
       const peakHours = businessData.peakHourRange;

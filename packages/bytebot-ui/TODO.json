@@ -1203,6 +1203,106 @@
       "description": "Perform final comprehensive ESLint validation across all packages after fixes are complete. Run full linting, TypeScript compilation, build processes, and generate final validation report. Ensure zero violations across entire ecosystem and document completion evidence",
       "category": "test",
       "id": "test_1758350426551_l5srczorhq9"
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-21T04:57:54.864Z",
+      "title": "Fix remaining 1382 TypeScript ESLint errors in bytebotd package",
+      "description": "After parsing error resolution and initial async/await fixes by subagents, 1382 TypeScript ESLint errors remain:\n\n1. Type safety violations (@typescript-eslint/no-unsafe-*): 1000+ errors\n   - Unsafe assignments, member access, calls, arguments\n   - Error typed values being used unsafely\n   - Missing type annotations and proper typing\n\n2. Async/await violations (@typescript-eslint/require-await): 300+ errors\n   - Async methods without await expressions\n   - Functions marked async but not using await\n\n3. Files with highest error counts:\n   - controller-security.integration.spec.ts: 100+ errors\n   - parlant-websocket-streaming-bridge.service.ts: 50+ errors  \n   - database-api.controller.ts: 25+ errors\n   - Multiple other files across auth, common, websocket modules\n\nRequires systematic fixes with proper TypeScript typing and async/await patterns.",
+      "category": "error",
+      "id": "error_1758430674864_py33djlzm3"
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-21T04:59:14.609Z",
+      "title": "Fix @typescript-eslint/require-await violations in database services",
+      "description": "Remove async keyword from methods that dont use await, add await for actual database operations, fix async patterns in data retrieval methods, ensure proper async/await for CRUD operations",
+      "category": "error",
+      "id": "error_1758430754609_yv1sqgqcep"
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-21T04:59:14.736Z",
+      "title": "Fix @typescript-eslint/require-await violations in parlant-websocket-streaming-bridge.service.ts",
+      "description": "Remove async keyword from methods that dont use await, add await expressions where async operations are performed, convert synchronous methods to remove async altogether, ensure proper async/await patterns for streaming operations",
+      "category": "error",
+      "id": "error_1758430754736_oanvceutil"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-21T04:59:15.212Z",
+      "title": "Fix @typescript-eslint/require-await violations in config and app modules",
+      "description": "Remove async keyword from synchronous methods, add await for actual initialization operations, fix async patterns in module initialization",
+      "category": "error",
+      "id": "error_1758430755212_fgfccrowroh",
+      "completed_at": "2025-09-21T05:08:51.177Z",
+      "updated_at": "2025-09-21T05:08:51.178Z"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-21T04:59:15.313Z",
+      "title": "Fix @typescript-eslint/require-await violations in auth services and guards",
+      "description": "Fix async/await violations in authentication components: remove async from synchronous methods, add await for database/external calls, fix JWT operations, ensure proper async patterns for security validations",
+      "category": "error",
+      "id": "error_1758430755313_0pdj0kt16o7k",
+      "completed_at": "2025-09-21T05:02:47.708Z",
+      "updated_at": "2025-09-21T05:02:47.708Z"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-21T04:59:15.399Z",
+      "title": "Fix remaining mixed @typescript-eslint violations across all bytebotd modules",
+      "description": "Handle remaining violations across all modules: Fix any remaining type safety violations (@typescript-eslint/no-unsafe-*), Fix any remaining async/await violations (@typescript-eslint/require-await), Address violations in smaller files not covered by other agents, Ensure comprehensive coverage of all error types",
+      "category": "error",
+      "id": "error_1758430755399_39g1yylba9s",
+      "completed_at": "2025-09-21T05:14:17.548Z",
+      "updated_at": "2025-09-21T05:14:17.548Z"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-21T04:59:16.013Z",
+      "title": "Fix @typescript-eslint/no-unsafe-* violations in websocket test files",
+      "description": "Fix unsafe assignments, member access, and add proper typing for mock websocket objects in test files at /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/common/websocket/__tests__/",
+      "category": "error",
+      "id": "error_1758430756013_qb4eh27rz6",
+      "completed_at": "2025-09-21T05:10:55.377Z",
+      "updated_at": "2025-09-21T05:10:55.377Z"
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-21T04:59:16.035Z",
+      "title": "Fix @typescript-eslint/no-unsafe-* violations in database controllers",
+      "description": "Fix type safety errors in database-api.controller.ts and other database controllers. Focus on unsafe assignments, proper typing for conversationId and securityLevel properties, type guards, and proper interface definitions.",
+      "category": "error",
+      "id": "error_1758430756035_h3xrsps9hxl"
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-21T04:59:16.139Z",
+      "title": "Fix TypeScript ESLint no-unsafe violations in common module",
+      "description": "Fix @typescript-eslint/no-unsafe-* violations in pipes, guards, and interceptors in /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/common/ by adding proper typing, interfaces, and type guards",
+      "category": "error",
+      "id": "error_1758430756139_1tfxknsoq5x"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-21T04:59:16.183Z",
+      "title": "Fix TypeScript ESLint unsafe violations in auth test files",
+      "description": "Fix @typescript-eslint/no-unsafe-* violations in auth test files, focusing on controller-security.integration.spec.ts with 100+ errors. Add proper type annotations, fix unsafe assignments/calls, and replace any types with specific TypeScript interfaces.",
+      "category": "error",
+      "id": "error_1758430756182_fgprm5zg53i",
+      "completed_at": "2025-09-21T05:10:02.112Z",
+      "updated_at": "2025-09-21T05:10:02.112Z"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-21T04:59:16.643Z",
+      "title": "Fix @typescript-eslint/no-unsafe-* violations in database test files",
+      "description": "Fix unsafe assignments, add proper typing for mock database objects, ensure test assertions have proper types, fix unsafe member access in test expectations in /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/database/__tests__/",
+      "category": "error",
+      "id": "error_1758430756643_ub1jyjuwxcs",
+      "completed_at": "2025-09-21T05:10:41.871Z",
+      "updated_at": "2025-09-21T05:10:41.871Z"
     }
   ],
   "agents": {
@@ -3156,6 +3256,216 @@
       "workload": 0,
       "maxConcurrentTasks": 5,
       "createdAt": "2025-09-20T06:34:36.517Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758430740268_1_general_f90ff111": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-21T04:59:00.269Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-21T04:59:00.269Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758430740395_1_general_1dba972b": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-21T04:59:00.396Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-21T04:59:00.396Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758430740626_1_general_dccd87d3": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-21T04:59:00.627Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-21T04:59:00.627Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758430740724_1_general_c98ab52a": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-21T04:59:00.725Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-21T04:59:00.725Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758430740759_1_general_2eaaff7c": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-21T04:59:00.759Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-21T04:59:00.759Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758430740825_1_general_c0021a40": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-21T04:59:00.826Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-21T04:59:00.826Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758430740906_1_general_d7a6ac6e": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-21T04:59:00.907Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-21T04:59:00.907Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758430740949_1_general_457a8c7a": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-21T04:59:00.950Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-21T04:59:00.950Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758430741035_1_general_3e545b99": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-21T04:59:01.035Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-21T04:59:01.035Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758430741079_1_general_b5ddef57": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-21T04:59:01.080Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-21T04:59:01.080Z",
       "sessionId": null,
       "metadata": {}
     }

@@ -9,7 +9,8 @@
  */
 
 // Main service export
-export { BackgroundJobWorkerService } from './background-job-worker.service';// Type definitionsexport {
+export { BackgroundJobWorkerService } from './background-job-worker.service';
+    // Type definitionsexport {
   WorkerState,
   WorkerInfo,
   JobExecutionContext,
@@ -17,7 +18,9 @@ export { BackgroundJobWorkerService } from './background-job-worker.service';// 
   WorkerPoolMetrics,
   WorkerMessageType,
   WorkerMessage,
-} from './background-job-worker.service';// Re-export related types from job managementexport {
+} from './background-job-worker.service';
+    // Re-export related types from job managementexport {
   JobStatus,
   JobPriority,
-} from '../job-management.service';// Re-export shared typesexport type { ComputerAction } from '@bytebot/shared';
+} from '../job-management.service';
+    // Re-export shared typesexport type { ComputerAction } from '@bytebot/shared';

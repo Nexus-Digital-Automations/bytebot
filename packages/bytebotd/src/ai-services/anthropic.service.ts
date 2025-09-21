@@ -20,7 +20,8 @@
 
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ParlantIntegrationService, RiskLevel, ParlantValidationRequest, ParlantConversationContext } from '../parlant/parlant-integration.service';
+import { RiskLevel } from '@bytebot/shared';
+import { ParlantIntegrationService, ParlantValidationRequest, ParlantConversationContext } from '../parlant/parlant-integration.service';
 
 // ===== ANTHROPIC AI INTEGRATION INTERFACES =====
 /**
@@ -137,7 +138,12 @@ export class AnthropicService {
     
     this.apiKey = this.configService.get<string>('ANTHROPIC_API_KEY', '');
     if (!this.apiKey) {
-      this.logger.warn(`[${operationId}] Anthropic API key not configured - service will operate in validation-only mode`);}this.logger.log(`[${operationId}] Anthropic Service initialized with MAXIMUM Parlant integration`, {parlantEnabled: true,validationRequired: true,
+      this.logger.warn(`[${operationId}] Anthropic API key not configured - service will operate in validation-only mode`);
+    }
+
+    this.logger.log(`[${operationId}] Anthropic Service initialized with MAXIMUM Parlant integration`, {
+      parlantEnabled: true,
+      validationRequired: true,
       auditTrailEnabled: true,
       baseUrl: this.baseUrl,
     });
@@ -195,7 +201,13 @@ export class AnthropicService {
           }
         );
 
-        throw new Error(`AI operation blocked by conversational validation: ${validationResponse.reasoning}`);}this.logger.log(`[${request.operationId}] Parlant validation approved - proceeding with Claude API call`);// Execute Claude API call with validated parametersconst response = await this.performClaudeAPICall(request);
+        throw new Error(`AI operation blocked by conversational validation: ${validationResponse.reasoning}`);
+      }
+
+      this.logger.log(`[${request.operationId}] Parlant validation approved - proceeding with Claude API call`);
+
+      // Execute Claude API call with validated parameters
+      const response = await this.performClaudeAPICall(request);
 
       // Update performance metrics
       const duration = Date.now() - startTime;
@@ -253,7 +265,10 @@ export class AnthropicService {
     request: ClaudeChatRequest,
     onChunk: (chunk: ClaudeStreamChunk) => void
   ): Promise<void> {
-    const operationId = `${request.operationId}_stream`;const startTime = Date.now();this.logger.log(
+    const operationId = `${request.operationId}_stream`;
+    const startTime = Date.now();
+
+    this.logger.log(
       `[${operationId}] Starting Claude streaming chat with Parlant validation`,
       {
         operationId,
@@ -306,7 +321,10 @@ export class AnthropicService {
   async executeToolCalling(
     request: ClaudeChatRequest & { toolChoice?: 'auto' | 'required' | { type: 'function'; function: { name: string } } }
   ): Promise<ClaudeChatResponse> {
-    const operationId = `${request.operationId}_tools`;const startTime = Date.now();this.logger.log(
+    const operationId = `${request.operationId}_tools`;
+    const startTime = Date.now();
+
+    this.logger.log(
       `[${operationId}] Starting Claude tool calling with Parlant validation`,
       {
         operationId,
@@ -442,10 +460,13 @@ export class AnthropicService {
     
     this.logger.log('Anthropic Service Performance Metrics', {
       requestCount: this.requestCount,
-      validationRate: `${validationRate.toFixed(2)}%`,averageResponseTime: `${this.averageResponseTime.toFixed(2)}ms`,
+      validationRate: `${validationRate.toFixed(2)}%`,
+      averageResponseTime: `${this.averageResponseTime.toFixed(2)}ms`,
       totalInputTokens: this.tokenUsage.input,
       totalOutputTokens: this.tokenUsage.output,
-      tokenRatio: this.tokenUsage.input > 0 ? (this.tokenUsage.output / this.tokenUsage.input).toFixed(2) : '0',});}
+      tokenRatio: this.tokenUsage.input > 0 ? (this.tokenUsage.output / this.tokenUsage.input).toFixed(2) : '0',
+    });
+  }
 
   // ===== PUBLIC UTILITY METHODS =====
 
@@ -453,11 +474,19 @@ export class AnthropicService {
    * Get current service health with performance metrics
    */
   getServiceHealth(): {
-    status: 'HEALTHY' | 'DEGRADED' | 'FAILED';metrics: Record<string, unknown>;} {
+    status: 'HEALTHY' | 'DEGRADED' | 'FAILED';
+    metrics: Record<string, unknown>;
+  } {
     const avgResponseTime = this.averageResponseTime;
     const validationRate = this.requestCount > 0 ? (this.validationCount / this.requestCount) * 100 : 100;
 
-    let status: 'HEALTHY' | 'DEGRADED' | 'FAILED' = 'HEALTHY';if (avgResponseTime > 2000 || validationRate < 95) {status = 'DEGRADED';}if (avgResponseTime > 5000 || validationRate < 80 || !this.apiKey) {
+    let status: 'HEALTHY' | 'DEGRADED' | 'FAILED' = 'HEALTHY';
+
+    if (avgResponseTime > 2000 || validationRate < 95) {
+      status = 'DEGRADED';
+    }
+
+    if (avgResponseTime > 5000 || validationRate < 80 || !this.apiKey) {
       status = 'FAILED';
     }
 
@@ -465,7 +494,8 @@ export class AnthropicService {
       status,
       metrics: {
         requestCount: this.requestCount,
-        averageResponseTime: `${avgResponseTime.toFixed(2)}ms`,validationRate: `${validationRate.toFixed(2)}%`,
+        averageResponseTime: `${avgResponseTime.toFixed(2)}ms`,
+        validationRate: `${validationRate.toFixed(2)}%`,
         tokenUsage: this.tokenUsage,
         apiKeyConfigured: !!this.apiKey,
       },

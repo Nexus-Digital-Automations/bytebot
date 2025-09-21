@@ -22,12 +22,21 @@
  * @version 1.0.0 - MAXIMUM ENTERPRISE MONITORING MODULE
  */
 
-import { Module } from '@nestjs/common';import { EventEmitterModule } from '@nestjs/event-emitter';import { ScheduleModule } from '@nestjs/schedule';// Monitoring Servicesimport { JobMonitoringService } from './services/job-monitoring.service';// Controllersimport { JobMonitoringController } from './controllers/job-monitoring.controller';// WebSocket Gatewaysimport { MonitoringRealtimeGateway } from './gateways/monitoring-realtime.gateway';// Dependenciesimport { MetricsService } from '../metrics/metrics.service';import { CacheService } from '../cache/cache.service';@Module({imports: [
+import { Module } from '@nestjs/common';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { ScheduleModule } from '@nestjs/schedule';
+    // Monitoring Servicesimport { JobMonitoringService } from './services/job-monitoring.service';
+    // Controllersimport { JobMonitoringController } from './controllers/job-monitoring.controller';
+    // WebSocket Gatewaysimport { MonitoringRealtimeGateway } from './gateways/monitoring-realtime.gateway';
+    // Dependenciesimport { MetricsService } from '../metrics/metrics.service';
+import { CacheService } from '../cache/cache.service';@Module({imports: [
     // Event system for real-time monitoring
     EventEmitterModule.forRoot({
       // Enable async event handling for better performance
       wildcard: false,
-      delimiter: '.',newListener: false,removeListener: false,
+      delimiter: '.',
+  newListener: false,
+  removeListener: false,
       maxListeners: 20,
       verboseMemoryLeak: false,
       ignoreErrors: false,

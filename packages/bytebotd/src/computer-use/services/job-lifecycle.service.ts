@@ -34,20 +34,60 @@ import {
   Logger,
   OnModuleInit,
   OnModuleDestroy,
-} from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { EventEmitter2 } from '@nestjs/event-emitter';import Redis from 'ioredis';import { v4 as uuidv4 } from 'uuid';import * as crypto from 'crypto';import * as zlib from 'zlib';import { promisify } from 'util';import { CronJob } from 'cron';import {JobStatus,
+} from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import Redis from 'ioredis';
+import { v4 as uuidv4 } from 'uuid';
+import * as crypto from 'crypto';
+import * as zlib from 'zlib';
+import { promisify } from 'util';
+import { CronJob } from 'cron';
+import {JobStatus,
   JobPriority,
   JobSubmissionResponseDto,
   JobStatusResponseDto,
   JobResultResponseDto,
-} from '../dto/async-job.dto';import { ComputerActionDto } from '../dto/computer-action.dto';// ===== ENHANCED TYPE DEFINITIONS =====/**
+} from '../dto/async-job.dto';
+import { ComputerActionDto } from '../dto/computer-action.dto';
+    // ===== ENHANCED TYPE DEFINITIONS =====/**
  * Enhanced job lifecycle states with comprehensive transitions
  */
 export enum JobLifecycleState {
-  SUBMITTED = 'submitted',QUEUED = 'queued',SCHEDULED = 'scheduled',WAITING_DEPENDENCIES = 'waiting_dependencies',READY = 'ready',RUNNING = 'running',PAUSED = 'paused',COMPLETING = 'completing',COMPLETED = 'completed',FAILED = 'failed',CANCELLED = 'cancelled',TIMEOUT = 'timeout',RETRYING = 'retrying',EXPIRED = 'expired',}/**
+  SUBMITTED = 'submitted',
+  QUEUED = 'queued',
+  SCHEDULED = 'scheduled',
+  WAITING_DEPENDENCIES = 'waiting_dependencies',
+  READY = 'ready',
+  RUNNING = 'running',
+  PAUSED = 'paused',
+  COMPLETING = 'completing',
+  COMPLETED = 'completed',
+  FAILED = 'failed',
+  CANCELLED = 'cancelled',
+  TIMEOUT = 'timeout',
+  RETRYING = 'retrying',
+  EXPIRED = 'expired',}/**
  * Job lifecycle events for monitoring and webhooks
  */
 export enum JobLifecycleEvent {
-  JOB_SUBMITTED = 'job.submitted',JOB_QUEUED = 'job.queued',JOB_SCHEDULED = 'job.scheduled',JOB_DEPENDENCIES_RESOLVED = 'job.dependencies_resolved',JOB_STARTED = 'job.started',JOB_PROGRESS_UPDATED = 'job.progress_updated',JOB_PAUSED = 'job.paused',JOB_RESUMED = 'job.resumed',JOB_COMPLETED = 'job.completed',JOB_FAILED = 'job.failed',JOB_CANCELLED = 'job.cancelled',JOB_TIMEOUT = 'job.timeout',JOB_RETRYING = 'job.retrying',JOB_EXPIRED = 'job.expired',BATCH_STARTED = 'batch.started',BATCH_COMPLETED = 'batch.completed',BATCH_FAILED = 'batch.failed',}/**
+  JOB_SUBMITTED = 'job.submitted',
+  JOB_QUEUED = 'job.queued',
+  JOB_SCHEDULED = 'job.scheduled',
+  JOB_DEPENDENCIES_RESOLVED = 'job.dependencies_resolved',
+  JOB_STARTED = 'job.started',
+  JOB_PROGRESS_UPDATED = 'job.progress_updated',
+  JOB_PAUSED = 'job.paused',
+  JOB_RESUMED = 'job.resumed',
+  JOB_COMPLETED = 'job.completed',
+  JOB_FAILED = 'job.failed',
+  JOB_CANCELLED = 'job.cancelled',
+  JOB_TIMEOUT = 'job.timeout',
+  JOB_RETRYING = 'job.retrying',
+  JOB_EXPIRED = 'job.expired',
+  BATCH_STARTED = 'batch.started',
+  BATCH_COMPLETED = 'batch.completed',
+  BATCH_FAILED = 'batch.failed',}/**
  * Job scheduling configuration with cron-like capabilities
  */
 export interface JobScheduleConfig {
@@ -216,7 +256,7 @@ export class JobLifecycleStateMachine {
     [JobLifecycleState.EXPIRED, []], // Terminal state
   ]);
 
-  /**
+/**
    * Validate state transition
    */
   public validateTransition(fromState: JobLifecycleState, toState: JobLifecycleState): boolean {
@@ -254,7 +294,7 @@ export class JobDependencyManager {
   private readonly dependencyGraph = new Map<string, Set<string>>();
   private readonly reverseDependencyGraph = new Map<string, Set<string>>();
 
-  /**
+/**
    * Add job dependency
    */
   public addDependency(jobId: string, dependsOnJobId: string): void {
@@ -314,7 +354,7 @@ export class JobDependencyManager {
     visited.add(jobId);
     recursionStack.add(jobId);
 
-    const dependencies = this.getDependencies(jobId);
+        const dependencies = this.getDependencies(jobId);
     for (const dep of dependencies) {
       if (this.hasCircularDependencies(dep, visited, recursionStack)) {
         return true;
@@ -330,13 +370,14 @@ export class JobDependencyManager {
    */
   public getExecutionOrder(jobIds: string[]): string[] {
     const visited = new Set<string>();
-    const result: string[] = [];
+
+        const result: string[] = [];
 
     const dfs = (jobId: string) => {
       if (visited.has(jobId)) return;
       visited.add(jobId);
 
-      const dependencies = this.getDependencies(jobId);
+        const dependencies = this.getDependencies(jobId);
       for (const dep of dependencies) {
         if (jobIds.includes(dep)) {
           dfs(dep);
@@ -364,7 +405,7 @@ export class JobProgressTracker {
   private readonly logger = new Logger(JobProgressTracker.name);
   private readonly progressHistory = new Map<string, JobProgress[]>();
 
-  /**
+/**
    * Update job progress
    */
   public updateProgress(
@@ -375,11 +416,13 @@ export class JobProgressTracker {
     completedSteps: number,
   ): JobProgress {
     const now = new Date();
-    const history = this.progressHistory.get(jobId) || [];
+
+        const history = this.progressHistory.get(jobId) || [];
 
     // Calculate ETA based on progress history
     const averageStepTime = this.calculateAverageStepTime(history);
-    const remainingSteps = totalSteps - completedSteps;
+
+        const remainingSteps = totalSteps - completedSteps;
     const estimatedTimeRemaining = remainingSteps * averageStepTime;
 
     const progress: JobProgress = {
@@ -421,7 +464,8 @@ export class JobProgressTracker {
     const stepTimes: number[] = [];
     for (let i = 1; i < history.length; i++) {
       const timeDiff = history[i].lastUpdatedAt.getTime() - history[i - 1].lastUpdatedAt.getTime();
-      const stepDiff = history[i].completedSteps - history[i - 1].completedSteps;
+
+        const stepDiff = history[i].completedSteps - history[i - 1].completedSteps;
       if (stepDiff > 0) {
         stepTimes.push(timeDiff / stepDiff);
       }
@@ -454,7 +498,12 @@ export class JobResultManager {
 
   constructor(private readonly configService: ConfigService) {
     this.redis = new Redis({
-      host: this.configService.get<string>('REDIS_HOST', 'localhost'),port: this.configService.get<number>('REDIS_PORT', 6379),password: this.configService.get<string>('REDIS_PASSWORD'),db: this.configService.get<number>('REDIS_JOB_RESULTS_DB', 1),keyPrefix: 'bytebot:job:results:',});}
+      host: this.configService.get<string>('REDIS_HOST', 'localhost'),
+  port: this.configService.get<number>('REDIS_PORT', 6379),
+  password: this.configService.get<string>('REDIS_PASSWORD'),
+  db: this.configService.get<number>('REDIS_JOB_RESULTS_DB', 1),
+  keyPrefix: 'bytebot:job:results:',});
+}
 
   /**
    * Store job result with compression and encryption
@@ -570,7 +619,8 @@ export class JobLifecycleService implements OnModuleInit, OnModuleDestroy {
     config: Partial<JobLifecycleConfig> = {},
   ): Promise<JobSubmissionResponseDto> {
     const jobId = this.generateJobId();
-    const now = new Date();
+
+        const now = new Date();
 
     // Validate configuration
     const fullConfig = this.validateAndMergeConfig(config);
@@ -595,7 +645,9 @@ export class JobLifecycleService implements OnModuleInit, OnModuleDestroy {
       config: fullConfig,
       progress: {
         percentage: 0,
-        currentStep: 'Submitted',totalSteps: 1,completedSteps: 0,
+        currentStep: 'Submitted',
+  totalSteps: 1,
+  completedSteps: 0,
         estimatedTimeRemaining: 0,
         averageStepTime: 0,
         startedAt: now,
@@ -611,7 +663,8 @@ export class JobLifecycleService implements OnModuleInit, OnModuleDestroy {
         fromState: JobLifecycleState.SUBMITTED,
         toState: JobLifecycleState.SUBMITTED,
         timestamp: now,
-        reason: 'Job submitted',triggeredBy: 'user',}],};
+        reason: 'Job submitted',
+  triggeredBy: 'user',}],};
 
     // Store job
     this.jobs.set(jobId, jobData);
@@ -643,7 +696,8 @@ export class JobLifecycleService implements OnModuleInit, OnModuleDestroy {
     }>,
   ): Promise<{ batchId: string; jobIds: string[] }> {
     const batchId = batchConfig.batchId || this.generateBatchId();
-    const jobIds: string[] = [];
+
+        const jobIds: string[] = [];
 
     try {
       // Submit all jobs in batch
@@ -657,6 +711,7 @@ export class JobLifecycleService implements OnModuleInit, OnModuleDestroy {
         };
 
         const result = await this.submitJob(action, enhancedConfig);
+
         const job = this.jobs.get(result.jobId);
         if (job) {
           job.batchId = batchId;
@@ -872,7 +927,8 @@ export class JobLifecycleService implements OnModuleInit, OnModuleDestroy {
       // Update job data
       job.result = result;
       job.progress.percentage = 100;
-      job.progress.currentStep = 'Completed';// Transition to completed stateawait this.transitionState(jobId, JobLifecycleState.COMPLETED, 'Job completed successfully');
+      job.progress.currentStep = 'Completed';
+    // Transition to completed stateawait this.transitionState(jobId, JobLifecycleState.COMPLETED, 'Job completed successfully');
 
       // Mark as completed for dependency resolution
       this.completedJobs.add(jobId);
@@ -935,18 +991,19 @@ export class JobLifecycleService implements OnModuleInit, OnModuleDestroy {
   } {
     const jobs = Array.from(this.jobs.values());
 
-    const byState = Object.values(JobLifecycleState).reduce((acc, state) => {
+        const byState = Object.values(JobLifecycleState).reduce((acc, state) => {
       acc[state] = jobs.filter(job => job.state === state).length;
       return acc;
     }, {} as Record<JobLifecycleState, number>);
 
-    const byPriority = Object.values(JobPriority).reduce((acc, priority) => {
+        const byPriority = Object.values(JobPriority).reduce((acc, priority) => {
       acc[priority] = jobs.filter(job => job.priority === priority).length;
       return acc;
     }, {} as Record<JobPriority, number>);
 
-    const completedJobs = jobs.filter(job => job.state === JobLifecycleState.COMPLETED);
-    const averageExecutionTime = completedJobs.length > 0
+        const completedJobs = jobs.filter(job => job.state === JobLifecycleState.COMPLETED);
+
+        const averageExecutionTime = completedJobs.length > 0
       ? completedJobs.reduce((sum, job) => {
           const execTime = job.timestamps.completedAt && job.timestamps.startedAt
             ? job.timestamps.completedAt.getTime() - job.timestamps.startedAt.getTime()
@@ -1154,7 +1211,8 @@ export class JobLifecycleService implements OnModuleInit, OnModuleDestroy {
   private startCleanupProcess(): void {
     this.cleanupInterval = setInterval(async () => {
       const now = Date.now();
-      const maxAge = 24 * 60 * 60 * 1000; // 24 hours
+
+        const maxAge = 24 * 60 * 60 * 1000; // 24 hours
 
       const expiredJobs = Array.from(this.jobs.entries())
         .filter(([_, job]) => {

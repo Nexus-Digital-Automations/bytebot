@@ -34,9 +34,17 @@
  * @version 1.0.0 - MAXIMUM ENTERPRISE MONITORING IMPLEMENTATION
  */
 
-import { Injectable, Logger } from '@nestjs/common';import { EventEmitter2 } from '@nestjs/event-emitter';import { Cron, CronExpression } from '@nestjs/schedule';import {JobStatus,
+import { Injectable, Logger } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Cron, CronExpression } from '@nestjs/schedule';
+import {
+  JobStatus,
   JobPriority,
-} from '../dto/async-job.dto';import { MetricsService } from '../../metrics/metrics.service';/*** Job execution metrics with comprehensive tracking
+} from '../dto/async-job.dto';
+import { MetricsService } from '../../metrics/metrics.service';
+
+/**
+ * Job execution metrics with comprehensive tracking
  */
 interface JobExecutionMetrics {
   jobId: string;
@@ -292,7 +300,8 @@ export class JobMonitoringService {
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(`[${operationId}] Failed to record job metrics: ${errorMessage}`, {jobId: jobData.jobId,error: errorMessage,
+      this.logger.error(`[${operationId}] Failed to record job metrics: ${errorMessage}`, {jobId: jobData.jobId,
+  error: errorMessage,
       });
     }
   }
@@ -547,7 +556,8 @@ export class JobMonitoringService {
       return;
     }
 
-    this.logger.log('Starting real-time monitoring system');this.isMonitoringActive = true;// Monitor system metrics every 30 seconds
+    this.logger.log('Starting real-time monitoring system');this.isMonitoringActive = true;
+    // Monitor system metrics every 30 seconds
     setInterval(async () => {
       try {
         const systemMetrics = await this.getCurrentSystemMetrics();
@@ -559,7 +569,8 @@ export class JobMonitoringService {
         }
 
         // Emit real-time system metrics
-        this.eventEmitter.emit('system.metrics.updated', {metrics: systemMetrics,timestamp: systemMetrics.timestamp,
+        this.eventEmitter.emit('system.metrics.updated', {metrics: systemMetrics,
+  timestamp: systemMetrics.timestamp,
         });
 
         // Check for alerts
@@ -575,16 +586,47 @@ export class JobMonitoringService {
    * Initialize alert configurations
    */
   private initializeAlertConfigurations(): void {
-    this.logger.debug('Initializing alert configurations');const alerts: AlertConfiguration[] = [{
-        id: 'high_queue_depth',name: 'High Queue Depth',description: 'Job queue depth exceeds acceptable threshold',condition: 'metrics.queueDepth > 50',severity: 'medium',enabled: true,cooldownPeriod: 300000, // 5 minutes
+    this.logger.debug('Initializing alert configurations');
+    const alerts: AlertConfiguration[] = [{
+        id: 'high_queue_depth',
+  name: 'High Queue Depth',
+  description: 'Job queue depth exceeds acceptable threshold',
+  condition: 'metrics.queueDepth > 50',
+  severity: 'medium',
+  enabled: true,
+  cooldownPeriod: 300000, // 5 minutes
         notificationChannels: ['websocket', 'email'],},{
-        id: 'high_error_rate',name: 'High Error Rate',description: 'Job error rate exceeds acceptable threshold',condition: 'metrics.errorRate > 10',severity: 'high',enabled: true,cooldownPeriod: 180000, // 3 minutes
+        id: 'high_error_rate',
+  name: 'High Error Rate',
+  description: 'Job error rate exceeds acceptable threshold',
+  condition: 'metrics.errorRate > 10',
+  severity: 'high',
+  enabled: true,
+  cooldownPeriod: 180000, // 3 minutes
         notificationChannels: ['websocket', 'email', 'slack'],},{
-        id: 'sla_violation',name: 'SLA Violation',description: 'Job execution time exceeds SLA threshold',condition: 'metrics.averageResponseTime > 5000',severity: 'critical',enabled: true,cooldownPeriod: 60000, // 1 minute
+        id: 'sla_violation',
+  name: 'SLA Violation',
+  description: 'Job execution time exceeds SLA threshold',
+  condition: 'metrics.averageResponseTime > 5000',
+  severity: 'critical',
+  enabled: true,
+  cooldownPeriod: 60000, // 1 minute
         notificationChannels: ['websocket', 'email', 'slack', 'pagerduty'],},{
-        id: 'memory_pressure',name: 'Memory Pressure',description: 'System memory usage exceeds safe threshold',condition: 'metrics.memoryPressure > 80',severity: 'high',enabled: true,cooldownPeriod: 300000, // 5 minutes
+        id: 'memory_pressure',
+  name: 'Memory Pressure',
+  description: 'System memory usage exceeds safe threshold',
+  condition: 'metrics.memoryPressure > 80',
+  severity: 'high',
+  enabled: true,
+  cooldownPeriod: 300000, // 5 minutes
         notificationChannels: ['websocket', 'email'],},{
-        id: 'worker_exhaustion',name: 'Worker Pool Exhaustion',description: 'Worker pool utilization critically high',condition: 'metrics.activeWorkers >= 8 && metrics.queueDepth > 20',severity: 'critical',enabled: true,cooldownPeriod: 120000, // 2 minutes
+        id: 'worker_exhaustion',
+  name: 'Worker Pool Exhaustion',
+  description: 'Worker pool utilization critically high',
+  condition: 'metrics.activeWorkers >= 8 && metrics.queueDepth > 20',
+  severity: 'critical',
+  enabled: true,
+  cooldownPeriod: 120000, // 2 minutes
         notificationChannels: ['websocket', 'email', 'slack', 'pagerduty'],
       },
     ];
@@ -729,7 +771,8 @@ export class JobMonitoringService {
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(`Failed to get system metrics: ${errorMessage}`);// Return fallback metricsreturn {
+      this.logger.error(`Failed to get system metrics: ${errorMessage}`);
+    // Return fallback metricsreturn {
         timestamp: new Date(),
         cpuUsage: 0,
         memoryUsage: 0,
@@ -948,7 +991,8 @@ export class JobMonitoringService {
     peakUtilization: number,
     growth: number,
     jobVolume: number
-  ): CapacityMetrics['recommendations'] {const scaleUpThreshold = 80;const scaleDownThreshold = 30;
+  ): CapacityMetrics['recommendations'] {const scaleUpThreshold = 80;
+    const scaleDownThreshold = 30;
     const currentWorkers = 10;
 
     let optimalWorkerCount = currentWorkers;
@@ -975,23 +1019,29 @@ export class JobMonitoringService {
     };
   }
 
-  private generateCostOptimizations(jobs: JobExecutionMetrics[]): BusinessMetrics['costOptimizationOpportunities'] {const opportunities: BusinessMetrics['costOptimizationOpportunities'] = [];// Analyze retry patternsconst highRetryJobs = jobs.filter(job => job.retryCount > 2);
+  private generateCostOptimizations(jobs: JobExecutionMetrics[]): BusinessMetrics['costOptimizationOpportunities'] {const opportunities: BusinessMetrics['costOptimizationOpportunities'] = [];
+    // Analyze retry patternsconst highRetryJobs = jobs.filter(job => job.retryCount > 2);
     if (highRetryJobs.length > jobs.length * 0.1) {
       opportunities.push({
-        type: 'retry_optimization',description: 'High retry rate detected. Consider improving error handling and resilience.',potentialSavings: highRetryJobs.length * 0.5, // Estimated cost per retry});
+        type: 'retry_optimization',
+  description: 'High retry rate detected. Consider improving error handling and resilience.',
+  potentialSavings: highRetryJobs.length * 0.5, // Estimated cost per retry});
     }
 
     // Analyze queue efficiency
     const avgQueueTime = jobs.reduce((sum, job) => sum + job.queueWaitTime, 0) / jobs.length;
     if (avgQueueTime > 2000) {
       opportunities.push({
-        type: 'queue_optimization',description: 'High average queue wait times. Consider optimizing job scheduling or adding workers.',potentialSavings: Math.ceil(avgQueueTime / 1000) * jobs.length * 0.01,});
+        type: 'queue_optimization',
+  description: 'High average queue wait times. Consider optimizing job scheduling or adding workers.',
+  potentialSavings: Math.ceil(avgQueueTime / 1000) * jobs.length * 0.01,});
     }
 
     return opportunities;
   }
 
-  private generatePerformanceRecommendations(jobs: JobExecutionMetrics[]): BusinessMetrics['performanceRecommendations'] {const recommendations: BusinessMetrics['performanceRecommendations'] = [];// Analyze execution times by job typeconst jobTypeStats = new Map<string, { total: number; count: number; avg: number }>();
+  private generatePerformanceRecommendations(jobs: JobExecutionMetrics[]): BusinessMetrics['performanceRecommendations'] {const recommendations: BusinessMetrics['performanceRecommendations'] = [];
+    // Analyze execution times by job typeconst jobTypeStats = new Map<string, { total: number; count: number; avg: number }>();
     jobs.forEach(job => {
       if (!jobTypeStats.has(job.jobType)) {
         jobTypeStats.set(job.jobType, { total: 0, count: 0, avg: 0 });
@@ -1018,7 +1068,10 @@ export class JobMonitoringService {
     const avgMemory = jobs.reduce((sum, job) => sum + job.resourceUsage.memoryPeak, 0) / jobs.length;
     if (avgMemory > 100) {
       recommendations.push({
-        category: 'resource',recommendation: 'Consider memory optimization techniques to reduce average memory usage per job',priority: 'medium',impact: 'Reduced memory pressure and improved concurrent job capacity',
+        category: 'resource',
+  recommendation: 'Consider memory optimization techniques to reduce average memory usage per job',
+  priority: 'medium',
+  impact: 'Reduced memory pressure and improved concurrent job capacity',
       });
     }
 
@@ -1034,7 +1087,8 @@ export class JobMonitoringService {
       // Replace metrics references and evaluate
       let expression = condition;
       Object.keys(metrics).forEach(key => {
-        expression = expression.replace(new RegExp(`metrics\\.${key}`, 'g'), metrics[key].toString());});// Basic safety check - only allow numbers, operators, and parentheses
+        expression = expression.replace(new RegExp(`metrics\\.${key}`, 'g'), metrics[key].toString());});
+    // Basic safety check - only allow numbers, operators, and parentheses
       if (!/^[\d\s+\-*/><=&|()!.]+$/.test(expression)) {
         throw new Error('Invalid expression');}// Evaluate the expression (using Function constructor as a simple evaluator)
       // Note: In production, use a proper safe expression evaluator
@@ -1107,14 +1161,17 @@ export class JobMonitoringService {
       const dashboardData = await this.getDashboardMetrics();
 
       // Emit comprehensive health report
-      this.eventEmitter.emit('health.report.generated', {operationId,timestamp: new Date(),
+      this.eventEmitter.emit('health.report.generated', {operationId,
+  timestamp: new Date(),
         capacity: capacityMetrics,
         business: businessMetrics,
         dashboard: dashboardData,
         recommendations: [
           ...businessMetrics.performanceRecommendations,
           ...businessMetrics.costOptimizationOpportunities.map(opt => ({
-            category: 'cost',recommendation: opt.description,priority: 'medium' as const,
+            category: 'cost',
+  recommendation: opt.description,
+  priority: 'medium' as const,
             impact: `Potential savings: ${opt.potentialSavings}`,})),],
       });
 

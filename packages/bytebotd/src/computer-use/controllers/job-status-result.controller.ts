@@ -44,7 +44,8 @@ import {
   NotFoundException,
   InternalServerErrorException,
   Logger,
-} from '@nestjs/common';import {ApiTags,
+} from '@nestjs/common';
+import {ApiTags,
   ApiOperation,
   ApiResponse,
   ApiParam,
@@ -54,13 +55,19 @@ import {
   ApiBearerAuth,
   ApiProduces,
   ApiConsumes,
-} from '@nestjs/swagger';import { Response } from 'express';import { Throttle } from '@nestjs/throttler';import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';import { JobStatusResultService } from '../services/job-status-result.service';import {EnhancedJobStatusResponseDto,
+} from '@nestjs/swagger';
+import { Response } from 'express';
+import { Throttle } from '@nestjs/throttler';
+import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
+import { JobStatusResultService } from '../services/job-status-result.service';
+import {EnhancedJobStatusResponseDto,
   JobAnalyticsDto,
   JobHistoryEntryDto,
   BulkJobStatusRequestDto,
   BulkJobStatusResponseDto,
   JobStatusUpdateNotificationDto,
-} from '../dto/enhanced-job-status.dto';import {EnhancedJobResultResponseDto,
+} from '../dto/enhanced-job-status.dto';
+import {EnhancedJobResultResponseDto,
   ResultDownloadRequestDto,
   ResultDownloadResponseDto,
   ResultExportRequestDto,
@@ -77,14 +84,24 @@ import {
 
   // ===== JOB STATUS ENDPOINTS =====
 
-  @Get(':jobId/status')@ApiOperation({summary: 'Get enhanced job status',description: 'Retrieves comprehensive job status including progress details, performance metrics, and execution timeline',})@ApiParam({
-    name: 'jobId',description: 'Unique job identifier',example: 'job_1702983456789_abc123',})@ApiQuery({
-    name: 'includeProgressDetails',required: false,description: 'Include detailed progress information with subtasks',example: true,})
+  @Get(':jobId/status')@ApiOperation({summary: 'Get enhanced job status',
+  description: 'Retrieves comprehensive job status including progress details, performance metrics, and execution timeline',})@ApiParam({
+    name: 'jobId',
+  description: 'Unique job identifier',
+  example: 'job_1702983456789_abc123',})@ApiQuery({
+    name: 'includeProgressDetails',
+  required: false,
+  description: 'Include detailed progress information with subtasks',
+  example: true,})
   @ApiQuery({
-    name: 'includePerformanceMetrics',required: false,description: 'Include real-time performance metrics',example: false,})
+    name: 'includePerformanceMetrics',
+  required: false,
+  description: 'Include real-time performance metrics',
+  example: false,})
   @ApiResponse({
     status: 200,
-    description: 'Enhanced job status retrieved successfully',type: EnhancedJobStatusResponseDto,})
+    description: 'Enhanced job status retrieved successfully',
+  type: EnhancedJobStatusResponseDto,})
   @ApiResponse({
     status: 404,
     description: 'Job not found',})@UseInterceptors(CacheInterceptor)
@@ -118,7 +135,8 @@ import {
         metadata: enhancedStatus.metadata,
       };
 
-      this.logger.debug(`Job status retrieved: ${jobId}`, {jobId,status: enhancedStatus.status,
+      this.logger.debug(`Job status retrieved: ${jobId}`, {jobId,
+  status: enhancedStatus.status,
         progress: enhancedStatus.progress,
       });
 
@@ -136,10 +154,22 @@ import {
     }
   }
 
-  @Put(':jobId/status')@ApiOperation({summary: 'Update job status',description: 'Updates job status with progress information and optional metadata',})@ApiParam({
-    name: 'jobId',description: 'Unique job identifier',example: 'job_1702983456789_abc123',})@ApiBody({
-    description: 'Status update information',schema: {type: 'object',properties: {status: { enum: ['pending', 'in_progress', 'completed', 'failed', 'cancelled'] },progress: { type: 'number', minimum: 0, maximum: 100 },progressDetails: {type: 'object',properties: {currentStep: { type: 'string' },totalSteps: { type: 'number' },currentStepIndex: { type: 'number' },estimatedTimeRemaining: { type: 'number' },},},
-        metadata: { type: 'object' },},required: ['status', 'progress'],},})
+  @Put(':jobId/status')@ApiOperation({summary: 'Update job status',
+  description: 'Updates job status with progress information and optional metadata',})@ApiParam({
+    name: 'jobId',
+  description: 'Unique job identifier',
+  example: 'job_1702983456789_abc123',})@ApiBody({
+    description: 'Status update information',
+  schema: {type: 'object',
+  properties: {status: { enum: ['pending', 'in_progress', 'completed', 'failed', 'cancelled'] },
+  progress: { type: 'number', minimum: 0, maximum: 100 },
+  progressDetails: {type: 'object',
+  properties: {currentStep: { type: 'string' },
+  totalSteps: { type: 'number' },
+  currentStepIndex: { type: 'number' },
+  estimatedTimeRemaining: { type: 'number' },},},
+        metadata: { type: 'object' },},
+  required: ['status', 'progress'],},})
   @ApiResponse({
     status: 200,
     description: 'Job status updated successfully',})@HttpCode(HttpStatus.OK)
@@ -162,7 +192,8 @@ import {
         updateData.metadata,
       );
 
-      this.logger.log(`Job status updated: ${jobId} -> ${updateData.status} (${updateData.progress}%)`, {jobId,status: updateData.status,
+      this.logger.log(`Job status updated: ${jobId} -> ${updateData.status} (${updateData.progress}%)`, {jobId,
+  status: updateData.status,
         progress: updateData.progress,
       });
 
@@ -177,11 +208,14 @@ import {
     }
   }
 
-  @Post('bulk/status')@ApiOperation({summary: 'Get status for multiple jobs',description: 'Retrieves status information for multiple jobs in a single request',})@ApiBody({
-    description: 'Bulk status request',type: BulkJobStatusRequestDto,})
+  @Post('bulk/status')@ApiOperation({summary: 'Get status for multiple jobs',
+  description: 'Retrieves status information for multiple jobs in a single request',})@ApiBody({
+    description: 'Bulk status request',
+  type: BulkJobStatusRequestDto,})
   @ApiResponse({
     status: 200,
-    description: 'Bulk job status retrieved successfully',type: BulkJobStatusResponseDto,})
+    description: 'Bulk job status retrieved successfully',
+  type: BulkJobStatusResponseDto,})
   @HttpCode(HttpStatus.OK)
   @Throttle({ default: { limit: 50, ttl: 60000 } }) // 50 requests per minute for bulk operations
   async getBulkJobStatus(
@@ -197,6 +231,7 @@ import {
       const concurrency = 10;
       for (let i = 0; i < bulkRequest.jobIds.length; i += concurrency) {
         const batch = bulkRequest.jobIds.slice(i, i + concurrency);
+
         const batchResults = await Promise.allSettled(
           batch.map(async (jobId) => {
             const status = await this.jobStatusResultService.getJobStatus(jobId);
@@ -218,7 +253,8 @@ import {
               },
               performance: bulkRequest.includePerformanceMetrics ? status.performance : undefined,
               error: status.error,
-              priority: status.metadata?.priority as any || 'normal',metadata: status.metadata,} as EnhancedJobStatusResponseDto;
+              priority: status.metadata?.priority as any || 'normal',
+  metadata: status.metadata,} as EnhancedJobStatusResponseDto;
           })
         );
 
@@ -258,13 +294,24 @@ import {
 
   // ===== JOB RESULT ENDPOINTS =====
 
-  @Get(':jobId/result')@ApiOperation({summary: 'Get job result',description: 'Retrieves job execution result with optional streaming support for large results',})@ApiParam({
-    name: 'jobId',description: 'Unique job identifier',example: 'job_1702983456789_abc123',})@ApiQuery({
-    name: 'stream',required: false,description: 'Enable streaming for large results',example: false,})
+  @Get(':jobId/result')@ApiOperation({summary: 'Get job result',
+  description: 'Retrieves job execution result with optional streaming support for large results',})@ApiParam({
+    name: 'jobId',
+  description: 'Unique job identifier',
+  example: 'job_1702983456789_abc123',})@ApiQuery({
+    name: 'stream',
+  required: false,
+  description: 'Enable streaming for large results',
+  example: false,})
   @ApiQuery({
-    name: 'format',required: false,description: 'Preferred result format',enum: ['json', 'binary', 'text', 'original'],example: 'json',})@ApiResponse({
+    name: 'format',
+  required: false,
+  description: 'Preferred result format',
+  enum: ['json', 'binary', 'text', 'original'],
+  example: 'json',})@ApiResponse({
     status: 200,
-    description: 'Job result retrieved successfully',type: EnhancedJobResultResponseDto,})
+    description: 'Job result retrieved successfully',
+  type: EnhancedJobResultResponseDto,})
   @ApiProduces('application/json', 'application/octet-stream')@Throttle({ default: { limit: 100, ttl: 60000 } })async getJobResult(
     @Param('jobId') jobId: string,@Query('stream') stream?: boolean,@Query('format') format: string = 'json',@Res({ passthrough: true }) res?: Response,): Promise<EnhancedJobResultResponseDto | StreamableFile> {
     try {
@@ -304,7 +351,8 @@ import {
         metadata: metadata.metadata,
       };
 
-      this.logger.debug(`Job result retrieved: ${jobId}`, {jobId,resultSize: metadata.size,
+      this.logger.debug(`Job result retrieved: ${jobId}`, {jobId,
+  resultSize: metadata.size,
         compressed: metadata.compressed,
         format: metadata.format,
       });
@@ -323,12 +371,17 @@ import {
     }
   }
 
-  @Post(':jobId/result/download')@ApiOperation({summary: 'Generate result download URL',description: 'Creates a secure download URL for job result with optional format conversion',})@ApiParam({
-    name: 'jobId',description: 'Unique job identifier',example: 'job_1702983456789_abc123',})@ApiBody({
-    description: 'Download configuration',type: ResultDownloadRequestDto,})
+  @Post(':jobId/result/download')@ApiOperation({summary: 'Generate result download URL',
+  description: 'Creates a secure download URL for job result with optional format conversion',})@ApiParam({
+    name: 'jobId',
+  description: 'Unique job identifier',
+  example: 'job_1702983456789_abc123',})@ApiBody({
+    description: 'Download configuration',
+  type: ResultDownloadRequestDto,})
   @ApiResponse({
     status: 200,
-    description: 'Download URL generated successfully',type: ResultDownloadResponseDto,})
+    description: 'Download URL generated successfully',
+  type: ResultDownloadResponseDto,})
   @HttpCode(HttpStatus.OK)
   @Throttle({ default: { limit: 50, ttl: 60000 } })
   async generateDownloadUrl(
@@ -344,12 +397,17 @@ import {
       const downloadUrl = `https://api.bytebot.com/jobs/${jobId}/result/download?token=${this.generateSecureToken(jobId)}`;
       const expirationTime = new Date(Date.now() + (downloadRequest.expirationSeconds || 3600) * 1000);
 
-      const response: ResultDownloadResponseDto = {
+        const response: ResultDownloadResponseDto = {
         jobId,
         downloadUrl,
         storageInfo: {
-          resultId: 'temp-result-id',size: 0,compressed: false,
-          format: 'json',contentType: 'application/json',checksum: '',storageLocation: '',
+          resultId: 'temp-result-id',
+  size: 0,
+  compressed: false,
+          format: 'json',
+  contentType: 'application/json',
+  checksum: '',
+  storageLocation: '',
           createdAt: new Date().toISOString(),
           expiresAt: expirationTime.toISOString(),
         },
@@ -364,7 +422,8 @@ import {
         },
       };
 
-      this.logger.log(`Download URL generated for job: ${jobId}`, {jobId,expiresAt: expirationTime.toISOString(),
+      this.logger.log(`Download URL generated for job: ${jobId}`, {jobId,
+  expiresAt: expirationTime.toISOString(),
         format: downloadRequest.format,
       });
 
@@ -380,10 +439,14 @@ import {
 
   // ===== JOB ANALYTICS ENDPOINTS =====
 
-  @Get(':jobId/analytics')@ApiOperation({summary: 'Get job analytics',description: 'Retrieves comprehensive analytics and performance metrics for a job',})@ApiParam({
-    name: 'jobId',description: 'Unique job identifier',example: 'job_1702983456789_abc123',})@ApiResponse({
+  @Get(':jobId/analytics')@ApiOperation({summary: 'Get job analytics',
+  description: 'Retrieves comprehensive analytics and performance metrics for a job',})@ApiParam({
+    name: 'jobId',
+  description: 'Unique job identifier',
+  example: 'job_1702983456789_abc123',})@ApiResponse({
     status: 200,
-    description: 'Job analytics retrieved successfully',type: JobAnalyticsDto,})
+    description: 'Job analytics retrieved successfully',
+  type: JobAnalyticsDto,})
   @UseInterceptors(CacheInterceptor)
   @CacheTTL(300) // Cache for 5 minutes
   @Throttle({ default: { limit: 50, ttl: 60000 } })
@@ -393,7 +456,8 @@ import {
     try {
       const analytics = await this.jobStatusResultService.getJobAnalytics(jobId);
 
-      this.logger.debug(`Job analytics retrieved: ${jobId}`, {jobId,totalTimeMs: analytics.executionMetrics.totalTimeMs,
+      this.logger.debug(`Job analytics retrieved: ${jobId}`, {jobId,
+  totalTimeMs: analytics.executionMetrics.totalTimeMs,
         errorCount: analytics.errorMetrics.errorCount,
       });
 
@@ -411,14 +475,24 @@ import {
     }
   }
 
-  @Get(':jobId/history')@ApiOperation({summary: 'Get job execution history',description: 'Retrieves detailed execution history and audit trail for a job',})@ApiParam({
-    name: 'jobId',description: 'Unique job identifier',example: 'job_1702983456789_abc123',})@ApiQuery({
-    name: 'limit',required: false,description: 'Maximum number of history entries to return',example: 100,})
+  @Get(':jobId/history')@ApiOperation({summary: 'Get job execution history',
+  description: 'Retrieves detailed execution history and audit trail for a job',})@ApiParam({
+    name: 'jobId',
+  description: 'Unique job identifier',
+  example: 'job_1702983456789_abc123',})@ApiQuery({
+    name: 'limit',
+  required: false,
+  description: 'Maximum number of history entries to return',
+  example: 100,})
   @ApiQuery({
-    name: 'offset',required: false,description: 'Number of entries to skip for pagination',example: 0,})
+    name: 'offset',
+  required: false,
+  description: 'Number of entries to skip for pagination',
+  example: 0,})
   @ApiResponse({
     status: 200,
-    description: 'Job history retrieved successfully',type: [JobHistoryEntryDto],})
+    description: 'Job history retrieved successfully',
+  type: [JobHistoryEntryDto],})
   @Throttle({ default: { limit: 100, ttl: 60000 } })
   async getJobHistory(
     @Param('jobId') jobId: string,@Query('limit') limit: number = 100,@Query('offset') offset: number = 0,
@@ -426,7 +500,7 @@ import {
     try {
       const history = await this.jobStatusResultService.getJobHistory(jobId, limit, offset);
 
-      const historyDtos: JobHistoryEntryDto[] = history.map(entry => ({
+        const historyDtos: JobHistoryEntryDto[] = history.map(entry => ({
         timestamp: entry.timestamp.toISOString(),
         event: entry.event,
         userId: entry.userId,
@@ -436,7 +510,8 @@ import {
         clientInfo: entry.clientInfo,
       }));
 
-      this.logger.debug(`Job history retrieved: ${jobId}`, {jobId,entryCount: historyDtos.length,
+      this.logger.debug(`Job history retrieved: ${jobId}`, {jobId,
+  entryCount: historyDtos.length,
         limit,
         offset,
       });
@@ -453,9 +528,16 @@ import {
 
   // ===== SYSTEM MONITORING ENDPOINTS =====
 
-  @Get('system/metrics')@ApiOperation({summary: 'Get system performance metrics',description: 'Retrieves overall system performance metrics for job management',})@ApiResponse({
+  @Get('system/metrics')@ApiOperation({summary: 'Get system performance metrics',
+  description: 'Retrieves overall system performance metrics for job management',})@ApiResponse({
     status: 200,
-    description: 'System metrics retrieved successfully',schema: {type: 'object',properties: {operationsPerSecond: { type: 'number' },averageResponseTimeMs: { type: 'number' },memoryUsageMB: { type: 'number' },activeJobs: { type: 'number' },cacheHitRate: { type: 'number' },},},
+    description: 'System metrics retrieved successfully',
+  schema: {type: 'object',
+  properties: {operationsPerSecond: { type: 'number' },
+  averageResponseTimeMs: { type: 'number' },
+  memoryUsageMB: { type: 'number' },
+  activeJobs: { type: 'number' },
+  cacheHitRate: { type: 'number' },},},
   })
   @UseInterceptors(CacheInterceptor)
   @CacheTTL(60) // Cache for 1 minute
@@ -464,7 +546,8 @@ import {
     try {
       const metrics = await this.jobStatusResultService.getSystemMetrics();
 
-      this.logger.debug('System metrics retrieved', {operationsPerSecond: metrics.operationsPerSecond,averageResponseTimeMs: metrics.averageResponseTimeMs,
+      this.logger.debug('System metrics retrieved', {operationsPerSecond: metrics.operationsPerSecond,
+  averageResponseTimeMs: metrics.averageResponseTimeMs,
         activeJobs: metrics.activeJobs,
       });
 
@@ -481,9 +564,15 @@ import {
 
   // ===== CLEANUP AND MAINTENANCE ENDPOINTS =====
 
-  @Delete(':jobId')@ApiOperation({summary: 'Cleanup job data',description: 'Manually cleanup job data and results with optional archival',})@ApiParam({
-    name: 'jobId',description: 'Unique job identifier',example: 'job_1702983456789_abc123',})@ApiQuery({
-    name: 'archive',required: false,description: 'Archive data before deletion',example: false,})
+  @Delete(':jobId')@ApiOperation({summary: 'Cleanup job data',
+  description: 'Manually cleanup job data and results with optional archival',})@ApiParam({
+    name: 'jobId',
+  description: 'Unique job identifier',
+  example: 'job_1702983456789_abc123',})@ApiQuery({
+    name: 'archive',
+  required: false,
+  description: 'Archive data before deletion',
+  example: false,})
   @ApiResponse({
     status: 200,
     description: 'Job cleaned up successfully',})@HttpCode(HttpStatus.OK)
@@ -494,7 +583,8 @@ import {
     try {
       await this.jobStatusResultService.cleanupJob(jobId, archive);
 
-      this.logger.log(`Job cleaned up: ${jobId}`, {jobId,archived: archive,
+      this.logger.log(`Job cleaned up: ${jobId}`, {jobId,
+  archived: archive,
       });
 
       return {

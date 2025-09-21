@@ -17,21 +17,33 @@ export class CoordinatesDto {
  * Restricts to safe, standard mouse button values
  */
 export enum ButtonType {
-  LEFT = 'left',RIGHT = 'right',MIDDLE = 'middle',}/**
+  LEFT = 'left',
+  RIGHT = 'right',
+  MIDDLE = 'middle',}/**
  * Key/Mouse press types with security validation
  * Restricts to safe press action values
  */
 export enum PressType {
-  UP = 'up',DOWN = 'down',}/**
+  UP = 'up',
+  DOWN = 'down',}/**
  * Scroll direction types with security validation
  * Restricts to safe directional values
  */
 export enum ScrollDirection {
-  UP = 'up',DOWN = 'down',LEFT = 'left',RIGHT = 'right',}/**
+  UP = 'up',
+  DOWN = 'down',
+  LEFT = 'left',
+  RIGHT = 'right',}/**
  * Allowed application names with security validation
  * Whitelist of approved applications for computer-use operations
  * Prevents arbitrary application launching for security
  */
 export enum ApplicationName {
-  FIREFOX = 'firefox',ONEPASSWORD = '1password',THUNDERBIRD = 'thunderbird',VSCODE = 'vscode',TERMINAL = 'terminal',DESKTOP = 'desktop',DIRECTORY = 'directory',
+  FIREFOX = 'firefox',
+  ONEPASSWORD = '1password',
+  THUNDERBIRD = 'thunderbird',
+  VSCODE = 'vscode',
+  TERMINAL = 'terminal',
+  DESKTOP = 'desktop',
+  DIRECTORY = 'directory',
 }

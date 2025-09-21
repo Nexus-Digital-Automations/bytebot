@@ -104,7 +104,9 @@ import { Test, TestingModule } from '@nestjs/testing';import { CACHE_MANAGER } f
       const startTime = performance.now();
 
       for (let i = 0; i < operations; i++) {
-        await cacheService.get(`perf-key-${i}`);}const endTime = performance.now();
+        await cacheService.get(`perf-key-${i}`);
+      }
+      const endTime = performance.now();
       const totalTime = endTime - startTime;
       const avgLatency = totalTime / operations;
 

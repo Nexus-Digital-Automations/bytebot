@@ -17,7 +17,11 @@
  * @version 1.0.0
  */
 
-import { Injectable, Logger } from '@nestjs/common';import { createHash } from 'crypto';/*** Cache key generation options
+import { Injectable, Logger } from '@nestjs/common';
+import { createHash } from 'crypto';
+
+/**
+ * Cache key generation options
  */
 interface KeyGenerationOptions {
   namespace?: string;
@@ -64,10 +68,17 @@ export class CacheKeyGenerator {
   };
 
   // Configuration constants
-  private readonly DEFAULT_NAMESPACE = 'bytebot';private readonly MAX_KEY_LENGTH = 250; // Redis key length limit is 512MB, but keep reasonableprivate readonly HASH_THRESHOLD = 200; // Hash keys longer than this
-  private readonly KEY_SEPARATOR = ':';constructor() {this.logger.log('Cache Key Generator initialized');
+  private readonly DEFAULT_NAMESPACE = 'bytebot';
+  private readonly MAX_KEY_LENGTH = 250; // Redis key length limit is 512MB, but keep reasonable
+  private readonly HASH_THRESHOLD = 200; // Hash keys longer than this
+  private readonly KEY_SEPARATOR = ':';
+
+  constructor() {
+    this.logger.log('Cache Key Generator initialized');
     this.logger.log(
-      `Max key length: ${this.MAX_KEY_LENGTH}, Hash threshold: ${this.HASH_THRESHOLD}`,);}
+      `Max key length: ${this.MAX_KEY_LENGTH}, Hash threshold: ${this.HASH_THRESHOLD}`,
+    );
+  }
 
   /**
    * Generate cache key with intelligent normalization
@@ -82,7 +93,9 @@ export class CacheKeyGenerator {
     namespace?: string,
     options: KeyGenerationOptions = {},
   ): string {
-    const operationId = `keygen${Date.now()}`;try {// Normalize the input key
+    const operationId = `keygen${Date.now()}`;
+    try {
+      // Normalize the input key
       const normalizedKey = this.normalizeKey(key);
 
       // Build key components
@@ -95,7 +108,10 @@ export class CacheKeyGenerator {
 
       // Add version if specified
       if (options.version) {
-        keyComponents.push(`v${options.version}`);}// Add main key
+        keyComponents.push(`v${options.version}`);
+      }
+
+      // Add main key
       keyComponents.push(normalizedKey);
 
       // Add timestamp if requested
@@ -141,8 +157,12 @@ export class CacheKeyGenerator {
       const errorMessage =
         _error instanceof Error ? _error.message : 'Unknown _error';
       this.logger.error(
-        `[${operationId}] Key generation failed: ${errorMessage}`,);// Fallback to simple key generation
-      const fallbackKey = `${namespace ?? this.DEFAULT_NAMESPACE}${this.KEY_SEPARATOR}${this.keyToString(key)}`;this.logger.warn(`Using fallback key: ${fallbackKey}`);
+        `[${operationId}] Key generation failed: ${errorMessage}`,
+      );
+
+      // Fallback to simple key generation
+      const fallbackKey = `${namespace ?? this.DEFAULT_NAMESPACE}${this.KEY_SEPARATOR}${this.keyToString(key)}`;
+      this.logger.warn(`Using fallback key: ${fallbackKey}`);
       return fallbackKey;
     }
   }
@@ -163,7 +183,9 @@ export class CacheKeyGenerator {
     userId?: string,
   ): string {
     const keyParts = [
-      'api',method.toLowerCase(),path.replace(/\//g, '').replace(/^_/, ''),
+      'api',
+      method.toLowerCase(),
+      path.replace(/\//g, '').replace(/^_/, ''),
     ];
 
     if (queryParams && Object.keys(queryParams).length > 0) {
@@ -185,7 +207,10 @@ export class CacheKeyGenerator {
       keyParts.push(`user${userId}`);
     }
 
-    return this.generate(keyParts, 'api');}/**
+    return this.generate(keyParts, 'api');
+  }
+
+  /**
    * Generate key for database query caching
    *
    * @param table Database table name
@@ -198,10 +223,16 @@ export class CacheKeyGenerator {
     operation: string,
     params?: Record<string, unknown>,
   ): string {
-    const keyParts = ['db', table, operation];if (params && Object.keys(params).length > 0) {keyParts.push(this.hashObject(params));
+    const keyParts = ['db', table, operation];
+
+    if (params && Object.keys(params).length > 0) {
+      keyParts.push(this.hashObject(params));
     }
 
-    return this.generate(keyParts, 'database');}/**
+    return this.generate(keyParts, 'database');
+  }
+
+  /**
    * Generate key for task-related caching
    *
    * @param taskId Task identifier
@@ -214,7 +245,10 @@ export class CacheKeyGenerator {
     operation: string,
     additionalParams?: Record<string, unknown>,
   ): string {
-    const keyParts = ['task', taskId, operation];if (additionalParams && Object.keys(additionalParams).length > 0) {keyParts.push(this.hashObject(additionalParams));
+    const keyParts = ['task', taskId, operation];
+
+    if (additionalParams && Object.keys(additionalParams).length > 0) {
+      keyParts.push(this.hashObject(additionalParams));
     }
 
     return this.generate(keyParts, 'tasks');
@@ -228,7 +262,11 @@ export class CacheKeyGenerator {
    * @returns string Invalidation pattern
    */
   generateInvalidationPattern(namespace: string, pattern?: string): string {
-    let invalidationPattern = `${namespace}${this.KEY_SEPARATOR}*`;if (pattern) {invalidationPattern = `${namespace}${this.KEY_SEPARATOR}${pattern}*`;}this.logger.debug(`Generated invalidation pattern: ${invalidationPattern}`);
+    let invalidationPattern = `${namespace}${this.KEY_SEPARATOR}*`;
+    if (pattern) {
+      invalidationPattern = `${namespace}${this.KEY_SEPARATOR}${pattern}*`;
+    }
+    this.logger.debug(`Generated invalidation pattern: ${invalidationPattern}`);
     return invalidationPattern;
   }
 
@@ -266,19 +304,26 @@ export class CacheKeyGenerator {
     this.stats.avgKeyLength = 0;
     this.keyRegistry.clear();
 
-    this.logger.log('Cache key statistics cleared');}/**
+    this.logger.log('Cache key statistics cleared');
+  }
+
+  /**
    * Normalize key input to string
    */
   private normalizeKey(
     key: string | string[] | Record<string, unknown>,
   ): string {
-    if (typeof key === 'string') {return this.sanitizeKey(key);}
+    if (typeof key === 'string') {
+      return this.sanitizeKey(key);
+    }
 
     if (Array.isArray(key)) {
       return key.map((k) => this.sanitizeKey(k)).join(this.KEY_SEPARATOR);
     }
 
-    if (typeof key === 'object' && key !== null) {return this.hashObject(key);}
+    if (typeof key === 'object' && key !== null) {
+      return this.hashObject(key);
+    }
 
     return this.sanitizeKey(String(key));
   }
@@ -288,7 +333,11 @@ export class CacheKeyGenerator {
    */
   private sanitizeKey(key: string): string {
     return key
-      .replace(/[^a-zA-Z0-9_\-.]/g, '') // Replace invalid characters.replace(/_+/g, '') // Collapse multiple underscores.replace(/^_|_$/g, '') // Remove leading/trailing underscores.toLowerCase();}
+      .replace(/[^a-zA-Z0-9_\-.]/g, '') // Replace invalid characters
+      .replace(/_+/g, '_') // Collapse multiple underscores
+      .replace(/^_|_$/g, '') // Remove leading/trailing underscores
+      .toLowerCase();
+  }
 
   /**
    * Hash long keys for performance and storage efficiency
@@ -315,16 +364,24 @@ export class CacheKeyGenerator {
       );
 
     const objString = JSON.stringify(sortedObj);
-    return createHash('md5').update(objString).digest('hex').substring(0, 12);}/**
+    return createHash('md5').update(objString).digest('hex').substring(0, 12);
+  }
+
+  /**
    * Convert key input to string for logging
    */
   private keyToString(
     key: string | string[] | Record<string, unknown>,
   ): string {
-    if (typeof key === 'string') {return key;}
+    if (typeof key === 'string') {
+      return key;
+    }
 
     if (Array.isArray(key)) {
-      return key.join(', ');}return JSON.stringify(key);
+      return key.join(', ');
+    }
+
+    return JSON.stringify(key);
   }
 
   /**

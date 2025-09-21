@@ -24,7 +24,15 @@ import {
   OnGatewayDisconnect,
   ConnectedSocket,
   MessageBody,
-} from '@nestjs/websockets';import { Logger, UseGuards } from '@nestjs/common';import { OnEvent } from '@nestjs/event-emitter';import { Server, Socket } from 'socket.io';import { JwtService } from '@nestjs/jwt';import { JobProgressUpdateDto } from './dto/batch-job.dto';import { JobStatus } from './dto/async-job.dto';/*** WebSocket client interface with authentication
+} from '@nestjs/websockets';
+import { Logger, UseGuards } from '@nestjs/common';
+import { OnEvent } from '@nestjs/event-emitter';
+import { Server, Socket } from 'socket.io';
+import { JwtService } from '@nestjs/jwt';
+import { JobProgressUpdateDto } from './dto/batch-job.dto';
+import { JobStatus } from './dto/async-job.dto';
+
+/*** WebSocket client interface with authentication
  */
 interface AuthenticatedSocket extends Socket {
   userId?: string;
@@ -69,8 +77,11 @@ interface JobSubscriptionRequest {
 
 @WebSocketGateway(8081, {
   cors: {
-    origin: '*',methods: ['GET', 'POST'],credentials: true,},
-  namespace: '/job-events',transports: ['websocket', 'polling'],})export class JobEventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
+    origin: '*',
+  methods: ['GET', 'POST'],
+  credentials: true,},
+  namespace: '/job-events',
+  transports: ['websocket', 'polling'],})export class JobEventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server = new Server();
 
@@ -141,7 +152,8 @@ interface JobSubscriptionRequest {
         `Authentication failed for client ${client.id}: ${error}`,
         error instanceof Error ? error.stack : undefined,
       );
-      client.emit('auth_error', {message: 'Authentication failed',error: error instanceof Error ? error.message : 'Unknown error',
+      client.emit('auth_error', {message: 'Authentication failed',
+  error: error instanceof Error ? error.message : 'Unknown error',
       });
       client.disconnect();
     }
@@ -200,12 +212,15 @@ interface JobSubscriptionRequest {
           batchIds: request.batchIds,
           allUserJobs: request.allUserJobs,\n        },\n      );
   client.emit('subscription_confirmed', {
-        message: `Subscribed to ${subscribedCount} job/batch updates`,jobIds: request.jobIds || [],batchIds: request.batchIds || [],
+        message: `Subscribed to ${subscribedCount} job/batch updates`,
+  jobIds: request.jobIds || [],
+  batchIds: request.batchIds || [],
         allUserJobs: request.allUserJobs || false,
         timestamp: new Date().toISOString(),\n      });\n    } catch (error) {
       this.logger.error(\n        `Subscription error for client ${client.id}: ${error}`,
         error instanceof Error ? error.stack : undefined,\n      );
-      client.emit('subscription_error', {message: 'Failed to process job subscription',error: error instanceof Error ? error.message : 'Unknown error',\n      });\n    }\n  }\n\n  /*** Unsubscribe from job progress updates\n   */\n  @SubscribeMessage('unsubscribe_jobs')
+      client.emit('subscription_error', {message: 'Failed to process job subscription',
+  error: error instanceof Error ? error.message : 'Unknown error',\n      });\n    }\n  }\n\n  /*** Unsubscribe from job progress updates\n   */\n  @SubscribeMessage('unsubscribe_jobs')
   handleJobUnsubscription(\n    @ConnectedSocket() client: AuthenticatedSocket,\n    @MessageBody() request: { jobIds?: string[]; batchIds?: string[] },\n  ): void {
     if (!client.userId) {
       return;\n    }

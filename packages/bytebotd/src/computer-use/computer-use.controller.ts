@@ -11,14 +11,23 @@ import {
   Get,
   Param,
   Delete,
-} from '@nestjs/common';import {ApiOperation,
+} from '@nestjs/common';
+import {
+  ApiOperation,
   ApiResponse,
   ApiBearerAuth,
   ApiTags,
   ApiParam,
-} from '@nestjs/swagger';import { EnterpriseRateLimitGuard as EnterpriseRateLimitGuard } from '../common/guards/rate-limit.guard';import { SecuritySanitizationPipes } from '../common/pipes/security-sanitization.pipe';import { LoggingInterceptor } from '../common/interceptors/logging.interceptor';import {ForVersion,
+} from '@nestjs/swagger';
+import { EnterpriseRateLimitGuard as EnterpriseRateLimitGuard } from '../common/guards/rate-limit.guard';
+import { SecuritySanitizationPipes } from '../common/pipes/security-sanitization.pipe';
+import { LoggingInterceptor } from '../common/interceptors/logging.interceptor';
+import {
+  ForVersion,
   SUPPORTED_API_VERSIONS,
-} from '../common/versioning/api-version.decorator';import {ParlantCritical,
+} from '../common/versioning/api-version.decorator';
+import {
+  ParlantCritical,
   ParlantSecure,
   ParlantValidated,
   ParlantAdmin,
@@ -27,20 +36,31 @@ import {
   ValidationMode,
   ConversationContext,
   ParlantValidationInterceptor
-} from '@bytebot/shared/src/parlant/parlant-validation.decorator';\nimport { ConversationContextParameter } from '@bytebot/shared/src/types/conversation-context.types';\nimport { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';import { RolesGuard } from '../auth/guards/roles.guard';import {OperatorOrAdmin,
+} from '@bytebot/shared/src/parlant/parlant-validation.decorator';\nimport { ConversationContextParameter } from '@bytebot/shared/src/types/conversation-context.types';\nimport { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import {OperatorOrAdmin,
   CurrentUser,
   ByteBotdUser,
-} from '../auth/decorators/roles.decorator';import { ComputerUseService } from './computer-use.service';import { AsyncJobService } from './async-job.service';import { EnhancedAsyncJobService } from './enhanced-async-job.service';import { ComputerActionValidationPipe } from './dto/computer-action-validation.pipe';import { BatchJobValidationPipe } from './pipes/batch-job-validation.pipe';import { ComputerActionDto } from './dto/computer-action.dto';import {JobSubmissionResponseDto,
+} from '../auth/decorators/roles.decorator';
+import { ComputerUseService } from './computer-use.service';
+import { AsyncJobService } from './async-job.service';
+import { EnhancedAsyncJobService } from './enhanced-async-job.service';
+import { ComputerActionValidationPipe } from './dto/computer-action-validation.pipe';
+import { BatchJobValidationPipe } from './pipes/batch-job-validation.pipe';
+import { ComputerActionDto } from './dto/computer-action.dto';
+import {JobSubmissionResponseDto,
   JobStatusResponseDto,
   JobResultResponseDto,
   AsyncActionSubmissionDto,
-} from './dto/async-job.dto';import {BatchJobSubmissionDto,
+} from './dto/async-job.dto';
+import {BatchJobSubmissionDto,
   BatchJobSubmissionResponseDto,
   JobSearchCriteriaDto,
   JobSearchResultsDto,
   JobAnalyticsDto,
   JobProgressUpdateDto,
-} from './dto/batch-job.dto';// Define interfaces for proper error handlinginterface ErrorWithMessage {
+} from './dto/batch-job.dto';
+    // Define interfaces for proper error handlinginterface ErrorWithMessage {
   message: string;
 }
 
@@ -207,9 +227,12 @@ type ComputerActionResponse =
    */
   @Post('jobs/batch')@OperatorOrAdmin()@ForVersion(SUPPORTED_API_VERSIONS.V1)
   @ApiOperation({
-    summary: 'Submit batch computer actions',description:'Submit multiple computer actions as a batch with dependency management and execution control. Supports sequential, parallel, and mixed execution modes.',operationId: 'submitBatchComputerActions',})@ApiResponse({
+    summary: 'Submit batch computer actions',
+  description:'Submit multiple computer actions as a batch with dependency management and execution control. Supports sequential, parallel, and mixed execution modes.',
+  operationId: 'submitBatchComputerActions',})@ApiResponse({
     status: 202,
-    description: 'Batch submitted successfully for async execution',type: BatchJobSubmissionResponseDto,})
+    description: 'Batch submitted successfully for async execution',
+  type: BatchJobSubmissionResponseDto,})
   @ApiResponse({
     status: 400,
     description: 'Invalid batch parameters or dependency configuration',})@ApiResponse({
@@ -221,10 +244,18 @@ type ComputerActionResponse =
     description: 'Rate limit exceeded',})@ParlantBatch(
     'Submit batch computer automation actions with dependency management and execution control',{securityLevel: SecurityLevel.CRITICAL,
       validationMode: ValidationMode.EXPLICIT,
-      businessCategory: 'BATCH_COMPUTER_AUTOMATION',complianceFlags: ['BATCH_PROCESSING', 'SYSTEM_CONTROL', 'HIGH_RISK'],requiredRoles: ['OPERATOR', 'ADMIN'],customRules: [{
-          name: 'batch_size_validation',condition: 'batch_size <= 50',action: 'APPROVE',priority: 5},
+      businessCategory: 'BATCH_COMPUTER_AUTOMATION',
+  complianceFlags: ['BATCH_PROCESSING', 'SYSTEM_CONTROL', 'HIGH_RISK'],
+  requiredRoles: ['OPERATOR', 'ADMIN'],
+  customRules: [{
+          name: 'batch_size_validation',
+  condition: 'batch_size <= 50',
+  action: 'APPROVE',
+  priority: 5},
         {
-          name: 'critical_action_detection',condition: 'contains_critical_actions',action: 'REQUIRE_CONFIRMATION',
+          name: 'critical_action_detection',
+  condition: 'contains_critical_actions',
+  action: 'REQUIRE_CONFIRMATION',
           priority: 10
         }
       ]
@@ -234,7 +265,8 @@ type ComputerActionResponse =
     @Body(new BatchJobValidationPipe()) batchRequest: BatchJobSubmissionDto,
     @CurrentUser() user: ByteBotdUser,
   ): Promise<BatchJobSubmissionResponseDto> {
-    const operationId = `batch_submit_${Date.now()}_${Math.random().toString(36).substring(7)}`;const startTime = Date.now();try {
+    const operationId = `batch_submit_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const startTime = Date.now();try {
       this.logger.log(
         `[${operationId}] Batch computer action submission: ${batchRequest.jobs.length} jobs`,
         {
@@ -308,9 +340,12 @@ type ComputerActionResponse =
    */
   @Post('jobs/search')@OperatorOrAdmin()@ForVersion(SUPPORTED_API_VERSIONS.V1)
   @ApiOperation({
-    summary: 'Search jobs with advanced filtering',description:'Search and filter jobs with comprehensive criteria including status, priority, date ranges, execution times, and metadata search.',operationId: 'searchJobs',})@ApiResponse({
+    summary: 'Search jobs with advanced filtering',
+  description:'Search and filter jobs with comprehensive criteria including status, priority, date ranges, execution times, and metadata search.',
+  operationId: 'searchJobs',})@ApiResponse({
     status: 200,
-    description: 'Job search results retrieved successfully',type: JobSearchResultsDto,})
+    description: 'Job search results retrieved successfully',
+  type: JobSearchResultsDto,})
   @ApiResponse({
     status: 400,
     description: 'Invalid search criteria',})@ApiResponse({
@@ -318,8 +353,11 @@ type ComputerActionResponse =
     description: 'Authentication required',})@ApiResponse({
     status: 403,
     description: 'Insufficient permissions - OPERATOR or ADMIN role required',})@ParlantValidated({
-    intent: 'Search and filter computer automation job history with advanced filtering criteria',securityLevel: SecurityLevel.MEDIUM,validationMode: ValidationMode.CONVERSATIONAL,
-    businessCategory: 'JOB_SEARCH_MONITORING',complianceFlags: ['JOB_MONITORING', 'DATA_ACCESS'],
+    intent: 'Search and filter computer automation job history with advanced filtering criteria',
+  securityLevel: SecurityLevel.MEDIUM,
+  validationMode: ValidationMode.CONVERSATIONAL,
+    businessCategory: 'JOB_SEARCH_MONITORING',
+  complianceFlags: ['JOB_MONITORING', 'DATA_ACCESS'],
     cacheable: true,
     timeout: 8000
   })
@@ -327,7 +365,8 @@ type ComputerActionResponse =
     @Body() criteria: JobSearchCriteriaDto,
     @CurrentUser() user: ByteBotdUser,
   ): Promise<JobSearchResultsDto> {
-    const operationId = `job_search_${Date.now()}_${Math.random().toString(36).substring(7)}`;const startTime = Date.now();try {
+    const operationId = `job_search_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const startTime = Date.now();try {
       this.logger.log(
         `[${operationId}] Job search request`,{operationId,
           userId: user.id,
@@ -391,10 +430,15 @@ type ComputerActionResponse =
    */
   @Get('jobs/:jobId/progress')@OperatorOrAdmin()@ForVersion(SUPPORTED_API_VERSIONS.V1)
   @ApiOperation({
-    summary: 'Get real-time job progress',description:'Retrieve real-time progress information including current step, completion estimates, and detailed progress metadata.',operationId: 'getJobProgress',})@ApiParam({
-    name: 'jobId',description: 'Unique job identifier',example: 'job_1702983456789_abc123',})@ApiResponse({
+    summary: 'Get real-time job progress',
+  description:'Retrieve real-time progress information including current step, completion estimates, and detailed progress metadata.',
+  operationId: 'getJobProgress',})@ApiParam({
+    name: 'jobId',
+  description: 'Unique job identifier',
+  example: 'job_1702983456789_abc123',})@ApiResponse({
     status: 200,
-    description: 'Job progress retrieved successfully',type: JobProgressUpdateDto,})
+    description: 'Job progress retrieved successfully',
+  type: JobProgressUpdateDto,})
   @ApiResponse({
     status: 404,
     description: 'Job not found',})@ApiResponse({
@@ -402,14 +446,20 @@ type ComputerActionResponse =
     description: 'Authentication required',})@ApiResponse({
     status: 403,
     description: 'Insufficient permissions - OPERATOR or ADMIN role required',})@ParlantValidated({
-    intent: 'Retrieve real-time progress information for computer automation job execution',securityLevel: SecurityLevel.MEDIUM,validationMode: ValidationMode.AUTOMATIC,
-    businessCategory: 'JOB_PROGRESS_MONITORING',complianceFlags: ['REAL_TIME_MONITORING', 'JOB_TRACKING'],cacheable: true,timeout: 5000
+    intent: 'Retrieve real-time progress information for computer automation job execution',
+  securityLevel: SecurityLevel.MEDIUM,
+  validationMode: ValidationMode.AUTOMATIC,
+    businessCategory: 'JOB_PROGRESS_MONITORING',
+  complianceFlags: ['REAL_TIME_MONITORING', 'JOB_TRACKING'],
+  cacheable: true,
+  timeout: 5000
   })
   async getJobProgress(
     @Param('jobId') jobId: string,
     @CurrentUser() user: ByteBotdUser,
   ): Promise<JobProgressUpdateDto> {
-    const operationId = `progress_${Date.now()}_${Math.random().toString(36).substring(7)}`;const startTime = Date.now();try {
+    const operationId = `progress_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const startTime = Date.now();try {
       this.logger.log(`[${operationId}] Job progress request for: ${jobId}`, {operationId,jobId,
         userId: user.id,
         username: user.username,
@@ -441,7 +491,9 @@ type ComputerActionResponse =
           operationId,
           jobId,
           processingTime,
-          errorType: error?.constructor?.name ?? 'Unknown',userId: user.id,username: user.username,
+          errorType: error?.constructor?.name ?? 'Unknown',
+  userId: user.id,
+  username: user.username,
         },
       );
 
@@ -469,23 +521,30 @@ type ComputerActionResponse =
    */
   @Get('jobs/analytics')@OperatorOrAdmin()@ForVersion(SUPPORTED_API_VERSIONS.V1)
   @ApiOperation({
-    summary: 'Get job analytics and performance metrics',description:'Retrieve comprehensive job analytics including success rates, execution times, and performance trends.',operationId: 'getJobAnalytics',})@ApiResponse({
+    summary: 'Get job analytics and performance metrics',
+  description:'Retrieve comprehensive job analytics including success rates, execution times, and performance trends.',
+  operationId: 'getJobAnalytics',})@ApiResponse({
     status: 200,
-    description: 'Job analytics retrieved successfully',type: JobAnalyticsDto,})
+    description: 'Job analytics retrieved successfully',
+  type: JobAnalyticsDto,})
   @ApiResponse({
     status: 401,
     description: 'Authentication required',})@ApiResponse({
     status: 403,
     description: 'Insufficient permissions - OPERATOR or ADMIN role required',})@ParlantValidated({
-    intent: 'Retrieve comprehensive analytics and performance metrics for computer automation system',securityLevel: SecurityLevel.MEDIUM,validationMode: ValidationMode.AUTOMATIC,
-    businessCategory: 'ANALYTICS_MONITORING',complianceFlags: ['PERFORMANCE_ANALYTICS', 'SYSTEM_METRICS'],
+    intent: 'Retrieve comprehensive analytics and performance metrics for computer automation system',
+  securityLevel: SecurityLevel.MEDIUM,
+  validationMode: ValidationMode.AUTOMATIC,
+    businessCategory: 'ANALYTICS_MONITORING',
+  complianceFlags: ['PERFORMANCE_ANALYTICS', 'SYSTEM_METRICS'],
     cacheable: true,
     timeout: 10000
   })
   async getJobAnalytics(
     @CurrentUser() user: ByteBotdUser,
   ): Promise<JobAnalyticsDto> {
-    const operationId = `analytics_${Date.now()}_${Math.random().toString(36).substring(7)}`;const startTime = Date.now();try {
+    const operationId = `analytics_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const startTime = Date.now();try {
       this.logger.log(
         `[${operationId}] Job analytics request`,{operationId,
           userId: user.id,
@@ -542,12 +601,24 @@ type ComputerActionResponse =
    */
   @Delete('jobs/batch/:batchId')@OperatorOrAdmin()@ForVersion(SUPPORTED_API_VERSIONS.V1)
   @ApiOperation({
-    summary: 'Cancel jobs by batch ID',description:'Cancel all jobs within a specific batch. Useful for stopping entire workflows or cleaning up failed batches.',operationId: 'cancelJobsBatch',})@ApiParam({
-    name: 'batchId',description: 'Batch identifier to cancel all jobs within',example: 'batch_1702983456789_xyz789',})@ApiResponse({
+    summary: 'Cancel jobs by batch ID',
+  description:'Cancel all jobs within a specific batch. Useful for stopping entire workflows or cleaning up failed batches.',
+  operationId: 'cancelJobsBatch',})@ApiParam({
+    name: 'batchId',
+  description: 'Batch identifier to cancel all jobs within',
+  example: 'batch_1702983456789_xyz789',})@ApiResponse({
     status: 200,
-    description: 'Batch cancellation processed',schema: {type: 'object',properties: {cancelled: {
-          type: 'array',items: { type: 'string' },description: 'Array of successfully cancelled job IDs',},failed: {
-          type: 'array',items: { type: 'string' },description: 'Array of job IDs that could not be cancelled',},batchId: { type: 'string' },},},
+    description: 'Batch cancellation processed',
+  schema: {type: 'object',
+  properties: {cancelled: {
+          type: 'array',
+  items: { type: 'string' },
+  description: 'Array of successfully cancelled job IDs',},
+  failed: {
+          type: 'array',
+  items: { type: 'string' },
+  description: 'Array of job IDs that could not be cancelled',},
+  batchId: { type: 'string' },},},
   })
   @ApiResponse({
     status: 404,
@@ -559,7 +630,8 @@ type ComputerActionResponse =
     @Param('batchId') batchId: string,
     @CurrentUser() user: ByteBotdUser,
   ): Promise<{ cancelled: string[]; failed: string[]; batchId: string }> {
-    const operationId = `cancel_batch_${Date.now()}_${Math.random().toString(36).substring(7)}`;const startTime = Date.now();try {
+    const operationId = `cancel_batch_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const startTime = Date.now();try {
       this.logger.log(
         `[${operationId}] Batch cancellation request for: ${batchId}`,{operationId,
           batchId,
@@ -626,9 +698,12 @@ type ComputerActionResponse =
    */
   @Post('action/async')@OperatorOrAdmin()@ForVersion(SUPPORTED_API_VERSIONS.V1)
   @ApiOperation({
-    summary: 'Submit async computer action',description:'Submit a computer action for asynchronous execution. Returns immediately with job ID for tracking. Supports priority queuing and result caching.',operationId: 'submitAsyncComputerAction',})@ApiResponse({
+    summary: 'Submit async computer action',
+  description:'Submit a computer action for asynchronous execution. Returns immediately with job ID for tracking. Supports priority queuing and result caching.',
+  operationId: 'submitAsyncComputerAction',})@ApiResponse({
     status: 202,
-    description: 'Action submitted successfully for async execution',type: JobSubmissionResponseDto,})
+    description: 'Action submitted successfully for async execution',
+  type: JobSubmissionResponseDto,})
   @ApiResponse({
     status: 400,
     description: 'Invalid action parameters or async options',})@ApiResponse({
@@ -642,12 +717,21 @@ type ComputerActionResponse =
     description: 'Job queue full or service temporarily unavailable',})@ParlantCritical(
     'Submit computer automation action for asynchronous execution with comprehensive security validation',{securityLevel: SecurityLevel.CRITICAL,
       validationMode: ValidationMode.EXPLICIT,
-      businessCategory: 'ASYNC_COMPUTER_AUTOMATION',complianceFlags: ['ASYNC_EXECUTION', 'SYSTEM_CONTROL', 'SECURITY_CRITICAL'],requiredRoles: ['OPERATOR', 'ADMIN'],timeout: 30000,cacheable: false,
+      businessCategory: 'ASYNC_COMPUTER_AUTOMATION',
+  complianceFlags: ['ASYNC_EXECUTION', 'SYSTEM_CONTROL', 'SECURITY_CRITICAL'],
+  requiredRoles: ['OPERATOR', 'ADMIN'],
+  timeout: 30000,
+  cacheable: false,
       customRules: [
         {
-          name: 'destructive_action_validation',condition: 'action_type in ["file_delete", "system_shutdown", "process_kill"]",action: 'REQUIRE_CONFIRMATION',priority: 10},
+          name: 'destructive_action_validation',
+  condition: 'action_type in ["file_delete", "system_shutdown", "process_kill"]",
+  action: 'REQUIRE_CONFIRMATION',
+  priority: 10},
         {
-          name: 'network_action_validation',condition: 'action_type in ["network_request", "download_file"]",action: 'REQUIRE_CONFIRMATION',
+          name: 'network_action_validation',
+  condition: 'action_type in ["network_request", "download_file"]",
+  action: 'REQUIRE_CONFIRMATION',
           priority: 8
         }
       ]
@@ -721,7 +805,9 @@ type ComputerActionResponse =
           operationId,
           action: params.action,
           processingTime,
-          errorType: error?.constructor?.name ?? 'Unknown',userId: user.id,username: user.username,
+          errorType: error?.constructor?.name ?? 'Unknown',
+  userId: user.id,
+  username: user.username,
         },
       );
 
@@ -752,10 +838,15 @@ type ComputerActionResponse =
    */
   @Get('jobs/:jobId/status')@OperatorOrAdmin()@ForVersion(SUPPORTED_API_VERSIONS.V1)
   @ApiOperation({
-    summary: 'Get async job status',description:'Retrieve current status and progress information for an async computer action job.',operationId: 'getAsyncJobStatus',})@ApiParam({
-    name: 'jobId',description: 'Unique job identifier from async submission',example: 'job_1702983456789_abc123',})@ApiResponse({
+    summary: 'Get async job status',
+  description:'Retrieve current status and progress information for an async computer action job.',
+  operationId: 'getAsyncJobStatus',})@ApiParam({
+    name: 'jobId',
+  description: 'Unique job identifier from async submission',
+  example: 'job_1702983456789_abc123',})@ApiResponse({
     status: 200,
-    description: 'Job status retrieved successfully',type: JobStatusResponseDto,})
+    description: 'Job status retrieved successfully',
+  type: JobStatusResponseDto,})
   @ApiResponse({
     status: 404,
     description: 'Job not found',})@ApiResponse({
@@ -763,14 +854,20 @@ type ComputerActionResponse =
     description: 'Authentication required',})@ApiResponse({
     status: 403,
     description: 'Insufficient permissions - OPERATOR or ADMIN role required',})@ParlantValidated({
-    intent: 'Retrieve current status and progress information for asynchronous computer automation job',securityLevel: SecurityLevel.LOW,validationMode: ValidationMode.AUTOMATIC,
-    businessCategory: 'JOB_STATUS_MONITORING',complianceFlags: ['STATUS_MONITORING', 'JOB_TRACKING'],cacheable: true,timeout: 3000
+    intent: 'Retrieve current status and progress information for asynchronous computer automation job',
+  securityLevel: SecurityLevel.LOW,
+  validationMode: ValidationMode.AUTOMATIC,
+    businessCategory: 'JOB_STATUS_MONITORING',
+  complianceFlags: ['STATUS_MONITORING', 'JOB_TRACKING'],
+  cacheable: true,
+  timeout: 3000
   })
   async getJobStatus(
     @Param('jobId') jobId: string,
     @CurrentUser() user: ByteBotdUser,
   ): Promise<JobStatusResponseDto> {
-    const operationId = `status${Date.now()}${Math.random().toString(36).substring(7)}`;const startTime = Date.now();try {
+    const operationId = `status${Date.now()}${Math.random().toString(36).substring(7)}`;
+    const startTime = Date.now();try {
       this.logger.log(`[${operationId}] Job status request for: ${jobId}`, {operationId,jobId,
         userId: user.id,
         username: user.username,
@@ -802,7 +899,9 @@ type ComputerActionResponse =
           operationId,
           jobId,
           processingTime,
-          errorType: error?.constructor?.name ?? 'Unknown',userId: user.id,username: user.username,
+          errorType: error?.constructor?.name ?? 'Unknown',
+  userId: user.id,
+  username: user.username,
         },
       );
 
@@ -830,10 +929,15 @@ type ComputerActionResponse =
    */
   @Get('jobs/:jobId/result')@OperatorOrAdmin()@ForVersion(SUPPORTED_API_VERSIONS.V1)
   @ApiOperation({
-    summary: 'Get async job result',description:'Retrieve the execution result of a completed async computer action job.',operationId: 'getAsyncJobResult',})@ApiParam({
-    name: 'jobId',description: 'Unique job identifier from async submission',example: 'job_1702983456789_abc123',})@ApiResponse({
+    summary: 'Get async job result',
+  description:'Retrieve the execution result of a completed async computer action job.',
+  operationId: 'getAsyncJobResult',})@ApiParam({
+    name: 'jobId',
+  description: 'Unique job identifier from async submission',
+  example: 'job_1702983456789_abc123',})@ApiResponse({
     status: 200,
-    description: 'Job result retrieved successfully',type: JobResultResponseDto,})
+    description: 'Job result retrieved successfully',
+  type: JobResultResponseDto,})
   @ApiResponse({
     status: 404,
     description: 'Job not found',})@ApiResponse({
@@ -843,14 +947,20 @@ type ComputerActionResponse =
     description: 'Authentication required',})@ApiResponse({
     status: 403,
     description: 'Insufficient permissions - OPERATOR or ADMIN role required',})@ParlantValidated({
-    intent: 'Retrieve execution results and output data from completed computer automation job',securityLevel: SecurityLevel.MEDIUM,validationMode: ValidationMode.CONVERSATIONAL,
-    businessCategory: 'JOB_RESULT_RETRIEVAL',complianceFlags: ['RESULT_ACCESS', 'DATA_RETRIEVAL'],cacheable: true,timeout: 8000
+    intent: 'Retrieve execution results and output data from completed computer automation job',
+  securityLevel: SecurityLevel.MEDIUM,
+  validationMode: ValidationMode.CONVERSATIONAL,
+    businessCategory: 'JOB_RESULT_RETRIEVAL',
+  complianceFlags: ['RESULT_ACCESS', 'DATA_RETRIEVAL'],
+  cacheable: true,
+  timeout: 8000
   })
   async getJobResult(
     @Param('jobId') jobId: string,
     @CurrentUser() user: ByteBotdUser,
   ): Promise<JobResultResponseDto> {
-    const operationId = `result${Date.now()}${Math.random().toString(36).substring(7)}`;const startTime = Date.now();try {
+    const operationId = `result${Date.now()}${Math.random().toString(36).substring(7)}`;
+    const startTime = Date.now();try {
       this.logger.log(`[${operationId}] Job result request for: ${jobId}`, {
         operationId,
         jobId,
@@ -902,7 +1012,9 @@ type ComputerActionResponse =
           operationId,
           jobId,
           processingTime,
-          errorType: error?.constructor?.name ?? 'Unknown',userId: user.id,username: user.username,
+          errorType: error?.constructor?.name ?? 'Unknown',
+  userId: user.id,
+  username: user.username,
         },
       );
 
@@ -937,10 +1049,18 @@ type ComputerActionResponse =
    */
   @Delete('jobs/:jobId')@OperatorOrAdmin()@ForVersion(SUPPORTED_API_VERSIONS.V1)
   @ApiOperation({
-    summary: 'Cancel async job',description:'Cancel a pending or in-progress async computer action job. Completed jobs cannot be cancelled.',operationId: 'cancelAsyncJob',})@ApiParam({
-    name: 'jobId',description: 'Unique job identifier from async submission',example: 'job_1702983456789_abc123',})@ApiResponse({
+    summary: 'Cancel async job',
+  description:'Cancel a pending or in-progress async computer action job. Completed jobs cannot be cancelled.',
+  operationId: 'cancelAsyncJob',})@ApiParam({
+    name: 'jobId',
+  description: 'Unique job identifier from async submission',
+  example: 'job_1702983456789_abc123',})@ApiResponse({
     status: 200,
-    description: 'Job cancellation processed',schema: {type: 'object',properties: {cancelled: { type: 'boolean' },message: { type: 'string' },jobId: { type: 'string' },},},
+    description: 'Job cancellation processed',
+  schema: {type: 'object',
+  properties: {cancelled: { type: 'boolean' },
+  message: { type: 'string' },
+  jobId: { type: 'string' },},},
   })
   @ApiResponse({
     status: 404,
@@ -952,7 +1072,8 @@ type ComputerActionResponse =
     @Param('jobId') jobId: string,
     @CurrentUser() user: ByteBotdUser,
   ): Promise<{ cancelled: boolean; message: string; jobId: string }> {
-    const operationId = `cancel${Date.now()}${Math.random().toString(36).substring(7)}`;const startTime = Date.now();try {
+    const operationId = `cancel${Date.now()}${Math.random().toString(36).substring(7)}`;
+    const startTime = Date.now();try {
       this.logger.log(
         `[${operationId}] Job cancellation request for: ${jobId}`,
         {
@@ -1028,9 +1149,15 @@ type ComputerActionResponse =
   @OperatorOrAdmin()
   @ForVersion(SUPPORTED_API_VERSIONS.V1)
   @ApiOperation({
-    summary: 'Execute computer action',description:'Execute various computer control actions including mouse, keyboard, and application operations. Requires OPERATOR or ADMIN role.',operationId: 'executeComputerAction',})@ApiResponse({
+    summary: 'Execute computer action',
+  description:'Execute various computer control actions including mouse, keyboard, and application operations. Requires OPERATOR or ADMIN role.',
+  operationId: 'executeComputerAction',})@ApiResponse({
     status: 200,
-    description: 'Action executed successfully',schema: {type: 'object',properties: {success: { type: 'boolean' },result: { type: 'object' },operationId: { type: 'string' },},},
+    description: 'Action executed successfully',
+  schema: {type: 'object',
+  properties: {success: { type: 'boolean' },
+  result: { type: 'object' },
+  operationId: { type: 'string' },},},
   })
   @ApiResponse({
     status: 400,
@@ -1043,18 +1170,36 @@ type ComputerActionResponse =
     description: 'Rate limit exceeded',})@ParlantCritical(
     'Execute immediate computer automation action with real-time system control and comprehensive validation',{securityLevel: SecurityLevel.CRITICAL,
       validationMode: ValidationMode.EXPLICIT,
-      businessCategory: 'DIRECT_COMPUTER_AUTOMATION',complianceFlags: ['IMMEDIATE_EXECUTION', 'SYSTEM_CONTROL', 'HIGH_RISK', 'REAL_TIME'],requiredRoles: ['OPERATOR', 'ADMIN'],timeout: 45000,cacheable: false,
+      businessCategory: 'DIRECT_COMPUTER_AUTOMATION',
+  complianceFlags: ['IMMEDIATE_EXECUTION', 'SYSTEM_CONTROL', 'HIGH_RISK', 'REAL_TIME'],
+  requiredRoles: ['OPERATOR', 'ADMIN'],
+  timeout: 45000,
+  cacheable: false,
       customRules: [
         {
-          name: 'screenshot_action_validation',condition: 'action === "screenshot"",action: 'APPROVE',priority: 2},
+          name: 'screenshot_action_validation',
+  condition: 'action === "screenshot"",
+  action: 'APPROVE',
+  priority: 2},
         {
-          name: 'file_write_validation',condition: 'action === "write_file"",action: 'REQUIRE_CONFIRMATION',priority: 9},
+          name: 'file_write_validation',
+  condition: 'action === "write_file"",
+  action: 'REQUIRE_CONFIRMATION',
+  priority: 9},
         {
-          name: 'mouse_click_validation',condition: 'action === "click"",action: 'REQUIRE_CONFIRMATION',priority: 7},
+          name: 'mouse_click_validation',
+  condition: 'action === "click"",
+  action: 'REQUIRE_CONFIRMATION',
+  priority: 7},
         {
-          name: 'keyboard_input_validation',condition: 'action === "type"",action: 'REQUIRE_CONFIRMATION',priority: 8},
+          name: 'keyboard_input_validation',
+  condition: 'action === "type"",
+  action: 'REQUIRE_CONFIRMATION',
+  priority: 8},
         {
-          name: 'application_launch_validation',condition: 'action === "launch_app"",action: 'REQUIRE_CONFIRMATION',
+          name: 'application_launch_validation',
+  condition: 'action === "launch_app"",
+  action: 'REQUIRE_CONFIRMATION',
           priority: 9
         }
       ]
@@ -1137,7 +1282,8 @@ type ComputerActionResponse =
    * Execute computer action (legacy method for backward compatibility)
    * @deprecated Use action() method instead
    */
-  @Post('execute')@ApiOperation({summary: 'Execute computer action (legacy)',description: 'Legacy endpoint for executing computer actions. Use /action instead.',})@ApiBearerAuth()
+  @Post('execute')@ApiOperation({summary: 'Execute computer action (legacy)',
+  description: 'Legacy endpoint for executing computer actions. Use /action instead.',})@ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard, EnterpriseRateLimitGuard)
   @OperatorOrAdmin()
   @UsePipes(new ComputerActionValidationPipe(), SecuritySanitizationPipes.HIGH_SECURITY)
@@ -1153,7 +1299,8 @@ type ComputerActionResponse =
   /**
    * Capture screenshot (convenience method)
    */
-  @Post('screenshot')@ApiOperation({summary: 'Capture screenshot',description: 'Convenience endpoint for capturing screenshots',})@ApiBearerAuth()
+  @Post('screenshot')@ApiOperation({summary: 'Capture screenshot',
+  description: 'Convenience endpoint for capturing screenshots',})@ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard, EnterpriseRateLimitGuard)
   @OperatorOrAdmin()
   @UseInterceptors(LoggingInterceptor)

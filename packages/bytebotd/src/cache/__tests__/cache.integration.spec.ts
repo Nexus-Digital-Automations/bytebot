@@ -25,8 +25,21 @@
  * @version 1.0.0
  */
 
-import { Test, TestingModule } from '@nestjs/testing';import { CACHE_MANAGER } from '@nestjs/cache-manager';import { Cache } from 'cache-manager';import Redis from 'ioredis';import { CacheModule } from '../cache.module';import { CacheService } from '../cache.service';import { CacheKeyGenerator } from '../cache-key.generator';import { MetricsService } from '../../metrics/metrics.service';// Test configurationconst REDIS_TEST_CONFIG = {
-  host: process.env.REDIS_HOST || 'localhost',port: parseInt(process.env.REDIS_PORT || '6379', 10),db: 15, // Use separate database for testingpassword: process.env.REDIS_PASSWORD,
+import { Test, TestingModule } from '@nestjs/testing';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
+import Redis from 'ioredis';
+import { CacheModule } from '../cache.module';
+import { CacheService } from '../cache.service';
+import { CacheKeyGenerator } from '../cache-key.generator';
+import { MetricsService } from '../../metrics/metrics.service';
+
+// Test configuration
+const REDIS_TEST_CONFIG = {
+  host: process.env.REDIS_HOST || 'localhost',
+  port: parseInt(process.env.REDIS_PORT || '6379', 10),
+  db: 15, // Use separate database for testing
+  password: process.env.REDIS_PASSWORD,
   connectTimeout: 5000,
   lazyConnect: true,
 };

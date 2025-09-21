@@ -9,19 +9,22 @@ import {
   Max,
   IsIn,
   Length,
-} from 'class-validator';// Constants for validation limitsconst CLICK_COUNT_MAX = 10;
+} from 'class-validator';
+    // Constants for validation limitsconst CLICK_COUNT_MAX = 10;
 const SCROLL_COUNT_MAX = 100;
 const WAIT_DURATION_MAX = 300000; // 5 minutes in ms
 const TEXT_LENGTH_MIN = 1;
 const TEXT_LENGTH_MAX = 5000;
 const PASTE_TEXT_MAX = 10000;
 const FILE_DATA_MAX = 52428800; // 50MB in bytes for base64
-import { Type } from 'class-transformer';import {IsValidComputerActionText,
+import { Type } from 'class-transformer';
+import {IsValidComputerActionText,
   IsSafeFilePath,
   IsNotXSS,
   IsNotSQLInjection,
   IsNotMaliciousFile,
-} from '@bytebot/shared/dist/index-server';import {ButtonType,
+} from '@bytebot/shared/dist/index-server';
+import {ButtonType,
   CoordinatesDto,
   PressType,
   ScrollDirection,
@@ -48,7 +51,8 @@ export class TraceMouseActionDto extends BaseActionDto {
   @IsArray()
   @IsString({ each: true })
   @Length(1, 50, {
-    message: 'Each hold key must be between 1 and 50 characters',each: true,})
+    message: 'Each hold key must be between 1 and 50 characters',
+  each: true,})
   holdKeys?: string[];
 }
 
@@ -61,7 +65,8 @@ export class ClickMouseActionDto extends BaseActionDto {
   @IsArray()
   @IsString({ each: true })
   @Length(1, 50, {
-    message: 'Each hold key must be between 1 and 50 characters',each: true,})
+    message: 'Each hold key must be between 1 and 50 characters',
+  each: true,})
   holdKeys?: string[];
 
   @IsNumber({}, { message: 'Click count must be a valid number' })@Min(1, { message: 'Click count must be at least 1' })@Max(CLICK_COUNT_MAX, { message: 'Click count cannot exceed 10' })clickCount!: number;}
@@ -84,7 +89,8 @@ export class DragMouseActionDto extends BaseActionDto {
   @IsArray()
   @IsString({ each: true })
   @Length(1, 50, {
-    message: 'Each hold key must be between 1 and 50 characters',each: true,})
+    message: 'Each hold key must be between 1 and 50 characters',
+  each: true,})
   holdKeys?: string[];
 }
 
@@ -100,14 +106,16 @@ export class ScrollActionDto extends BaseActionDto {
   @IsArray()
   @IsString({ each: true })
   @Length(1, 50, {
-    message: 'Each hold key must be between 1 and 50 characters',each: true,})
+    message: 'Each hold key must be between 1 and 50 characters',
+  each: true,})
   holdKeys?: string[];
 }
 
 export class TypeKeysActionDto extends BaseActionDto {
   @IsIn(['type_keys'])action!: 'type_keys';@IsArray()@IsString({ each: true })
   @Length(1, 50, {
-    message: 'Each key must be between 1 and 50 characters',each: true,})
+    message: 'Each key must be between 1 and 50 characters',
+  each: true,})
   keys!: string[];
 
   @IsOptional()
@@ -116,7 +124,8 @@ export class TypeKeysActionDto extends BaseActionDto {
 export class PressKeysActionDto extends BaseActionDto {
   @IsIn(['press_keys'])action!: 'press_keys';@IsArray()@IsString({ each: true })
   @Length(1, 50, {
-    message: 'Each key must be between 1 and 50 characters',each: true,})
+    message: 'Each key must be between 1 and 50 characters',
+  each: true,})
   keys!: string[];
 
   @IsEnum(PressType, { message: 'Press type must be either "up" or "down"" })press!: PressType;

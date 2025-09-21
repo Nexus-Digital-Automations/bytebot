@@ -428,7 +428,8 @@ export class BrowserUseRbacGuard implements CanActivate {
       this.logger.debug(
         `[${decisionId}] Browser use authorization granted`,{userId: request.user.userId,
           operation: evaluationContext.operation.endpoint,
-          processingTime: `${(performance.now() - startTime).toFixed(2)}ms`,});
+          processingTime: `${(performance.now() - startTime).toFixed(2)}ms`,
+        });
 
       return true;
 
@@ -438,7 +439,8 @@ export class BrowserUseRbacGuard implements CanActivate {
       this.logger.error(
         `[${decisionId}] Browser use authorization failed`,{error: error instanceof Error ? error.message : String(error),
           userId: request.user?.userId,
-          endpoint: `${request.method} ${request.url}`,processingTime: `${processingTime.toFixed(2)}ms`,
+          endpoint: `${request.method} ${request.url}`,
+          processingTime: `${processingTime.toFixed(2)}ms`,
         }
       );
 
@@ -473,7 +475,9 @@ export class BrowserUseRbacGuard implements CanActivate {
     authRequirements: any
   ): PermissionEvaluationContext {
     const operation: BrowserOperationContext = {
-      endpoint: `${request.method} ${request.route?.path || request.url}`,method: request.method,operationType: this.determineOperationType(request.method),
+      endpoint: `${request.method} ${request.route?.path || request.url}`,
+      method: request.method,
+      operationType: this.determineOperationType(request.method),
       resourceType: this.determineResourceType(request.url),
       targetResource: this.extractTargetResource(request),
       parameters: { ...request.body, ...request.query, ...request.params },
@@ -737,7 +741,10 @@ export class BrowserUseRbacGuard implements CanActivate {
       };
     }
 
-    return { granted: true, reasoning: 'Time restriction satisfied' };}/**
+    return { granted: true, reasoning: 'Time restriction satisfied' };
+  }
+
+  /**
    * Create various decision types
    */
   private createGrantedDecision(
@@ -748,7 +755,11 @@ export class BrowserUseRbacGuard implements CanActivate {
   ): AuthorizationDecision {
     return {
       granted: true,
-      reasoning: 'Authorization granted - all requirements satisfied',conditions: this.generateAuthorizationConditions(context),auditTrail: this.createAuditEntry(decisionId, 'GRANTED', context, startTime),conversationalValidation,escalationRequired: false,
+      reasoning: 'Authorization granted - all requirements satisfied',
+      conditions: this.generateAuthorizationConditions(context),
+      auditTrail: this.createAuditEntry(decisionId, 'GRANTED', context, startTime),
+      conversationalValidation,
+      escalationRequired: false,
       temporaryAccess: false,
     };
   }
@@ -763,7 +774,9 @@ export class BrowserUseRbacGuard implements CanActivate {
       granted: false,
       reasoning,
       conditions: [],
-      auditTrail: this.createAuditEntry(decisionId, 'DENIED', context, startTime),escalationRequired: false,temporaryAccess: false,
+      auditTrail: this.createAuditEntry(decisionId, 'DENIED', context, startTime),
+      escalationRequired: false,
+      temporaryAccess: false,
     };
   }
 
@@ -775,7 +788,11 @@ export class BrowserUseRbacGuard implements CanActivate {
   ): AuthorizationDecision {
     return {
       granted: false,
-      reasoning: 'Authorization requires escalation',conditions: [],auditTrail: this.createAuditEntry(decisionId, 'ESCALATED', context, startTime),conversationalValidation,escalationRequired: true,
+      reasoning: 'Authorization requires escalation',
+      conditions: [],
+      auditTrail: this.createAuditEntry(decisionId, 'ESCALATED', context, startTime),
+      conversationalValidation,
+      escalationRequired: true,
       temporaryAccess: false,
     };
   }
@@ -789,11 +806,20 @@ export class BrowserUseRbacGuard implements CanActivate {
     // Add monitoring condition for high-risk operations
     if (context.operation.estimatedRiskLevel >= RiskLevel._HIGH) {
       conditions.push({
-        type: 'MONITORING',description: 'Enhanced monitoring required for high-risk operation',parameters: { level: 'COMPREHENSIVE' },mandatory: true,});
+        type: 'MONITORING',
+        description: 'Enhanced monitoring required for high-risk operation',
+        parameters: { level: 'COMPREHENSIVE' },
+        mandatory: true,
+      });
     }
 
     // Add time limit for certain operations
-    if (context.operation.businessImpact === 'CRITICAL') {conditions.push({type: 'TIME_LIMIT',description: 'Operation must complete within 1 hour',parameters: { maxDurationMs: 3600000 },mandatory: true,
+    if (context.operation.businessImpact === 'CRITICAL') {
+      conditions.push({
+        type: 'TIME_LIMIT',
+        description: 'Operation must complete within 1 hour',
+        parameters: { maxDurationMs: 3600000 },
+        mandatory: true,
       });
     }
 
@@ -816,7 +842,9 @@ export class BrowserUseRbacGuard implements CanActivate {
       sessionId: context.session.sessionId,
       operation: context.operation.endpoint,
       decision,
-      reasoning: `Authorization ${decision.toLowerCase()}`,riskLevel: context.operation.estimatedRiskLevel,conditions: [],
+      reasoning: `Authorization ${decision.toLowerCase()}`,
+      riskLevel: context.operation.estimatedRiskLevel,
+      conditions: [],
       processingTime: performance.now() - startTime,
       metadata: {
         operationType: context.operation.operationType,
@@ -830,13 +858,24 @@ export class BrowserUseRbacGuard implements CanActivate {
   // ===== UTILITY METHODS =====
 
   private generateDecisionId(): string {
-    return `rbac_${Date.now()}_${Math.random().toString(36).substring(7)}`;}private generateOperationId(): string {
+    return `rbac_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+  }
+
+  private generateOperationId(): string {
     return `auth_op_${Date.now()}_${Math.random().toString(36).substring(7)}`;
   }
 
   private determineOperationType(method: string): 'READ' | 'WRITE' | 'DELETE' | 'ADMIN' {switch (method.toUpperCase()) {case 'GET': return 'READ';case 'POST':case 'PUT':case 'PATCH': return 'WRITE';case 'DELETE': return 'DELETE';default: return 'ADMIN';}}
 
-  private determineResourceType(url: string): 'TASK' | 'SESSION' | 'ASYNC_JOB' | 'DATA' | 'SYSTEM' {if (url.includes('/tasks')) return 'TASK';if (url.includes('/sessions')) return 'SESSION';if (url.includes('/async-jobs')) return 'ASYNC_JOB';if (url.includes('/data') || url.includes('/extract')) return 'DATA';return 'SYSTEM';}private extractTargetResource(request: AuthenticatedRequest): string | undefined {
+  private determineResourceType(url: string): 'TASK' | 'SESSION' | 'ASYNC_JOB' | 'DATA' | 'SYSTEM' {
+    if (url.includes('/tasks')) return 'TASK';
+    if (url.includes('/sessions')) return 'SESSION';
+    if (url.includes('/async-jobs')) return 'ASYNC_JOB';
+    if (url.includes('/data') || url.includes('/extract')) return 'DATA';
+    return 'SYSTEM';
+  }
+
+  private extractTargetResource(request: AuthenticatedRequest): string | undefined {
     return request.params?.id || request.params?.taskId || request.params?.sessionId || request.params?.jobId;
   }
 
@@ -845,7 +884,14 @@ export class BrowserUseRbacGuard implements CanActivate {
     if (request.method === 'DELETE') return RiskLevel._HIGH;if (request.url.includes('/admin')) return RiskLevel._CRITICAL;if (request.body?.actions?.length > 10) return RiskLevel._MODERATE;return RiskLevel._LOW;
   }
 
-  private assessBusinessImpact(request: AuthenticatedRequest): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {if (request.url.includes('/admin')) return 'CRITICAL';if (request.method === 'DELETE') return 'HIGH';if (request.body?.priority === 'HIGH') return 'HIGH';return 'MEDIUM';}private getRequiredSecurityLevel(operation: BrowserOperationContext): SecurityLevel {
+  private assessBusinessImpact(request: AuthenticatedRequest): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
+    if (request.url.includes('/admin')) return 'CRITICAL';
+    if (request.method === 'DELETE') return 'HIGH';
+    if (request.body?.priority === 'HIGH') return 'HIGH';
+    return 'MEDIUM';
+  }
+
+  private getRequiredSecurityLevel(operation: BrowserOperationContext): SecurityLevel {
     if (operation.operationType === 'ADMIN') return SecurityLevel._CRITICAL;if (operation.operationType === 'DELETE') return SecurityLevel._HIGH;if (operation.businessImpact === 'CRITICAL') return SecurityLevel._HIGH;
     return SecurityLevel._MODERATE;
   }
@@ -892,7 +938,9 @@ export class BrowserUseRbacGuard implements CanActivate {
     this.logger.log(`Authorization Decision: ${decision.auditTrail.decision}`, {decisionId: decision.auditTrail.decisionId,userId: decision.auditTrail.userId,
       operation: decision.auditTrail.operation,
       reasoning: decision.reasoning,
-      processingTime: `${decision.auditTrail.processingTime.toFixed(2)}ms`,});}
+      processingTime: `${decision.auditTrail.processingTime.toFixed(2)}ms`,
+    });
+  }
 
   private updateAuthorizationMetrics(processingTime: number): void {
     this.authorizationMetrics.averageDecisionTime =
@@ -923,14 +971,24 @@ export class BrowserUseRbacGuard implements CanActivate {
       deniedDecisions: this.authorizationMetrics.deniedDecisions,
       escalatedDecisions: this.authorizationMetrics.escalatedDecisions,
       conversationalValidations: this.authorizationMetrics.conversationalValidations,
-      successRate: `${successRate.toFixed(2)}%`,averageDecisionTime: `${this.authorizationMetrics.averageDecisionTime.toFixed(2)}ms`,
+      successRate: `${successRate.toFixed(2)}%`,
+      averageDecisionTime: `${this.authorizationMetrics.averageDecisionTime.toFixed(2)}ms`,
       cacheSize: this.authorizationCache.size,
     });
   }
 
   // Placeholder implementations for missing methods
   private determineNetworkSegment(riskFactors: any[]): string {
-    return 'internal';}private determineSecurityPosture(security: BrowserUseSecurityContext): 'NORMAL' | 'ELEVATED' | 'HIGH_ALERT' | 'MAINTENANCE' {if (security.riskLevel === 'CRITICAL') return 'HIGH_ALERT';if (security.riskLevel === 'HIGH') return 'ELEVATED';return 'NORMAL';}private isComplianceModeActive(): boolean {
+    return 'internal';
+  }
+
+  private determineSecurityPosture(security: BrowserUseSecurityContext): 'NORMAL' | 'ELEVATED' | 'HIGH_ALERT' | 'MAINTENANCE' {
+    if (security.riskLevel === 'CRITICAL') return 'HIGH_ALERT';
+    if (security.riskLevel === 'HIGH') return 'ELEVATED';
+    return 'NORMAL';
+  }
+
+  private isComplianceModeActive(): boolean {
     return false; // Placeholder
   }
 
@@ -939,9 +997,18 @@ export class BrowserUseRbacGuard implements CanActivate {
   }
 
   private evaluateLocationRestriction(restriction: RoleRestriction, context: PermissionEvaluationContext): { granted: boolean; reasoning: string } {
-    return { granted: true, reasoning: 'Location restriction satisfied' }; // Placeholder}private evaluateIpRangeRestriction(restriction: RoleRestriction, context: PermissionEvaluationContext): { granted: boolean; reasoning: string } {
-    return { granted: true, reasoning: 'IP range restriction satisfied' }; // Placeholder}private evaluateDeviceRestriction(restriction: RoleRestriction, context: PermissionEvaluationContext): { granted: boolean; reasoning: string } {
-    return { granted: true, reasoning: 'Device restriction satisfied' }; // Placeholder}private evaluateApprovalRestriction(restriction: RoleRestriction, context: PermissionEvaluationContext): { granted: boolean; reasoning: string } {
+    return { granted: true, reasoning: 'Location restriction satisfied' }; // Placeholder
+  }
+
+  private evaluateIpRangeRestriction(restriction: RoleRestriction, context: PermissionEvaluationContext): { granted: boolean; reasoning: string } {
+    return { granted: true, reasoning: 'IP range restriction satisfied' }; // Placeholder
+  }
+
+  private evaluateDeviceRestriction(restriction: RoleRestriction, context: PermissionEvaluationContext): { granted: boolean; reasoning: string } {
+    return { granted: true, reasoning: 'Device restriction satisfied' }; // Placeholder
+  }
+
+  private evaluateApprovalRestriction(restriction: RoleRestriction, context: PermissionEvaluationContext): { granted: boolean; reasoning: string } {
     return { granted: true, reasoning: 'Approval restriction satisfied' }; // Placeholder
   }
 

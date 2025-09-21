@@ -186,64 +186,94 @@ export class ThrottleConfig {
   @Max(1000)
   requestsPerMinute!: number;
 
-  @ApiProperty({ description: 'Delay between requests in milliseconds', example: 1000 })@IsNumber()@Min(0)
+  @ApiProperty({ description: 'Delay between requests in milliseconds', example: 1000 })
+  @IsNumber()
+  @Min(0)
   @Max(60000)
   delayBetweenRequests!: number;
 }
 
 export class PaginationConfig {
-  @ApiProperty({ description: 'Enable pagination support', example: true })@IsBoolean()enabled!: boolean;
+  @ApiProperty({ description: 'Enable pagination support', example: true })
+  @IsBoolean()
+  enabled!: boolean;
 
-  @ApiProperty({ description: 'Maximum pages to process', example: 50 })@IsNumber()@Min(1)
+  @ApiProperty({ description: 'Maximum pages to process', example: 50 })
+  @IsNumber()
+  @Min(1)
   @Max(1000)
   maxPages!: number;
 
-  @ApiProperty({ description: 'CSS selector for next page button', example: '.next-page' })@IsString()nextButtonSelector!: string;
+  @ApiProperty({ description: 'CSS selector for next page button', example: '.next-page' })
+  @IsString()
+  nextButtonSelector!: string;
 
-  @ApiPropertyOptional({ description: 'Delay between page navigation in milliseconds', example: 2000 })@IsOptional()@IsNumber()
+  @ApiPropertyOptional({ description: 'Delay between page navigation in milliseconds', example: 2000 })
+  @IsOptional()
+  @IsNumber()
   navigationDelay?: number;
 }
 
 export class ExtractionConfig {
-  @ApiProperty({ description: 'CSS selectors for data extraction', example: ['.product-item', '.product-card'] })@IsArray()@IsString({ each: true })
+  @ApiProperty({ description: 'CSS selectors for data extraction', example: ['.product-item', '.product-card'] })
+  @IsArray()
+  @IsString({ each: true })
   @ArrayMinSize(1)
   selectors!: string[];
 
-  @ApiProperty({ description: 'Data fields to extract', example: ['name', 'price', 'description'] })@IsArray()@IsString({ each: true })
+  @ApiProperty({ description: 'Data fields to extract', example: ['name', 'price', 'description'] })
+  @IsArray()
+  @IsString({ each: true })
   @ArrayMinSize(1)
   dataFields!: string[];
 
-  @ApiPropertyOptional({ description: 'Pagination configuration' })@IsOptional()@ValidateNested()
+  @ApiPropertyOptional({ description: 'Pagination configuration' })
+  @IsOptional()
+  @ValidateNested()
   @Type(() => PaginationConfig)
   pagination?: PaginationConfig;
 
-  @ApiPropertyOptional({ description: 'Wait for selector before extraction' })@IsOptional()@IsString()
+  @ApiPropertyOptional({ description: 'Wait for selector before extraction' })
+  @IsOptional()
+  @IsString()
   waitForSelector?: string;
 
-  @ApiPropertyOptional({ description: 'Extraction timeout in milliseconds', example: 30000 })@IsOptional()@IsNumber()
+  @ApiPropertyOptional({ description: 'Extraction timeout in milliseconds', example: 30000 })
+  @IsOptional()
+  @IsNumber()
   @Min(1000)
   @Max(300000)
   timeout?: number;
 }
 
 export class OrchestrationConfig {
-  @ApiProperty({ description: 'Maximum concurrent agents to use', example: 5 })@IsNumber()@Min(1)
+  @ApiProperty({ description: 'Maximum concurrent agents to use', example: 5 })
+  @IsNumber()
+  @Min(1)
   @Max(20)
   maxConcurrentAgents!: number;
 
-  @ApiProperty({ description: 'Number of retry attempts for failed tasks', example: 3 })@IsNumber()@Min(0)
+  @ApiProperty({ description: 'Number of retry attempts for failed tasks', example: 3 })
+  @IsNumber()
+  @Min(0)
   @Max(10)
   retryAttempts!: number;
 
-  @ApiProperty({ description: 'Overall operation timeout in milliseconds', example: 300000 })@IsNumber()@Min(10000)
+  @ApiProperty({ description: 'Overall operation timeout in milliseconds', example: 300000 })
+  @IsNumber()
+  @Min(10000)
   @Max(3600000)
   timeout!: number;
 
-  @ApiPropertyOptional({ description: 'Request throttling configuration' })@IsOptional()@ValidateNested()
+  @ApiPropertyOptional({ description: 'Request throttling configuration' })
+  @IsOptional()
+  @ValidateNested()
   @Type(() => ThrottleConfig)
   throttle?: ThrottleConfig;
 
-  @ApiPropertyOptional({ description: 'Priority level for the operation (1-10)', example: 5 })@IsOptional()@IsNumber()
+  @ApiPropertyOptional({ description: 'Priority level for the operation (1-10)', example: 5 })
+  @IsOptional()
+  @IsNumber()
   @Min(1)
   @Max(10)
   priority?: number;
@@ -444,9 +474,16 @@ export class SortingOptions {
   @ApiPropertyOptional({ description: 'Field to sort by', example: 'timestamp' })@IsOptional()@IsString()
   field?: string;
 
-  @ApiPropertyOptional({ description: 'Sort order', example: 'desc' })@IsOptional()@IsString()
-  order?: 'asc' | 'desc';}export class AggregationOptions {
-  @ApiPropertyOptional({ description: 'Group results by field', example: 'type' })@IsOptional()@IsString()
+  @ApiPropertyOptional({ description: 'Sort order', example: 'desc' })
+  @IsOptional()
+  @IsString()
+  order?: 'asc' | 'desc';
+}
+
+export class AggregationOptions {
+  @ApiPropertyOptional({ description: 'Group results by field', example: 'type' })
+  @IsOptional()
+  @IsString()
   groupBy?: string;
 
   @ApiPropertyOptional({ description: 'Calculate statistical summaries', example: true })@IsOptional()@IsBoolean()

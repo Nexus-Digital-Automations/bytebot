@@ -13,7 +13,14 @@
  * Performance: Includes comprehensive timing metrics and operation tracking
  */
 
-import { Injectable, Logger } from '@nestjs/common';import { exec, spawn } from 'child_process';import { promisify } from 'util';import * as fs from 'fs/promises';import * as path from 'path';import { NutService } from '../nut/nut.service';import {ComputerAction,
+import { Injectable, Logger } from '@nestjs/common';
+import { exec, spawn } from 'child_process';
+import { promisify } from 'util';
+import * as fs from 'fs/promises';
+import * as path from 'path';
+import { NutService } from '../nut/nut.service';
+import {
+  ComputerAction,
   MoveMouseAction,
   TraceMouseAction,
   ClickMouseAction,
@@ -28,7 +35,8 @@ import { Injectable, Logger } from '@nestjs/common';import { exec, spawn } from 
   PasteTextAction,
   WriteFileAction,
   ReadFileAction,
-} from '@bytebot/shared';// ===== ENTERPRISE-GRADE TYPE DEFINITIONS =====/**
+} from '@bytebot/shared';
+    // ===== ENTERPRISE-GRADE TYPE DEFINITIONS =====/**
  * Comprehensive error interface for structured error handling
  * Provides detailed error context for debugging and monitoring
  */
@@ -252,12 +260,14 @@ export class ComputerUseService {
     | FileReadResult
     | void
   > {
-    const operationId = `action${Date.now()}${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.logger.log(
+    const operationId = `action${Date.now()}${Math.random().toString(36).substring(7)}`;
+    const startTime = Date.now();this.logger.log(
       `[${operationId}] Executing computer action: ${params.action}`,
       {
         operationId,
         actionType: params.action,
-        hasCoordinates: 'coordinates' in params && !!params.coordinates,timestamp: new Date().toISOString(),},
+        hasCoordinates: 'coordinates' in params && !!params.coordinates,
+  timestamp: new Date().toISOString(),},
     );
 
     try {
@@ -371,7 +381,8 @@ export class ComputerUseService {
    * @throws Error when mouse movement fails
    */
   private async moveMouse(action: MoveMouseAction): Promise<void> {
-    const operationId = `move_mouse${Date.now()}${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Moving mouse to coordinates`, {operationId,targetX: action.coordinates.x,
+    const operationId = `move_mouse${Date.now()}${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Moving mouse to coordinates`, {operationId,
+  targetX: action.coordinates.x,
       targetY: action.coordinates.y,
     });
 
@@ -396,7 +407,8 @@ export class ComputerUseService {
    * @throws Error when mouse tracing fails
    */
   private async traceMouse(action: TraceMouseAction): Promise<void> {
-    const operationId = `trace_mouse${Date.now()}${Math.random().toString(36).substring(7)}`;const { path, holdKeys } = action;this.logger.log(`[${operationId}] Tracing mouse path`, {
+    const operationId = `trace_mouse${Date.now()}${Math.random().toString(36).substring(7)}`;
+    const { path, holdKeys } = action;this.logger.log(`[${operationId}] Tracing mouse path`, {
       operationId,
       pathLength: path.length,
       hasHoldKeys: !!holdKeys,
@@ -440,7 +452,8 @@ export class ComputerUseService {
 
       // Release hold keys
       if (holdKeys && holdKeys.length > 0) {
-        this.logger.log(`[${operationId}] Releasing held keys`);await this.nutService.holdKeys(holdKeys, false);}
+        this.logger.log(`[${operationId}] Releasing held keys`);
+    await this.nutService.holdKeys(holdKeys, false);}
 
       this.logger.log(`[${operationId}] Mouse tracing completed successfully`);} catch (_error) {// Ensure keys are released on _error
       if (holdKeys && holdKeys.length > 0) {
@@ -470,7 +483,9 @@ export class ComputerUseService {
    * @throws Error when mouse click operation fails
    */
   private async clickMouse(action: ClickMouseAction): Promise<void> {
-    const operationId = `click_mouse${Date.now()}${Math.random().toString(36).substring(7)}`;const { coordinates, button, holdKeys, clickCount } = action;this.logger.log(`[${operationId}] Performing mouse click operation`, {operationId,hasCoordinates: !!coordinates,
+    const operationId = `click_mouse${Date.now()}${Math.random().toString(36).substring(7)}`;
+    const { coordinates, button, holdKeys, clickCount } = action;this.logger.log(`[${operationId}] Performing mouse click operation`, {operationId,
+  hasCoordinates: !!coordinates,
       coordinates,
       button,
       clickCount,
@@ -505,7 +520,8 @@ export class ComputerUseService {
         this.logger.log(
           `[${operationId}] Performing ${validClickCount} clicks`,);for (let i = 0; i < validClickCount; i++) {
           this.logger.debug(
-            `[${operationId}] Click ${i + 1}/${validClickCount}`,);await this.nutService.mouseClickEvent(button);
+            `[${operationId}] Click ${i + 1}/${validClickCount}`,);
+    await this.nutService.mouseClickEvent(button);
 
           // Add delay between clicks except for the last one
           if (i < validClickCount - 1) {
@@ -514,11 +530,13 @@ export class ComputerUseService {
         }
       } else {
         // Perform a single click
-        this.logger.log(`[${operationId}] Performing single ${button} click`);await this.nutService.mouseClickEvent(button);}
+        this.logger.log(`[${operationId}] Performing single ${button} click`);
+    await this.nutService.mouseClickEvent(button);}
 
       // Release hold keys
       if (holdKeys && holdKeys.length > 0) {
-        this.logger.log(`[${operationId}] Releasing held keys`);await this.nutService.holdKeys(holdKeys, false);}
+        this.logger.log(`[${operationId}] Releasing held keys`);
+    await this.nutService.holdKeys(holdKeys, false);}
 
       this.logger.log(
         `[${operationId}] Mouse click operation completed successfully`,);} catch (_error) {
@@ -552,7 +570,8 @@ export class ComputerUseService {
    * @throws Error when mouse button operation fails
    */
   private async pressMouse(action: PressMouseAction): Promise<void> {
-    const operationId = `press_mouse${Date.now()}${Math.random().toString(36).substring(7)}`;const { coordinates, button, press } = action;this.logger.log(
+    const operationId = `press_mouse${Date.now()}${Math.random().toString(36).substring(7)}`;
+    const { coordinates, button, press } = action;this.logger.log(
       `[${operationId}] Performing mouse button press operation`,{operationId,
         hasCoordinates: !!coordinates,
         coordinates,
@@ -574,7 +593,8 @@ export class ComputerUseService {
       // Perform press or release operation
       const isPress = press === 'down';
       this.logger.log(
-        `[${operationId}] ${isPress ? 'Pressing' : 'Releasing'} ${button} mouse button`,);await this.nutService.mouseButtonEvent(button, isPress);
+        `[${operationId}] ${isPress ? 'Pressing' : 'Releasing'} ${button} mouse button`,);
+    await this.nutService.mouseButtonEvent(button, isPress);
 
       this.logger.log(
         `[${operationId}] Mouse button operation completed successfully`,);} catch (_error) {
@@ -598,7 +618,8 @@ export class ComputerUseService {
    * @throws Error when mouse drag operation fails
    */
   private async dragMouse(action: DragMouseAction): Promise<void> {
-    const operationId = `drag_mouse${Date.now()}${Math.random().toString(36).substring(7)}`;const { path, button, holdKeys } = action;this.logger.log(`[${operationId}] Performing mouse drag operation`, {
+    const operationId = `drag_mouse${Date.now()}${Math.random().toString(36).substring(7)}`;
+    const { path, button, holdKeys } = action;this.logger.log(`[${operationId}] Performing mouse drag operation`, {
       operationId,
       pathLength: path.length,
       button,
@@ -634,7 +655,8 @@ export class ComputerUseService {
 
       // Press and hold mouse button to begin drag
       this.logger.log(
-        `[${operationId}] Pressing ${button} button to begin drag`,);await this.nutService.mouseButtonEvent(button, true);
+        `[${operationId}] Pressing ${button} button to begin drag`,);
+    await this.nutService.mouseButtonEvent(button, true);
       mouseButtonPressed = true;
 
       // Move along the drag path
@@ -654,12 +676,14 @@ export class ComputerUseService {
 
       // Release mouse button to end drag
       this.logger.log(
-        `[${operationId}] Releasing ${button} button to end drag`,);await this.nutService.mouseButtonEvent(button, false);
+        `[${operationId}] Releasing ${button} button to end drag`,);
+    await this.nutService.mouseButtonEvent(button, false);
       mouseButtonPressed = false;
 
       // Release hold keys
       if (holdKeys && holdKeys.length > 0) {
-        this.logger.log(`[${operationId}] Releasing held keys`);await this.nutService.holdKeys(holdKeys, false);}
+        this.logger.log(`[${operationId}] Releasing held keys`);
+    await this.nutService.holdKeys(holdKeys, false);}
 
       this.logger.log(
         `[${operationId}] Mouse drag operation completed successfully`,);} catch (_error) {
@@ -701,7 +725,9 @@ export class ComputerUseService {
    * @throws Error when scroll operation fails
    */
   private async scroll(action: ScrollAction): Promise<void> {
-    const operationId = `scroll${Date.now()}${Math.random().toString(36).substring(7)}`;const { coordinates, direction, scrollCount, holdKeys } = action;this.logger.log(`[${operationId}] Performing scroll operation`, {operationId,hasCoordinates: !!coordinates,
+    const operationId = `scroll${Date.now()}${Math.random().toString(36).substring(7)}`;
+    const { coordinates, direction, scrollCount, holdKeys } = action;this.logger.log(`[${operationId}] Performing scroll operation`, {operationId,
+  hasCoordinates: !!coordinates,
       coordinates,
       direction,
       scrollCount,
@@ -734,7 +760,8 @@ export class ComputerUseService {
       this.logger.log(
         `[${operationId}] Performing ${validScrollCount} scroll ${direction} operations`,);for (let i = 0; i < validScrollCount; i++) {
         this.logger.debug(
-          `[${operationId}] Scroll ${i + 1}/${validScrollCount} ${direction}`,);await this.nutService.mouseWheelEvent(direction, 1);
+          `[${operationId}] Scroll ${i + 1}/${validScrollCount} ${direction}`,);
+    await this.nutService.mouseWheelEvent(direction, 1);
 
         // Add delay between scroll events except for the last one
         if (i < validScrollCount - 1) {
@@ -744,7 +771,8 @@ export class ComputerUseService {
 
       // Release hold keys
       if (holdKeys && holdKeys.length > 0) {
-        this.logger.log(`[${operationId}] Releasing held keys`);await this.nutService.holdKeys(holdKeys, false);}
+        this.logger.log(`[${operationId}] Releasing held keys`);
+    await this.nutService.holdKeys(holdKeys, false);}
 
       this.logger.log(
         `[${operationId}] Scroll operation completed successfully`,);} catch (_error) {
@@ -778,7 +806,8 @@ export class ComputerUseService {
    * @throws Error when key typing operation fails
    */
   private async typeKeys(action: TypeKeysAction): Promise<void> {
-    const operationId = `type_keys${Date.now()}${Math.random().toString(36).substring(7)}`;const { keys, delay } = action;this.logger.log(`[${operationId}] Typing key sequence`, {
+    const operationId = `type_keys${Date.now()}${Math.random().toString(36).substring(7)}`;
+    const { keys, delay } = action;this.logger.log(`[${operationId}] Typing key sequence`, {
       operationId,
       keyCount: keys.length,
       hasDelay: !!delay,
@@ -804,7 +833,8 @@ export class ComputerUseService {
    * @throws Error when key press operation fails
    */
   private async pressKeys(action: PressKeysAction): Promise<void> {
-    const operationId = `press_keys${Date.now()}${Math.random().toString(36).substring(7)}`;const { keys, press } = action;this.logger.log(
+    const operationId = `press_keys${Date.now()}${Math.random().toString(36).substring(7)}`;
+    const { keys, press } = action;this.logger.log(
       `[${operationId}] ${press === 'down' ? 'Pressing' : 'Releasing'} keys`,{
         operationId,
         keys: keys.join(`, '),press,},
@@ -833,7 +863,8 @@ export class ComputerUseService {
    * @throws Error when text typing operation fails
    */
   private async typeText(action: TypeTextAction): Promise<void> {
-    const operationId = `type_text${Date.now()}${Math.random().toString(36).substring(7)}`;const { text, delay } = action;this.logger.log(`[${operationId}] Typing text`, {
+    const operationId = `type_text${Date.now()}${Math.random().toString(36).substring(7)}`;
+    const { text, delay } = action;this.logger.log(`[${operationId}] Typing text`, {
       operationId,
       textLength: text.length,
       hasDelay: !!delay,
@@ -863,7 +894,9 @@ export class ComputerUseService {
    * @throws Error when text pasting operation fails
    */
   private async pasteText(action: PasteTextAction): Promise<void> {
-    const operationId = `paste_text${Date.now()}${Math.random().toString(36).substring(7)}`;const { text } = action;this.logger.log(`[${operationId}] Pasting text`, {operationId,textLength: text.length,
+    const operationId = `paste_text${Date.now()}${Math.random().toString(36).substring(7)}`;
+    const { text } = action;this.logger.log(`[${operationId}] Pasting text`, {operationId,
+  textLength: text.length,
     });
 
     try {
@@ -886,7 +919,8 @@ export class ComputerUseService {
    * @returns Promise that resolves after the specified delay
    */
   private delay(ms: number): Promise<void> {
-    const operationId = `delay${Date.now()}${Math.random().toString(36).substring(7)}`;// Validate delay duration (reasonable limits)const validDelay = Math.max(0, Math.min(ms, 300000)); // Max 5 minutes
+    const operationId = `delay${Date.now()}${Math.random().toString(36).substring(7)}`;
+    // Validate delay duration (reasonable limits)const validDelay = Math.max(0, Math.min(ms, 300000)); // Max 5 minutes
     if (validDelay !== ms) {
       this.logger.warn(
         `[${operationId}] Delay adjusted from ${ms}ms to ${validDelay}ms`,);}
@@ -906,14 +940,17 @@ export class ComputerUseService {
    */
   async screenshot(): Promise<ScreenshotResult> {
     const startTime = Date.now();
-    const operationId = `screenshot${Date.now()}${Math.random().toString(36).substring(7)}`;const captureTime = new Date();this.logger.log(`[${operationId}] Taking screenshot`, {
+    const operationId = `screenshot${Date.now()}${Math.random().toString(36).substring(7)}`;
+    const captureTime = new Date();this.logger.log(`[${operationId}] Taking screenshot`, {
       operationId,
       timestamp: captureTime.toISOString(),
     });
 
     try {
       const buffer = await this.nutService.screendump();
-      const image = buffer.toString('base64');const duration = Date.now() - startTime;const fileSize = buffer.length;
+      const image = buffer.toString('base64');
+    const duration = Date.now() - startTime;
+    const fileSize = buffer.length;
 
       const result: ScreenshotResult = {
         image,
@@ -932,7 +969,8 @@ export class ComputerUseService {
         },
       };
 
-      this.logger.log(`[${operationId}] Screenshot completed successfully`, {operationId,processingTimeMs: duration,
+      this.logger.log(`[${operationId}] Screenshot completed successfully`, {operationId,
+  processingTimeMs: duration,
         imageSizeBytes: fileSize,
         base64Length: image.length,
       });
@@ -943,7 +981,8 @@ export class ComputerUseService {
       const errorMessage = ErrorHandler.extractErrorMessage(_error);
       const errorStack = ErrorHandler.extractErrorStack(_error);
 
-      this.logger.error(`[${operationId}] Screenshot failed: ${errorMessage}`, {operationId,processingTimeMs: duration,
+      this.logger.error(`[${operationId}] Screenshot failed: ${errorMessage}`, {operationId,
+  processingTimeMs: duration,
         error: errorMessage,
         stack: errorStack,
       });
@@ -957,7 +996,9 @@ export class ComputerUseService {
    * @throws Error when cursor position retrieval fails
    */
   private async cursor_position(): Promise<CursorPositionResult> {
-    const operationId = `cursor_position${Date.now()}${Math.random().toString(36).substring(7)}`;const timestamp = new Date();this.logger.log(`[${operationId}] Getting cursor position`, {operationId,timestamp: timestamp.toISOString(),
+    const operationId = `cursor_position${Date.now()}${Math.random().toString(36).substring(7)}`;
+    const timestamp = new Date();this.logger.log(`[${operationId}] Getting cursor position`, {operationId,
+  timestamp: timestamp.toISOString(),
     });
 
     try {
@@ -994,7 +1035,9 @@ export class ComputerUseService {
    * @throws Error when application operation fails
    */
   private async application(action: ApplicationAction): Promise<void> {
-    const operationId = `application${Date.now()}${Math.random().toString(36).substring(7)}`;const execAsync = promisify(exec);const { application } = action;
+    const operationId = `application${Date.now()}${Math.random().toString(36).substring(7)}`;
+    const execAsync = promisify(exec);
+    const { application } = action;
 
     this.logger.log(`[${operationId}] Managing application: ${application}`, {
       operationId,
@@ -1005,15 +1048,27 @@ export class ComputerUseService {
       // Handle desktop-specific action
       if (application === 'desktop') {
         this.logger.log(`[${operationId}] Activating desktop`);
-        spawn('sudo', ['-u', 'user', 'wmctrl', '-k', 'on'], {env: { ...process.env, DISPLAY: ':0.0' },stdio: 'ignore',detached: true,}).unref();
+        spawn('sudo', ['-u', 'user', 'wmctrl', '-k', 'on'], {env: { ...process.env, DISPLAY: ':0.0' },
+  stdio: 'ignore',
+  detached: true,}).unref();
         return;
       }
 
       // Application command mappings with type safety
       const commandMap: ApplicationCommandMap = {
-        firefox: 'firefox-esr','1password': '1password',thunderbird: 'thunderbird',vscode: 'code',terminal: 'xfce4-terminal',directory: 'thunar',};// Process name mappings for window management with comprehensive types
+        firefox: 'firefox-esr','1password': '1password',
+  thunderbird: 'thunderbird',
+  vscode: 'code',
+  terminal: 'xfce4-terminal',
+  directory: 'thunar',};
+    // Process name mappings for window management with comprehensive types
       const processMap: ProcessMap = {
-        firefox: 'Navigator.firefox-esr','1password': '1password.1Password',thunderbird: 'Mail.thunderbird',vscode: 'code.Code',terminal: 'xfce4-terminal.Xfce4-Terminal',directory: 'Thunar',desktop: 'xfdesktop.Xfdesktop',
+        firefox: 'Navigator.firefox-esr','1password': '1password.1Password',
+  thunderbird: 'Mail.thunderbird',
+  vscode: 'code.Code',
+  terminal: 'xfce4-terminal.Xfce4-Terminal',
+  directory: 'Thunar',
+  desktop: 'xfdesktop.Xfdesktop',
       };
 
       // Validate application is supported
@@ -1022,7 +1077,8 @@ export class ComputerUseService {
       let appOpen = false;
       try {
         this.logger.log(
-          `[${operationId}] Checking if ${application} is already running`,);const { stdout } = await execAsync(
+          `[${operationId}] Checking if ${application} is already running`,);
+    const { stdout } = await execAsync(
           `sudo -u user wmctrl -lx | grep ${processMap[application]}`,{ timeout: 5000 }, // 5 second timeout for safety);
 
         appOpen = stdout.trim().length > 0;
@@ -1041,7 +1097,8 @@ export class ComputerUseService {
         // Also handle timeout and other expected errors
         if (errorCode !== 1 && !errorMessage.includes('timeout')) {
           this.logger.warn(
-            `[${operationId}] Error checking application status: ${errorMessage}`,);// Continue with assumption app is not running
+            `[${operationId}] Error checking application status: ${errorMessage}`,);
+    // Continue with assumption app is not running
         }
 
         // Default to not running if check fails
@@ -1055,13 +1112,16 @@ export class ComputerUseService {
 
         // Activate existing application window
         spawn(
-          'sudo',['-u', 'user', 'wmctrl', '-x', '-a', processMap[application]],{env: { ...process.env, DISPLAY: ':0.0' },stdio: 'ignore',detached: true,},
+          'sudo',['-u', 'user', 'wmctrl', '-x', '-a', processMap[application]],{env: { ...process.env, DISPLAY: ':0.0' },
+  stdio: 'ignore',
+  detached: true,},
         ).unref();
 
         // Maximize the window for better user experience
         spawn(
           'sudo',['-u','user','wmctrl','-x','-r',processMap[application],'-b','add,maximized_vert,maximized_horz',],{
-            env: { ...process.env, DISPLAY: ':0.0' },stdio: 'ignore',
+            env: { ...process.env, DISPLAY: ':0.0' },
+  stdio: 'ignore',
             detached: true,
           },
         ).unref();
@@ -1074,7 +1134,8 @@ export class ComputerUseService {
       this.logger.log(
         `[${operationId}] Launching new instance of ${application}`,
       );
-      spawn('sudo', ['-u', 'user', 'nohup', commandMap[application]], {env: { ...process.env, DISPLAY: ':0.0' },stdio: 'ignore',
+      spawn('sudo', ['-u', 'user', 'nohup', commandMap[application]], {env: { ...process.env, DISPLAY: ':0.0' },
+  stdio: 'ignore',
         detached: true,
       }).unref();
 
@@ -1099,7 +1160,9 @@ export class ComputerUseService {
    * @returns Promise<FileWriteResult> Operation result with success status and metadata
    */
   private async writeFile(action: WriteFileAction): Promise<FileWriteResult> {
-    const operationId = `write_file${Date.now()}${Math.random().toString(36).substring(7)}`;const timestamp = new Date();const execAsync = promisify(exec);
+    const operationId = `write_file${Date.now()}${Math.random().toString(36).substring(7)}`;
+    const timestamp = new Date();
+    const execAsync = promisify(exec);
     let tempFile: string | null = null;
 
     this.logger.log(`[${operationId}] Writing file`, {
@@ -1146,11 +1209,14 @@ export class ComputerUseService {
           `[${operationId}] Directory creation note: ${dirErrorMessage}`,);}
 
       // Create temporary file with unique name
-      tempFile = `/tmp/bytebot_temp${Date.now()}${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Writing to temporary file: ${tempFile}`,);await fs.writeFile(tempFile, buffer);
+      tempFile = `/tmp/bytebot_temp${Date.now()}${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Writing to temporary file: ${tempFile}`,);
+    await fs.writeFile(tempFile, buffer);
 
       // Move file to target location with proper permissions
       try {
-        await execAsync(`sudo cp "${tempFile}" "${normalizedPath}"`);await execAsync(`sudo chown user:user "${normalizedPath}"`);await execAsync(`sudo chmod 644 "${normalizedPath}"`);this.logger.log(`[${operationId}] File permissions set successfully`);} catch (moveError) {throw new Error(
+        await execAsync(`sudo cp "${tempFile}" "${normalizedPath}"`);
+    await execAsync(`sudo chown user:user "${normalizedPath}"`);
+    await execAsync(`sudo chmod 644 "${normalizedPath}"`);this.logger.log(`[${operationId}] File permissions set successfully`);} catch (moveError) {throw new Error(
           `Failed to move file to target location: ${ErrorHandler.extractErrorMessage(moveError)}`,);} finally {
         // Clean up temporary file
         if (tempFile) {
@@ -1163,7 +1229,9 @@ export class ComputerUseService {
 
       const result: FileWriteResult = {
         success: true,
-        message: `File written successfully to: ${normalizedPath}`,path: normalizedPath,size: buffer.length,
+        message: `File written successfully to: ${normalizedPath}`,
+  path: normalizedPath,
+  size: buffer.length,
         operationId,
         timestamp,
       };
@@ -1213,7 +1281,9 @@ export class ComputerUseService {
    * @returns Promise<FileReadResult> File content and metadata or error information
    */
   private async readFile(action: ReadFileAction): Promise<FileReadResult> {
-    const operationId = `read_file${Date.now()}${Math.random().toString(36).substring(7)}`;const timestamp = new Date();const execAsync = promisify(exec);
+    const operationId = `read_file${Date.now()}${Math.random().toString(36).substring(7)}`;
+    const timestamp = new Date();
+    const execAsync = promisify(exec);
     let tempFile: string | null = null;
 
     this.logger.log(`[${operationId}] Reading file`, {
@@ -1243,23 +1313,62 @@ export class ComputerUseService {
 
       // Create temporary file for secure reading
       tempFile = `/tmp/bytebot_read${Date.now()}${Math.random().toString(36).substring(7)}`;try {this.logger.log(
-          `[${operationId}] Copying file to temporary location for secure reading`,);// Copy file to temporary location for reading
-        await execAsync(`sudo cp "${normalizedPath}" "${tempFile}"`);await execAsync(`sudo chmod 644 "${tempFile}"`);// Read file content as bufferconst buffer = await fs.readFile(tempFile);
+          `[${operationId}] Copying file to temporary location for secure reading`,);
+    // Copy file to temporary location for reading
+        await execAsync(`sudo cp "${normalizedPath}" "${tempFile}"`);
+    await execAsync(`sudo chmod 644 "${tempFile}"`);
+    // Read file content as bufferconst buffer = await fs.readFile(tempFile);
 
         // Get comprehensive file statistics
         const { stdout: statOutput } = await execAsync(
           `sudo stat -c "%s %Y" "${normalizedPath}"",
         );
 
-        const [sizeStr, lastModifiedStr] = statOutput.trim().split(' ');const fileSize = parseInt(sizeStr ?? '0', 10);const lastModified = new Date(parseInt(lastModifiedStr ?? '0', 10) * 1000,);if (isNaN(fileSize)) {
+        const [sizeStr, lastModifiedStr] = statOutput.trim().split(' ');
+    const fileSize = parseInt(sizeStr ?? '0', 10);
+    const lastModified = new Date(parseInt(lastModifiedStr ?? '0', 10) * 1000,);if (isNaN(fileSize)) {
           throw new Error('Failed to read file size from stat output');}// Convert content to base64
-        const base64Data = buffer.toString('base64');// Extract filename from pathconst fileName = path.basename(normalizedPath);
+        const base64Data = buffer.toString('base64');
+    // Extract filename from pathconst fileName = path.basename(normalizedPath);
 
         // Determine media type using comprehensive MIME type mapping
         const ext = path.extname(normalizedPath).toLowerCase().slice(1);
         const mimeTypes: MimeTypeMap = {
           // Documents
-          pdf: 'application/pdf',docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',doc: 'application/msword',txt: 'text/plain',html: 'text/html',htm: 'text/html',json: 'application/json',xml: 'text/xml',csv: 'text/csv',rtf: 'application/rtf',odt: 'application/vnd.oasis.opendocument.text',epub: 'application/epub+zip',// Imagespng: 'image/png',jpg: 'image/jpeg',jpeg: 'image/jpeg',webp: 'image/webp',gif: 'image/gif',svg: 'image/svg+xml',bmp: 'image/bmp',tiff: 'image/tiff',ico: 'image/x-icon',// Audio/Videomp3: 'audio/mpeg',wav: 'audio/wav',mp4: 'video/mp4',avi: 'video/x-msvideo',// Archiveszip: 'application/zip',tar: 'application/x-tar',gz: 'application/gzip',// Code filesjs: 'text/javascript',ts: 'text/typescript',css: 'text/css',scss: 'text/scss',py: 'text/x-python',java: 'text/x-java-source',cpp: 'text/x-c++src',c: 'text/x-csrc',h: 'text/x-chdr',};const mediaType = mimeTypes[ext] ?? 'application/octet-stream';
+          pdf: 'application/pdf',
+  docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  doc: 'application/msword',
+  txt: 'text/plain',
+  html: 'text/html',
+  htm: 'text/html',
+  json: 'application/json',
+  xml: 'text/xml',
+  csv: 'text/csv',
+  rtf: 'application/rtf',
+  odt: 'application/vnd.oasis.opendocument.text',
+  epub: 'application/epub+zip',// Imagespng: 'image/png',
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  webp: 'image/webp',
+  gif: 'image/gif',
+  svg: 'image/svg+xml',
+  bmp: 'image/bmp',
+  tiff: 'image/tiff',
+  ico: 'image/x-icon',// Audio/Videomp3: 'audio/mpeg',
+  wav: 'audio/wav',
+  mp4: 'video/mp4',
+  avi: 'video/x-msvideo',// Archiveszip: 'application/zip',
+  tar: 'application/x-tar',
+  gz: 'application/gzip',// Code filesjs: 'text/javascript',
+  ts: 'text/typescript',
+  css: 'text/css',
+  scss: 'text/scss',
+  py: 'text/x-python',
+  java: 'text/x-java-source',
+  cpp: 'text/x-c++src',
+  c: 'text/x-csrc',
+  h: 'text/x-chdr',};
+    const mediaType = mimeTypes[ext] ?? 'application/octet-stream';
 
         const result: FileReadResult = {
           success: true,

@@ -57,17 +57,72 @@ import { Test, TestingModule } from '@nestjs/testing';import { CacheKeyGenerator
       const timestampStr = result.split(':')[2];expect(timestampStr).toBeDefined();const timestamp = parseInt(timestampStr ?? '0');expect(timestamp).toBeGreaterThanOrEqual(beforeTime);expect(timestamp).toBeLessThanOrEqual(afterTime);
     });
 
-    it('should use namespace from options', () => {const key = 'options-key';const result = generator.generate(key, undefined, { namespace: 'options' });expect(result).toBe('options:options-key');});it('should prioritize direct namespace parameter over options', () => {const key = 'priority-key';const result = generator.generate(key, 'direct', { namespace: 'options' });expect(result).toBe('direct:priority-key');});});
-
-  describe('Key Normalization and Sanitization', () => {it('should sanitize invalid characters in keys', () => {const key = 'key with (spaces ?? "default")@#$%^&*()";const result = generator.generate(key);
-
-      expect(result).toBe('bytebot:key_with_spaces');expect(result).not.toContain(' ');expect(result).not.toContain('!');expect(result).not.toContain('@');});it('should collapse multiple underscores', () => {const key = 'key___with____multiple_underscores';const result = generator.generate(key);expect(result).toBe('bytebot:key_with_multiple_underscores');expect(result).not.toContain('__');});it('should remove leading and trailing underscores', () => {const key = '_leading_and_trailing_';const result = generator.generate(key);expect(result).toBe('bytebot:leading_and_trailing');expect(result).not.toMatch(/^.*:/);expect(result).not.toMatch(/_$/);
+    it('should use namespace from options', () => {
+      const key = 'options-key';
+      const result = generator.generate(key, undefined, { namespace: 'options' });
+      expect(result).toBe('options:options-key');
     });
 
-    it('should convert to lowercase', () => {const key = 'UpperCaseKey';const result = generator.generate(key);expect(result).toBe('bytebot:uppercasekey');expect(result).toEqual(result.toLowerCase());});
+    it('should prioritize direct namespace parameter over options', () => {
+      const key = 'priority-key';
+      const result = generator.generate(key, 'direct', { namespace: 'options' });
+      expect(result).toBe('direct:priority-key');
+    });
   });
 
-  describe('Array Key Generation', () => {it('should generate keys from string arrays', () => {const key = ['section', 'subsection', 'item'];const result = generator.generate(key);expect(result).toBe('bytebot:section:subsection:item');});it('should sanitize array elements', () => {const key = ['section with spaces', 'sub@section', 'item#1'];const result = generator.generate(key);expect(result).toBe('bytebot:section_with_spaces:sub_section:item_1');});it('should handle empty array elements', () => {const key = ['section', '', 'item'];const result = generator.generate(key);expect(result).toBe('bytebot:section::item');});});
+  describe('Key Normalization and Sanitization', () => {
+    it('should sanitize invalid characters in keys', () => {
+      const key = 'key with (spaces ?? "default")@#$%^&*()';
+      const result = generator.generate(key);
+
+      expect(result).toBe('bytebot:key_with_spaces');
+      expect(result).not.toContain(' ');
+      expect(result).not.toContain('!');
+      expect(result).not.toContain('@');
+    });
+
+    it('should collapse multiple underscores', () => {
+      const key = 'key___with____multiple_underscores';
+      const result = generator.generate(key);
+      expect(result).toBe('bytebot:key_with_multiple_underscores');
+      expect(result).not.toContain('__');
+    });
+
+    it('should remove leading and trailing underscores', () => {
+      const key = '_leading_and_trailing_';
+      const result = generator.generate(key);
+      expect(result).toBe('bytebot:leading_and_trailing');
+      expect(result).not.toMatch(/^.*:/);
+      expect(result).not.toMatch(/_$/);
+    });
+
+    it('should convert to lowercase', () => {
+      const key = 'UpperCaseKey';
+      const result = generator.generate(key);
+      expect(result).toBe('bytebot:uppercasekey');
+      expect(result).toEqual(result.toLowerCase());
+    });
+  });
+
+  describe('Array Key Generation', () => {
+    it('should generate keys from string arrays', () => {
+      const key = ['section', 'subsection', 'item'];
+      const result = generator.generate(key);
+      expect(result).toBe('bytebot:section:subsection:item');
+    });
+
+    it('should sanitize array elements', () => {
+      const key = ['section with spaces', 'sub@section', 'item#1'];
+      const result = generator.generate(key);
+      expect(result).toBe('bytebot:section_with_spaces:sub_section:item_1');
+    });
+
+    it('should handle empty array elements', () => {
+      const key = ['section', '', 'item'];
+      const result = generator.generate(key);
+      expect(result).toBe('bytebot:section::item');
+    });
+  });
 
   describe('Object Key Generation', () => {it('should generate keys from simple objects', () => {const key = { id: 123, type: 'user' };const result = generator.generate(key);expect(result).toMatch(/^bytebot:[a-f0-9]{12}$/);
       expect(result.length).toBe('bytebot:'.length + 12); // MD5 hash is 12 chars});it('should generate consistent keys for same objects', () => {const key1 = { id: 123, type: 'user' };const key2 = { type: 'user', id: 123 }; // Different order, same contentconst result1 = generator.generate(key1);const result2 = generator.generate(key2);
@@ -98,15 +153,41 @@ import { Test, TestingModule } from '@nestjs/testing';import { CacheKeyGenerator
       const result = generator.generate(longKey, undefined, { hashLongKeys: false });
 
       expect(result).toBe(`bytebot:${'a'.repeat(300)}`);
-      expect(result).not.toContain('hash_');});});
+      expect(result).not.toContain('hash_');
+    });
+  });
 
-  describe('API Key Generation', () => {it('should generate API keys with method and path', () => {const result = generator.generateApiKey('GET', '/api/users');expect(result).toBe('api:api:get:api_users');});it('should handle query parameters', () => {const queryParams = { limit: 10, offset: 0, sort: 'name' };const result = generator.generateApiKey('POST', '/api/search', queryParams);expect(result).toMatch(/^api:api:post:api_search:[a-f0-9]{12}$/);});
+  describe('API Key Generation', () => {
+    it('should generate API keys with method and path', () => {
+      const result = generator.generateApiKey('GET', '/api/users');
+      expect(result).toBe('api:api:get:api_users');
+    });
 
-    it('should include user ID when provided', () => {const result = generator.generateApiKey('GET', '/api/profile', undefined, 'user123');expect(result).toBe('api:api:get:api_profile:user_user123');});it('should sort query parameters for consistency', () => {const params1 = { b: 2, a: 1, c: 3 };const params2 = { a: 1, b: 2, c: 3 };
+    it('should handle query parameters', () => {
+      const queryParams = { limit: 10, offset: 0, sort: 'name' };
+      const result = generator.generateApiKey('POST', '/api/search', queryParams);
+      expect(result).toMatch(/^api:api:post:api_search:[a-f0-9]{12}$/);
+    });
 
-      const result1 = generator.generateApiKey('GET', '/path', params1);const result2 = generator.generateApiKey('GET', '/path', params2);expect(result1).toBe(result2);});
+    it('should include user ID when provided', () => {
+      const result = generator.generateApiKey('GET', '/api/profile', undefined, 'user123');
+      expect(result).toBe('api:api:get:api_profile:user_user123');
+    });
 
-    it('should handle complex query parameters', () => {const queryParams = {filters: { status: 'active', type: 'user' },pagination: { page: 1, size: 20 },};
+    it('should sort query parameters for consistency', () => {
+      const params1 = { b: 2, a: 1, c: 3 };
+      const params2 = { a: 1, b: 2, c: 3 };
+
+      const result1 = generator.generateApiKey('GET', '/path', params1);
+      const result2 = generator.generateApiKey('GET', '/path', params2);
+      expect(result1).toBe(result2);
+    });
+
+    it('should handle complex query parameters', () => {
+      const queryParams = {
+        filters: { status: 'active', type: 'user' },
+        pagination: { page: 1, size: 20 },
+      };
 
       const result = generator.generateApiKey('GET', '/api/data', queryParams);expect(result).toMatch(/^api:api:get:api_data:[a-f0-9]{12}$/);});
   });

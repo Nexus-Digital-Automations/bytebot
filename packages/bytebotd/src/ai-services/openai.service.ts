@@ -20,7 +20,8 @@
 
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ParlantIntegrationService, RiskLevel, ParlantValidationRequest, ParlantConversationContext } from '../parlant/parlant-integration.service';
+import { RiskLevel } from '@bytebot/shared';
+import { ParlantIntegrationService, ParlantValidationRequest, ParlantConversationContext } from '../parlant/parlant-integration.service';
 
 // ===== OPENAI INTEGRATION INTERFACES =====
 /**

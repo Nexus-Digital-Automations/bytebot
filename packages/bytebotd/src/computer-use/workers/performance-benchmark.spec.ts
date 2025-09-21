@@ -11,7 +11,17 @@
  * @version 1.0.0
  */
 
-import { Test, TestingModule } from '@nestjs/testing';import { ConfigService } from '@nestjs/config';import { BackgroundJobWorkerService, WorkerState } from './background-job-worker.service';import { JobManagementService, JobStatus, JobPriority } from '../job-management.service';import { ComputerUseService } from '../computer-use.service';import { ComputerAction } from '@bytebot/shared';import * as child_process from 'child_process';// Mock child_process modulejest.mock('child_process');const mockFork = child_process.fork as jest.MockedFunction<typeof child_process.fork>;// Performance test configuration
+import { Test, TestingModule } from '@nestjs/testing';
+import { ConfigService } from '@nestjs/config';
+import { BackgroundJobWorkerService, WorkerState } from './background-job-worker.service';
+import { JobManagementService, JobStatus, JobPriority } from '../job-management.service';
+import { ComputerUseService } from '../computer-use.service';
+import { ComputerAction } from '@bytebot/shared';
+import * as child_process from 'child_process';
+    // Mock child_process modulejest.mock('child_process');
+
+        const mockFork = child_process.fork as jest.MockedFunction<typeof child_process.fork>;
+    // Performance test configuration
 const PERFORMANCE_CONFIG = {
   CONCURRENT_JOBS_TARGET: 50,
   JOB_STARTUP_LATENCY_TARGET_MS: 500,
@@ -20,7 +30,8 @@ const PERFORMANCE_CONFIG = {
   LOAD_TEST_JOBS_COUNT: 100,
 };
 
-describe('Background Job Worker System - Performance Benchmarks', () => {let service: BackgroundJobWorkerService;let configService: jest.Mocked<ConfigService>;
+describe('Background Job Worker System - Performance Benchmarks', () => {let service: BackgroundJobWorkerService;
+    let configService: jest.Mocked<ConfigService>;
   let jobManagementService: jest.Mocked<JobManagementService>;
   let computerUseService: jest.Mocked<ComputerUseService>;
 
@@ -105,7 +116,7 @@ describe('Background Job Worker System - Performance Benchmarks', () => {let ser
       return mockProcess;
     });
 
-    const module: TestingModule = await Test.createTestingModule({
+        const module: TestingModule = await Test.createTestingModule({
       providers: [
         BackgroundJobWorkerService,
         {
@@ -158,18 +169,21 @@ describe('Background Job Worker System - Performance Benchmarks', () => {let ser
 
   describe('Concurrent Job Execution Performance', () => {it('should support 50+ concurrent job executions', async () => {await service.onModuleInit();jest.advanceTimersByTime(1000);
 
-      const startTime = Date.now();
-      const jobPromises: Promise<string>[] = [];
+        const startTime = Date.now();
+
+        const jobPromises: Promise<string>[] = [];
 
       // Submit 60 jobs concurrently to exceed the target
       for (let i = 0; i < 60; i++) {
         const action: ComputerAction = {
-          action: 'screenshot',metadata: { testJob: i },};
+          action: 'screenshot',
+  metadata: { testJob: i },};
         jobPromises.push(service.submitJob(action, JobPriority.NORMAL, 30000));
       }
 
       const jobIds = await Promise.all(jobPromises);
-      const submissionTime = Date.now() - startTime;
+
+        const submissionTime = Date.now() - startTime;
 
       expect(jobIds).toHaveLength(60);
       expect(submissionTime).toBeLessThan(1000); // Should submit quickly
@@ -177,7 +191,7 @@ describe('Background Job Worker System - Performance Benchmarks', () => {let ser
       // Advance time to process jobs
       jest.advanceTimersByTime(5000);
 
-      const metrics = service.getWorkerPoolMetrics();
+        const metrics = service.getWorkerPoolMetrics();
 
       // Should scale up to handle the load
       expect(metrics.totalWorkers).toBeGreaterThan(5); // Should have scaled beyond minimum
@@ -189,7 +203,7 @@ describe('Background Job Worker System - Performance Benchmarks', () => {let ser
 
     it('should maintain sub-500ms job startup latency', async () => {await service.onModuleInit();jest.advanceTimersByTime(1000);
 
-      const latencyMeasurements: number[] = [];
+        const latencyMeasurements: number[] = [];
 
       // Measure startup latency for 20 jobs
       for (let i = 0; i < 20; i++) {
@@ -217,8 +231,9 @@ describe('Background Job Worker System - Performance Benchmarks', () => {let ser
 
   describe('Auto-scaling Performance', () => {it('should scale up quickly under load', async () => {await service.onModuleInit();jest.advanceTimersByTime(1000);
 
-      const initialMetrics = service.getWorkerPoolMetrics();
-      const initialWorkerCount = initialMetrics.totalWorkers;
+        const initialMetrics = service.getWorkerPoolMetrics();
+
+        const initialWorkerCount = initialMetrics.totalWorkers;
 
       // Create heavy load
       const jobPromises: Promise<string>[] = [];
@@ -234,7 +249,8 @@ describe('Background Job Worker System - Performance Benchmarks', () => {let ser
       }
 
       const scaledMetrics = service.getWorkerPoolMetrics();
-      const scalingIncrease = scaledMetrics.totalWorkers - initialWorkerCount;
+
+        const scalingIncrease = scaledMetrics.totalWorkers - initialWorkerCount;
 
       expect(scalingIncrease).toBeGreaterThan(0);
       expect(scaledMetrics.totalWorkers).toBeGreaterThan(initialWorkerCount);
@@ -271,12 +287,14 @@ describe('Background Job Worker System - Performance Benchmarks', () => {let ser
 
   describe('Worker Recovery Performance', () => {it('should recover from worker failures in under 30 seconds', async () => {await service.onModuleInit();jest.advanceTimersByTime(1000);
 
-      const initialMetrics = service.getWorkerPoolMetrics();
-      const failureStartTime = Date.now();
+        const initialMetrics = service.getWorkerPoolMetrics();
+
+        const failureStartTime = Date.now();
 
       // Simulate worker failure by killing a mock process
       const mockProcesses = (mockFork as any).mock.results.map((r: any) => r.value);
-      const workerToFail = mockProcesses[0];
+
+        const workerToFail = mockProcesses[0];
 
       // Simulate worker crash
       workerToFail.emit('error', new Error('Simulated worker crash'));
@@ -302,7 +320,8 @@ describe('Background Job Worker System - Performance Benchmarks', () => {let ser
 
       for (let i = 0; i < 20; i++) {
         try {
-          const jobId = await service.submitJob({ action: 'screenshot' });jobResults.push(true);// Randomly fail workers during job execution
+          const jobId = await service.submitJob({ action: 'screenshot' });jobResults.push(true);
+    // Randomly fail workers during job execution
           if (i % 5 === 0 && mockProcesses[i % mockProcesses.length]) {
             mockProcesses[i % mockProcesses.length].emit('error', new Error('Random failure'));
           }
@@ -324,8 +343,9 @@ describe('Background Job Worker System - Performance Benchmarks', () => {let ser
 
   describe('Throughput and Load Testing', () => {it('should process high throughput job loads efficiently', async () => {await service.onModuleInit();jest.advanceTimersByTime(1000);
 
-      const testStartTime = Date.now();
-      const jobSubmissionPromises: Promise<string>[] = [];
+        const testStartTime = Date.now();
+
+        const jobSubmissionPromises: Promise<string>[] = [];
 
       // Submit 100 jobs as fast as possible
       for (let i = 0; i < PERFORMANCE_CONFIG.LOAD_TEST_JOBS_COUNT; i++) {
@@ -338,16 +358,19 @@ describe('Background Job Worker System - Performance Benchmarks', () => {let ser
       }
 
       const submissionStartTime = Date.now();
-      const jobIds = await Promise.all(jobSubmissionPromises);
-      const submissionDuration = Date.now() - submissionStartTime;
+
+        const jobIds = await Promise.all(jobSubmissionPromises);
+
+        const submissionDuration = Date.now() - submissionStartTime;
 
       expect(jobIds).toHaveLength(PERFORMANCE_CONFIG.LOAD_TEST_JOBS_COUNT);
 
       // Process all jobs
       jest.advanceTimersByTime(30000);
 
-      const finalMetrics = service.getWorkerPoolMetrics();
-      const testDuration = Date.now() - testStartTime;
+        const finalMetrics = service.getWorkerPoolMetrics();
+
+        const testDuration = Date.now() - testStartTime;
 
       // Calculate throughput
       const jobsPerSecond = (PERFORMANCE_CONFIG.LOAD_TEST_JOBS_COUNT / testDuration) * 1000;
@@ -361,7 +384,7 @@ describe('Background Job Worker System - Performance Benchmarks', () => {let ser
 
     it('should maintain consistent performance under sustained load', async () => {await service.onModuleInit();jest.advanceTimersByTime(1000);
 
-      const performanceSnapshots: { time: number; metrics: any }[] = [];
+        const performanceSnapshots: { time: number; metrics: any }[] = [];
       const testDuration = 30000; // 30 seconds
       const snapshotInterval = 5000; // Every 5 seconds
 
@@ -394,10 +417,12 @@ describe('Background Job Worker System - Performance Benchmarks', () => {let ser
 
       // Analyze performance consistency
       const workerCounts = performanceSnapshots.map(s => s.metrics.totalWorkers);
-      const queueSizes = performanceSnapshots.map(s => s.metrics.queueSize);
 
-      const workerVariance = Math.max(...workerCounts) - Math.min(...workerCounts);
-      const averageQueueSize = queueSizes.reduce((a, b) => a + b, 0) / queueSizes.length;
+        const queueSizes = performanceSnapshots.map(s => s.metrics.queueSize);
+
+        const workerVariance = Math.max(...workerCounts) - Math.min(...workerCounts);
+
+        const averageQueueSize = queueSizes.reduce((a, b) => a + b, 0) / queueSizes.length;
 
       console.log(`Sustained load performance:`);performanceSnapshots.forEach((snapshot, index) => {console.log(`  T+${snapshot.time}ms: ${snapshot.metrics.totalWorkers} workers, queue: ${snapshot.metrics.queueSize}, memory: ${(snapshot.metrics.memoryUsage / 1024 / 1024).toFixed(1)}MB`);
       });
@@ -408,8 +433,9 @@ describe('Background Job Worker System - Performance Benchmarks', () => {let ser
 
   describe('Resource Efficiency', () => {it('should maintain optimal memory usage under load', async () => {await service.onModuleInit();jest.advanceTimersByTime(1000);
 
-      const initialMetrics = service.getWorkerPoolMetrics();
-      const initialMemory = initialMetrics.memoryUsage;
+        const initialMetrics = service.getWorkerPoolMetrics();
+
+        const initialMemory = initialMetrics.memoryUsage;
 
       // Generate memory-intensive load
       for (let i = 0; i < 50; i++) {
@@ -423,7 +449,8 @@ describe('Background Job Worker System - Performance Benchmarks', () => {let ser
       jest.advanceTimersByTime(20000); // Allow jobs to process
 
       const loadedMetrics = service.getWorkerPoolMetrics();
-      const memoryIncrease = loadedMetrics.memoryUsage - initialMemory;
+
+        const memoryIncrease = loadedMetrics.memoryUsage - initialMemory;
       const memoryPerWorker = loadedMetrics.memoryUsage / loadedMetrics.totalWorkers;
 
       console.log(`Memory usage analysis:`);console.log(`- Initial: ${(initialMemory / 1024 / 1024).toFixed(1)}MB`);console.log(`- Under load: ${(loadedMetrics.memoryUsage / 1024 / 1024).toFixed(1)}MB`);console.log(`- Increase: ${(memoryIncrease / 1024 / 1024).toFixed(1)}MB`);console.log(`- Per worker: ${(memoryPerWorker / 1024 / 1024).toFixed(1)}MB`);
@@ -435,16 +462,19 @@ describe('Background Job Worker System - Performance Benchmarks', () => {let ser
 
     it('should efficiently manage worker lifecycle', async () => {await service.onModuleInit();jest.advanceTimersByTime(1000);
 
-      const workerLifecycleEvents: { event: string; time: number; workerId?: string }[] = [];
+        const workerLifecycleEvents: { event: string; time: number; workerId?: string }[] = [];
 
       // Monitor worker events
-      service.on('worker_ready', (data) => {workerLifecycleEvents.push({event: 'worker_ready',time: Date.now(),workerId: data.workerId,
+      service.on('worker_ready', (data) => {workerLifecycleEvents.push({event: 'worker_ready',
+  time: Date.now(),
+  workerId: data.workerId,
         });
       });
 
       // Create load that triggers scaling
       for (let i = 0; i < 25; i++) {
-        await service.submitJob({ action: 'screenshot' });}jest.advanceTimersByTime(35000); // Allow scaling up
+        await service.submitJob({ action: 'screenshot' });
+}jest.advanceTimersByTime(35000); // Allow scaling up
 
       // Let load decrease
       jest.advanceTimersByTime(60000);

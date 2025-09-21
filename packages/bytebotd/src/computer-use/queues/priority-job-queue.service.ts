@@ -45,7 +45,12 @@ import {
   OnModuleDestroy,
   BadRequestException,
   InternalServerErrorException,
-} from '@nestjs/common';import { ConfigService } from '@nestjs/config';import Redis from 'ioredis';import * as crypto from 'crypto';import { JobStatus } from '../dto/async-job.dto';// ===== ENTERPRISE-GRADE TYPE DEFINITIONS =====/**
+} from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import Redis from 'ioredis';
+import * as crypto from 'crypto';
+import { JobStatus } from '../dto/async-job.dto';
+    // ===== ENTERPRISE-GRADE TYPE DEFINITIONS =====/**
  * Enhanced job priority enumeration with execution targets
  */
 export enum EnhancedJobPriority {
@@ -53,11 +58,22 @@ export enum EnhancedJobPriority {
  * Queue operation types for metrics and monitoring
  */
 export enum QueueOperation {
-  ENQUEUE = 'enqueue',DEQUEUE = 'dequeue',PEEK = 'peek',REMOVE = 'remove',CLEAR = 'clear',REQUEUE = 'requeue',BATCH_ENQUEUE = 'batch_enqueue',BATCH_DEQUEUE = 'batch_dequeue',}/**
+  ENQUEUE = 'enqueue',
+  DEQUEUE = 'dequeue',
+  PEEK = 'peek',
+  REMOVE = 'remove',
+  CLEAR = 'clear',
+  REQUEUE = 'requeue',
+  BATCH_ENQUEUE = 'batch_enqueue',
+  BATCH_DEQUEUE = 'batch_dequeue',}/**
  * Lock types for different operation granularity
  */
 export enum LockType {
-  QUEUE_GLOBAL = 'queue:global',QUEUE_PRIORITY = 'queue:priority',QUEUE_OPERATION = 'queue:operation',QUEUE_METRICS = 'queue:metrics',QUEUE_PERSISTENCE = 'queue:persistence',}/**
+  QUEUE_GLOBAL = 'queue:global',
+  QUEUE_PRIORITY = 'queue:priority',
+  QUEUE_OPERATION = 'queue:operation',
+  QUEUE_METRICS = 'queue:metrics',
+  QUEUE_PERSISTENCE = 'queue:persistence',}/**
  * Comprehensive job metadata for queue operations
  */
 export interface QueueJobMetadata {
@@ -186,9 +202,23 @@ export class PriorityJobQueueService implements OnModuleInit, OnModuleDestroy {
   private operationHistory: Array<{ operation: QueueOperation; timestamp: Date; duration: number }> = [];
 
   constructor(private readonly configService: ConfigService) {
-    this.nodeId = `node_${process.pid}_${crypto.randomBytes(4).toString('hex')}';// Initialize enterprise-grade configuration
+    this.nodeId = `node_${process.pid}_${crypto.randomBytes(4).toString('hex')}';
+    // Initialize enterprise-grade configuration
     this.configuration = {
-      maxQueueSize: this.configService.get<number>('QUEUE_MAX_SIZE', 10000),maxJobsPerPriority: this.configService.get<number>('QUEUE_MAX_JOBS_PER_PRIORITY', 2000),backpressureThreshold: this.configService.get<number>('QUEUE_BACKPRESSURE_THRESHOLD', 0.8),lockTimeout: this.configService.get<number>('QUEUE_LOCK_TIMEOUT', 30000),lockRetryAttempts: this.configService.get<number>('QUEUE_LOCK_RETRY_ATTEMPTS', 5),lockRetryDelay: this.configService.get<number>('QUEUE_LOCK_RETRY_DELAY', 100),metricsUpdateInterval: this.configService.get<number>('QUEUE_METRICS_UPDATE_INTERVAL', 5000),persistenceInterval: this.configService.get<number>('QUEUE_PERSISTENCE_INTERVAL', 30000),deadlockDetectionInterval: this.configService.get<number>('QUEUE_DEADLOCK_DETECTION_INTERVAL', 10000),starvationPreventionEnabled: this.configService.get<boolean>('QUEUE_STARVATION_PREVENTION', true),starvationPreventionThreshold: this.configService.get<number>('QUEUE_STARVATION_THRESHOLD', 300000), // 5 minutesbatchOperationSize: this.configService.get<number>('QUEUE_BATCH_SIZE', 100),compressionEnabled: this.configService.get<boolean>('QUEUE_COMPRESSION', true),encryptionEnabled: this.configService.get<boolean>('QUEUE_ENCRYPTION', false),};// Initialize metrics
+      maxQueueSize: this.configService.get<number>('QUEUE_MAX_SIZE', 10000),
+  maxJobsPerPriority: this.configService.get<number>('QUEUE_MAX_JOBS_PER_PRIORITY', 2000),
+  backpressureThreshold: this.configService.get<number>('QUEUE_BACKPRESSURE_THRESHOLD', 0.8),
+  lockTimeout: this.configService.get<number>('QUEUE_LOCK_TIMEOUT', 30000),
+  lockRetryAttempts: this.configService.get<number>('QUEUE_LOCK_RETRY_ATTEMPTS', 5),
+  lockRetryDelay: this.configService.get<number>('QUEUE_LOCK_RETRY_DELAY', 100),
+  metricsUpdateInterval: this.configService.get<number>('QUEUE_METRICS_UPDATE_INTERVAL', 5000),
+  persistenceInterval: this.configService.get<number>('QUEUE_PERSISTENCE_INTERVAL', 30000),
+  deadlockDetectionInterval: this.configService.get<number>('QUEUE_DEADLOCK_DETECTION_INTERVAL', 10000),
+  starvationPreventionEnabled: this.configService.get<boolean>('QUEUE_STARVATION_PREVENTION', true),
+  starvationPreventionThreshold: this.configService.get<number>('QUEUE_STARVATION_THRESHOLD', 300000), // 5 minutesbatchOperationSize: this.configService.get<number>('QUEUE_BATCH_SIZE', 100),
+  compressionEnabled: this.configService.get<boolean>('QUEUE_COMPRESSION', true),
+  encryptionEnabled: this.configService.get<boolean>('QUEUE_ENCRYPTION', false),};
+    // Initialize metrics
     this.metrics = {
       totalJobs: 0,
       jobsByPriority: {
@@ -225,7 +255,10 @@ export class PriorityJobQueueService implements OnModuleInit, OnModuleDestroy {
   async onModuleInit(): Promise<void> {
     this.logger.log('Initializing Priority Job Queue Service...');try {// Initialize Redis connection with optimal configuration
       this.redis = new Redis({
-        host: this.configService.get<string>('REDIS_HOST', 'localhost'),port: this.configService.get<number>('REDIS_PORT', 6379),password: this.configService.get<string>('REDIS_PASSWORD'),db: this.configService.get<number>('REDIS_DB', 0),
+        host: this.configService.get<string>('REDIS_HOST', 'localhost'),
+  port: this.configService.get<number>('REDIS_PORT', 6379),
+  password: this.configService.get<string>('REDIS_PASSWORD'),
+  db: this.configService.get<number>('REDIS_DB', 0),
         retryDelayOnFailover: 100,
         enableReadyCheck: true,
         maxRetriesPerRequest: 3,
@@ -326,6 +359,7 @@ export class PriorityJobQueueService implements OnModuleInit, OnModuleDestroy {
 
         // Store job in Redis with priority-based key
         const jobKey = this.getJobKey(jobId);
+
         const priorityQueueKey = this.getPriorityQueueKey(priority);
 
         // Use Redis transaction for atomic operations
@@ -340,7 +374,9 @@ export class PriorityJobQueueService implements OnModuleInit, OnModuleDestroy {
 
         // Update queue metrics
         pipeline.hincrby(this.getMetricsKey(), 'totalJobs', 1);
-        pipeline.hincrby(this.getMetricsKey(), `priority:${priority}`, 1);pipeline.hincrby(this.getMetricsKey(), `status:${JobStatus.PENDING}`, 1);await pipeline.exec();// Update metrics and trigger notifications
+        pipeline.hincrby(this.getMetricsKey(), `priority:${priority}`, 1);pipeline.hincrby(this.getMetricsKey(), `status:${JobStatus.PENDING}`, 1);
+    await pipeline.exec();
+    // Update metrics and trigger notifications
         await this.updateMetricsCache();
 
         const duration = Date.now() - startTime;
@@ -376,7 +412,9 @@ export class PriorityJobQueueService implements OnModuleInit, OnModuleDestroy {
         operation: QueueOperation.ENQUEUE,
         timestamp: new Date(),
         duration,
-        error: error instanceof Error ? error.message : 'Unknown error',lockAcquired: false,queueSize: await this.getQueueSize(),
+        error: error instanceof Error ? error.message : 'Unknown error',
+  lockAcquired: false,
+  queueSize: await this.getQueueSize(),
         metadata: { priority, jobId },
       };
     }
@@ -460,7 +498,9 @@ export class PriorityJobQueueService implements OnModuleInit, OnModuleDestroy {
         operation: QueueOperation.DEQUEUE,
         timestamp: new Date(),
         duration,
-        error: error instanceof Error ? error.message : 'Unknown error',lockAcquired: false,queueSize: await this.getQueueSize(),
+        error: error instanceof Error ? error.message : 'Unknown error',
+  lockAcquired: false,
+  queueSize: await this.getQueueSize(),
         metadata: {},
       };
     }
@@ -478,6 +518,7 @@ export class PriorityJobQueueService implements OnModuleInit, OnModuleDestroy {
       if (priority) {
         // Peek at specific priority queue
         const priorityQueueKey = this.getPriorityQueueKey(priority);
+
         const result = await this.redis.zrange(priorityQueueKey, 0, 0);
         jobId = result[0] || null;
       } else {
@@ -499,9 +540,10 @@ export class PriorityJobQueueService implements OnModuleInit, OnModuleDestroy {
 
       // Retrieve job data
       const jobData = await this.redis.hgetall(this.getJobKey(jobId));
-      const job = this.deserializeJob(jobData);
 
-      const duration = Date.now() - startTime;
+        const job = this.deserializeJob(jobData);
+
+        const duration = Date.now() - startTime;
       this.recordOperation(QueueOperation.PEEK, duration);
 
       return {
@@ -527,7 +569,9 @@ export class PriorityJobQueueService implements OnModuleInit, OnModuleDestroy {
         operation: QueueOperation.PEEK,
         timestamp: new Date(),
         duration,
-        error: error instanceof Error ? error.message : 'Unknown error',lockAcquired: false,queueSize: await this.getQueueSize(),
+        error: error instanceof Error ? error.message : 'Unknown error',
+  lockAcquired: false,
+  queueSize: await this.getQueueSize(),
         metadata: { priority },
       };
     }
@@ -593,7 +637,9 @@ export class PriorityJobQueueService implements OnModuleInit, OnModuleDestroy {
         operation: QueueOperation.REMOVE,
         timestamp: new Date(),
         duration,
-        error: error instanceof Error ? error.message : 'Unknown error',lockAcquired: false,queueSize: await this.getQueueSize(),
+        error: error instanceof Error ? error.message : 'Unknown error',
+  lockAcquired: false,
+  queueSize: await this.getQueueSize(),
         metadata: { jobId },
       };
     }
@@ -685,7 +731,8 @@ export class PriorityJobQueueService implements OnModuleInit, OnModuleDestroy {
       this.logger.warn(`Queue backpressure activated: ${(utilizationRate * 100).toFixed(1)}% capacity`);}}
 
   private async acquireLock(lockType: LockType, operation: string): Promise<string> {
-    const lockId = `${lockType}:${operation}:${this.nodeId}:${Date.now()}`;const lockKey = `lock:${lockType}:${operation}`;
+    const lockId = `${lockType}:${operation}:${this.nodeId}:${Date.now()}`;
+    const lockKey = `lock:${lockType}:${operation}`;
 
     let attempts = 0;
     const maxAttempts = this.configuration.lockRetryAttempts;
@@ -727,12 +774,14 @@ export class PriorityJobQueueService implements OnModuleInit, OnModuleDestroy {
       if (!lock) {
         this.logger.warn(`Attempting to release unknown lock: ${lockId}`);return;}
 
-      const lockKey = `lock:${lock.lockType}:${lock.metadata.operation}`;// Use Lua script for atomic lock releaseconst script = `
+      const lockKey = `lock:${lock.lockType}:${lock.metadata.operation}`;
+    // Use Lua script for atomic lock releaseconst script = `
         if redis.call("get", KEYS[1]) == ARGV[1] thenreturn redis.call("del", KEYS[1])
         else
           return 0
         end
-      `;const result = await this.redis.eval(script, 1, lockKey, lockId);if (result === 1) {
+      `;
+    const result = await this.redis.eval(script, 1, lockKey, lockId);if (result === 1) {
         this.activeLocks.delete(lockId);
       } else {
         this.logger.warn(`Lock release failed - lock may have expired: ${String(lockId)}`);}} catch (error) {
@@ -763,7 +812,8 @@ export class PriorityJobQueueService implements OnModuleInit, OnModuleDestroy {
     // Normal priority-based selection
     for (const priority of priorities) {
       const priorityQueueKey = this.getPriorityQueueKey(priority);
-      const result = await this.redis.zrange(priorityQueueKey, 0, 0);
+
+        const result = await this.redis.zrange(priorityQueueKey, 0, 0);
 
       if (result.length > 0) {
         const jobId = result[0];
@@ -789,11 +839,13 @@ export class PriorityJobQueueService implements OnModuleInit, OnModuleDestroy {
 
     for (const priority of lowerPriorities) {
       const priorityQueueKey = this.getPriorityQueueKey(priority);
-      const result = await this.redis.zrange(priorityQueueKey, 0, 0, 'WITHSCORES');
+
+        const result = await this.redis.zrange(priorityQueueKey, 0, 0, 'WITHSCORES');
 
       if (result.length >= 2) {
         const jobId = result[0];
         const score = parseFloat(result[1]);
+
         const submissionTime = this.extractTimeFromScore(score);
 
         if (currentTime - submissionTime > starvationThreshold) {
@@ -839,7 +891,8 @@ export class PriorityJobQueueService implements OnModuleInit, OnModuleDestroy {
       const pipeline = this.redis.pipeline();
 
       // Decrement old status count
-      pipeline.hincrby(this.getMetricsKey(), `status:${oldStatus}`, -1);// Increment new status countpipeline.hincrby(this.getMetricsKey(), `status:${newStatus}`, 1);
+      pipeline.hincrby(this.getMetricsKey(), `status:${oldStatus}`, -1);
+    // Increment new status countpipeline.hincrby(this.getMetricsKey(), `status:${newStatus}`, 1);
 
       await pipeline.exec();
 
@@ -877,6 +930,7 @@ export class PriorityJobQueueService implements OnModuleInit, OnModuleDestroy {
 
       for (const priority of Object.values(EnhancedJobPriority)) {
         const priorityQueueKey = this.getPriorityQueueKey(priority);
+
         const size = await this.redis.zcard(priorityQueueKey);
         totalSize += size;
       }
@@ -898,7 +952,8 @@ export class PriorityJobQueueService implements OnModuleInit, OnModuleDestroy {
 
     // Combine priority weight with timestamp for fair ordering within priority levels
     const timestamp = submittedAt.getTime();
-    const priorityWeight = priorityWeights[priority];
+
+        const priorityWeight = priorityWeights[priority];
 
     // Score = priority_weight + (max_timestamp - current_timestamp) for FIFO within priority
     return priorityWeight + (Date.now() - timestamp);
@@ -929,7 +984,8 @@ export class PriorityJobQueueService implements OnModuleInit, OnModuleDestroy {
     try {
       // Simple estimation based on queue position and average processing time
       const position = await this.calculateQueuePosition(priority);
-      const averageProcessingTime = this.metrics.averageExecutionTime ?? 5000; // Default 5 seconds
+
+        const averageProcessingTime = this.metrics.averageExecutionTime ?? 5000; // Default 5 seconds
 
       const estimatedDelay = position * averageProcessingTime;
       return new Date(Date.now() + estimatedDelay);
@@ -968,7 +1024,13 @@ export class PriorityJobQueueService implements OnModuleInit, OnModuleDestroy {
       payload: JSON.stringify(job.payload),
       status: job.status,
       queuedAt: job.queuedAt.toISOString(),
-      startedAt: job.startedAt?.toISOString() ?? '',completedAt: job.completedAt?.toISOString() ?? '',executionTimeMs: job.executionTimeMs?.toString() ?? '',errorMessage: job.errorMessage ?? '',result: job.result ? JSON.stringify(job.result) : '',lockId: job.lockId ?? '',processingNode: job.processingNode ?? '',};}
+      startedAt: job.startedAt?.toISOString() ?? '',
+  completedAt: job.completedAt?.toISOString() ?? '',
+  executionTimeMs: job.executionTimeMs?.toString() ?? '',
+  errorMessage: job.errorMessage ?? '',
+  result: job.result ? JSON.stringify(job.result) : '',
+  lockId: job.lockId ?? '',
+  processingNode: job.processingNode ?? '',};}
 
   private deserializeJob(data: Record<string, string>): QueueJob {
     return {
@@ -1024,7 +1086,8 @@ export class PriorityJobQueueService implements OnModuleInit, OnModuleDestroy {
 
   private async recoverQueueState(): Promise<void> {
     try {
-      this.logger.log('Recovering queue state from persistence...');// Recovery logic would go here// For now, just log the recovery attempt
+      this.logger.log('Recovering queue state from persistence...');
+    // Recovery logic would go here// For now, just log the recovery attempt
 
       this.logger.log('Queue state recovery completed');} catch (error) {this.logger.error('Queue state recovery failed:', error);
     }

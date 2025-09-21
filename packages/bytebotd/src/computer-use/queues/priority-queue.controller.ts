@@ -40,7 +40,8 @@ import {
   ParseUUIDPipe,
   ParseEnumPipe,
   DefaultValuePipe,
-} from '@nestjs/common';import {ApiTags,
+} from '@nestjs/common';
+import {ApiTags,
   ApiOperation,
   ApiResponse,
   ApiParam,
@@ -49,7 +50,11 @@ import {
   ApiBearerAuth,
   ApiSecurity,
   ApiExtraModels,
-} from '@nestjs/swagger';import { Throttle } from '@nestjs/throttler';import { v4 as uuidv4 } from 'uuid';import { PriorityJobQueueService, EnhancedJobPriority } from './priority-job-queue.service';import {QueueJobSubmissionDto,
+} from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
+import { v4 as uuidv4 } from 'uuid';
+import { PriorityJobQueueService, EnhancedJobPriority } from './priority-job-queue.service';
+import {QueueJobSubmissionDto,
   QueueJobResponseDto,
   QueueMetricsDto,
   QueueOperationResultDto,
@@ -57,7 +62,9 @@ import {
   BatchJobSubmissionResultDto,
   QueueConfigurationDto,
   QueueHealthStatusDto,
-} from './priority-queue.dto';import { JobStatus } from '../dto/async-job.dto';// Simple mock implementations for compilationconst LoggingInterceptor = class {};
+} from './priority-queue.dto';
+import { JobStatus } from '../dto/async-job.dto';
+    // Simple mock implementations for compilationconst LoggingInterceptor = class {};
 const CacheInterceptor = class {};
 const JwtAuthGuard = class {};
 const RolesGuard = class {};
@@ -98,11 +105,13 @@ export class PriorityQueueController {
    * Submit a single job to the priority queue
    */
   @Post('jobs')@HttpCode(HttpStatus.CREATED)@Throttle(100, 60) // 100 requests per minute
-  @Roles('user', 'admin', 'service')@ApiOperation({summary: 'Submit job to priority queue',description: 'Submit a single job to the priority queue with comprehensive metadata and priority management.',})@ApiBody({
+  @Roles('user', 'admin', 'service')@ApiOperation({summary: 'Submit job to priority queue',
+  description: 'Submit a single job to the priority queue with comprehensive metadata and priority management.',})@ApiBody({
     type: QueueJobSubmissionDto,
     description: 'Job submission data with payload and configuration',})@ApiResponse({
     status: 201,
-    description: 'Job submitted successfully',type: QueueOperationResultDto,})
+    description: 'Job submitted successfully',
+  type: QueueOperationResultDto,})
   @ApiResponse({
     status: 400,
     description: 'Invalid job submission data',})@ApiResponse({
@@ -191,11 +200,13 @@ export class PriorityQueueController {
    * Submit multiple jobs in a batch operation
    */
   @Post('jobs/batch')@HttpCode(HttpStatus.CREATED)@Throttle(10, 60) // 10 batch requests per minute
-  @Roles('admin', 'service')@ApiOperation({summary: 'Submit batch of jobs to priority queue',description: 'Submit multiple jobs to the priority queue in a single atomic or best-effort operation.',})@ApiBody({
+  @Roles('admin', 'service')@ApiOperation({summary: 'Submit batch of jobs to priority queue',
+  description: 'Submit multiple jobs to the priority queue in a single atomic or best-effort operation.',})@ApiBody({
     type: BatchJobSubmissionDto,
     description: 'Batch job submission data with array of jobs',})@ApiResponse({
     status: 201,
-    description: 'Batch submission completed',type: BatchJobSubmissionResultDto,})
+    description: 'Batch submission completed',
+  type: BatchJobSubmissionResultDto,})
   @ApiResponse({
     status: 400,
     description: 'Invalid batch submission data',})@ApiResponse({
@@ -208,8 +219,9 @@ export class PriorityQueueController {
   ): Promise<BatchJobSubmissionResultDto> {
     this.logger.log(`Submitting batch of ${batchSubmission.jobs.length} jobs - Request: ${requestId}`);
 
-    const startTime = Date.now();
-    const successfulJobIds: string[] = [];
+        const startTime = Date.now();
+
+        const successfulJobIds: string[] = [];
     const failures: Array<{ index: number; error: string }> = [];
 
     try {
@@ -220,7 +232,7 @@ export class PriorityQueueController {
         try {
           const jobId = uuidv4();
 
-          const result = await this.priorityQueueService.enqueue(
+        const result = await this.priorityQueueService.enqueue(
             jobId,
             jobSubmission.payload,
             jobSubmission.priority ?? EnhancedJobPriority.NORMAL,
@@ -243,13 +255,15 @@ export class PriorityQueueController {
           if (result.success) {
             successfulJobIds.push(jobId);
           } else {
-            failures.push({ index: i, error: result.error || 'Unknown error' });}} catch (error) {
+            failures.push({ index: i, error: result.error || 'Unknown error' });
+}} catch (error) {
           const errorMessage = error instanceof Error ? error.message : 'Unknown error';
           failures.push({ index: i, error: errorMessage });
 
           // If atomic operation, rollback on any failure
           if (batchSubmission.atomic && failures.length > 0) {
-            this.logger.warn(`Atomic batch submission failed at index ${i}, rolling back - Request: ${requestId}`);// Rollback logic would go herebreak;
+            this.logger.warn(`Atomic batch submission failed at index ${i}, rolling back - Request: ${requestId}`);
+    // Rollback logic would go herebreak;
           }
         }
       }
@@ -279,7 +293,8 @@ export class PriorityQueueController {
         successfulJobIds,
         failures: [
           ...failures,
-          { index: -1, error: error instanceof Error ? error.message : 'Batch operation failed' }],submittedAt: new Date().toISOString(),
+          { index: -1, error: error instanceof Error ? error.message : 'Batch operation failed' }],
+  submittedAt: new Date().toISOString(),
       };
     }
   }
@@ -289,10 +304,15 @@ export class PriorityQueueController {
   /**
    * Get job status and details
    */
-  @Get('jobs/:jobId')@Throttle(200, 60) // 200 requests per minute@Roles('user', 'admin', 'service')@ApiOperation({summary: 'Get job details',description: 'Retrieve detailed information about a specific job in the queue.',})@ApiParam({
-    name: 'jobId',description: 'Unique job identifier',type: 'string',format: 'uuid',})@ApiResponse({
+  @Get('jobs/:jobId')@Throttle(200, 60) // 200 requests per minute@Roles('user', 'admin', 'service')@ApiOperation({summary: 'Get job details',
+  description: 'Retrieve detailed information about a specific job in the queue.',})@ApiParam({
+    name: 'jobId',
+  description: 'Unique job identifier',
+  type: 'string',
+  format: 'uuid',})@ApiResponse({
     status: 200,
-    description: 'Job details retrieved successfully',type: QueueJobResponseDto,})
+    description: 'Job details retrieved successfully',
+  type: QueueJobResponseDto,})
   @ApiResponse({
     status: 404,
     description: 'Job not found',})async getJob(
@@ -332,8 +352,12 @@ export class PriorityQueueController {
    * Remove job from queue
    */
   @Delete('jobs/:jobId')@HttpCode(HttpStatus.NO_CONTENT)@Throttle(50, 60) // 50 requests per minute
-  @Roles('user', 'admin', 'service')@ApiOperation({summary: 'Remove job from queue',description: 'Remove a pending job from the priority queue before it starts processing.',})@ApiParam({
-    name: 'jobId',description: 'Unique job identifier',type: 'string',format: 'uuid',})@ApiResponse({
+  @Roles('user', 'admin', 'service')@ApiOperation({summary: 'Remove job from queue',
+  description: 'Remove a pending job from the priority queue before it starts processing.',})@ApiParam({
+    name: 'jobId',
+  description: 'Unique job identifier',
+  type: 'string',
+  format: 'uuid',})@ApiResponse({
     status: 204,
     description: 'Job removed successfully',})@ApiResponse({
     status: 404,
@@ -361,13 +385,24 @@ export class PriorityQueueController {
   /**
    * Update job status (for internal use by job processors)
    */
-  @Patch('jobs/:jobId/status')@Throttle(500, 60) // 500 requests per minute for high-frequency status updates@Roles('service', 'admin')@ApiOperation({summary: 'Update job status',description: 'Update job status and result data (typically called by job processors).',})@ApiParam({
-    name: 'jobId',description: 'Unique job identifier',type: 'string',format: 'uuid',})@ApiBody({
+  @Patch('jobs/:jobId/status')@Throttle(500, 60) // 500 requests per minute for high-frequency status updates@Roles('service', 'admin')@ApiOperation({summary: 'Update job status',
+  description: 'Update job status and result data (typically called by job processors).',})@ApiParam({
+    name: 'jobId',
+  description: 'Unique job identifier',
+  type: 'string',
+  format: 'uuid',})@ApiBody({
     schema: {
-      type: 'object',properties: {status: {
-          type: 'string',enum: Object.values(JobStatus),description: 'New job status',},result: {
-          type: 'object',description: 'Job execution result data',},errorMessage: {
-          type: 'string',description: 'Error message if job failed',},},
+      type: 'object',
+  properties: {status: {
+          type: 'string',
+  enum: Object.values(JobStatus),
+  description: 'New job status',},
+  result: {
+          type: 'object',
+  description: 'Job execution result data',},
+  errorMessage: {
+          type: 'string',
+  description: 'Error message if job failed',},},
       required: ['status'],},})
   @ApiResponse({
     status: 200,
@@ -406,7 +441,8 @@ export class PriorityQueueController {
    * Get comprehensive queue metrics
    */
   @Get('metrics')@UseInterceptors(CacheInterceptor) // Cache metrics for 30 seconds@Throttle(60, 60) // 60 requests per minute
-  @Roles('user', 'admin', 'service')@ApiOperation({summary: 'Get queue metrics',description: 'Retrieve comprehensive analytics and performance metrics for the priority queue.',})@ApiResponse({
+  @Roles('user', 'admin', 'service')@ApiOperation({summary: 'Get queue metrics',
+  description: 'Retrieve comprehensive analytics and performance metrics for the priority queue.',})@ApiResponse({
     status: 200,
     description: 'Queue metrics retrieved successfully',
     type: QueueMetricsDto,
@@ -441,11 +477,15 @@ export class PriorityQueueController {
   /**
    * Peek at next job without removing it
    */
-  @Get('peek')@Throttle(100, 60) // 100 requests per minute@Roles('admin', 'service')@ApiOperation({summary: 'Peek at next job',description: 'View the next job in the queue without removing it, optionally filtered by priority.',})@ApiQuery({
-    name: 'priority',required: false,enum: EnhancedJobPriority,
+  @Get('peek')@Throttle(100, 60) // 100 requests per minute@Roles('admin', 'service')@ApiOperation({summary: 'Peek at next job',
+  description: 'View the next job in the queue without removing it, optionally filtered by priority.',})@ApiQuery({
+    name: 'priority',
+  required: false,
+  enum: EnhancedJobPriority,
     description: 'Filter by specific priority level',})@ApiResponse({
     status: 200,
-    description: 'Next job information or null if queue is empty',type: QueueJobResponseDto,})
+    description: 'Next job information or null if queue is empty',
+  type: QueueJobResponseDto,})
   async peekNextJob(
     @Query('priority', new DefaultValuePipe(undefined), new ParseEnumPipe(EnhancedJobPriority, { optional: true }))
     priority?: EnhancedJobPriority,
@@ -483,7 +523,8 @@ export class PriorityQueueController {
   /**
    * Get queue health status
    */
-  @Get('health')@Throttle(120, 60) // 120 requests per minute@Roles('user', 'admin', 'service')@ApiOperation({summary: 'Get queue health status',description: 'Retrieve comprehensive health status of the priority queue system.',})@ApiResponse({
+  @Get('health')@Throttle(120, 60) // 120 requests per minute@Roles('user', 'admin', 'service')@ApiOperation({summary: 'Get queue health status',
+  description: 'Retrieve comprehensive health status of the priority queue system.',})@ApiResponse({
     status: 200,
     description: 'Queue health status retrieved successfully',
     type: QueueHealthStatusDto,
@@ -497,7 +538,15 @@ export class PriorityQueueController {
       // Perform comprehensive health checks
       const metrics = await this.priorityQueueService.getQueueMetrics();
 
-      const checks: Record<string, 'healthy' | 'degraded' | 'critical'> = {redis_connection: 'healthy',queue_capacity: metrics.capacityUtilization < 0.8 ? 'healthy' : metrics.capacityUtilization < 0.95 ? 'degraded' : 'critical',lock_system: metrics.lockContention < 10 ? 'healthy' : metrics.lockContention < 50 ? 'degraded' : 'critical',deadlock_detection: metrics.deadlockCount < 5 ? 'healthy' : 'degraded',error_rate: metrics.errorRate < 0.05 ? 'healthy' : metrics.errorRate < 0.15 ? 'degraded' : 'critical',backpressure: metrics.backpressureActive ? 'degraded' : 'healthy',};const criticalCount = Object.values(checks).filter(status => status === 'critical').length;const degradedCount = Object.values(checks).filter(status => status === 'degraded').length;let overallStatus: 'healthy' | 'degraded' | 'critical' | 'maintenance';if (criticalCount > 0) {overallStatus = 'critical';} else if (degradedCount > 2) {overallStatus = 'degraded';} else {overallStatus = 'healthy';
+        const checks: Record<string, 'healthy' | 'degraded' | 'critical'> = {redis_connection: 'healthy',
+  queue_capacity: metrics.capacityUtilization < 0.8 ? 'healthy' : metrics.capacityUtilization < 0.95 ? 'degraded' : 'critical',
+  lock_system: metrics.lockContention < 10 ? 'healthy' : metrics.lockContention < 50 ? 'degraded' : 'critical',
+  deadlock_detection: metrics.deadlockCount < 5 ? 'healthy' : 'degraded',
+  error_rate: metrics.errorRate < 0.05 ? 'healthy' : metrics.errorRate < 0.15 ? 'degraded' : 'critical',
+  backpressure: metrics.backpressureActive ? 'degraded' : 'healthy',};
+    const criticalCount = Object.values(checks).filter(status => status === 'critical').length;
+    const degradedCount = Object.values(checks).filter(status => status === 'degraded').length;
+    let overallStatus: 'healthy' | 'degraded' | 'critical' | 'maintenance';if (criticalCount > 0) {overallStatus = 'critical';} else if (degradedCount > 2) {overallStatus = 'degraded';} else {overallStatus = 'healthy';
       }
 
       const warnings: string[] = [];
@@ -524,7 +573,12 @@ export class PriorityQueueController {
       this.logger.error(`Failed to get queue health status - Request: ${requestId}:`, error);
 
       return {
-        status: 'critical',checks: {redis_connection: 'critical',queue_capacity: 'critical',lock_system: 'critical',deadlock_detection: 'critical',},lastChecked: new Date().toISOString(),
+        status: 'critical',
+  checks: {redis_connection: 'critical',
+  queue_capacity: 'critical',
+  lock_system: 'critical',
+  deadlock_detection: 'critical',},
+  lastChecked: new Date().toISOString(),
         errors: ['Health check system failure'],};}
   }
 
@@ -534,7 +588,8 @@ export class PriorityQueueController {
    * Dequeue next job for processing (for internal job processors)
    */
   @Post('dequeue')@HttpCode(HttpStatus.OK)@Throttle(1000, 60) // High frequency for job processors
-  @Roles('service', 'admin')@ApiOperation({summary: 'Dequeue next job',description: 'Dequeue the next highest priority job for processing (internal use by job processors).',})@ApiResponse({
+  @Roles('service', 'admin')@ApiOperation({summary: 'Dequeue next job',
+  description: 'Dequeue the next highest priority job for processing (internal use by job processors).',})@ApiResponse({
     status: 200,
     description: 'Job dequeued successfully or queue is empty',
     type: QueueOperationResultDto,

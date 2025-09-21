@@ -24,55 +24,93 @@
  */
 
 // Mock dependencies before imports
-jest.mock('../computer-use.service');jest.mock('@nestjs/config');jest.mock('ioredis');jest.mock('crypto');jest.mock('uuid', () => ({
+jest.mock('../computer-use.service');
+
+jest.mock('@nestjs/config');
+
+jest.mock('ioredis');
+
+jest.mock('crypto');
+
+jest.mock('uuid', () => ({
   v4: jest.fn(() => `mock-job-${Date.now()}-${Math.random().toString(36).substring(7)}`),
 }));
-
-import { Test, TestingModule } from '@nestjs/testing';import { Logger } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import {JobManagementService,
+import { Test, TestingModule } from '@nestjs/testing';
+import { Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import {JobManagementService,
   JobStorage,
   BackgroundWorker,
   JobCleanupManager,
   JobStatus,
   JobPriority,
   JobOptions,
-} from '../job-management.service';import { ComputerUseService } from '../computer-use.service';import { ComputerAction } from '@bytebot/shared';import Redis from 'ioredis';/*** Enhanced mock computer actions for testing
+} from '../job-management.service';
+import { ComputerUseService } from '../computer-use.service';
+import { ComputerAction } from '@bytebot/shared';
+import Redis from 'ioredis';
+
+/*** Enhanced mock computer actions for testing
  */
 const mockActions = {
   screenshot: {
-    action: 'screenshot',} as ComputerAction,moveMouse: {
-    action: 'move_mouse',coordinates: { x: 100, y: 200 },} as ComputerAction,
+    action: 'screenshot',} as ComputerAction,
+  moveMouse: {
+    action: 'move_mouse',
+  coordinates: { x: 100, y: 200 },} as ComputerAction,
 
   clickMouse: {
-    action: 'click_mouse',coordinates: { x: 150, y: 250 },clickCount: 1,
-    button: 'left',} as ComputerAction,writeFile: {
-    action: 'write_file',path: '/tmp/test.txt',content: 'test content',} as ComputerAction,readFile: {
-    action: 'read_file',path: '/tmp/test.txt',} as ComputerAction,};
+    action: 'click_mouse',
+  coordinates: { x: 150, y: 250 },
+  clickCount: 1,
+    button: 'left',} as ComputerAction,
+  writeFile: {
+    action: 'write_file',
+  path: '/tmp/test.txt',
+  content: 'test content',} as ComputerAction,
+  readFile: {
+    action: 'read_file',
+  path: '/tmp/test.txt',} as ComputerAction,};
 
 /**
  * Enhanced mock action results
  */
 const mockResults = {
   screenshot: {
-    image: 'data:image/png;base64,mock-screenshot-data',metadata: {width: 1920,
+    image: 'data:image/png;base64,mock-screenshot-data',
+  metadata: {width: 1920,
       height: 1080,
-      format: 'png',timestamp: new Date(),},
+      format: 'png',
+  timestamp: new Date(),},
   },
 
   moveMouse: {
     x: 100,
     y: 200,
     timestamp: new Date(),
-    operationId: 'move_123',},clickMouse: {
+    operationId: 'move_123',},
+  clickMouse: {
     x: 150,
     y: 250,
     timestamp: new Date(),
-    operationId: 'click_123',},writeFile: {
+    operationId: 'click_123',},
+  writeFile: {
     success: true,
-    message: 'File written successfully',path: '/tmp/test.txt',size: 12,operationId: 'write_123',timestamp: new Date(),},
+    message: 'File written successfully',
+  path: '/tmp/test.txt',
+  size: 12,
+  operationId: 'write_123',
+  timestamp: new Date(),},
 
   readFile: {
     success: true,
-    data: 'test content',name: 'test.txt',size: 12,mediaType: 'text/plain',lastModified: new Date(),operationId: 'read_123',timestamp: new Date(),},
+    data: 'test content',
+  name: 'test.txt',
+  size: 12,
+  mediaType: 'text/plain',
+  lastModified: new Date(),
+  operationId: 'read_123',
+  timestamp: new Date(),},
 };
 
 /**
@@ -147,7 +185,8 @@ const mockRedisPipeline = {
   exec: jest.fn().mockResolvedValue([
     [null, 'OK'],[null, 1],[null, 'OK'],]),};
 
-describe('Enhanced JobManagementService', () => {let service: JobManagementService;let _jobStorage: JobStorage;
+describe('Enhanced JobManagementService', () => {let service: JobManagementService;
+    let _jobStorage: JobStorage;
   let backgroundWorker: BackgroundWorker;
   let cleanupManager: JobCleanupManager;
   let computerUseService: jest.Mocked<ComputerUseService>;
@@ -183,7 +222,7 @@ describe('Enhanced JobManagementService', () => {let service: JobManagementServi
     // Mock Redis constructor
     (Redis as jest.MockedClass<typeof Redis>).mockImplementation(() => mockRedisInstance as Redis);
 
-    const module: TestingModule = await Test.createTestingModule({
+        const module: TestingModule = await Test.createTestingModule({
       providers: [
         JobManagementService,
         JobStorage,
@@ -228,7 +267,8 @@ describe('Enhanced JobManagementService', () => {let service: JobManagementServi
       ]);
     });
 
-    it('should create jobs with different priorities and maintain queue order', async () => {const priorities = [JobPriority.LOW, JobPriority.HIGH, JobPriority.URGENT, JobPriority.NORMAL];const jobIds: string[] = [];
+    it('should create jobs with different priorities and maintain queue order', async () => {const priorities = [JobPriority.LOW, JobPriority.HIGH, JobPriority.URGENT, JobPriority.NORMAL];
+    const jobIds: string[] = [];
 
       // Create jobs with different priorities
       for (const priority of priorities) {
@@ -250,7 +290,8 @@ describe('Enhanced JobManagementService', () => {let service: JobManagementServi
         expect.stringContaining('priority:normal'),expect.any(String));
     });
 
-    it('should handle batch job creation efficiently', async () => {const batchSize = 50;const jobs: Promise<string>[] = [];
+    it('should handle batch job creation efficiently', async () => {const batchSize = 50;
+    const jobs: Promise<string>[] = [];
 
       // Create batch of jobs
       for (let i = 0; i < batchSize; i++) {
@@ -267,7 +308,12 @@ describe('Enhanced JobManagementService', () => {let service: JobManagementServi
     it('should handle job creation with custom metadata and tags', async () => {const options: JobOptions = {priority: JobPriority.HIGH,
         timeout: 60000,
         maxRetries: 5,
-        tags: ['test', 'automation', 'screenshot'],metadata: {userId: 'user-123',sessionId: 'session-456',correlationId: 'corr-789',sourceIp: '192.168.1.1',userAgent: 'test-agent/1.0',},};
+        tags: ['test', 'automation', 'screenshot'],
+  metadata: {userId: 'user-123',
+  sessionId: 'session-456',
+  correlationId: 'corr-789',
+  sourceIp: '192.168.1.1',
+  userAgent: 'test-agent/1.0',},};
 
       const jobId = await service.createJob(mockActions.screenshot, options);
 
@@ -280,26 +326,32 @@ describe('Enhanced JobManagementService', () => {let service: JobManagementServi
     });
   });
 
-  describe('Enhanced Redis Operations and Failover', () => {it('should handle Redis connection failures during job creation', async () => {mockRedisInstance.setex.mockRejectedValue(new Error('Redis connection lost'));await expect(service.createJob(mockActions.screenshot)
-      ).rejects.toThrow('Failed to create job');expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('Failed to save job'),expect.objectContaining({error: 'Redis connection lost',}));
+  describe('Enhanced Redis Operations and Failover', () => {it('should handle Redis connection failures during job creation', async () => {mockRedisInstance.setex.mockRejectedValue(new Error('Redis connection lost'));
+    await expect(service.createJob(mockActions.screenshot)
+      ).rejects.toThrow('Failed to create job');
+      expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('Failed to save job'),expect.objectContaining({error: 'Redis connection lost',}));
     });
 
     it('should handle Redis cluster failover scenarios', async () => {// Simulate cluster failovermockRedisInstance.setex
-        .mockRejectedValueOnce(new Error('CLUSTERDOWN')).mockResolvedValueOnce('OK');// Should retry and succeedconst jobId = await service.createJob(mockActions.screenshot);
+        .mockRejectedValueOnce(new Error('CLUSTERDOWN')).mockResolvedValueOnce('OK');
+    // Should retry and succeedconst jobId = await service.createJob(mockActions.screenshot);
 
       expect(jobId).toBeDefined();
       expect(mockRedisInstance.setex).toHaveBeenCalledTimes(2);
     });
 
-    it('should handle Redis memory pressure scenarios', async () => {mockRedisInstance.setex.mockRejectedValue(new Error('OOM command not allowed'));await expect(service.createJob(mockActions.screenshot)
-      ).rejects.toThrow('Failed to create job');expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('Failed to save job'),expect.objectContaining({error: 'OOM command not allowed',}));
+    it('should handle Redis memory pressure scenarios', async () => {mockRedisInstance.setex.mockRejectedValue(new Error('OOM command not allowed'));
+    await expect(service.createJob(mockActions.screenshot)
+      ).rejects.toThrow('Failed to create job');
+      expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('Failed to save job'),expect.objectContaining({error: 'OOM command not allowed',}));
     });
 
     it('should handle transaction failures gracefully', async () => {mockRedisPipeline.exec.mockResolvedValue([[new Error('Transaction failed'), null],[null, 1],]);
 
       await expect(
         service.createJob(mockActions.screenshot)
-      ).rejects.toThrow('Failed to create job');});});
+      ).rejects.toThrow('Failed to create job');});
+});
 
   describe('Enhanced Job Execution and Worker Management', () => {let jobId: string;beforeEach(async () => {
       // Setup successful job creation
@@ -328,7 +380,8 @@ describe('Enhanced JobManagementService', () => {let service: JobManagementServi
 
       // Start multiple workers
       const worker1Stats = await backgroundWorker.getWorkerStats();
-      const worker2Stats = await backgroundWorker.getWorkerStats();
+
+        const worker2Stats = await backgroundWorker.getWorkerStats();
 
       expect(worker1Stats.workerId).toBeDefined();
       expect(worker2Stats.workerId).toBeDefined();
@@ -368,7 +421,7 @@ describe('Enhanced JobManagementService', () => {let service: JobManagementServi
         maxRetries: 3,
       }));
 
-      const stats = await backgroundWorker.getWorkerStats();
+        const stats = await backgroundWorker.getWorkerStats();
       expect(stats.memoryUsage).toBeGreaterThan(0);
     });
 
@@ -376,7 +429,7 @@ describe('Enhanced JobManagementService', () => {let service: JobManagementServi
         () => new Promise(resolve => setTimeout(() => resolve(mockResults.screenshot), 100000))
       );
 
-      const shortTimeoutJob = {
+        const shortTimeoutJob = {
         jobId,
         status: JobStatus.PENDING,
         priority: JobPriority.NORMAL,
@@ -448,7 +501,9 @@ describe('Enhanced JobManagementService', () => {let service: JobManagementServi
       expect(mockRedisInstance.get).toHaveBeenCalled();
     });
 
-    it('should handle circuit breaker pattern for repeated failures', async () => {// Mock repeated failurescomputerUseService.action.mockRejectedValue(new Error('Service unavailable'));const jobs = [];for (let i = 0; i < 10; i++) {
+    it('should handle circuit breaker pattern for repeated failures', async () => {// Mock repeated failurescomputerUseService.action.mockRejectedValue(new Error('Service unavailable'));
+
+        const jobs = [];for (let i = 0; i < 10; i++) {
         jobs.push(service.createJob(mockActions.screenshot));
       }
 
@@ -464,9 +519,9 @@ describe('Enhanced JobManagementService', () => {let service: JobManagementServi
         return mockResults.screenshot;
       });
 
-      const jobId = await service.createJob(mockActions.screenshot);
+        const jobId = await service.createJob(mockActions.screenshot);
 
-      const stats = await service.getQueueStats();
+        const stats = await service.getQueueStats();
 
       expect(stats).toMatchObject({
         pending: expect.any(Number),
@@ -477,7 +532,7 @@ describe('Enhanced JobManagementService', () => {let service: JobManagementServi
         timeout: expect.any(Number),
       });
 
-      const workerStats = await service.getWorkerStats();
+        const workerStats = await service.getWorkerStats();
 
       expect(workerStats).toMatchObject({
         workerId: expect.any(String),
@@ -491,7 +546,8 @@ describe('Enhanced JobManagementService', () => {let service: JobManagementServi
       });
     });
 
-    it('should handle high-throughput job processing', async () => {const jobCount = 1000;const jobs: Promise<string>[] = [];
+    it('should handle high-throughput job processing', async () => {const jobCount = 1000;
+    const jobs: Promise<string>[] = [];
 
       computerUseService.action.mockResolvedValue(mockResults.screenshot);
 
@@ -523,13 +579,19 @@ describe('Enhanced JobManagementService', () => {let service: JobManagementServi
         blocked_clients:0
       `);
 
-      const jobId = await service.createJob(mockActions.screenshot);
+        const jobId = await service.createJob(mockActions.screenshot);
 
       expect(jobId).toBeDefined();
       // Redis monitoring should be active
-      expect(mockRedisInstance.on).toHaveBeenCalledWith('error', expect.any(Function));expect(mockRedisInstance.on).toHaveBeenCalledWith('connect', expect.any(Function));expect(mockRedisInstance.on).toHaveBeenCalledWith('ready', expect.any(Function));});});
+      expect(mockRedisInstance.on).toHaveBeenCalledWith('error', expect.any(Function));
+      expect(mockRedisInstance.on).toHaveBeenCalledWith('connect', expect.any(Function));
+      expect(mockRedisInstance.on).toHaveBeenCalledWith('ready', expect.any(Function));});
+});
 
-  describe('Enhanced Security and Data Protection', () => {it('should encrypt and decrypt job data correctly', async () => {const sensitiveAction = {action: 'write_file',path: '/sensitive/file.txt',content: 'classified information',} as ComputerAction;const jobId = await service.createJob(sensitiveAction);
+  describe('Enhanced Security and Data Protection', () => {it('should encrypt and decrypt job data correctly', async () => {const sensitiveAction = {action: 'write_file',
+  path: '/sensitive/file.txt',
+  content: 'classified information',} as ComputerAction;
+    const jobId = await service.createJob(sensitiveAction);
 
       // Verify that sensitive data was encrypted
       const setexCall = mockRedisInstance.setex.mock.calls.find(
@@ -537,13 +599,20 @@ describe('Enhanced JobManagementService', () => {let service: JobManagementServi
       );
 
       expect(setexCall).toBeDefined();
-      expect(setexCall![2]).not.toContain('classified information');});it('should handle encryption/decryption failures gracefully', async () => {// Mock crypto failureconst mockCrypto = require('crypto');mockCrypto.createCipheriv.mockImplementation(() => {throw new Error('Encryption failed');});await expect(
+      expect(setexCall![2]).not.toContain('classified information');});
+
+  it('should handle encryption/decryption failures gracefully', async () => {// Mock crypto failureconst mockCrypto = require('crypto');mockCrypto.createCipheriv.mockImplementation(() => {throw new Error('Encryption failed');});
+    await expect(
         service.createJob(mockActions.writeFile)
-      ).rejects.toThrow('Data encryption failed');});it('should validate job access permissions', async () => {const jobId = await service.createJob(mockActions.screenshot, {metadata: { userId: 'user-123' }});// Mock job data with different user
+      ).rejects.toThrow('Data encryption failed');});
+
+  it('should validate job access permissions', async () => {const jobId = await service.createJob(mockActions.screenshot, {metadata: { userId: 'user-123' }});
+    // Mock job data with different user
       mockRedisInstance.get.mockResolvedValue(JSON.stringify({
         jobId,
         status: JobStatus.COMPLETED,
-        metadata: { userId: 'user-456' },}));// Should enforce access control
+        metadata: { userId: 'user-456' },}));
+    // Should enforce access control
       await expect(
         service.getJobStatus(jobId)
       ).resolves.toBeDefined();
@@ -561,7 +630,7 @@ describe('Enhanced JobManagementService', () => {let service: JobManagementServi
         }));
       });
 
-      const deletedCount = await service.forceCleanup();
+        const deletedCount = await service.forceCleanup();
 
       expect(deletedCount).toBeGreaterThanOrEqual(0);
     });
@@ -581,10 +650,11 @@ describe('Enhanced JobManagementService', () => {let service: JobManagementServi
       expect(logger.log).toHaveBeenCalledWith(
         expect.stringContaining('Starting job cleanup'));});
 
-    it('should maintain job statistics during cleanup', async () => {const initialStats = await service.getQueueStats();// Perform cleanup
+    it('should maintain job statistics during cleanup', async () => {const initialStats = await service.getQueueStats();
+    // Perform cleanup
       await service.forceCleanup();
 
-      const finalStats = await service.getQueueStats();
+        const finalStats = await service.getQueueStats();
 
       // Stats should still be accurate
       expect(finalStats.pending).toBeGreaterThanOrEqual(0);
@@ -593,18 +663,26 @@ describe('Enhanced JobManagementService', () => {let service: JobManagementServi
     });
   });
 
-  describe('Enhanced Edge Cases and Error Boundaries', () => {it('should handle malformed job data in Redis', async () => {mockRedisInstance.get.mockResolvedValue('invalid-json{');await expect(service.getJobStatus('malformed-job')).rejects.toThrow();expect(logger.error).toHaveBeenCalledWith(
+  describe('Enhanced Edge Cases and Error Boundaries', () => {it('should handle malformed job data in Redis', async () => {mockRedisInstance.get.mockResolvedValue('invalid-json{');
+    await expect(service.getJobStatus('malformed-job')).rejects.toThrow();
+      expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining('Failed to retrieve job'),expect.any(Object));
     });
 
-    it('should handle Redis connection drops during job execution', async () => {const jobId = await service.createJob(mockActions.screenshot);// Simulate connection drop
-      mockRedisInstance.get.mockRejectedValue(new Error('Connection lost'));await expect(service.getJobStatus(jobId)
-      ).rejects.toThrow('Failed to get job status');});it('should handle worker shutdown gracefully', async () => {await backgroundWorker.start();const stats = await backgroundWorker.getWorkerStats();
+    it('should handle Redis connection drops during job execution', async () => {const jobId = await service.createJob(mockActions.screenshot);
+    // Simulate connection drop
+      mockRedisInstance.get.mockRejectedValue(new Error('Connection lost'));
+    await expect(service.getJobStatus(jobId)
+      ).rejects.toThrow('Failed to get job status');});
+
+  it('should handle worker shutdown gracefully', async () => {await backgroundWorker.start();
+
+        const stats = await backgroundWorker.getWorkerStats();
       expect(stats.isRunning).toBe(true);
 
       await backgroundWorker.stop();
 
-      const finalStats = await backgroundWorker.getWorkerStats();
+        const finalStats = await backgroundWorker.getWorkerStats();
       expect(finalStats.isRunning).toBe(false);
     });
 

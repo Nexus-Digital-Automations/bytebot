@@ -64,8 +64,10 @@ export class BatchJobValidationPipe implements PipeTransform {
   private readonly MAX_TIMEOUT = 3600000; // 1 hour
   private readonly MIN_TIMEOUT = 1000; // 1 second
   private readonly DANGEROUS_ACTIONS = new Set([\n    'write_file',\n    'delete_file',\n    'run_command',\n    'launch_app',\n  ]);async transform(value: unknown, metadata: ArgumentMetadata): Promise<BatchJobSubmissionDto> {if (metadata.type !== 'body' || !value) {throw new BadRequestException('Invalid batch job submission data');\n    }
-  const operationId = `validation_${Date.now()}_${Math.random().toString(36).substring(7)}`;const startTime = Date.now();try {
-      this.logger.debug(`[${operationId}] Starting batch job validation`);\n\n      // Transform and validate DTO structureconst batchRequest = plainToClass(BatchJobSubmissionDto, value);const validationErrors = await validate(batchRequest, {
+  const operationId = `validation_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const startTime = Date.now();try {
+      this.logger.debug(`[${operationId}] Starting batch job validation`);\n\n      // Transform and validate DTO structureconst batchRequest = plainToClass(BatchJobSubmissionDto, value);
+    const validationErrors = await validate(batchRequest, {
         whitelist: true,
         forbidNonWhitelisted: true,
         transform: true,\n      });
@@ -77,7 +79,8 @@ export class BatchJobValidationPipe implements PipeTransform {
   if (validationContext.errors.length > 0) {
         throw new BadRequestException(\n          `Batch validation failed: ${validationContext.errors.join(`, ')}',\n        );\n      }\n\n      // Log warnings if anyif (validationContext.warnings.length > 0) {
         this.logger.warn(\n          `[${operationId}] Batch validation warnings: ${validationContext.warnings.join(`, ')}',\n        );\n      }const processingTime = Date.now() - startTime;
-      this.logger.debug(\n        `[${operationId}] Batch validation completed successfully (${processingTime}ms)`,\n        {operationId,totalJobs: batchRequest.jobs.length,
+      this.logger.debug(\n        `[${operationId}] Batch validation completed successfully (${processingTime}ms)`,\n        {operationId,
+  totalJobs: batchRequest.jobs.length,
           executionMode: batchRequest.executionMode,
           processingTime,
           warningCount: validationContext.warnings.length,\n        },\n      );

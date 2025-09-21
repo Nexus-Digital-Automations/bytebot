@@ -17,12 +17,18 @@
  * @version 2.0.0
  */
 
-import { Injectable, Logger } from '@nestjs/common';import { EventEmitter2 } from '@nestjs/event-emitter';import { v4 as uuidv4 } from 'uuid';import {JobStatus,
+import { Injectable, Logger } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { v4 as uuidv4 } from 'uuid';
+import {
+  JobStatus,
   JobPriority,
   JobSubmissionResponseDto,
   JobStatusResponseDto,
   JobResultResponseDto,
-} from './dto/async-job.dto';import {BatchJobSubmissionDto,
+} from './dto/async-job.dto';
+import {
+  BatchJobSubmissionDto,
   BatchJobSubmissionResponseDto,
   BatchJobSpecDto,
   BatchExecutionMode,
@@ -31,7 +37,12 @@ import { Injectable, Logger } from '@nestjs/common';import { EventEmitter2 } fro
   JobSearchResultsDto,
   JobAnalyticsDto,
   JobProgressUpdateDto,
-} from './dto/batch-job.dto';import { ComputerActionDto } from './dto/computer-action.dto';import { AsyncJobService } from './async-job.service';/*** Enhanced job data structure with batch and dependency support
+} from './dto/batch-job.dto';
+import { ComputerActionDto } from './dto/computer-action.dto';
+import { AsyncJobService } from './async-job.service';
+
+/**
+ * Enhanced job data structure with batch and dependency support
  */
 interface EnhancedJobData {
   jobId: string;
@@ -314,7 +325,8 @@ export class EnhancedAsyncJobService {
     }
 
     // Sort results
-    const sortBy = criteria.sortBy ?? 'submittedAt';const sortOrder = criteria.sortOrder ?? 'desc';filteredJobs.sort((a, b) => {let aValue: unknown;
+    const sortBy = criteria.sortBy ?? 'submittedAt';
+    const sortOrder = criteria.sortOrder ?? 'desc';filteredJobs.sort((a, b) => {let aValue: unknown;
       let bValue: unknown;
 
       switch (sortBy) {
@@ -517,7 +529,8 @@ export class EnhancedAsyncJobService {
           cancelled.push(job.jobId);
 
           // Emit cancellation event
-          this.eventEmitter.emit('job.cancelled', {jobId: job.jobId,batchId: job.batchId,
+          this.eventEmitter.emit('job.cancelled', {jobId: job.jobId,
+  batchId: job.batchId,
             reason: 'bulk_cancellation',
           });
         } else {

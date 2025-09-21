@@ -35,11 +35,26 @@ import {
   OnModuleInit,
   OnModuleDestroy,
   OnApplicationShutdown,
-} from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { fork, ChildProcess } from 'child_process';import { EventEmitter } from 'events';import { v4 as uuidv4 } from 'uuid';import * as path from 'path';import * as os from 'os';import { JobManagementService, JobStatus, JobPriority } from '../job-management.service';import { ComputerUseService } from '../computer-use.service';import { ComputerAction } from '@bytebot/shared';// ===== ENTERPRISE-GRADE TYPE DEFINITIONS =====/**
+} from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { fork, ChildProcess } from 'child_process';
+import { EventEmitter } from 'events';
+import { v4 as uuidv4 } from 'uuid';
+import * as path from 'path';
+import * as os from 'os';
+import { JobManagementService, JobStatus, JobPriority } from '../job-management.service';
+import { ComputerUseService } from '../computer-use.service';
+import { ComputerAction } from '@bytebot/shared';
+    // ===== ENTERPRISE-GRADE TYPE DEFINITIONS =====/**
  * Worker process state enumeration
  */
 export enum WorkerState {
-  IDLE = 'idle',BUSY = 'busy',STARTING = 'starting',STOPPING = 'stopping',FAILED = 'failed',TERMINATED = 'terminated',}/**
+  IDLE = 'idle',
+  BUSY = 'busy',
+  STARTING = 'starting',
+  STOPPING = 'stopping',
+  FAILED = 'failed',
+  TERMINATED = 'terminated',}/**
  * Worker process information and metrics
  */
 export interface WorkerInfo {
@@ -113,7 +128,14 @@ export interface WorkerPoolMetrics {
  * Background worker process message types
  */
 export enum WorkerMessageType {
-  EXECUTE_JOB = 'execute_job',JOB_PROGRESS = 'job_progress',JOB_COMPLETED = 'job_completed',JOB_FAILED = 'job_failed',HEARTBEAT = 'heartbeat',SHUTDOWN = 'shutdown',WORKER_READY = 'worker_ready',HEALTH_CHECK = 'health_check',}/**
+  EXECUTE_JOB = 'execute_job',
+  JOB_PROGRESS = 'job_progress',
+  JOB_COMPLETED = 'job_completed',
+  JOB_FAILED = 'job_failed',
+  HEARTBEAT = 'heartbeat',
+  SHUTDOWN = 'shutdown',
+  WORKER_READY = 'worker_ready',
+  HEALTH_CHECK = 'health_check',}/**
  * Inter-process communication message structure
  */
 export interface WorkerMessage {
@@ -160,7 +182,13 @@ export class BackgroundJobWorkerService
 
     // Initialize worker pool configuration
     this.config = {
-      minWorkers: this.configService.get<number>('WORKER_MIN_WORKERS', 2),maxWorkers: this.configService.get<number>('WORKER_MAX_WORKERS', 10),scaleUpThreshold: this.configService.get<number>('WORKER_SCALE_UP_THRESHOLD', 3),scaleDownThreshold: this.configService.get<number>('WORKER_SCALE_DOWN_THRESHOLD', 1),workerTimeoutMs: this.configService.get<number>('WORKER_TIMEOUT_MS', 300000), // 5 minuteshealthCheckIntervalMs: this.configService.get<number>('WORKER_HEALTH_CHECK_INTERVAL_MS', 10000), // 10 secondsmaxJobsPerWorker: this.configService.get<number>('WORKER_MAX_JOBS_PER_WORKER', 5),workerRestartDelayMs: this.configService.get<number>('WORKER_RESTART_DELAY_MS', 5000), // 5 seconds};this.logger.log('Background Job Worker Service initialized', {config: this.config,systemInfo: {
+      minWorkers: this.configService.get<number>('WORKER_MIN_WORKERS', 2),
+  maxWorkers: this.configService.get<number>('WORKER_MAX_WORKERS', 10),
+  scaleUpThreshold: this.configService.get<number>('WORKER_SCALE_UP_THRESHOLD', 3),
+  scaleDownThreshold: this.configService.get<number>('WORKER_SCALE_DOWN_THRESHOLD', 1),
+  workerTimeoutMs: this.configService.get<number>('WORKER_TIMEOUT_MS', 300000), // 5 minuteshealthCheckIntervalMs: this.configService.get<number>('WORKER_HEALTH_CHECK_INTERVAL_MS', 10000), // 10 secondsmaxJobsPerWorker: this.configService.get<number>('WORKER_MAX_JOBS_PER_WORKER', 5),
+  workerRestartDelayMs: this.configService.get<number>('WORKER_RESTART_DELAY_MS', 5000), // 5 seconds};this.logger.log('Background Job Worker Service initialized', {config: this.config,
+  systemInfo: {
         cpus: os.cpus().length,
         totalMemory: os.totalmem(),
         freeMemory: os.freemem(),
@@ -184,7 +212,8 @@ export class BackgroundJobWorkerService
       // Begin processing jobs from Redis
       this.startJobProcessing();
 
-      this.logger.log('Background Job Worker Service fully initialized', {workers: this.workers.size,config: this.config,
+      this.logger.log('Background Job Worker Service fully initialized', {workers: this.workers.size,
+  config: this.config,
       });
 
       this.emit('worker_pool_ready', this.getWorkerPoolMetrics());} catch (error) {this.logger.error('Failed to initialize Background Job Worker Service', {
@@ -199,7 +228,9 @@ export class BackgroundJobWorkerService
    * Initialize the initial worker pool with minimum workers
    */
   private async initializeWorkerPool(): Promise<void> {
-    this.logger.log(`Creating initial worker pool with ${this.config.minWorkers} workers...`);const workerPromises: Promise<void>[] = [];for (let i = 0; i < this.config.minWorkers; i++) {
+    this.logger.log(`Creating initial worker pool with ${this.config.minWorkers} workers...`);
+
+        const workerPromises: Promise<void>[] = [];for (let i = 0; i < this.config.minWorkers; i++) {
       workerPromises.push(this.createWorker());
     }
 
@@ -213,7 +244,8 @@ export class BackgroundJobWorkerService
    */
   private async createWorker(): Promise<void> {
     const workerId = uuidv4();
-    const workerScriptPath = path.join(__dirname, 'worker-process.js');
+
+        const workerScriptPath = path.join(__dirname, 'worker-process.js');
 
     this.logger.debug(`Creating worker ${workerId}...`);
 
@@ -262,7 +294,8 @@ export class BackgroundJobWorkerService
       this.workerProcesses.set(workerId, workerProcess);
       this.workerLoadTracking.set(workerId, 0);
 
-      this.logger.debug(`Worker ${workerId} created successfully with PID ${workerProcess.pid}`);// Wait for worker to be readyawait this.waitForWorkerReady(workerId);
+      this.logger.debug(`Worker ${workerId} created successfully with PID ${workerProcess.pid}`);
+    // Wait for worker to be readyawait this.waitForWorkerReady(workerId);
 
     } catch (error) {
       this.logger.error(`Failed to create worker ${workerId}`, {
@@ -318,7 +351,7 @@ export class BackgroundJobWorkerService
         reject(new Error(`Worker ${workerId} failed to start within ${timeoutMs}ms`));
       }, timeoutMs);
 
-      const onWorkerReady = (message: WorkerMessage) => {
+        const onWorkerReady = (message: WorkerMessage) => {
         if (message.workerId === workerId && message.type === WorkerMessageType.WORKER_READY) {
           clearTimeout(timeout);
           this.updateWorkerState(workerId, WorkerState.IDLE);
@@ -360,7 +393,8 @@ export class BackgroundJobWorkerService
           break;
 
         default:
-          this.logger.warn(`Unknown message type from worker ${workerId}`, { message });}} catch (error) {
+          this.logger.warn(`Unknown message type from worker ${workerId}`, { message });
+}} catch (error) {
       this.logger.error(`Error handling worker message from ${workerId}`, {error: error.message,message,
       });
     }
@@ -399,7 +433,8 @@ export class BackgroundJobWorkerService
    * Handle worker process errors
    */
   private async handleWorkerError(workerId: string, error: Error): Promise<void> {
-    this.logger.error(`Worker ${workerId} encountered error`, {error: error.message,stack: error.stack,
+    this.logger.error(`Worker ${workerId} encountered error`, {error: error.message,
+  stack: error.stack,
     });
 
     this.updateWorkerState(workerId, WorkerState.FAILED);
@@ -501,7 +536,8 @@ export class BackgroundJobWorkerService
    */
   private async performHealthCheck(): Promise<void> {
     const now = new Date();
-    const healthCheckPromises: Promise<void>[] = [];
+
+        const healthCheckPromises: Promise<void>[] = [];
 
     for (const [workerId, workerInfo] of this.workers.entries()) {
       const timeSinceHeartbeat = now.getTime() - workerInfo.lastHeartbeat.getTime();
@@ -537,7 +573,8 @@ export class BackgroundJobWorkerService
     if (this.isShuttingDown) return;
 
     const metrics = this.getWorkerPoolMetrics();
-    const queueDepth = this.jobQueue.length;
+
+        const queueDepth = this.jobQueue.length;
     const activeWorkers = metrics.activeWorkers;
     const totalWorkers = metrics.totalWorkers;
 
@@ -589,7 +626,7 @@ export class BackgroundJobWorkerService
       .filter(([_, worker]) => worker.state === WorkerState.IDLE)
       .slice(0, count);
 
-    const terminationPromises = idleWorkers.map(([workerId]) =>
+        const terminationPromises = idleWorkers.map(([workerId]) =>
       this.terminateWorker(workerId, true)
     );
 
@@ -610,8 +647,13 @@ export class BackgroundJobWorkerService
   private collectMetrics(): void {
     const metrics = this.getWorkerPoolMetrics();
 
-    this.logger.debug('Worker pool metrics', metrics);this.emit('metrics_collected', metrics);// Log important metricsthis.logger.log('Worker Pool Status', {
-      workers: `${metrics.activeWorkers}/${metrics.totalWorkers}`,queue: metrics.queueSize,throughput: `${metrics.jobsPerSecond.toFixed(2)} jobs/sec`,avgExecutionTime: `${metrics.averageExecutionTime.toFixed(0)}ms`,memoryUsage: `${(metrics.memoryUsage / 1024 / 1024).toFixed(0)}MB`,
+    this.logger.debug('Worker pool metrics', metrics);this.emit('metrics_collected', metrics);
+    // Log important metricsthis.logger.log('Worker Pool Status', {
+      workers: `${metrics.activeWorkers}/${metrics.totalWorkers}`,
+  queue: metrics.queueSize,
+  throughput: `${metrics.jobsPerSecond.toFixed(2)} jobs/sec`,
+  avgExecutionTime: `${metrics.averageExecutionTime.toFixed(0)}ms`,
+  memoryUsage: `${(metrics.memoryUsage / 1024 / 1024).toFixed(0)}MB`,
     });
   }
 
@@ -619,7 +661,8 @@ export class BackgroundJobWorkerService
    * Start job processing from Redis queue
    */
   private startJobProcessing(): void {
-    this.logger.log('Starting job processing...');// Poll for jobs from Redis every 1 secondsetInterval(() => {
+    this.logger.log('Starting job processing...');
+    // Poll for jobs from Redis every 1 secondsetInterval(() => {
       this.processJobQueue();
     }, 1000);
   }
@@ -686,7 +729,8 @@ export class BackgroundJobWorkerService
 
       workerProcess.send(message);
 
-      this.logger.debug(`Job ${job.jobId} assigned to worker ${workerId}`, {priority: job.priority,action: job.action.action,
+      this.logger.debug(`Job ${job.jobId} assigned to worker ${workerId}`, {priority: job.priority,
+  action: job.action.action,
       });
 
       // Update job status in Redis
@@ -742,7 +786,8 @@ export class BackgroundJobWorkerService
       return jobId;
 
     } catch (error) {
-      this.logger.error(`Failed to submit job ${jobId}`, {error: error.message,action: action.action,
+      this.logger.error(`Failed to submit job ${jobId}`, {error: error.message,
+  action: action.action,
       });
       throw error;
     }
@@ -781,16 +826,20 @@ export class BackgroundJobWorkerService
    */
   getWorkerPoolMetrics(): WorkerPoolMetrics {
     const workers = Array.from(this.workers.values());
-    const activeWorkers = workers.filter(w => w.state === WorkerState.BUSY).length;
+
+        const activeWorkers = workers.filter(w => w.state === WorkerState.BUSY).length;
     const idleWorkers = workers.filter(w => w.state === WorkerState.IDLE).length;
     const failedWorkers = workers.filter(w => w.state === WorkerState.FAILED).length;
 
     const totalMemory = workers.reduce((sum, w) => sum + w.memoryUsage.rss, 0);
-    const totalCpuUser = workers.reduce((sum, w) => sum + w.cpuUsage.user, 0);
-    const totalCpuSystem = workers.reduce((sum, w) => sum + w.cpuUsage.system, 0);
 
-    const totalJobsProcessed = workers.reduce((sum, w) => sum + w.completedJobs, 0);
-    const avgExecutionTime = workers.length > 0
+        const totalCpuUser = workers.reduce((sum, w) => sum + w.cpuUsage.user, 0);
+
+        const totalCpuSystem = workers.reduce((sum, w) => sum + w.cpuUsage.system, 0);
+
+        const totalJobsProcessed = workers.reduce((sum, w) => sum + w.completedJobs, 0);
+
+        const avgExecutionTime = workers.length > 0
       ? workers.reduce((sum, w) => sum + w.averageExecutionTime, 0) / workers.length
       : 0;
 
@@ -819,7 +868,8 @@ export class BackgroundJobWorkerService
    */
   private calculateAverageQueueTime(): number {
     const now = Date.now();
-    const queueTimes = Array.from(this.performanceMetrics.queueStartTimes.values())
+
+        const queueTimes = Array.from(this.performanceMetrics.queueStartTimes.values())
       .map(startTime => now - startTime);
 
     return queueTimes.length > 0
@@ -952,7 +1002,8 @@ export class BackgroundJobWorkerService
         errorMessage,
       );
     } catch (error) {
-      this.logger.error(`Failed to update job status for failed job ${jobId}`, {error: error.message,originalError: errorMessage,
+      this.logger.error(`Failed to update job status for failed job ${jobId}`, {error: error.message,
+  originalError: errorMessage,
       });
     }
   }
@@ -1091,7 +1142,8 @@ export class BackgroundJobWorkerService
 
       await Promise.allSettled(terminationPromises);
 
-      this.logger.log('Background Job Worker Service shutdown complete');} catch (error) {this.logger.error('Error during shutdown', {error: error.message,stack: error.stack,
+      this.logger.log('Background Job Worker Service shutdown complete');} catch (error) {this.logger.error('Error during shutdown', {error: error.message,
+  stack: error.stack,
       });
     }
   }
@@ -1111,7 +1163,8 @@ export class BackgroundJobWorkerService
         return;
       }
 
-      this.logger.log(`Waiting for ${activeJobs} active jobs to complete...`);await new Promise(resolve => setTimeout(resolve, 1000));}
+      this.logger.log(`Waiting for ${activeJobs} active jobs to complete...`);
+    await new Promise(resolve => setTimeout(resolve, 1000));}
 
     this.logger.warn(`Timeout waiting for active jobs to complete after ${timeoutMs}ms`);
   }

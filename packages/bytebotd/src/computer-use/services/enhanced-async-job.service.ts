@@ -33,16 +33,27 @@
  * @created 2025-09-20
  */
 
-import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { v4 as _uuidv4 } from 'uuid';import { performance } from 'perf_hooks';import {JobStatus,
+import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { v4 as _uuidv4 } from 'uuid';
+import { performance } from 'perf_hooks';
+import {JobStatus,
   JobPriority,
   JobSubmissionResponseDto,
   JobStatusResponseDto,
   JobResultResponseDto,
-} from '../dto/async-job.dto';import { ComputerActionDto } from '../dto/computer-action.dto';import { ComputerUseService } from '../computer-use.service';import { CacheService } from '../../cache/cache.service';import { MetricsService } from '../../metrics/metrics.service';import {RedisJobPersistenceService,
+} from '../dto/async-job.dto';
+import { ComputerActionDto } from '../dto/computer-action.dto';
+import { ComputerUseService } from '../computer-use.service';
+import { CacheService } from '../../cache/cache.service';
+import { MetricsService } from '../../metrics/metrics.service';
+import {RedisJobPersistenceService,
   RedisJobData,
   JobQueryOptions,
   BulkJobOperationResult,
-} from './redis-job-persistence.service';/*** Enhanced JobData interface compatible with Redis persistence
+} from './redis-job-persistence.service';
+
+/*** Enhanced JobData interface compatible with Redis persistence
  */
 interface EnhancedJobData extends RedisJobData {
   // Additional in-memory fields for processing
@@ -144,7 +155,8 @@ export class EnhancedAsyncJobService implements OnModuleInit, OnModuleDestroy {
   }
 
   async onModuleInit(): Promise<void> {
-    const operationId = `enhanced_job_service_init_${Date.now()}`;try {this.logger.log(`[${operationId}] Initializing Enhanced Async Job Service...`);// Start job processorthis.startJobProcessor();
+    const operationId = `enhanced_job_service_init_${Date.now()}`;try {this.logger.log(`[${operationId}] Initializing Enhanced Async Job Service...`);
+    // Start job processorthis.startJobProcessor();
 
       // Start heartbeat monitoring if persistence enabled
       if (this.config.persistenceEnabled) {
@@ -164,7 +176,8 @@ export class EnhancedAsyncJobService implements OnModuleInit, OnModuleDestroy {
       // Start cleanup
       this.startJobCleanup();
 
-      this.logger.log(`[${operationId}] Enhanced Async Job Service initialized successfully`, {persistenceHealthy: this.persistenceHealthy,recoveredJobs: this.recoveredJobCount,
+      this.logger.log(`[${operationId}] Enhanced Async Job Service initialized successfully`, {persistenceHealthy: this.persistenceHealthy,
+  recoveredJobs: this.recoveredJobCount,
         memoryJobs: this.jobs.size,
         queueLength: this.queue.length,
       });
@@ -183,7 +196,8 @@ export class EnhancedAsyncJobService implements OnModuleInit, OnModuleDestroy {
   }
 
   async onModuleDestroy(): Promise<void> {
-    const operationId = `enhanced_job_service_shutdown_${Date.now()}`;try {this.logger.log(`[${operationId}] Shutting down Enhanced Async Job Service...`);// Stop timersif (this.heartbeatTimer) {
+    const operationId = `enhanced_job_service_shutdown_${Date.now()}`;try {this.logger.log(`[${operationId}] Shutting down Enhanced Async Job Service...`);
+    // Stop timersif (this.heartbeatTimer) {
         clearInterval(this.heartbeatTimer);
       }
       if (this.monitoringTimer) {
@@ -217,11 +231,14 @@ export class EnhancedAsyncJobService implements OnModuleInit, OnModuleDestroy {
       persistenceEnabled?: boolean;
     } = {},
   ): Promise<JobSubmissionResponseDto> {
-    const operationId = `submit_job_${Date.now()}_${Math.random().toString(36).substring(7)}`;const startTime = performance.now();try {
+    const operationId = `submit_job_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const startTime = performance.now();try {
       const jobId = this.generateJobId();
-      const submittedAt = new Date();
 
-      this.logger.debug(`[${operationId}] Submitting enhanced job: ${jobId}`);// Check cache if enabledif (options.useCache) {
+        const submittedAt = new Date();
+
+      this.logger.debug(`[${operationId}] Submitting enhanced job: ${jobId}`);
+    // Check cache if enabledif (options.useCache) {
         const cachedResult = await this.getCachedResult(action);
         if (cachedResult) {
           return this.createCachedJobResponse(jobId, submittedAt, cachedResult, options);
@@ -271,7 +288,8 @@ export class EnhancedAsyncJobService implements OnModuleInit, OnModuleDestroy {
           jobData,
           resolve: () => {
             const latency = performance.now() - startTime;
-            this.logger.debug(`[${operationId}] Job submitted successfully: ${jobId} (${latency.toFixed(2)}ms)`, {persistenceEnabled,priority: jobData.priority,
+            this.logger.debug(`[${operationId}] Job submitted successfully: ${jobId} (${latency.toFixed(2)}ms)`, {persistenceEnabled,
+  priority: jobData.priority,
               userId: jobData.userId,
             });
 
@@ -290,7 +308,8 @@ export class EnhancedAsyncJobService implements OnModuleInit, OnModuleDestroy {
 
     } catch (error) {
       const latency = performance.now() - startTime;
-      this.logger.error(`[${operationId}] Failed to submit job:`, {error: error instanceof Error ? error.message : String(error),latency: `${latency.toFixed(2)}ms`,});throw error;
+      this.logger.error(`[${operationId}] Failed to submit job:`, {error: error instanceof Error ? error.message : String(error),
+  latency: `${latency.toFixed(2)}ms`,});throw error;
     }
   }
 
@@ -409,7 +428,8 @@ export class EnhancedAsyncJobService implements OnModuleInit, OnModuleDestroy {
     // Persist cancellation if enabled
     if (this.config.persistenceEnabled && this.persistenceHealthy) {
       this.persistJobAsync(job).catch(error => {
-        this.logger.warn(`Failed to persist job cancellation: ${jobId}`, error);});}
+        this.logger.warn(`Failed to persist job cancellation: ${jobId}`, error);});
+}
 
     this.logger.log(`Job ${jobId} cancelled`);
     return true;
@@ -420,13 +440,16 @@ export class EnhancedAsyncJobService implements OnModuleInit, OnModuleDestroy {
    */
   getJobStats(): EnhancedJobStats {
     const allJobs = Array.from(this.jobs.values());
-    const completedJobs = allJobs.filter(
+
+        const completedJobs = allJobs.filter(
       (job) => job.status === JobStatus.COMPLETED,
     );
-    const failedJobs = allJobs.filter((job) => job.status === JobStatus.FAILED);
-    const persistedJobs = allJobs.filter((job) => job.version > 1 || job.compressedSize);
 
-    const avgExecutionTime =
+        const failedJobs = allJobs.filter((job) => job.status === JobStatus.FAILED);
+
+        const persistedJobs = allJobs.filter((job) => job.version > 1 || job.compressedSize);
+
+        const avgExecutionTime =
       completedJobs.length > 0
         ? completedJobs.reduce((sum, job) => {
             const executionTime =
@@ -490,7 +513,8 @@ export class EnhancedAsyncJobService implements OnModuleInit, OnModuleDestroy {
       };
     }>
   ): Promise<BulkJobOperationResult> {
-    const operationId = `bulk_submit_${Date.now()}_${Math.random().toString(36).substring(7)}`;const startTime = performance.now();try {
+    const operationId = `bulk_submit_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const startTime = performance.now();try {
       this.logger.log(`[${operationId}] Starting bulk job submission: ${actions.length} jobs`);if (actions.length > this.config.bulkOperationBatchSize) {throw new Error(`Batch size ${actions.length} exceeds maximum ${this.config.bulkOperationBatchSize}`);
       }
 
@@ -503,9 +527,10 @@ export class EnhancedAsyncJobService implements OnModuleInit, OnModuleDestroy {
       for (const { action, options = {} } of actions) {
         try {
           const jobId = this.generateJobId();
-          const submittedAt = new Date();
 
-          const jobData: EnhancedJobData = {
+        const submittedAt = new Date();
+
+        const jobData: EnhancedJobData = {
             jobId,
             status: JobStatus.PENDING,
             priority: options.priority ?? JobPriority.NORMAL,
@@ -585,8 +610,11 @@ export class EnhancedAsyncJobService implements OnModuleInit, OnModuleDestroy {
         processedCount: 0,
         successCount: 0,
         failureCount: actions.length,
-        errors: [{ jobId: 'BULK_OPERATION', error: error instanceof Error ? error.message : String(error) }],latency,metadata: {
-          operationType: 'BULK_SUBMIT',batchSize: actions.length,compressionUsed: false,
+        errors: [{ jobId: 'BULK_OPERATION', error: error instanceof Error ? error.message : String(error) }],latency,
+  metadata: {
+          operationType: 'BULK_SUBMIT',
+  batchSize: actions.length,
+  compressionUsed: false,
           nodeDistribution: {},
         },
       };
@@ -601,7 +629,9 @@ export class EnhancedAsyncJobService implements OnModuleInit, OnModuleDestroy {
       userId,
       limit: options.limit || 50,
       status: options.status,
-      sortBy: 'submittedAt',sortOrder: 'desc',});}
+      sortBy: 'submittedAt',
+  sortOrder: 'desc',});
+}
 
   /**
    * Get service health including persistence status
@@ -636,15 +666,26 @@ export class EnhancedAsyncJobService implements OnModuleInit, OnModuleDestroy {
 
   private loadEnhancedJobServiceConfig(): EnhancedJobServiceConfig {
     return {
-      persistenceEnabled: this.configService.get<boolean>('ENHANCED_JOB_PERSISTENCE_ENABLED', true),fallbackToMemory: this.configService.get<boolean>('ENHANCED_JOB_FALLBACK_TO_MEMORY', true),recoveryOnStartup: this.configService.get<boolean>('ENHANCED_JOB_RECOVERY_ON_STARTUP', true),heartbeatIntervalMs: this.configService.get<number>('ENHANCED_JOB_HEARTBEAT_INTERVAL', 30000),jobRecoveryTimeoutMs: this.configService.get<number>('ENHANCED_JOB_RECOVERY_TIMEOUT', 10000),bulkOperationBatchSize: this.configService.get<number>('ENHANCED_JOB_BULK_BATCH_SIZE', 100),performanceMonitoring: {enabled: this.configService.get<boolean>('ENHANCED_JOB_MONITORING_ENABLED', true),reportIntervalMs: this.configService.get<number>('ENHANCED_JOB_MONITORING_INTERVAL', 300000), // 5 minutesalertThresholds: {persistenceLatencyMs: this.configService.get<number>('ENHANCED_JOB_ALERT_PERSISTENCE_LATENCY', 25),errorRatePercent: this.configService.get<number>('ENHANCED_JOB_ALERT_ERROR_RATE', 5),recoveryTimeMs: this.configService.get<number>('ENHANCED_JOB_ALERT_RECOVERY_TIME', 10000),
+      persistenceEnabled: this.configService.get<boolean>('ENHANCED_JOB_PERSISTENCE_ENABLED', true),
+  fallbackToMemory: this.configService.get<boolean>('ENHANCED_JOB_FALLBACK_TO_MEMORY', true),
+  recoveryOnStartup: this.configService.get<boolean>('ENHANCED_JOB_RECOVERY_ON_STARTUP', true),
+  heartbeatIntervalMs: this.configService.get<number>('ENHANCED_JOB_HEARTBEAT_INTERVAL', 30000),
+  jobRecoveryTimeoutMs: this.configService.get<number>('ENHANCED_JOB_RECOVERY_TIMEOUT', 10000),
+  bulkOperationBatchSize: this.configService.get<number>('ENHANCED_JOB_BULK_BATCH_SIZE', 100),
+  performanceMonitoring: {enabled: this.configService.get<boolean>('ENHANCED_JOB_MONITORING_ENABLED', true),
+  reportIntervalMs: this.configService.get<number>('ENHANCED_JOB_MONITORING_INTERVAL', 300000), // 5 minutesalertThresholds: {persistenceLatencyMs: this.configService.get<number>('ENHANCED_JOB_ALERT_PERSISTENCE_LATENCY', 25),
+  errorRatePercent: this.configService.get<number>('ENHANCED_JOB_ALERT_ERROR_RATE', 5),
+  recoveryTimeMs: this.configService.get<number>('ENHANCED_JOB_ALERT_RECOVERY_TIME', 10000),
         },
       },
     };
   }
 
   private async recoverPersistedJobs(): Promise<void> {
-    const operationId = `recover_jobs_${Date.now()}`;const startTime = performance.now();try {
-      this.logger.log(`[${operationId}] Starting job recovery from Redis...`);// Query for in-progress jobsconst inProgressJobs = await this.queryJobs({
+    const operationId = `recover_jobs_${Date.now()}`;
+    const startTime = performance.now();try {
+      this.logger.log(`[${operationId}] Starting job recovery from Redis...`);
+    // Query for in-progress jobsconst inProgressJobs = await this.queryJobs({
         status: JobStatus.IN_PROGRESS,
         limit: 1000,
       });
@@ -655,7 +696,7 @@ export class EnhancedAsyncJobService implements OnModuleInit, OnModuleDestroy {
         limit: 1000,
       });
 
-      const allRecoveredJobs = [...inProgressJobs, ...pendingJobs];
+        const allRecoveredJobs = [...inProgressJobs, ...pendingJobs];
 
       for (const jobData of allRecoveredJobs) {
         // Convert to enhanced job data
@@ -685,8 +726,9 @@ export class EnhancedAsyncJobService implements OnModuleInit, OnModuleDestroy {
       this.recoveredJobCount = allRecoveredJobs.length;
       this.lastRecoveryTime = new Date();
 
-      const latency = performance.now() - startTime;
-      this.logger.log(`[${operationId}] Job recovery completed: ${this.recoveredJobCount} jobs recovered (${latency.toFixed(2)}ms)`, {inProgressJobs: inProgressJobs.length,pendingJobs: pendingJobs.length,
+        const latency = performance.now() - startTime;
+      this.logger.log(`[${operationId}] Job recovery completed: ${this.recoveredJobCount} jobs recovered (${latency.toFixed(2)}ms)`, {inProgressJobs: inProgressJobs.length,
+  pendingJobs: pendingJobs.length,
         totalRecovered: this.recoveredJobCount,
       });
 
@@ -806,7 +848,8 @@ export class EnhancedAsyncJobService implements OnModuleInit, OnModuleDestroy {
     queueItem.resolve(null);
 
     this.logger.log(
-      `Job ${queueItem.jobData.jobId} added to enhanced queue (priority: ${queueItem.jobData.priority}, persistence: ${queueItem.persistenceEnabled})`,);// Start processing if not already running
+      `Job ${queueItem.jobData.jobId} added to enhanced queue (priority: ${queueItem.jobData.priority}, persistence: ${queueItem.persistenceEnabled})`,);
+    // Start processing if not already running
     if (!this.isProcessing) {
       this.processQueue();
     }
@@ -860,7 +903,9 @@ export class EnhancedAsyncJobService implements OnModuleInit, OnModuleDestroy {
 
   private async executeJob(jobData: EnhancedJobData): Promise<void> {
     const startTime = Date.now();
-    const operationId = `execute_job_${jobData.jobId}`;try {this.logger.log(`[${operationId}] Starting enhanced job execution: ${jobData.jobId}`);// Update job statusjobData.status = JobStatus.IN_PROGRESS;
+
+        const operationId = `execute_job_${jobData.jobId}`;try {this.logger.log(`[${operationId}] Starting enhanced job execution: ${jobData.jobId}`);
+    // Update job statusjobData.status = JobStatus.IN_PROGRESS;
       jobData.startedAt = new Date();
       jobData.progress = 10;
       jobData.updatedAt = new Date();
@@ -878,7 +923,8 @@ export class EnhancedAsyncJobService implements OnModuleInit, OnModuleDestroy {
 
       // Execute the action with timeout
       const executionPromise = this.computerUseService.action(jobData.action);
-      const result = await Promise.race([executionPromise, timeoutPromise]);
+
+        const result = await Promise.race([executionPromise, timeoutPromise]);
 
       // Job completed successfully
       jobData.status = JobStatus.COMPLETED;
@@ -917,7 +963,8 @@ export class EnhancedAsyncJobService implements OnModuleInit, OnModuleDestroy {
       const executionTime = Date.now() - startTime;
 
       this.logger.error(
-        `[${operationId}] Enhanced job failed: ${jobData.jobId}: ${errorMessage} (${executionTime}ms)`,);// Check if we should retry
+        `[${operationId}] Enhanced job failed: ${jobData.jobId}: ${errorMessage} (${executionTime}ms)`,);
+    // Check if we should retry
       if (jobData.retryCount < jobData.maxRetries) {
         jobData.retryCount++;
         jobData.status = JobStatus.PENDING;
@@ -969,7 +1016,8 @@ export class EnhancedAsyncJobService implements OnModuleInit, OnModuleDestroy {
     try {
       const cacheKey = this.generateCacheKey(action);
       return await this.cacheService.get(cacheKey, {
-        namespace: 'computer-actions',ttl: 300,});
+        namespace: 'computer-actions',
+  ttl: 300,});
     } catch {
       return null;
     }
@@ -979,13 +1027,15 @@ export class EnhancedAsyncJobService implements OnModuleInit, OnModuleDestroy {
     try {
       const cacheKey = this.generateCacheKey(action);
       await this.cacheService.set(cacheKey, result, {
-        namespace: 'computer-actions',ttl: 300,});
+        namespace: 'computer-actions',
+  ttl: 300,});
     } catch (error) {
       this.logger.warn('Failed to cache result:', error);}}
 
   private generateCacheKey(action: ComputerActionDto): string {
     const actionString = JSON.stringify(action);
-    const hash = Buffer.from(actionString).toString('base64');
+
+        const hash = Buffer.from(actionString).toString('base64');
     return `action_${hash.substring(0, 32)}`;
   }
 
@@ -1019,6 +1069,7 @@ export class EnhancedAsyncJobService implements OnModuleInit, OnModuleDestroy {
     setInterval(
       () => {
         const cutoffTime = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
         const jobsToDelete = Array.from(this.jobs.entries())
           .filter(
             ([_, job]) =>
@@ -1072,7 +1123,8 @@ export class EnhancedAsyncJobService implements OnModuleInit, OnModuleDestroy {
   private startPerformanceMonitoring(): void {
     this.monitoringTimer = setInterval(() => {
       const health = this.getServiceHealth();
-      const avgPersistenceLatency = this.persistenceLatencyHistory.length > 0
+
+        const avgPersistenceLatency = this.persistenceLatencyHistory.length > 0
         ? this.persistenceLatencyHistory.reduce((a, b) => a + b, 0) / this.persistenceLatencyHistory.length
         : 0;
 
@@ -1082,7 +1134,12 @@ export class EnhancedAsyncJobService implements OnModuleInit, OnModuleDestroy {
         queueLength: health.queueLength,
         activeJobs: health.activeJobs,
         persistenceHealthy: health.persistenceHealthy,
-        avgExecutionTime: `${health.stats.averageExecutionTime.toFixed(2)}ms`,avgPersistenceTime: `${avgPersistenceLatency.toFixed(2)}ms`,recoveredJobs: health.recoveredJobs,compressionRate: `${(health.stats.compressionRate * 100).toFixed(1)}%`,uptime: `${Math.floor(health.uptime / 1000)}s`,});// Generate alerts if thresholds exceeded
+        avgExecutionTime: `${health.stats.averageExecutionTime.toFixed(2)}ms`,
+  avgPersistenceTime: `${avgPersistenceLatency.toFixed(2)}ms`,
+  recoveredJobs: health.recoveredJobs,
+  compressionRate: `${(health.stats.compressionRate * 100).toFixed(1)}%`,
+  uptime: `${Math.floor(health.uptime / 1000)}s`,});
+    // Generate alerts if thresholds exceeded
       if (avgPersistenceLatency > this.config.performanceMonitoring.alertThresholds.persistenceLatencyMs) {
         this.logger.warn(`ALERT: Persistence latency ${avgPersistenceLatency.toFixed(2)}ms exceeds threshold`);}}, this.config.performanceMonitoring.reportIntervalMs);
   }
@@ -1096,7 +1153,9 @@ export class EnhancedAsyncJobService implements OnModuleInit, OnModuleDestroy {
         return;
       }
 
-      this.logger.log(`[${operationId}] Persisting ${remainingJobs.length} remaining jobs...`);const bulkResult = await this.redisPersistence.bulkSaveJobs(remainingJobs);this.logger.log(`[${operationId}] Remaining jobs persisted: ${bulkResult.successCount}/${remainingJobs.length} successful`);} catch (error) {this.logger.error(`[${operationId}] Failed to persist remaining jobs:`, error);
+      this.logger.log(`[${operationId}] Persisting ${remainingJobs.length} remaining jobs...`);
+
+        const bulkResult = await this.redisPersistence.bulkSaveJobs(remainingJobs);this.logger.log(`[${operationId}] Remaining jobs persisted: ${bulkResult.successCount}/${remainingJobs.length} successful`);} catch (error) {this.logger.error(`[${operationId}] Failed to persist remaining jobs:`, error);
     }
   }
 
@@ -1115,7 +1174,11 @@ export class EnhancedAsyncJobService implements OnModuleInit, OnModuleDestroy {
       failedJobs: health.stats.failedJobs,
       persistedJobs: health.stats.persistedJobs,
       recoveredJobs: health.recoveredJobs,
-      avgExecutionTime: `${health.stats.averageExecutionTime.toFixed(2)}ms`,avgPersistenceTime: `${health.stats.averagePersistenceTime.toFixed(2)}ms`,compressionRate: `${(health.stats.compressionRate * 100).toFixed(1)}%`,finalPersistenceHealth: health.persistenceHealthy,uptime: `${Math.floor(health.uptime / 1000)}s`,
+      avgExecutionTime: `${health.stats.averageExecutionTime.toFixed(2)}ms`,
+  avgPersistenceTime: `${health.stats.averagePersistenceTime.toFixed(2)}ms`,
+  compressionRate: `${(health.stats.compressionRate * 100).toFixed(1)}%`,
+  finalPersistenceHealth: health.persistenceHealthy,
+  uptime: `${Math.floor(health.uptime / 1000)}s`,
     });
   }
 }

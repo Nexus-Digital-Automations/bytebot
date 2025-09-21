@@ -4,7 +4,10 @@ import {
   BadRequestException,
   ArgumentMetadata,
   Logger,
-} from '@nestjs/common';import { validate, ValidationError } from 'class-validator';import { plainToClass, ClassConstructor } from 'class-transformer';import {detectSQLInjection,
+} from '@nestjs/common';
+import { validate, ValidationError } from 'class-validator';
+import { plainToClass, ClassConstructor } from 'class-transformer';
+import {detectSQLInjection,
   detectAdvancedXSS,
   detectCommandInjection,
   detectMaliciousFileContent,
@@ -17,7 +20,8 @@ import {
   type CommandInjectionDetectionResult,
   type FilePathValidationResult,
   type CoordinatesValidationResult,
-} from '@bytebot/shared';import {MoveMouseActionDto,
+} from '@bytebot/shared';
+import {MoveMouseActionDto,
   TraceMouseActionDto,
   ClickMouseActionDto,
   PressMouseActionDto,
@@ -34,7 +38,9 @@ import {
   WriteFileActionDto,
   ReadFileActionDto,
   ComputerActionDto,
-} from './computer-action.dto';/*** Interface defining the structure of raw action input data
+} from './computer-action.dto';
+
+/*** Interface defining the structure of raw action input data
  * Ensures type safety for incoming requests before validation
  */
 interface RawActionInput {
@@ -47,7 +53,9 @@ interface RawActionInput {
  * Used for type-safe action validation and DTO mapping
  */
 type ActionType =
-  | 'move_mouse'| 'trace_mouse'| 'click_mouse'| 'press_mouse'| 'drag_mouse'| 'scroll'| 'type_keys'| 'press_keys'| 'type_text'| 'paste_text'| 'wait'| 'screenshot'| 'cursor_position'| 'application'| 'write_file'| 'read_file';/*** Enterprise-Grade Multi-Stage Security Validation Pipeline for Computer Action DTOs
+  | 'move_mouse'| 'trace_mouse'| 'click_mouse'| 'press_mouse'| 'drag_mouse'| 'scroll'| 'type_keys'| 'press_keys'| 'type_text'| 'paste_text'| 'wait'| 'screenshot'| 'cursor_position'| 'application'| 'write_file'| 'read_file';
+
+/*** Enterprise-Grade Multi-Stage Security Validation Pipeline for Computer Action DTOs
  * Validates incoming action requests and transforms them to strongly-typed DTOs with
  * comprehensive threat detection and advanced security analysis
  *
@@ -80,7 +88,7 @@ export class ComputerActionValidationPipe
 {
   private readonly logger = new Logger(ComputerActionValidationPipe.name);
 
-  /**
+/**
    * Safely typed wrapper for XSS detection
    */
   private safeDetectAdvancedXSS(input: string): XSSDetectionResult {
@@ -168,7 +176,7 @@ export class ComputerActionValidationPipe
     read_file: ReadFileActionDto,
   };
 
-  /**
+/**
    * Validates and transforms raw input data into a strongly-typed action DTO with enhanced security
    *
    * @param value - Raw input data from the request body
@@ -179,7 +187,8 @@ export class ComputerActionValidationPipe
     value: unknown,
     metadata: ArgumentMetadata,
   ): Promise<ComputerActionDto> {
-    const operationId = `computer-action-validation-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;const startTime = Date.now();try {
+    const operationId = `computer-action-validation-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const startTime = Date.now();try {
       this.logger.debug(
         `[${operationId}] Starting computer action validation`,
         {
@@ -265,7 +274,8 @@ export class ComputerActionValidationPipe
     if (!value || typeof value !== 'object') {this.logSecurityEvent(operationId,
         SecurityEventType._VALIDATION_FAILED,
         'Invalid request body structure',value,['Request body must be a valid object'],);throw new BadRequestException({
-        message: 'Request body must be a valid object',operationId,timestamp: new Date().toISOString(),
+        message: 'Request body must be a valid object',operationId,
+  timestamp: new Date().toISOString(),
       });
     }
 
@@ -313,11 +323,13 @@ export class ComputerActionValidationPipe
   private getDtoClass(action: string): ClassConstructor<ComputerActionDto> {
     // Type guard to ensure action is a valid ActionType
     if (!this.isValidActionType(action)) {
-      this.logger.warn(`Unsupported action type attempted: ${action}`, {action,validActions: Object.keys(this.actionToDtoMap),
+      this.logger.warn(`Unsupported action type attempted: ${action}`, {action,
+  validActions: Object.keys(this.actionToDtoMap),
       });
 
       throw new BadRequestException({
-        message: `Unsupported action type: '${action}'',validActions: Object.keys(this.actionToDtoMap),
+        message: `Unsupported action type: '${action}'',
+  validActions: Object.keys(this.actionToDtoMap),
         timestamp: new Date().toISOString(),
       });
     }
@@ -372,7 +384,11 @@ export class ComputerActionValidationPipe
       this.logger.debug(
         `[${operationId}] Stage _1: Input preprocessing and normalization`,
       );
-      securityContext.validationStages.push('input-preprocessing');const inputString = JSON.stringify(rawInput);const normalizedInput = inputString.normalize('NFKC');
+      securityContext.validationStages.push('input-preprocessing');
+
+        const inputString = JSON.stringify(rawInput);
+
+        const normalizedInput = inputString.normalize('NFKC');
 
       // Unicode normalization attack detection
       if (normalizedInput !== inputString) {
@@ -387,7 +403,9 @@ export class ComputerActionValidationPipe
       this.logger.debug(
         `[${operationId}] Stage _2: Advanced XSS pattern analysis`,
       );
-      securityContext.validationStages.push('xss-detection');const xssAnalysis: XSSDetectionResult =this.safeDetectAdvancedXSS(inputString);
+      securityContext.validationStages.push('xss-detection');
+
+        const xssAnalysis: XSSDetectionResult =this.safeDetectAdvancedXSS(inputString);
       if (xssAnalysis.hasXSS) {
         securityContext.threats.push('ADVANCED_XSS');securityContext.totalRiskScore += xssAnalysis.riskScore;securityContext.detectionEvents.push({
           type: 'XSS_DETECTED',
@@ -415,7 +433,9 @@ export class ComputerActionValidationPipe
       this.logger.debug(
         `[${operationId}] Stage _3: Advanced SQL injection analysis`,
       );
-      securityContext.validationStages.push('sql-injection-detection');const sqlAnalysis: SQLInjectionDetectionResult =this.safeDetectSQLInjection(inputString);
+      securityContext.validationStages.push('sql-injection-detection');
+
+        const sqlAnalysis: SQLInjectionDetectionResult =this.safeDetectSQLInjection(inputString);
       if (sqlAnalysis.hasInjection) {
         securityContext.threats.push('ADVANCED_SQL_INJECTION');securityContext.totalRiskScore += sqlAnalysis.riskScore;securityContext.detectionEvents.push({
           type: 'SQL_INJECTION_DETECTED',
@@ -444,7 +464,9 @@ export class ComputerActionValidationPipe
       this.logger.debug(
         `[${operationId}] Stage _4: Command injection pattern analysis`,
       );
-      securityContext.validationStages.push('command-injection-detection');const cmdAnalysis: CommandInjectionDetectionResult =this.safeDetectCommandInjection(_inputString, {
+      securityContext.validationStages.push('command-injection-detection');
+
+        const cmdAnalysis: CommandInjectionDetectionResult =this.safeDetectCommandInjection(_inputString, {
           strictMode: true,
           contextType: this.getSecurityContext(rawInput.action),
         });
@@ -479,7 +501,9 @@ export class ComputerActionValidationPipe
         this.logger.debug(
           `[${operationId}] Stage _5: File operation security validation`,
         );
-        securityContext.validationStages.push('file-security-validation');const filePath = (rawInput as { path?: string }).path;if (typeof filePath === 'string') {// Enhanced file path validation with comprehensive security checksconst pathValidation: FilePathValidationResult =
+        securityContext.validationStages.push('file-security-validation');
+
+        const filePath = (rawInput as { path?: string }).path;if (typeof filePath === 'string') {// Enhanced file path validation with comprehensive security checksconst pathValidation: FilePathValidationResult =
             this.safeValidateFilePath(_filePath, {
               allowAbsolutePaths: false,
               maxPathLength: 1000,
@@ -491,7 +515,8 @@ export class ComputerActionValidationPipe
 
           if (!pathValidation.isValid) {
             securityContext.threats.push('MALICIOUS_FILE_PATH');securityContext.totalRiskScore += pathValidation.riskScore ?? 60;securityContext.detectionEvents.push({
-              type: 'FILE_PATH_VIOLATION',severity: pathValidation.severity ?? 'high',
+              type: 'FILE_PATH_VIOLATION',
+  severity: pathValidation.severity ?? 'high',
               riskScore: pathValidation.riskScore ?? 60,
               confidence: 95,
               context: pathValidation.errors ?? [],
@@ -512,7 +537,10 @@ export class ComputerActionValidationPipe
 
         // Enhanced malicious file content detection for write operations
         if (rawInput.action === 'write_file') {const fileData = (rawInput as { data?: string }).data;if (typeof fileData === 'string') {if (detectMaliciousFileContent(fileData, filePath ?? '')) {securityContext.threats.push('MALICIOUS_FILE_CONTENT');securityContext.totalRiskScore += 80;securityContext.detectionEvents.push({
-                type: 'MALICIOUS_CONTENT_DETECTED',severity: 'critical',riskScore: 80,confidence: 90,
+                type: 'MALICIOUS_CONTENT_DETECTED',
+  severity: 'critical',
+  riskScore: 80,
+  confidence: 90,
                 context: ['malicious-file-content'],
                 timestamp: new Date(),
               });
@@ -537,7 +565,9 @@ export class ComputerActionValidationPipe
         this.logger.debug(
           `[${operationId}] Stage _6: Enhanced coordinate validation`,
         );
-        securityContext.validationStages.push('coordinate-validation');const coordinates = (rawInput as { coordinates?: { x?: number; y?: number } }
+        securityContext.validationStages.push('coordinate-validation');
+
+        const coordinates = (rawInput as { coordinates?: { x?: number; y?: number } }
         ).coordinates;
         if (coordinates && typeof coordinates === 'object') {const { x, y } = coordinates;if (typeof x === 'number' && typeof y === 'number') {// Enhanced coordinate validation with overflow protection and multi-monitor supportconst coordValidation: CoordinatesValidationResult =
               this.safeValidateCoordinates(
@@ -566,7 +596,8 @@ export class ComputerActionValidationPipe
 
             if (!coordValidation.isValid) {
               securityContext.threats.push('INVALID_COORDINATES');securityContext.totalRiskScore += coordValidation.riskScore ?? 40;securityContext.detectionEvents.push({
-                type: 'COORDINATE_VALIDATION_FAILED',severity: coordValidation.severity ?? 'medium',
+                type: 'COORDINATE_VALIDATION_FAILED',
+  severity: coordValidation.severity ?? 'medium',
                 riskScore: coordValidation.riskScore ?? 40,
                 confidence: 95,
                 context: coordValidation.errors ?? [],
@@ -595,7 +626,7 @@ export class ComputerActionValidationPipe
       );
       securityContext.validationStages.push('threat-aggregation');
 
-      const processingTime = Date.now() - startTime;
+        const processingTime = Date.now() - startTime;
       const finalThreatAssessment =
         this.calculateFinalThreatScore(securityContext);
 
@@ -631,7 +662,8 @@ export class ComputerActionValidationPipe
         );
 
         throw new BadRequestException({
-          message: `Advanced security threats detected: ${threatTypes}. Request blocked by multi-stage validation pipeline.`,operationId,threatTypes: securityContext.threats,
+          message: `Advanced security threats detected: ${threatTypes}. Request blocked by multi-stage validation pipeline.`,operationId,
+  threatTypes: securityContext.threats,
           totalRiskScore: securityContext.totalRiskScore,
           threatLevel: finalThreatAssessment.level,
           validationStages: securityContext.validationStages,
@@ -785,7 +817,8 @@ export class ComputerActionValidationPipe
           operationId,
           inputData: data,
           errors,
-          service: 'BytebotD',component: 'ComputerActionValidationPipe',
+          service: 'BytebotD',
+  component: 'ComputerActionValidationPipe',
         },
       );
 

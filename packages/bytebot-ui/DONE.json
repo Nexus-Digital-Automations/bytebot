@@ -1811,10 +1811,82 @@
       "updated_at": "2025-09-20T06:41:54.450Z",
       "archived_at": "2025-09-20T06:41:54.458Z",
       "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-21T04:59:15.313Z",
+      "title": "Fix @typescript-eslint/require-await violations in auth services and guards",
+      "description": "Fix async/await violations in authentication components: remove async from synchronous methods, add await for database/external calls, fix JWT operations, ensure proper async patterns for security validations",
+      "category": "error",
+      "id": "error_1758430755313_0pdj0kt16o7k",
+      "completed_at": "2025-09-21T05:02:47.708Z",
+      "updated_at": "2025-09-21T05:02:47.708Z",
+      "archived_at": "2025-09-21T05:02:47.713Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-21T04:59:15.212Z",
+      "title": "Fix @typescript-eslint/require-await violations in config and app modules",
+      "description": "Remove async keyword from synchronous methods, add await for actual initialization operations, fix async patterns in module initialization",
+      "category": "error",
+      "id": "error_1758430755212_fgfccrowroh",
+      "completed_at": "2025-09-21T05:08:51.177Z",
+      "updated_at": "2025-09-21T05:08:51.178Z",
+      "archived_at": "2025-09-21T05:08:51.182Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-21T04:59:16.183Z",
+      "title": "Fix TypeScript ESLint unsafe violations in auth test files",
+      "description": "Fix @typescript-eslint/no-unsafe-* violations in auth test files, focusing on controller-security.integration.spec.ts with 100+ errors. Add proper type annotations, fix unsafe assignments/calls, and replace any types with specific TypeScript interfaces.",
+      "category": "error",
+      "id": "error_1758430756182_fgprm5zg53i",
+      "completed_at": "2025-09-21T05:10:02.112Z",
+      "updated_at": "2025-09-21T05:10:02.112Z",
+      "archived_at": "2025-09-21T05:10:02.117Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-21T04:59:16.643Z",
+      "title": "Fix @typescript-eslint/no-unsafe-* violations in database test files",
+      "description": "Fix unsafe assignments, add proper typing for mock database objects, ensure test assertions have proper types, fix unsafe member access in test expectations in /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/database/__tests__/",
+      "category": "error",
+      "id": "error_1758430756643_ub1jyjuwxcs",
+      "completed_at": "2025-09-21T05:10:41.871Z",
+      "updated_at": "2025-09-21T05:10:41.871Z",
+      "archived_at": "2025-09-21T05:10:41.874Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-21T04:59:16.013Z",
+      "title": "Fix @typescript-eslint/no-unsafe-* violations in websocket test files",
+      "description": "Fix unsafe assignments, member access, and add proper typing for mock websocket objects in test files at /Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/packages/bytebotd/src/common/websocket/__tests__/",
+      "category": "error",
+      "id": "error_1758430756013_qb4eh27rz6",
+      "completed_at": "2025-09-21T05:10:55.377Z",
+      "updated_at": "2025-09-21T05:10:55.377Z",
+      "archived_at": "2025-09-21T05:10:55.380Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-21T04:59:15.399Z",
+      "title": "Fix remaining mixed @typescript-eslint violations across all bytebotd modules",
+      "description": "Handle remaining violations across all modules: Fix any remaining type safety violations (@typescript-eslint/no-unsafe-*), Fix any remaining async/await violations (@typescript-eslint/require-await), Address violations in smaller files not covered by other agents, Ensure comprehensive coverage of all error types",
+      "category": "error",
+      "id": "error_1758430755399_39g1yylba9s",
+      "completed_at": "2025-09-21T05:14:17.548Z",
+      "updated_at": "2025-09-21T05:14:17.548Z",
+      "archived_at": "2025-09-21T05:14:17.551Z",
+      "archive_version": "2.0.0"
     }
   ],
-  "total_completed": 51,
+  "total_completed": 57,
   "last_completion": "2025-09-11T08:31:32.558Z",
   "created_at": "2025-09-11T06:47:03.082Z",
-  "last_archived": "2025-09-20T06:41:54.458Z"
+  "last_archived": "2025-09-21T05:14:17.551Z"
 }

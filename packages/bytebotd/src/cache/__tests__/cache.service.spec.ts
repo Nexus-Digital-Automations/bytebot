@@ -222,12 +222,32 @@ import { Test, TestingModule } from '@nestjs/testing';import { CACHE_MANAGER } f
     });
   });
 
-  describe('Error Resilience', () => {it('should handle metrics service errors gracefully', async () => {const key = 'metrics-error-key';keyGenerator.generate.mockReturnValue('bytebot:metrics-error-key');cacheManager.get.mockResolvedValue('"test-value"');metricsService.recordCacheOperation.mockImplementation(() => {throw new Error('Metrics service error');});// Should still return the cached value despite metrics error
-      const result = await service.get(key);
-      expect(result).toBe('test-value');});});
+  describe('Error Resilience', () => {
+    it('should handle metrics service errors gracefully', async () => {
+      const key = 'metrics-error-key';
+      keyGenerator.generate.mockReturnValue('bytebot:metrics-error-key');
+      cacheManager.get.mockResolvedValue('"test-value"');
+      metricsService.recordCacheOperation.mockImplementation(() => {
+        throw new Error('Metrics service error');
+      });
 
-  describe('Performance Monitoring', () => {it('should measure operation duration', async () => {const key = 'performance-key';keyGenerator.generate.mockReturnValue('bytebot:performance-key');cacheManager.get.mockResolvedValue('"test-value"');await service.get(key);expect(metricsService.recordCacheOperation).toHaveBeenCalledWith(
-        'get','hit',
+      // Should still return the cached value despite metrics error
+      const result = await service.get(key);
+      expect(result).toBe('test-value');
+    });
+  });
+
+  describe('Performance Monitoring', () => {
+    it('should measure operation duration', async () => {
+      const key = 'performance-key';
+      keyGenerator.generate.mockReturnValue('bytebot:performance-key');
+      cacheManager.get.mockResolvedValue('"test-value"');
+
+      await service.get(key);
+
+      expect(metricsService.recordCacheOperation).toHaveBeenCalledWith(
+        'get',
+        'hit',
         expect.any(Number) // Duration should be a number
       );
     });

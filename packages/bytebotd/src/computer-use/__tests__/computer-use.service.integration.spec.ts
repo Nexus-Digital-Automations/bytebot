@@ -16,17 +16,27 @@
  * @version 1.0.0
  */
 
-import { Test, TestingModule } from '@nestjs/testing';import { INestApplication } from '@nestjs/common';import {ComputerUseService,
+import { Test, TestingModule } from '@nestjs/testing';
+import { INestApplication } from '@nestjs/common';
+import {ComputerUseService,
   ScreenshotResult,
   FileWriteResult,
   FileReadResult,
-} from '../computer-use.service';import { ComputerUseModule } from '../computer-use.module';import { NutService } from '../../nut/nut.service';import {ComputerAction,
+} from '../computer-use.service';
+import { ComputerUseModule } from '../computer-use.module';
+import { NutService } from '../../nut/nut.service';
+import {ComputerAction,
   MoveMouseAction,
   ClickMouseAction,
   WriteFileAction,
-} from '@bytebot/shared';import {ReadFileActionDto,
+} from '@bytebot/shared';
+import {ReadFileActionDto,
   ApplicationActionDto,
-} from '../dto/computer-action.dto';import { ApplicationName } from '../dto/base.dto';import * as fs from 'fs/promises';import * as path from 'path';// Integration test specific interfacesinterface IntegrationTestContext {
+} from '../dto/computer-action.dto';
+import { ApplicationName } from '../dto/base.dto';
+import * as fs from 'fs/promises';
+import * as path from 'path';
+    // Integration test specific interfacesinterface IntegrationTestContext {
   service: ComputerUseService;
   nutService: NutService;
   testDataDir: string;
@@ -39,9 +49,12 @@ interface TestFileData {
   expectedMediaType: string;
 }
 
-describe('ComputerUseService Integration Tests', () => {let app: INestApplication;let testModule: TestingModule;
+describe('ComputerUseService Integration Tests', () => {let app: INestApplication;
+    let testModule: TestingModule;
   let context: IntegrationTestContext;
-  const testDataDir = '/tmp/bytebot-integration-tests';/*** Setup comprehensive integration test environment
+  const testDataDir = '/tmp/bytebot-integration-tests';
+
+/*** Setup comprehensive integration test environment
    * Creates real services with minimal mocking for genuine integration testing
    */
   beforeAll(async () => {
@@ -80,38 +93,59 @@ describe('ComputerUseService Integration Tests', () => {let app: INestApplicatio
     jest.clearAllMocks();
   });
 
-  describe('Service Integration and Dependency Injection', () => {it('should initialize all services with proper dependency injection', () => {expect(context.service).toBeDefined();expect(context.nutService).toBeDefined();
+  describe('Service Integration and Dependency Injection', () => {it('should initialize all services with proper dependency injection', () => {expect(context.service).toBeDefined();
+      expect(context.nutService).toBeDefined();
     });
 
-    it('should have proper service lifecycle management', async () => {// Test service interactionconst screenshot = await context.service.action({ action: 'screenshot' });expect(screenshot).toBeDefined();expect((screenshot as ScreenshotResult).image).toBeDefined();
+    it('should have proper service lifecycle management', async () => {// Test service interactionconst screenshot = await context.service.action({ action: 'screenshot' });
+      expect(screenshot).toBeDefined();
+      expect((screenshot as ScreenshotResult).image).toBeDefined();
     });
 
     it('should handle unsupported actions gracefully', async () => {// Test with unsupported actionconst invalidAction = { action: 'invalid_action' } as unknown;await expect(context.service.action(invalidAction as ComputerAction),
-      ).rejects.toThrow('Unsupported computer action');});});
+      ).rejects.toThrow('Unsupported computer action');});
+});
 
   describe('End-to-End Action Workflows', () => {it('should execute complex mouse interaction workflow', async () => {// Comprehensive mouse workflow: move → click → dragconst moveAction: MoveMouseAction = {
-        action: 'move_mouse',coordinates: { x: 100, y: 200 },};
+        action: 'move_mouse',
+  coordinates: { x: 100, y: 200 },};
 
       const clickAction: ClickMouseAction = {
-        action: 'click_mouse',coordinates: { x: 150, y: 250 },button: 'left',clickCount: 2,holdKeys: ['ctrl'],};// Execute workflow sequence
+        action: 'click_mouse',
+  coordinates: { x: 150, y: 250 },
+  button: 'left',
+  clickCount: 2,
+  holdKeys: ['ctrl'],};
+    // Execute workflow sequence
       await context.service.action(moveAction);
       await context.service.action(clickAction);
 
       // Verify service calls in sequence
       expect(context.nutService.mouseMoveEvent).toHaveBeenCalledTimes(2); // Move + Click move
-      expect(context.nutService.holdKeys).toHaveBeenCalledWith(['ctrl'], true);expect(context.nutService.mouseClickEvent).toHaveBeenCalledTimes(2);expect(context.nutService.holdKeys).toHaveBeenCalledWith(['ctrl'], false);});it('should handle application lifecycle with window management', async () => {const appAction: ApplicationActionDto = {action: 'application',application: ApplicationName.FIREFOX,};
+      expect(context.nutService.holdKeys).toHaveBeenCalledWith(['ctrl'], true);
+      expect(context.nutService.mouseClickEvent).toHaveBeenCalledTimes(2);
+      expect(context.nutService.holdKeys).toHaveBeenCalledWith(['ctrl'], false);});
+
+  it('should handle application lifecycle with window management', async () => {const appAction: ApplicationActionDto = {action: 'application',
+  application: ApplicationName.FIREFOX,};
 
       // Mock application not running initially
-      const util = await import('util');const promisifySpy = jest.spyOn(util, 'promisify');promisifySpy.mockReturnValue(jest.fn().mockRejectedValue({ code: 1 }));await context.service.action(appAction as unknown as ComputerAction);
+      const util = await import('util');
+
+        const promisifySpy = jest.spyOn(util, 'promisify');promisifySpy.mockReturnValue(jest.fn().mockRejectedValue({ code: 1 }));
+    await context.service.action(appAction as unknown as ComputerAction);
 
       // Verify application launch sequence
       // Note: spawn calls are mocked in createMockNutService
     });
   });
 
-  describe('File Operations Integration', () => {it('should handle complete file write-read cycle', async () => {const testFile = createTestFile('integration-test.txt','Integration test content',);// Write file
+  describe('File Operations Integration', () => {it('should handle complete file write-read cycle', async () => {const testFile = createTestFile('integration-test.txt','Integration test content',);
+    // Write file
       const writeAction: WriteFileAction = {
-        action: 'write_file',path: path.join(testDataDir, 'test-write.txt'),data: testFile.base64,};
+        action: 'write_file',
+  path: path.join(testDataDir, 'test-write.txt'),
+  data: testFile.base64,};
 
       const writeResult = (await context.service.action(
         writeAction,
@@ -122,7 +156,9 @@ describe('ComputerUseService Integration Tests', () => {let app: INestApplicatio
 
       // Read file back
       const readAction: ReadFileActionDto = {
-        action: 'read_file',path: writeResult.path ?? '',};const readResult = (await context.service.action(
+        action: 'read_file',
+  path: writeResult.path ?? '',};
+    const readResult = (await context.service.action(
         readAction,
       )) as FileReadResult;
       expect(readResult.success).toBe(true);
@@ -133,7 +169,9 @@ describe('ComputerUseService Integration Tests', () => {let app: INestApplicatio
 
     it('should handle multiple file formats correctly', async () => {const testFiles = [createTestFile('test.json', '{"test": "data"}', 'application/json'),createTestFile('test.html','<html><body>Test</body></html>','text/html',),createTestFile('test.css', 'body { color: red; }', 'text/css'),];for (const testFile of testFiles) {
         const writeAction: WriteFileAction = {
-          action: 'write_file',path: path.join(testDataDir, testFile.path),data: testFile.base64,
+          action: 'write_file',
+  path: path.join(testDataDir, testFile.path),
+  data: testFile.base64,
         };
 
         const writeResult = (await context.service.action(
@@ -142,7 +180,9 @@ describe('ComputerUseService Integration Tests', () => {let app: INestApplicatio
         expect(writeResult.success).toBe(true);
 
         const readAction: ReadFileActionDto = {
-          action: 'read_file',path: writeResult.path ?? '',};const readResult = (await context.service.action(
+          action: 'read_file',
+  path: writeResult.path ?? '',};
+    const readResult = (await context.service.action(
           readAction,
         )) as FileReadResult;
         expect(readResult.success).toBe(true);
@@ -150,13 +190,20 @@ describe('ComputerUseService Integration Tests', () => {let app: INestApplicatio
       }
     });
 
-    it('should enforce security restrictions on file paths', async () => {const maliciousWriteAction: WriteFileAction = {action: 'write_file',path: '/etc/passwd',data: Buffer.from('malicious content').toString('base64'),};const writeResult = (await context.service.action(
+    it('should enforce security restrictions on file paths', async () => {const maliciousWriteAction: WriteFileAction = {action: 'write_file',
+  path: '/etc/passwd',
+  data: Buffer.from('malicious content').toString('base64'),};
+    const writeResult = (await context.service.action(
         maliciousWriteAction,
       )) as FileWriteResult;
       expect(writeResult.success).toBe(false);
       expect(writeResult.message).toContain(
-        'File path outside allowed directories',);const maliciousReadAction: ReadFileActionDto = {
-        action: 'read_file',path: '/etc/shadow',};const readResult = (await context.service.action(
+        'File path outside allowed directories',);
+
+        const maliciousReadAction: ReadFileActionDto = {
+        action: 'read_file',
+  path: '/etc/shadow',};
+    const readResult = (await context.service.action(
         maliciousReadAction,
       )) as FileReadResult;
       expect(readResult.success).toBe(false);
@@ -164,11 +211,15 @@ describe('ComputerUseService Integration Tests', () => {let app: INestApplicatio
         'File path outside allowed directories',);});
   });
 
-  describe('Performance and Resource Management', () => {it('should handle concurrent operations efficiently', async () => {const concurrentActions = Array.from({ length: 5 }, () => ({action: 'screenshot' as const,}));const startTime = Date.now();
-      const results = await Promise.all(
+  describe('Performance and Resource Management', () => {it('should handle concurrent operations efficiently', async () => {const concurrentActions = Array.from({ length: 5 }, () => ({action: 'screenshot' as const,}));
+
+        const startTime = Date.now();
+
+        const results = await Promise.all(
         concurrentActions.map((action) => context.service.action(action)),
       );
-      const endTime = Date.now();
+
+        const endTime = Date.now();
 
       // Verify all operations completed
       expect(results).toHaveLength(5);
@@ -183,7 +234,8 @@ describe('ComputerUseService Integration Tests', () => {let app: INestApplicatio
       const operationIds = results.map(
         (result) => (result as ScreenshotResult).metadata?.operationId,
       );
-      const uniqueIds = new Set(operationIds);
+
+        const uniqueIds = new Set(operationIds);
       expect(uniqueIds.size).toBe(5);
     });
 
@@ -195,7 +247,9 @@ describe('ComputerUseService Integration Tests', () => {let app: INestApplicatio
       for (let i = 0; i < 10; i++) {
         const testFile = createTestFile(
           `stress-test-${i}.txt`,
-          'Stress test content',);const writeAction: WriteFileAction = {
+          'Stress test content',);
+
+        const writeAction: WriteFileAction = {
           action: 'write_file',
           path: path.join(testDataDir, `stress-${i}.txt`),
           data: testFile.base64,
@@ -207,7 +261,9 @@ describe('ComputerUseService Integration Tests', () => {let app: INestApplicatio
         expect(writeResult.success).toBe(true);
 
         const readAction: ReadFileActionDto = {
-          action: 'read_file',path: writeResult.path ?? '',};const readResult = (await context.service.action(
+          action: 'read_file',
+  path: writeResult.path ?? '',};
+    const readResult = (await context.service.action(
           readAction,
         )) as FileReadResult;
         expect(readResult.success).toBe(true);
@@ -225,7 +281,10 @@ describe('ComputerUseService Integration Tests', () => {let app: INestApplicatio
       expect(memoryGrowth).toBeLessThan(50 * 1024 * 1024); // Less than 50MB growth
     });
 
-    it('should handle multiple actions successfully', async () => {const actions = [{ action: 'screenshot' as const },{ action: 'move_mouse' as const, coordinates: { x: 100, y: 200 } },{action: 'click_mouse' as const,coordinates: { x: 100, y: 200 },button: 'left' as const,clickCount: 1,},
+    it('should handle multiple actions successfully', async () => {const actions = [{ action: 'screenshot' as const },{ action: 'move_mouse' as const, coordinates: { x: 100, y: 200 } },{action: 'click_mouse' as const,
+  coordinates: { x: 100, y: 200 },
+  button: 'left' as const,
+  clickCount: 1,},
       ];
 
       // Execute actions sequentially
@@ -245,12 +304,16 @@ describe('ComputerUseService Integration Tests', () => {let app: INestApplicatio
       const mouseMoveEventSpy = jest.spyOn(
         context.nutService,
         'mouseMoveEvent',);mouseMoveEventSpy
-        .mockRejectedValueOnce(new Error('Temporary failure')).mockImplementation(originalMouseMove);const moveAction: MoveMouseAction = {
-        action: 'move_mouse',coordinates: { x: 100, y: 200 },};
+        .mockRejectedValueOnce(new Error('Temporary failure')).mockImplementation(originalMouseMove);
+
+        const moveAction: MoveMouseAction = {
+        action: 'move_mouse',
+  coordinates: { x: 100, y: 200 },};
 
       // First attempt should fail
       await expect(context.service.action(moveAction)).rejects.toThrow(
-        'Temporary failure',);// Second attempt should succeed (service recovered)
+        'Temporary failure',);
+    // Second attempt should succeed (service recovered)
       await expect(context.service.action(moveAction)).resolves.not.toThrow();
     });
 
@@ -261,41 +324,60 @@ describe('ComputerUseService Integration Tests', () => {let app: INestApplicatio
           'Unsupported computer action',);}
     });
 
-    it('should handle resource cleanup on operation failures', async () => {// Mock file write failure after temporary file creationconst util = await import('util');const promisifySpy = jest.spyOn(util, 'promisify');promisifySpy.mockReturnValue(jest.fn().mockRejectedValue(new Error('Copy failed')));const testFile = createTestFile('failure-test.txt', 'Test content');const writeAction: WriteFileAction = {action: 'write_file',path: path.join(testDataDir, 'failure-test.txt'),data: testFile.base64,};
+    it('should handle resource cleanup on operation failures', async () => {// Mock file write failure after temporary file creationconst util = await import('util');
+
+        const promisifySpy = jest.spyOn(util, 'promisify');promisifySpy.mockReturnValue(jest.fn().mockRejectedValue(new Error('Copy failed')));
+
+        const testFile = createTestFile('failure-test.txt', 'Test content');
+
+        const writeAction: WriteFileAction = {action: 'write_file',
+  path: path.join(testDataDir, 'failure-test.txt'),
+  data: testFile.base64,};
 
       const result = (await context.service.action(
         writeAction,
       )) as FileWriteResult;
       expect(result.success).toBe(false);
       expect(result.message).toContain(
-        'Failed to move file to target location',);// Verify temporary file cleanup was attempted
+        'Failed to move file to target location',);
+    // Verify temporary file cleanup was attempted
       expect(fs.unlink).toHaveBeenCalled();
     });
   });
 
   describe('Real-world Integration Scenarios', () => {it('should handle typical automation workflow: screenshot → navigate → interact', async () => {const workflow = async () => {// 1. Take initial screenshot
         const screenshot = await context.service.action({
-          action: 'screenshot',});expect((screenshot as ScreenshotResult).image).toBeDefined();
+          action: 'screenshot',});
+      expect((screenshot as ScreenshotResult).image).toBeDefined();
 
         // 2. Move mouse to target location
         await context.service.action({
-          action: 'move_mouse',coordinates: { x: 200, y: 300 },});
+          action: 'move_mouse',
+  coordinates: { x: 200, y: 300 },});
 
         // 3. Click on target location
         await context.service.action({
-          action: 'click_mouse',coordinates: { x: 200, y: 300 },button: 'left',clickCount: 1,});
+          action: 'click_mouse',
+  coordinates: { x: 200, y: 300 },
+  button: 'left',
+  clickCount: 1,});
 
         // 4. Take final screenshot to verify state
         const finalScreenshot = await context.service.action({
-          action: 'screenshot',});expect((finalScreenshot as ScreenshotResult).image).toBeDefined();
+          action: 'screenshot',});
+      expect((finalScreenshot as ScreenshotResult).image).toBeDefined();
       };
 
       await expect(workflow()).resolves.not.toThrow();
     });
 
     it('should handle document processing workflow: read → process → save results', async () => {// Create test documentconst testDoc = createTestFile(
-        'document.txt','Document processing test content',);const writeAction: WriteFileAction = {
-        action: 'write_file',path: path.join(testDataDir, 'test-document.txt'),data: testDoc.base64,};
+        'document.txt','Document processing test content',);
+
+        const writeAction: WriteFileAction = {
+        action: 'write_file',
+  path: path.join(testDataDir, 'test-document.txt'),
+  data: testDoc.base64,};
 
       // Write document
       const writeResult = (await context.service.action(
@@ -305,27 +387,43 @@ describe('ComputerUseService Integration Tests', () => {let app: INestApplicatio
 
       // Read document back to verify
       const readResult = (await context.service.action({
-        action: 'read_file',path: writeResult.path ?? '',})) as FileReadResult;expect(readResult.success).toBe(true);
+        action: 'read_file',
+  path: writeResult.path ?? '',})) as FileReadResult;
+      expect(readResult.success).toBe(true);
 
       // Take screenshot to document the process
-      const screenshot = await context.service.action({ action: 'screenshot' });expect((screenshot as ScreenshotResult).image).toBeDefined();// Create processing results
+      const screenshot = await context.service.action({ action: 'screenshot' });
+      expect((screenshot as ScreenshotResult).image).toBeDefined();
+    // Create processing results
       const processingResults = JSON.stringify({
-        originalFile: 'test-document.txt',fileSize: readResult.size,mediaType: readResult.mediaType,
+        originalFile: 'test-document.txt',
+  fileSize: readResult.size,
+  mediaType: readResult.mediaType,
         processedAt: new Date().toISOString(),
-        status: 'completed',});const saveResultsAction: WriteFileAction = {
-        action: 'write_file',path: path.join(testDataDir, 'processing-results.json'),data: Buffer.from(processingResults).toString('base64'),};const saveResult = (await context.service.action(
+        status: 'completed',});
+
+        const saveResultsAction: WriteFileAction = {
+        action: 'write_file',
+  path: path.join(testDataDir, 'processing-results.json'),
+  data: Buffer.from(processingResults).toString('base64'),};
+    const saveResult = (await context.service.action(
         saveResultsAction,
       )) as FileWriteResult;
       expect(saveResult.success).toBe(true);
 
       // Verify results can be read back
       const readResults = (await context.service.action({
-        action: 'read_file',path: saveResult.path ?? '',})) as FileReadResult;expect(readResults.success).toBe(true);
+        action: 'read_file',
+  path: saveResult.path ?? '',})) as FileReadResult;
+      expect(readResults.success).toBe(true);
       if (!readResults.data) {
         throw new Error(
           'Expected readResults.data to be defined for successful read operation',);}
       const parsedResults = JSON.parse(
-        Buffer.from(readResults.data, 'base64').toString(),) as { originalFile: string; status: string };expect(parsedResults.originalFile).toBe('test-document.txt');expect(parsedResults.status).toBe('completed');});});
+        Buffer.from(readResults.data, 'base64').toString(),) as { originalFile: string; status: string };
+      expect(parsedResults.originalFile).toBe('test-document.txt');
+      expect(parsedResults.status).toBe('completed');});
+});
 
   // Helper functions for integration testing
 
@@ -344,7 +442,8 @@ describe('ComputerUseService Integration Tests', () => {let app: INestApplicatio
       pasteText: jest.fn().mockResolvedValue({ success: true }),
       screendump: jest
         .fn()
-        .mockResolvedValue(Buffer.from('mocked-screenshot-data')),getCursorPosition: jest.fn().mockResolvedValue({ x: 100, y: 200 }),};
+        .mockResolvedValue(Buffer.from('mocked-screenshot-data')),
+  getCursorPosition: jest.fn().mockResolvedValue({ x: 100, y: 200 }),};
   }
 
   /**
@@ -367,11 +466,21 @@ describe('ComputerUseService Integration Tests', () => {let app: INestApplicatio
     expectedMediaType?: string,
   ): TestFileData {
     const ext = path.extname(fileName).toLowerCase().slice(1);
-    const mediaTypeMap: Record<string, string> = {
-      txt: 'text/plain',json: 'application/json',html: 'text/html',css: 'text/css',js: 'text/javascript',ts: 'text/typescript',png: 'image/png',jpg: 'image/jpeg',pdf: 'application/pdf',};return {
+
+        const mediaTypeMap: Record<string, string> = {
+      txt: 'text/plain',
+  json: 'application/json',
+  html: 'text/html',
+  css: 'text/css',
+  js: 'text/javascript',
+  ts: 'text/typescript',
+  png: 'image/png',
+  jpg: 'image/jpeg',
+  pdf: 'application/pdf',};return {
       path: fileName,
       content,
-      base64: Buffer.from(content).toString('base64'),expectedMediaType:expectedMediaType ?? mediaTypeMap[ext] ?? 'application/octet-stream',};}
+      base64: Buffer.from(content).toString('base64'),
+  expectedMediaType:expectedMediaType ?? mediaTypeMap[ext] ?? 'application/octet-stream',};}
 
   /**
    * Cleanup test data after tests complete

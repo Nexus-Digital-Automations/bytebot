@@ -28,20 +28,26 @@ jest.mock('child_process', () => {const mockChildProcess = {pid: 12345,
 
   return {
     exec: jest.fn().mockImplementation((cmd: string, opts: unknown, cb?: unknown) => {
-      const callback = typeof opts === 'function' ? opts : cb;if (callback) {setTimeout(() => (callback as MockExecCallback)(null, '', ''), 10);}return mockChildProcess as unknown as import('child_process').ChildProcess;}),spawn: (
+      const callback = typeof opts === 'function' ? opts : cb;if (callback) {setTimeout(() => (callback as MockExecCallback)(null, '', ''), 10);}return mockChildProcess as unknown as import('child_process').ChildProcess;}),
+  spawn: (
       jest.fn() as jest.MockedFunction<typeof import('child_process').spawn>).mockReturnValue(mockChildProcess as unknown as import('child_process').ChildProcess,),};
 });
 
-jest.mock('fs/promises', () => ({writeFile: jest.fn().mockResolvedValue(undefined),readFile: jest.fn().mockResolvedValue(Buffer.from('test content')),unlink: jest.fn().mockResolvedValue(undefined),}));
+jest.mock('fs/promises', () => ({writeFile: jest.fn().mockResolvedValue(undefined),
+  readFile: jest.fn().mockResolvedValue(Buffer.from('test content')),
+  unlink: jest.fn().mockResolvedValue(undefined),}));
 
 // Don't mock util completely - just mock promisify when needed
 jest.mock(
   'util',() =>({
-      ...jest.requireActual('util'),promisify: jest.fn((fn: (...args: unknown[]) => unknown) =>
+      ...jest.requireActual('util'),
+  promisify: jest.fn((fn: (...args: unknown[]) => unknown) =>
           (...args: unknown[]) =>
             Promise.resolve(fn(...args)),
       ),
-    }) as unknown as jest.Mocked<typeof import('util')>,);/**
+    }) as unknown as jest.Mocked<typeof import('util')>,);
+
+/**
  * Type definitions for mocked modules
  */
 interface MockChildProcess {
@@ -52,11 +58,15 @@ interface MockChildProcess {
 
 // MockSpawnProcess interface removed - using direct mocks with type assertions
 
-import { Test, TestingModule } from '@nestjs/testing';import { Logger } from '@nestjs/common';import {ComputerUseService,
+import { Test, TestingModule } from '@nestjs/testing';
+import { Logger } from '@nestjs/common';
+import {ComputerUseService,
   ErrorHandler,
   ScreenshotResult,
   FileWriteResult,
-} from '../computer-use.service';import { NutService } from '../../nut/nut.service';import {ComputerAction,
+} from '../computer-use.service';
+import { NutService } from '../../nut/nut.service';
+import {ComputerAction,
   MoveMouseAction,
   TraceMouseAction,
   ClickMouseAction,
@@ -73,7 +83,8 @@ import { Test, TestingModule } from '@nestjs/testing';import { Logger } from '@n
   ApplicationAction,
   WriteFileAction,
   ReadFileAction,
-} from '@bytebot/shared';// Mock dependenciesconst mockNutService = {
+} from '@bytebot/shared';
+    // Mock dependenciesconst mockNutService = {
   mouseMoveEvent: jest.fn(),
   mouseClickEvent: jest.fn(),
   mouseButtonEvent: jest.fn(),
@@ -86,14 +97,16 @@ import { Test, TestingModule } from '@nestjs/testing';import { Logger } from '@n
   getCursorPosition: jest.fn(),
 };
 
-describe('ComputerUseService - Main Action Router and Error Handling', () => {let service: ComputerUseService;let nutService: NutService;
+describe('ComputerUseService - Main Action Router and Error Handling', () => {let service: ComputerUseService;
+    let nutService: NutService;
 
   // Helper function to create test actions
   const createTestAction = <T extends ComputerAction>(
     overrides: Partial<T> = {},
   ): T => {
     const baseAction = {
-      action: 'move_mouse' as const,coordinates: { x: 100, y: 200 },...overrides,
+      action: 'move_mouse' as const,
+  coordinates: { x: 100, y: 200 },...overrides,
     };
     return baseAction as T;
   };
@@ -103,7 +116,10 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {le
     jest.clearAllMocks();
 
     // Mock child_process.exec with proper typing
-    const childProcess = jest.requireMock<MockChildProcess>('child_process');const util = jest.requireMock<MockUtil>('util');// Mock exec to resolve quickly for testsconst mockChildProcess = {
+    const childProcess = jest.requireMock<MockChildProcess>('child_process');
+
+        const util = jest.requireMock<MockUtil>('util');
+    // Mock exec to resolve quickly for testsconst mockChildProcess = {
       pid: 12345,
       unref: jest.fn(),
       kill: jest.fn(),
@@ -114,12 +130,16 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {le
 
     const mockedExec = childProcess.exec;
     mockedExec.mockImplementation((command: string, options: unknown, callback?: unknown) => {
-      const cb = typeof options === 'function' ? options : callback;// Simulate quick exec resolutionsetTimeout(() => {
+      const cb = typeof options === 'function' ? options : callback;
+    // Simulate quick exec resolutionsetTimeout(() => {
         if (cb) {
           if (command.includes('stat')) {(cb as MockExecCallback)(null, '1024 1640995200', ''); // stdout, stderr} else {(cb as MockExecCallback)(null, '', '');}}
       }, 10);
-      return mockChildProcess as unknown as import('child_process').ChildProcess;});// Mock Logger to prevent console output during tests
-    jest.spyOn(Logger.prototype, 'log').mockImplementation(() => {});jest.spyOn(Logger.prototype, 'error').mockImplementation(() => {});jest.spyOn(Logger.prototype, 'warn').mockImplementation(() => {});jest.spyOn(Logger.prototype, 'debug').mockImplementation(() => {});const module: TestingModule = await Test.createTestingModule({providers: [
+      return mockChildProcess as unknown as import('child_process').ChildProcess;});
+    // Mock Logger to prevent console output during tests
+    jest.spyOn(Logger.prototype, 'log').mockImplementation(() => {});jest.spyOn(Logger.prototype, 'error').mockImplementation(() => {});jest.spyOn(Logger.prototype, 'warn').mockImplementation(() => {});jest.spyOn(Logger.prototype, 'debug').mockImplementation(() => {});
+
+        const module: TestingModule = await Test.createTestingModule({providers: [
         ComputerUseService,
         {
           provide: NutService,
@@ -133,7 +153,8 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {le
   });
 
   describe('Main Action Router', () => {describe('Mouse Action Routing', () => {it('should route move_mouse action correctly', async () => {// Arrangeconst action = createTestAction<MoveMouseAction>({
-          action: 'move_mouse',coordinates: { x: 100, y: 200 },});
+          action: 'move_mouse',
+  coordinates: { x: 100, y: 200 },});
 
         // Act
         const result = await service.action(action);
@@ -147,18 +168,27 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {le
       });
 
       it('should route trace_mouse action correctly', async () => {// Arrangeconst action = createTestAction<TraceMouseAction>({
-          action: 'trace_mouse',path: [{ x: 100, y: 200 },
+          action: 'trace_mouse',
+  path: [{ x: 100, y: 200 },
             { x: 150, y: 250 },
           ],
-          holdKeys: ['ctrl'],});// Act
+          holdKeys: ['ctrl'],});
+    // Act
         const result = await service.action(action);
 
         // Assert - trace_mouse calls move to first coordinate + each path coordinate
         expect(nutService.mouseMoveEvent).toHaveBeenCalledTimes(3); // Initial + 2 path points
-        expect(nutService.holdKeys).toHaveBeenCalledWith(['ctrl'], true);expect(nutService.holdKeys).toHaveBeenCalledWith(['ctrl'], false);expect(result).toBeUndefined();});
+        expect(nutService.holdKeys).toHaveBeenCalledWith(['ctrl'], true);
+      expect(nutService.holdKeys).toHaveBeenCalledWith(['ctrl'], false);
+      expect(result).toBeUndefined();});
 
       it('should route click_mouse action correctly', async () => {// Arrangeconst action = createTestAction<ClickMouseAction>({
-          action: 'click_mouse',coordinates: { x: 100, y: 200 },button: 'left',clickCount: 2,holdKeys: ['shift'],});// Act
+          action: 'click_mouse',
+  coordinates: { x: 100, y: 200 },
+  button: 'left',
+  clickCount: 2,
+  holdKeys: ['shift'],});
+    // Act
         const result = await service.action(action);
 
         // Assert
@@ -166,10 +196,17 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {le
           x: 100,
           y: 200,
         });
-        expect(nutService.holdKeys).toHaveBeenCalledWith(['shift'], true);expect(nutService.mouseClickEvent).toHaveBeenCalledTimes(2);expect(nutService.holdKeys).toHaveBeenCalledWith(['shift'], false);expect(result).toBeUndefined();});
+        expect(nutService.holdKeys).toHaveBeenCalledWith(['shift'], true);
+      expect(nutService.mouseClickEvent).toHaveBeenCalledTimes(2);
+      expect(nutService.holdKeys).toHaveBeenCalledWith(['shift'], false);
+      expect(result).toBeUndefined();});
 
       it('should route press_mouse action correctly', async () => {// Arrangeconst action = createTestAction<PressMouseAction>({
-          action: 'press_mouse',coordinates: { x: 100, y: 200 },button: 'right',press: 'down',});// Act
+          action: 'press_mouse',
+  coordinates: { x: 100, y: 200 },
+  button: 'right',
+  press: 'down',});
+    // Act
         const result = await service.action(action);
 
         // Assert
@@ -177,21 +214,34 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {le
           x: 100,
           y: 200,
         });
-        expect(nutService.mouseButtonEvent).toHaveBeenCalledWith('right', true);expect(result).toBeUndefined();});
+        expect(nutService.mouseButtonEvent).toHaveBeenCalledWith('right', true);
+      expect(result).toBeUndefined();});
 
       it('should route drag_mouse action correctly', async () => {// Arrangeconst action = createTestAction<DragMouseAction>({
-          action: 'drag_mouse',path: [{ x: 100, y: 200 },
+          action: 'drag_mouse',
+  path: [{ x: 100, y: 200 },
             { x: 300, y: 400 },
           ],
-          button: 'left',holdKeys: ['alt'],});// Act
+          button: 'left',
+  holdKeys: ['alt'],});
+    // Act
         const result = await service.action(action);
 
         // Assert
         expect(nutService.mouseMoveEvent).toHaveBeenCalledTimes(3); // Initial + path
-        expect(nutService.holdKeys).toHaveBeenCalledWith(['alt'], true);expect(nutService.mouseButtonEvent).toHaveBeenCalledWith('left', true);expect(nutService.mouseButtonEvent).toHaveBeenCalledWith('left', false);expect(nutService.holdKeys).toHaveBeenCalledWith(['alt'], false);expect(result).toBeUndefined();});
+        expect(nutService.holdKeys).toHaveBeenCalledWith(['alt'], true);
+      expect(nutService.mouseButtonEvent).toHaveBeenCalledWith('left', true);
+      expect(nutService.mouseButtonEvent).toHaveBeenCalledWith('left', false);
+      expect(nutService.holdKeys).toHaveBeenCalledWith(['alt'], false);
+      expect(result).toBeUndefined();});
 
       it('should route scroll action correctly', async () => {// Arrangeconst action = createTestAction<ScrollAction>({
-          action: 'scroll',coordinates: { x: 100, y: 200 },direction: 'down',scrollCount: 3,holdKeys: ['ctrl'],});// Act
+          action: 'scroll',
+  coordinates: { x: 100, y: 200 },
+  direction: 'down',
+  scrollCount: 3,
+  holdKeys: ['ctrl'],});
+    // Act
         const result = await service.action(action);
 
         // Assert
@@ -199,52 +249,72 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {le
           x: 100,
           y: 200,
         });
-        expect(nutService.holdKeys).toHaveBeenCalledWith(['ctrl'], true);expect(nutService.mouseWheelEvent).toHaveBeenCalledTimes(3);expect(nutService.holdKeys).toHaveBeenCalledWith(['ctrl'], false);expect(result).toBeUndefined();});
+        expect(nutService.holdKeys).toHaveBeenCalledWith(['ctrl'], true);
+      expect(nutService.mouseWheelEvent).toHaveBeenCalledTimes(3);
+      expect(nutService.holdKeys).toHaveBeenCalledWith(['ctrl'], false);
+      expect(result).toBeUndefined();});
     });
 
     describe('Keyboard Action Routing', () => {it('should route type_keys action correctly', async () => {// Arrangeconst action = createTestAction<TypeKeysAction>({
-          action: 'type_keys',keys: ['ctrl', 'c'],delay: 100,});
+          action: 'type_keys',
+  keys: ['ctrl', 'c'],
+  delay: 100,});
 
         // Act
         const result = await service.action(action);
 
         // Assert
-        expect(nutService.sendKeys).toHaveBeenCalledWith(['ctrl', 'c'], 100);expect(result).toBeUndefined();});
+        expect(nutService.sendKeys).toHaveBeenCalledWith(['ctrl', 'c'], 100);
+      expect(result).toBeUndefined();});
 
       it('should route press_keys action correctly', async () => {// Arrangeconst action = createTestAction<PressKeysAction>({
-          action: 'press_keys',keys: ['ctrl', 'alt'],press: 'down',});// Act
+          action: 'press_keys',
+  keys: ['ctrl', 'alt'],
+  press: 'down',});
+    // Act
         const result = await service.action(action);
 
         // Assert
-        expect(nutService.holdKeys).toHaveBeenCalledWith(['ctrl', 'alt'], true);expect(result).toBeUndefined();});
+        expect(nutService.holdKeys).toHaveBeenCalledWith(['ctrl', 'alt'], true);
+      expect(result).toBeUndefined();});
 
       it('should route type_text action correctly', async () => {// Arrangeconst action = createTestAction<TypeTextAction>({
-          action: 'type_text',text: 'Hello World',delay: 50,sensitive: false,
+          action: 'type_text',
+  text: 'Hello World',
+  delay: 50,
+  sensitive: false,
         });
 
         // Act
         const result = await service.action(action);
 
         // Assert
-        expect(nutService.typeText).toHaveBeenCalledWith('Hello World', 50);expect(result).toBeUndefined();});
+        expect(nutService.typeText).toHaveBeenCalledWith('Hello World', 50);
+      expect(result).toBeUndefined();});
 
       it('should route paste_text action correctly', async () => {// Arrangeconst action = createTestAction<PasteTextAction>({
-          action: 'paste_text',text: 'Clipboard content',});// Act
+          action: 'paste_text',
+  text: 'Clipboard content',});
+    // Act
         const result = await service.action(action);
 
         // Assert
-        expect(nutService.pasteText).toHaveBeenCalledWith('Clipboard content');expect(result).toBeUndefined();});
+        expect(nutService.pasteText).toHaveBeenCalledWith('Clipboard content');
+      expect(result).toBeUndefined();});
     });
 
     describe('System Action Routing', () => {it('should route wait action correctly and call delay', async () => {// Arrangeconst action = createTestAction<WaitAction>({
-          action: 'wait',duration: 1000,});
+          action: 'wait',
+  duration: 1000,});
 
         // Mock setTimeout for delay testing
         jest.useFakeTimers();
+
         const delayPromise = service.action(action);
 
         // Act
         jest.advanceTimersByTime(1000);
+
         const result = await delayPromise;
 
         // Assert
@@ -255,7 +325,9 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {le
       });
 
       it('should route screenshot action correctly', async () => {// Arrangeconst action = createTestAction<ScreenshotAction>({
-          action: 'screenshot',});const mockBuffer = Buffer.from('test-image-data', 'base64');(mockNutService.screendump as jest.MockedFunction<
+          action: 'screenshot',});
+
+        const mockBuffer = Buffer.from('test-image-data', 'base64');(mockNutService.screendump as jest.MockedFunction<
             typeof mockNutService.screendump
           >
         ).mockResolvedValue(mockBuffer);
@@ -265,7 +337,9 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {le
 
         // Assert
         expect(nutService.screendump).toHaveBeenCalled();
-        expect(result).toHaveProperty('image');expect(result).toHaveProperty('metadata');expect((result as ScreenshotResult).image).toBe(mockBuffer.toString('base64'),);});
+        expect(result).toHaveProperty('image');
+      expect(result).toHaveProperty('metadata');
+      expect((result as ScreenshotResult).image).toBe(mockBuffer.toString('base64'),);});
 
       it('should route cursor_position action correctly', async () => {// Arrangeconst action = createTestAction<CursorPositionAction>({
           action: 'cursor_position',});(mockNutService.getCursorPosition).mockResolvedValue({
@@ -278,8 +352,16 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {le
 
         // Assert
         expect(nutService.getCursorPosition).toHaveBeenCalled();
-        expect(result).toHaveProperty('x', 150);expect(result).toHaveProperty('y', 250);expect(result).toHaveProperty('timestamp');expect(result).toHaveProperty('operationId');});it('should route application action correctly', async () => {// Arrangeconst childProcessForApp =
-          jest.requireMock<MockChildProcess>('child_process');const { spawn } = childProcessForApp;const mockSpawnProcess = {
+        expect(result).toHaveProperty('x', 150);
+      expect(result).toHaveProperty('y', 250);
+      expect(result).toHaveProperty('timestamp');
+      expect(result).toHaveProperty('operationId');});
+
+  it('should route application action correctly', async () => {// Arrangeconst childProcessForApp =
+          jest.requireMock<MockChildProcess>('child_process');
+
+        const { spawn } = childProcessForApp;
+    const mockSpawnProcess = {
           unref: jest.fn(),
           pid: 12345,
           kill: jest.fn(),
@@ -288,8 +370,12 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {le
           stderr: { on: jest.fn() },
         };
         (spawn as jest.Mock).mockReturnValue(
-          mockSpawnProcess as unknown as import('child_process').ChildProcess,);const action = createTestAction<ApplicationAction>({
-          action: 'application',application: 'firefox',});// Act
+          mockSpawnProcess as unknown as import('child_process').ChildProcess,);
+
+        const action = createTestAction<ApplicationAction>({
+          action: 'application',
+  application: 'firefox',});
+    // Act
         const result = await service.action(action);
 
         // Assert - Application management uses spawn, so we just verify no errors
@@ -298,38 +384,54 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {le
       }, 5000);
     });
 
-    describe('File System Action Routing', () => {it('should route write_file action correctly', async () => {// Arrangeconst testData = Buffer.from('test file content').toString('base64');const action = createTestAction<WriteFileAction>({action: 'write_file',path: '/tmp/test-file.txt',data: testData,});
+    describe('File System Action Routing', () => {it('should route write_file action correctly', async () => {// Arrangeconst testData = Buffer.from('test file content').toString('base64');
+
+        const action = createTestAction<WriteFileAction>({action: 'write_file',
+  path: '/tmp/test-file.txt',
+  data: testData,});
 
         // Act
         const result = await service.action(action);
 
         // Assert - file operations may fail in test environment
-        expect(result).toHaveProperty('success');expect(result).toHaveProperty('operationId');expect(result).toHaveProperty('timestamp');// File write may fail due to test environment permissionsif ((result as FileWriteResult).success) {
+        expect(result).toHaveProperty('success');
+      expect(result).toHaveProperty('operationId');
+      expect(result).toHaveProperty('timestamp');
+    // File write may fail due to test environment permissionsif ((result as FileWriteResult).success) {
           expect(result).toHaveProperty('path');} else {expect(result).toHaveProperty('message');}}, 5000);
 
       it('should route read_file action correctly', async () => {// Arrangeconst action = createTestAction<ReadFileAction>({
-          action: 'read_file',path: '/tmp/test-read.txt',});// Act
+          action: 'read_file',
+  path: '/tmp/test-read.txt',});
+    // Act
         const result = await service.action(action);
 
         // Assert - File operations may fail in test environment, check structure
-        expect(result).toHaveProperty('success');expect(result).toHaveProperty('operationId');expect(result).toHaveProperty('timestamp');}, 5000);});
+        expect(result).toHaveProperty('success');
+      expect(result).toHaveProperty('operationId');
+      expect(result).toHaveProperty('timestamp');}, 5000);});
 
     describe('Invalid Action Handling', () => {it('should throw error for unsupported action type', async () => {// Arrange - Create invalid action by type assertionconst invalidAction = {
-          action: 'invalid_action',someParam: 'value',} as unknown as ComputerAction;// Act & Assert
+          action: 'invalid_action',
+  someParam: 'value',} as unknown as ComputerAction;
+    // Act & Assert
         await expect(service.action(invalidAction)).rejects.toThrow(
           /Unsupported computer action/,
         );
       });
 
       it('should handle exhaustive check in default case', async () => {// Arrange - Create action with unknown typeconst unknownAction = {
-          action: 'completely_unknown',} as unknown as ComputerAction;// Act & Assert
+          action: 'completely_unknown',} as unknown as ComputerAction;
+    // Act & Assert
         await expect(service.action(unknownAction)).rejects.toThrow();
       });
     });
   });
 
   describe('Error Handling and Structured Errors', () => {describe('Action Error Handling', () => {it('should handle NutService errors and wrap them properly', async () => {// Arrangeconst action = createTestAction<MoveMouseAction>({
-          action: 'move_mouse',coordinates: { x: 100, y: 200 },});
+          action: 'move_mouse',
+  coordinates: { x: 100, y: 200 },});
+
         const originalError = new Error('NutService connection failed');(mockNutService.mouseMoveEvent).mockRejectedValue(originalError,
         );
 
@@ -340,7 +442,10 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {le
       });
 
       it('should handle service errors gracefully', async () => {// Arrangeconst action = createTestAction<ScreenshotAction>({
-          action: 'screenshot',});const mockBuffer = Buffer.from('screenshot-data');(mockNutService.screendump).mockResolvedValue(mockBuffer);// Act
+          action: 'screenshot',});
+
+        const mockBuffer = Buffer.from('screenshot-data');(mockNutService.screendump).mockResolvedValue(mockBuffer);
+    // Act
         const result = await service.action(action);
 
         // Assert - Should successfully take screenshot
@@ -348,19 +453,27 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {le
         expect(nutService.screendump).toHaveBeenCalled();
       });
 
-      it('should log structured error information', async () => {// Arrangeconst loggerErrorSpy = jest.spyOn(Logger.prototype, 'error');const action = createTestAction<ClickMouseAction>({action: 'click_mouse',button: 'left',clickCount: 1,});
+      it('should log structured error information', async () => {// Arrangeconst loggerErrorSpy = jest.spyOn(Logger.prototype, 'error');
+
+        const action = createTestAction<ClickMouseAction>({action: 'click_mouse',
+  button: 'left',
+  clickCount: 1,});
         (mockNutService.mouseClickEvent).mockRejectedValue(
-          new Error('Mouse hardware error'),);// Act
+          new Error('Mouse hardware error'),);
+    // Act
         await expect(service.action(action)).rejects.toThrow();
 
         // Assert
         expect(loggerErrorSpy).toHaveBeenCalledWith(
-          expect.stringContaining('Computer action failed'),expect.objectContaining({actionType: 'click_mouse',error: 'Mouse hardware error',}),);
+          expect.stringContaining('Computer action failed'),expect.objectContaining({actionType: 'click_mouse',
+  error: 'Mouse hardware error',}),);
       });
 
       it('should include operation ID in all error messages', async () => {// Arrangeconst action = createTestAction<TypeTextAction>({
-          action: 'type_text',text: 'test',});(mockNutService.typeText).mockRejectedValue(
-          new Error('Keyboard error'),);// Act & Assert
+          action: 'type_text',
+  text: 'test',});(mockNutService.typeText).mockRejectedValue(
+          new Error('Keyboard error'),);
+    // Act & Assert
         try {
           await service.action(action);
           fail('Expected error to be thrown');} catch (error) {expect(error).toBeInstanceOf(Error);
@@ -369,37 +482,53 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {le
       });
     });
 
-    describe('Performance Monitoring', () => {it('should log action start with performance tracking', async () => {// Arrangeconst loggerLogSpy = jest.spyOn(Logger.prototype, 'log');const action = createTestAction<MoveMouseAction>({action: 'move_mouse',coordinates: { x: 100, y: 200 },});
+    describe('Performance Monitoring', () => {it('should log action start with performance tracking', async () => {// Arrangeconst loggerLogSpy = jest.spyOn(Logger.prototype, 'log');
+
+        const action = createTestAction<MoveMouseAction>({action: 'move_mouse',
+  coordinates: { x: 100, y: 200 },});
 
         // Act
         await service.action(action);
 
         // Assert
         expect(loggerLogSpy).toHaveBeenCalledWith(
-          _expect.stringContaining('Executing computer action: move_mouse'),expect.objectContaining({actionType: 'move_mouse',hasCoordinates: true,}),
+          _expect.stringContaining('Executing computer action: move_mouse'),expect.objectContaining({actionType: 'move_mouse',
+  hasCoordinates: true,}),
         );
       });
 
-      it('should log action completion with performance metrics', async () => {// Arrangeconst loggerLogSpy = jest.spyOn(Logger.prototype, 'log');const action = createTestAction<ScreenshotAction>({action: 'screenshot',});const mockBuffer = Buffer.from('test-data');(mockNutService.screendump).mockResolvedValue(mockBuffer);// Act
+      it('should log action completion with performance metrics', async () => {// Arrangeconst loggerLogSpy = jest.spyOn(Logger.prototype, 'log');
+
+        const action = createTestAction<ScreenshotAction>({action: 'screenshot',});
+
+        const mockBuffer = Buffer.from('test-data');(mockNutService.screendump).mockResolvedValue(mockBuffer);
+    // Act
         await service.action(action);
 
         // Assert
         expect(_loggerLogSpy).toHaveBeenCalledWith(
-          expect.stringContaining('Computer action completed successfully'),expect.objectContaining({actionType: 'screenshot',hasResult: true,}),
+          expect.stringContaining('Computer action completed successfully'),expect.objectContaining({actionType: 'screenshot',
+  hasResult: true,}),
         );
       });
 
       it('should record performance metrics when C/ua is enabled', async () => {// Arrangeconst action = createTestAction<ScreenshotAction>({
-          action: 'screenshot',});const mockBuffer = Buffer.from('test-data');(mockNutService.screendump).mockResolvedValue(mockBuffer);// Act
+          action: 'screenshot',});
+
+        const mockBuffer = Buffer.from('test-data');(mockNutService.screendump).mockResolvedValue(mockBuffer);
+    // Act
         const result = await service.action(action);
 
         // Assert - Performance service may not be available in test setup
         // This test validates the service doesn't crash when performance service is unavailable
         expect(result).toBeDefined();
-        expect(result).toHaveProperty('image');});});
+        expect(result).toHaveProperty('image');});
+});
 
     describe('Cleanup and Resource Management', () => {it('should release held keys on error during trace_mouse', async () => {// Arrangeconst action = createTestAction<TraceMouseAction>({
-          action: 'trace_mouse',path: [{ x: 100, y: 200 }],holdKeys: ['ctrl', 'shift'],});mockNutService.mouseMoveEvent
+          action: 'trace_mouse',
+  path: [{ x: 100, y: 200 }],
+  holdKeys: ['ctrl', 'shift'],});mockNutService.mouseMoveEvent
           .mockResolvedValueOnce(undefined) // First call succeeds
           .mockRejectedValueOnce(new Error('Movement failed')); // Second call fails// Act & Assertawait expect(service.action(action)).rejects.toThrow();
 
@@ -409,13 +538,15 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {le
       });
 
       it('should release mouse button on error during drag_mouse', async () => {// Arrangeconst action = createTestAction<DragMouseAction>({
-          action: 'drag_mouse',path: [{ x: 100, y: 200 },
+          action: 'drag_mouse',
+  path: [{ x: 100, y: 200 },
             { x: 300, y: 400 },
           ],
           button: 'left',});mockNutService.mouseMoveEvent.mockResolvedValueOnce(undefined);
         mockNutService.mouseButtonEvent.mockResolvedValueOnce(undefined);
         mockNutService.mouseMoveEvent.mockRejectedValueOnce(
-          new Error('Move failed'),);// Act & Assert
+          new Error('Move failed'),);
+    // Act & Assert
         await expect(service.action(action)).rejects.toThrow();
 
         // Verify cleanup - mouse button should be released
@@ -442,7 +573,7 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {le
       // Fast-forward time
       jest.advanceTimersByTime(duration);
 
-      const result = await delayPromise;
+        const result = await delayPromise;
 
       // Assert
       expect(result).toBeUndefined();
@@ -450,8 +581,11 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {le
 
     it('should validate and limit delay duration to maximum', async () => {// Arrange - Duration exceeding maximum (5 minutes = 300000ms)const excessiveDuration = 400000; // 6.67 minutes
       const action = createTestAction<WaitAction>({
-        action: 'wait',duration: excessiveDuration,});
-      const loggerWarnSpy = jest.spyOn(Logger.prototype, 'warn');// Actconst delayPromise = service.action(action);
+        action: 'wait',
+  duration: excessiveDuration,});
+
+        const loggerWarnSpy = jest.spyOn(Logger.prototype, 'warn');
+    // Actconst delayPromise = service.action(action);
       jest.advanceTimersByTime(300000); // Advance by maximum allowed time
       await delayPromise;
 
@@ -461,8 +595,11 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {le
 
     it('should handle negative delay values', async () => {// Arrangeconst negativeDuration = -1000;
       const action = createTestAction<WaitAction>({
-        action: 'wait',duration: negativeDuration,});
-      const loggerWarnSpy = jest.spyOn(Logger.prototype, 'warn');// Actconst delayPromise = service.action(action);
+        action: 'wait',
+  duration: negativeDuration,});
+
+        const loggerWarnSpy = jest.spyOn(Logger.prototype, 'warn');
+    // Actconst delayPromise = service.action(action);
       jest.advanceTimersByTime(0); // No time advancement needed for 0ms delay
       const result = await delayPromise;
 
@@ -474,44 +611,60 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {le
     it('should log delay start and completion', async () => {// Arrangeconst duration = 1000;
       const action = createTestAction<WaitAction>({
         action: 'wait',duration,});
-      const loggerDebugSpy = jest.spyOn(Logger.prototype, 'debug');// Actconst delayPromise = service.action(action);
+
+        const loggerDebugSpy = jest.spyOn(Logger.prototype, 'debug');
+    // Actconst delayPromise = service.action(action);
       jest.advanceTimersByTime(duration);
       await delayPromise;
 
       // Assert
       expect(_loggerDebugSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Starting delay of 1000ms'),);expect(_loggerDebugSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Starting delay of 1000ms'),);
+      expect(_loggerDebugSpy).toHaveBeenCalledWith(
         expect.stringContaining('Delay of 1000ms completed'),);});
   });
 
-  describe('ErrorHandler Utility Class', () => {describe('extractErrorMessage', () => {it('should extract message from Error instances', () => {// Arrangeconst error = new Error('Test error message');// Actconst result = ErrorHandler.extractErrorMessage(error);
+  describe('ErrorHandler Utility Class', () => {describe('extractErrorMessage', () => {it('should extract message from Error instances', () => {// Arrangeconst error = new Error('Test error message');
+    // Actconst result = ErrorHandler.extractErrorMessage(error);
 
         // Assert
-        expect(result).toBe('Test error message');});it('should handle string errors', () => {// Arrangeconst error = 'String error message';// Actconst result = ErrorHandler.extractErrorMessage(error);
+        expect(result).toBe('Test error message');});
+
+  it('should handle string errors', () => {// Arrangeconst error = 'String error message';
+    // Actconst result = ErrorHandler.extractErrorMessage(error);
 
         // Assert
-        expect(result).toBe('String error message');});it('should handle objects with message property', () => {// Arrangeconst error = { message: 'Object error message', code: 'ERR001' };// Actconst result = ErrorHandler.extractErrorMessage(error);
+        expect(result).toBe('String error message');});
+
+  it('should handle objects with message property', () => {// Arrangeconst error = { message: 'Object error message', code: 'ERR001' };
+    // Actconst result = ErrorHandler.extractErrorMessage(error);
 
         // Assert
-        expect(result).toBe('Object error message');});it('should handle non-error objects', () => {// Arrangeconst error = { status: 500, detail: 'Server error' };// Actconst result = ErrorHandler.extractErrorMessage(error);
+        expect(result).toBe('Object error message');});
+
+  it('should handle non-error objects', () => {// Arrangeconst error = { status: 500, detail: 'Server error' };
+    // Actconst result = ErrorHandler.extractErrorMessage(error);
 
         // Assert
         expect(result).toBe(JSON.stringify(error));
       });
 
-      it('should handle null and undefined', () => {// Act & Assertexpect(ErrorHandler.extractErrorMessage(null)).toBe('null');expect(ErrorHandler.extractErrorMessage(undefined)).toBe(JSON.stringify(undefined),
+      it('should handle null and undefined', () => {// Act & Assertexpect(ErrorHandler.extractErrorMessage(null)).toBe('null');
+      expect(ErrorHandler.extractErrorMessage(undefined)).toBe(JSON.stringify(undefined),
         );
       });
     });
 
-    describe('extractErrorStack', () => {it('should extract stack from Error instances', () => {// Arrangeconst error = new Error('Test error');error.stack = 'Error: Test errorat test.js:1:1';// Act
+    describe('extractErrorStack', () => {it('should extract stack from Error instances', () => {// Arrangeconst error = new Error('Test error');error.stack = 'Error: Test errorat test.js:1:1';
+    // Act
         const result = ErrorHandler.extractErrorStack(error);
 
         // Assert
         expect(result).toBe('Error: Test errorat test.js:1:1');});
 
       it('should handle objects with stack property', () => {// Arrangeconst error = {
-          message: 'Custom error',stack: 'Custom errorat custom.js:1:1',};
+          message: 'Custom error',
+  stack: 'Custom errorat custom.js:1:1',};
 
         // Act
         const result = ErrorHandler.extractErrorStack(error);
@@ -519,14 +672,20 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {le
         // Assert
         expect(result).toBe('Custom errorat custom.js:1:1');});
 
-      it('should return undefined for objects without stack', () => {// Arrangeconst errorObject = { message: 'No stack error' };// Actconst result = ErrorHandler.extractErrorStack(errorObject);
+      it('should return undefined for objects without stack', () => {// Arrangeconst errorObject = { message: 'No stack error' };
+    // Actconst result = ErrorHandler.extractErrorStack(errorObject);
 
         // Assert
         expect(result).toBeUndefined();
       });
     });
 
-    describe('createError', () => {it('should create comprehensive error object', () => {// Arrangeconst code = 'TEST_ERROR';const message = 'Test error message';const operationId = 'test_op_123';const context = { param1: 'value1', param2: 42 };const originalError = new Error('Original error');// Actconst result = ErrorHandler.createError(
+    describe('createError', () => {it('should create comprehensive error object', () => {// Arrangeconst code = 'TEST_ERROR';
+    const message = 'Test error message';
+    const operationId = 'test_op_123';
+    const context = { param1: 'value1', param2: 42 };
+    const originalError = new Error('Original error');
+    // Actconst result = ErrorHandler.createError(
           code,
           message,
           operationId,
@@ -546,7 +705,10 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {le
         expect(result.stack).toEqual(expect.any(String));
       });
 
-      it('should handle missing original error', () => {// Arrangeconst code = 'TEST_ERROR';const message = 'Test error message';const operationId = 'test_op_123';// Actconst result = ErrorHandler.createError(code, message, operationId);
+      it('should handle missing original error', () => {// Arrangeconst code = 'TEST_ERROR';
+    const message = 'Test error message';
+    const operationId = 'test_op_123';
+    // Actconst result = ErrorHandler.createError(code, message, operationId);
 
         // Assert
         expect(result).toMatchObject({
@@ -564,12 +726,17 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {le
 
   describe('Integration Tests', () => {it('should handle complex action sequence with proper logging', async () => {// Arrangeconst actions: ComputerAction[] = [
         {
-          action: 'move_mouse',coordinates: { x: 100, y: 200 },},
+          action: 'move_mouse',
+  coordinates: { x: 100, y: 200 },},
         {
-          action: 'click_mouse',button: 'left',clickCount: 1,},
+          action: 'click_mouse',
+  button: 'left',
+  clickCount: 1,},
         {
-          action: 'type_text',text: 'Hello World',},];
-      const loggerLogSpy = jest.spyOn(Logger.prototype, 'log');// Actfor (const action of actions) {
+          action: 'type_text',
+  text: 'Hello World',},];
+      const loggerLogSpy = jest.spyOn(Logger.prototype, 'log');
+    // Actfor (const action of actions) {
         await service.action(action);
       }
 
@@ -581,13 +748,18 @@ describe('ComputerUseService - Main Action Router and Error Handling', () => {le
         x: 100,
         y: 200,
       });
-      expect(nutService.mouseClickEvent).toHaveBeenCalledWith('left');expect(nutService.typeText).toHaveBeenCalledWith('Hello World',undefined,);
+      expect(nutService.mouseClickEvent).toHaveBeenCalledWith('left');
+      expect(nutService.typeText).toHaveBeenCalledWith('Hello World',undefined,);
     });
 
     it('should maintain operation isolation between concurrent actions', async () => {// Arrangeconst action1 = createTestAction<MoveMouseAction>({
-        action: 'move_mouse',coordinates: { x: 100, y: 200 },});
-      const action2 = createTestAction<TypeTextAction>({
-        action: 'type_text',text: 'Concurrent text',});// Act
+        action: 'move_mouse',
+  coordinates: { x: 100, y: 200 },});
+
+        const action2 = createTestAction<TypeTextAction>({
+        action: 'type_text',
+  text: 'Concurrent text',});
+    // Act
       const [result1, result2] = await Promise.all([
         service.action(action1),
         service.action(action2),

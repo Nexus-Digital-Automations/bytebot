@@ -33,15 +33,20 @@ import {
   Logger,
   OnModuleInit,
   OnModuleDestroy,
-} from '@nestjs/common';import { ConfigService } from '@nestjs/config';import { v4 as uuidv4 } from 'uuid';import {JobResult,
+} from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { v4 as uuidv4 } from 'uuid';
+import {JobResult,
   JobError,
   JobStatus,
   JobPriority,
   JobStorage,
-} from '../job-management.service';import {getErrorMessage,
+} from '../job-management.service';
+import {getErrorMessage,
   getErrorSeverity,
   ErrorSeverity,
-} from '../../types/error-types';// ===== ERROR CLASSIFICATION & RECOVERY TYPES =====/**
+} from '../../types/error-types';
+    // ===== ERROR CLASSIFICATION & RECOVERY TYPES =====/**
  * Comprehensive error classification for intelligent recovery
  */
 export enum ErrorCategory {
@@ -163,7 +168,7 @@ export interface ErrorRecoveryConfig {
 export class ErrorClassifier {
   private readonly logger = new Logger(ErrorClassifier.name);
 
-  /**
+/**
    * Classify error and determine appropriate recovery strategy
    */
   classifyError(error: JobError, _jobContext: JobResult): {
@@ -172,15 +177,19 @@ export class ErrorClassifier {
     confidence: number;
     reasoning: string;
   } {
-    const operationId = `classify_${Date.now()}_${Math.random().toString(36).substring(7)}`;this.logger.debug(`[${operationId}] Classifying error`, {jobId: _jobContext.jobId,errorCode: error.code,
+    const operationId = `classify_${Date.now()}_${Math.random().toString(36).substring(7)}`;this.logger.debug(`[${operationId}] Classifying error`, {jobId: _jobContext.jobId,
+  errorCode: error.code,
       errorMessage: error.message,
     });
 
     // Analyze error characteristics
     const category = this.categorizeError(error, _jobContext);
-    const strategy = this.determineRecoveryStrategy(category, error, _jobContext);
-    const confidence = this.calculateConfidence(category, error, _jobContext);
-    const reasoning = this.generateReasoning(category, strategy, error, _jobContext);
+
+        const strategy = this.determineRecoveryStrategy(category, error, _jobContext);
+
+        const confidence = this.calculateConfidence(category, error, _jobContext);
+
+        const reasoning = this.generateReasoning(category, strategy, error, _jobContext);
 
     this.logger.log(`[${operationId}] Error classified`, {
       jobId: _jobContext.jobId,
@@ -202,7 +211,8 @@ export class ErrorClassifier {
    */
   private categorizeError(error: JobError, _jobContext: JobResult): ErrorCategory {
     const errorMessage = error.message.toLowerCase();
-    const errorCode = error.code.toLowerCase();
+
+        const errorCode = error.code.toLowerCase();
 
     // Network-related errors
     if (
@@ -241,7 +251,8 @@ export class ErrorClassifier {
 
     // Determine if error is likely transient
     const transientIndicators = [
-      'temporary','retry','unavailable','busy','throttled','rate limit',];const isTransient = transientIndicators.some(indicator =>
+      'temporary','retry','unavailable','busy','throttled','rate limit',];
+    const isTransient = transientIndicators.some(indicator =>
       errorMessage.includes(indicator) || errorCode.includes(indicator)
     );
 
@@ -330,7 +341,8 @@ export class ErrorClassifier {
 
     // Increase confidence based on specific error patterns
     const errorMessage = error.message.toLowerCase();
-    const errorCode = error.code.toLowerCase();
+
+        const errorCode = error.code.toLowerCase();
 
     // Strong indicators increase confidence
     if (errorCode.includes('timeout')) confidence += 0.3;if (errorMessage.includes('network')) confidence += 0.3;if (errorMessage.includes('unauthorized')) confidence += 0.4;
@@ -381,11 +393,19 @@ export class RetryManager {
    * Calculate retry delay with exponential backoff and jitter
    */
   calculateRetryDelay(retryCount: number, baseDelay?: number): number {
-    const base = baseDelay ?? this.config.get<number>('ERROR_RECOVERY_BASE_RETRY_DELAY', 1000);const multiplier = this.config.get<number>('ERROR_RECOVERY_BACKOFF_MULTIPLIER', 2);const maxDelay = this.config.get<number>('ERROR_RECOVERY_MAX_RETRY_DELAY', 60000);const jitterPercent = this.config.get<number>('ERROR_RECOVERY_JITTER_PERCENT', 10);// Exponential backoffconst exponentialDelay = Math.min(base * Math.pow(multiplier, retryCount), maxDelay);
+    const base = baseDelay ?? this.config.get<number>('ERROR_RECOVERY_BASE_RETRY_DELAY', 1000);
+
+        const multiplier = this.config.get<number>('ERROR_RECOVERY_BACKOFF_MULTIPLIER', 2);
+
+        const maxDelay = this.config.get<number>('ERROR_RECOVERY_MAX_RETRY_DELAY', 60000);
+
+        const jitterPercent = this.config.get<number>('ERROR_RECOVERY_JITTER_PERCENT', 10);
+    // Exponential backoffconst exponentialDelay = Math.min(base * Math.pow(multiplier, retryCount), maxDelay);
 
     // Add jitter to prevent thundering herd
     const jitterRange = exponentialDelay * (jitterPercent / 100);
-    const jitter = (Math.random() * 2 - 1) * jitterRange;
+
+        const jitter = (Math.random() * 2 - 1) * jitterRange;
 
     return Math.max(exponentialDelay + jitter, base);
   }
@@ -445,7 +465,8 @@ export class RetryManager {
    */
   recordRetrySuccess(errorCategory: ErrorCategory): void {
     if (errorCategory === ErrorCategory.NETWORK || errorCategory === ErrorCategory.DEPENDENCY) {
-      const circuitBreakerKey = `${errorCategory}_circuit`;const circuitBreaker = this.getOrCreateCircuitBreaker(circuitBreakerKey);circuitBreaker.successCount++;
+      const circuitBreakerKey = `${errorCategory}_circuit`;
+    const circuitBreaker = this.getOrCreateCircuitBreaker(circuitBreakerKey);circuitBreaker.successCount++;
       circuitBreaker.lastSuccessTime = new Date();
 
       if (circuitBreaker.state === CircuitBreakerState.HALF_OPEN) {
@@ -463,13 +484,15 @@ export class RetryManager {
    */
   recordRetryFailure(errorCategory: ErrorCategory): void {
     if (errorCategory === ErrorCategory.NETWORK || errorCategory === ErrorCategory.DEPENDENCY) {
-      const circuitBreakerKey = `${errorCategory}_circuit`;const circuitBreaker = this.getOrCreateCircuitBreaker(circuitBreakerKey);circuitBreaker.failureCount++;
+      const circuitBreakerKey = `${errorCategory}_circuit`;
+    const circuitBreaker = this.getOrCreateCircuitBreaker(circuitBreakerKey);circuitBreaker.failureCount++;
       circuitBreaker.lastFailureTime = new Date();
 
       // Open circuit breaker if threshold exceeded
       if (circuitBreaker.failureCount >= circuitBreaker.failureThreshold) {
         circuitBreaker.state = CircuitBreakerState.OPEN;
-        this.logger.warn(`Circuit breaker ${circuitBreakerKey} opened`);// Schedule half-open transitionsetTimeout(() => {
+        this.logger.warn(`Circuit breaker ${circuitBreakerKey} opened`);
+    // Schedule half-open transitionsetTimeout(() => {
           if (circuitBreaker.state === CircuitBreakerState.OPEN) {
             circuitBreaker.state = CircuitBreakerState.HALF_OPEN;
             circuitBreaker.halfOpenCalls = 0;
@@ -490,7 +513,9 @@ export class RetryManager {
         state: CircuitBreakerState.CLOSED,
         failureCount: 0,
         successCount: 0,
-        failureThreshold: this.config.get<number>('ERROR_RECOVERY_CIRCUIT_BREAKER_THRESHOLD', 5),recoveryTimeout: this.config.get<number>('ERROR_RECOVERY_CIRCUIT_BREAKER_TIMEOUT', 60000),halfOpenMaxCalls: this.config.get<number>('ERROR_RECOVERY_HALF_OPEN_MAX_CALLS', 3),
+        failureThreshold: this.config.get<number>('ERROR_RECOVERY_CIRCUIT_BREAKER_THRESHOLD', 5),
+  recoveryTimeout: this.config.get<number>('ERROR_RECOVERY_CIRCUIT_BREAKER_TIMEOUT', 60000),
+  halfOpenMaxCalls: this.config.get<number>('ERROR_RECOVERY_HALF_OPEN_MAX_CALLS', 3),
         halfOpenCalls: 0,
       };
       this.circuitBreakers.set(key, circuitBreaker);
@@ -520,7 +545,7 @@ export class FailureAnalyzer {
   private readonly logger = new Logger(FailureAnalyzer.name);
   private readonly errorPatterns = new Map<string, ErrorPattern>();
 
-  /**
+/**
    * Perform comprehensive failure analysis
    */
   analyzeFailure(
@@ -528,7 +553,8 @@ export class FailureAnalyzer {
     error: JobError,
     recoveryAttempts: RecoveryAttempt[],
   ): FailureAnalysis {
-    const operationId = `analyze_${Date.now()}_${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Analyzing failure`, {jobId: job.jobId,errorCode: error.code,
+    const operationId = `analyze_${Date.now()}_${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Analyzing failure`, {jobId: job.jobId,
+  errorCode: error.code,
     });
 
     // Generate error signature for pattern matching
@@ -539,12 +565,15 @@ export class FailureAnalyzer {
 
     // Perform root cause analysis
     const rootCause = this.identifyRootCause(job, error, recoveryAttempts);
-    const contributingFactors = this.identifyContributingFactors(job, error, recoveryAttempts);
+
+        const contributingFactors = this.identifyContributingFactors(job, error, recoveryAttempts);
 
     // Determine severity and recommendations
     const severity = getErrorSeverity(error);
-    const recommendedStrategy = this.recommendStrategy(job, error, recoveryAttempts);
-    const alternativeStrategies = this.getAlternativeStrategies(recommendedStrategy);
+
+        const recommendedStrategy = this.recommendStrategy(job, error, recoveryAttempts);
+
+        const alternativeStrategies = this.getAlternativeStrategies(recommendedStrategy);
 
     // Generate prevention measures
     const preventionMeasures = this.generatePreventionMeasures(rootCause, contributingFactors);
@@ -552,7 +581,7 @@ export class FailureAnalyzer {
     // Find similar patterns
     const similarPatterns = this.findSimilarPatterns(errorSignature);
 
-    const analysis: FailureAnalysis = {
+        const analysis: FailureAnalysis = {
       analysisId: uuidv4(),
       jobId: job.jobId,
       errorCategory: this.categorizeErrorForAnalysis(error),
@@ -622,7 +651,8 @@ export class FailureAnalyzer {
     recoveryAttempts: RecoveryAttempt[],
   ): string {
     const errorMessage = error.message.toLowerCase();
-    const errorCode = error.code.toLowerCase();
+
+        const errorCode = error.code.toLowerCase();
 
     // Analyze based on error patterns
     if (errorCode.includes('timeout')) {return 'Job execution exceeded time limit due to long-running operation or resource contention';}if (errorMessage.includes('network') || errorMessage.includes('connection')) {return 'Network connectivity issue preventing communication with required services';}if (errorMessage.includes('memory') || errorMessage.includes('out of memory')) {return 'Insufficient memory allocation causing job execution failure';}if (errorMessage.includes('permission') || errorMessage.includes('unauthorized')) {return 'Insufficient permissions or expired credentials preventing job execution';}if (errorMessage.includes('validation') || errorMessage.includes('invalid')) {return 'Invalid input data or parameters causing validation failure';}if (recoveryAttempts.length > 0) {
@@ -675,7 +705,8 @@ export class FailureAnalyzer {
   private categorizeErrorForAnalysis(error: JobError): ErrorCategory {
     // Reuse classification logic
     const errorMessage = error.message.toLowerCase();
-    const errorCode = error.code.toLowerCase();
+
+        const errorCode = error.code.toLowerCase();
 
     if (errorCode.includes('timeout')) return ErrorCategory.TIMEOUT;if (errorMessage.includes('network')) return ErrorCategory.NETWORK;if (errorMessage.includes('memory')) return ErrorCategory.SYSTEM;if (errorMessage.includes('permission')) return ErrorCategory.SECURITY;if (errorMessage.includes('validation')) return ErrorCategory.USER;return ErrorCategory.PERMANENT;}
 
@@ -688,7 +719,8 @@ export class FailureAnalyzer {
     recoveryAttempts: RecoveryAttempt[],
   ): RecoveryStrategy {
     const category = this.categorizeErrorForAnalysis(error);
-    const failedStrategies = recoveryAttempts
+
+        const failedStrategies = recoveryAttempts
       .filter(attempt => !attempt.success)
       .map(attempt => attempt.strategy);
 
@@ -813,13 +845,15 @@ export class FailureAnalyzer {
     let confidence = 0.5;
 
     // Error specificity
-    if (error.code && error.code !== 'UNKNOWN_ERROR') confidence += 0.2;if (error.context && Object.keys(error.context).length > 0) confidence += 0.1;// Historical data
+    if (error.code && error.code !== 'UNKNOWN_ERROR') confidence += 0.2;if (error.context && Object.keys(error.context).length > 0) confidence += 0.1;
+    // Historical data
     if (recoveryAttempts.length > 0) confidence += 0.1;
     if (job.retryCount > 0) confidence += 0.1;
 
     // Pattern matching
     const signature = this.generateErrorSignature(error);
-    const existingPattern = this.errorPatterns.get(signature);
+
+        const existingPattern = this.errorPatterns.get(signature);
     if (existingPattern && existingPattern.frequency > 3) {
       confidence += 0.1;
     }
@@ -872,11 +906,12 @@ export class RecoveryStrategyManager {
     strategy: RecoveryStrategy,
     analysis: FailureAnalysis,
   ): Promise<RecoveryAttempt> {
-    const operationId = `recovery_${Date.now()}_${Math.random().toString(36).substring(7)}`;const startTime = Date.now();this.logger.log(`[${operationId}] Executing recovery strategy`, {jobId: job.jobId,strategy,
+    const operationId = `recovery_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const startTime = Date.now();this.logger.log(`[${operationId}] Executing recovery strategy`, {jobId: job.jobId,strategy,
       errorCategory: analysis.errorCategory,
     });
 
-    const attempt: RecoveryAttempt = {
+        const attempt: RecoveryAttempt = {
       attemptId: uuidv4(),
       jobId: job.jobId,
       strategy,
@@ -1002,7 +1037,9 @@ export class RecoveryStrategyManager {
    */
   private async executeJobSplitting(job: JobResult): Promise<void> {
     // For demonstration - in reality this would split the job into smaller parts
-    this.logger.log('Job splitting strategy executed', {jobId: job.jobId,note: 'Job marked for splitting into smaller components',});// Mark job for manual splitting
+    this.logger.log('Job splitting strategy executed', {jobId: job.jobId,
+  note: 'Job marked for splitting into smaller components',});
+    // Mark job for manual splitting
     const updatedJob = {
       ...job,
       metadata: {
@@ -1017,7 +1054,9 @@ export class RecoveryStrategyManager {
    * Execute resource scaling strategy
    */
   private async executeResourceScaling(job: JobResult): Promise<void> {
-    this.logger.log('Resource scaling strategy executed', {jobId: job.jobId,note: 'Requesting additional resources for job execution',});// Mark job for high-resource execution
+    this.logger.log('Resource scaling strategy executed', {jobId: job.jobId,
+  note: 'Requesting additional resources for job execution',});
+    // Mark job for high-resource execution
     const updatedJob = {
       ...job,
       metadata: {
@@ -1036,12 +1075,16 @@ export class RecoveryStrategyManager {
     job: JobResult,
     _analysis: FailureAnalysis,
   ): Promise<void> {
-    this.logger.log('Manual review strategy executed', {jobId: job.jobId,analysisId: _analysis.analysisId,
+    this.logger.log('Manual review strategy executed', {jobId: job.jobId,
+  analysisId: _analysis.analysisId,
     });
 
     // Update job with manual review flag
     const reviewError: JobError = {
-      code: 'REQUIRES_MANUAL_REVIEW',message: 'Job requires manual intervention for recovery',timestamp: new Date(),retryable: false,
+      code: 'REQUIRES_MANUAL_REVIEW',
+  message: 'Job requires manual intervention for recovery',
+  timestamp: new Date(),
+  retryable: false,
       context: {
         analysisId: _analysis.analysisId,
         rootCause: _analysis.rootCause,
@@ -1064,11 +1107,15 @@ export class RecoveryStrategyManager {
     job: JobResult,
     _analysis: FailureAnalysis,
   ): Promise<void> {
-    this.logger.log('Dead letter queue strategy executed', {jobId: job.jobId,analysisId: _analysis.analysisId,
+    this.logger.log('Dead letter queue strategy executed', {jobId: job.jobId,
+  analysisId: _analysis.analysisId,
     });
 
-    const deadLetterError: JobError = {
-      code: 'MOVED_TO_DEAD_LETTER',message: 'Job moved to dead letter queue for permanent failure',timestamp: new Date(),retryable: false,
+        const deadLetterError: JobError = {
+      code: 'MOVED_TO_DEAD_LETTER',
+  message: 'Job moved to dead letter queue for permanent failure',
+  timestamp: new Date(),
+  retryable: false,
       context: {
         analysisId: _analysis.analysisId,
         rootCause: _analysis.rootCause,
@@ -1091,14 +1138,18 @@ export class RecoveryStrategyManager {
     job: JobResult,
     analysis: FailureAnalysis,
   ): Promise<void> {
-    this.logger.log('Circuit breaker strategy executed', {jobId: job.jobId,errorCategory: analysis.errorCategory,
+    this.logger.log('Circuit breaker strategy executed', {jobId: job.jobId,
+  errorCategory: analysis.errorCategory,
     });
 
     // Record failure for circuit breaker
     this.retryManager.recordRetryFailure(analysis.errorCategory);
 
-    const circuitError: JobError = {
-      code: 'CIRCUIT_BREAKER_ACTIVATED',message: 'Circuit breaker activated due to repeated failures',timestamp: new Date(),retryable: true, // Can be retried when circuit closes
+        const circuitError: JobError = {
+      code: 'CIRCUIT_BREAKER_ACTIVATED',
+  message: 'Circuit breaker activated due to repeated failures',
+  timestamp: new Date(),
+  retryable: true, // Can be retried when circuit closes
       context: {
         errorCategory: analysis.errorCategory,
         circuitBreakerActivated: true,
@@ -1120,15 +1171,21 @@ export class RecoveryStrategyManager {
     job: JobResult,
     analysis: FailureAnalysis,
   ): Promise<void> {
-    this.logger.warn('Escalation strategy executed - URGENT ATTENTION REQUIRED', {jobId: job.jobId,priority: job.priority,
+    this.logger.warn('Escalation strategy executed - URGENT ATTENTION REQUIRED', {jobId: job.jobId,
+  priority: job.priority,
       rootCause: analysis.rootCause,
       analysisId: analysis.analysisId,
     });
 
-    const escalationError: JobError = {
-      code: 'ESCALATED_TO_ADMIN',message: 'Job failure escalated to administrator for immediate attention',timestamp: new Date(),retryable: false,
+        const escalationError: JobError = {
+      code: 'ESCALATED_TO_ADMIN',
+  message: 'Job failure escalated to administrator for immediate attention',
+  timestamp: new Date(),
+  retryable: false,
       context: {
-        escalationLevel: 'CRITICAL',requiresImmediateAttention: true,analysisId: analysis.analysisId,
+        escalationLevel: 'CRITICAL',
+  requiresImmediateAttention: true,
+  analysisId: analysis.analysisId,
         rootCause: analysis.rootCause,
         adminNotificationSent: true,
       },
@@ -1149,11 +1206,13 @@ export class RecoveryStrategyManager {
     job: JobResult,
     analysis: FailureAnalysis,
   ): Promise<void> {
-    this.logger.log('Configuration update strategy executed', {jobId: job.jobId,analysisId: analysis.analysisId,
+    this.logger.log('Configuration update strategy executed', {jobId: job.jobId,
+  analysisId: analysis.analysisId,
     });
 
-    const configError: JobError = {
-      code: 'REQUIRES_CONFIG_UPDATE',message: 'Job requires configuration update for successful execution',
+        const configError: JobError = {
+      code: 'REQUIRES_CONFIG_UPDATE',
+  message: 'Job requires configuration update for successful execution',
       timestamp: new Date(),
       retryable: true,
       context: {
@@ -1193,11 +1252,12 @@ export class DeadLetterQueueService {
     recoveryAttempts: RecoveryAttempt[],
     analysis: FailureAnalysis,
   ): Promise<string> {
-    const operationId = `dlq_add_${Date.now()}_${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Adding job to dead letter queue`, {jobId: job.jobId,errorCode: finalError.code,
+    const operationId = `dlq_add_${Date.now()}_${Math.random().toString(36).substring(7)}`;this.logger.log(`[${operationId}] Adding job to dead letter queue`, {jobId: job.jobId,
+  errorCode: finalError.code,
       analysisId: analysis.analysisId,
     });
 
-    const deadLetterItem: DeadLetterItem = {
+        const deadLetterItem: DeadLetterItem = {
       id: uuidv4(),
       jobId: job.jobId,
       originalJob: job,
@@ -1282,7 +1342,8 @@ export class DeadLetterQueueService {
     this.deadLetterItems.delete(deadLetterId);
 
     if (existed) {
-      this.logger.log('Item removed from dead letter queue', { deadLetterId });}return existed;
+      this.logger.log('Item removed from dead letter queue', { deadLetterId });
+}return existed;
   }
 
   /**
@@ -1297,7 +1358,7 @@ export class DeadLetterQueueService {
   } {
     const items = Array.from(this.deadLetterItems.values());
 
-    const byPriority: Record<JobPriority, number> = {
+        const byPriority: Record<JobPriority, number> = {
       [JobPriority.URGENT]: 0,
       [JobPriority.HIGH]: 0,
       [JobPriority.NORMAL]: 0,
@@ -1307,7 +1368,7 @@ export class DeadLetterQueueService {
     const byCategory: Record<ErrorCategory, number> = Object.values(ErrorCategory)
       .reduce((acc, category) => ({ ...acc, [category]: 0 }), {} as Record<ErrorCategory, number>);
 
-    const escalationLevels: Record<number, number> = {};
+        const escalationLevels: Record<number, number> = {};
     let requiresManualReview = 0;
 
     items.forEach(item => {
@@ -1391,7 +1452,16 @@ export class JobErrorRecoveryService implements OnModuleInit, OnModuleDestroy {
     private readonly deadLetterQueue: DeadLetterQueueService,
   ) {
     this.config = {
-      maxRetryAttempts: this.configService.get<number>('ERROR_RECOVERY_MAX_RETRIES', 3),baseRetryDelay: this.configService.get<number>('ERROR_RECOVERY_BASE_DELAY', 1000),maxRetryDelay: this.configService.get<number>('ERROR_RECOVERY_MAX_DELAY', 60000),exponentialBackoffMultiplier: this.configService.get<number>('ERROR_RECOVERY_BACKOFF_MULTIPLIER', 2),jitterMaxPercent: this.configService.get<number>('ERROR_RECOVERY_JITTER_PERCENT', 10),circuitBreakerFailureThreshold: this.configService.get<number>('ERROR_RECOVERY_CIRCUIT_THRESHOLD', 5),circuitBreakerRecoveryTimeout: this.configService.get<number>('ERROR_RECOVERY_CIRCUIT_TIMEOUT', 60000),deadLetterQueueMaxSize: this.configService.get<number>('ERROR_RECOVERY_DLQ_MAX_SIZE', 1000),errorPatternAnalysisWindow: this.configService.get<number>('ERROR_RECOVERY_PATTERN_WINDOW', 3600000),manualReviewEscalationTime: this.configService.get<number>('ERROR_RECOVERY_ESCALATION_TIME', 1800000),};this.logger.log('JobErrorRecoveryService initialized', this.config);}onModuleInit(): void {
+      maxRetryAttempts: this.configService.get<number>('ERROR_RECOVERY_MAX_RETRIES', 3),
+  baseRetryDelay: this.configService.get<number>('ERROR_RECOVERY_BASE_DELAY', 1000),
+  maxRetryDelay: this.configService.get<number>('ERROR_RECOVERY_MAX_DELAY', 60000),
+  exponentialBackoffMultiplier: this.configService.get<number>('ERROR_RECOVERY_BACKOFF_MULTIPLIER', 2),
+  jitterMaxPercent: this.configService.get<number>('ERROR_RECOVERY_JITTER_PERCENT', 10),
+  circuitBreakerFailureThreshold: this.configService.get<number>('ERROR_RECOVERY_CIRCUIT_THRESHOLD', 5),
+  circuitBreakerRecoveryTimeout: this.configService.get<number>('ERROR_RECOVERY_CIRCUIT_TIMEOUT', 60000),
+  deadLetterQueueMaxSize: this.configService.get<number>('ERROR_RECOVERY_DLQ_MAX_SIZE', 1000),
+  errorPatternAnalysisWindow: this.configService.get<number>('ERROR_RECOVERY_PATTERN_WINDOW', 3600000),
+  manualReviewEscalationTime: this.configService.get<number>('ERROR_RECOVERY_ESCALATION_TIME', 1800000),};this.logger.log('JobErrorRecoveryService initialized', this.config);}onModuleInit(): void {
     this.logger.log('Job Error Recovery Service starting...');this.startErrorPatternCleanup();}
 
   onModuleDestroy(): void {
@@ -1425,7 +1495,8 @@ export class JobErrorRecoveryService implements OnModuleInit, OnModuleDestroy {
       // Step 1: Classify error and determine recovery strategy
       const classification = this.errorClassifier.classifyError(job.error, job);
 
-      this.logger.log(`[${operationId}] Error classified`, {jobId: job.jobId,category: classification.category,
+      this.logger.log(`[${operationId}] Error classified`, {jobId: job.jobId,
+  category: classification.category,
         strategy: classification.strategy,
         confidence: classification.confidence,
       });
@@ -1465,7 +1536,8 @@ export class JobErrorRecoveryService implements OnModuleInit, OnModuleDestroy {
       // Step 3: Perform failure analysis
       const analysis = this.failureAnalyzer.analyzeFailure(job, job.error, attempts);
 
-      this.logger.log(`[${operationId}] Failure analysis completed`, {jobId: job.jobId,analysisId: analysis.analysisId,
+      this.logger.log(`[${operationId}] Failure analysis completed`, {jobId: job.jobId,
+  analysisId: analysis.analysisId,
         rootCause: analysis.rootCause,
         recommendedStrategy: analysis.recommendedStrategy,
       });
@@ -1537,7 +1609,7 @@ export class JobErrorRecoveryService implements OnModuleInit, OnModuleDestroy {
   } {
     const allAttempts = Array.from(this.recoveryAttempts.values()).flat();
 
-    const strategiesByType: Record<RecoveryStrategy, number> = Object.values(RecoveryStrategy)
+        const strategiesByType: Record<RecoveryStrategy, number> = Object.values(RecoveryStrategy)
       .reduce((acc, strategy) => ({ ...acc, [strategy]: 0 }), {} as Record<RecoveryStrategy, number>);
 
     allAttempts.forEach(attempt => {
@@ -1588,7 +1660,8 @@ export class JobErrorRecoveryService implements OnModuleInit, OnModuleDestroy {
    * Force circuit breaker state change (for testing/admin purposes)
    */
   setCircuitBreakerState(category: ErrorCategory, state: CircuitBreakerState): void {
-    this.logger.log('Manually setting circuit breaker state', { category, state });// This would be implemented in the RetryManager// For now, just log the action
+    this.logger.log('Manually setting circuit breaker state', { category, state });
+    // This would be implemented in the RetryManager// For now, just log the action
   }
 
   /**
@@ -1602,13 +1675,14 @@ export class JobErrorRecoveryService implements OnModuleInit, OnModuleDestroy {
     };
   } {
     const stats = this.getRecoveryStatistics();
-    const recentAttempts = Array.from(this.recoveryAttempts.values())
+
+        const recentAttempts = Array.from(this.recoveryAttempts.values())
       .flat()
       .filter(attempt =>
         attempt.timestamp.getTime() > Date.now() - 15 * 60 * 1000 // Last 15 minutes
       );
 
-    const recentFailureRate = recentAttempts.length > 0
+        const recentFailureRate = recentAttempts.length > 0
       ? recentAttempts.filter(a => !a.success).length / recentAttempts.length
       : 0;
 
