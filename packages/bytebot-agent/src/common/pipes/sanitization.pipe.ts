@@ -177,14 +177,23 @@ const SANITIZATION_STRATEGIES: Record<
 /**
  * Union type for all sanitizable values
  */
-type SanitizableValue = string | number | boolean | null | undefined | SanitizableObject | SanitizableArray;
+type SanitizableValue =
+  | string
+  | number
+  | boolean
+  | null
+  | undefined
+  | SanitizableObject
+  | SanitizableArray;
 interface SanitizableObject {
   [key: string]: SanitizableValue;
 }
 interface SanitizableArray extends Array<SanitizableValue> {}
 
 @Injectable()
-export class SanitizationPipe implements PipeTransform<SanitizableValue, unknown> {
+export class SanitizationPipe
+  implements PipeTransform<SanitizableValue, unknown>
+{
   private readonly logger = new Logger(SanitizationPipe.name);
   private readonly options: SanitizationPipeOptions;
 
@@ -427,7 +436,10 @@ export class SanitizationPipe implements PipeTransform<SanitizableValue, unknown
    * @param operationId - Operation tracking ID
    * @returns Sanitized object
    */
-  private sanitizeObject(value: SanitizableValue, operationId: string): unknown {
+  private sanitizeObject(
+    value: SanitizableValue,
+    operationId: string,
+  ): unknown {
     if (Array.isArray(value)) {
       return value.map((item, index) => {
         if (typeof item === 'string') {

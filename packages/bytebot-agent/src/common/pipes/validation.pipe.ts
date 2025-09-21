@@ -91,14 +91,23 @@ const DEFAULT_OPTIONS: GlobalValidationPipeOptions = {
 /**
  * Union type for all validatable values
  */
-type ValidatableValue = string | number | boolean | null | undefined | ValidatableObject | ValidatableArray;
+type ValidatableValue =
+  | string
+  | number
+  | boolean
+  | null
+  | undefined
+  | ValidatableObject
+  | ValidatableArray;
 interface ValidatableObject {
   [key: string]: ValidatableValue;
 }
 interface ValidatableArray extends Array<ValidatableValue> {}
 
 @Injectable()
-export class GlobalValidationPipe implements PipeTransform<ValidatableValue, unknown> {
+export class GlobalValidationPipe
+  implements PipeTransform<ValidatableValue, unknown>
+{
   private readonly logger = new Logger(GlobalValidationPipe.name);
   private readonly options: GlobalValidationPipeOptions;
 
@@ -120,7 +129,10 @@ export class GlobalValidationPipe implements PipeTransform<ValidatableValue, unk
    * @param metadata - Argument metadata from NestJS
    * @returns Validated and transformed value
    */
-  async transform(value: ValidatableValue, metadata: ArgumentMetadata): Promise<unknown> {
+  async transform(
+    value: ValidatableValue,
+    metadata: ArgumentMetadata,
+  ): Promise<unknown> {
     const operationId = `validation-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const startTime = Date.now();
 
@@ -238,7 +250,10 @@ export class GlobalValidationPipe implements PipeTransform<ValidatableValue, unk
    * @param operationId - Operation tracking ID
    * @returns Sanitized value
    */
-  private sanitizeBasicValue(value: ValidatableValue, operationId: string): ValidatableValue {
+  private sanitizeBasicValue(
+    value: ValidatableValue,
+    operationId: string,
+  ): ValidatableValue {
     if (typeof value === 'string' && this.options.enableSanitization) {
       const sanitized = sanitizeInput(value, this.options.sanitizationOptions);
 
@@ -315,7 +330,10 @@ export class GlobalValidationPipe implements PipeTransform<ValidatableValue, unk
    * @param value - Value to analyze
    * @param operationId - Operation tracking ID
    */
-  private detectSecurityThreats(value: ValidatableValue, operationId: string): void {
+  private detectSecurityThreats(
+    value: ValidatableValue,
+    operationId: string,
+  ): void {
     const threats: string[] = [];
 
     // Convert value to string for pattern analysis
@@ -485,7 +503,9 @@ export class GlobalValidationPipe implements PipeTransform<ValidatableValue, unk
    * @param errors - Class-validator errors
    * @returns Formatted error array
    */
-  private formatValidationErrors(errors: ValidationError[]): Array<Record<string, unknown>> {
+  private formatValidationErrors(
+    errors: ValidationError[],
+  ): Array<Record<string, unknown>> {
     return errors.map((error) => ({
       property: error.property,
       value: error.value as unknown,

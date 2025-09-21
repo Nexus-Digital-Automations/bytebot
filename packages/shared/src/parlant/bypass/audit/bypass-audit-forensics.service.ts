@@ -1262,8 +1262,8 @@ export class BypassAuditForensicsService {
   }
 
   private verifyEntryHash(entry: BypassAuditEntry): boolean {
-    const entryWithoutHash = { ...entry };
-    delete entryWithoutHash.entryHash;
+    // Use destructuring to exclude entryHash instead of delete operator
+    const { entryHash: _, ...entryWithoutHash } = entry;
     const expectedHash = createHash('sha256').update(JSON.stringify(entryWithoutHash)).digest('hex');
     return entry.entryHash === expectedHash;
   }

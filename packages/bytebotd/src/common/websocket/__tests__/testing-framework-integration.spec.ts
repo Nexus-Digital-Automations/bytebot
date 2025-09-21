@@ -48,9 +48,9 @@ class WebSocketTestOrchestrator extends EventEmitter {
 }
 
   private initializeTestSuites(): void {
-  // Register all WebSocket test suites
-    this.registerTestSuite({,
-  id: 'connection-lifecycle',
+    // Register all WebSocket test suites
+    this.registerTestSuite({
+      id: 'connection-lifecycle',
       name: 'WebSocket Connection Lifecycle Tests',
       filePath: './connection-lifecycle.spec.ts',
       category: 'core',
@@ -156,7 +156,7 @@ class WebSocketTestOrchestrator extends EventEmitter {
     this.emit('execution_started', execution);try {
   const result = await this.executeTestPlanInternal(plan, execution);
       execution.status = result.success ? 'completed' : 'failed';
-execution.endTime = performance.now();this.executionHistory.push({,
+execution.endTime = performance.now();this.executionHistory.push({
   executionId: execution.id,
         plan,
         result,
@@ -178,7 +178,7 @@ execution.endTime = performance.now();execution.error = error instanceof Error ?
   }
 
   private async executeTestPlanInternal(plan: TestExecutionPlan, execution: TestExecution): Promise<TestPlanResult>  {
-  const result: TestPlanResult = {,
+  const result: TestPlanResult = {
   planId: plan.id,
       success: true,
       suiteResults: [],
@@ -266,17 +266,20 @@ const suite = this.testSuites.get(suiteId);
       execution.suiteResults.set(suite.id, suiteResult);
 
       this.updateSummary(result.summary, suiteResult);
-      this.emit('suite_completed', suite, suiteResult);// Stop on failure if configuredif (!suiteResult.success && execution.plan.failFast) {
+      this.emit('suite_completed', suite, suiteResult);
+
+      // Stop on failure if configured
+      if (!suiteResult.success && execution.plan.failFast) {
         break;
-      
-}
+      }
     }
   }
 
-  private async executeParallelSuites(suites: TestSuiteConfig[],
+  private async executeParallelSuites(
+    suites: TestSuiteConfig[],
     execution: TestExecution,
     result: TestPlanResult
-  ): Promise<void>  {
+  ): Promise<void> {
   // Group suites by dependency level for parallel execution
     const dependencyLevels = this.groupByDependencyLevel(suites);
 
@@ -294,7 +297,7 @@ const suite = this.testSuites.get(suiteId);
         let suiteResult: TestSuiteResult;
         if (promiseResult.status === 'fulfilled') {suiteResult = promiseResult.value;
 } else {
-  suiteResult = {,
+  suiteResult = {
   suiteId: suite.id,
             suiteName: suite.name,
             success: false,
@@ -356,7 +359,7 @@ levels.push(currentLevel);
       const mockTestResult = await this.simulateTestExecution(suite);
 
       const endTime = performance.now();
-      const result: TestSuiteResult = {,
+      const result: TestSuiteResult = {
   suiteId: suite.id,
         suiteName: suite.name,
         success: mockTestResult.success,
@@ -373,7 +376,7 @@ levels.push(currentLevel);
 
     } catch (error) {
   const endTime = performance.now();
-      return {,
+      return {
   suiteId: suite.id,
         suiteName: suite.name,
         success: false,
@@ -400,7 +403,7 @@ levels.push(currentLevel);
     for (let i = 0; i < testCount; i++) {
       const success = Math.random() > 0.05; // 95% success rate for simulation
 
-      tests.push({,
+      tests.push({
   testName: `${suite.category
 } test ${i + 1}`,success,duration: Math.random() * 5000 + 100,
         error: success ? undefined : `Simulated error in ${suite.name}`
@@ -425,7 +428,7 @@ return testCounts[suite.category] || 10;
   }
 
   private calculateTestSummary(tests: TestResult[]): TestSummary {
-  return {,
+  return {
   total: tests.length,
       passed: tests.filter(t => t.success).length,
       failed: tests.filter(t => !t.success).length,
@@ -469,18 +472,25 @@ class CICDIntegrationManager {
 }
 
   async generateGitHubActionsWorkflow(): Promise<GitHubWorkflow>  {
-  const workflow: GitHubWorkflow = {,
+  const workflow: GitHubWorkflow = {
   name: 'WebSocket Test Suite',
-      on: {push: { branches: ['main', 'develop'] 
-},pull_request: { branches: ['main'] },schedule: [{ cron: '0 2 * * *' }] // Daily at 2 AM},jobs: {
-  'websocket-tests': {'runs-on': 'ubuntu-latest',
-      strategy: {matrix: {
-              'node-version': ['18.x', '20.x'],environment: ['test', 'staging']
-}},
+      on: {
+        push: { branches: ['main', 'develop'] },
+        pull_request: { branches: ['main'] },
+        schedule: [{ cron: '0 2 * * *' }] // Daily at 2 AM
+      },
+      jobs: {
+        'websocket-tests': {
+          'runs-on': 'ubuntu-latest',
+          strategy: {
+            matrix: {
+              'node-version': ['18.x', '20.x'],
+              environment: ['test', 'staging']
+            }
+          },
           steps: [
-  {
-  ,
-  name: 'Checkout code',
+            {
+              name: 'Checkout code',
       uses: 'actions/checkout@v4'
 },{
               name: 'Setup Node.js',
@@ -516,7 +526,7 @@ class CICDIntegrationManager {
   }
 
   async generateDockerComposeConfig(): Promise<DockerComposeConfig>  {
-  return {,
+  return {
   version: '3.8',
       services: {'websocket-server': {build: {context: '.',
       dockerfile: 'Dockerfile.test'
@@ -547,7 +557,7 @@ class CICDIntegrationManager {
   }
 
   async createTestExecutionPlan(environment: string): Promise<TestExecutionPlan>  {
-  const plans: Record<string, TestExecutionPlan> = {,
+  const plans: Record<string, TestExecutionPlan> = {
   development: {
   id: 'dev-quick',
       name: 'Development Quick Tests',
@@ -587,7 +597,7 @@ class CICDIntegrationManager {
 // Test Report Generator
 class TestReportGenerator {
   async generateComprehensiveReport(results: TestPlanResult[]): Promise<TestReport>  {
-    const report: TestReport = {,
+    const report: TestReport = {
   id: `report_${Date.now()
 }`,
       timestamp: new Date().toISOString(),
@@ -602,7 +612,7 @@ class TestReportGenerator {
   }
 
   private calculateOverallSummary(results: TestPlanResult[]): OverallSummary {
-  const summary: OverallSummary = {,
+  const summary: OverallSummary = {
   totalExecutions: results.length,
       successfulExecutions: results.filter(r => r.success).length,
       failedExecutions: results.filter(r => !r.success).length,
@@ -629,7 +639,7 @@ class TestReportGenerator {
     const sortedResults = results.sort((a, b) => a.startTime - b.startTime);
 
     if (sortedResults.length < 2) {
-      return {,
+      return {
   executionTimeTrend: 'stable',
       successRateTrend: 'stable',
       performanceTrend: 'stable',
@@ -719,7 +729,7 @@ const loadTestResults = results.flatMap(r =>
   }
 
   private async collectArtifacts(results: TestPlanResult[]): Promise<TestArtifacts>  {
-  return {,
+  return {
   screenshots: [], // Would collect actual screenshots in real implementation,
   logs: await this.collectTestLogs(results),
       metrics: await this.collectPerformanceMetrics(results),
@@ -737,7 +747,7 @@ const loadTestResults = results.flatMap(r =>
   private async collectPerformanceMetrics(results: TestPlanResult[]): Promise<PerformanceMetrics>  {
   const allSuites = results.flatMap(r => r.suiteResults);
 
-    return {,
+    return {
   averageExecutionTime: allSuites.reduce((sum, s) => sum + s.duration, 0) / allSuites.length,
       p95ExecutionTime: this.calculatePercentile(allSuites.map(s => s.duration), 95),
       memoryUsage: Math.random() * 512 + 256, // Simulated,
@@ -754,7 +764,7 @@ const loadTestResults = results.flatMap(r =>
 }
 
   private async collectCoverageData(): Promise<CoverageData>  {
-  return {,
+  return {
   linesCovered: 1250,
       totalLines: 1500,
       branchesCovered: 180,
@@ -859,7 +869,7 @@ class RegressionTestManager {
 
   constructor(orchestrator: WebSocketTestOrchestrator) {
     this.orchestrator = orchestrator;
-    this.regressionThresholds = {,
+    this.regressionThresholds = {
   performanceDegradation: 0.2, // 20% slower is regression,
   successRateDrops: 0.05, // 5% drop in success rate,
   newFailures: 3, // More than 3 new failing tests,
@@ -1294,7 +1304,7 @@ expect(executionOrder.indexOf('realtime-message-flow')).toBeLessThan(executionOr
     test('should handle fail-fast behavior correctly', async () => {
   // Mock a failing test suite for this testconst originalExecute = orchestrator['executeSingleSuite'];let callCount = 0;orchestrator['executeSingleSuite'] = async function(suite: TestSuiteConfig) {callCount++;if (callCount === 2) {
           // Make second suite fail
-          return {,
+          return {
   suiteId: suite.id,
             suiteName: suite.name,
             success: false,
@@ -1390,7 +1400,7 @@ expect(prodPlan.suiteIds.length).toBe(9);
 
     test('should analyze trends correctly', async () => {
   // Create mock results with different characteristicsconst results: TestPlanResult[] = [
-  {,
+  {
   planId: 'test-1',
       success: true,
       suiteResults: [],
@@ -1619,7 +1629,7 @@ test('should support multi-environment configurations', async () => {
     });
 
     test('should handle test data management', async () => {
-  // Simulate test data setup and cleanupconst testData = {,
+  // Simulate test data setup and cleanupconst testData = {
   users: [
           { id: 1, name: 'Test User 1' 
 },{ id: 2, name: 'Test User 2' }],sessions: [

@@ -178,11 +178,13 @@ export interface DatabaseBackupDto {
 
 /**
  * Database analytics request DTO
- */;
-
+ */
 export interface DatabaseAnalyticsDto {
-  /** Time range for analytics */;
-  timeRange: '1h' | '24h' | '7d' | '30d';/** Include performance metrics */includePerformance?: boolean;
+  /** Time range for analytics */
+  timeRange: '1h' | '24h' | '7d' | '30d';
+
+  /** Include performance metrics */
+  includePerformance?: boolean;
 
   /** Include security metrics */
   includeSecurity?: boolean;
@@ -349,7 +351,7 @@ export interface DatabaseAnalyticsDto {
       timeout: 45000,
       cacheable: false,
       customRules: [
-        {,
+        {
   name: 'backup_requirement_validation',
           condition: 'operation in ["DELETE", "UPDATE"] && requireBackup === true',
           action: 'APPROVE',
@@ -375,7 +377,7 @@ export interface DatabaseAnalyticsDto {
   )
   @ApiOperation({
     summary: 'Execute database modification',description: 'Execute INSERT, UPDATE, DELETE, or UPSERT operations with comprehensive validation'})@ApiBody({
-  schema: {,
+  schema: {
   type: 'object',properties: {table: { type: 'string' 
 },operation: { type: 'string', enum: ['INSERT', 'UPDATE', 'DELETE', 'UPSERT'] },data: { type: 'object' },conditions: { type: 'object' },justification: { type: 'string' },useTransaction: { type: 'boolean' },requireBackup: { type: 'boolean' }},required: ['table', 'operation', 'justification']}})
   @ApiResponse({
@@ -468,21 +470,36 @@ export interface DatabaseAnalyticsDto {
     'Execute database schema modification with DDL operations and migration support',{
   securityLevel: SecurityLevel.CRITICAL,
       validationMode: ValidationMode.EXPLICIT,
-      businessCategory: 'SCHEMA_MODIFICATION',complianceFlags: ['SCHEMA_CHANGE', 'DDL_OPERATION', 'CRITICAL_SYSTEM_CHANGE'],requiredRoles: ['ADMIN'],timeout: 60000,cacheable: false,
+      businessCategory: 'SCHEMA_MODIFICATION',
+      complianceFlags: ['SCHEMA_CHANGE', 'DDL_OPERATION', 'CRITICAL_SYSTEM_CHANGE'],
+      requiredRoles: ['ADMIN'],
+      timeout: 60000,
+      cacheable: false,
       customRules: [
-        {,
-  name: 'drop_operation_validation',condition: 'operation.startsWith("DROP")",action: 'REQUIRE_CONFIRMATION',priority: 10
-},
         {
-          name: 'production_schema_change',condition: 'environment === "production"",action: 'REQUIRE_CONFIRMATION',priority: 9},
+          name: 'drop_operation_validation',
+          condition: 'operation.startsWith("DROP")',
+          action: 'REQUIRE_CONFIRMATION',
+          priority: 10,
+        },
         {
-          name: 'reversible_migration_check',condition: 'reversible === true',action: 'APPROVE',priority: 5}
+          name: 'production_schema_change',
+          condition: 'environment === "production"',
+          action: 'REQUIRE_CONFIRMATION',
+          priority: 9,
+        },
+        {
+          name: 'reversible_migration_check',
+          condition: 'reversible === true',
+          action: 'APPROVE',
+          priority: 5,
+        }
       ]
     }
   )
   @ApiOperation({
     summary: 'Execute schema modification',description: 'Execute DDL operations with comprehensive validation and rollback support'})@ApiBody({
-  schema: {,
+  schema: {
   type: 'object',properties: {operation: { type: 'string', enum: ['CREATE_TABLE', 'ALTER_TABLE', 'DROP_TABLE', 'CREATE_INDEX', 'DROP_INDEX'] 
 },ddl: { type: 'string' },description: { type: 'string' },reversible: { type: 'boolean' },rollbackInstructions: { type: 'string' }},required: ['operation', 'ddl', 'description']
     }
@@ -694,10 +711,14 @@ export interface DatabaseAnalyticsDto {
   }  private createMigrationRecord(dto: DatabaseSchemaDto, userId: string): string {
     // Mock implementation - would create migration tracking record
     return `migration_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-  }  private executeSchemaOperation(dto: DatabaseSchemaDto, migrationId: string): void {
+  }
+
+  private executeSchemaOperation(dto: DatabaseSchemaDto, migrationId: string): void {
     // Mock implementation - would execute actual DDL
     this.logger.log(`Executing schema operation: ${dto.operation} (${migrationId})`);
-  }}private generateOperationId(): string {
+  }
+
+  private generateOperationId(): string {
     return `db_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
   }
 }

@@ -459,7 +459,7 @@ export class ParlantHealthMonitorService extends EventEmitter implements OnModul
         }
 
         const ws = new WebSocket(this.config.wsUrl, {
-          headers: this.config.apiKey ? { 'Authorization': `Bearer ${this.config.apiKey}` } : {},
+          headers: this.config.apiKey ? { 'Authorization', : `Bearer ${this.config.apiKey}` } : {},
         });
 
         const timeout = setTimeout(() => {
@@ -558,7 +558,7 @@ export class ParlantHealthMonitorService extends EventEmitter implements OnModul
       baseURL: this.config.serverUrl,
       timeout: this.config.monitoring.healthCheckTimeout,
       headers: {
-        'Content-Type': 'application/json','Accept': 'application/json','User-Agent': 'Bytebot-Health-Monitor/1.0',...(this.config.apiKey && { 'Authorization': `Bearer ${this.config.apiKey}` }),
+        'Content-Type': 'application/json','Accept': 'application/json','User-Agent': 'Bytebot-Health-Monitor/1.0',...(this.config.apiKey && { 'Authorization', : `Bearer ${this.config.apiKey}` }),
       },
     });
   }

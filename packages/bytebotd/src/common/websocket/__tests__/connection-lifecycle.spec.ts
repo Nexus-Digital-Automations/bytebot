@@ -340,7 +340,7 @@ describe('WebSocket Connection Lifecycle Tests', () => {
     wsServer = createSafeWebSocketServer({
   server: testServer,
       verifyClient: createSecureVerifyCallback({
-  allowedOrigins: ['http://localhost:3000', 'https: //localhost:3000'],
+        allowedOrigins: ['http://localhost:3000', 'https://localhost:3000'],
       requireHttps: false,
       maxConnections: 10,
         rateLimitByIP: false,
@@ -427,11 +427,15 @@ expect(connectionEvent?.connectionTime).toBeLessThan(1000); // Sub-1000ms connec
 
 
     it('should handle connection timeout gracefully', async () => {
-// Test with invalid URL to simulate timeoutconst client = new ConnectionLifecycleTestClient('ws://localhost:99999', maxReconnectionAttempts: 1,});
+      // Test with invalid URL to simulate timeout
+      const client = new ConnectionLifecycleTestClient('ws://localhost:99999', {
+        maxReconnectionAttempts: 1,
+      });
 
       await expect(client.connect()).rejects.toThrow();
-      expect(client.getConnectionState()).toBe('disconnected');const metrics = client.getConnectionMetrics();
-expect(metrics.lastConnectionError).toBeTruthy();
+      expect(client.getConnectionState()).toBe('disconnected');
+      const metrics = client.getConnectionMetrics();
+      expect(metrics.lastConnectionError).toBeTruthy();
     });
 
 
@@ -508,7 +512,7 @@ it('should maintain connection metrics accurately', async () => {
 
   // ===== RECONNECTION AND FAILOVER =====
 
-  describe('Reconnection and Failover', () => 
+  describe('Reconnection and Failover', () => { 
 
   it('should handle automatic reconnection after connection loss', async () => {
     const client = new ConnectionLifecycleTestClient(TEST_URL, {
@@ -587,14 +591,18 @@ it('should maintain connection metrics accurately', async () => {
 
     it('should stop reconnection after max attempts', async () => {
 
-  const maxAttempts = 3;const client = new ConnectionLifecycleTestClient('ws://localhost:99999', autoReconnect: true,
+      const maxAttempts = 3;
+      const client = new ConnectionLifecycleTestClient('ws://localhost:99999', {
+        autoReconnect: true,
       maxReconnectionAttempts: maxAttempts,
         reconnectionDelay: 100,
       
 });
 
       let totalAttempts = 0;
-      client.on('reconnection-failed', ({ attempt }) => {totalAttempts = attempt;});
+      client.on('reconnection-failed', ({ attempt }) => {
+        totalAttempts = attempt;
+      });
 
       await client.connect().catch(() => {});
 
@@ -602,7 +610,9 @@ it('should maintain connection metrics accurately', async () => {
       await new Promise(resolve => setTimeout(resolve, 3000));
 
       expect(totalAttempts).toBe(maxAttempts);
-      expect(client.getConnectionState()).toBe('disconnected');});});
+      expect(client.getConnectionState()).toBe('disconnected');
+    });
+  });
 
   // ===== CONNECTION POOL MANAGEMENT =====
 
@@ -733,8 +743,9 @@ expect(originalMessage.sessionId).toBe(sessionId);
 
     it('should track connection lifecycle events per session', async () => {
 
-  const sessionEvents: Array<sessionId: string;
-  event: string;
+      const sessionEvents: Array<{
+        sessionId: string;
+        event: string;
         timestamp: number;
       
 }> = [];
@@ -803,11 +814,13 @@ ms`,
 
     it('should achieve 99.9% connection success rate', async () => {
 
-  const totalAttempts = 100;let successfulConnections = 0;
+      const totalAttempts = 100;
+      let successfulConnections = 0;
       let failedConnections = 0;
 
-      const connectionPromises = Array.from( length: totalAttempts 
-}, async (_, i) => {
+      const connectionPromises = Array.from({
+        length: totalAttempts
+      }, async (_, i) => {
   try {
           const client = new ConnectionLifecycleTestClient(TEST_URL, {
   headers: { 'X-Client-ID': `reliability-test-${i

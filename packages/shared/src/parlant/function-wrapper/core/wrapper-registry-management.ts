@@ -242,7 +242,7 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
 
       this.logger.error(`Failed to register wrapper: ${functionId}`, {
         registrationId,
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         registrationTime
       });
 
@@ -340,7 +340,7 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
 
       this.logger.error(`Failed to unregister wrapper: ${functionId}`, {
         unregistrationId,
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         unregistrationTime
       });
 
@@ -349,7 +349,7 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
         unregistrationId,
         functionId,
         unregistrationTime,
-        error: error.message
+        error: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -614,7 +614,7 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
           functionId: registration.functionId,
           healthy: false,
           healthScore: 0,
-          issues: [`Health check failed: ${error.message}`],
+          issues: [`Health check failed: ${error instanceof Error ? error.message : String(error)}`],
           recommendations: ['Check wrapper configuration and dependencies'],
           lastCheck: new Date()
         });
@@ -693,7 +693,7 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
 
       this.logger.error(`Failed to update wrapper config: ${functionId}`, {
         updateId,
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         updateTime
       });
 
@@ -704,7 +704,7 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
         oldConfig: null,
         newConfig: null,
         updateTime,
-        error: error.message
+        error: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -882,7 +882,7 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
           functionId: configData.functionId,
           success: false,
           action: 'failed',
-          reason: error.message
+          reason: error instanceof Error ? error.message : String(error)
         });
       }
     }

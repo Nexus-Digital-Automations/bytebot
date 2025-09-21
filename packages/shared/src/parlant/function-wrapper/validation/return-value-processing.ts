@@ -84,16 +84,15 @@ export class ReturnValueProcessingService {
       );
 
       if (!securityValidation.passed) {
-        throw new WrapperError({
-          code: 'RETURN_VALUE_SECURITY_VIOLATION',
-          message: `Return value security validation failed: ${securityValidation.violations.join(', ')}`,
-          category: ErrorCategory.VALIDATION_ERROR,
-          metadata: {
-            processingId,
-            functionName,
-            violations: securityValidation.violations
-          }
-        });
+        const error = new Error(`Return value security validation failed: ${securityValidation.violations.join(', ')}`);
+        (error as any).code = 'RETURN_VALUE_SECURITY_VIOLATION';
+        (error as any).category = ErrorCategory.VALIDATION_ERROR;
+        (error as any).metadata = {
+          processingId,
+          functionName,
+          violations: securityValidation.violations
+        };
+        throw error;
       }
 
       // Step 3: Transform and sanitize return value
@@ -173,7 +172,7 @@ export class ReturnValueProcessingService {
 
       this.logger.error(`Return value processing failed for ${functionName}`, {
         processingId,
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         processingTime
       });
 
@@ -191,7 +190,7 @@ export class ReturnValueProcessingService {
           structure: { isCollection: false, elementCount: 0, nestedLevels: 0 },
           contentAnalysis: { containsPII: false, containsCredentials: false, containsSensitiveData: false, dataPatterns: [] }
         },
-        securityValidation: { passed: false, violations: [error.message], sanitizationApplied: false },
+        securityValidation: { passed: false, violations: [error instanceof Error ? error.message : String(error)], sanitizationApplied: false },
         performanceAnalysis: {
           serializationTime: 0,
           memoryFootprint: 0,
@@ -302,7 +301,7 @@ export class ReturnValueProcessingService {
     } catch (error) {
       return {
         valid: false,
-        errors: [`Schema validation failed: ${error.message}`],
+        errors: [`Schema validation failed: ${error instanceof Error ? error.message : String(error)}`],
         warnings: [],
         schema: expectedSchema,
         actualType: typeof returnValue,
@@ -371,7 +370,7 @@ export class ReturnValueProcessingService {
     } catch (error) {
       this.logger.error(`Return value transformation failed`, {
         transformationId,
-        error: error.message
+        error: error instanceof Error ? error.message : String(error)
       });
 
       return {
@@ -382,7 +381,7 @@ export class ReturnValueProcessingService {
         transformationSuccessful: false,
         sizeBefore: this.calculateValueSize(returnValue),
         sizeAfter: this.calculateValueSize(returnValue),
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         transformationMetadata: {
           timestamp: new Date(),
           options: transformationOptions
@@ -1128,7 +1127,7 @@ export class ReturnValueProcessingService {
           errors.push(`String does not match required pattern`);
         }
       } catch (error) {
-        errors.push(`Invalid pattern: ${error.message}`);
+        errors.push(`Invalid pattern: ${error instanceof Error ? error.message : String(error)}`);
       }
     }
 
@@ -1556,7 +1555,7 @@ export class ResultTransformationEngine {
    */
   public async sanitizePII<T>(value: T): Promise<T> {
     if (typeof value === 'string') {
-      let sanitized = value;
+      let sanitized: string = value;
       sanitized = sanitized.replace(/\b\d{3}-\d{2}-\d{4}\b/g, 'XXX-XX-XXXX'); // SSN
       sanitized = sanitized.replace(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g, '[EMAIL_REDACTED]'); // Email
       return sanitized as unknown as T;
@@ -1584,7 +1583,7 @@ export class ResultTransformationEngine {
   public async redactCredentials<T>(value: T): Promise<T> {
     if (typeof value === 'string') {
       // Replace credential-like patterns
-      let redacted = value;
+      let redacted: string = value;
       redacted = redacted.replace(/password["\s]*[:=]["\s]*[^"\s,}]+/gi, 'password: "[REDACTED]"');
       redacted = redacted.replace(/token["\s]*[:=]["\s]*[^"\s,}]+/gi, 'token: "[REDACTED]"');
       redacted = redacted.replace(/key["\s]*[:=]["\s]*[^"\s,}]+/gi, 'key: "[REDACTED]"');

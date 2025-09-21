@@ -576,20 +576,35 @@ export interface VulnerabilityScanResult {
   /** Scan identifier */
   scanId: string;
 
+  /** Scan type */
+  scanType: VulnerabilityScanType;
+
+  /** Function name tested */
+  functionName: string;
+
   /** Scan timestamp */
-  timestamp: Date;
+  timestamp?: Date;
 
   /** Scan duration */
-  duration: number;
+  duration?: number;
+
+  /** Scan duration in milliseconds */
+  scanDuration: number;
+
+  /** Scan completion status */
+  completed: boolean;
+
+  /** Error message if scan failed */
+  errorMessage?: string;
 
   /** Scan status */
-  status: 'completed' | 'failed' | 'partial';
+  status?: 'completed' | 'failed' | 'partial';
 
   /** Discovered vulnerabilities */
-  vulnerabilities: Vulnerability[];
+  vulnerabilities: SecurityVulnerability[];
 
   /** Scan statistics */
-  statistics: VulnerabilityScanStatistics;
+  statistics?: VulnerabilityScanStatistics;
 }
 
 /**

@@ -59,11 +59,11 @@ class FaultInjector {
   injectConnectionFailure(duration = 5000): void {
   const faultId = 'connection_failure';
     this.activeFaults.add(faultId);
-    this.faultHistory.push({,
+    this.faultHistory.push({
   faultType: faultId,
       injectedAt: Date.now(),
       duration,
-    
+
 });
 
     setTimeout(() => {
@@ -84,7 +84,7 @@ class FaultInjector {
 
   injectServerOverload(duration = 3000): void {
   const faultId = 'server_overload';
-this.activeFaults.add(faultId);this.faultHistory.push({,
+this.activeFaults.add(faultId);this.faultHistory.push({
   faultType: faultId,
       injectedAt: Date.now(),
       duration,
@@ -100,7 +100,7 @@ this.activeFaults.add(faultId);this.faultHistory.push({,
   injectNetworkPartition(duration = 2000): void {
   const faultId = 'network_partition';
     this.activeFaults.add(faultId);
-    this.faultHistory.push({,
+    this.faultHistory.push({
   faultType: faultId,
       injectedAt: Date.now(),
       duration,
@@ -154,7 +154,7 @@ this.activeFaults.add(faultId);this.faultHistory.push({,
  * Recovery metrics tracker
  */
 class RecoveryMetricsTracker {
-  private recoveryEvents: Array<{,
+  private recoveryEvents: Array<{
   eventType: 'failure' | 'recovery_attempt' | 'recovery_success' | 'recovery_failure';
   timestamp: number;
   faultType: string;
@@ -198,7 +198,7 @@ _${Math.random().toString(36).substring(7)}`;
     if (failure) {
       failure.recoveryAttempts = attempt;
 
-      this.recoveryEvents.push({,
+      this.recoveryEvents.push({
   eventType: 'recovery_attempt',
       timestamp: Date.now(),
       faultType: failure.faultType,
@@ -214,7 +214,7 @@ _${Math.random().toString(36).substring(7)}`;
     if (failure) {
       const recoveryTime = Date.now() - failure.startTime;
 
-      this.recoveryEvents.push({,
+      this.recoveryEvents.push({
   eventType: 'recovery_success',
       timestamp: Date.now(),
       faultType: failure.faultType,
@@ -231,7 +231,7 @@ _${Math.random().toString(36).substring(7)}`;
   recordRecoveryFailure(failureId: string, details?: any): void {
   const failure = this.activeFailures.get(failureId);
     if (failure) {
-      this.recoveryEvents.push({,
+      this.recoveryEvents.push({
   eventType: 'recovery_failure',
       timestamp: Date.now(),
       faultType: failure.faultType,
@@ -342,7 +342,7 @@ class ResilientWebSocketClient extends EventEmitter {
 }
 return new Promise((resolve, reject) => {
   try {
-        this.ws = new WebSocket.WebSocket(this.url, {,
+        this.ws = new WebSocket.WebSocket(this.url, {
   headers: this.options.clientId ? { 'X-Client-ID': this.options.clientId 
 } : {},});
     const connectionTimeout = setTimeout(() => {
@@ -442,7 +442,7 @@ private scheduleReconnection(): void {
 
       try {
   await this.connect();
-        this.recoveryTracker.recordRecoverySuccess(failureId, {,
+        this.recoveryTracker.recordRecoverySuccess(failureId, {
   attempt: this.reconnectionAttempts,
           delay,
         
@@ -580,21 +580,29 @@ class ServerFaultSimulator {
   }
 
   private resolveServerOverload(): void {
-    this.faults.delete('server_overload');// Restore normal send behavior (would need more sophisticated approach in real implementation)}
+    this.faults.delete('server_overload');
+    // Restore normal send behavior (would need more sophisticated approach in real implementation)
+  }
 
   simulateConnectionDrops(percentage = 0.3): void {
-  this.faults.add('connection_drops');const connectionsToClose = Array.from(this.connections.values()).slice(0, Math.floor(this.connections.size * percentage));
+    this.faults.add('connection_drops');
+    const connectionsToClose = Array.from(this.connections.values()).slice(0, Math.floor(this.connections.size * percentage));
 
     connectionsToClose.forEach(ws => {
       if (ws.readyState === WebSocket.OPEN) {
         ws.close(1006, 'Simulated connection drop');
-}});
+      }
+    });
 
     setTimeout(() => {
-      this.faults.delete('connection_drops');}, 1000);}
+      this.faults.delete('connection_drops');
+    }, 1000);
+  }
 
   simulateMessageLoss(lossRate = 0.1): void {
-  this.faults.add('message_loss');// Intercept and randomly drop messagesthis.connections.forEach(ws => {
+    this.faults.add('message_loss');
+    // Intercept and randomly drop messages
+    this.connections.forEach(ws => {
       const originalSend = ws.send.bind(ws);
       ws.send = function(data: any) {
         if (Math.random() > lossRate) {
@@ -612,20 +620,27 @@ class ServerFaultSimulator {
   }
 
   private resolveMessageLoss(): void {
-  this.faults.delete('message_loss');// Restore normal send behavior for all connectionsthis.connections.forEach(ws => {
+    this.faults.delete('message_loss');
+    // Restore normal send behavior for all connections
+    this.connections.forEach(ws => {
       // In real implementation, would need to restore original send method
     
 });
   }
 
   simulateNetworkPartition(duration = 2000): void {
-  this.faults.add('network_partition');// Close all connections to simulate network partitionthis.connections.forEach(ws => {
+    this.faults.add('network_partition');
+    // Close all connections to simulate network partition
+    this.connections.forEach(ws => {
       if (ws.readyState === WebSocket.OPEN) {
         ws.close(1006, 'Network partition');
-}});
+      }
+    });
 
     setTimeout(() => {
-      this.faults.delete('network_partition');}, duration);}
+      this.faults.delete('network_partition');
+    }, duration);
+  }
 
   getActiveFaults(): string[] {
   return Array.from(this.faults);
@@ -668,10 +683,10 @@ describe('Error Handling and Recovery Tests', () => {
   beforeAll(async () => {
   jest.setTimeout(240000); // 4 minutes for error recovery tests
 
-    module = await Test.createTestingModule({,
+    module = await Test.createTestingModule({
   providers: [
         ConversationalWebSocketBridgeService,
-        {,
+        {
   provide: ConfigService,
           useValue: mockConfigService,
         
@@ -693,7 +708,11 @@ describe('Error Handling and Recovery Tests', () => {
 }`);
 
       ws.on('message', async (data: WebSocket.RawData) => {
-  try {const message = JSON.parse(Buffer.from(data as ArrayBuffer).toString('utf8')) as ConversationalMessage;// Simulate processing delays during server overloadif (faultSimulator.getActiveFaults().includes('server_overload')) {
+        try {
+          const message = JSON.parse(Buffer.from(data as ArrayBuffer).toString('utf8')) as ConversationalMessage;
+
+          // Simulate processing delays during server overload
+          if (faultSimulator.getActiveFaults().includes('server_overload')) {
             await new Promise(resolve => setTimeout(resolve, Math.random() * 2000 + 1000));
           
 }
@@ -706,28 +725,31 @@ describe('Error Handling and Recovery Tests', () => {
             sequence: (message.sequence || 0) + 1,
             type: ConversationalMessageType.STATUS_UPDATE,
             payload: {
-  echo: true,
+              echo: true,
               originalMessage: message,
               serverFaults: faultSimulator.getActiveFaults(),
-            
-},
+            },
             metadata: {
-  priority: 'normal',
-      requiresAck: false,
-      compression: false,
+              priority: 'normal',
+              requiresAck: false,
+              compression: false,
               routingHints: ['error-recovery-test'],
-},};
+            },
+          };
 
           // Only send response if not simulating message loss
-          if (!faultSimulator.getActiveFaults().includes('message_loss') || Math.random() > 0.1) {ws.send(JSON.stringify(response));}
+          if (!faultSimulator.getActiveFaults().includes('message_loss') || Math.random() > 0.1) {
+            ws.send(JSON.stringify(response));
+          }
 
         } catch (error) {
-  console.error('Error processing message in recovery test:', error);// Send error responseconst errorResponse = {,
-  error: 'Invalid message format',
-      originalData: data.toString(),
-      timestamp: Date.now(),
-          
-};
+          console.error('Error processing message in recovery test:', error);
+          // Send error response
+          const errorResponse = {
+            error: 'Invalid message format',
+            originalData: data.toString(),
+            timestamp: Date.now(),
+          };
 
           ws.send(JSON.stringify(errorResponse));
         }
@@ -772,7 +794,7 @@ describe('Error Handling and Recovery Tests', () => {
 
   describe('Connection Failure and Recovery', () => {
 
-  it('should automatically reconnect after connection loss', async () => const client = new ResilientWebSocketClient(TEST_URL, {autoReconnect: true,
+  it('should automatically reconnect after connection loss', async () => { const client = new ResilientWebSocketClient(TEST_URL, {autoReconnect: true,
         maxReconnectionAttempts: 5,
         clientId: 'auto-reconnect-test',
 });const connectionEvents: string[] = [];
@@ -812,10 +834,12 @@ expect(recoveryMetrics.recoverySuccessRate).toBeGreaterThan(0.5); // 50%+ recove
 
     it('should implement exponential backoff for reconnection attempts', async () => {
 
-  const client = new ResilientWebSocketClient('ws://localhost:99999',  // Invalid URLautoReconnect: true,
+  const client = new ResilientWebSocketClient('ws://localhost:99999', {  // Invalid URL
+      autoReconnect: true,
       maxReconnectionAttempts: 5,
-        clientId: 'backoff-test',
-});const reconnectionEvents: Array<{ attempt: number; delay: number; timestamp: number }> = [];
+      clientId: 'backoff-test',
+    });
+    const reconnectionEvents: Array<{ attempt: number; delay: number; timestamp: number }> = [];
 
       client.on('reconnection-scheduled', (event) => {
   reconnectionEvents.push({attempt: event.attempt,
@@ -842,7 +866,7 @@ expect(recoveryMetrics.recoverySuccessRate).toBeGreaterThan(0.5); // 50%+ recove
       console.log('Exponential Backoff Results:', {
   reconnectionAttempts: reconnectionEvents.length,
         delays: reconnectionEvents.map(e => e.delay),
-        backoffProgression: reconnectionEvents.map((e, i) => ({,
+        backoffProgression: reconnectionEvents.map((e, i) => ({
   attempt: e.attempt,
           delay: `${e.delay
 }
@@ -898,7 +922,7 @@ expect(circuitBreakerEvents).toContain('opened');await client.disconnect();});
 
   describe('Message Delivery Failure and Retry', () => {
 
-  it('should queue messages during disconnection and replay on reconnect', async () => const client = new ResilientWebSocketClient(TEST_URL, {autoReconnect: true,
+  it('should queue messages during disconnection and replay on reconnect', async () => { const client = new ResilientWebSocketClient(TEST_URL, {autoReconnect: true,
         queueMessages: true,
         clientId: 'message-queue-test',
 });const messageEvents: Array<{ type: string; message?: any }> = [];
@@ -910,7 +934,7 @@ expect(circuitBreakerEvents).toContain('opened');await client.disconnect();});
 
       // Send some messages while connected
       for (let i = 0; i < 3; i++) {
-  await client.sendMessage({,
+  await client.sendMessage({
   messageId: `connected-msg-${i
 }`,
           sessionId: 'queue-test-session',
@@ -934,7 +958,7 @@ expect(circuitBreakerEvents).toContain('opened');await client.disconnect();});
 
       // Send messages while disconnected (should be queued)
       for (let i = 0; i < 5; i++) {
-  await client.sendMessage({,
+  await client.sendMessage({
   messageId: `queued-msg-${i
 }`,
           sessionId: 'queue-test-session',
@@ -988,7 +1012,7 @@ expect(client.getQueueSize()).toBeLessThanOrEqual(1); // Should process most/all
 
       // Send messages before inducing message loss
       for (let i = 0; i < 10; i++) {
-  const message: ConversationalMessage = {,
+  const message: ConversationalMessage = {
   messageId: `loss-test-msg-${i
 }`,
           sessionId: 'loss-test-session',
@@ -1015,7 +1039,7 @@ expect(client.getQueueSize()).toBeLessThanOrEqual(1); // Should process most/all
 
       // Send more messages during message loss
       for (let i = 10; i < 20; i++) {
-  const message: ConversationalMessage = {,
+  const message: ConversationalMessage = {
   messageId: `loss-test-msg-${i
 }`,
           sessionId: 'loss-test-session',
@@ -1059,7 +1083,7 @@ expect(client.getQueueSize()).toBeLessThanOrEqual(1); // Should process most/all
 
   describe('Server Overload and Graceful Degradation', () => {
 
-  it('should handle server overload with graceful degradation', async () => const client = new ResilientWebSocketClient(TEST_URL, {autoReconnect: true,
+  it('should handle server overload with graceful degradation', async () => { const client = new ResilientWebSocketClient(TEST_URL, {autoReconnect: true,
         clientId: 'overload-test',
 });await client.connect();
 
@@ -1078,7 +1102,7 @@ expect(client.getQueueSize()).toBeLessThanOrEqual(1); // Should process most/all
       // Measure response times before overload
       for (let i = 0; i < 5; i++) {
   const startTime = Date.now();
-        await client.sendMessage({,
+        await client.sendMessage({
   messageId: `before-overload-${i
 }`,
           sessionId: 'overload-test-session',
@@ -1115,7 +1139,7 @@ expect(client.getQueueSize()).toBeLessThanOrEqual(1); // Should process most/all
       // Send messages during overload
       for (let i = 0; i < 5; i++) {
   const startTime = Date.now();
-        await client.sendMessage({,
+        await client.sendMessage({
   messageId: `during-overload-${i
 }`,
           sessionId: 'overload-test-session',
@@ -1170,7 +1194,7 @@ x` : 'N/A',responsesReceived: responsesReceived.length,});
   // ===== MALFORMED MESSAGE HANDLING =====
 
   describe('Malformed Message Handling', () => {
-it('should handle malformed messages without crashing', async () => const client = new ResilientWebSocketClient(TEST_URL, {clientId: 'malformed-test',});await client.connect();
+it('should handle malformed messages without crashing', async () => { const client = new ResilientWebSocketClient(TEST_URL, {clientId: 'malformed-test',});await client.connect();
 
       const malformedMessages = [
         '{ invalid json','{"type": "unknown_type"}','{"messageId": null}",'{"messageId": "valid", "invalidField": }",'not json at all','','{"messageId": "valid", "sessionId": "test", "timestamp": "invalid_timestamp"}',];const errorEvents: any[] = [];
@@ -1228,7 +1252,7 @@ it('should handle malformed messages without crashing', async () => const client
 
   describe('Network Interruption and Recovery', () => {
 
-  it('should recover from network partition scenarios', async () => const client = new ResilientWebSocketClient(TEST_URL, {autoReconnect: true,
+  it('should recover from network partition scenarios', async () => { const client = new ResilientWebSocketClient(TEST_URL, {autoReconnect: true,
         queueMessages: true,
         maxReconnectionAttempts: 8,
         clientId: 'partition-test',
@@ -1244,7 +1268,7 @@ it('should handle malformed messages without crashing', async () => const client
 
       // Send messages during partition (should be queued)
       for (let i = 0; i < 3; i++) {
-  await client.sendMessage({,
+  await client.sendMessage({
   messageId: `partition-msg-${i
 }`,
           sessionId: 'partition-test-session',

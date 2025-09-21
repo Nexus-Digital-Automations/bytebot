@@ -750,7 +750,7 @@ export class MultiLanguageBridgeService implements OnApplicationShutdown {
         baseURL: config.bridgeUrl,
         timeout: config.timeout,
         headers: {
-          'Content-Type': 'application/json','Authorization': config.authenticationKey ? `Bearer ${config.authenticationKey}` : undefined,
+          'Content-Type': 'application/json','Authorization', : config.authenticationKey ? `Bearer ${config.authenticationKey}` : undefined,
           'User-Agent': 'AIgent-MultiLanguageBridge/1.0',},});
 
       this.httpClients.set(language, client);

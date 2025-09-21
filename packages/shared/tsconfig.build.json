@@ -6,7 +6,7 @@
     "declaration": true,
     "outDir": "./dist",
     "rootDir": "./src",
-    "strict": false,
+    "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
@@ -15,8 +15,10 @@
     "emitDecoratorMetadata": true,
     "moduleResolution": "node",
     "resolveJsonModule": true,
-    "noEmitOnError": false,
-    "noImplicitAny": false
+    "noEmitOnError": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true
   },
   "include": [
     "src/index.ts",

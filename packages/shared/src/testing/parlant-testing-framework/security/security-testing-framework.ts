@@ -43,7 +43,8 @@ import {
   DataClassification,
   VulnerabilityScanResult,
   VulnerabilityScanType,
-  AuthenticationTestScenario
+  AuthenticationTestScenario,
+  Vulnerability
 } from '../types/security-testing.types';
 
 /**
@@ -145,7 +146,7 @@ export class SecurityTestingFramework extends EventEmitter {
         vulnerabilitiesFound: results.reduce((sum, r) => sum + r.vulnerabilities.length, 0),
         overallSecurityScore: this.calculateOverallSecurityScore(results),
         results,
-        recommendations: this.generateSecurityRecommendations(results),
+        recommendations: this.aggregateSecurityRecommendations(results),
         complianceStatus: this.assessComplianceStatus(results),
         targetFunctions: functions,
         config: this.config,
@@ -1048,16 +1049,10 @@ export class SecurityTestingFramework extends EventEmitter {
 
   private getDefaultVulnerabilityScans(): VulnerabilityScanType[] {
     return [
-      'SQL_INJECTION',
-      'XSS',
-      'CSRF',
-      'AUTHENTICATION_BYPASS',
-      'AUTHORIZATION_BYPASS',
-      'SENSITIVE_DATA_EXPOSURE',
-      'SECURITY_MISCONFIGURATION',
-      'INSECURE_DESERIALIZATION',
-      'COMPONENTS_VULNERABILITIES',
-      'INSUFFICIENT_LOGGING'
+      VulnerabilityScanType.STATIC_CODE_ANALYSIS,
+      VulnerabilityScanType.DYNAMIC_ANALYSIS,
+      VulnerabilityScanType.DEPENDENCY_SCANNING,
+      VulnerabilityScanType.WEB_APPLICATION_SCANNING
     ];
   }
 
@@ -1088,7 +1083,7 @@ export class SecurityTestingFramework extends EventEmitter {
         vulnerabilities: [],
         scanDuration: 0,
         completed: false,
-        errorMessage: error.message
+        errorMessage: error instanceof Error ? error.message : String(error)
       };
     }
   }
@@ -1100,7 +1095,7 @@ export class SecurityTestingFramework extends EventEmitter {
     const vulnerabilities: SecurityVulnerability[] = [];
 
     // Mock vulnerability detection based on function characteristics
-    if (scanType === 'SQL_INJECTION' && func.category === 'QUERY') {
+    if (scanType === VulnerabilityScanType.STATIC_CODE_ANALYSIS && func.category === 'QUERY') {
       if (Math.random() < 0.3) { // 30% chance of SQL injection vulnerability
         vulnerabilities.push({
           id: `SQLI_${Date.now()}`,
@@ -1116,7 +1111,7 @@ export class SecurityTestingFramework extends EventEmitter {
       }
     }
 
-    if (scanType === 'AUTHENTICATION_BYPASS' && func.category === 'AUTHENTICATION') {
+    if (scanType === VulnerabilityScanType.WEB_APPLICATION_SCANNING && func.category === 'AUTHENTICATION') {
       if (Math.random() < 0.2) { // 20% chance of auth bypass vulnerability
         vulnerabilities.push({
           id: `AUTH_BYPASS_${Date.now()}`,
@@ -1171,7 +1166,7 @@ export class SecurityTestingFramework extends EventEmitter {
     return totalScore / results.length;
   }
 
-  private generateSecurityRecommendations(results: SecurityTestResult[]): SecurityRecommendation[] {
+  private aggregateSecurityRecommendations(results: SecurityTestResult[]): SecurityRecommendation[] {
     const allRecommendations = results.flatMap(result => result.recommendations);
     return this.prioritizeRecommendations(allRecommendations);
   }

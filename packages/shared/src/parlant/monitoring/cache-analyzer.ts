@@ -1187,7 +1187,7 @@ export class CacheAnalyzer extends EventEmitter {
       }
 
       // Latency optimization
-      if (levelMetrics.avgAccessTime > targets.maxAccessTime) {
+      if ('maxAccessTime' in targets && levelMetrics.avgAccessTime > targets.maxAccessTime) {
         levelOptimizations.push({
           id: `level-opt-latency-${level.toLowerCase()}-${Date.now()}`,
           type: "MEMORY_OPTIMIZATION",
@@ -1198,8 +1198,9 @@ export class CacheAnalyzer extends EventEmitter {
             hitRateImprovement: 0,
             latencyReduction: Math.min(
               0.5,
-              (levelMetrics.avgAccessTime - targets.maxAccessTime) /
-                targets.maxAccessTime,
+              'maxAccessTime' in targets
+                ? (levelMetrics.avgAccessTime - targets.maxAccessTime) / targets.maxAccessTime
+                : 0,
             ),
             memoryOptimization: 0.1,
           },
@@ -1465,7 +1466,7 @@ export class CacheAnalyzer extends EventEmitter {
         );
       }
 
-      if (analysis.avgAccessTime > targets.maxAccessTime * 1.5) {
+      if ('maxAccessTime' in targets && analysis.avgAccessTime > targets.maxAccessTime * 1.5) {
         alerts.warnings.push(
           `${level} cache access time (${analysis.avgAccessTime.toFixed(1)}ms) is high`,
         );

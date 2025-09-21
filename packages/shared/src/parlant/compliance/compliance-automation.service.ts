@@ -1011,7 +1011,7 @@ export class ComplianceAutomationService implements OnApplicationShutdown {
       this.eventEmitter.emit('compliance.assessment.failed', {
         assessmentId,
         framework,
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         timestamp: new Date(),
       });
 

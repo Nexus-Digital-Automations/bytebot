@@ -669,7 +669,7 @@ _${this.generateId()}`;this.logger.log(`[${operationId}] Starting Parlant WebSoc
    * Create enhanced verification callback for streaming security
    */
   private createStreamingVerificationCallback() {
-  return createSecureVerifyCallback({,
+  return createSecureVerifyCallback({
   allowedOrigins: this.getAllowedOrigins(),
       requireHttps: this.isHttpsRequired(),
       maxConnections: 100, // Higher limit for streaming,
@@ -1286,7 +1286,7 @@ const message = JSON.parse(rawMessage) as ParlantStreamingMessage;
   private async sendValidationResponseStream(sessionId: string,
     response: ParlantValidationStreamResponse
   ): Promise<void>  {
-  const message: ParlantStreamingMessage = {,
+  const message: ParlantStreamingMessage = {
   type: ParlantStreamingMessageType.VALIDATION_RESPONSE_STREAM,
       messageId: this.generateMessageId(),
       sessionId,
@@ -1321,7 +1321,7 @@ const message = JSON.parse(rawMessage) as ParlantStreamingMessage;
 },
     streamId?: string
   ): Promise<void>  {
-  const message: ParlantStreamingMessage = {,
+  const message: ParlantStreamingMessage = {
   type: ParlantStreamingMessageType.VALIDATION_PROGRESS_UPDATE,
       messageId: this.generateMessageId(),
       streamId,
@@ -1349,7 +1349,7 @@ const message = JSON.parse(rawMessage) as ParlantStreamingMessage;
     validationId: string,
     streamId?: string
   ): Promise<void>  {
-  const message: ParlantStreamingMessage = {,
+  const message: ParlantStreamingMessage = {
   type: ParlantStreamingMessageType.VALIDATION_COMPLETE,
       messageId: this.generateMessageId(),
       streamId,
@@ -1737,7 +1737,7 @@ resolve();
    * Broadcast shutdown notification to all sessions
    */
   private async broadcastShutdownNotification(): Promise<void>  {
-  const shutdownMessage: ParlantStreamingMessage = {,
+  const shutdownMessage: ParlantStreamingMessage = {
   type: ParlantStreamingMessageType.CONNECTION_CLOSE,
       messageId: this.generateMessageId(),
       sessionId: 'system',
@@ -1776,7 +1776,7 @@ resolve();
     const streams = Array.from(this.streams.values());
     const performanceData = sessions.map(s => s.performanceMetrics);
 
-    return {,
+    return {
   server: {
   activeSessions: this.sessions.size,
         activeConnections: this.clients.size,

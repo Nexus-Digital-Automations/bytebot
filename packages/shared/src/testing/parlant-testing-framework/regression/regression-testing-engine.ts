@@ -15,7 +15,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter } from 'events';
 import * as fs from 'fs';
 import * as path from 'path';
-import { DatabaseFunction } from '../types/framework.types';
+import { DatabaseFunction, TestCategory } from '../types/framework.types';
 import {
   RegressionTestConfig,
   RegressionTestResult,
@@ -26,7 +26,9 @@ import {
   BaselineComparison,
   RegressionTestExecution,
   FunctionRegressionTest,
-  RegressionAlert
+  RegressionAlert,
+  RegressionAlertType,
+  ChangeType
 } from '../types/regression-testing.types';
 import { ParallelExecutionManager } from '../core/parallel-execution-manager';
 import { AutomatedTestGenerator } from '../generators/automated-test-generator';
@@ -641,7 +643,7 @@ export class RegressionTestingEngine extends EventEmitter {
         if (change.severity === 'HIGH' || change.severity === 'CRITICAL') {
           alerts.push({
             alertId: `functional_${Date.now()}_${Math.random()}`,
-            type: 'FUNCTIONAL_REGRESSION',
+            type: RegressionAlertType.FUNCTIONAL_REGRESSION,
             severity: change.severity as 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL',
             functionName: change.functionName,
             title: `Functional regression detected in ${change.functionName}`,
@@ -650,7 +652,7 @@ export class RegressionTestingEngine extends EventEmitter {
             recommendation: this.generateRegressionRecommendation(change),
             timestamp: new Date(),
             evidence: {
-              changeType: 'FUNCTIONAL',
+              changeType: ChangeType.FUNCTIONAL,
               changes: change.changes,
               severity: change.severity
             }
@@ -664,7 +666,7 @@ export class RegressionTestingEngine extends EventEmitter {
         if (change.severity === 'MEDIUM' || change.severity === 'HIGH' || change.severity === 'CRITICAL') {
           alerts.push({
             alertId: `performance_${Date.now()}_${Math.random()}`,
-            type: 'PERFORMANCE_REGRESSION',
+            type: RegressionAlertType.PERFORMANCE_REGRESSION,
             severity: change.severity as 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL',
             functionName: change.functionName,
             title: `Performance regression detected in ${change.functionName}`,
@@ -673,7 +675,7 @@ export class RegressionTestingEngine extends EventEmitter {
             recommendation: this.generatePerformanceRecommendation(change),
             timestamp: new Date(),
             evidence: {
-              changeType: 'PERFORMANCE',
+              changeType: ChangeType.PERFORMANCE,
               changes: change.changes,
               severity: change.severity
             }
@@ -685,7 +687,7 @@ export class RegressionTestingEngine extends EventEmitter {
       if (baselineComparison.summary.compatibilityScore < this.config.minCompatibilityScore) {
         alerts.push({
           alertId: `compatibility_${Date.now()}`,
-          type: 'COMPATIBILITY_ISSUE',
+          type: RegressionAlertType.COMPATIBILITY_ISSUE,
           severity: 'HIGH',
           functionName: 'MULTIPLE',
           title: 'Baseline compatibility issues detected',
@@ -694,9 +696,11 @@ export class RegressionTestingEngine extends EventEmitter {
           recommendation: 'Review changed functions and consider baseline update or rollback',
           timestamp: new Date(),
           evidence: {
-            compatibilityScore: baselineComparison.summary.compatibilityScore,
-            threshold: this.config.minCompatibilityScore,
-            affectedFunctions: baselineComparison.functionComparisons.filter(c => !c.matches).length
+            additionalData: {
+              compatibilityScore: baselineComparison.summary.compatibilityScore,
+              threshold: this.config.minCompatibilityScore,
+              affectedFunctions: baselineComparison.functionComparisons.filter(c => !c.matches).length
+            }
           }
         });
       }
@@ -771,18 +775,22 @@ export class RegressionTestingEngine extends EventEmitter {
   ): Promise<any[]> {
     // Use existing test generator to create scenarios
     const testConfig = {
-      unitTests: true,
-      integrationTests: false,
-      performanceTests: true,
-      securityTests: false,
+      categories: ['UNIT', 'FUNCTIONAL'] as TestCategory[],
+      includePerformanceTests: true,
+      includeSecurityTests: false,
+      generateMockData: true,
+      testDataVolume: 'medium' as 'small' | 'medium' | 'large',
+      maxTestsPerFunction: 50,
+      includeBoundaryTests: true,
+      includeErrorTests: true,
       parallelGeneration: false
     };
 
     try {
       const generatedTests = await this.testGenerator.generateTestsForFunction(func, testConfig);
-      return generatedTests.unitTests || [];
+      return generatedTests.generatedTests || [];
     } catch (error) {
-      this.logger.warn(`Failed to generate scenarios for ${func.name}: ${error.message}`);
+      this.logger.warn(`Failed to generate scenarios for ${func.name}: ${error instanceof Error ? error.message : String(error)}`);
       return [];
     }
   }

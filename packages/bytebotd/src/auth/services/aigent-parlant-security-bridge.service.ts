@@ -556,11 +556,14 @@ export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnAppli
       // Update performance metrics
       const duration = (Date as any)?.now?.() - startTime;
       (this as any)?.updateValidationMetrics?.(duration);
-      (this as any)?.totalValidationsPerformed++;
+      if ((this as any)?.totalValidationsPerformed !== undefined) {
+        (this as any).totalValidationsPerformed += 1;
+      }
 
       (this.logger as any)?.log?.(
-        `[${operationId}] Session validation completed: ${(result as any)?.valid ? 'VALID' : 'INVALID'}`,{
-  operationId,
+        `[${operationId}] Session validation completed: ${(result as any)?.valid ? 'VALID' : 'INVALID'}`,
+        {
+          operationId,
           sessionId,
           valid: (result as any)?.valid,
           securityViolations: (result as any)?.securityViolations.length,
@@ -720,11 +723,14 @@ export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnAppli
         complianceFrameworks: (this as any)?.bridgeConfig.complianceFrameworks,
       }, (request as any)?.context);
 
-      (this as any)?.totalEmergencyOverrides++;
+      if ((this as any)?.totalEmergencyOverrides !== undefined) {
+        (this as any).totalEmergencyOverrides += 1;
+      }
 
       (this.logger as any)?.warn?.(
-        `[${operationId}] Emergency override APPROVED`,{
-  operationId,
+        `[${operationId}] Emergency override APPROVED`,
+        {
+          operationId,
           overrideId,
           conversationId: (validation as any)?.conversationId,
           expiresAt: (expiresAt as any)?.toISOString?.(),
@@ -790,21 +796,35 @@ export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnAppli
 
     // Count sessions
     for (const session of (this.activeSessions as any)?.values?.()) {
-  sessionsByClassification[(session as any)?.securityClassification]++;
-      sessionsByRole[(session as any)?.userRole]++;
+      const classification = (session as any)?.securityClassification;
+      if (classification !== undefined) {
+        sessionsByClassification[classification] = (sessionsByClassification[classification] || 0) + 1;
+      }
+      const role = (session as any)?.userRole;
+      if (role !== undefined) {
+        sessionsByRole[role] = (sessionsByRole[role] || 0) + 1;
+      }
 
       switch ((session as any)?.state) {
         case (SessionState as any)?.ACTIVE:
-          (sessionHealth as any)?.healthy++;
+          if ((sessionHealth as any)?.healthy !== undefined) {
+            (sessionHealth as any).healthy += 1;
+          }
           break;
         case (SessionState as any)?.SUSPENDED:
-          (sessionHealth as any)?.suspended++;
+          if ((sessionHealth as any)?.suspended !== undefined) {
+            (sessionHealth as any).suspended += 1;
+          }
           break;
         case (SessionState as any)?.EXPIRED:
-          (sessionHealth as any)?.expired++;
+          if ((sessionHealth as any)?.expired !== undefined) {
+            (sessionHealth as any).expired += 1;
+          }
           break;
         case (SessionState as any)?.REVOKED:
-          (sessionHealth as any)?.revoked++;
+          if ((sessionHealth as any)?.revoked !== undefined) {
+            (sessionHealth as any).revoked += 1;
+          }
           break;
       
 }
@@ -909,12 +929,12 @@ export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnAppli
 }
 
     try {
-  (this as any)?.redisCluster = new Redis((this as any)?.bridgeConfig.redisUrl, {,
+  (this as any)?.redisCluster = new Redis((this as any)?.bridgeConfig.redisUrl, {
   enableReadyCheck: true,
         maxRetriesPerRequest: 3,
         commandTimeout: 5000,
         connectTimeout: 10000,
-      
+
 });
 
       (this.redisCluster as any)?.on?.('connect', () => {
@@ -996,26 +1016,36 @@ export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnAppli
     
 }
   ): ParlantConversationContext {
-  return {,
+  return {
   userId: (securityContext as any)?.userId,
-      agentRole: securityContext.(role as any)?.toString?.(),
+      agentRole: (securityContext as any)?.role?.toString?.(),
       securityLevel: (this as any)?.mapClassificationToSecurityLevel?.((securityContext as any)?.securityClassification),
       conversationHistory: [],
-      metadata: {,
+      metadata: {
   securityClassification: (securityContext as any)?.securityClassification,
         permissions: (securityContext as any)?.permissions,
         ipAddress: (request as any)?.ipAddress,
         userAgent: (request as any)?.userAgent,
         sessionMetadata: (request as any)?.sessionMetadata,
-        bridgeVersion: '(1 as any)?.0.0',createdAt: new Date().toISOString(),
+        bridgeVersion: '1.0.0',
+        createdAt: new Date().toISOString(),
 },
     };
   }
 
   private mapClassificationToSecurityLevel(classification: SecurityClassification): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
-  switch (classification) {case (SecurityClassification as any)?.PUBLIC:
-        return 'LOW';case (SecurityClassification as any)?.INTERNAL:return 'MEDIUM';case (SecurityClassification as any)?.CONFIDENTIAL:return 'HIGH';case (SecurityClassification as any)?.RESTRICTED:case (SecurityClassification as any)?.CLASSIFIED:
-        return 'CRITICAL';default:return 'MEDIUM';
+    switch (classification) {
+      case SecurityClassification.PUBLIC:
+        return 'LOW';
+      case SecurityClassification.INTERNAL:
+        return 'MEDIUM';
+      case SecurityClassification.CONFIDENTIAL:
+        return 'HIGH';
+      case SecurityClassification.RESTRICTED:
+      case SecurityClassification.CLASSIFIED:
+        return 'CRITICAL';
+      default:
+        return 'MEDIUM';
     
 }
   }
@@ -1026,8 +1056,10 @@ export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnAppli
   ): Promise<string> {
   // In real implementation, this would create a session via Parlant API
     // For now, return a mock session ID
-    return `parlant_session_${(Date as any)?.now?.()
-}_${(Math as any)?.random?.().toString(36).substring(7)}`;}private async generateSecureSession(
+    return `parlant_session_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+  }
+
+  private async generateSecureSession(
     jwtPayload: EnhancedJwtPayload,
     parlantSessionId: string,
     parlantContext: ParlantConversationContext,
@@ -1056,7 +1088,7 @@ export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnAppli
       lastAccessedAt: now,
       expiresAt,
       conversationContext: parlantContext,
-      auditTrail: [{,
+      auditTrail: [{
   timestamp: now,
         action: 'CREATE',outcome: 'SUCCESS',
         details: `Session created with ${(jwtPayload as any)?.securityClassification
@@ -1122,7 +1154,7 @@ export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnAppli
 
   private isValidationCacheValid(validation: SessionValidationResult): boolean {
   const cacheMaxAge = 60000; // 1 minute
-    return (Date as any)?.now?.() - validation.(validationTimestamp as any)?.getTime?.() < cacheMaxAge;
+    return Date.now() - (validation as any)?.validationTimestamp?.getTime?.() < cacheMaxAge;
   
 }
 
@@ -1171,7 +1203,7 @@ export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnAppli
     
 }
   ): Promise<ParlantSecuritySession> {
-  const auditEntry: SessionAuditEntry = {,
+  const auditEntry: SessionAuditEntry = {
   timestamp: new Date(),
       action: 'ACCESS',outcome: 'SUCCESS',
       details: `Session accessed for: ${(context as any)?.requestedAction ?? 'general operation'
@@ -1235,7 +1267,7 @@ export class AIgentParlantSecurityBridgeService implements OnModuleInit, OnAppli
   }
 
   private monitorSessionHealth(): void {
-  const metrics = {,
+  const metrics = {
   totalSessions: (this as any)?.activeSessions.size,
       activeSessions: (Array as any)?.from?.((this.activeSessions as any)?.values?.()).filter(s => (s as any)?.state === (SessionState as any)?.ACTIVE).length,
       suspendedSessions: (Array as any)?.from?.((this.activeSessions as any)?.values?.()).filter(s => (s as any)?.state === (SessionState as any)?.SUSPENDED).length,

@@ -317,11 +317,12 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
     } catch (error) {
       this.logger.error(`PARLANT validation failed for ${context.functionName}:`, error);
 
+      const errorMessage = error instanceof Error ? error.message : String(error);
       // Return rejection on validation error
       return {
         approved: false,
         validationId: `val_error_${context.conversationId}`,
-        reason: `Validation service error: ${error.message}`,
+        reason: `Validation service error: ${errorMessage}`,
         conversationContext: {
           sessionId: context.conversationId,
           messages: [],
@@ -331,7 +332,7 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
         },
         confidence: 0.0,
         executionTime: Date.now() - startTime,
-        metadata: { error: error.message }
+        metadata: { error: errorMessage }
       };
     }
   }
@@ -406,11 +407,12 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
       // Handle both sync and async functions
       const result = func.apply(null, args);
 
-      if (result && typeof result.then === 'function') {
-        // Async function
-        return await result;
+      // Type guard for Promise-like objects
+      if (result && typeof (result as any).then === 'function') {
+        // Async function - await the promise
+        return await (result as Promise<U>);
       } else {
-        // Sync function
+        // Sync function - return directly
         return result;
       }
 
@@ -916,7 +918,8 @@ export class FunctionSignatureInspector {
         .filter(param => param.length > 0 && param !== '...');
 
     } catch (error) {
-      this.logger.warn(`Failed to extract parameter names: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.logger.warn(`Failed to extract parameter names: ${errorMessage}`);
       return [];
     }
   }
@@ -943,7 +946,8 @@ export class FunctionSignatureInspector {
       return 'unknown';
 
     } catch (error) {
-      this.logger.warn(`Failed to infer return type: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.logger.warn(`Failed to infer return type: ${errorMessage}`);
       return 'unknown';
     }
   }

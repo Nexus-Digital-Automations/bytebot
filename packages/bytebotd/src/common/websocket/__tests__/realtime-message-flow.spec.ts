@@ -680,8 +680,7 @@ _${updateCount}`,sessionId: request.sessionId,
       await new Promise<void>((resolve, reject) => {
         ws.on('open', resolve);
         ws.on('error', reject);
-      
-});
+      });
 
       const messageValidator = new MessageFlowValidator(ws);
       const messageCount = 10;
@@ -1034,18 +1033,19 @@ expect(metrics.totalSent).toBe(messageCount);
       timestamp: Date.now() + i,
       sequence: i + 1,
         type: ConversationalMessageType.STATUS_UPDATE,
-        payload: { index: i, largeData: 'x'.repeat(1000) }, // 1KB per messagemetadata: {
-  priority: 'normal',
-      requiresAck: false,
-      compression: false,
+        payload: { index: i, largeData: 'x'.repeat(1000) }, // 1KB per message
+        metadata: {
+          priority: 'normal',
+          requiresAck: false,
+          compression: false,
           routingHints: ['backpressure'],
-},}));
+        },
+      }));
 
       // Send burst without delays
       for (const message of largeMessages) {
-  await messageValidator.sendMessage(message);
-      
-}
+        await messageValidator.sendMessage(message);
+      }
 
       // Wait for queue to drain
       await new Promise(resolve => setTimeout(resolve, 2000));

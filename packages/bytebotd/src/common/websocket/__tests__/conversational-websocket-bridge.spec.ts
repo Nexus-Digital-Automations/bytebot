@@ -220,15 +220,17 @@ it('should create validation request successfully', async () => {
 
     it('should broadcast messages to all sessions', async () => {
 
-  const message = type: ConversationalMessageType.HEARTBEAT,
+      const message = {
+        type: ConversationalMessageType.HEARTBEAT,
         timestamp: Date.now(),
-        payload: { test: 'broadcast' 
-},metadata: {
-  priority: 'normal' as const,
-      requiresAck: false,
-      compression: false,
+        payload: { test: 'broadcast' },
+        metadata: {
+          priority: 'normal' as const,
+          requiresAck: false,
+          compression: false,
           routingHints: ['test'],
-},};
+        },
+      };
 
       // Test that broadcast method exists and doesn't throw
       await expect(service.broadcastToAllSessions(message)).resolves.toBeUndefined();
@@ -239,19 +241,19 @@ it('should create validation request successfully', async () => {
 
   describe('Message Protocol Validation', () => {
 
-  const createValidMessage = (type: ConversationalMessageType): ConversationalMessage => (
+    const createValidMessage = (type: ConversationalMessageType): ConversationalMessage => ({
       type,
-      messageId: `msg_${Date.now()
-}`,sessionId: `session_${Date.now()}`,
+      messageId: `msg_${Date.now()}`,
+      sessionId: `session_${Date.now()}`,
       timestamp: Date.now(),
       sequence: 1,
-      payload: { test: 'data' },metadata: {
-  priority: 'normal',
-      requiresAck: false,
-      compression: false,
+      payload: { test: 'data' },
+      metadata: {
+        priority: 'normal',
+        requiresAck: false,
+        compression: false,
         routingHints: [],
-      
-},
+      },
     });
 
 
@@ -369,10 +371,12 @@ it('should create user confirmation message', () => {
       for (let i = 0; i < testIterations; i++) {
         const latency = await PerformanceTestHelper.measureLatency(async () => {
           // Simulate message processing
-          const _message = JSON.stringify({,
+          const _message = JSON.stringify({
   type: 'test',
       payload: { data: 'test'.repeat(100) 
-}, // ~400 bytestimestamp: Date.now(),});
+}, // ~400 bytes
+      timestamp: Date.now(),
+    });
 
           // Simulate compression and serialization time
           await new Promise(resolve => setTimeout(resolve, 1));
@@ -431,12 +435,10 @@ ms`,
       );
 
       console.log('Concurrent Session Performance:', {
-  totalSessions: targetConcurrentSessions,
-        totalTime: `${results.totalTime.toFixed(2)
-}
-ms`,averageBatchTime: `${results.averageTime.toFixed(2)}
-ms`,maxBatchTime: `${results.maxTime.toFixed(2)}
-ms`,
+        totalSessions: targetConcurrentSessions,
+        totalTime: `${results.totalTime.toFixed(2)}ms`,
+        averageBatchTime: `${results.averageTime.toFixed(2)}ms`,
+        maxBatchTime: `${results.maxTime.toFixed(2)}ms`,
         sessionsPerSecond: Math.floor(targetConcurrentSessions / (results.totalTime / 1000)),
       });
 
@@ -570,7 +572,7 @@ expect(auditEntry.complianceFlags).toContain('audit_required');});});
 
 
     it('should support existing parlant message format', () => {
-  // Test compatibility with existing Parlant message structureconst parlantMessage = {,
+  // Test compatibility with existing Parlant message structureconst parlantMessage = {
   type: 'conversation_start',
       conversation_id: 'test-conv-123',
       session_id: 'test-session-123',
@@ -637,7 +639,7 @@ expect(streamingComplete.type).toBe(ConversationalMessageType.STREAMING_COMPLETE
 
 describe('Performance Benchmarks', () => {
 
-  jest.setTimeout(60000); // 60 seconds for benchmark testsit('should benchmark message serialization performance', () => const iterations = 10000;const message = {,
+  jest.setTimeout(60000); // 60 seconds for benchmark testsit('should benchmark message serialization performance', () => const iterations = 10000;const message = {
   type: 'validation_request',
       payload: {data: 'test'.repeat(1000), // ~4KB messagemetadata: { complex: true 
 },},

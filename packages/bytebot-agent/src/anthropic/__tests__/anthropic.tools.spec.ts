@@ -570,12 +570,18 @@ describe('Anthropic Tools', () => {
         expect(schema.properties).toBeDefined();
 
         // Validate property definitions
-        Object.values(schema.properties).forEach((property: Record<string, unknown>) => {
-          expect(property).toHaveProperty('type');
-          expect(['string', 'number', 'boolean', 'array', 'object']).toContain(
-            property.type as string,
-          );
-        });
+        Object.values(schema.properties).forEach(
+          (property: Record<string, unknown>) => {
+            expect(property).toHaveProperty('type');
+            expect([
+              'string',
+              'number',
+              'boolean',
+              'array',
+              'object',
+            ]).toContain(property.type as string);
+          },
+        );
 
         // Validate required fields if present
         if (schema.required) {

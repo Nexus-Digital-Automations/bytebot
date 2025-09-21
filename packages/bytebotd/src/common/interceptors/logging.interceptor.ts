@@ -245,7 +245,7 @@ export class LoggingInterceptor implements NestInterceptor {
     response: Response,
     processingTime: number,
   ): ResponseContext {
-  return {,
+  return {
   statusCode: response.statusCode,
       processingTime,
       contentLength:
@@ -259,7 +259,7 @@ export class LoggingInterceptor implements NestInterceptor {
    * @returns Error context object
    */
   private createErrorContext(error: Error): ErrorContext {
-  return {,
+  return {
   name: error?.name ?? 'UnknownError',
       message: error?.message ?? 'An unknown error occurred',
       stack: error?.stack,
@@ -306,24 +306,40 @@ export class LoggingInterceptor implements NestInterceptor {
    * @returns Normalized URL pattern
    */
   private normalizeUrlForMetrics(url: string): string {
-  // Remove query parameters
-    const path = url.split('?')[0];// Replace common ID patterns with placeholdersreturn (path ?? '').replace(/\/\d+/g, '/:id') // Replace numeric IDs.replace(/\/[a-f0-9-]{36
-}/g, '/:uuid') // Replace UUIDs.replace(/\/[a-f0-9]{24}/g, '/:objectId') // Replace MongoDB ObjectIDs.replace(/\/$/, ''); // Remove trailing slash}/**
+    // Remove query parameters
+    const path = url.split('?')[0];
+
+    // Replace common ID patterns with placeholders
+    return (path ?? '')
+      .replace(/\/\d+/g, '/:id') // Replace numeric IDs
+      .replace(/\/[a-f0-9-]{36}/g, '/:uuid') // Replace UUIDs
+      .replace(/\/[a-f0-9]{24}/g, '/:objectId') // Replace MongoDB ObjectIDs
+      .replace(/\/$/, ''); // Remove trailing slash
+  }
+
+  /**
    * Get client IP address from request
    *
    * @param request HTTP request object
    * @returns Client IP address
    */
   private getClientIpAddress(request: Request): string {
-  return (request.headers['x-forwarded-for'] ??request.headers['x-real-ip'] ??request.connection?.remoteAddress ??request.socket?.remoteAddress ??
-      'unknown') as string;
-}/**
+    return (
+      request.headers['x-forwarded-for'] ??
+      request.headers['x-real-ip'] ??
+      request.connection?.remoteAddress ??
+      request.socket?.remoteAddress ??
+      'unknown'
+    ) as string;
+  }
+
+  /**
    * Log successful request
    *
    * @param requestContext Request context information
    */
   private logRequest(requestContext: RequestContext): void {
-  this.logger.log({,
+  this.logger.log({
   message: 'HTTP Request Started',
       level: 'info',
       type: 'http_request',
@@ -379,7 +395,7 @@ export class LoggingInterceptor implements NestInterceptor {
     responseContext: ResponseContext,
     errorContext: ErrorContext,
   ): void {
-  this.logger.error({,
+  this.logger.error({
   message: `HTTP Request Failed - ${requestContext.method
 } ${requestContext.url} - ${errorContext.name}`,
       level: 'error',

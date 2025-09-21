@@ -136,16 +136,15 @@ export class GlobalValidationPipe implements PipeTransform<unknown> {
         return this.sanitizeBasicValue(value, operationId);
       }
 
-      // Check payload size if it's an objectif (typeof value === 'object' && value !== null) {
-  this.validatePayloadSize(value, operationId);
-      
-}
+      // Check payload size if it's an object
+      if (typeof value === 'object' && value !== null) {
+        this.validatePayloadSize(value, operationId);
+      }
 
       // Perform security threat detection
       if (this.options.enableThreatDetection) {
-  this.detectSecurityThreats(value, operationId);
-      
-}
+        this.detectSecurityThreats(value, operationId);
+      }
 
       // Sanitize input if enabled
       let sanitizedValue = value;
@@ -316,40 +315,42 @@ private isBasicType(
 
     // Convert value to string for pattern analysis
     const stringValue =
-      typeof value === 'string' ? value : JSON.stringify(value);// Detect XSS attemptsif (detectXSS(stringValue)) {
+      typeof value === 'string' ? value : JSON.stringify(value);
+
+    // Detect XSS attempts
+    if (detectXSS(stringValue)) {
       threats.push('XSS');
 
-      this.logger.warn(`[${operationId
-}] XSS attempt detected`, {
-  operationId,
+      this.logger.warn(`[${operationId}] XSS attempt detected`, {
+        operationId,
         threatType: 'XSS',
-      inputLength: stringValue.length,
-      inputPreview: stringValue.substring(0, 100) + '...',
-});}
+        inputLength: stringValue.length,
+        inputPreview: stringValue.substring(0, 100) + '...',
+      });
+    }
 
     // Detect SQL injection attempts
     if (detectSQLInjection(stringValue)) {
-  threats.push('SQL_INJECTION');
+      threats.push('SQL_INJECTION');
 
-      this.logger.warn(`[${operationId
-}] SQL injection attempt detected`, {
-  operationId,
+      this.logger.warn(`[${operationId}] SQL injection attempt detected`, {
+        operationId,
         threatType: 'SQL_INJECTION',
-      inputLength: stringValue.length,
-      inputPreview: stringValue.substring(0, 100) + '...',
-});}
+        inputLength: stringValue.length,
+        inputPreview: stringValue.substring(0, 100) + '...',
+      });
+    }
 
     // Throw error if threats detected
     if (threats.length > 0) {
-  const threatTypes = threats.join(', ');
+      const threatTypes = threats.join(', ');
 
-      this.logger.error(`[${operationId
-}] Security threats blocked`, {
-  operationId,threatTypes: threatTypes,
+      this.logger.error(`[${operationId}] Security threats blocked`, {
+        operationId,
+        threatTypes: threatTypes,
         threatCount: threats.length,
         blocked: true,
-      
-});
+      });
 
       throw new BadRequestException(
         `Security violation detected: ${threatTypes}. Request has been blocked and logged.`,
@@ -425,7 +426,7 @@ private isBasicType(
   ): Promise<void>  {
   const startTime = Date.now();
 
-    const errors: ValidationError[] = await validate(value as object, {,
+    const errors: ValidationError[] = await validate(value as object, {
   whitelist: this.options.whitelist,
       forbidNonWhitelisted: this.options.forbidNonWhitelisted,
       skipMissingProperties: this.options.skipMissingProperties,
@@ -476,7 +477,7 @@ private isBasicType(
     children?: unknown;
   
 }> {
-  return errors.map((error) => ({,
+  return errors.map((error) => ({
   property: error.property,
       value: error.value as unknown,
       constraints: error.constraints,
@@ -568,59 +569,55 @@ export function createBytebotDValidationPipe(
 
 /**
  * Pre-configured validation pipes for different security levels in BytebotD
- */;
-
+ */
 export const BytebotDValidationPipes = {
   /**
    * Maximum security validation with strict sanitization for sensitive operations
-   */,
-  MAXIMUM_SECURITY: createBytebotDValidationPipe({,
-  transform: true,
+   */
+  MAXIMUM_SECURITY: createBytebotDValidationPipe({
+    transform: true,
     whitelist: true,
     forbidNonWhitelisted: true,
     enableSanitization: true,
     enableThreatDetection: true,
-    maxPayloadSize: 10 * 1024 * 1024, // 10MB,
-  sanitizationOptions: {
+    maxPayloadSize: 10 * 1024 * 1024, // 10MB
+    sanitizationOptions: {
       ...DEFAULT_SANITIZATION_OPTIONS,
       stripHtml: true,
       allowHtml: false,
       maxLength: 5000,
-    
-},
+    },
   }),
 
   /**
    * Desktop operations validation with moderate sanitization for computer use
    */
   DESKTOP_OPERATIONS: createBytebotDValidationPipe({
-  transform: true,
+    transform: true,
     whitelist: true,
     forbidNonWhitelisted: true,
     enableSanitization: true,
     enableThreatDetection: true,
-    maxPayloadSize: 50 * 1024 * 1024, // 50MB for screenshots,
-  sanitizationOptions: {
+    maxPayloadSize: 50 * 1024 * 1024, // 50MB for screenshots
+    sanitizationOptions: {
       ...DEFAULT_SANITIZATION_OPTIONS,
       allowHtml: false,
       stripHtml: true,
       maxLength: 50000, // Allow larger text for desktop operations
-    
-},
+    },
   }),
 
   /**
    * Standard security validation for most BytebotD endpoints
    */
   STANDARD: createBytebotDValidationPipe({
-  transform: true,
+    transform: true,
     whitelist: true,
     forbidNonWhitelisted: false,
     enableSanitization: true,
     enableThreatDetection: true,
     maxPayloadSize: 100 * 1024 * 1024, // 100MB
-  
-}),
+  }),
 
   /**
    * Development-friendly validation with relaxed rules

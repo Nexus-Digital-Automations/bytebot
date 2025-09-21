@@ -83,16 +83,15 @@ export class ParameterCaptureValidationService {
       );
 
       if (!securityValidation.passed) {
-        throw new WrapperError({
-          code: 'PARAMETER_SECURITY_VIOLATION',
-          message: `Parameter security validation failed: ${securityValidation.violations.join(', ')}`,
-          category: ErrorCategory.VALIDATION_ERROR,
-          metadata: {
-            captureId,
-            functionName,
-            violations: securityValidation.violations
-          }
-        });
+        const error = new Error(`Parameter security validation failed: ${securityValidation.violations.join(', ')}`);
+        (error as any).code = 'PARAMETER_SECURITY_VIOLATION';
+        (error as any).category = ErrorCategory.VALIDATION_ERROR;
+        (error as any).metadata = {
+          captureId,
+          functionName,
+          violations: securityValidation.violations
+        };
+        throw error;
       }
 
       // Step 4: Sanitize parameters for PARLANT context
@@ -159,7 +158,7 @@ export class ParameterCaptureValidationService {
 
       this.logger.error(`Parameter capture failed for ${functionName}`, {
         captureId,
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         executionTime
       });
 
@@ -170,7 +169,7 @@ export class ParameterCaptureValidationService {
         capturedParameters: [],
         sanitizedParameters: [],
         typeAnalysis: { parameterTypes: [], complexityScore: 0, riskFactors: [] },
-        securityValidation: { passed: false, violations: [error.message], sensitiveParameterIndices: [] },
+        securityValidation: { passed: false, violations: [error instanceof Error ? error.message : String(error)], sensitiveParameterIndices: [] },
         customValidationResults: [],
         performanceAnalysis: { estimatedProcessingTime: 0, memoryFootprint: 0, optimizationRecommendations: [] },
         parlantContext: null,
@@ -341,7 +340,7 @@ export class ParameterCaptureValidationService {
       return serialized;
 
     } catch (error) {
-      return `[Serialization Error: ${error.message}]`;
+      return `[Serialization Error: ${error instanceof Error ? error.message : String(error)}]`;
     }
   }
 
@@ -548,11 +547,11 @@ export class ParameterCaptureValidationService {
           ruleId: rule.id,
           ruleName: rule.description,
           passed: false,
-          message: `Rule execution failed: ${error.message}`,
+          message: `Rule execution failed: ${error instanceof Error ? error.message : String(error)}`,
           priority: rule.priority || 0,
           continueOnFailure: rule.continueOnFailure || false,
           executionTime: 0,
-          metadata: { error: error.message }
+          metadata: { error: error instanceof Error ? error.message : String(error) }
         });
 
         if (!rule.continueOnFailure) {
@@ -811,7 +810,7 @@ export class ParameterCaptureValidationService {
       overallRiskLevel,
       riskFactors,
       recommendedValidationLevel: this.mapRiskToValidationLevel(overallRiskLevel),
-      requiresApproval: overallRiskLevel === SecurityRiskLevel.CRITICAL || overallRiskLevel === SecurityRiskLevel.HIGH
+      requiresApproval: [SecurityRiskLevel.CRITICAL, SecurityRiskLevel.HIGH].includes(overallRiskLevel)
     };
   }
 

@@ -62,12 +62,11 @@ import {
 class SecurityTestClient extends EventEmitter {
   private ws: WebSocket.WebSocket | null = null;
   private connected = false;
-  private securityEvents: Array<{,
-  timestamp: number;
-  eventType: string;
+  private securityEvents: Array<{
+    timestamp: number;
+    eventType: string;
     details: any;
-  
-}> = [];
+  }> = [];
 
   constructor(
     private url: string,
@@ -89,8 +88,12 @@ class SecurityTestClient extends EventEmitter {
       const headers: Record<string, string> = {
 };
 
-      if (this.options.clientId) headers['X-Client-ID'] = this.options.clientId;if (this.options.authToken) headers['Authorization'] = `Bearer ${this.options.authToken}`;
-      if (this.options.origin) headers['Origin'] = this.options.origin;if (this.options.userAgent) headers['User-Agent'] = this.options.userAgent;if (this.options.customHeaders) Object.assign(headers, this.options.customHeaders);this.ws = new WebSocket.WebSocket(this.url, { headers });
+      if (this.options.clientId) headers['X-Client-ID'] = this.options.clientId;
+      if (this.options.authToken) headers['Authorization'] = `Bearer ${this.options.authToken}`;
+      if (this.options.origin) headers['Origin'] = this.options.origin;
+      if (this.options.userAgent) headers['User-Agent'] = this.options.userAgent;
+      if (this.options.customHeaders) Object.assign(headers, this.options.customHeaders);
+      this.ws = new WebSocket.WebSocket(this.url, { headers });
 
       const timeout = setTimeout(() => {
   this.ws?.terminate();
@@ -137,7 +140,7 @@ reject(error);});
 this.recordSecurityEvent('malicious_payload_sent', { payloadLength: payload.length });this.ws.send(payload);}
 
   private recordSecurityEvent(eventType: string, details: any): void {
-  this.securityEvents.push({,
+  this.securityEvents.push({
   timestamp: Date.now(),
       eventType,
       details,
@@ -171,7 +174,7 @@ this.recordSecurityEvent('malicious_payload_sent', { payloadLength: payload.leng
  */
 class TokenGenerator {
   private secret = 'test-secret-key-for-websocket-security-testing';
-generateValidToken(userId: string, permissions: string[] = ['read', 'write']): string {return jwt.sign({,
+generateValidToken(userId: string, permissions: string[] = ['read', 'write']): string {return jwt.sign({
   sub: userId,
         permissions,
         iat: Math.floor(Date.now() / 1000),
@@ -184,7 +187,7 @@ generateValidToken(userId: string, permissions: string[] = ['read', 'write']): s
 
   generateExpiredToken(userId: string): string {
   return jwt.sign(
-      {,
+      {
   sub: userId,
         permissions: ['read'],
       iat: Math.floor(Date.now() / 1000) - 7200, // 2 hours agoexp: Math.floor(Date.now() / 1000) - 3600, // 1 hour ago (expired),
@@ -220,7 +223,7 @@ generateValidToken(userId: string, permissions: string[] = ['read', 'write']): s
  * Attack simulator for security testing
  */
 class AttackSimulator {
-  private attackLog: Array<{,
+  private attackLog: Array<{
   timestamp: number;
   attackType: string;
     success: boolean;
@@ -228,15 +231,19 @@ class AttackSimulator {
   
 }> = [];
 
-  async simulateXSSAttack(client: SecurityTestClient): Promise<boolean>  {
-  const xssPayloads = [
-      '<script>alert("XSS")</script>",'javascript:alert("XSS")",'"><script>alert("XSS")</script>",'\'" onmouseover="alert(1)" "",];
+  async simulateXSSAttack(client: SecurityTestClient): Promise<boolean> {
+    const xssPayloads = [
+      '<script>alert("XSS")</script>',
+      'javascript:alert("XSS")',
+      '"><script>alert("XSS")</script>',
+      '\'" onmouseover="alert(1)" "',
+    ];
 
     let successfulAttacks = 0;
 
     for (const payload of xssPayloads) {
       try {
-        const maliciousMessage: ConversationalMessage = {,
+        const maliciousMessage: ConversationalMessage = {
   messageId: randomUUID(),
           sessionId: 'xss-attack-session',
       timestamp: Date.now(),
@@ -274,15 +281,19 @@ class AttackSimulator {
     return success;
   }
 
-  async simulateSQLInjectionAttack(client: SecurityTestClient): Promise<boolean>  {
-  const sqlPayloads = [
-      ""; DROP TABLE users; --","' OR '1'='1',"1' UNION SELECT password FROM users --',""; INSERT INTO logs VALUES ('injected') --',];
+  async simulateSQLInjectionAttack(client: SecurityTestClient): Promise<boolean> {
+    const sqlPayloads = [
+      '\"; DROP TABLE users; --',
+      "' OR '1'='1'",
+      "1' UNION SELECT password FROM users --'",
+      '\"; INSERT INTO logs VALUES (\'injected\') --',
+    ];
 
     let successfulAttacks = 0;
 
     for (const payload of sqlPayloads) {
       try {
-        const maliciousMessage: ConversationalMessage = {,
+        const maliciousMessage: ConversationalMessage = {
   messageId: randomUUID(),
           sessionId: 'sql-injection-session',
       timestamp: Date.now(),
@@ -350,9 +361,13 @@ class AttackSimulator {
     return success;
   }
 
-  async simulateBufferOverflowAttack(client: SecurityTestClient): Promise<boolean>  {
-  const largePayloads = [
-      'A'.repeat(1024 * 1024), // 1MB'B'.repeat(10 * 1024 * 1024), // 10MB'X'.repeat(100 * 1024 * 1024), // 100MB];let successfulAttacks = 0;
+  async simulateBufferOverflowAttack(client: SecurityTestClient): Promise<boolean> {
+    const largePayloads = [
+      'A'.repeat(1024 * 1024), // 1MB
+      'B'.repeat(10 * 1024 * 1024), // 10MB
+      'X'.repeat(100 * 1024 * 1024), // 100MB
+    ];
+    let successfulAttacks = 0;
 
     for (const payload of largePayloads) {
       try {
@@ -383,7 +398,7 @@ class AttackSimulator {
 
     for (let i = 0; i < requestCount; i++) {
       try {
-        const message: ConversationalMessage = {,
+        const message: ConversationalMessage = {
   messageId: `rate-limit-test-${i
 }`,
           sessionId: 'rate-limit-session',
@@ -422,7 +437,7 @@ class AttackSimulator {
   }
 
   private recordAttack(attackType: string, success: boolean, details: any): void {
-  this.attackLog.push({,
+  this.attackLog.push({
   timestamp: Date.now(),
       attackType,
       success,
@@ -447,7 +462,7 @@ class AttackSimulator {
  */
 class RateLimiter {
   private requests = new Map<string, number[]>();
-  private limits = {,
+  private limits = {
   perSecond: 10,
     perMinute: 100,
     perHour: 1000,
@@ -488,7 +503,7 @@ class RateLimiter {
   const now = Date.now();
     const clientRequests = this.requests.get(clientId) || [];
 
-    return {,
+    return {
   perSecond: clientRequests.filter(timestamp => timestamp > now - 1000).length,
       perMinute: clientRequests.filter(timestamp => timestamp > now - 60000).length,
       perHour: clientRequests.filter(timestamp => timestamp > now - 3600000).length,
@@ -508,11 +523,16 @@ const mockConfigService = {
 
   get: jest.fn((key: string, defaultValue?: unknown) => {
     const config: Record<string, unknown> = {
-      'CONVERSATIONAL_WEBSOCKET_PORT': 8193,'PARLANT_WEBSOCKET_PORT': 8194,'WEBSOCKET_SECURITY_ENABLED': true,'WEBSOCKET_AUTH_REQUIRED': true,'WEBSOCKET_RATE_LIMITING_ENABLED': true,'WEBSOCKET_ORIGIN_VALIDATION_ENABLED': true,'WEBSOCKET_MESSAGE_SIZE_LIMIT': 1048576, // 1MB'WEBSOCKET_ALLOWED_ORIGINS': 'https: //localhost:3000,
-      https://trusted-domain.com',
-
-};
-return config[key] ?? defaultValue;
+      'CONVERSATIONAL_WEBSOCKET_PORT': 8193,
+      'PARLANT_WEBSOCKET_PORT': 8194,
+      'WEBSOCKET_SECURITY_ENABLED': true,
+      'WEBSOCKET_AUTH_REQUIRED': true,
+      'WEBSOCKET_RATE_LIMITING_ENABLED': true,
+      'WEBSOCKET_ORIGIN_VALIDATION_ENABLED': true,
+      'WEBSOCKET_MESSAGE_SIZE_LIMIT': 1048576, // 1MB
+      'WEBSOCKET_ALLOWED_ORIGINS': 'https://localhost:3000,https://trusted-domain.com',
+    };
+    return config[key] ?? defaultValue;
   }),
 };
 
@@ -535,10 +555,10 @@ describe('WebSocket Security Validation Tests', () => {
   beforeAll(async () => {
   jest.setTimeout(300000); // 5 minutes for security tests
 
-    module = await Test.createTestingModule({,
+    module = await Test.createTestingModule({
   providers: [
         ConversationalWebSocketBridgeService,
-        {,
+        {
   provide: ConfigService,
           useValue: mockConfigService,
         
@@ -555,7 +575,7 @@ describe('WebSocket Security Validation Tests', () => {
     testServer = createServer();
     wsServer = createSafeWebSocketServer({
   server: testServer,
-      verifyClient: createSecureVerifyCallback({,
+      verifyClient: createSecureVerifyCallback({
   allowedOrigins: ['https://localhost:3000', 'https: //trusted-domain.com'],
       requireHttps: false, // Disabled for testingmaxConnections: 10,
         rateLimitByIP: true,
@@ -579,19 +599,19 @@ describe('WebSocket Security Validation Tests', () => {
           userContext = tokenGenerator.verifyToken(token);
           authenticated = true;
 
-          securityAuditLog.push({,
+          securityAuditLog.push({
   timestamp: Date.now(),
             eventType: 'authentication_success',
       clientId,details: { userId: userContext.sub, permissions: userContext.permissions 
 },
             riskLevel: 'low',});} catch (error) {
-  securityAuditLog.push({,
+  securityAuditLog.push({
   timestamp: Date.now(),
             eventType: 'authentication_failure',
       clientId,details: { error: error.message, token: token.substring(0, 20) + '...' 
 },riskLevel: 'high',});ws.close(1008, 'Authentication failed');return;}
       } else {
-  securityAuditLog.push({,
+  securityAuditLog.push({
   timestamp: Date.now(),
           eventType: 'unauthenticated_connection_attempt',
       clientId,details: { origin, userAgent: req.headers['user-agent'] 
@@ -604,7 +624,7 @@ describe('WebSocket Security Validation Tests', () => {
       ws.on('message', async (data: WebSocket.RawData) => {
   try {// Rate limiting check
           if (!rateLimiter.isAllowed(clientId)) {
-            securityAuditLog.push({,
+            securityAuditLog.push({
   timestamp: Date.now(),
               eventType: 'rate_limit_exceeded',
       clientId,details: { stats: rateLimiter.getStats(clientId) 
@@ -614,7 +634,7 @@ describe('WebSocket Security Validation Tests', () => {
           // Message size validation
           if (data.length > 1048576) {
   // 1MB limit
-            securityAuditLog.push({,
+            securityAuditLog.push({
   timestamp: Date.now(),
               eventType: 'message_size_violation',
       clientId,details: { size: data.length, limit: 1048576 
@@ -623,7 +643,7 @@ describe('WebSocket Security Validation Tests', () => {
 
           const message = JSON.parse(Buffer.from(data as ArrayBuffer).toString('utf8')) as ConversationalMessage;// Input validation and sanitizationconst validationResult = validateMessageContent(message);
           if (!validationResult.valid) {
-  securityAuditLog.push({,
+  securityAuditLog.push({
   timestamp: Date.now(),
               eventType: 'message_validation_failure',
       clientId,details: {
@@ -675,7 +695,7 @@ describe('WebSocket Security Validation Tests', () => {
           ws.send(JSON.stringify(response));
 
         } catch (error) {
-  securityAuditLog.push({,
+  securityAuditLog.push({
   timestamp: Date.now(),
             eventType: 'message_processing_error',
       clientId,details: { error: error.message 
@@ -784,19 +804,27 @@ return {
   // ===== AUTHENTICATION AND AUTHORIZATION =====
 
   describe('Authentication and Authorization', () => {
-it('should reject connections without valid authentication tokens', async () => const unauthenticatedClient = new SecurityTestClient(TEST_URL, {clientId: 'unauthenticated-test',// No auth token provided});
+  it('should reject connections without valid authentication tokens', async () => {
+    const unauthenticatedClient = new SecurityTestClient(TEST_URL, {
+      clientId: 'unauthenticated-test',
+      // No auth token provided
+    });
 
       await expect(unauthenticatedClient.connect()).rejects.toThrow();
 
       const securityEvents = unauthenticatedClient.getSecurityEvents();
       const connectionEvents = securityEvents.filter(e => e.eventType === 'connection_error');
-expect(connectionEvents.length).toBeGreaterThan(0);});
+      expect(connectionEvents.length).toBeGreaterThan(0);
+    });
 
 
 
     it('should accept connections with valid JWT tokens', async () => {
-const validToken = tokenGenerator.generateValidToken('test-user-123', ['read', 'write']);const authenticatedClient = new SecurityTestClient(TEST_URL, clientId: 'authenticated-test',
-      authToken: validToken,});
+      const validToken = tokenGenerator.generateValidToken('test-user-123', ['read', 'write']);
+      const authenticatedClient = new SecurityTestClient(TEST_URL, {
+        clientId: 'authenticated-test',
+        authToken: validToken,
+      });
 
       await authenticatedClient.connect();
       expect(authenticatedClient.isConnected()).toBe(true);
@@ -821,13 +849,18 @@ const validToken = tokenGenerator.generateValidToken('test-user-123', ['read', '
 
       const securityEvents = authenticatedClient.getSecurityEvents();
       expect(securityEvents.some(e => e.eventType === 'connection_established')).toBe(true);
-expect(securityEvents.some(e => e.eventType === 'message_sent')).toBe(true);await authenticatedClient.disconnect();});
+      expect(securityEvents.some(e => e.eventType === 'message_sent')).toBe(true);
+      await authenticatedClient.disconnect();
+    });
 
 
 
     it('should reject expired JWT tokens', async () => {
-const expiredToken = tokenGenerator.generateExpiredToken('test-user-expired');const expiredTokenClient = new SecurityTestClient(TEST_URL, clientId: 'expired-token-test',
-      authToken: expiredToken,});
+      const expiredToken = tokenGenerator.generateExpiredToken('test-user-expired');
+      const expiredTokenClient = new SecurityTestClient(TEST_URL, {
+        clientId: 'expired-token-test',
+        authToken: expiredToken,
+      });
 
       await expect(expiredTokenClient.connect()).rejects.toThrow();
     });
@@ -835,12 +868,17 @@ const expiredToken = tokenGenerator.generateExpiredToken('test-user-expired');co
 
 
     it('should reject malformed or tampered JWT tokens', async () => {
-const malformedToken = tokenGenerator.generateMalformedToken();const tamperedToken = tokenGenerator.generateTamperedToken('test-user-tampered');const malformedClient = new SecurityTestClient(TEST_URL, clientId: 'malformed-token-test',
-      authToken: malformedToken,});
+      const malformedToken = tokenGenerator.generateMalformedToken();
+      const tamperedToken = tokenGenerator.generateTamperedToken('test-user-tampered');
+      const malformedClient = new SecurityTestClient(TEST_URL, {
+        clientId: 'malformed-token-test',
+        authToken: malformedToken,
+      });
 
       const tamperedClient = new SecurityTestClient(TEST_URL, {
         clientId: 'tampered-token-test',
-      authToken: tamperedToken,});
+        authToken: tamperedToken,
+      });
 
       await expect(malformedClient.connect()).rejects.toThrow();
       await expect(tamperedClient.connect()).rejects.toThrow();
@@ -850,7 +888,10 @@ const malformedToken = tokenGenerator.generateMalformedToken();const tamperedTok
   // ===== INPUT VALIDATION AND INJECTION PREVENTION =====
 
   describe('Input Validation and Injection Prevention', () => {
-it('should prevent XSS attacks through message content', async () => const validToken = tokenGenerator.generateValidToken('xss-test-user');const client = new SecurityTestClient(TEST_URL, {clientId: 'xss-test',
+  it('should prevent XSS attacks through message content', async () => {
+    const validToken = tokenGenerator.generateValidToken('xss-test-user');
+    const client = new SecurityTestClient(TEST_URL, {
+      clientId: 'xss-test',
       authToken: validToken,});
 
       await client.connect();
@@ -871,8 +912,11 @@ it('should prevent XSS attacks through message content', async () => const valid
 
 
     it('should prevent SQL injection attempts through validation payloads', async () => {
-const validToken = tokenGenerator.generateValidToken('sql-test-user');const client = new SecurityTestClient(TEST_URL, clientId: 'sql-injection-test',
-      authToken: validToken,});
+      const validToken = tokenGenerator.generateValidToken('sql-test-user');
+      const client = new SecurityTestClient(TEST_URL, {
+        clientId: 'sql-injection-test',
+        authToken: validToken,
+      });
 
       await client.connect();
 
@@ -891,8 +935,11 @@ const validToken = tokenGenerator.generateValidToken('sql-test-user');const clie
 
 
     it('should enforce message size limits to prevent buffer overflow attacks', async () => {
-const validToken = tokenGenerator.generateValidToken('buffer-test-user');const client = new SecurityTestClient(TEST_URL, clientId: 'buffer-overflow-test',
-      authToken: validToken,});
+      const validToken = tokenGenerator.generateValidToken('buffer-test-user');
+      const client = new SecurityTestClient(TEST_URL, {
+        clientId: 'buffer-overflow-test',
+        authToken: validToken,
+      });
 
       await client.connect();
 
@@ -912,7 +959,10 @@ const validToken = tokenGenerator.generateValidToken('buffer-test-user');const c
   // ===== RATE LIMITING AND DDOS PROTECTION =====
 
   describe('Rate Limiting and DDoS Protection', () => {
-it('should enforce rate limits per connection', async () => const validToken = tokenGenerator.generateValidToken('rate-limit-test-user');const client = new SecurityTestClient(TEST_URL, {clientId: 'rate-limit-test',
+  it('should enforce rate limits per connection', async () => {
+    const validToken = tokenGenerator.generateValidToken('rate-limit-test-user');
+    const client = new SecurityTestClient(TEST_URL, {
+      clientId: 'rate-limit-test',
       authToken: validToken,});
 
       await client.connect();
@@ -968,7 +1018,10 @@ expect(successfulConnections).toBeGreaterThan(maxClients * 0.8); // 80%+ should 
 
   describe('Origin Validation and CSRF Protection', () => {
 
-  it('should validate origin headers and reject unauthorized origins', async () => const validToken = tokenGenerator.generateValidToken('origin-test-user');// Test with unauthorized originconst unauthorizedClient = new SecurityTestClient(TEST_URL, {,
+  it('should validate origin headers and reject unauthorized origins', async () => {
+    const validToken = tokenGenerator.generateValidToken('origin-test-user');
+    // Test with unauthorized origin
+    const unauthorizedClient = new SecurityTestClient(TEST_URL, {
   clientId: 'unauthorized-origin-test',
       authToken: validToken,
       origin: 'https://malicious-domain.com',
@@ -993,8 +1046,8 @@ expect(successfulConnections).toBeGreaterThan(maxClients * 0.8); // 80%+ should 
 
       let blockedOrigins = 0;
 
-      for (const origin of csrfOrigins) 
-        const csrfClient = new SecurityTestClient(TEST_URL, {,
+      for (const origin of csrfOrigins) {
+        const csrfClient = new SecurityTestClient(TEST_URL, {
   clientId: `csrf-test-${blockedOrigins
 }`,
           authToken: validToken,
@@ -1025,7 +1078,10 @@ expect(successfulConnections).toBeGreaterThan(maxClients * 0.8); // 80%+ should 
   // ===== MESSAGE INTEGRITY AND CONFIDENTIALITY =====
 
   describe('Message Integrity and Confidentiality', () => {
-it('should maintain message integrity during transmission', async () => const validToken = tokenGenerator.generateValidToken('integrity-test-user');const client = new SecurityTestClient(TEST_URL, {clientId: 'integrity-test',
+  it('should maintain message integrity during transmission', async () => {
+    const validToken = tokenGenerator.generateValidToken('integrity-test-user');
+    const client = new SecurityTestClient(TEST_URL, {
+      clientId: 'integrity-test',
       authToken: validToken,});
 
       await client.connect();
@@ -1039,7 +1095,7 @@ it('should maintain message integrity during transmission', async () => const va
 });
 
       for (const testMsg of testMessages) {
-  await client.sendMessage({,
+  await client.sendMessage({
   messageId: `integrity-test-${testMsg.id
 }`,
           sessionId: 'integrity-test-session',

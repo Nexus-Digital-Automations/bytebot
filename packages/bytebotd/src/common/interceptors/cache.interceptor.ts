@@ -119,7 +119,7 @@ interface CacheInterceptorStats {
 @Injectable()
 export class CacheInterceptor implements NestInterceptor {
   private readonly logger = new Logger(CacheInterceptor.name);
-  private readonly stats: CacheInterceptorStats = {,
+  private readonly stats: CacheInterceptorStats = {
   totalRequests: 0,
     cacheHits: 0,
     cacheMisses: 0,
@@ -127,7 +127,7 @@ export class CacheInterceptor implements NestInterceptor {
     hitRate: 0,
     averageResponseTime: 0,
     endpointStats: new Map(),
-  
+
 };
 
   // Default cache rules for different endpoint patterns
@@ -138,14 +138,14 @@ export class CacheInterceptor implements NestInterceptor {
       ttl: 300,
       includeUserId: true,
       cacheableStatuses: [200],
-      varyBy: ['Authorization'],
+      varyBy: ['Authorization', ],
 },// Task lists - cache for 2 minutes
     {
   pattern: /^\/api\/tasks(\?.*)?$/,
       ttl: 120,
       includeUserId: true,
       cacheableStatuses: [200],
-      varyBy: ['Authorization'],
+      varyBy: ['Authorization', ],
       skipCacheIf: (req) => {// Skip cache if real-time data is requested
         return req.query.realtime === 'true';
 },},
@@ -156,7 +156,7 @@ export class CacheInterceptor implements NestInterceptor {
       ttl: 600,
       includeUserId: true,
       cacheableStatuses: [200],
-      varyBy: ['Authorization'],
+      varyBy: ['Authorization', ],
 },// Static data - cache for 1 hour
     {
   pattern: /^\/api\/models$/,
@@ -286,7 +286,7 @@ export class CacheInterceptor implements NestInterceptor {
               next,
               operationId,
               startTime,
-            ).subscribe({,
+            ).subscribe({
   next: (data) => {
                 observer.next(data);
               
@@ -372,7 +372,10 @@ this.updateStats();
         const duration = Date.now() - startTime;
 
         this.stats.cacheMisses++;
-        this.recordEndpointStats(request.url, 'miss');// Check if response should be cachedif (this.shouldCacheResponse(response, cacheRule)) {
+        this.recordEndpointStats(request.url, 'miss');
+
+        // Check if response should be cached
+        if (this.shouldCacheResponse(response, cacheRule)) {
           // Create cached response
           const cachedResponse: CachedResponse = {
             data,
@@ -397,21 +400,24 @@ this.updateStats();
 });
 
           this.logger.debug(
-            `[${operationId}] Cache MISS: ${request.url} - stored for ${cacheRule.ttl}
-
-  s(${duration}
-ms)`,);} else {
-  this.logger.debug(
-            `[${operationId
-}] Cache SKIP: ${request.url} - not cacheable (${duration}
-ms)`,
+            `[${operationId}] Cache MISS: ${request.url} - stored for ${cacheRule.ttl}s (${duration}ms)`,
+          );
+        } else {
+          this.logger.debug(
+            `[${operationId}] Cache SKIP: ${request.url} - not cacheable (${duration}ms)`,
           );
         }
 
         // Add cache headers
-        response.set('X-Cache', 'MISS');response.set('X-Cache-Key', this.hashForLogging(operationId));// Record metricsif (this.metricsService) {
-          this.metricsService.recordCacheOperation?.('get', 'miss', duration);}
-this.updateStats();
+        response.set('X-Cache', 'MISS');
+        response.set('X-Cache-Key', this.hashForLogging(operationId));
+
+        // Record metrics
+        if (this.metricsService) {
+          this.metricsService.recordCacheOperation?.('get', 'miss', duration);
+        }
+
+        this.updateStats();
       }),
     );
   }
@@ -420,10 +426,12 @@ this.updateStats();
    * Find applicable cache rule for request
    */
   private findCacheRule(request: Request): CacheRule | null {
-  const path = request.url.split('?')[0]; // Remove query string for pattern matchingfor (const rule of this.cacheRules) {if (rule.pattern.test(path ?? '')) {
+    const path = request.url.split('?')[0]; // Remove query string for pattern matching
+
+    for (const rule of this.cacheRules) {
+      if (rule.pattern.test(path ?? '')) {
         return rule;
-      
-}
+      }
     }
 
     return null;
@@ -526,7 +534,7 @@ this.updateStats();
    */
   private extractUserId(request: Request): string | undefined {
   // Try to extract from various common locations
-    const authHeader = request.get('Authorization');if (authHeader) {// Simple hash of auth header for user identification
+    const authHeader = request.get('Authorization', );if (authHeader) {// Simple hash of auth header for user identification
       return this.hashString(authHeader).substring(0, 8);
     
 }
@@ -604,7 +612,7 @@ this.updateStats();
    */
   private recordEndpointStats(url: string, result: 'hit' | 'miss'): void {
   const normalizedUrl = this.normalizeUrlForStats(url);if (!this.stats.endpointStats.has(normalizedUrl)) {
-      this.stats.endpointStats.set(normalizedUrl, {,
+      this.stats.endpointStats.set(normalizedUrl, {
   hits: 0,
         misses: 0,
         hitRate: 0,
@@ -663,7 +671,7 @@ return basePath.replace(/\/\d+/g, '/:id') // Replace IDs.replace(/\/[a-f0-9-]{36
    * Clear cache statistics
    */
   clearStats(): void {
-  Object.assign(this.stats, {,
+  Object.assign(this.stats, {
   totalRequests: 0,
       cacheHits: 0,
       cacheMisses: 0,
@@ -681,7 +689,7 @@ return basePath.replace(/\/\d+/g, '/:id') // Replace IDs.replace(/\/[a-f0-9-]{36
   // Report cache stats every 5 minutes
     setInterval(() => {
       if (this.stats.totalRequests > 0) {
-        this.logger.log('Cache Interceptor Statistics:', {,
+        this.logger.log('Cache Interceptor Statistics:', {
   totalRequests: this.stats.totalRequests,
           cacheHits: this.stats.cacheHits,
           cacheMisses: this.stats.cacheMisses,

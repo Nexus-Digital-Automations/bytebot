@@ -344,8 +344,8 @@ class ConcurrentSessionManager {
   }
 
   async createConcurrentSessions(sessionCount: number,
-    userPattern: 'single' | 'multiple' | 'mixed' = 'multiple'): Promise<TestSession[]>  {
-  const sessions: TestSession[] = [];
+    userPattern: 'single' | 'multiple' | 'mixed' = 'multiple'): Promise<TestSession[]> {
+    const sessions: TestSession[] = [];
     const connectionPromises: Promise<void>[] = [];
 
     for (let i = 0; i < sessionCount; i++) {
@@ -353,15 +353,16 @@ class ConcurrentSessionManager {
 
       switch (userPattern) {
 
-        case 'single':userId = 'test-user-single';
-break;
-      case 'multiple':
-          userId = `test-user-${i
-
-    }`;
+        case 'single':
+          userId = 'test-user-single';
+          break;
+        case 'multiple':
+          userId = `test-user-${i}`;
           break;
         case 'mixed':
-          userId = `test-user-${Math.floor(i / 3)}`; // 3 sessions per userbreak;}
+          userId = `test-user-${Math.floor(i / 3)}`; // 3 sessions per user
+          break;
+      }
 
       const session = await this.createSession(userId);
       sessions.push(session);
@@ -375,12 +376,10 @@ break;
             this.metrics.connectionTimes.push(connectionTime);
             this.metrics.averageConnectionTime =
               this.metrics.connectionTimes.reduce((sum, time) => sum + time, 0) / this.metrics.connectionTimes.length;
-          
-})
+          })
           .catch(() => {
-  // Connection failure already tracked by session event handlers
-          
-})
+            // Connection failure already tracked by session event handlers
+          })
       );
     }
 
@@ -388,7 +387,7 @@ break;
     return sessions;
   }
 
-  async testSessionIsolation(sessions: TestSession[]): Promise<{
+  private async testSessionIsolation(sessions: TestSession[]): Promise<{
     isolationIntegrity: number;
     violations: Array<{ sessionId: string; violation: string; details: IsolationViolationDetails }>;
   }> {
@@ -518,7 +517,7 @@ break;
             const response = await session.waitForValidationResponse(validationId);
             const duration = Date.now() - startTime;
 
-            validationResults.push({,
+            validationResults.push({
   sessionId: session.sessionId,
               success: true,
               duration,
@@ -528,7 +527,7 @@ break;
             return { sessionId: session.sessionId, success: true, response };
           } catch (error) {
   const duration = Date.now() - startTime;
-            validationResults.push({,
+            validationResults.push({
   sessionId: session.sessionId,
               success: false,
               duration,
@@ -870,7 +869,7 @@ const deviceId = req.headers['x-device-id'] as string || 'unknown';
 expect(sessions.length).toBe(sessionCount);const connectedSessions = sessions.filter(session => session.isConnected());
       const metrics = sessionManager.getMetrics();
 
-      console.log('100 Concurrent Sessions Results:', {,
+      console.log('100 Concurrent Sessions Results:', {
   totalSessions: sessionCount,
         connectedSessions: connectedSessions.length,
         successRate: `${(metrics.sessionSuccessRate * 100).toFixed(2)
@@ -887,19 +886,20 @@ ms`,
 
     it('should handle 1000+ concurrent sessions under load', async () => {
 
-  const sessionCount = 1000;const batchSize = 50;
+  const sessionCount = 1000;
+  const batchSize = 50;
       const sessions: TestSession[] = [];
 
       // Create sessions in batches to avoid overwhelming
-      for (let i = 0; i < sessionCount; i += batchSize) 
+      for (let i = 0; i < sessionCount; i += batchSize) {
         const batchSessions = await sessionManager.createConcurrentSessions(
           Math.min(batchSize, sessionCount - i),
-          'mixed');sessions.push(...batchSessions);
+          'mixed');
+        sessions.push(...batchSessions);
 
         // Small delay between batches
         await new Promise(resolve => setTimeout(resolve, 100));
-      
-}
+      }
 
       const connectedSessions = sessions.filter(session => session.isConnected());
       const metrics = sessionManager.getMetrics();
@@ -923,9 +923,9 @@ ms`,
 
     it('should maintain session creation performance under concurrent load', async () => {
 
-  const testRounds = 5;const sessionsPerRound = 50;
-      const performanceResults: Array< round: number; averageTime: number; successRate: number 
-}> = [];
+  const testRounds = 5;
+  const sessionsPerRound = 50;
+      const performanceResults: Array<{ round: number; averageTime: number; successRate: number }> = [];
 
       for (let round = 0; round < testRounds; round++) {
   const roundStart = performance.now();
@@ -936,7 +936,7 @@ ms`,
         const successRate = connectedCount / sessionsPerRound;
         const averageTime = roundDuration / sessionsPerRound;
 
-        performanceResults.push({,
+        performanceResults.push({
   round: round + 1,
           averageTime,
           successRate,
@@ -981,7 +981,7 @@ expect(connectedSessions.length).toBeGreaterThan(sessionCount * 0.9);
       // Test session isolation
       const isolationResults = await sessionManager.testSessionIsolation(connectedSessions);
 
-      console.log('Session Isolation Test Results:', {,
+      console.log('Session Isolation Test Results:', {
   testedSessions: connectedSessions.length,
         isolationIntegrity: `${(isolationResults.isolationIntegrity * 100).toFixed(2)
 }%`,
@@ -999,15 +999,15 @@ expect(connectedSessions.length).toBeGreaterThan(sessionCount * 0.9);
 
     it('should prevent cross-session data leakage', async () => {
 
-  const sessionCount = 20;const sessions = await sessionManager.createConcurrentSessions(sessionCount, 'multiple');
+  const sessionCount = 20;
+  const sessions = await sessionManager.createConcurrentSessions(sessionCount, 'multiple');
 
       const connectedSessions = sessions.filter(session => session.isConnected());
       const sensitiveData = new Map<string, string>();
 
       // Send sensitive data to each session
-      for (const session of connectedSessions) 
-        const secretData = `secret-${session.sessionId
-}-${Math.random().toString(36)}`;
+      for (const session of connectedSessions) {
+        const secretData = `secret-${session.sessionId}-${Math.random().toString(36)}`;
         sensitiveData.set(session.sessionId, secretData);
 
         await session.sendMessage({
@@ -1034,7 +1034,7 @@ expect(connectedSessions.length).toBeGreaterThan(sessionCount * 0.9);
         for (const message of receivedMessages) {
           if (message.payload?.sensitiveData && message.payload.sensitiveData !== ownSecretData) {
             leakageDetected++;
-            leakageDetails.push({,
+            leakageDetails.push({
   fromSession: message.payload.sessionOwner ?? 'unknown',
       toSession: session.sessionId,
       data: message.payload.sensitiveData,
@@ -1059,7 +1059,9 @@ expect(connectedSessions.length).toBeGreaterThan(sessionCount * 0.9);
 
     it('should handle concurrent validations without interference', async () => {
 
-  const sessionCount = 30;const sessions = await sessionManager.createConcurrentSessions(sessionCount, 'multiple');const connectedSessions = sessions.filter(session => session.isConnected());
+  const sessionCount = 30;
+  const sessions = await sessionManager.createConcurrentSessions(sessionCount, 'multiple');
+  const connectedSessions = sessions.filter(session => session.isConnected());
 expect(connectedSessions.length).toBeGreaterThan(sessionCount * 0.9);
 
       // Perform concurrent validations
@@ -1209,7 +1211,7 @@ ms`,concurrencyIssues: validationResults.concurrencyIssues,
       for (const session of connectedSessions) {
         // Send multiple messages to build up session state
         for (let i = 0; i < 10; i++) {
-          await session.sendMessage({,
+          await session.sendMessage({
   type: ConversationalMessageType.STATUS_UPDATE,
             payload: { activityIndex: i, largeData: 'x'.repeat(1000) 
 }, // 1KB per message});}

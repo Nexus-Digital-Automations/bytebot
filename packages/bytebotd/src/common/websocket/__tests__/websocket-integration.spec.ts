@@ -438,12 +438,14 @@ describe('WebSocket Integration Tests', () => {
 
     testActions.forEach((action, _index) => {
       it(`should complete validation workflow for ${action.actionType}`, async () => {
-  // Mock test for validation workflow
-        const validationRequest = {,
-  actionType: action.actionType,
+        // Mock test for validation workflow
+        const validationRequest = {
+          actionType: action.actionType,
           parameters: action.parameters,
           riskLevel: action.impact.scope === 'external' ? 'high' : 'medium',
-};// Simulate validation processing
+        };
+
+        // Simulate validation processing
         const processingTime = Math.random() * 100 + 50; // 50-150ms
         const _approved = action.reversible && action.impact.scope !== 'external';
 expect(validationRequest.actionType).toBe(action.actionType);
@@ -459,8 +461,10 @@ expect(processingTime).toBeLessThan(200); // Performance requirement
 
 
     it('should handle conditional approvals', async () => {
-const conditionalAction: ValidationAction = actionType: 'data_export',
-      parameters: { format: 'csv', destination: 'external' },expectedOutcome: 'Data exported with conditions',
+      const conditionalAction: ValidationAction = {
+        actionType: 'data_export',
+        parameters: { format: 'csv', destination: 'external' },
+        expectedOutcome: 'Data exported with conditions',
       reversible: false,
       impact: {
   scope: 'external',
@@ -482,7 +486,16 @@ expect(requiresApproval).toBe(true);
   // ===== REAL-TIME STREAMING TESTS =====
 
   describe('Real-time Progress Streaming', () => {
-it('should stream progress updates during validation', async () => const mockProgressUpdates = [{ stage: 'init', progress: 0, status: 'pending' },{ stage: 'analysis', progress: 25, status: 'active' },{ stage: 'risk_assessment', progress: 50, status: 'active' },{ stage: 'user_interaction', progress: 75, status: 'active' },{ stage: 'completion', progress: 100, status: 'completed' },];// Simulate progress streaming
+    it('should stream progress updates during validation', async () => {
+      const mockProgressUpdates = [
+        { stage: 'init', progress: 0, status: 'pending' },
+        { stage: 'analysis', progress: 25, status: 'active' },
+        { stage: 'risk_assessment', progress: 50, status: 'active' },
+        { stage: 'user_interaction', progress: 75, status: 'active' },
+        { stage: 'completion', progress: 100, status: 'completed' },
+      ];
+
+      // Simulate progress streaming
       let currentProgress = 0;
       for (const update of mockProgressUpdates) {
   expect(update.progress).toBeGreaterThanOrEqual(currentProgress);
@@ -497,9 +510,16 @@ it('should stream progress updates during validation', async () => const mockPro
 
     it('should handle streaming interruption and recovery', async () => {
 
-  // Test recovery from interrupted streamingconst interruptedStream = [
-         stage: 'init', progress: 0 
-},{ stage: 'analysis', progress: 25 },// Interruption here{ stage: 'recovery', progress: 25 }, // Resume from last known state{ stage: 'completion', progress: 100 },];// Verify recovery logic
+      // Test recovery from interrupted streaming
+      const interruptedStream = [
+        { stage: 'init', progress: 0 },
+        { stage: 'analysis', progress: 25 },
+        // Interruption here
+        { stage: 'recovery', progress: 25 }, // Resume from last known state
+        { stage: 'completion', progress: 100 },
+      ];
+
+      // Verify recovery logic
       const maxProgress = Math.max(...interruptedStream.map(s => s.progress));
       expect(maxProgress).toBe(100);
     });
@@ -509,7 +529,7 @@ it('should stream progress updates during validation', async () => const mockPro
 
   describe('Performance Under Load', () => {
 
-  it('should handle multiple concurrent validations', async () => 
+    it('should handle multiple concurrent validations', async () => {
       const concurrentValidations = 50;
       const validationPromises: Promise<unknown>[] = [];
 
@@ -518,7 +538,7 @@ it('should stream progress updates during validation', async () => const mockPro
           new Promise(resolve => {
             // Simulate concurrent validation
             setTimeout(() => {
-              resolve({,
+              resolve({
   validationId: `concurrent_${i
 }`,
                 approved: Math.random() > 0.3,
@@ -547,10 +567,11 @@ it('should stream progress updates during validation', async () => const mockPro
         const start = performance.now();
 
         // Simulate message delivery
-        const message = {,
-  id: i,
-          data: 'test'.repeat(100), // ~400 bytestimestamp: Date.now(),
-};
+        const message = {
+          id: i,
+          data: 'test'.repeat(100), // ~400 bytes
+          timestamp: Date.now(),
+        };
         JSON.stringify(message); // Simulate serialization
 
         const deliveryTime = performance.now() - start;
@@ -561,13 +582,13 @@ it('should stream progress updates during validation', async () => const mockPro
       const p95Delivery = deliveryTimes.sort((a, b) => a - b)[Math.floor(deliveryTimes.length * 0.95)] ?? 0;
 
       console.log('Message Delivery Performance:', {
-  messageCount,
-        averageDelivery: `${averageDelivery.toFixed(3)
-}
-ms`,p95Delivery: `${p95Delivery.toFixed(3)}
-ms`,
-        target: '50ms',});
-expect(averageDelivery).toBeLessThan(50);
+        messageCount,
+        averageDelivery: `${averageDelivery.toFixed(3)}ms`,
+        p95Delivery: `${p95Delivery.toFixed(3)}ms`,
+        target: '50ms',
+      });
+
+      expect(averageDelivery).toBeLessThan(50);
       expect(p95Delivery).toBeLessThan(100); // Allow higher P95 for realistic testing
     });
   });
@@ -628,7 +649,7 @@ const malformedMessages = [' invalid json','{"type": "unknown"}','{"type": "vali
 
   describe('Security and Compliance', () => {
 
-  it('should enforce authentication levels', () => const authLevels = ['basic', 'multi_factor', 'enterprise'];authLevels.forEach(level => {const securityContext: SecurityContext = {,
+  it('should enforce authentication levels', () => const authLevels = ['basic', 'multi_factor', 'enterprise'];authLevels.forEach(level => {const securityContext: SecurityContext = {
   authenticationLevel: level as 'basic' | 'multi_factor' | 'enterprise',
       permissions: ['read'],
       auditRequired: level === 'enterprise',
@@ -642,7 +663,7 @@ expect(securityContext.complianceFlags).toContain('GDPR');}});
 
 
     it('should track audit trail for compliance', () => {
-  const auditTrail = [{,
+  const auditTrail = [{
   timestamp: Date.now(),
           event: 'validation_request',
       actor: 'user-123',
@@ -751,7 +772,7 @@ const messageCount = 10000;const messages:  id: number; processed: boolean }[] =
           new Promise<void>(resolve => {
             // Simulate message processing
             const messageId = i + j;
-            const message = {,
+            const message = {
   id: messageId,
               type: 'test',
       data: 'x'.repeat(500), // 500 bytestimestamp: Date.now(),

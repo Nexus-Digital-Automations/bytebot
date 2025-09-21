@@ -57,19 +57,24 @@ describe('Browser-Use Integration Tests', () => {
     })
       .overrideProvider(ConfigService)
       .useValue({
-        get: jest.fn((key: string, defaultValue?: string | number | boolean | Record<string, unknown>) => {
-          const mockConfig = {
-            NODE_ENV: 'test',
-            DATABASE_URL: 'postgresql://test:test@localhost:5432/test_db',
-            BROWSER_USE_PYTHON_PATH: 'python3',
-            BROWSER_USE_PATH: '/tmp/browser-use-test',
-            BROWSER_USE_WORKING_DIR: '/tmp/browser-use-data',
-            BROWSER_USE_HEADLESS: 'true',
-            BROWSER_USE_MAX_SESSIONS: '3',
-            BROWSER_USE_SESSION_TIMEOUT: '300000',
-          };
-          return mockConfig[key] || defaultValue;
-        }),
+        get: jest.fn(
+          (
+            key: string,
+            defaultValue?: string | number | boolean | Record<string, unknown>,
+          ) => {
+            const mockConfig = {
+              NODE_ENV: 'test',
+              DATABASE_URL: 'postgresql://test:test@localhost:5432/test_db',
+              BROWSER_USE_PYTHON_PATH: 'python3',
+              BROWSER_USE_PATH: '/tmp/browser-use-test',
+              BROWSER_USE_WORKING_DIR: '/tmp/browser-use-data',
+              BROWSER_USE_HEADLESS: 'true',
+              BROWSER_USE_MAX_SESSIONS: '3',
+              BROWSER_USE_SESSION_TIMEOUT: '300000',
+            };
+            return mockConfig[key] || defaultValue;
+          },
+        ),
       })
       .compile();
 

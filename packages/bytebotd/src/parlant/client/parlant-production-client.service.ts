@@ -652,7 +652,7 @@ export class ParlantProductionClientService implements OnModuleInit, OnModuleDes
       timeout: this.config.connection.timeout,
       httpsAgent,
       headers: {
-        'Content-Type': 'application/json','Accept': 'application/json','User-Agent': 'Bytebot-Parlant-Client/1.0',...(this.config.apiKey && { 'Authorization': `Bearer ${this.config.apiKey}` }),},});
+        'Content-Type': 'application/json','Accept': 'application/json','User-Agent': 'Bytebot-Parlant-Client/1.0',...(this.config.apiKey && { 'Authorization', : `Bearer ${this.config.apiKey}` }),},});
 
     // Add request interceptor for logging and metrics
     this.httpClient.interceptors.request.use(
@@ -715,7 +715,7 @@ export class ParlantProductionClientService implements OnModuleInit, OnModuleDes
     try {
       const headers: Record<string, string> = {};
       if (this.config.apiKey) {
-        headers['Authorization'] = `Bearer ${this.config.apiKey}`;
+        headers['Authorization', ] = `Bearer ${this.config.apiKey}`;
       }
 
       this.wsClient = new WebSocket(this.config.wsUrl, { headers });

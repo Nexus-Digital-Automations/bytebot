@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */;
+ ;
 
 import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';/*** Automation Error Categories
  */;
@@ -853,13 +853,14 @@ constructor(private readonly operationName: string,
 }
 
   recordFailure(): void {
-  (this as any)?.failureCount++;
+    if ((this as any)?.failureCount !== undefined) {
+      (this as any).failureCount += 1;
+    }
     (this as any)?.lastFailureTime = new Date();
 
     if ((this as any)?.failureCount >= (this as any)?.threshold) {
       (this as any)?.state = 'open';
-    
-}
+    }
   }
 
   getStatus(): string {

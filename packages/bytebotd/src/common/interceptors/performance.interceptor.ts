@@ -40,14 +40,12 @@ interface PerformanceMetrics {
   statusCode: number;
   memoryBefore: NodeJS.MemoryUsage;
   memoryAfter: NodeJS.MemoryUsage;
-  memoryDelta: {;
-  rss: number;
+  memoryDelta: {
+    rss: number;
     heapTotal: number;
     heapUsed: number;
     external: number;
-  
-
-};
+  };
 }
 
 /**
@@ -85,8 +83,8 @@ interface PerformanceStats {
 export class PerformanceInterceptor implements NestInterceptor {
   private readonly logger = new Logger(PerformanceInterceptor.name);
   private readonly responseTimes: number[] = [];
-  private readonly stats: PerformanceStats = {,
-  requestCount: 0,
+  private readonly stats: PerformanceStats = {
+    requestCount: 0,
     averageResponseTime: 0,
     slowRequests: 0,
     memoryAlerts: 0,
@@ -94,19 +92,24 @@ export class PerformanceInterceptor implements NestInterceptor {
     p90ResponseTime: 0,
     p95ResponseTime: 0,
     p99ResponseTime: 0,
-  
-};
+  };
 
   // Performance thresholds (configurable via environment variables)
   private readonly thresholds: PerformanceThresholds = {
-  slowRequestWarning: parseInt(
-      process.env.SLOW_REQUEST_WARNING ?? '1000',10,), // 1 second,
-  slowRequestCritical: parseInt(
-      process.env.SLOW_REQUEST_CRITICAL ?? '5000',10,), // 5 seconds,
-  memoryLeakWarning: parseInt(
-      process.env.MEMORY_LEAK_WARNING ?? '50000000',10,), // 50MB,
-  memoryUsageWarning: parseInt(process.env.MEMORY_USAGE_WARNING ?? '80', 10), // 80%
-};
+    slowRequestWarning: parseInt(
+      process.env.SLOW_REQUEST_WARNING ?? '1000',
+      10,
+    ), // 1 second
+    slowRequestCritical: parseInt(
+      process.env.SLOW_REQUEST_CRITICAL ?? '5000',
+      10,
+    ), // 5 seconds
+    memoryLeakWarning: parseInt(
+      process.env.MEMORY_LEAK_WARNING ?? '50000000',
+      10,
+    ), // 50MB
+    memoryUsageWarning: parseInt(process.env.MEMORY_USAGE_WARNING ?? '80', 10), // 80%
+  };
 constructor(private readonly metricsService?: MetricsService) {
   this.logger.log('Performance Interceptor initialized');
     this.logger.log(
@@ -215,7 +218,7 @@ ${Math.random().toString(36).substring(7)}`;const startTime = Date.now();const m
    */
   private logPerformanceMetrics(metrics: PerformanceMetrics): void {
   const logLevel = this.determineLogLevel(metrics.duration);
-    const logData = {,
+    const logData = {
   operationId: metrics.operationId,
       method: metrics.method,
       url: metrics.url,
@@ -335,10 +338,15 @@ ms threshold`,{
    * Normalize URL for consistent metrics grouping
    */
   private normalizeUrl(url: string): string {
-  // Remove query parameters and normalize path parameters
+    // Remove query parameters and normalize path parameters
     const cleanUrl = (url ?? '').split('?')[0] ?? '';
-return cleanUrl.replace(/\/\d+/g, '/:id') // Replace numeric path params.replace(/\/[a-f0-9-]{36
-}/g, '/:uuid') // Replace UUID path params.replace(/\/[a-f0-9]{24}/g, '/:objectid'); // Replace MongoDB ObjectId path params}/**
+    return cleanUrl
+      .replace(/\/\d+/g, '/:id') // Replace numeric path params
+      .replace(/\/[a-f0-9-]{36}/g, '/:uuid') // Replace UUID path params
+      .replace(/\/[a-f0-9]{24}/g, '/:objectid'); // Replace MongoDB ObjectId path params
+  }
+
+  /**
    * Store response time for percentile calculations
    */
   private storeResponseTime(duration: number): void {
@@ -410,8 +418,8 @@ return cleanUrl.replace(/\/\d+/g, '/:id') // Replace numeric path params.replace
    * Clear performance statistics
    */
   clearStats(): void {
-  Object.assign(this.stats, {,
-  requestCount: 0,
+    Object.assign(this.stats, {
+      requestCount: 0,
       averageResponseTime: 0,
       slowRequests: 0,
       memoryAlerts: 0,
@@ -419,8 +427,7 @@ return cleanUrl.replace(/\/\d+/g, '/:id') // Replace numeric path params.replace
       p90ResponseTime: 0,
       p95ResponseTime: 0,
       p99ResponseTime: 0,
-    
-});
+    });
 
     this.responseTimes.length = 0;
     this.logger.log('Performance statistics cleared');}/**
@@ -432,7 +439,7 @@ return cleanUrl.replace(/\/\d+/g, '/:id') // Replace numeric path params.replace
       if (this.stats.requestCount > 0) {
         this.calculatePercentiles();
 
-        this.logger.log('Performance Statistics Summary:', {,
+        this.logger.log('Performance Statistics Summary:', {
   requestCount: this.stats.requestCount,
           averageResponseTime: `${this.stats.averageResponseTime.toFixed(2)
 }

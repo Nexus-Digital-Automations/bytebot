@@ -32,7 +32,10 @@ import { Observable, tap, catchError } from 'rxjs';
 import { Request } from 'express';
 import { MetricsService } from '../../metrics/metrics.service';
 import { CacheService } from '../../cache/cache.service';
-import { CacheKeyGenerator } from '../../cache/cache-key.generator';/*** Database operation metadata
+import { CacheKeyGenerator } from '../../cache/cache-key.generator';
+
+/**
+ * Database operation metadata
  */
 interface DatabaseOperation {
   operation: string;
@@ -70,13 +73,11 @@ interface DatabaseStats {
   slowQueries: number;
   failedQueries: number;
   cacheHitRate: number;
-  connectionPoolStats: {;
-  active: number;
+  connectionPoolStats: {
+    active: number;
     idle: number;
     total: number;
-  
-
-};
+  };
   topSlowQueries: Array<{
   operation: string;
     table: string;
@@ -106,18 +107,17 @@ interface DatabaseConfig {
 @Injectable()
 export class DatabaseInterceptor implements NestInterceptor {
   private readonly logger = new Logger(DatabaseInterceptor.name);
-  private readonly stats: DatabaseStats = {,
-  totalQueries: 0,
+  private readonly stats: DatabaseStats = {
+    totalQueries: 0,
     averageQueryTime: 0,
     slowQueries: 0,
     failedQueries: 0,
     cacheHitRate: 0,
     connectionPoolStats: {
-  active: 0,
+      active: 0,
       idle: 0,
       total: 0,
-    
-},
+    },
     topSlowQueries: [],
   };
 
@@ -133,13 +133,19 @@ export class DatabaseInterceptor implements NestInterceptor {
 
   // Database performance configuration
   private readonly config: DatabaseConfig = {
-  slowQueryThreshold: parseInt(
-      process.env.DB_SLOW_QUERY_THRESHOLD ?? '1000',10,), // 1 second,
-  criticalQueryThreshold: parseInt(
-      process.env.DB_CRITICAL_QUERY_THRESHOLD ?? '5000',10,), // 5 seconds,
-  enableQueryCaching: process.env.DB_ENABLE_QUERY_CACHING !== 'false',
-      defaultCacheTtl: parseInt(process.env.DB_CACHE_TTL ?? '300', 10), // 5 minutesmaxRetryAttempts: parseInt(process.env.DB_MAX_RETRY_ATTEMPTS ?? '3', 10),retryDelay: parseInt(process.env.DB_RETRY_DELAY ?? '1000', 10), // 1 second
-};
+    slowQueryThreshold: parseInt(
+      process.env.DB_SLOW_QUERY_THRESHOLD ?? '1000',
+      10,
+    ), // 1 second
+    criticalQueryThreshold: parseInt(
+      process.env.DB_CRITICAL_QUERY_THRESHOLD ?? '5000',
+      10,
+    ), // 5 seconds
+    enableQueryCaching: process.env.DB_ENABLE_QUERY_CACHING !== 'false',
+    defaultCacheTtl: parseInt(process.env.DB_CACHE_TTL ?? '300', 10), // 5 minutes
+    maxRetryAttempts: parseInt(process.env.DB_MAX_RETRY_ATTEMPTS ?? '3', 10),
+    retryDelay: parseInt(process.env.DB_RETRY_DELAY ?? '1000', 10), // 1 second
+  };
 constructor(
     private readonly metricsService?: MetricsService,
     private readonly cacheService?: CacheService,
@@ -280,7 +286,7 @@ ms, caching=${this.config.enableQueryCaching}`,);// Start periodic reporting
               startTime,
               cacheKey,
               next,
-            ).subscribe({,
+            ).subscribe({
   next: (result) => observer.next(result),
               error: (error: unknown) => observer.error(error),
               complete: () => observer.complete(),
@@ -327,7 +333,7 @@ ms, caching=${this.config.enableQueryCaching}`,);// Start periodic reporting
 
         // Cache the result
         if (this.cacheService) {
-          await this.cacheService.set(cacheKey, result, {,
+          await this.cacheService.set(cacheKey, result, {
   ttl: this.config.defaultCacheTtl,
             namespace: 'database-queries',
           
@@ -419,7 +425,11 @@ ms)`,
    * Extract table name from controller class name
    */
   private extractTableName(controllerClass: string): string {
-    // Remove 'Controller' suffix and convert to lowercasereturn controllerClass.replace(/Controller$/i, '').toLowerCase().replace(/s$/, ''); // Remove plural 's' if present}/**
+    // Remove 'Controller' suffix and convert to lowercase
+    return controllerClass.replace(/Controller$/i, '').toLowerCase().replace(/s$/, ''); // Remove plural 's' if present
+  }
+
+  /**
    * Check if operation is cacheable
    */
   private isCacheableOperation(dbOperation: DatabaseOperation): boolean {
@@ -560,7 +570,7 @@ ms)`,{
     const queryKey = `${operation.operation}:${operation.table}`;
 
     if (!this.slowQueries.has(queryKey)) {
-  this.slowQueries.set(queryKey, {,
+  this.slowQueries.set(queryKey, {
   totalDuration: duration,
         count: 1,
         avgDuration: duration,
@@ -612,7 +622,7 @@ ms)`,{
    * Clear database statistics
    */
   clearStats(): void {
-  Object.assign(this.stats, {,
+  Object.assign(this.stats, {
   totalQueries: 0,
       averageQueryTime: 0,
       slowQueries: 0,
@@ -635,7 +645,7 @@ ms)`,{
   // Report database stats every 10 minutes
     setInterval(() => {
       if (this.stats.totalQueries > 0) {
-        this.logger.log('Database Performance Statistics:', {,
+        this.logger.log('Database Performance Statistics:', {
   totalQueries: this.stats.totalQueries,
           averageQueryTime: `${this.stats.averageQueryTime.toFixed(2)
 }

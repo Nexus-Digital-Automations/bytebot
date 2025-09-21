@@ -3520,6 +3520,155 @@
           "claimPriority": "normal"
         }
       ]
+    },
+    {
+      "status": "in_progress",
+      "created_at": "2025-09-21T00:27:42.590Z",
+      "title": "Fix remaining TypeScript compilation errors in shared package",
+      "description": "Fix remaining TypeScript compilation errors after concurrent subagent fixes: 1) Monitoring controller missing properties (includeValidation, FollowUpQueryDto), 2) Audit types missing imports and duplicate identifiers, 3) Testing framework missing exports and property mismatches, 4) Security testing type issues. Continue systematic resolution.",
+      "category": "error",
+      "id": "error_1758414462590_94sschzfqz7",
+      "assigned_agent": "dev_session_1758411006117_1_general_b2145dfe",
+      "started_at": "2025-09-21T00:27:59.349Z",
+      "claimed_by": "dev_session_1758411006117_1_general_b2145dfe",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758411006117_1_general_b2145dfe",
+          "role": "primary",
+          "assignedAt": "2025-09-21T00:27:59.349Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "status": "in_progress",
+      "created_at": "2025-09-21T00:27:50.077Z",
+      "title": "Fix audit-core.types parlant import and missing type definitions",
+      "description": "Fix specific TypeScript errors in audit types: 1) Fix parlant.types import path in audit-core.types.ts line 36, 2) Add missing ComplianceMetadata type definition, 3) Add missing AuditParlantResponse type, 4) Resolve duplicate enum identifier conflicts for COMPLIANT/NON_COMPLIANT, 5) Add missing type definitions for EvidenceType, ImplementationStatus, EffectivenessRating, RiskMitigation.",
+      "priority": "high",
+      "category": "error",
+      "important_files": [
+        "bytebot/packages/shared/src/parlant/audit/types/audit-core.types.ts",
+        "bytebot/packages/shared/src/types/parlant.types.ts"
+      ],
+      "id": "error_1758414470076_ataur8gfexj",
+      "assigned_agent": "dev_session_1758411814604_1_general_6975b84d",
+      "started_at": "2025-09-21T00:28:08.098Z",
+      "claimed_by": "dev_session_1758411814604_1_general_6975b84d",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758411814604_1_general_6975b84d",
+          "role": "primary",
+          "assignedAt": "2025-09-21T00:28:08.098Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-21T00:29:22.644Z",
+      "title": "Fix TypeScript compilation errors in monitoring controller",
+      "description": "Fix missing DTO properties, FollowUpQueryDto type, and keyMetrics type mismatch in parlant-monitoring.controller.ts",
+      "category": "error",
+      "id": "error_1758414562644_zawc6x0qunh",
+      "assigned_agent": "dev_session_1758414544664_1_general_ab4c16f8",
+      "started_at": "2025-09-21T00:35:14.763Z",
+      "claimed_by": "dev_session_1758414544664_1_general_ab4c16f8",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758414544664_1_general_ab4c16f8",
+          "role": "primary",
+          "assignedAt": "2025-09-21T00:35:14.763Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-21T00:35:58.481Z",
+      "updated_at": "2025-09-21T00:35:58.481Z"
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-21T00:29:22.816Z",
+      "title": "Fix TypeScript compilation errors in audit types",
+      "description": "Fix import paths, missing type definitions, and duplicate identifiers in audit-core.types.ts, audit-extended.types.ts, and compliance-forensic.types.ts",
+      "category": "error",
+      "id": "error_1758414562816_fmyrafmoqsi"
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-21T00:29:23.033Z",
+      "title": "Fix TypeScript compilation errors in testing framework",
+      "description": "Fix missing exports, property mismatches, and interface inconsistencies in security testing framework files",
+      "category": "error",
+      "id": "error_1758414563033_g7m94t4p0g4"
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-21T00:29:23.540Z",
+      "title": "Fix TypeScript compilation errors in security testing components",
+      "description": "Fix type mismatches and missing properties in SecurityTestResult and SecurityTestSuite interfaces, resolve SecurityLevel and ValidationMessage array type issues",
+      "category": "error",
+      "id": "error_1758414563539_p6yg2srmza9"
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-21T00:29:25.418Z",
+      "title": "Fix TypeScript parlant integration type compilation errors",
+      "description": "Fix TypeScript compilation errors related to parlant integration types including AuditParlantResponse, ParlantValidationSession, ConversationAnalysis, DecisionReasoning, BypassInfo, ComplianceMetadata, EvidenceType and related types. Create comprehensive type definitions and resolve import issues.",
+      "category": "error",
+      "id": "error_1758414565418_2qqdcht9njn"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-21T03:55:14.154Z",
+      "title": "Clean TODO.json and add dead code removal task",
+      "description": "Review TODO.json via TaskManager API to remove unnecessary tasks, then add a new task to find and remove dead code from the codebase",
+      "category": "feature",
+      "id": "feature_1758426914154_pq3hprbhw99",
+      "completed_at": "2025-09-21T03:59:34.148Z",
+      "updated_at": "2025-09-21T03:59:34.148Z"
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-21T04:21:32.362Z",
+      "title": "Fix missing comma errors in bytebotd TypeScript files",
+      "description": "Fix , expected parsing errors in 4 specific test files: concurrent-session-management.spec.ts (line 903:6), error-handling-recovery.spec.ts (line 838:29), websocket-integration.spec.ts (line 581:6), and jwt-auth.guard.spec.ts (line 565:55)",
+      "category": "error",
+      "id": "error_1758428492361_6bevt04hs77"
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-21T04:21:32.631Z",
+      "title": "Fix Property/Constructor syntax errors in TypeScript files",
+      "description": "Fix class property assignment and constructor syntax issues in global-validation.pipe.ts (line 577), security-sanitization.pipe.ts (line 349), and conversational-websocket-bridge.service.ts (line 1564). Maintain functionality and dependency injection.",
+      "category": "error",
+      "id": "error_1758428492630_1yh7ru91rm8"
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-21T04:21:32.891Z",
+      "title": "Quality Assurance - Validate ESLint parsing error fixes",
+      "description": "Monitor and validate all parsing error fixes from concurrent agents. Run comprehensive ESLint validation to ensure all 24 parsing errors in bytebotd are resolved and no new errors were introduced.",
+      "category": "test",
+      "id": "test_1758428492891_31bkcyq9cwj"
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-21T04:21:32.951Z",
+      "title": "Fix missing comma syntax errors in bytebotd TypeScript files",
+      "description": "Fix 4 specific missing comma parsing errors: Line 506:49 in message-ordering-delivery-validation.spec.ts, Line 479:2 in testing-framework-integration.spec.ts, Line 432:6 in conversational-websocket-bridge.spec.ts, Line 402:10 in cache.interceptor.ts",
+      "category": "error",
+      "id": "error_1758428492951_iz3mwcxydx"
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-21T04:21:35.747Z",
+      "title": "Fix Missing Comma ESLint Errors in bytebotd WebSocket and Interceptor Files",
+      "description": "Fix comma expected parsing errors in websocket-connection-lifecycle.spec.ts (line 1254:6), security-penetration.spec.ts (line 1078:19), and compression.interceptor.ts (line 125:2). Focus on missing commas in test configurations and interceptor setups while preserving WebSocket lifecycle testing and security penetration scenarios.",
+      "category": "error",
+      "id": "error_1758428495747_q7to41itxie"
     }
   ],
   "agents": {
@@ -9608,6 +9757,216 @@
       "workload": 0,
       "maxConcurrentTasks": 5,
       "createdAt": "2025-09-20T22:26:10.853Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758414544489_1_general_2e636386": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-21T00:29:04.491Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-21T00:29:04.491Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758414544664_1_general_ab4c16f8": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-21T00:29:04.665Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-21T00:29:04.665Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758414544857_1_general_ab219143": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-21T00:29:04.860Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-21T00:29:04.860Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758414545044_1_general_7305501d": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-21T00:29:05.045Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-21T00:29:05.045Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758414545242_1_general_52030995": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-21T00:29:05.247Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-21T00:29:05.247Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758428477203_1_general_336b8866": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-21T04:21:17.204Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-21T04:21:17.204Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758428477394_1_general_6196d453": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-21T04:21:17.395Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-21T04:21:17.395Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758428477521_1_general_df20ab9a": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-21T04:21:17.522Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-21T04:21:17.522Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758428477562_1_general_275cb9e6": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-21T04:21:17.563Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-21T04:21:17.563Z",
+      "sessionId": null,
+      "metadata": {}
+    },
+    "dev_session_1758428477739_1_general_c25eb5c2": {
+      "name": "undefined Agent",
+      "role": "development",
+      "specialization": [],
+      "status": "active",
+      "assignedTasks": [],
+      "lastHeartbeat": "2025-09-21T04:21:17.740Z",
+      "parentAgentId": null,
+      "capabilities": [
+        "file-operations",
+        "linting",
+        "testing",
+        "build-fixes",
+        "refactoring"
+      ],
+      "workload": 0,
+      "maxConcurrentTasks": 5,
+      "createdAt": "2025-09-21T04:21:17.740Z",
       "sessionId": null,
       "metadata": {}
     }

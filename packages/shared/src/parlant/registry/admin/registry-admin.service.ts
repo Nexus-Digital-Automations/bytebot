@@ -54,7 +54,8 @@ import {
   PerformanceStatus,
   PerformanceLevel,
   StorageStatus,
-  ValidationResult
+  ValidationResult,
+  TrendDirection
 } from '../core/registry.interface';
 
 /**
@@ -263,7 +264,7 @@ export class RegistryAdminService implements IRegistryAdmin {
           ...issues,
           {
             type: IssueType._PERFORMANCE_ISSUE,
-            description: `Maintenance failed: ${error.message}`,
+            description: `Maintenance failed: ${error instanceof Error ? error.message : String(error)}`,
             severity: IssueSeverity._HIGH,
             resolution: 'Review error logs and retry maintenance'
           }

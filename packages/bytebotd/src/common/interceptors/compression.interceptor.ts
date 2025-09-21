@@ -105,14 +105,27 @@ export class CompressionInterceptor implements NestInterceptor {
 
   // Compression configuration (configurable via environment variables)
   private readonly config: CompressionConfig = {
-    minSize: parseInt(process.env.COMPRESSION_MIN_SIZE ?? '1024', 10), // 1KBlevel: parseInt(process.env.COMPRESSION_LEVEL ?? '6', 10), // Balanced compressionthreshold: parseFloat(process.env.COMPRESSION_THRESHOLD ?? '0.8'), // 20% minimum reductionmaxSize: parseInt(process.env.COMPRESSION_MAX_SIZE ?? '10485760', 10), // 10MBcompressibleTypes: new Set(['application/json','application/javascript','application/xml','text/plain','text/html','text/css','text/javascript','text/xml','image/svg+xml',]),};
+    minSize: parseInt(process.env.COMPRESSION_MIN_SIZE ?? '1024', 10), // 1KB
+    level: parseInt(process.env.COMPRESSION_LEVEL ?? '6', 10), // Balanced compression
+    threshold: parseFloat(process.env.COMPRESSION_THRESHOLD ?? '0.8'), // 20% minimum reduction
+    maxSize: parseInt(process.env.COMPRESSION_MAX_SIZE ?? '10485760', 10), // 10MB
+    compressibleTypes: new Set([
+      'application/json',
+      'application/javascript',
+      'application/xml',
+      'text/plain',
+      'text/html',
+      'text/css',
+      'text/javascript',
+      'text/xml',
+      'image/svg+xml',
+    ]),
+  };
 
   constructor(private readonly metricsService?: MetricsService) {
-  this.logger.log('Compression Interceptor initialized');
+    this.logger.log('Compression Interceptor initialized');
     this.logger.log(
-      `Config: minSize=${this.config.minSize
-}
-b, level=${this.config.level}, threshold=${this.config.threshold}`,
+      `Config: minSize=${this.config.minSize}b, level=${this.config.level}, threshold=${this.config.threshold}`,
     );
 
     // Start periodic stats reporting
@@ -123,14 +136,13 @@ b, level=${this.config.level}, threshold=${this.config.threshold}`,
    * Intercept HTTP responses to apply compression
    */
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
-  const request = context.switchToHttp().getRequest<Request>();
+    const request = context.switchToHttp().getRequest<Request>();
     const response = context.switchToHttp().getResponse<Response>();
 
     return next.handle().pipe(
       mergeMap((data: unknown) => {
         return from(this.handleCompressionAsync(data, request, response));
-      
-}),
+      }),
     );
   }
 
@@ -196,7 +208,7 @@ b ` +`(${(compressionResult.ratio * 100).toFixed(1)}% reduction)`,);}
 
       // Check if compression should be applied
       if (!this.shouldCompress(responseBuffer, response)) {
-        return {,
+        return {
   algorithm: 'identity',
       originalSize,compressedSize: originalSize,
           ratio: 1,
@@ -220,7 +232,7 @@ b ` +`(${(compressionResult.ratio * 100).toFixed(1)}% reduction)`,);}
       // Check if compression is beneficial
       if (ratio > this.config.threshold) {
   // Compression not beneficial enough
-        return {,
+        return {
   algorithm: 'identity',
       originalSize,compressedSize: originalSize,
           ratio: 1,
@@ -298,21 +310,23 @@ return this.config.compressibleTypes.has(baseType);}
   /**
    * Apply compression using specified algorithm
    */
-  private async applyCompression(data: Buffer,
+  private async applyCompression(
+    data: Buffer,
     algorithm: CompressionAlgorithm,
-  ): Promise<Buffer>  {
-  switch (algorithm) {
-
-      case 'brotli':return await brotliCompressAsync(data, {params: {
+  ): Promise<Buffer> {
+    switch (algorithm) {
+      case 'brotli':
+        return await brotliCompressAsync(data, {
+          params: {
             [zlibConstants.BROTLI_PARAM_QUALITY as number]: this.config.level,
-          
-
-    },
+          },
         });
 
-      case 'gzip':return await gzipAsync(data, { level: this.config.level });
-    case 'deflate':return await deflateAsync(data, { level: this.config.level });
-  default:
+      case 'gzip':
+        return await gzipAsync(data, { level: this.config.level });
+      case 'deflate':
+        return await deflateAsync(data, { level: this.config.level });
+      default:
         return data;
     }
   }
@@ -398,7 +412,7 @@ return Buffer.from(String(data), 'utf8');}/**
    * Clear compression statistics
    */
   clearStats(): void {
-  Object.assign(this.stats, {,
+  Object.assign(this.stats, {
   totalRequests: 0,
       compressedRequests: 0,
       compressionRatio: 0,
@@ -421,7 +435,7 @@ return Buffer.from(String(data), 'utf8');}/**
   // Report compression stats every 10 minutes
     setInterval(() => {
       if (this.stats.totalRequests > 0) {
-        this.logger.log('Compression Statistics Summary:', {,
+        this.logger.log('Compression Statistics Summary:', {
   totalRequests: this.stats.totalRequests,
           compressedRequests: this.stats.compressedRequests,
           compressionRate: `${((this.stats.compressedRequests / this.stats.totalRequests) * 100).toFixed(1)

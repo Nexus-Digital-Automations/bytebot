@@ -249,7 +249,7 @@ export class MessageOrderingDeliveryValidationService
   super();
 
     // Initialize configuration
-    this.queueConfig = {,
+    this.queueConfig = {
   maxQueueSize: this.configService.get<number>('MESSAGE_QUEUE_MAX_SIZE', 50000),flushInterval: this.configService.get<number>('MESSAGE_QUEUE_FLUSH_INTERVAL', 100),batchSize: this.configService.get<number>('MESSAGE_QUEUE_BATCH_SIZE', 100),compressionEnabled: this.configService.get<boolean>('MESSAGE_COMPRESSION_ENABLED', true),priorityWeights: {[MessagePriority.CRITICAL]: 1000,
         [MessagePriority.HIGH]: 100,
         [MessagePriority.NORMAL]: 10,
@@ -275,12 +275,18 @@ export class MessageOrderingDeliveryValidationService
     
 };
 
-    this.maxBufferSize = this.configService.get<number>('MESSAGE_BUFFER_MAX_SIZE', 10000);this.validationEnabled = this.configService.get<boolean>('MESSAGE_VALIDATION_ENABLED', true);// Initialize priority queuesObject.values(MessagePriority).forEach(priority => {
-      if (typeof priority === 'number') {this.priorityQueues.set(priority, []);}
+    this.maxBufferSize = this.configService.get<number>('MESSAGE_BUFFER_MAX_SIZE', 10000);
+    this.validationEnabled = this.configService.get<boolean>('MESSAGE_VALIDATION_ENABLED', true);
+
+    // Initialize priority queues
+    Object.values(MessagePriority).forEach(priority => {
+      if (typeof priority === 'number') {
+        this.priorityQueues.set(priority, []);
+      }
     });
 
     this.logger.log('MessageOrderingDeliveryValidationService initialized with configuration', {
-  queueConfig: this.queueConfig,
+      queueConfig: this.queueConfig,
       retryConfig: this.retryConfig,
       maxBufferSize: this.maxBufferSize,
       validationEnabled: this.validationEnabled,
@@ -383,7 +389,7 @@ export class MessageOrderingDeliveryValidationService
     const validationErrors: MessageValidationError[] = [];
 
     if (isDuplicate) {
-  validationErrors.push({,
+  validationErrors.push({
   errorCode: 'DUPLICATE_MESSAGE',
         message: `Duplicate message detected: ${messageId
 }`,
@@ -394,7 +400,7 @@ export class MessageOrderingDeliveryValidationService
     }
 
   if(!sequenceValid) {
-  validationErrors.push({,
+  validationErrors.push({
   errorCode: 'SEQUENCE_OUT_OF_ORDER',
         message: `Message sequence out of order: expected ${expectedSequence
 }, got ${currentSequence}`,
@@ -744,7 +750,7 @@ export class MessageOrderingDeliveryValidationService
       ConversationalMessageType.CONFIRMATION_RESULT,
     ];
 
-    const validation: ConversationFlowValidation = {,
+    const validation: ConversationFlowValidation = {
   conversationId: validationId,
       messageSequence: parlantMessages,
       orderingValid: this.validateParlantMessageOrdering(parlantMessages, expectedMessageTypes),
@@ -764,7 +770,7 @@ export class MessageOrderingDeliveryValidationService
    * Calculate message checksum for integrity validation
    */
   private calculateMessageChecksum(message: ConversationalMessage): string {
-  const messageData = JSON.stringify({,
+  const messageData = JSON.stringify({
   type: message.type,
       messageId: message.messageId,
       sessionId: message.sessionId,
@@ -794,16 +800,18 @@ export class MessageOrderingDeliveryValidationService
   this.metricsInterval = setInterval(() => {
       this.updateMetrics();
       this.emit('metrics_updated', this.getPerformanceMetrics());
-}, 5000); // Update every 5 seconds}
+    }, 5000); // Update every 5 seconds
+  }
 
   /**
    * Start queue processing interval
    */
   private startQueueProcessing(): void {
-  setInterval(() => {
+    setInterval(() => {
       this.processMessageQueues().catch(error => {
         this.logger.error('Queue processing error', error);
-});}, this.queueConfig.flushInterval);
+      });
+    }, this.queueConfig.flushInterval);
   }
 
   /**

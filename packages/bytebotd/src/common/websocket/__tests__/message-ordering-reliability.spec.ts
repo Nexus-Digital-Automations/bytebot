@@ -1158,17 +1158,25 @@ expect(starvationViolations.length).toBe(0); // No starvation should occurawait 
   // ===== MESSAGE DEDUPLICATION AND IDEMPOTENCY =====
 
   describe('Message Deduplication and Idempotency', () => {
-it('should detect and handle duplicate messages', async () => const client = new ReliabilityTestClient(TEST_URL);await client.connect();
+    it('should detect and handle duplicate messages', async () => {
+      const client = new ReliabilityTestClient(TEST_URL);
+      await client.connect();
 
       const sessionId = 'deduplication-test';
-const originalMessage: ConversationalMessage = {messageId: 'duplicate-test-message',
-      sessionId,timestamp: Date.now(),
+      const originalMessage: ConversationalMessage = {
+        messageId: 'duplicate-test-message',
+        sessionId,
+        timestamp: Date.now(),
         sequence: 1,
         type: ConversationalMessageType.STATUS_UPDATE,
-        payload: { testData: 'original message' },metadata: {priority: 'normal',
-      requiresAck: false,
-      compression: false,
-          routingHints: ['dedup-test'],},};
+        payload: { testData: 'original message' },
+        metadata: {
+          priority: 'normal',
+          requiresAck: false,
+          compression: false,
+          routingHints: ['dedup-test'],
+        },
+      };
 
       // Send the same message multiple times
       for (let i = 0; i < 5; i++) {
@@ -1196,40 +1204,46 @@ const originalMessage: ConversationalMessage = {messageId: 'duplicate-test-messa
 
 
     it('should maintain idempotency for validation requests', async () => {
-const client = new ReliabilityTestClient(TEST_URL);await client.connect();
+      const client = new ReliabilityTestClient(TEST_URL);
+      await client.connect();
 
       const sessionId = 'idempotency-test';
-const validationId = randomUUID();const validationRequest: ValidationRequestMessage = 
+      const validationId = randomUUID();
+      const validationRequest: ValidationRequestMessage = {
         type: ConversationalMessageType.VALIDATION_REQUEST,
         messageId: 'idempotent-validation',
-      sessionId,timestamp: Date.now(),
+        sessionId,
+        timestamp: Date.now(),
         sequence: 1,
         payload: {
           validationId,
           context: {
             userId: 'test-user',
-      applicationContext: 'idempotency-test',
-      environmentInfo: {},previousActions: [],
+            applicationContext: 'idempotency-test',
+            environmentInfo: {},
+            previousActions: [],
             securityContext: {
               authenticationLevel: 'basic',
-      permissions: ['read'],
-      auditRequired: false,
-      complianceFlags: [],
+              permissions: ['read'],
+              auditRequired: false,
+              complianceFlags: [],
             },
           },
           action: {
             actionType: 'idempotent_action',
-      parameters: { test: true },expectedOutcome: 'Should be processed once',
-      reversible: true,
-      impact: {
+            parameters: { test: true },
+            expectedOutcome: 'Should be processed once',
+            reversible: true,
+            impact: {
               scope: 'local',
-      dataAccess: false,
-      stateChanges: false,
+              dataAccess: false,
+              stateChanges: false,
               userInteraction: false,
             },
           },
           riskLevel: 'low',
-      streamingOptions: {enableProgressUpdates: false,
+          streamingOptions: {
+            enableProgressUpdates: false,
             updateInterval: 1000,
             maxUpdateCount: 1,
             compressionEnabled: false,
@@ -1238,9 +1252,11 @@ const validationId = randomUUID();const validationRequest: ValidationRequestMess
         },
         metadata: {
           priority: 'normal',
-      requiresAck: true,
-      compression: false,
-          routingHints: ['validation'],},};
+          requiresAck: true,
+          compression: false,
+          routingHints: ['validation'],
+        },
+      };
 
       // Send the same validation request multiple times
       for (let i = 0; i < 3; i++) {

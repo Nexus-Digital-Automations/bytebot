@@ -322,7 +322,7 @@ export class BrowserUseAuthMiddleware implements NestMiddleware {
     deviceFingerprint?: string;
     apiKey?: string;
   }> {
-    const authHeader = req.get('Authorization');const sessionHeader = req.get('X-Session-ID');const deviceHeader = req.get('X-Device-Fingerprint');const apiKeyHeader = req.get('X-API-Key');// Extract Bearer tokenlet token: string | undefined;
+    const authHeader = req.get('Authorization', );const sessionHeader = req.get('X-Session-ID');const deviceHeader = req.get('X-Device-Fingerprint');const apiKeyHeader = req.get('X-API-Key');// Extract Bearer tokenlet token: string | undefined;
     if (authHeader?.startsWith('Bearer ')) {token = authHeader.substring(7);}
 
     // Generate device fingerprint if not provided

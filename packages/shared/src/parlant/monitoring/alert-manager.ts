@@ -1166,14 +1166,14 @@ export class AlertManager extends EventEmitter {
     rule: AlertCorrelationRule,
     alerts: PerformanceAlert[],
   ): void {
-    if (rule.actions.createCombined && rule.combinedTemplate) {
+    if (rule.actions.createCombined && rule.actions.combinedTemplate) {
       const combinedAlert: PerformanceAlert = {
         id: `correlated-${rule.id}-${Date.now()}`,
         type: "CUSTOM_THRESHOLD",
-        severity: rule.combinedTemplate.severity,
+        severity: rule.actions.combinedTemplate.severity,
         status: "OPEN",
-        title: rule.combinedTemplate.title,
-        description: rule.combinedTemplate.description,
+        title: rule.actions.combinedTemplate.title,
+        description: rule.actions.combinedTemplate.description,
         metric: {
           name: "correlation",
           currentValue: alerts.length,

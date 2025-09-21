@@ -49,15 +49,14 @@ import { createSafeWebSocketServer } from '../websocket-types';
 class SystemResourceMonitor {
   private monitoring = false;
   private monitoringInterval: NodeJS.Timeout | null = null;
-  private resourceSnapshots: Array<{,
-  timestamp: number;
-  cpuUsage: NodeJS.CpuUsage;
+  private resourceSnapshots: Array<{
+    timestamp: number;
+    cpuUsage: NodeJS.CpuUsage;
     memoryUsage: NodeJS.MemoryUsage;
     systemLoad: number[];
-  freeMemory: number;
+    freeMemory: number;
     totalMemory: number;
-  
-}> = [];
+  }> = [];
 
   private initialCpuUsage: NodeJS.CpuUsage;
   private initialMemoryUsage: NodeJS.MemoryUsage;
@@ -75,7 +74,7 @@ class SystemResourceMonitor {
     this.resourceSnapshots = [];
 
     this.monitoringInterval = setInterval(() => {
-      this.resourceSnapshots.push({,
+      this.resourceSnapshots.push({
   timestamp: performance.now(),
         cpuUsage: process.cpuUsage(),
         memoryUsage: process.memoryUsage(),
@@ -174,7 +173,7 @@ class ThroughputBenchmark {
   private endTime = 0;
   private latencies: number[] = [];
   private messageSizes: number[] = [];
-  private throughputSnapshots: Array<{,
+  private throughputSnapshots: Array<{
   timestamp: number;
   sentCount: number;
     receivedCount: number;
@@ -198,7 +197,7 @@ class ThroughputBenchmark {
       const elapsed = now - this.startTime;
       const instantThroughput = elapsed > 0 ? (this.receivedMessages / elapsed) * 1000 : 0;
 
-      this.throughputSnapshots.push({,
+      this.throughputSnapshots.push({
   timestamp: now,
         sentCount: this.sentMessages,
         receivedCount: this.receivedMessages,
@@ -300,7 +299,7 @@ class ThroughputBenchmark {
  * Connection scalability tester
  */
 class ConnectionScalabilityTester {
-  private connections = new Map<string, {,
+  private connections = new Map<string, {
   ws: WebSocket.WebSocket;
   connectionTime: number;
   lastActivity: number;
@@ -376,7 +375,7 @@ class ConnectionScalabilityTester {
   const connectionStart = performance.now();
 
     return new Promise((resolve, reject) => {
-      const ws = new WebSocket.WebSocket(url, {,
+      const ws = new WebSocket.WebSocket(url, {
   headers: { 'X-Connection-ID': connectionId 
 },
       });
@@ -473,7 +472,7 @@ const messagesPerConnection = Math.floor(messageCount / activeConnections.length
     messageCount: number
   ): Promise<void>  {
   for (let i = 0; i < messageCount; i++) {
-      const message: ConversationalMessage = {,
+      const message: ConversationalMessage = {
   messageId: randomUUID(),
         sessionId: 'load-test-session',
       timestamp: Date.now(),
@@ -533,7 +532,7 @@ const messagesPerConnection = Math.floor(messageCount / activeConnections.length
 
   reset(): void {
   this.connections.clear();
-    this.connectionMetrics = {,
+    this.connectionMetrics = {
   totalAttempts: 0,
       successfulConnections: 0,
       failedConnections: 0,
@@ -562,7 +561,7 @@ class PerformanceTestClient extends EventEmitter {
 
   async connect(): Promise<void>  {
   return new Promise((resolve, reject) => {
-      this.ws = new WebSocket.WebSocket(this.url, {,
+      this.ws = new WebSocket.WebSocket(this.url, {
   headers: this.clientId ? { 'X-Client-ID': this.clientId 
 } : {},});
     this.ws.on('open', () => {this.connected = true;this.emit('connected');
@@ -618,7 +617,7 @@ const messageData = JSON.stringify(message);
     this.benchmark.startBenchmark();
 
     for (let i = 0; i < messageCount; i++) {
-      const message: ConversationalMessage = {,
+      const message: ConversationalMessage = {
   messageId: `throughput_test_${i
 }
 _${Date.now()}`,
@@ -702,10 +701,10 @@ describe('WebSocket Performance Benchmarking Tests', () => {
   beforeAll(async () => {
   jest.setTimeout(300000); // 5 minutes for performance tests
 
-    module = await Test.createTestingModule({,
+    module = await Test.createTestingModule({
   providers: [
         ConversationalWebSocketBridgeService,
-        {,
+        {
   provide: ConfigService,
           useValue: mockConfigService,
         
@@ -750,7 +749,7 @@ describe('WebSocket Performance Benchmarking Tests', () => {
   try {const message = JSON.parse(Buffer.from(data as ArrayBuffer).toString('utf8')) as ConversationalMessage;connectionInfo.messageCount++;connectionInfo.lastActivity = performance.now();
 
           // High-performance echo response
-          const response: ConversationalMessage = {,
+          const response: ConversationalMessage = {
   messageId: message.messageId, // Echo back same ID for latency measurement,
   sessionId: message.sessionId,
             timestamp: Date.now(),
@@ -823,11 +822,14 @@ describe('WebSocket Performance Benchmarking Tests', () => {
 
   describe('Message Throughput Benchmarking', () => {
 
-  it('should achieve 5000+ messages/second throughput target', async () => const client = new PerformanceTestClient(TEST_URL, 'throughput-client');await client.connect();resourceMonitor.startMonitoring();
+  it('should achieve 5000+ messages/second throughput target', async () => {
+    const client = new PerformanceTestClient(TEST_URL, 'throughput-client');
+    await client.connect();
+    resourceMonitor.startMonitoring();
 
       // Run high-throughput test
       const messageCount = 10000;
-      const results = await client.runThroughputTest(messageCount, {,
+      const results = await client.runThroughputTest(messageCount, {
   messageSize: 500, // 500 bytes per message,
   sendRate: 0, // Maximum send rate,
   priority: 'high',
@@ -859,15 +861,18 @@ ms`,deliveryRate: `${(results.deliveryRate * 100).toFixed(2)}%`,throughputStabil
 
     it('should maintain sub-50ms P95 latency under load', async () => {
 
-  const client = new PerformanceTestClient(TEST_URL, 'latency-client');await client.connect();resourceMonitor.startMonitoring();
+    const client = new PerformanceTestClient(TEST_URL, 'latency-client');
+    await client.connect();
+    resourceMonitor.startMonitoring();
 
       // Run latency-focused test
       const messageCount = 5000;
-      const results = await client.runThroughputTest(messageCount, ,
-  messageSize: 1000, // 1KB messages,
-  sendRate: 100, // 100 messages/second for latency measurement,
-  priority: 'critical',
-});resourceMonitor.stopMonitoring();
+      const results = await client.runThroughputTest(messageCount, {
+        messageSize: 1000, // 1KB messages
+        sendRate: 100, // 100 messages/second for latency measurement
+        priority: 'critical',
+      });
+      resourceMonitor.stopMonitoring();
 
       console.log('Latency Benchmark Results:', {
   messageCount,
@@ -891,9 +896,10 @@ expect(results.p95Latency).toBeLessThan(100); // P95 under 100ms (adjusted for t
 
     it('should handle various message sizes efficiently', async () => {
 
-  const client = new PerformanceTestClient(TEST_URL, 'message-size-client');await client.connect();const messageSizes = [100, 500, 1000, 5000, 10000]; // Bytes
-      const resultsPerSize: Array< size: number; results: any 
-}> = [];
+      const client = new PerformanceTestClient(TEST_URL, 'message-size-client');
+      await client.connect();
+      const messageSizes = [100, 500, 1000, 5000, 10000]; // Bytes
+      const resultsPerSize: Array<{size: number; results: any}> = [];
 
       for (const messageSize of messageSizes) {
   resourceMonitor.reset();
@@ -943,11 +949,13 @@ ms avg, ` +`${results.resourceUsage.cpu.toFixed(1)}% CPU`);
 
   describe('Connection Scalability Testing', () => {
 
-  it('should support 1000+ concurrent connections', async () => const scalabilityTester = new ConnectionScalabilityTester();resourceMonitor.startMonitoring();
+    it('should support 1000+ concurrent connections', async () => {
+      const scalabilityTester = new ConnectionScalabilityTester();
+      resourceMonitor.startMonitoring();
 
       // Create concurrent connections in batches
       const targetConnections = 1000;
-      await scalabilityTester.createConcurrentConnections(targetConnections, TEST_URL, {,
+      await scalabilityTester.createConcurrentConnections(targetConnections, TEST_URL, {
   batchSize: 50,
         batchDelay: 100,
         connectionTimeout: 15000,
@@ -983,13 +991,14 @@ ms`,connectionRate: `${scalabilityMetrics.connectionRate.toFixed(1)} conn/s`,
 
     it('should distribute load evenly across connections', async () => {
 
-  const scalabilityTester = new ConnectionScalabilityTester();// Create smaller number of connections for load distribution test
+      const scalabilityTester = new ConnectionScalabilityTester();
+
+      // Create smaller number of connections for load distribution test
       const connectionCount = 100;
-      await scalabilityTester.createConcurrentConnections(connectionCount, TEST_URL, ,
-  batchSize: 25,
+      await scalabilityTester.createConcurrentConnections(connectionCount, TEST_URL, {
+        batchSize: 25,
         batchDelay: 50,
-      
-});
+      });
 
       resourceMonitor.startMonitoring();
 
@@ -1027,7 +1036,7 @@ ms`,connectionRate: `${scalabilityMetrics.connectionRate.toFixed(1)} conn/s`,
 
   describe('Resource Utilization Analysis', () => {
 
-  it('should maintain CPU usage under 70% at maximum load', async () => 
+  it('should maintain CPU usage under 70% at maximum load', async () => {
       const clients: PerformanceTestClient[] = [];
       const clientCount = 10;
 
@@ -1094,19 +1103,17 @@ ms`,cpuUsage: {average: `${resourceAnalysis.cpu.average.toFixed(1)}%`,peak: `${r
 
       // Gradually increase connections and measure memory
       const connectionBatches = [50, 100, 200, 300];
-      const memoryResults: Array<,
-  connections: number;
-  memoryUsage: number;
+      const memoryResults: Array<{
+        connections: number;
+        memoryUsage: number;
         memoryPerConnection: number;
-      
-}> = [];
+      }> = [];
 
       for (const batchSize of connectionBatches) {
-  await scalabilityTester.createConcurrentConnections(batchSize, TEST_URL, {,
-  batchSize: 25,
+        await scalabilityTester.createConcurrentConnections(batchSize, TEST_URL, {
+          batchSize: 25,
           batchDelay: 100,
-        
-});
+        });
 
         // Wait for memory stabilization
         await new Promise(resolve => setTimeout(resolve, 2000));
@@ -1150,11 +1157,14 @@ expect(finalResult.memoryPerConnection).toBeLessThan(2); // <2MB per connection 
 
   describe('Compression Performance Evaluation', () => {
 
-  it('should evaluate compression efficiency vs performance trade-offs', async () => const client = new PerformanceTestClient(TEST_URL, 'compression-client');await client.connect();// Test with large, compressible messages
-      const largeMessage = JSON.stringify({,
-  data: 'This is a test message that contains repeated data. '.repeat(100), // ~5KB of repeated text,
-  metadata: { compressionTest: true, timestamp: Date.now() 
-},
+  it('should evaluate compression efficiency vs performance trade-offs', async () => {
+    const client = new PerformanceTestClient(TEST_URL, 'compression-client');
+    await client.connect();
+
+    // Test with large, compressible messages
+      const largeMessage = JSON.stringify({
+        data: 'This is a test message that contains repeated data. '.repeat(100), // ~5KB of repeated text
+        metadata: { compressionTest: true, timestamp: Date.now() },
         payload: Array.from({ length: 100 }, (_, i) => ({ index: i, value: `item-${i}` })),
       });
 
@@ -1162,10 +1172,12 @@ expect(finalResult.memoryPerConnection).toBeLessThan(2); // <2MB per connection 
 
       const messageCount = 1000;
       const results = await client.runThroughputTest(messageCount, {
-  messageSize: largeMessage.length,
-        sendRate: 50, // Controlled rate,
-  priority: 'normal',
-});resourceMonitor.stopMonitoring();
+        messageSize: largeMessage.length,
+        sendRate: 50, // Controlled rate
+        priority: 'normal',
+      });
+
+      resourceMonitor.stopMonitoring();
       const resourceAnalysis = resourceMonitor.getResourceAnalysis();
 
       console.log('Compression Performance Results:', {

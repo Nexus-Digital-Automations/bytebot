@@ -2089,6 +2089,54 @@
       "description": "Fix 32 critical errors and 124 warnings in bytebot-agent-cc package. Focus on TypeScript strict mode violations, unsafe type operations, error handling type safety, Prisma type safety, and null/undefined guards. Target files: src/tasks/tasks.service.ts (21 errors, 78 warnings), src/messages/messages.service.ts (8 errors, 10 warnings), src/agent/agent.scheduler.ts (1 error, 20 warnings)",
       "category": "error",
       "id": "error_1758350388739_tf6rtvfj2m"
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-21T01:15:57.817Z",
+      "title": "Fix @typescript-eslint/require-await violations in validation modules",
+      "description": "Fix async functions without await statements in TypeScript validation and module files, focusing on enterprise-validation.module.ts and related validation logic",
+      "category": "error",
+      "id": "error_1758417357817_i8dfvrdxi2a"
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-21T01:15:58.655Z",
+      "title": "Fix @typescript-eslint/require-await violations in TypeScript function wrapper files",
+      "description": "Fix @typescript-eslint/require-await violations in parameter-capture-validation.ts, signature-preserving-wrapper.ts, and return-value-processing.ts. Focus on functions marked as async that dont contain any await statements while preserving wrapper functionality and signature compatibility.",
+      "category": "error",
+      "id": "error_1758417358655_c6rpvztq6k5"
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-21T01:15:59.046Z",
+      "title": "Fix @typescript-eslint/no-unsafe-* violations in TypeScript files",
+      "description": "Focus on unsafe type operations: no-unsafe-assignment, no-unsafe-member-access, no-unsafe-call, no-unsafe-return, no-unsafe-argument. Replace any types with proper typing, add type guards, use proper type assertions, and add type annotations.",
+      "category": "error",
+      "id": "error_1758417359046_sg602oln4vp"
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-21T01:15:59.179Z",
+      "title": "Fix @typescript-eslint/require-await violations in TypeScript guard files",
+      "description": "Remove async keyword from functions without await statements in jwt-parlant-auth.guard.ts, enterprise-security.guard.ts, rbac-authorization.guard.ts, and enhanced-parlant-auth.guard.ts",
+      "category": "error",
+      "id": "error_1758417359179_klo4c4drmoe"
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-21T01:15:59.377Z",
+      "title": "Fix @typescript-eslint/require-await violations in TypeScript service files",
+      "description": "Fix async functions without await statements in 5 service files: parlant-huginn-bridge.service.ts, security-monitoring.service.ts, compliance-dashboard.service.ts, parlant-context-correlation.service.ts, parlant-enhanced-auth.service.ts",
+      "category": "error",
+      "id": "error_1758417359377_to6ymxyg9vm"
+    },
+    {
+      "status": "pending",
+      "created_at": "2025-09-21T01:15:59.739Z",
+      "title": "Final validation and comprehensive cleanup of async/await violations",
+      "description": "Perform final validation after all specialized agents complete async/await fixes. Re-run ESLint checks, search for remaining violations, validate fixes, and generate comprehensive report.",
+      "category": "error",
+      "id": "error_1758417359739_tisoozpegre"
     }
   ],
   "agents": {},

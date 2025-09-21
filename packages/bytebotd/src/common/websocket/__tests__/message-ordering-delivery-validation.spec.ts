@@ -501,11 +501,12 @@ const originalMessage = TestMessageFactory.createTestMessage(ConversationalMessa
     it('should handle high-volume duplicate detection efficiently', async () => {
 
   const sessionId = 'test_session_dedup_004';
-const messageCount = 1000;const duplicateRatio = 0.3; // 30% duplicates
+const messageCount = 1000;
+      const duplicateRatio = 0.3; // 30% duplicates
 
-      const originalMessages = Array.from( length: Math.floor(messageCount * (1 - duplicateRatio)) 
-}, (_, i) =>
-        TestMessageFactory.createTestMessage(ConversationalMessageType.HEARTBEAT, sessionId, 'low', i + 1));const allMessages = [...originalMessages];
+      const originalMessages = Array.from({ length: Math.floor(messageCount * (1 - duplicateRatio)) }, (_, i) =>
+        TestMessageFactory.createTestMessage(ConversationalMessageType.HEARTBEAT, sessionId, 'low', i + 1));
+      const allMessages = [...originalMessages];
 
       // Add duplicates
       const duplicateCount = Math.floor(messageCount * duplicateRatio);
@@ -567,16 +568,20 @@ const processedMessages: string[] = [];// Listen for message processing events
     it('should handle queue overflow with appropriate strategies', async () => {
 
   const sessionId = 'test_session_priority_002';
-const droppedMessages: string[] = [];// Listen for dropped messages
-      service.on('message_dropped', (event) => 
-        droppedMessages.push(`${event.messageId
-}:${event.reason}`);
+const droppedMessages: string[] = [];
+
+      // Listen for dropped messages
+      service.on('message_dropped', (event) => {
+        droppedMessages.push(`${event.messageId}:${event.reason}`);
+      });
       });
 
       // Fill queue beyond capacity (using small test capacity)
       const overflowCount = 300; // Should exceed queue capacity per priority
       const messages = Array.from({ length: overflowCount }, (_, i) =>
-        TestMessageFactory.createTestMessage(ConversationalMessageType.HEARTBEAT, sessionId, 'normal', i + 1));for (const message of messages) {
+        TestMessageFactory.createTestMessage(ConversationalMessageType.HEARTBEAT, sessionId, 'normal', i + 1));
+
+      for (const message of messages) {
   service.addMessageToPriorityQueue(message);
       
 }
@@ -590,8 +595,10 @@ const droppedMessages: string[] = [];// Listen for dropped messages
 
 it('should maintain message ordering within same priority level', async () => {
 const sessionId = 'test_session_priority_003';
-const queuedMessages: Array< messageId: string; timestamp: number }>  =  [];
-    service.on('message_queued', (event) => {const message = TestMessageFactory.createTestMessage(ConversationalMessageType.HEARTBEAT, sessionId);queuedMessages.push({ messageId: event.messageId, timestamp: message.timestamp });
+const queuedMessages: Array<{ messageId: string; timestamp: number }> = [];
+    service.on('message_queued', (event) => {
+      const message = TestMessageFactory.createTestMessage(ConversationalMessageType.HEARTBEAT, sessionId);
+      queuedMessages.push({ messageId: event.messageId, timestamp: message.timestamp });
       });
 
       // Create messages with same priority but different timestamps

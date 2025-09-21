@@ -5141,10 +5141,46 @@
       "updated_at": "2025-09-20T22:30:57.789Z",
       "archived_at": "2025-09-20T22:30:57.794Z",
       "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-21T00:29:22.644Z",
+      "title": "Fix TypeScript compilation errors in monitoring controller",
+      "description": "Fix missing DTO properties, FollowUpQueryDto type, and keyMetrics type mismatch in parlant-monitoring.controller.ts",
+      "category": "error",
+      "id": "error_1758414562644_zawc6x0qunh",
+      "assigned_agent": "dev_session_1758414544664_1_general_ab4c16f8",
+      "started_at": "2025-09-21T00:35:14.763Z",
+      "claimed_by": "dev_session_1758414544664_1_general_ab4c16f8",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758414544664_1_general_ab4c16f8",
+          "role": "primary",
+          "assignedAt": "2025-09-21T00:35:14.763Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ],
+      "completed_at": "2025-09-21T00:35:58.481Z",
+      "updated_at": "2025-09-21T00:35:58.481Z",
+      "archived_at": "2025-09-21T00:35:58.491Z",
+      "archive_version": "2.0.0"
+    },
+    {
+      "status": "completed",
+      "created_at": "2025-09-21T03:55:14.154Z",
+      "title": "Clean TODO.json and add dead code removal task",
+      "description": "Review TODO.json via TaskManager API to remove unnecessary tasks, then add a new task to find and remove dead code from the codebase",
+      "category": "feature",
+      "id": "feature_1758426914154_pq3hprbhw99",
+      "completed_at": "2025-09-21T03:59:34.148Z",
+      "updated_at": "2025-09-21T03:59:34.148Z",
+      "archived_at": "2025-09-21T03:59:34.155Z",
+      "archive_version": "2.0.0"
     }
   ],
-  "total_completed": 156,
+  "total_completed": 158,
   "last_completion": "2025-09-13T17:42:38.813Z",
   "created_at": "2025-09-06T03:52:57.066Z",
-  "last_archived": "2025-09-20T22:30:57.794Z"
+  "last_archived": "2025-09-21T03:59:34.155Z"
 }

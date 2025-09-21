@@ -407,7 +407,7 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
 
     try {
   // Create high-performance WebSocket server with optimized settings
-      const serverOptions: SafeWebSocketServerOptions = {,
+      const serverOptions: SafeWebSocketServerOptions = {
   port: this.getConversationalPort(),
         // Optimized compression for high throughput,
   perMessageDeflate: {
@@ -461,7 +461,7 @@ export class ConversationalWebSocketBridgeService extends EventEmitter implement
    * Create enhanced verification callback for conversational security
    */
   private createConversationalVerificationCallback() {
-  return createSecureVerifyCallback({,
+  return createSecureVerifyCallback({
   allowedOrigins: this.getAllowedOrigins(),
       requireHttps: this.isHttpsRequired(),
       maxConnections: 50, // Higher limit per IP for conversational flows,
@@ -805,7 +805,7 @@ this.emit('user_confirmation', { sessionId, confirmationId, validationId, approv
     timestamp: number;
   
 }): Promise<void>  {
-  const message: ConversationalMessage = {,
+  const message: ConversationalMessage = {
   type: ConversationalMessageType.VALIDATION_RESPONSE,
       messageId: this.generateMessageId(),
       sessionId,
@@ -833,7 +833,7 @@ this.emit('user_confirmation', { sessionId, confirmationId, validationId, approv
     timestamp: number;
   
 }): Promise<void>  {
-  const message: ConversationalMessage = {,
+  const message: ConversationalMessage = {
   type: ConversationalMessageType.CONFIRMATION_RESULT,
       messageId: this.generateMessageId(),
       sessionId,
@@ -860,7 +860,7 @@ this.emit('user_confirmation', { sessionId, confirmationId, validationId, approv
     status: 'pending' | 'active' | 'completed' | 'failed';
   details: ProgressDetails;
 }): Promise<void>  {
-  const message: ProgressUpdateMessage = {,
+  const message: ProgressUpdateMessage = {
   type: ConversationalMessageType.PROGRESS_UPDATE,
       messageId: this.generateMessageId(),
       sessionId,
@@ -881,7 +881,7 @@ this.emit('user_confirmation', { sessionId, confirmationId, validationId, approv
    * Send streaming complete message
    */
   private async sendStreamingComplete(sessionId: string, operationId: string): Promise<void>  {
-  const message: ConversationalMessage = {,
+  const message: ConversationalMessage = {
   type: ConversationalMessageType.STREAMING_COMPLETE,
       messageId: this.generateMessageId(),
       sessionId,
@@ -981,7 +981,7 @@ this.emit('user_confirmation', { sessionId, confirmationId, validationId, approv
    * Send error message to client
    */
   private async sendErrorMessage(sessionId: string, errorMessage: string, operationId?: string): Promise<void>  {
-  const message: ConversationalMessage = {,
+  const message: ConversationalMessage = {
   type: ConversationalMessageType.ERROR_STREAM,
       messageId: this.generateMessageId(),
       sessionId,
@@ -1010,7 +1010,7 @@ this.emit('user_confirmation', { sessionId, confirmationId, validationId, approv
   const session = this.sessions.get(sessionId);
     if (!session) return;
 
-    const message: ConversationalMessage = {,
+    const message: ConversationalMessage = {
   type: ConversationalMessageType.SESSION_READY,
       messageId: this.generateMessageId(),
       sessionId,
@@ -1077,7 +1077,7 @@ this.emit('user_confirmation', { sessionId, confirmationId, validationId, approv
    * Send heartbeat to specific session
    */
   private async sendHeartbeat(sessionId: string): Promise<void>  {
-  const message: ConversationalMessage = {,
+  const message: ConversationalMessage = {
   type: ConversationalMessageType.HEARTBEAT,
       messageId: this.generateMessageId(),
       sessionId,
@@ -1122,7 +1122,7 @@ this.emit('user_confirmation', { sessionId, confirmationId, validationId, approv
     _operationId: string
   ): Promise<void>  {
   // Send heartbeat acknowledgment
-    const ackMessage: ConversationalMessage = {,
+    const ackMessage: ConversationalMessage = {
   type: ConversationalMessageType.HEARTBEAT_ACK,
       messageId: this.generateMessageId(),
       sessionId,
@@ -1177,7 +1177,7 @@ this.emit('user_confirmation', { sessionId, confirmationId, validationId, approv
    * Collect and log performance metrics
    */
   private collectPerformanceMetrics(): void {
-  interface CollectedMetrics {,
+  interface CollectedMetrics {
   activeSessions: number;
       activeConnections: number;
       pendingValidations: number;
@@ -1284,11 +1284,15 @@ this.emit('user_confirmation', { sessionId, confirmationId, validationId, approv
    * Update delivery metrics
    */
   private updateDeliveryMetrics(sessionId: string, deliveryTime: number): void {
-    this.performanceMetrics.set(`delivery_${sessionId}`, deliveryTime);// Log performance warning if delivery exceeds targetif (deliveryTime > this.PERFORMANCE_TARGETS.TARGET_MESSAGE_LATENCY) {
-  this.logger.warn(`Message delivery exceeded target latency`, {sessionId,deliveryTime,
+    this.performanceMetrics.set(`delivery_${sessionId}`, deliveryTime);
+
+    // Log performance warning if delivery exceeds target
+    if (deliveryTime > this.PERFORMANCE_TARGETS.TARGET_MESSAGE_LATENCY) {
+      this.logger.warn(`Message delivery exceeded target latency`, {
+        sessionId,
+        deliveryTime,
         target: this.PERFORMANCE_TARGETS.TARGET_MESSAGE_LATENCY,
-      
-});
+      });
     }
   }
 
@@ -1301,11 +1305,10 @@ this.emit('user_confirmation', { sessionId, confirmationId, validationId, approv
     operationId: string
   ): void {
     this.logger.log(`[${operationId}] Session end requested`, {
-  operationId,
+      operationId,
       sessionId,
       reason: message.payload.reason,
-    
-});
+    });
 
     // Clean up session resources
     this.cleanupSession(sessionId);
@@ -1429,7 +1432,7 @@ private isHttpsRequired(): boolean {
   const sessions = Array.from(this.sessions.values());
     const performanceData = sessions.map(s => s.performanceMetrics);
 
-    return {,
+    return {
   server: {
   activeSessions: this.sessions.size,
         activeConnections: this.clients.size,
@@ -1541,21 +1544,32 @@ _${this.generateId()}`;
   /**
    * Assess risk level for validation action
    */
-  private assessRiskLevel(action: ValidationAction): 'low' | 'medium' | 'high' | 'critical' {// Simple risk assessment logicif (action.impact.scope === 'external' || !action.reversible) {return 'critical';}
+  private assessRiskLevel(action: ValidationAction): 'low' | 'medium' | 'high' | 'critical' {
+    // Simple risk assessment logic
+    if (action.impact.scope === 'external' || !action.reversible) {
+      return 'critical';
+    }
 
-  if(action.impact.dataAccess || action.impact.stateChanges) {
-      return 'high';}
+    if (action.impact.dataAccess || action.impact.stateChanges) {
+      return 'high';
+    }
 
-  if(action.impact.userInteraction) {
-      return 'medium';}
-return 'low';}/**
+    if (action.impact.userInteraction) {
+      return 'medium';
+    }
+    return 'low';
+  }
+
+  /**
    * Clean shutdown of the conversational WebSocket bridge
    */
-  async onApplicationShutdown(): Promise<void>  {
-  this.logger.log('Shutting down ConversationalWebSocketBridge');// Clear heartbeat intervalif (this.heartbeatInterval) {
+  async onApplicationShutdown(): Promise<void> {
+    this.logger.log('Shutting down ConversationalWebSocketBridge');
+
+    // Clear heartbeat interval
+    if (this.heartbeatInterval) {
       clearInterval(this.heartbeatInterval);
-    
-}
+    }
 
     // Clear all heartbeat timers
     this.heartbeatTimers.forEach(timer => clearTimeout(timer));

@@ -167,7 +167,7 @@ export class ParlantIntegrationService implements OnApplicationShutdown {
     this.parlantServerUrl = this.configService.get<string>('PARLANT_SERVER_URL', 'http://localhost:8000');this.parlantApiKey = this.configService.get<string>('PARLANT_API_KEY', '');// Initialize Parlant HTTP client with authenticationthis.parlantApiClient = axios.create({
       baseURL: this.parlantServerUrl,
       headers: {
-        'Content-Type': 'application/json','Authorization': this.parlantApiKey ? `Bearer ${this.parlantApiKey}` : undefined,},timeout: 10000, // 10 second timeout
+        'Content-Type': 'application/json','Authorization', : this.parlantApiKey ? `Bearer ${this.parlantApiKey}` : undefined,},timeout: 10000, // 10 second timeout
     });
     
     this.logger.log(`[${operationId}] Initializing Parlant Integration Service`, {parlantEnabled: this.isParlantEnabled(),parlantServerUrl: this.parlantServerUrl,

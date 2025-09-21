@@ -418,7 +418,7 @@ export class ParlantAuthenticationBridgeService
 
       this.logger.log("✅ Enhanced Authentication Bridge Service initialized successfully");
       this.emit("auth:service:initialized");
-    } catch (error) {
+    } catch (error: unknown) {
       this.logger.error("❌ Failed to initialize Authentication Bridge Service", error);
       throw new ParlantIntegrationError(
         "Authentication Bridge Service initialization failed",
@@ -525,7 +525,7 @@ export class ParlantAuthenticationBridgeService
       );
 
       return result;
-    } catch (error) {
+    } catch (error: unknown) {
       this.logger.error("❌ Authentication failed", error);
 
       // Update metrics
@@ -619,7 +619,7 @@ export class ParlantAuthenticationBridgeService
           setupTime: new Date(),
         },
       };
-    } catch (error) {
+    } catch (error: unknown) {
       this.logger.error("❌ MFA setup failed", error);
       return {
         success: false,
@@ -700,7 +700,7 @@ export class ParlantAuthenticationBridgeService
       this.logger.debug(`✅ MFA challenge issued: ${challengeId} for ${userId} via ${method}`);
 
       return challenge;
-    } catch (error) {
+    } catch (error: unknown) {
       this.logger.error("❌ Failed to issue MFA challenge", error);
       throw new ParlantIntegrationError(
         "MFA challenge issuance failed",
@@ -788,7 +788,7 @@ export class ParlantAuthenticationBridgeService
       this.logger.debug(`✅ MFA challenge validated: ${challenge.challengeId} for ${request.userId}`);
 
       return { success: true, errors: [] };
-    } catch (error) {
+    } catch (error: unknown) {
       this.logger.error("❌ MFA challenge validation failed", error);
       return {
         success: false,

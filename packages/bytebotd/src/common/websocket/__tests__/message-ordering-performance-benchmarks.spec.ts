@@ -668,7 +668,8 @@ ms`,errorRate: `${(result.errorRate * 100).toFixed(3)}%`,
 
 
     it('should scale linearly with session count', async () => {
-const sessionCounts = [100, 200, 400];const scalabilityResults: Array< sessions: number; throughput: number; latency: number }> = [];
+      const sessionCounts = [100, 200, 400];
+      const scalabilityResults: Array<{ sessions: number; throughput: number; latency: number }> = [];
 
       for (const sessionCount of sessionCounts) {
   const config = {

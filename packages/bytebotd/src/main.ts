@@ -116,7 +116,7 @@ POST /content-monitoring/monitors
 - **SDK Documentation**: Client libraries for popular languages
       `)
       .setVersion('1.0.0').setContact('BytebotD API Support','https://docs.bytebot.ai','api-support@bytebot.ai').setLicense('Commercial', 'https://bytebot.ai/license').addServer('http://localhost:9990', 'Development Server').addServer('https://api.bytebot.ai', 'Production Server').addBearerAuth({
-          type: 'http',scheme: 'bearer',bearerFormat: 'JWT',name: 'Authorization',description: 'Enter JWT token for authentication',in: 'header',},'bearer').addApiKey(
+          type: 'http',scheme: 'bearer',bearerFormat: 'JWT',name: 'Authorization', ,description: 'Enter JWT token for authentication',in: 'header',},'bearer').addApiKey(
         {
           type: 'apiKey',name: 'X-API-Key',in: 'header',description: 'API key for additional authentication'},'apikey').addTag('Form Automation', 'Comprehensive form interaction and automation APIs').addTag('Data Extraction', 'Structured data extraction from web pages').addTag('Workflow Automation', 'Multi-step browser workflows with conditional logic').addTag('File Management', 'File upload, download, and management automation').addTag('Content Monitoring', 'Real-time content monitoring and change detection').addTag('System Health', 'System monitoring, health checks, and diagnostics').addTag('Authentication', 'API authentication and authorization').addTag('Metrics', 'Performance metrics and analytics')
       .build();
@@ -230,7 +230,7 @@ POST /content-monitoring/monitors
           false,
         );
       },
-      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],allowedHeaders: ['Content-Type','Authorization','X-Requested-With','X-API-Key','Accept','Origin','Cache-Control',],exposedHeaders: [
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],allowedHeaders: ['Content-Type','Authorization', ,'X-Requested-With','X-API-Key','Accept','Origin','Cache-Control',],exposedHeaders: [
         'X-Request-ID','X-Response-Time','X-Rate-Limit-Remaining','X-Total-Count','X-Service-ID',],credentials: true,
       maxAge: environment === 'production' ? 86400 : 3600, // 24h prod, 1h devpreflightContinue: false,optionsSuccessStatus: 204,
     });

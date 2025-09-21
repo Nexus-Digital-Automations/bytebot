@@ -997,7 +997,7 @@ export class BrowserOrchestrationSessionService implements OnModuleDestroy {
     try {
       // TODO: Implement HTTP call to Python coordinator
       // const response = await fetch(`${this.coordinatorUrl}/sessions`, {
-      //   method: 'POST',//   headers: {//     'Authorization': `Bearer ${this.coordinatorApiKey}`,
+      //   method: 'POST',//   headers: {//     'Authorization', : `Bearer ${this.coordinatorApiKey}`,
       //     'Content-Type': 'application/json',//   },//   body: JSON.stringify({
       //     action: 'session_created',//     sessionId: session.sessionId,//     agentId,
       //     sessionType,

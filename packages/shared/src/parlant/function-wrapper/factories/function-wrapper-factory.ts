@@ -108,7 +108,7 @@ export class EnterpriseFunctionWrapperFactory implements FunctionWrapperFactory 
 
     } catch (error) {
       this.logger.error(`Failed to create wrapper for ${config.functionId}:`, error);
-      throw new WrapperCreationError(`Failed to create wrapper: ${error.message}`, {
+      throw new WrapperCreationError(`Failed to create wrapper: ${error instanceof Error ? error.message : String(error)}`, {
         functionId: config.functionId,
         originalError: error
       });
@@ -144,7 +144,7 @@ export class EnterpriseFunctionWrapperFactory implements FunctionWrapperFactory 
 
       } catch (error) {
         const wrapperError = new WrapperCreationError(
-          `Failed to create wrapper for ${key}: ${error.message}`,
+          `Failed to create wrapper for ${key}: ${error instanceof Error ? error.message : String(error)}`,
           { functionId: key, originalError: error }
         );
         errors.push(wrapperError);
@@ -169,7 +169,7 @@ export class EnterpriseFunctionWrapperFactory implements FunctionWrapperFactory 
     // Handle any errors
     if (errors.length > 0) {
       this.logger.warn(`Batch wrapper creation completed with ${errors.length} errors`);
-      errors.forEach(error => this.logger.error(error.message, error.metadata));
+      errors.forEach(error => this.logger.error(error instanceof Error ? error.message : String(error), error.metadata));
     }
 
     this.logger.log(`Batch wrapper creation completed: ${Object.keys(results).length} successful, ${errors.length} failed`);

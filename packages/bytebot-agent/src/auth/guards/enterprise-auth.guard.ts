@@ -140,7 +140,10 @@ export class EnterpriseAuthGuard implements CanActivate {
   private readonly logger = new Logger('EnterpriseAuthGuard');
   private readonly secretKey: string;
   private readonly sessionStore = new Map<string, Record<string, unknown>>();
-  private readonly rateLimitStore = new Map<string, { count: number; resetTime: number; violations: number }>();
+  private readonly rateLimitStore = new Map<
+    string,
+    { count: number; resetTime: number; violations: number }
+  >();
   private readonly securityEvents: SecurityEvent[] = [];
   private readonly deviceStore = new Map<string, Record<string, unknown>>();
 

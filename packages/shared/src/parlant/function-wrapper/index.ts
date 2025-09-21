@@ -499,7 +499,7 @@ export class FrameworkValidationUtils {
       return {
         compatible: false,
         signature: null,
-        issues: [`Analysis failed: ${error.message}`],
+        issues: [`Analysis failed: ${error instanceof Error ? error.message : String(error)}`],
         warnings: [],
         recommendations: ['Ensure function is properly defined and accessible']
       };

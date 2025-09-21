@@ -901,8 +901,9 @@ export class ParlantBypassIntegrationService extends EventEmitter {
         }
       };
 
-    } catch (parlantError) {
-      this.logger.warn(`PARLANT execution failed, falling back to bypass: ${parlantError.message}`);
+    } catch (parlantError: unknown) {
+      const parlantErrorMessage = this.extractErrorMessage(parlantError);
+      this.logger.warn(`PARLANT execution failed, falling back to bypass: ${parlantErrorMessage}`);
 
       // Fallback to bypass
       try {
@@ -915,7 +916,7 @@ export class ParlantBypassIntegrationService extends EventEmitter {
             code: 'PARLANT_FALLBACK',
             message: 'PARLANT failed, bypass successful',
             source: ErrorSource.PARLANT_SERVICE,
-            metadata: { parlantError: parlantError.message },
+            metadata: { parlantError: parlantErrorMessage },
             retryable: false
           },
           executionPath: ExecutionPath.PARLANT_FAILURE_BYPASS_SUCCESS,
@@ -939,7 +940,8 @@ export class ParlantBypassIntegrationService extends EventEmitter {
           }
         };
 
-      } catch (bypassError) {
+      } catch (bypassError: unknown) {
+        const bypassErrorMessage = this.extractErrorMessage(bypassError);
         return {
           success: false,
           error: {
@@ -947,8 +949,8 @@ export class ParlantBypassIntegrationService extends EventEmitter {
             message: 'Both PARLANT and bypass systems failed',
             source: ErrorSource.BYPASS_SYSTEM,
             metadata: {
-              parlantError: parlantError.message,
-              bypassError: bypassError.message
+              parlantError: parlantErrorMessage,
+              bypassError: bypassErrorMessage
             },
             retryable: true
           },
@@ -1018,12 +1020,13 @@ export class ParlantBypassIntegrationService extends EventEmitter {
         }
       };
 
-    } catch (error) {
+    } catch (error: unknown) {
+      const errorMessage = this.extractErrorMessage(error);
       return {
         success: false,
         error: {
           code: 'BYPASS_EXECUTION_FAILED',
-          message: error.message,
+          message: errorMessage,
           source: ErrorSource.BYPASS_SYSTEM,
           metadata: {},
           retryable: true
@@ -1316,17 +1319,18 @@ export class ParlantBypassIntegrationService extends EventEmitter {
    */
   private async handleExecutionError(
     request: BypassOperationRequest,
-    error: any,
+    error: unknown,
     executionId: string,
     startTime: number
   ): Promise<OperationExecutionResult> {
+    const errorMessage = this.extractErrorMessage(error);
     this.logger.error(`Operation execution failed (${executionId}):`, error);
 
     return {
       success: false,
       error: {
         code: 'EXECUTION_ERROR',
-        message: error.message || 'Unknown execution error',
+        message: errorMessage,
         source: ErrorSource.BYPASS_SYSTEM,
         metadata: { executionId },
         retryable: true
@@ -1428,6 +1432,48 @@ export class ParlantBypassIntegrationService extends EventEmitter {
       failoverRate: Math.random() * 5, // 0-5%
       totalOperationsToday: Math.floor(Math.random() * 1000) + 100
     };
+  }
+
+  /**
+   * Extract error message from unknown error type with comprehensive handling
+   */
+  private extractErrorMessage(error: unknown): string {
+    if (error instanceof Error) {
+      return error.message;
+    }
+
+    if (typeof error === 'string') {
+      return error;
+    }
+
+    if (error && typeof error === 'object') {
+      const errorObj = error as Record<string, unknown>;
+
+      // Try common error message properties
+      if (typeof errorObj.message === 'string') {
+        return errorObj.message;
+      }
+
+      if (typeof errorObj.error === 'string') {
+        return errorObj.error;
+      }
+
+      if (typeof errorObj.description === 'string') {
+        return errorObj.description;
+      }
+
+      // Try to get a meaningful string representation
+      try {
+        return JSON.stringify(error);
+      } catch {
+        return 'Failed to serialize error object';
+      }
+    }
+
+    // Fallback for null, undefined, or other types
+    return error === null ? 'Error is null' :
+           error === undefined ? 'Error is undefined' :
+           `Unknown error type: ${typeof error}`;
   }
 }
 

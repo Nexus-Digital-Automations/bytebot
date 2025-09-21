@@ -358,11 +358,27 @@ export class JwtParlantSecurityModule {
             auditService: SecurityAuditTrailService,
           ) => ({
             async check() {
+              const bridgeHealthCheck = bridgeService.getHealthStatus
+                ? bridgeService.getHealthStatus()
+                : Promise.resolve({ status: 'healthy' });
+
+              const rbacHealthCheck = rbacService.getHealthStatus
+                ? rbacService.getHealthStatus()
+                : Promise.resolve({ status: 'healthy' });
+
+              const emergencyHealthCheck = emergencyService.getEmergencyOverrideStats
+                ? emergencyService.getEmergencyOverrideStats()
+                : Promise.resolve({ status: 'healthy' });
+
+              const auditHealthCheck = auditService.verifyAuditIntegrity
+                ? auditService.verifyAuditIntegrity()
+                : Promise.resolve({ verified: true });
+
               const checks = await Promise.allSettled([
-                bridgeService.getHealthStatus?.() || Promise.resolve({ status: 'healthy' }),
-                rbacService.getHealthStatus?.() || Promise.resolve({ status: 'healthy' }),
-                emergencyService.getEmergencyOverrideStats?.() || Promise.resolve({ status: 'healthy' }),
-                auditService.verifyAuditIntegrity?.() || Promise.resolve({ verified: true }),
+                bridgeHealthCheck,
+                rbacHealthCheck,
+                emergencyHealthCheck,
+                auditHealthCheck,
               ]);
 
               return {
@@ -405,17 +421,46 @@ export class JwtParlantSecurityModule {
   /**
    * Register module asynchronously with factory
    */
-  static registerAsync(options: {
-    inject?: any[];
-    useFactory?: (...args: any[]) => Promise<JwtParlantSecurityConfig> | JwtParlantSecurityConfig;
-    useClass?: any;
-    useExisting?: any;
-  }): DynamicModule {
-    const configProvider: Provider = {
-      provide: 'JWT_PARLANT_CONFIG',
-      useFactory: options.useFactory,
-      inject: options.inject,
-    };
+  static registerAsync(options:
+    | {
+        inject?: any[];
+        useFactory: (...args: any[]) => Promise<JwtParlantSecurityConfig> | JwtParlantSecurityConfig;
+        useClass?: never;
+        useExisting?: never;
+      }
+    | {
+        inject?: any[];
+        useFactory?: never;
+        useClass: new (...args: any[]) => JwtParlantSecurityConfig;
+        useExisting?: never;
+      }
+    | {
+        inject?: any[];
+        useFactory?: never;
+        useClass?: never;
+        useExisting: string | symbol;
+      }
+  ): DynamicModule {
+    let configProvider: Provider;
+
+    if (options.useFactory) {
+      configProvider = {
+        provide: 'JWT_PARLANT_CONFIG',
+        useFactory: options.useFactory,
+        ...(options.inject && { inject: options.inject }),
+      };
+    } else if (options.useClass) {
+      configProvider = {
+        provide: 'JWT_PARLANT_CONFIG',
+        useClass: options.useClass,
+        ...(options.inject && { inject: options.inject }),
+      };
+    } else {
+      configProvider = {
+        provide: 'JWT_PARLANT_CONFIG',
+        useExisting: options.useExisting,
+      };
+    }
 
     return {
       module: JwtParlantSecurityModule,
@@ -424,13 +469,20 @@ export class JwtParlantSecurityModule {
         PassportModule.register({ defaultStrategy: 'jwt-parlant' }),
         JwtModule.registerAsync({
           inject: ['JWT_PARLANT_CONFIG'],
-          useFactory: (config: JwtParlantSecurityConfig) => ({
-            secret: config.jwt.hmacSecret,
-            signOptions: {
-              expiresIn: config.jwt.expiresIn,
-              algorithm: config.jwt.algorithms[0] as 'HS256' | 'RS256' | 'ES256',
-            },
-          }),
+          useFactory: (config: JwtParlantSecurityConfig) => {
+            // Ensure we have a valid secret
+            if (!config.jwt.hmacSecret && !process.env.JWT_SECRET) {
+              throw new Error('JWT Parlant Security Module: No JWT secret provided in configuration or JWT_SECRET environment variable');
+            }
+
+            return {
+              secret: config.jwt.hmacSecret || process.env.JWT_SECRET,
+              signOptions: {
+                expiresIn: config.jwt.expiresIn,
+                algorithm: config.jwt.algorithms[0] as 'HS256' | 'RS256' | 'ES256',
+              },
+            };
+          },
         }),
       ],
       providers: [
@@ -544,16 +596,53 @@ export class JwtParlantSecurityModule {
    * Merge user configuration with defaults
    */
   private static mergeConfiguration(userConfig: Partial<JwtParlantSecurityConfig>): JwtParlantSecurityConfig {
-    return {
-      jwt: { ...DEFAULT_CONFIG.jwt!, ...userConfig.jwt },
-      parlant: { ...DEFAULT_CONFIG.parlant!, ...userConfig.parlant },
-      redis: { ...DEFAULT_CONFIG.redis!, ...userConfig.redis },
-      security: { ...DEFAULT_CONFIG.security!, ...userConfig.security },
-      emergency: { ...DEFAULT_CONFIG.emergency!, ...userConfig.emergency },
-      audit: { ...DEFAULT_CONFIG.audit!, ...userConfig.audit },
-      compliance: { ...DEFAULT_CONFIG.compliance!, ...userConfig.compliance },
-      monitoring: { ...DEFAULT_CONFIG.monitoring!, ...userConfig.monitoring },
-    } as JwtParlantSecurityConfig;
+    // Deep merge nested objects to prevent property loss
+    const mergeDeep = <T extends Record<string, any>>(
+      defaults: Partial<T>,
+      override: Partial<T> = {}
+    ): T => {
+      const result = { ...defaults } as T;
+
+      for (const key in override) {
+        if (override.hasOwnProperty(key)) {
+          const value = override[key];
+          if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+            result[key] = mergeDeep(result[key] || {}, value) as T[Extract<keyof T, string>];
+          } else if (value !== undefined) {
+            result[key] = value as T[Extract<keyof T, string>];
+          }
+        }
+      }
+
+      return result;
+    };
+
+    // Ensure all required sections exist
+    const config = {
+      jwt: mergeDeep(DEFAULT_CONFIG.jwt || {}, userConfig.jwt),
+      parlant: mergeDeep(DEFAULT_CONFIG.parlant || {}, userConfig.parlant),
+      redis: mergeDeep(DEFAULT_CONFIG.redis || {}, userConfig.redis),
+      security: mergeDeep(DEFAULT_CONFIG.security || {}, userConfig.security),
+      emergency: mergeDeep(DEFAULT_CONFIG.emergency || {}, userConfig.emergency),
+      audit: mergeDeep(DEFAULT_CONFIG.audit || {}, userConfig.audit),
+      compliance: mergeDeep(DEFAULT_CONFIG.compliance || {}, userConfig.compliance),
+      monitoring: mergeDeep(DEFAULT_CONFIG.monitoring || {}, userConfig.monitoring),
+    };
+
+    // Validate critical configuration properties
+    if (!config.jwt.algorithms || config.jwt.algorithms.length === 0) {
+      throw new Error('JWT Parlant Security Module: JWT algorithms must be specified');
+    }
+
+    if (!config.jwt.expiresIn) {
+      throw new Error('JWT Parlant Security Module: JWT expiration time must be specified');
+    }
+
+    if (!config.parlant.apiUrl) {
+      throw new Error('JWT Parlant Security Module: Parlant API URL must be specified');
+    }
+
+    return config as JwtParlantSecurityConfig;
   }
 }
 
