@@ -733,209 +733,219 @@ export const getAllRateLimitConfigs = parlantWrapper(
 export function registerParlantSecurityFunctions(): void {
   const functions: Array<{
     name: string;
-    func: (..._args: unknown[]) => Promise<unknown>;
+    func: (...args: unknown[]) => Promise<unknown>;
     level: FunctionSecurityLevel;
   }> = [
     // CRITICAL SECURITY FUNCTIONS (Dual Approval Required)
     {
       name: "hashPassword",
-      func: hashPassword as (..._args: unknown[]) => Promise<unknown>,
+      func: hashPassword as (...args: unknown[]) => Promise<unknown>,
       level: FunctionSecurityLevel._RESTRICTED,
     },
     {
       name: "verifyPassword",
-      func: verifyPassword as (..._args: unknown[]) => Promise<unknown>,
+      func: verifyPassword as (...args: unknown[]) => Promise<unknown>,
       level: FunctionSecurityLevel._RESTRICTED,
     },
     {
       name: "generateAccessToken",
-      func: generateAccessToken as (..._args: unknown[]) => Promise<unknown>,
+      func: generateAccessToken as (...args: unknown[]) => Promise<unknown>,
       level: FunctionSecurityLevel._RESTRICTED,
     },
     {
       name: "generateRefreshToken",
-      func: generateRefreshToken as (..._args: unknown[]) => Promise<unknown>,
+      func: generateRefreshToken as (...args: unknown[]) => Promise<unknown>,
       level: FunctionSecurityLevel._RESTRICTED,
     },
     {
       name: "verifyToken",
-      func: verifyToken as (..._args: unknown[]) => Promise<unknown>,
+      func: verifyToken as (...args: unknown[]) => Promise<unknown>,
       level: FunctionSecurityLevel._RESTRICTED,
     },
     {
       name: "generateHMAC",
-      func: generateHMAC as (..._args: unknown[]) => Promise<unknown>,
+      func: generateHMAC as (...args: unknown[]) => Promise<unknown>,
       level: FunctionSecurityLevel._RESTRICTED,
     },
     {
       name: "verifyHMAC",
-      func: verifyHMAC as (..._args: unknown[]) => Promise<unknown>,
+      func: verifyHMAC as (...args: unknown[]) => Promise<unknown>,
       level: FunctionSecurityLevel._RESTRICTED,
     },
     {
       name: "detectMaliciousFileContent",
-      func: detectMaliciousFileContent as (..._args: unknown[]) => Promise<unknown>,
+      func: detectMaliciousFileContent as (
+        ...args: unknown[]
+      ) => Promise<unknown>,
       level: FunctionSecurityLevel._RESTRICTED,
     },
     {
       name: "detectComprehensiveMaliciousPatterns",
-      func: detectComprehensiveMaliciousPatterns as (..._args: unknown[]) => Promise<unknown>,
+      func: detectComprehensiveMaliciousPatterns as (
+        ...args: unknown[]
+      ) => Promise<unknown>,
       level: FunctionSecurityLevel._RESTRICTED,
     },
 
     // HIGH SECURITY FUNCTIONS (Single Approval Required)
     {
       name: "validatePassword",
-      func: validatePassword as (..._args: unknown[]) => Promise<unknown>,
+      func: validatePassword as (...args: unknown[]) => Promise<unknown>,
       level: FunctionSecurityLevel._CONFIDENTIAL,
     },
     {
       name: "generateSecurePassword",
-      func: generateSecurePassword as (..._args: unknown[]) => Promise<unknown>,
+      func: generateSecurePassword as (...args: unknown[]) => Promise<unknown>,
       level: FunctionSecurityLevel._CONFIDENTIAL,
     },
     {
       name: "sanitizeInput",
-      func: sanitizeInput as (..._args: unknown[]) => Promise<unknown>,
+      func: sanitizeInput as (...args: unknown[]) => Promise<unknown>,
       level: FunctionSecurityLevel._CONFIDENTIAL,
     },
     {
       name: "sanitizeObject",
-      func: sanitizeObject as (..._args: unknown[]) => Promise<unknown>,
+      func: sanitizeObject as (...args: unknown[]) => Promise<unknown>,
       level: FunctionSecurityLevel._CONFIDENTIAL,
     },
     {
       name: "detectXSS",
-      func: detectXSS as (..._args: unknown[]) => Promise<unknown>,
+      func: detectXSS as (...args: unknown[]) => Promise<unknown>,
       level: FunctionSecurityLevel._CONFIDENTIAL,
     },
     {
       name: "hashData",
-      func: hashData as (..._args: unknown[]) => Promise<unknown>,
+      func: hashData as (...args: unknown[]) => Promise<unknown>,
       level: FunctionSecurityLevel._CONFIDENTIAL,
     },
     {
       name: "generateRandomString",
-      func: generateRandomString as (..._args: unknown[]) => Promise<unknown>,
+      func: generateRandomString as (...args: unknown[]) => Promise<unknown>,
       level: FunctionSecurityLevel._CONFIDENTIAL,
     },
     {
       name: "hasPermission",
-      func: hasPermission as (..._args: unknown[]) => Promise<unknown>,
+      func: hasPermission as (...args: unknown[]) => Promise<unknown>,
       level: FunctionSecurityLevel._CONFIDENTIAL,
     },
     {
       name: "hasRole",
-      func: hasRole as (..._args: unknown[]) => Promise<unknown>,
+      func: hasRole as (...args: unknown[]) => Promise<unknown>,
       level: FunctionSecurityLevel._CONFIDENTIAL,
     },
     {
       name: "createSecurityEvent",
-      func: createSecurityEvent as (..._args: unknown[]) => Promise<unknown>,
+      func: createSecurityEvent as (...args: unknown[]) => Promise<unknown>,
       level: FunctionSecurityLevel._CONFIDENTIAL,
     },
     {
       name: "calculateRiskScore",
-      func: calculateRiskScore as (..._args: unknown[]) => Promise<unknown>,
+      func: calculateRiskScore as (...args: unknown[]) => Promise<unknown>,
       level: FunctionSecurityLevel._CONFIDENTIAL,
     },
     {
       name: "validateFilePath",
-      func: validateFilePath as (..._args: unknown[]) => Promise<unknown>,
+      func: validateFilePath as (...args: unknown[]) => Promise<unknown>,
       level: FunctionSecurityLevel._CONFIDENTIAL,
     },
     {
       name: "scanFileContent",
-      func: scanFileContent as (..._args: unknown[]) => Promise<unknown>,
+      func: scanFileContent as (...args: unknown[]) => Promise<unknown>,
       level: FunctionSecurityLevel._CONFIDENTIAL,
     },
     {
       name: "detectAdvancedXSS",
-      func: detectAdvancedXSS as (..._args: unknown[]) => Promise<unknown>,
+      func: detectAdvancedXSS as (...args: unknown[]) => Promise<unknown>,
       level: FunctionSecurityLevel._CONFIDENTIAL,
     },
     {
       name: "sanitizeContentByContext",
-      func: sanitizeContentByContext as (..._args: unknown[]) => Promise<unknown>,
+      func: sanitizeContentByContext as (
+        ...args: unknown[]
+      ) => Promise<unknown>,
       level: FunctionSecurityLevel._CONFIDENTIAL,
     },
     {
       name: "generateCSPHeader",
-      func: generateCSPHeader as (..._args: unknown[]) => Promise<unknown>,
+      func: generateCSPHeader as (...args: unknown[]) => Promise<unknown>,
       level: FunctionSecurityLevel._CONFIDENTIAL,
     },
     {
       name: "detectCommandInjectionAdvanced",
-      func: detectCommandInjectionAdvanced as (..._args: unknown[]) => Promise<unknown>,
+      func: detectCommandInjectionAdvanced as (
+        ...args: unknown[]
+      ) => Promise<unknown>,
       level: FunctionSecurityLevel._CONFIDENTIAL,
     },
     {
       name: "detectTemplateInjection",
-      func: detectTemplateInjection as (..._args: unknown[]) => Promise<unknown>,
+      func: detectTemplateInjection as (...args: unknown[]) => Promise<unknown>,
       level: FunctionSecurityLevel._CONFIDENTIAL,
     },
     {
       name: "detectLDAPInjection",
-      func: detectLDAPInjection as (..._args: unknown[]) => Promise<unknown>,
+      func: detectLDAPInjection as (...args: unknown[]) => Promise<unknown>,
       level: FunctionSecurityLevel._CONFIDENTIAL,
     },
     {
       name: "detectXMLInjection",
-      func: detectXMLInjection as (..._args: unknown[]) => Promise<unknown>,
+      func: detectXMLInjection as (...args: unknown[]) => Promise<unknown>,
       level: FunctionSecurityLevel._CONFIDENTIAL,
     },
     {
       name: "detectNoSQLInjection",
-      func: detectNoSQLInjection as (..._args: unknown[]) => Promise<unknown>,
+      func: detectNoSQLInjection as (...args: unknown[]) => Promise<unknown>,
       level: FunctionSecurityLevel._CONFIDENTIAL,
     },
 
     // MEDIUM SECURITY FUNCTIONS (Automatic Approval)
     {
       name: "detectSQLInjection",
-      func: detectSQLInjection as (..._args: unknown[]) => Promise<unknown>,
+      func: detectSQLInjection as (...args: unknown[]) => Promise<unknown>,
       level: FunctionSecurityLevel._INTERNAL,
     },
     {
       name: "detectCommandInjection",
-      func: detectCommandInjection as (..._args: unknown[]) => Promise<unknown>,
+      func: detectCommandInjection as (...args: unknown[]) => Promise<unknown>,
       level: FunctionSecurityLevel._INTERNAL,
     },
     {
       name: "detectPathTraversal",
-      func: detectPathTraversal as (..._args: unknown[]) => Promise<unknown>,
+      func: detectPathTraversal as (...args: unknown[]) => Promise<unknown>,
       level: FunctionSecurityLevel._INTERNAL,
     },
     {
       name: "generateEventId",
-      func: generateEventId as (..._args: unknown[]) => Promise<unknown>,
+      func: generateEventId as (...args: unknown[]) => Promise<unknown>,
       level: FunctionSecurityLevel._INTERNAL,
     },
     {
       name: "getRateLimitConfig",
-      func: getRateLimitConfig as (..._args: unknown[]) => Promise<unknown>,
+      func: getRateLimitConfig as (...args: unknown[]) => Promise<unknown>,
       level: FunctionSecurityLevel._INTERNAL,
     },
     {
       name: "generateRateLimitKey",
-      func: generateRateLimitKey as (..._args: unknown[]) => Promise<unknown>,
+      func: generateRateLimitKey as (...args: unknown[]) => Promise<unknown>,
       level: FunctionSecurityLevel._INTERNAL,
     },
     {
       name: "detectSQLInjectionLegacy",
-      func: detectSQLInjectionLegacy as (..._args: unknown[]) => Promise<unknown>,
+      func: detectSQLInjectionLegacy as (
+        ...args: unknown[]
+      ) => Promise<unknown>,
       level: FunctionSecurityLevel._INTERNAL,
     },
 
     // LOW SECURITY FUNCTIONS (Optional Approval)
     {
       name: "validateCoordinates",
-      func: validateCoordinates as (..._args: unknown[]) => Promise<unknown>,
+      func: validateCoordinates as (...args: unknown[]) => Promise<unknown>,
       level: FunctionSecurityLevel._PUBLIC,
     },
     {
       name: "getAllRateLimitConfigs",
-      func: getAllRateLimitConfigs as (..._args: unknown[]) => Promise<unknown>,
+      func: getAllRateLimitConfigs as (...args: unknown[]) => Promise<unknown>,
       level: FunctionSecurityLevel._PUBLIC,
     },
   ];
