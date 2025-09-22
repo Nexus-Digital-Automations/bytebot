@@ -42,9 +42,10 @@ import {
 // Import existing PARLANT error handler for compatibility
 import {
   ParlantErrorFilter,
-  ParlantErrorResponse,
-  ConversationalValidationError
-} from '../parlant-error-handler';
+  ParlantErrorResponse
+} from '../../parlant-error-handler';
+
+import { ConversationalValidationError } from '../../monitoring/parlant-integration.service';
 
 // ===== INTEGRATION INTERFACES =====
 
@@ -56,7 +57,7 @@ export interface EnhancedParlantErrorResponse extends ParlantErrorResponse {
   conversational?: ConversationalErrorResponse;
 
   /** Recovery session information */
-  recovery?: {
+  recoverySession?: {
     sessionId: string;
     status: 'ACTIVE' | 'COMPLETED' | 'FAILED';
     availableActions: string[];
@@ -77,6 +78,20 @@ export interface EnhancedParlantErrorResponse extends ParlantErrorResponse {
     phase1Enabled: boolean;
     processingTime: number;
     version: string;
+  };
+
+  /** HTTP status code */
+  statusCode: number;
+
+  /** Metadata for tracking and analytics */
+  metadata: {
+    /** Error ID for tracking */
+    errorId?: string;
+    /** Request correlation ID */
+    correlationId: string;
+    /** Error occurrence timestamp */
+    timestamp: string;
+    [key: string]: any;
   };
 }
 

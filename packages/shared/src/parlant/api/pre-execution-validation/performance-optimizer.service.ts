@@ -30,6 +30,7 @@ import {
   PreExecutionValidationResponse,
   RiskAssessmentResult
 } from './pre-execution-validation.service';
+import { SecurityLevel } from '../../validation/types/validation-layer.types';
 
 // ===== PERFORMANCE OPTIMIZATION TYPES =====
 
@@ -858,7 +859,8 @@ export class PerformanceOptimizerService implements OnApplicationShutdown {
     }
 
     // Higher priority for low-risk operations (more likely to be cached)
-    if (request.securityClassification === 'INTERNAL' || request.securityClassification === 'PUBLIC') {
+    if (request.securityClassification === SecurityLevel._LOW ||
+        request.securityClassification === SecurityLevel._MINIMAL) {
       priority += 10;
     }
 
@@ -1016,11 +1018,11 @@ export class PerformanceOptimizerService implements OnApplicationShutdown {
 
     // Security level complexity
     const securityComplexity = {
-      'PUBLIC': 0,
-      'INTERNAL': 10,
-      'CONFIDENTIAL': 20,
-      'RESTRICTED': 30,
-      'CLASSIFIED': 40
+      [SecurityLevel._MINIMAL]: 0,
+      [SecurityLevel._LOW]: 10,
+      [SecurityLevel._MEDIUM]: 20,
+      [SecurityLevel._HIGH]: 30,
+      [SecurityLevel._CRITICAL]: 40
     };
     complexity += securityComplexity[request.securityClassification] || 0;
 

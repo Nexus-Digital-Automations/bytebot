@@ -12,6 +12,9 @@
 
 import { SecurityLevel } from '../../../types/parlant-integration.types';
 
+// Re-export SecurityLevel so it can be imported from this module
+export { SecurityLevel };
+
 // ===== CORE VALIDATION TYPES =====
 
 /**

@@ -1029,7 +1029,7 @@ export class EnterpriseAPIGatewayService implements EnterpriseAPIGateway {
 
   private async notifyThrottlingChanges(decision: any): Promise<void> {
     // Mock implementation - replace with actual throttling notifications
-    this.logger.info('Throttling changes notified', decision);
+    this.logger.log('Throttling changes notified', decision);
   }
 
   private async getAllClusterInstances(): Promise<any[]> {
@@ -1069,17 +1069,17 @@ export class EnterpriseAPIGatewayService implements EnterpriseAPIGateway {
 
   private async drainInstanceTraffic(instance: any): Promise<void> {
     // Mock implementation - replace with actual traffic draining
-    this.logger.info('Draining traffic from instance', instance);
+    this.logger.log('Draining traffic from instance', instance);
   }
 
   private async routeTrafficToInstance(instance: any): Promise<void> {
     // Mock implementation - replace with actual traffic routing
-    this.logger.info('Routing traffic to instance', instance);
+    this.logger.log('Routing traffic to instance', instance);
   }
 
   private async updateLoadBalancerConfig(config: any): Promise<void> {
     // Mock implementation - replace with actual load balancer updates
-    this.logger.info('Load balancer config updated', config);
+    this.logger.log('Load balancer config updated', config);
   }
 
   private async assessFailoverImpact(failover: any): Promise<any> {
@@ -1099,7 +1099,7 @@ export class EnterpriseAPIGatewayService implements EnterpriseAPIGateway {
 
   private startBackgroundMonitoring(): void {
     // Mock implementation - replace with actual background monitoring
-    this.logger.info('Background monitoring started');
+    this.logger.log('Background monitoring started');
   }
 
   private async getCurrentSystemCapacity(): Promise<any> {

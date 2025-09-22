@@ -560,6 +560,11 @@ export interface PerformanceMetrics {
   errorRate: number;
   resourceUtilization: ResourceUtilization;
   timestamp: Date;
+  latency?: {
+    p50: number;
+    p95: number;
+    p99: number;
+  };
 }
 
 export interface ResourceUtilization {

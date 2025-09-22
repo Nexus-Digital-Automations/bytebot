@@ -1418,7 +1418,11 @@ export class ProgressiveDisclosureEngine {
     action: 'EXPAND' | 'SIMPLIFY' | 'REDIRECT' | 'SUGGEST';
     reason: string;
   }> {
-    const rules = [];
+    const rules: Array<{
+      condition: string;
+      action: 'EXPAND' | 'SIMPLIFY' | 'REDIRECT' | 'SUGGEST';
+      reason: string;
+    }> = [];
 
     // Critical errors should expand automatically
     if (severity === ConversationalErrorSeverity.CRITICAL) {
@@ -1768,9 +1772,7 @@ export class NaturalLanguageCommunicationSystem {
   /**
    * Identify clarification opportunities
    */
-  private identifyClari
-
-ationOpportunities(
+  private identifyClarificationOpportunities(
     message: string,
     category: ConversationalErrorCategory
   ): string[] {

@@ -893,7 +893,9 @@ export class ConversationalErrorHandler {
       [ConversationalErrorCategory.AUTHORIZATION]: 0.85,
       [ConversationalErrorCategory.BUSINESS_LOGIC]: 0.88,
       [ConversationalErrorCategory.INTEGRATION]: 0.82,
-      [ConversationalErrorCategory.SYSTEM]: 0.75
+      [ConversationalErrorCategory.PERFORMANCE]: 0.78,
+      [ConversationalErrorCategory.SYSTEM]: 0.75,
+      [ConversationalErrorCategory.RATE_LIMITING]: 0.85
     };
     return rates[category] || 0.80;
   }

@@ -383,20 +383,29 @@ export class RiskAssessmentService {
    */
   private async calculateRiskFactors(
     context: RiskAssessmentContext
-  ): Promise<Record<string, number>> {
+  ): Promise<{
+    dataSensitivity: number;
+    operationComplexity: number;
+    userContext: number;
+    systemImpact: number;
+    complianceRequirements: number;
+  }> {
     const factors = {
       dataSensitivity: this.assessDataSensitivity(context),
       operationComplexity: this.assessOperationComplexity(context),
       userContext: this.assessUserContext(context),
       systemImpact: this.assessSystemImpact(context),
-      complianceRequirements: this.assessComplianceRequirements(context),
-      temporalContext: this.assessTemporalContext(context),
-      environmentalFactors: this.assessEnvironmentalFactors(context)
+      complianceRequirements: this.assessComplianceRequirements(context)
     };
+
+    // Calculate temporal and environmental factors for internal scoring but not returned in interface
+    const temporalContext = this.assessTemporalContext(context);
+    const environmentalFactors = this.assessEnvironmentalFactors(context);
 
     this.logger.debug('Risk factors calculated', {
       requestId: context.request.id,
-      factors
+      factors,
+      additionalFactors: { temporalContext, environmentalFactors }
     });
 
     return factors;

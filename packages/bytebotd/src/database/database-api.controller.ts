@@ -59,7 +59,7 @@ import {
   ParlantValidationInterceptor
 
 } from '@bytebot/shared/src/parlant/parlant-validation.decorator';
-import { ConversationContextParameter, ConversationContext as ConversationContextType } from '@bytebot/shared/src/types/conversation-context.types';
+import { ConversationContextParameter, ConversationContext as ConversationContextType, ConversationContext } from '@bytebot/shared/src/types/conversation-context.types';
 
 // Authentication and Authorization;
 
@@ -275,7 +275,7 @@ export class DatabaseApiController {
       limit,
       offset,
       userId: user.id,
-      conversationId: conversationContext?.conversationId,
+      conversationId: conversationContext && typeof conversationContext === 'object' && 'conversationId' in conversationContext ? conversationContext.conversationId : undefined,
       validationApproved: true
     });
 
@@ -462,9 +462,9 @@ export class DatabaseApiController {
       operation: modificationDto.operation,
       justification: modificationDto.justification,
       userId: user.id,
-      conversationId: conversationContext?.conversationId,
+      conversationId: conversationContext && typeof conversationContext === 'object' && 'conversationId' in conversationContext ? conversationContext.conversationId : undefined,
       validationApproved: true,
-      securityLevel: conversationContext?.securityContext?.accessLevel ?? SecurityLevel.MEDIUM
+      securityLevel: conversationContext && typeof conversationContext === 'object' && 'securityContext' in conversationContext && conversationContext.securityContext && 'accessLevel' in conversationContext.securityContext ? conversationContext.securityContext.accessLevel : SecurityLevel.MEDIUM
     });
 
     try {
@@ -588,7 +588,7 @@ export class DatabaseApiController {
       description: schemaDto.description,
       reversible: schemaDto.reversible,
       userId: user.id,
-      conversationId: conversationContext?.conversationId,
+      conversationId: conversationContext && typeof conversationContext === 'object' && 'conversationId' in conversationContext ? conversationContext.conversationId : undefined,
       validationApproved: true
     });
 

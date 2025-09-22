@@ -460,7 +460,10 @@ let testModule: TestingModule;
           return await context.computerUseService.action({ action: 'screenshot' });
         },
         async (): Promise<unknown> => {
-          return await (context.mcpTools as ComputerUseTools).moveMouse({ coordinates: { x: Math.random() * 500, y: Math.random() * 500 } });
+          if (context.mcpTools && typeof context.mcpTools.moveMouse === 'function') {
+            return await context.mcpTools.moveMouse({ coordinates: { x: Math.random() * 500, y: Math.random() * 500 } });
+          }
+          throw new Error('mcpTools.moveMouse not available');
         },
         async (): Promise<unknown> => {
           return await (context.mcpTools as ComputerUseTools).clickMouse({ coordinates: { x: 200, y: 300 }, button: 'left', clickCount: 1 });
@@ -545,9 +548,20 @@ let testModule: TestingModule;
         () => context.computerUseService.action({ action: 'move_mouse', coordinates: { x: 300, y: 400 } }),() => context.computerUseService.action({ action: 'screenshot' }),
         
         // MCP tool operations
-        () => context.mcpTools.moveMouse({ coordinates: { x: 150, y: 250 } }) as Promise<unknown>,
-        () => context.mcpTools.screenshot(),
-        () => context.mcpTools.typeText({ text: `perf-${Math.random().toString(36).substring(7)}` }),
+        async (): Promise<unknown> => {
+          if (context.mcpTools && typeof context.mcpTools.moveMouse === 'function') {
+            return await context.mcpTools.moveMouse({ coordinates: { x: 150, y: 250 } });
+          }
+          throw new Error('mcpTools.moveMouse not available');
+        },
+        async (): Promise<unknown> => {
+          const tools = context.mcpTools as ComputerUseTools;
+          return await tools.screenshot();
+        },
+        async (): Promise<unknown> => {
+          const tools = context.mcpTools as ComputerUseTools;
+          return await tools.typeText({ text: `perf-${Math.random().toString(36).substring(7)}` });
+        },
         
         // Validated operations (with Parlant)
         () => context.parlantValidatedService.action(
@@ -604,7 +618,39 @@ let testModule: TestingModule;
 
   describe('Latency Performance Tests', () => {
 it('should maintain low latency for critical operations', async () => {
-      const criticalOperations = [{ name: 'cursor_position', operation: () => context.computerUseService.action({ action: 'cursor_position' }) as Promise<unknown>, maxLatency: 50 },{ name: 'move_mouse', operation: () => context.computerUseService.action({ action: 'move_mouse', coordinates: { x: 100, y: 200 } }) as Promise<unknown>, maxLatency: 100 },{ name: 'mcp_cursor_position', operation: () => context.mcpTools.cursorPosition() as Promise<unknown>, maxLatency: 75 },{ name: 'mcp_move_mouse', operation: () => context.mcpTools.moveMouse({ coordinates: { x: 150, y: 250 } }) as Promise<unknown>, maxLatency: 150 },
+      const criticalOperations = [
+        {
+          name: 'cursor_position',
+          operation: async (): Promise<unknown> => {
+            return await context.computerUseService.action({ action: 'cursor_position' });
+          },
+          maxLatency: 50
+        },
+        {
+          name: 'move_mouse',
+          operation: async (): Promise<unknown> => {
+            return await context.computerUseService.action({ action: 'move_mouse', coordinates: { x: 100, y: 200 } });
+          },
+          maxLatency: 100
+        },
+        {
+          name: 'mcp_cursor_position',
+          operation: async (): Promise<unknown> => {
+            const tools = context.mcpTools as ComputerUseTools;
+            return await tools.cursorPosition();
+          },
+          maxLatency: 75
+        },
+        {
+          name: 'mcp_move_mouse',
+          operation: async (): Promise<unknown> => {
+            if (context.mcpTools && typeof context.mcpTools.moveMouse === 'function') {
+              return await context.mcpTools.moveMouse({ coordinates: { x: 150, y: 250 } });
+            }
+            throw new Error('mcpTools.moveMouse not available');
+          },
+          maxLatency: 150
+        },
       ];
 
       const testId = generateTestId();
@@ -744,7 +790,10 @@ it('should handle extreme concurrent load', async () => {
             return await context.computerUseService.action({ action: 'cursor_position' });
           },
           async (): Promise<unknown> => {
-            return await (context.mcpTools as ComputerUseTools).moveMouse({ coordinates: { x: Math.random() * 500, y: Math.random() * 500 } });
+            if (context.mcpTools && typeof context.mcpTools.moveMouse === 'function') {
+              return await context.mcpTools.moveMouse({ coordinates: { x: Math.random() * 500, y: Math.random() * 500 } });
+            }
+            throw new Error('mcpTools.moveMouse not available');
           },
           async (): Promise<unknown> => {
             return await (context.mcpTools as ComputerUseTools).cursorPosition();
@@ -857,8 +906,7 @@ it('should demonstrate linear scaling characteristics', async () => {
 
       for (const config of scalabilityConfigurations) {
         const testConfig: LoadTestConfiguration = {
-          testName: `scalability${config.concurrentUsers}
-_users`,
+          testName: `scalability_${config.concurrentUsers}_users`,
           concurrentUsers: config.concurrentUsers,
           operationsPerUser: config.operationsPerUser,
           rampUpTime: 2000,
@@ -882,7 +930,10 @@ _users`,
             return await context.computerUseService.action({ action: 'cursor_position' });
           },
           async (): Promise<unknown> => {
-            return await (context.mcpTools as ComputerUseTools).moveMouse({ coordinates: { x: 100, y: 150 } });
+            if (context.mcpTools && typeof context.mcpTools.moveMouse === 'function') {
+              return await context.mcpTools.moveMouse({ coordinates: { x: 100, y: 150 } });
+            }
+            throw new Error('mcpTools.moveMouse not available');
           },
           async (): Promise<unknown> => {
             return await (context.mcpTools as ComputerUseTools).cursorPosition();

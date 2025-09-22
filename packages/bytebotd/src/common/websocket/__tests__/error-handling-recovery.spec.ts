@@ -850,12 +850,11 @@ expect(recoveryEvents.some(e => safeGet(e as Record<string, unknown>, 'type', ''
 
 
     it('should implement exponential backoff for reconnection attempts', async () => {
-
-  const client = new ResilientWebSocketClient('ws://localhost:99999', {  // Invalid URL
-      autoReconnect: true,
-      maxReconnectionAttempts: 5,
-      clientId: 'backoff-test',
-    });
+      const client = new ResilientWebSocketClient('ws://localhost:99999', {  // Invalid URL
+        autoReconnect: true,
+        maxReconnectionAttempts: 5,
+        clientId: 'backoff-test',
+      });
     const reconnectionEvents: Array<{ attempt: number; delay: number; timestamp: number }> = [];
 
       client.on('reconnection-scheduled', (event: Record<string, unknown>) => {
@@ -865,37 +864,39 @@ expect(recoveryEvents.some(e => safeGet(e as Record<string, unknown>, 'type', ''
           timestamp: Date.now(),
         });
       });
-      });
 
-      client.on('recovery-failed', () => {// Stop after max attempts});
+      client.on('recovery-failed', () => {
+        // Stop after max attempts
+      });
 
       // Attempt connection (will fail)
       try {
-  await client.connect();
-      
-} catch (error) {
-  // Expected to fail
-      
-}
+        await client.connect();
+      } catch (error: unknown) {
+        // Expected to fail - connection should fail for testing backoff
+        console.log('Expected connection failure for backoff testing');
+      }
 
       // Wait for all reconnection attempts
       await new Promise(resolve => setTimeout(resolve, 15000));
 
       console.log('Exponential Backoff Results:', {
-  reconnectionAttempts: reconnectionEvents.length,
+        reconnectionAttempts: reconnectionEvents.length,
         delays: reconnectionEvents.map(e => e.delay),
         backoffProgression: reconnectionEvents.map((e, i) => ({
-  attempt: e.attempt,
-          delay: `${e.delay
-}
-ms`,timeBetween: i > 0 ? `${e.timestamp - reconnectionEvents[i-1].timestamp}
-ms` : 'N/A',})),});
+          attempt: e.attempt,
+          delay: `${e.delay}ms`,
+          timeBetween: i > 0 ? `${e.timestamp - reconnectionEvents[i-1]?.timestamp}ms` : 'N/A',
+        })),
+      });
 
       expect(reconnectionEvents.length).toBeGreaterThan(1);
 
       // Verify exponential backoff (each delay should be longer than the previous)
       for (let i = 1; i < reconnectionEvents.length; i++) {
-  expect(reconnectionEvents[i].delay).toBeGreaterThan(reconnectionEvents[i - 1].delay);
+        const currentDelay = reconnectionEvents[i]?.delay ?? 0;
+        const previousDelay = reconnectionEvents[i - 1]?.delay ?? 0;
+        expect(currentDelay).toBeGreaterThan(previousDelay);
       
 }
 
