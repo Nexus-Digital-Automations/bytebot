@@ -399,7 +399,7 @@ export class PerformanceOptimizationService implements OnModuleInit, OnModuleDes
 
   // Async processing
   private readonly validationQueue: ValidationRequest[] = [];
-  private readonly processingRecord<string, unknown>: Record<string, unknown>[] = [];
+  private readonly processingRecord: Record<string, unknown>[] = [];
   private readonly streamingConnections = new Map<string, StreamingConnection>();
 
   // Performance tracking
