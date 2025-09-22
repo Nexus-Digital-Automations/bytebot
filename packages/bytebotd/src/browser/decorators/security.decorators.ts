@@ -436,8 +436,8 @@ export const BrowserAdminSecurity = () => {
   return applyDecorators(
     BrowserMaximumSecurity(),
     BrowserPermissions(
-      Permission._COMPUTER_CONTROL,
-      Permission._WRITE,
+      Permission._COMPUTER_ADMIN,
+      Permission._SYSTEM_ADMIN,
     ),
     ApiResponse({
       status: 403,
