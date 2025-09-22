@@ -591,7 +591,7 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
         involvedTransactions: cycle.map(node => node.waitingTransaction),
         cycle: cycle,
         suggestedVictim: this.selectVictim(cycle.map(node => node.waitingTransaction)),
-        resolutionStrategy: this.configuration.resolutionStrategy,
+        resolutionStrategy: this.mapResolutionStrategyToString(this.configuration.resolutionStrategy),
         status: 'DETECTED',
       };
 
@@ -631,7 +631,7 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
         involvedTransactions: unsafeTransactions,
         cycle: this.constructCycleFromTransactions(unsafeTransactions),
         suggestedVictim: this.selectVictim(unsafeTransactions),
-        resolutionStrategy: this.configuration.resolutionStrategy,
+        resolutionStrategy: this.mapResolutionStrategyToString(this.configuration.resolutionStrategy),
         status: 'DETECTED',
       };
 
@@ -686,7 +686,7 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
           involvedTransactions: group,
           cycle: this.constructCycleFromTransactions(group),
           suggestedVictim: this.selectVictim(group),
-          resolutionStrategy: DeadlockResolutionStrategy.TIMEOUT_RESOLUTION,
+          resolutionStrategy: 'TIMEOUT',
           status: 'DETECTED',
         };
 
@@ -1226,7 +1226,7 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
                 waitingTransaction: current,
                 holdingTransaction: next,
                 resource: waitingLock?.resourceId || 'unknown',
-                lockType: waitingLock?.lockType === LockType.SHARED ? 'READ' : 'write',
+                lockType: this.mapLockTypeToString(waitingLock?.lockType),
               });
             }
 
@@ -1797,5 +1797,40 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
     }
 
     this.logger.log('Deadlock detector cleanup completed');
+  }
+
+  /**
+   * Map DeadlockResolutionStrategy enum to string literal type
+   */
+  private mapResolutionStrategyToString(strategy: DeadlockResolutionStrategy): 'TIMEOUT' | 'VICTIM_SELECTION' | 'PRIORITY_BASED' {
+    switch (strategy) {
+      case DeadlockResolutionStrategy.TIMEOUT_RESOLUTION:
+        return 'TIMEOUT';
+      case DeadlockResolutionStrategy.VICTIM_ABORT:
+      case DeadlockResolutionStrategy.WAIT_DIE:
+      case DeadlockResolutionStrategy.WOUND_WAIT:
+        return 'VICTIM_SELECTION';
+      case DeadlockResolutionStrategy.PRIORITY_BASED:
+        return 'PRIORITY_BASED';
+      default:
+        return 'VICTIM_SELECTION';
+    }
+  }
+
+  /**
+   * Map LockType enum to string literal type
+   */
+  private mapLockTypeToString(lockType?: LockType): 'READ' | 'WRITE' | 'EXCLUSIVE' {
+    switch (lockType) {
+      case LockType.SHARED:
+        return 'READ';
+      case LockType.EXCLUSIVE:
+      case LockType.INTENT_EXCLUSIVE:
+        return 'EXCLUSIVE';
+      case LockType.UPDATE:
+      case LockType.INTENT_SHARED:
+      default:
+        return 'WRITE';
+    }
   }
 }
