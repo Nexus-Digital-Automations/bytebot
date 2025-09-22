@@ -732,18 +732,35 @@ export class ConversationalDatabaseService {
         },
       };
 
-      // Perform conversational validation
-      const parlantResponse = await (
-        this.parlantService.validateOperation as (
-          req: ParlantValidationRequest,
-        ) => Promise<{
-          approved: boolean;
-          conversationId: string;
-          reason: string;
-          recommendations: string[];
-          requiresManualApproval: boolean;
-        }>
-      )(parlantRequest);
+      // Perform conversational validation with type-safe method call
+      // Type-safe validation operation using explicit typing
+      type ValidateOperationResult = {
+        approved: boolean;
+        conversationId: string;
+        reason: string;
+        recommendations: string[];
+        requiresManualApproval: boolean;
+      };
+
+      // Execute validation with comprehensive error handling and type safety
+      let parlantResponse: ValidateOperationResult;
+      try {
+        // Direct method call with fallback to unknown type handling
+        const rawResult: unknown = await (this.parlantService as unknown as {
+          validateOperation: (req: ParlantValidationRequest) => Promise<unknown>;
+        }).validateOperation(parlantRequest);
+
+        // Validate and type-cast the result
+        if (rawResult && typeof rawResult === 'object' &&
+            'approved' in rawResult && 'conversationId' in rawResult) {
+          parlantResponse = rawResult as ValidateOperationResult;
+        } else {
+          throw new Error('Invalid validation response format');
+        }
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        throw new Error(`ParlantService validation failed: ${errorMessage}`);
+      }
 
       const validationResult: DatabaseValidationResult = {
         approved: parlantResponse.approved,
@@ -997,7 +1014,10 @@ export class ConversationalDatabaseService {
       `[${context.operationId}] Multi-party approval required for ${context.operationType}`,
     );
 
-    // For demo purposes, we'll simulate approval based on user roleif (context.userRole === 'admin' || context.userRole === 'system') {return { approved: true };}
+    // For demo purposes, we'll simulate approval based on user role
+    if (context.userRole === 'admin' || context.userRole === 'system') {
+      return { approved: true };
+    }
 
     return {
       approved: false,
@@ -1072,8 +1092,12 @@ export class ConversationalDatabaseService {
     }
 
     // Don't use cache for operations with different user contexts
+    const evidenceContext = cached.auditTrail.evidence as {
+      operationContext?: DatabaseOperationContext;
+      [key: string]: unknown;
+    };
     if (
-      cached.auditTrail.evidence.operationContext?.userId !== context.userId
+      evidenceContext.operationContext?.userId !== context.userId
     ) {
       return false;
     }
@@ -1239,7 +1263,10 @@ export class ConversationalDatabaseService {
    * Clear expired cache entries and backups
    */
   cleanup(): void {
-    this.logger.debug('Running database service cleanup'); // Clear expired cache entriesconst now = Date.now();
+    this.logger.debug('Running database service cleanup');
+
+    // Clear expired cache entries
+    const now = Date.now();
     const cacheKeysToDelete: string[] = [];
 
     this.validationCache.forEach((result, key) => {

@@ -1400,7 +1400,10 @@ expect(prodPlan.suiteIds.length).toBe(9);
 
   describe('Test Reporting', () => {
 
-  test('should generate comprehensive test report', async () => const plan = await cicdManager.createTestExecutionPlan('development');const result1 = await orchestrator.executeTestPlan(plan);const result2 = await orchestrator.executeTestPlan(plan);
+  test('should generate comprehensive test report', async () => {
+    const plan = await cicdManager.createTestExecutionPlan('development');
+    const result1 = await orchestrator.executeTestPlan(plan);
+    const result2 = await orchestrator.executeTestPlan(plan);
 
       const report = await reportGenerator.generateComprehensiveReport([result1, result2]);
 
@@ -1415,26 +1418,25 @@ expect(prodPlan.suiteIds.length).toBe(9);
 }, 180000);
 
     test('should analyze trends correctly', async () => {
-  // Create mock results with different characteristicsconst results: TestPlanResult[] = [
-  {
-  planId: 'test-1',
-      success: true,
-      suiteResults: [],
+      // Create mock results with different characteristics
+      const results: TestPlanResult[] = [
+        {
+          planId: 'test-1',
+          success: true,
+          suiteResults: [],
           startTime: performance.now() - 10000,
           endTime: performance.now() - 5000,
           totalDuration: 5000,
-          summary: { totalSuites: 3, passedSuites: 3, failedSuites: 0, skippedSuites: 0, totalTests: 50, passedTests: 50, failedTests: 0 
-}
+          summary: { totalSuites: 3, passedSuites: 3, failedSuites: 0, skippedSuites: 0, totalTests: 50, passedTests: 50, failedTests: 0 }
         },
         {
-  planId: 'test-2',
-      success: true,
-      suiteResults: [],
+          planId: 'test-2',
+          success: true,
+          suiteResults: [],
           startTime: performance.now() - 8000,
           endTime: performance.now() - 2000,
           totalDuration: 6000,
-          summary: { totalSuites: 3, passedSuites: 3, failedSuites: 0, skippedSuites: 0, totalTests: 50, passedTests: 48, failedTests: 2 
-}
+          summary: { totalSuites: 3, passedSuites: 3, failedSuites: 0, skippedSuites: 0, totalTests: 50, passedTests: 48, failedTests: 2 }
         }
       ];
 
@@ -1443,226 +1445,267 @@ expect(prodPlan.suiteIds.length).toBe(9);
       expect(report.trends.executionTimeTrend).toBeDefined();
       expect(report.trends.successRateTrend).toBeDefined();
       expect(report.trends.performanceTrend).toBeDefined();
-      expect(report.trends.analysis).toContain('%');});
-test('should export reports in different formats', async () => {
-  const mockReport: TestReport = {id: 'test-report',
-      timestamp: new Date().toISOString(),
-      summary: {
-  totalExecutions: 1,
+      expect(report.trends.analysis).toContain('%');
+    });
+    test('should export reports in different formats', async () => {
+      const mockReport: TestReport = {
+        id: 'test-report',
+        timestamp: new Date().toISOString(),
+        summary: {
+          totalExecutions: 1,
           successfulExecutions: 1,
           failedExecutions: 0,
           totalTestSuites: 3,
           totalTests: 50,
           averageExecutionTime: 60000,
           successRate: 100
-        
-},
+        },
         executionDetails: [],
         trends: {
           executionTimeTrend: 'stable',
-      successRateTrend: 'stable',
-      performanceTrend: 'good',
-      analysis: 'All metrics within normal range'},recommendations: ['Continue monitoring'],
-      artifacts: {
-  screenshots: [],
+          successRateTrend: 'stable',
+          performanceTrend: 'good',
+          analysis: 'All metrics within normal range'
+        },
+        recommendations: ['Continue monitoring'],
+        artifacts: {
+          screenshots: [],
           logs: [],
-          metrics: { averageExecutionTime: 60000, p95ExecutionTime: 80000, memoryUsage: 512, cpuUsage: 45 
-},
+          metrics: { averageExecutionTime: 60000, p95ExecutionTime: 80000, memoryUsage: 512, cpuUsage: 45 },
           coverage: { linesCovered: 1200, totalLines: 1500, branchesCovered: 180, totalBranches: 200, functionsCovered: 95, totalFunctions: 100 }
         }
       };
 
-      const jsonReport = await reportGenerator.exportReport(mockReport, 'json');const htmlReport = await reportGenerator.exportReport(mockReport, 'html');const pdfReport = await reportGenerator.exportReport(mockReport, 'pdf');
-expect(JSON.parse(jsonReport)).toEqual(mockReport);
-expect(htmlReport).toContain('<!DOCTYPE html>');
-expect(htmlReport).toContain('WebSocket Test Report');
-expect(pdfReport).toContain('PDF Report');});});
+      const jsonReport = await reportGenerator.exportReport(mockReport, 'json');
+      const htmlReport = await reportGenerator.exportReport(mockReport, 'html');
+      const pdfReport = await reportGenerator.exportReport(mockReport, 'pdf');
+
+      expect(JSON.parse(jsonReport)).toEqual(mockReport);
+      expect(htmlReport).toContain('<!DOCTYPE html>');
+      expect(htmlReport).toContain('WebSocket Test Report');
+      expect(pdfReport).toContain('PDF Report');
+    });
+  });
 
 
 
   describe('Regression Testing', () => {
 
-  test('should detect performance regressions', async () => const baselinePlan = await cicdManager.createTestExecutionPlan('development');const baselineResult = await orchestrator.executeTestPlan(baselinePlan);await regressionManager.setBaseline(baselineResult);
+  test('should detect performance regressions', async () => {
+    const baselinePlan = await cicdManager.createTestExecutionPlan('development');
+    const baselineResult = await orchestrator.executeTestPlan(baselinePlan);
+    await regressionManager.setBaseline(baselineResult);
 
-      // Create a mock current result with performance regression
-      const currentResult: TestPlanResult = {
-        ...baselineResult,
-        suiteResults: baselineResult.suiteResults.map(suite => ({
-          ...suite,
-          duration: suite.duration * 1.5 // 50% slower
-        
-}))
-      };
+    // Create a mock current result with performance regression
+    const currentResult: TestPlanResult = {
+      ...baselineResult,
+      suiteResults: baselineResult.suiteResults.map(suite => ({
+        ...suite,
+        duration: suite.duration * 1.5 // 50% slower
+      }))
+    };
 
-      const regressionReport = await regressionManager.detectRegressions(currentResult);
+    const regressionReport = await regressionManager.detectRegressions(currentResult);
 
-      expect(regressionReport.hasRegressions).toBe(true);
-      expect(regressionReport.regressionCount).toBeGreaterThan(0);
+    expect(regressionReport.hasRegressions).toBe(true);
+    expect(regressionReport.regressionCount).toBeGreaterThan(0);
 
-      const perfRegressions = regressionReport.regressions.filter(r => r.regressionType === 'performance');
-expect(perfRegressions.length).toBeGreaterThan(0);}, 120000);
+    const perfRegressions = regressionReport.regressions.filter(r => r.regressionType === 'performance');
+    expect(perfRegressions.length).toBeGreaterThan(0);
+  }, 120000);
 
-    test('should detect reliability regressions', async () => {
-  const baselinePlan = await cicdManager.createTestExecutionPlan('development');const baselineResult = await orchestrator.executeTestPlan(baselinePlan);await regressionManager.setBaseline(baselineResult);
+  test('should detect reliability regressions', async () => {
+    const baselinePlan = await cicdManager.createTestExecutionPlan('development');
+    const baselineResult = await orchestrator.executeTestPlan(baselinePlan);
+    await regressionManager.setBaseline(baselineResult);
 
-      // Create a mock current result with reliability regression
-      const currentResult: TestPlanResult = {
-        ...baselineResult,
-        suiteResults: baselineResult.suiteResults.map(suite => ({
-          ...suite,
-          summary: {
-            ...suite.summary,
-            failed: suite.summary.failed + 5,
-            passed: suite.summary.passed - 5
-          
-}
-        }))
-      };
+    // Create a mock current result with reliability regression
+    const currentResult: TestPlanResult = {
+      ...baselineResult,
+      suiteResults: baselineResult.suiteResults.map(suite => ({
+        ...suite,
+        summary: {
+          ...suite.summary,
+          failed: suite.summary.failed + 5,
+          passed: suite.summary.passed - 5
+        }
+      }))
+    };
 
-      const regressionReport = await regressionManager.detectRegressions(currentResult);
+    const regressionReport = await regressionManager.detectRegressions(currentResult);
 
-      expect(regressionReport.hasRegressions).toBe(true);
+    expect(regressionReport.hasRegressions).toBe(true);
 
-      const reliabilityRegressions = regressionReport.regressions.filter(r =>
-        r.regressionType === 'reliability' || r.regressionType === 'functional');
-expect(reliabilityRegressions.length).toBeGreaterThan(0);
-    }, 120000);
+    const reliabilityRegressions = regressionReport.regressions.filter(r =>
+      r.regressionType === 'reliability' || r.regressionType === 'functional');
+    expect(reliabilityRegressions.length).toBeGreaterThan(0);
+  }, 120000);
 
-    test('should generate appropriate recommendations', async () => {
-  const baselinePlan = await cicdManager.createTestExecutionPlan('development');const baselineResult = await orchestrator.executeTestPlan(baselinePlan);await regressionManager.setBaseline(baselineResult);
+  test('should generate appropriate recommendations', async () => {
+    const baselinePlan = await cicdManager.createTestExecutionPlan('development');
+    const baselineResult = await orchestrator.executeTestPlan(baselinePlan);
+    await regressionManager.setBaseline(baselineResult);
 
-      // Create a mock current result with critical regressions
-      const currentResult: TestPlanResult = {
-        ...baselineResult,
-        suiteResults: baselineResult.suiteResults.map(suite => ({
-          ...suite,
-          duration: suite.duration * 2, // 100% slower (critical);
-    summary: {
-            ...suite.summary,
-            failed: suite.summary.failed + 15, // Many new failures,
-  passed: Math.max(0, suite.summary.passed - 15)
-          
-}
-        }))
-      };
+    // Create a mock current result with critical regressions
+    const currentResult: TestPlanResult = {
+      ...baselineResult,
+      suiteResults: baselineResult.suiteResults.map(suite => ({
+        ...suite,
+        duration: suite.duration * 2, // 100% slower (critical)
+        summary: {
+          ...suite.summary,
+          failed: suite.summary.failed + 15, // Many new failures
+          passed: Math.max(0, suite.summary.passed - 15)
+        }
+      }))
+    };
 
-      const regressionReport = await regressionManager.detectRegressions(currentResult);
+    const regressionReport = await regressionManager.detectRegressions(currentResult);
 
-      expect(regressionReport.recommendations).toContain(
-        'Critical regressions detected - halt deployment and investigate immediately');
-expect(regressionReport.recommendations.some(r =>
-        r.includes('Performance regressions'))).toBe(true);}, 120000);
+    expect(regressionReport.recommendations).toContain(
+      'Critical regressions detected - halt deployment and investigate immediately');
+    expect(regressionReport.recommendations.some(r =>
+      r.includes('Performance regressions'))).toBe(true);
+  }, 120000);
   });
 
 
 
   describe('Test Automation', () => {
 
-  test('should track execution history', async () => const plan = await cicdManager.createTestExecutionPlan('development');await orchestrator.executeTestPlan(plan);await orchestrator.executeTestPlan(plan);
+  test('should track execution history', async () => {
+    const plan = await cicdManager.createTestExecutionPlan('development');
+    await orchestrator.executeTestPlan(plan);
+    await orchestrator.executeTestPlan(plan);
 
-      const history = orchestrator.getExecutionHistory();
+    const history = orchestrator.getExecutionHistory();
 
-      expect(history.length).toBe(2);
-      expect(history[0].executionId).toBeDefined();
-      expect(history[0].plan).toEqual(plan);
-      expect(history[0].result).toBeDefined();
-      expect(history[0].timestamp).toBeDefined();
-      expect(history[0].duration).toBeGreaterThan(0);
-    
-}, 180000);
+    expect(history.length).toBe(2);
+    expect(history[0].executionId).toBeDefined();
+    expect(history[0].plan).toEqual(plan);
+    expect(history[0].result).toBeDefined();
+    expect(history[0].timestamp).toBeDefined();
+    expect(history[0].duration).toBeGreaterThan(0);
+  }, 180000);
 
-    test('should handle concurrent execution attempts', async () => {
-  const plan = await cicdManager.createTestExecutionPlan('development');const execution1Promise = orchestrator.executeTestPlan(plan);// Try to start another execution while first is running
-      await expect(orchestrator.executeTestPlan(plan)).rejects.toThrow(
-        'Test execution already in progress');// Wait for first execution to complete
-      await execution1Promise;
+  test('should handle concurrent execution attempts', async () => {
+    const plan = await cicdManager.createTestExecutionPlan('development');
+    const execution1Promise = orchestrator.executeTestPlan(plan);
 
-      // Now second execution should work
-      const result2 = await orchestrator.executeTestPlan(plan);
-      expect(result2.success).toBe(true);
-    
-}, 240000);
+    // Try to start another execution while first is running
+    await expect(orchestrator.executeTestPlan(plan)).rejects.toThrow(
+      'Test execution already in progress');
 
-    test('should provide real-time execution status', async () => {
-  const plan = await cicdManager.createTestExecutionPlan('development');const executionPromise = orchestrator.executeTestPlan(plan);// Check status during execution
-      const currentExecution = orchestrator.getCurrentExecution();
-      expect(currentExecution).toBeDefined();
-      expect(currentExecution?.status).toBe('running');
-expect(currentExecution?.plan).toEqual(plan);await executionPromise;
+    // Wait for first execution to complete
+    await execution1Promise;
 
-      // Check status after completion
-      const finalExecution = orchestrator.getCurrentExecution();
-      expect(finalExecution).toBeNull();
-    
-}, 120000);
+    // Now second execution should work
+    const result2 = await orchestrator.executeTestPlan(plan);
+    expect(result2.success).toBe(true);
+  }, 240000);
 
-    test('should handle test suite registration and management', () => {
-  const customSuite: TestSuiteConfig = {
-id: 'custom-test',
+  test('should provide real-time execution status', async () => {
+    const plan = await cicdManager.createTestExecutionPlan('development');
+    const executionPromise = orchestrator.executeTestPlan(plan);
+
+    // Check status during execution
+    const currentExecution = orchestrator.getCurrentExecution();
+    expect(currentExecution).toBeDefined();
+    expect(currentExecution?.status).toBe('running');
+    expect(currentExecution?.plan).toEqual(plan);
+
+    await executionPromise;
+
+    // Check status after completion
+    const finalExecution = orchestrator.getCurrentExecution();
+    expect(finalExecution).toBeNull();
+  }, 120000);
+
+  test('should handle test suite registration and management', () => {
+    const customSuite: TestSuiteConfig = {
+      id: 'custom-test',
       name: 'Custom Test Suite',
       filePath: './custom-test.spec.ts',
       category: 'custom',
       dependencies: ['connection-lifecycle'],
       executionTime: 120,
       priority: 10,
-        tags: ['custom', 'experimental']
+      tags: ['custom', 'experimental']
+    };
 
-};
-orchestrator.registerTestSuite(customSuite);
+    orchestrator.registerTestSuite(customSuite);
 
-      // Test with custom suite
-      const plan: TestExecutionPlan = {
-        id: 'custom-plan',
+    // Test with custom suite
+    const plan: TestExecutionPlan = {
+      id: 'custom-plan',
       name: 'Custom Test Plan',
-      suiteIds: ['connection-lifecycle', 'custom-test'],strategy: 'sequential',
-      environment: 'test'};
-expect(async () => {
-  await orchestrator.executeTestPlan(plan);
-      
-}).not.toThrow();
+      suiteIds: ['connection-lifecycle', 'custom-test'],
+      strategy: 'sequential',
+      environment: 'test'
+    };
+
+    expect(async () => {
+      await orchestrator.executeTestPlan(plan);
+    }).not.toThrow();
     });
   });
 
 
 
   describe('Integration with External Systems', () => {
-test('should validate CI/CD configuration files', () => const workflow = {name: 'WebSocket Test Suite',
-      on: {push: { branches: ['main', 'develop'] },pull_request: { branches: ['main'] }},jobs: {
-          'websocket-tests': {'runs-on': 'ubuntu-latest',
-      steps: []}
+  test('should validate CI/CD configuration files', () => {
+    const workflow = {
+      name: 'WebSocket Test Suite',
+      on: {
+        push: { branches: ['main', 'develop'] },
+        pull_request: { branches: ['main'] }
+      },
+      jobs: {
+        'websocket-tests': {
+          'runs-on': 'ubuntu-latest',
+          steps: []
         }
-      };
+      }
+    };
 
-      expect(workflow.name).toBeDefined();
-      expect(workflow.on.push.branches).toContain('main');
-expect(workflow.jobs['websocket-tests']['runs-on']).toBe('ubuntu-latest');});
-test('should support multi-environment configurations', async () => {
-  const environments = ['development', 'staging', 'production'];for (const env of environments) {const plan = await cicdManager.createTestExecutionPlan(env);
-        expect(plan.environment).toBe(env);
-        expect(plan.suiteIds.length).toBeGreaterThan(0);
-      
-}
-    });
+    expect(workflow.name).toBeDefined();
+    expect(workflow.on.push.branches).toContain('main');
+    expect(workflow.jobs['websocket-tests']['runs-on']).toBe('ubuntu-latest');
+  });
 
-    test('should handle test data management', async () => {
-  // Simulate test data setup and cleanupconst testData = {
-  users: [
-          { id: 1, name: 'Test User 1' 
-},{ id: 2, name: 'Test User 2' }],sessions: [
-          { id: 'session1', userId: 1 },{ id: 'session2', userId: 2 }
-        ]
-      };
+  test('should support multi-environment configurations', async () => {
+    const environments = ['development', 'staging', 'production'];
 
-      // Test data should be available during test execution
-      expect(testData.users.length).toBe(2);
-      expect(testData.sessions.length).toBe(2);
+    for (const env of environments) {
+      const plan = await cicdManager.createTestExecutionPlan(env);
+      expect(plan.environment).toBe(env);
+      expect(plan.suiteIds.length).toBeGreaterThan(0);
+    }
+  });
 
-      // Simulate cleanup
-      testData.users.length = 0;
-      testData.sessions.length = 0;
+  test('should handle test data management', async () => {
+    // Simulate test data setup and cleanup
+    const testData = {
+      users: [
+        { id: 1, name: 'Test User 1' },
+        { id: 2, name: 'Test User 2' }
+      ],
+      sessions: [
+        { id: 'session1', userId: 1 },
+        { id: 'session2', userId: 2 }
+      ]
+    };
 
-      expect(testData.users.length).toBe(0);
-      expect(testData.sessions.length).toBe(0);
-    });
+    // Test data should be available during test execution
+    expect(testData.users.length).toBe(2);
+    expect(testData.sessions.length).toBe(2);
+
+    // Simulate cleanup
+    testData.users.length = 0;
+    testData.sessions.length = 0;
+
+    expect(testData.users.length).toBe(0);
+    expect(testData.sessions.length).toBe(0);
+  });
   });
 });

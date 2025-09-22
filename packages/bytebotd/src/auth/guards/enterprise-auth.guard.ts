@@ -52,6 +52,67 @@ interface EnhancedJwtPayload extends jwt.JwtPayload {
 }
 
 /**
+ * Type guard to validate enterprise JWT payload has required properties
+ */
+function isValidEnterpriseJwtPayload(payload: unknown): payload is EnhancedJwtPayload {
+  return (
+    typeof payload === 'object' &&
+    payload !== null &&
+    'sub' in payload &&
+    typeof (payload as Record<string, unknown>).sub === 'string' &&
+    'username' in payload &&
+    'sessionId' in payload
+  );
+}
+
+/**
+ * Safe property access utilities for Enterprise JWT payload
+ */
+class SafeEnterpriseJwtAccess {
+  static getSub(payload: unknown): string | null {
+    if (isValidEnterpriseJwtPayload(payload)) {
+      return payload.sub;
+    }
+    return null;
+  }
+
+  static getUsername(payload: unknown): string | null {
+    if (isValidEnterpriseJwtPayload(payload)) {
+      return payload.username;
+    }
+    return null;
+  }
+
+  static getSessionId(payload: unknown): string | null {
+    if (isValidEnterpriseJwtPayload(payload)) {
+      return payload.sessionId;
+    }
+    return null;
+  }
+
+  static getPermissions(payload: unknown): Permission[] {
+    if (isValidEnterpriseJwtPayload(payload) && Array.isArray(payload.permissions)) {
+      return payload.permissions;
+    }
+    return [];
+  }
+
+  static getEmail(payload: unknown): string | null {
+    if (isValidEnterpriseJwtPayload(payload) && typeof payload.email === 'string') {
+      return payload.email;
+    }
+    return null;
+  }
+
+  static getRoles(payload: unknown): UserRole[] {
+    if (isValidEnterpriseJwtPayload(payload) && Array.isArray(payload.roles)) {
+      return payload.roles;
+    }
+    return [];
+  }
+}
+
+/**
  * Security context interface for comprehensive authentication
  */
 interface SecurityContext {
@@ -315,8 +376,12 @@ export class EnterpriseAuthGuard implements CanActivate {
       throw new UnauthorizedException('Token not yet valid');
     }
 
-    // Validate required claims
-    if (!payload.sub || !payload.username || !payload.sessionId) {
+    // Validate required claims with safe access
+    const sub = SafeEnterpriseJwtAccess.getSub(payload);
+    const username = SafeEnterpriseJwtAccess.getUsername(payload);
+    const sessionId = SafeEnterpriseJwtAccess.getSessionId(payload);
+
+    if (!sub || !username || !sessionId) {
       throw new UnauthorizedException('Token missing required claims');
     }
 
@@ -339,11 +404,16 @@ export class EnterpriseAuthGuard implements CanActivate {
     request: Request,
   ): Promise<void> {
     const currentFingerprint = this.generateDeviceFingerprint(request);
-    const storedFingerprints = this.deviceFingerprints.get(payload.sub);
+    const userSub = SafeEnterpriseJwtAccess.getSub(payload);
+    if (!userSub) {
+      throw new UnauthorizedException('Invalid token: missing user identifier');
+    }
+
+    const storedFingerprints = this.deviceFingerprints.get(userSub);
 
     if (!storedFingerprints) {
       // First time seeing this user, store fingerprint
-      this.deviceFingerprints.set(payload.sub, new Set([currentFingerprint]));
+      this.deviceFingerprints.set(userSub, new Set([currentFingerprint]));
       return;
     }
 
@@ -355,8 +425,8 @@ export class EnterpriseAuthGuard implements CanActivate {
         // Log suspicious activity but allow (with increased monitoring)
         this.logSecurityEvent({
           type: SecurityViolationType.DEVICE_FINGERPRINT_MISMATCH,
-          userId: payload.sub,
-          sessionId: payload.sessionId,
+          userId: SafeEnterpriseJwtAccess.getSub(payload) || 'unknown',
+          sessionId: SafeEnterpriseJwtAccess.getSessionId(payload) || 'unknown',
           ipAddress: this.getClientIp(request),
           userAgent: request.headers['user-agent'] || '',
           endpoint: request.url,
@@ -549,18 +619,25 @@ export class EnterpriseAuthGuard implements CanActivate {
   }
 
   /**
-   * Create user object from JWT payload
+   * Create user object from JWT payload with safe access
    */
   private createUserFromPayload(payload: EnhancedJwtPayload): ByteBotdUser {
+    const sub = SafeEnterpriseJwtAccess.getSub(payload) || 'unknown';
+    const email = SafeEnterpriseJwtAccess.getEmail(payload) || 'unknown@unknown.local';
+    const username = SafeEnterpriseJwtAccess.getUsername(payload) || 'unknown';
+    const roles = SafeEnterpriseJwtAccess.getRoles(payload);
+    const sessionId = SafeEnterpriseJwtAccess.getSessionId(payload) || 'unknown-session';
+    const permissions = SafeEnterpriseJwtAccess.getPermissions(payload);
+
     return {
-      sub: payload.sub,
-      id: payload.sub,
-      email: payload.email,
-      username: payload.username,
-      role: payload.roles[0] || UserRole._VIEWER,
+      sub,
+      id: sub,
+      email,
+      username,
+      role: roles[0] || UserRole._VIEWER,
       isActive: true,
-      sessionId: payload.sessionId,
-      permissions: payload.permissions,
+      sessionId,
+      permissions,
     };
   }
 

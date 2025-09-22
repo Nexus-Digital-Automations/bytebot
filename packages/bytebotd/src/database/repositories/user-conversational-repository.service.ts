@@ -127,12 +127,13 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
       }
 
       // Password validation (for create/update operations)
+      const passwordData = data as { password?: string };
       if (
-        (data as { password?: string }).password &&
+        passwordData.password &&
         context?.requirePasswordValidation !== false
       ) {
         const passwordValidation = this.validatePassword(
-          (data as { password?: string }).password,
+          passwordData.password,
         );
         if (!passwordValidation.valid) {
           result.errors.push(...passwordValidation.errors);

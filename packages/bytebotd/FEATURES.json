@@ -200,6 +200,37 @@
       "status": "active",
       "initialized": "2025-09-22T08:27:38.250Z",
       "sessionId": "6936251f7058cb7a"
+    },
+    "claude-main-agent": {
+      "lastHeartbeat": "2025-09-22T08:42:40.593Z",
+      "status": "active",
+      "initialized": "2025-09-22T08:42:40.593Z",
+      "sessionId": "958b2f5070163672"
+    },
+    "agent-2-typescript-safety": {
+      "lastHeartbeat": "2025-09-22T08:43:55.211Z",
+      "status": "active",
+      "initialized": "2025-09-22T08:43:55.211Z",
+      "sessionId": "264bf22ebe3e5907"
+    },
+    "agent-4": {
+      "lastHeartbeat": "2025-09-22T08:43:41.524Z",
+      "status": "active",
+      "reinitialized": "2025-09-22T08:43:41.524Z",
+      "sessionId": "be439933ef196e3c",
+      "previousSessions": []
+    },
+    "agent-1-typescript-safety": {
+      "lastHeartbeat": "2025-09-22T08:43:53.469Z",
+      "status": "active",
+      "initialized": "2025-09-22T08:43:53.469Z",
+      "sessionId": "663af7f38f703a2d"
+    },
+    "agent-3-typescript-safety": {
+      "lastHeartbeat": "2025-09-22T08:43:59.505Z",
+      "status": "active",
+      "initialized": "2025-09-22T08:43:59.505Z",
+      "sessionId": "1682ff7e9d2170c1"
     }
   }
 }

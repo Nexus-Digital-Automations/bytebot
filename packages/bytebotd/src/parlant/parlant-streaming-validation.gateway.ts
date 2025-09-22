@@ -44,7 +44,46 @@ import {
   StreamingSessionStatus,
   StreamInfo,
   StreamStatus,
-} from '../common/websocket/parlant-websocket-streaming-bridge.service';import {ParlantStreamingProtocolType,
+} from '../common/websocket/parlant-websocket-streaming-bridge.service';
+
+/**
+ * Type guard to validate JWT payload has required properties
+ */
+function isValidAuthPayload(payload: unknown): payload is { sub?: string; userId?: string; permissions?: string[]; roles?: string[] } {
+  return (
+    typeof payload === 'object' &&
+    payload !== null &&
+    ('sub' in payload || 'userId' in payload)
+  );
+}
+
+/**
+ * Safe property access utilities for WebSocket JWT payload
+ */
+class SafeWebSocketJwtAccess {
+  static getUserId(payload: unknown): string | null {
+    if (isValidAuthPayload(payload)) {
+      return payload.sub || payload.userId || null;
+    }
+    return null;
+  }
+
+  static getPermissions(payload: unknown): string[] {
+    if (isValidAuthPayload(payload) && Array.isArray(payload.permissions)) {
+      return payload.permissions;
+    }
+    return [];
+  }
+
+  static getRoles(payload: unknown): string[] {
+    if (isValidAuthPayload(payload) && Array.isArray(payload.roles)) {
+      return payload.roles;
+    }
+    return [];
+  }
+}
+
+import {ParlantStreamingProtocolType,
   ParlantProtocolMessage,
   EnhancedValidationContext,
   EnhancedValidationAction,
@@ -80,6 +119,9 @@ const GATEWAY_CONFIG = {
 export interface AuthenticatedSocket extends Socket {
   userId?: string;
   sessionId?: string;
+  permissions?: string[];
+  roles?: string[];
+  authLevel?: string;
   permissions?: string[];
   roles?: string[];
   authLevel?: AuthenticationLevel;
@@ -347,9 +389,9 @@ export class ParlantStreamingValidationGateway
       const payload = await this.jwtService.verifyAsync(token);
       if (!payload) {
         return { success: false, reason: 'Invalid authentication token' };}// Set user context
-      client.userId = payload.sub || payload.userId;
-      client.permissions = payload.permissions || [];
-      client.roles = payload.roles || [];
+      client.userId = SafeWebSocketJwtAccess.getUserId(payload);
+      client.permissions = SafeWebSocketJwtAccess.getPermissions(payload);
+      client.roles = SafeWebSocketJwtAccess.getRoles(payload);
       client.authLevel = this.determineAuthLevel(payload);
 
       // Perform risk assessment

@@ -887,10 +887,15 @@ export class ComputerUseService {
    */
   private async pressKeys(action: PressKeysAction): Promise<void> {
     const operationId = `press_keys${Date.now()}${Math.random().toString(36).substring(7)}`;
-    const { keys, press } = action;this.logger.log(
-      `[${operationId}] ${press === 'down' ? 'Pressing' : 'Releasing'} keys`,{
+    const { keys, press } = action;
+
+    this.logger.log(
+      `[${operationId}] ${press === 'down' ? 'Pressing' : 'Releasing'} keys`,
+      {
         operationId,
-        keys: keys.join(`, '),press,},
+        keys: keys.join(', '),
+        press,
+      },
     );
 
     try {
@@ -1456,7 +1461,9 @@ export class ComputerUseService {
         };
 
         this.logger.log(
-          `[${operationId}] File read operation completed successfully`,{operationId,
+          `[${operationId}] File read operation completed successfully`,
+          {
+            operationId,
             fileName,
             fileSize,
             mediaType,
@@ -1467,7 +1474,9 @@ export class ComputerUseService {
         return result;
       } catch (fileError) {
         throw new Error(
-          `Failed to read file: ${ErrorHandler.extractErrorMessage(fileError)}`,);} finally {
+          `Failed to read file: ${ErrorHandler.extractErrorMessage(fileError)}`,
+        );
+      } finally {
         // Clean up temporary file
         if (tempFile) {
           try {

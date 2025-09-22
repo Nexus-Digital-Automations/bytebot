@@ -312,7 +312,7 @@ export class ComputerUseController {
           userId: user.id,
           username: user.username,
           userRole: user.role,
-          executionMode: batchRequest.executionMode,
+          executionMode: batchRequest.executionMode as string,
           totalJobs: batchRequest.jobs.length,
           batchPriority: batchRequest.batchPriority,
         },
@@ -353,7 +353,7 @@ export class ComputerUseController {
         {
           operationId,
           totalJobs: batchRequest.jobs.length,
-          executionMode: batchRequest.executionMode,
+          executionMode: batchRequest.executionMode as string,
           processingTime,
           errorType: error?.constructor?.name ?? 'Unknown',
           userId: user.id,
@@ -435,22 +435,22 @@ export class ComputerUseController {
       });
 
       const searchResults =
-        await this.enhancedAsyncJobService.searchJobs(criteria);
+        await this.enhancedAsyncJobService.searchJobs(criteria) as JobSearchResultsDto;
 
       const processingTime = Date.now() - startTime;
       this.logger.log(
-        `[${operationId}] Job search completed: ${searchResults.totalCount} total, ${searchResults.jobs.length} returned (${processingTime}ms)`,
+        `[${operationId}] Job search completed: ${(searchResults as JobSearchResultsDto).totalCount} total, ${(searchResults as JobSearchResultsDto).jobs.length} returned (${processingTime}ms)`,
         {
           operationId,
-          totalCount: searchResults.totalCount,
-          returnedCount: searchResults.jobs.length,
+          totalCount: (searchResults as JobSearchResultsDto).totalCount,
+          returnedCount: (searchResults as JobSearchResultsDto).jobs.length,
           processingTime,
           userId: user.id,
           username: user.username,
         },
       );
 
-      return searchResults;
+      return searchResults as JobSearchResultsDto;
     } catch (error: unknown) {
       const processingTime = Date.now() - startTime;
       const errorMessage = getErrorMessage(error);
@@ -540,23 +540,23 @@ export class ComputerUseController {
       });
 
       const progressUpdate =
-        await this.enhancedAsyncJobService.getJobProgress(jobId);
+        await this.enhancedAsyncJobService.getJobProgress(jobId) as JobProgressUpdateDto;
 
       const processingTime = Date.now() - startTime;
       this.logger.log(
-        `[${operationId}] Job progress retrieved: ${progressUpdate.progress}% (${processingTime}ms)`,
+        `[${operationId}] Job progress retrieved: ${(progressUpdate as JobProgressUpdateDto).progress}% (${processingTime}ms)`,
         {
           operationId,
           jobId,
-          progress: progressUpdate.progress,
-          status: progressUpdate.status,
+          progress: (progressUpdate as JobProgressUpdateDto).progress,
+          status: (progressUpdate as JobProgressUpdateDto).status,
           processingTime,
           userId: user.id,
           username: user.username,
         },
       );
 
-      return progressUpdate;
+      return progressUpdate as JobProgressUpdateDto;
     } catch (error: unknown) {
       const processingTime = Date.now() - startTime;
       const errorMessage = getErrorMessage(error);
@@ -642,22 +642,22 @@ export class ComputerUseController {
         username: user.username,
       });
 
-      const analytics = await this.enhancedAsyncJobService.getJobAnalytics(24);
+      const analytics = await this.enhancedAsyncJobService.getJobAnalytics(24) as JobAnalyticsDto;
 
       const processingTime = Date.now() - startTime;
       this.logger.log(
-        `[${operationId}] Job analytics retrieved: ${analytics.totalJobs} total jobs (${processingTime}ms)`,
+        `[${operationId}] Job analytics retrieved: ${(analytics as JobAnalyticsDto).totalJobs} total jobs (${processingTime}ms)`,
         {
           operationId,
-          totalJobs: analytics.totalJobs,
-          successRate: analytics.successRate,
+          totalJobs: (analytics as JobAnalyticsDto).totalJobs,
+          successRate: (analytics as JobAnalyticsDto).successRate,
           processingTime,
           userId: user.id,
           username: user.username,
         },
       );
 
-      return analytics;
+      return analytics as JobAnalyticsDto;
     } catch (error: unknown) {
       const processingTime = Date.now() - startTime;
       const errorMessage = getErrorMessage(error);
@@ -751,16 +751,16 @@ export class ComputerUseController {
 
       const results = await this.enhancedAsyncJobService.cancelJobsByCriteria({
         batchId,
-      });
+      }) as { cancelled: string[]; failed: string[] };
 
       const processingTime = Date.now() - startTime;
       this.logger.log(
-        `[${operationId}] Batch cancellation completed: ${results.cancelled.length} cancelled, ${results.failed.length} failed (${processingTime}ms)`,
+        `[${operationId}] Batch cancellation completed: ${(results as { cancelled: string[]; failed: string[] }).cancelled.length} cancelled, ${(results as { cancelled: string[]; failed: string[] }).failed.length} failed (${processingTime}ms)`,
         {
           operationId,
           batchId,
-          cancelledCount: results.cancelled.length,
-          failedCount: results.failed.length,
+          cancelledCount: (results as { cancelled: string[]; failed: string[] }).cancelled.length,
+          failedCount: (results as { cancelled: string[]; failed: string[] }).failed.length,
           processingTime,
           userId: user.id,
           username: user.username,
@@ -882,11 +882,11 @@ export class ComputerUseController {
 
     try {
       // Extract async options from the combined DTO
-      const { priority, timeout, useCache, metadata, ...actionParams } = params;
+      const { priority, timeout, useCache, metadata, ...actionParams } = params as AsyncActionSubmissionDto;
 
       // Create safe copy for logging
-      const paramsCopy = { ...actionParams };
-      if (paramsCopy.action === 'write_file') {
+      const paramsCopy = { ...actionParams } as Record<string, unknown>;
+      if ((paramsCopy as { action?: string }).action === 'write_file') {
         (paramsCopy as Record<string, unknown>).data = '[base64 data redacted]';
       }
 
@@ -894,13 +894,13 @@ export class ComputerUseController {
         `[${operationId}] Async computer action submission: ${JSON.stringify(paramsCopy)}`,
         {
           operationId,
-          action: actionParams.action,
+          action: (actionParams as ComputerActionDto).action,
           userId: user.id,
           username: user.username,
           userRole: user.role,
-          priority: priority,
-          useCache: useCache,
-          timeout: timeout,
+          priority: priority as JobPriority,
+          useCache: useCache as boolean,
+          timeout: timeout as number,
         },
       );
 
@@ -908,9 +908,9 @@ export class ComputerUseController {
       const jobResponse = await this.asyncJobService.submitJob(
         actionParams as ComputerActionDto,
         {
-          priority,
-          timeout,
-          useCache,
+          priority: priority as JobPriority,
+          timeout: timeout as number,
+          useCache: useCache as boolean,
           metadata: {
             ...metadata,
             userId: user.id,

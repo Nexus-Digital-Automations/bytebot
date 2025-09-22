@@ -59,6 +59,80 @@ import {
 } from '../decorators/security.decorators';
 
 /**
+ * Type guard to validate JWT payload has required browser properties
+ */
+function isValidBrowserJwtPayload(payload: unknown): payload is {
+  sub?: string;
+  id?: string;
+  email?: string;
+  username?: string;
+  role?: UserRole;
+  permissions?: string[];
+  isActive?: boolean;
+  sessionId?: string;
+} {
+  return (
+    typeof payload === 'object' &&
+    payload !== null &&
+    ('sub' in payload || 'id' in payload)
+  );
+}
+
+/**
+ * Safe property access utilities for Browser JWT payload
+ */
+class SafeBrowserJwtAccess {
+  static getId(payload: unknown): string | null {
+    if (isValidBrowserJwtPayload(payload)) {
+      return payload.sub || payload.id || null;
+    }
+    return null;
+  }
+
+  static getEmail(payload: unknown): string | null {
+    if (isValidBrowserJwtPayload(payload) && typeof payload.email === 'string') {
+      return payload.email;
+    }
+    return null;
+  }
+
+  static getUsername(payload: unknown): string | null {
+    if (isValidBrowserJwtPayload(payload) && typeof payload.username === 'string') {
+      return payload.username;
+    }
+    return null;
+  }
+
+  static getRole(payload: unknown): UserRole | null {
+    if (isValidBrowserJwtPayload(payload)) {
+      return payload.role || null;
+    }
+    return null;
+  }
+
+  static getPermissions(payload: unknown): string[] {
+    if (isValidBrowserJwtPayload(payload) && Array.isArray(payload.permissions)) {
+      return payload.permissions;
+    }
+    return [];
+  }
+
+  static getIsActive(payload: unknown): boolean {
+    if (isValidBrowserJwtPayload(payload)) {
+      return payload.isActive !== false;
+    }
+    return false;
+  }
+
+  static getSessionId(payload: unknown): string | null {
+    if (isValidBrowserJwtPayload(payload) && typeof payload.sessionId === 'string') {
+      return payload.sessionId;
+    }
+    return null;
+  }
+}
+
+/**
  * Authenticated user interface for browser automation
  */
 interface BrowserUser {
@@ -369,15 +443,15 @@ export class BrowserSecurityGuard implements CanActivate {
       // Verify JWT token
       const payload = this.jwtService.verify(token);
 
-      // Extract user information
+      // Extract user information with safe access
       const user: BrowserUser = {
-        id: payload.sub || payload.id,
-        email: payload.email,
-        username: payload.username,
-        role: payload.role,
-        permissions: payload.permissions || [],
-        isActive: payload.isActive !== false,
-        sessionId: payload.sessionId,
+        id: SafeBrowserJwtAccess.getId(payload) || 'unknown',
+        email: SafeBrowserJwtAccess.getEmail(payload) || 'unknown@unknown.local',
+        username: SafeBrowserJwtAccess.getUsername(payload) || 'unknown',
+        role: SafeBrowserJwtAccess.getRole(payload) || UserRole._VIEWER,
+        permissions: SafeBrowserJwtAccess.getPermissions(payload),
+        isActive: SafeBrowserJwtAccess.getIsActive(payload),
+        sessionId: SafeBrowserJwtAccess.getSessionId(payload) || 'unknown-session',
       };
 
       // Validate user is active
