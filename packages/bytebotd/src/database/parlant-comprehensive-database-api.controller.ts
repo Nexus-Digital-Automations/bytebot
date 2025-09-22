@@ -223,7 +223,7 @@ export class ParlantComprehensiveDatabaseApiController {
         functionName: 'DatabaseQuery.execute',
         functionParams: queryParams,
         actionDescription: `Execute database query: ${queryParams.query.substring(0, 100)}...`,
-        context: await this.buildConversationContext(req, operationId),
+        context: this.buildConversationContext(req, operationId),
         riskLevel: this.assessInitialRiskLevel(databaseOperation),
         databaseOperation,
         performanceConstraints: {
@@ -249,7 +249,7 @@ export class ParlantComprehensiveDatabaseApiController {
 
       // Execute the validated query
       const startTime = Date.now();
-      const queryResult = await this.executeValidatedQuery(queryParams.query, validationResult);
+      const queryResult = this.executeValidatedQuery(queryParams.query, validationResult);
       const executionTime = Date.now() - startTime;
 
       this.logger.log(`Query executed successfully: ${operationId} (${executionTime}ms)`);
@@ -356,8 +356,8 @@ export class ParlantComprehensiveDatabaseApiController {
               auditTrail: {
                 auditId: `audit_error_${Date.now()}`,
                 timestamp: new Date(),
-                userId: req.user?.id || 'unknown',
-                sessionId: req.sessionId || 'unknown',
+                userId: String((req as any).user?.id) || 'unknown',
+                sessionId: String((req as any).sessionId) || 'unknown',
                 operation: {
                   operationType: DatabaseOperationType.SELECT,
                   tableName: 'unknown',
@@ -461,16 +461,14 @@ export class ParlantComprehensiveDatabaseApiController {
         functionName: `DatabaseModification.${modificationRequest.operation.toLowerCase()}`,
         functionParams: modificationRequest,
         actionDescription: `${modificationRequest.operation} operation on ${modificationRequest.tableName}`,
-        context: await this.buildConversationContext(req, operationId),
+        context: this.buildConversationContext(req, operationId),
         riskLevel: this.assessInitialRiskLevel(databaseOperation),
         databaseOperation,
         transactionContext: {
           transactionId: `tx_${operationId}`,
           isolationLevel: TransactionIsolationLevel.REPEATABLE_READ,
           timeoutMs: 60000,
-          rollbackStrategy: databaseOperation.isDestructive ?
-            require('../../../bytebot-agent/src/database/parlant-database-validation-comprehensive.service').RollbackStrategy.MANUAL_APPROVAL :
-            require('../../../bytebot-agent/src/database/parlant-database-validation-comprehensive.service').RollbackStrategy.AUTOMATIC,
+          rollbackStrategy: databaseOperation.isDestructive ? 'MANUAL_APPROVAL' : 'AUTOMATIC',
           backupRequired: databaseOperation.isDestructive,
           approvalRequired: modificationRequest.approvalRequired || databaseOperation.isDestructive
         }
@@ -491,7 +489,7 @@ export class ParlantComprehensiveDatabaseApiController {
 
       // Execute the validated modification
       const startTime = Date.now();
-      const modificationResult = await this.executeValidatedModification(modificationRequest, validationResult);
+      const modificationResult = this.executeValidatedModification(modificationRequest, validationResult);
       const executionTime = Date.now() - startTime;
 
       this.logger.log(`Data modification completed successfully: ${operationId} (${executionTime}ms)`);
@@ -552,7 +550,7 @@ export class ParlantComprehensiveDatabaseApiController {
           functionName: `BulkOperation.${operation.operation.toLowerCase()}`,
           functionParams: operation,
           actionDescription: `Bulk ${operation.operation} on ${operation.tableName}`,
-          context: await this.buildConversationContext(req, operationId),
+          context: this.buildConversationContext(req, operationId),
           riskLevel: this.assessInitialRiskLevel(databaseOperation),
           databaseOperation
         };
@@ -574,7 +572,7 @@ export class ParlantComprehensiveDatabaseApiController {
 
       // Execute all validated operations
       const startTime = Date.now();
-      const bulkResult = await this.executeValidatedBulkOperations(bulkRequest, validationResults);
+      const bulkResult = this.executeValidatedBulkOperations(bulkRequest, validationResults);
       const executionTime = Date.now() - startTime;
 
       this.logger.log(`Bulk operations completed successfully: ${operationId} (${executionTime}ms)`);
@@ -633,14 +631,14 @@ export class ParlantComprehensiveDatabaseApiController {
         functionName: `DatabaseAdmin.${adminRequest.operation.toLowerCase()}`,
         functionParams: adminRequest,
         actionDescription: `Execute database administration: ${adminRequest.operation}`,
-        context: await this.buildConversationContext(req, operationId),
+        context: this.buildConversationContext(req, operationId),
         riskLevel: RiskLevel._CRITICAL, // Admin operations are always critical
         databaseOperation,
         transactionContext: {
           transactionId: `admin_tx_${operationId}`,
           isolationLevel: TransactionIsolationLevel.SERIALIZABLE,
           timeoutMs: 300000, // 5 minutes for admin operations
-          rollbackStrategy: require('../../../bytebot-agent/src/database/parlant-database-validation-comprehensive.service').RollbackStrategy.MANUAL_APPROVAL,
+          rollbackStrategy: 'MANUAL_APPROVAL',
           backupRequired: true,
           approvalRequired: true
         }
@@ -661,7 +659,7 @@ export class ParlantComprehensiveDatabaseApiController {
 
       // Execute the validated admin operation
       const startTime = Date.now();
-      const adminResult = await this.executeValidatedAdminOperation(adminRequest, validationResult);
+      const adminResult = this.executeValidatedAdminOperation(adminRequest, validationResult) as any;
       const executionTime = Date.now() - startTime;
 
       this.logger.log(`Admin operation completed successfully: ${operationId} (${executionTime}ms)`);
@@ -734,7 +732,7 @@ export class ParlantComprehensiveDatabaseApiController {
         functionName: 'DatabaseSchema.getTableSchema',
         functionParams: { tableName, ...options },
         actionDescription: `Retrieve schema information for table: ${tableName}`,
-        context: await this.buildConversationContext(req, operationId),
+        context: this.buildConversationContext(req, operationId),
         riskLevel: this.assessInitialRiskLevel(databaseOperation),
         databaseOperation
       };
@@ -754,7 +752,7 @@ export class ParlantComprehensiveDatabaseApiController {
 
       // Retrieve the validated schema
       const startTime = Date.now();
-      const schemaResult = await this.getValidatedTableSchema(tableName, options, validationResult);
+      const schemaResult = this.getValidatedTableSchema(tableName, options, validationResult) as any;
       const executionTime = Date.now() - startTime;
 
       this.logger.log(`Table schema retrieved successfully: ${operationId} (${executionTime}ms)`);
@@ -783,21 +781,21 @@ export class ParlantComprehensiveDatabaseApiController {
     description: 'Check database health and PARLANT validation service status'
   })
   @ApiResponse({ status: 200, description: 'Health check completed successfully' })
-  async getDatabaseHealth(@Request() req: any): Promise<{
+  getDatabaseHealth(@Request() req: any): {
     database: 'healthy' | 'degraded' | 'unhealthy';
     parlantValidation: 'healthy' | 'degraded' | 'unhealthy';
     timestamp: Date;
     details: Record<string, unknown>;
-  }> {
+  } {
     const operationId = this.generateOperationId();
     this.logger.log(`Checking database health: ${operationId}`);
 
     try {
       // Check database connectivity
-      const dbHealth = await this.checkDatabaseHealth();
+      const dbHealth = this.checkDatabaseHealth();
 
       // Check PARLANT validation service health
-      const parlantHealth = await this.checkParlantValidationHealth();
+      const parlantHealth = this.checkParlantValidationHealth();
 
       return {
         database: dbHealth.status,
@@ -843,11 +841,11 @@ export class ParlantComprehensiveDatabaseApiController {
     return `db_op_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
   }
 
-  private async buildConversationContext(req: any, operationId: string): Promise<ParlantConversationContext> {
+  private buildConversationContext(req: any, operationId: string): ParlantConversationContext {
     return {
       conversationId: `db_conv_${operationId}`,
-      userId: req.user?.id || 'anonymous',
-      sessionId: req.sessionId || `session_${Date.now()}`,
+      userId: String((req as any).user?.id) || 'anonymous',
+      sessionId: String((req as any).sessionId) || `session_${Date.now()}`,
       state: ConversationState._ACTIVE,
       participants: [],
       createdAt: new Date(),
@@ -930,10 +928,10 @@ export class ParlantComprehensiveDatabaseApiController {
     }
   }
 
-  private async executeValidatedQuery(query: string, validationResult: ParlantDatabaseValidationResponse): Promise<{
+  private executeValidatedQuery(query: string, validationResult: ParlantDatabaseValidationResponse): {
     rows: any[];
     rowCount: number;
-  }> {
+  } {
     // Mock query execution - in production, this would use actual database connection
     this.logger.debug(`Executing validated query with optimization: ${validationResult.optimizedQuery || query}`);
 
@@ -943,10 +941,10 @@ export class ParlantComprehensiveDatabaseApiController {
     };
   }
 
-  private async executeValidatedModification(
+  private executeValidatedModification(
     request: DataModificationRequest,
     validationResult: ParlantDatabaseValidationResponse
-  ): Promise<{ rowsAffected: number }> {
+  ): { rowsAffected: number } {
     // Mock modification execution - in production, this would use actual database connection
     this.logger.debug(`Executing validated modification: ${request.operation} on ${request.tableName}`);
 
@@ -955,10 +953,10 @@ export class ParlantComprehensiveDatabaseApiController {
     };
   }
 
-  private async executeValidatedBulkOperations(
+  private executeValidatedBulkOperations(
     request: BulkOperationRequest,
     validationResults: ParlantDatabaseValidationResponse[]
-  ): Promise<{ totalRowsAffected: number }> {
+  ): { totalRowsAffected: number } {
     // Mock bulk execution - in production, this would use actual database transaction
     this.logger.debug(`Executing validated bulk operations: ${request.operations.length} operations`);
 
@@ -968,10 +966,10 @@ export class ParlantComprehensiveDatabaseApiController {
     };
   }
 
-  private async executeValidatedAdminOperation(
+  private executeValidatedAdminOperation(
     request: DatabaseAdminRequest,
     validationResult: ParlantDatabaseValidationResponse
-  ): Promise<any> {
+  ): any {
     // Mock admin operation execution - in production, this would execute actual admin commands
     this.logger.debug(`Executing validated admin operation: ${request.operation}`);
 
@@ -983,11 +981,11 @@ export class ParlantComprehensiveDatabaseApiController {
     };
   }
 
-  private async getValidatedTableSchema(
+  private getValidatedTableSchema(
     tableName: string,
     options: any,
     validationResult: ParlantDatabaseValidationResponse
-  ): Promise<any> {
+  ): any {
     // Mock schema retrieval - in production, this would query information schema
     this.logger.debug(`Retrieving validated table schema: ${tableName}`);
 
@@ -1052,10 +1050,10 @@ export class ParlantComprehensiveDatabaseApiController {
     return Array.from(recommendations);
   }
 
-  private async checkDatabaseHealth(): Promise<{
+  private checkDatabaseHealth(): {
     status: 'healthy' | 'degraded' | 'unhealthy';
     details: Record<string, unknown>;
-  }> {
+  } {
     // Mock database health check - in production, this would ping the database
     return {
       status: 'healthy',
@@ -1068,10 +1066,10 @@ export class ParlantComprehensiveDatabaseApiController {
     };
   }
 
-  private async checkParlantValidationHealth(): Promise<{
+  private checkParlantValidationHealth(): {
     status: 'healthy' | 'degraded' | 'unhealthy';
     details: Record<string, unknown>;
-  }> {
+  } {
     // Check PARLANT validation service health
     try {
       // This would call the actual health check method

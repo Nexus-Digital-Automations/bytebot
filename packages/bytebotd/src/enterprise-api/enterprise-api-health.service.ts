@@ -29,7 +29,10 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';import { Confi
   ParlantValidationResponse,
   RiskLevel,
   ParlantConversationContext as ParlantConversationContext,
-} from '../parlant/parlant-integration.service';// ===== HEALTH SERVICE TYPES =====/**
+} from '../parlant/parlant-integration.service';
+
+// ===== HEALTH SERVICE TYPES =====
+/**
  * Overall system health status
  */
 export interface SystemHealthStatus {
@@ -469,7 +472,7 @@ export class EnterpriseApiHealthService implements OnModuleInit {
   /**
    * Check database health
    */
-  private async checkDatabaseHealth(): Promise<ComponentHealth> {
+  private checkDatabaseHealth(): ComponentHealth {
     const startTime = Date.now();
     
     try {
@@ -595,27 +598,41 @@ export class EnterpriseApiHealthService implements OnModuleInit {
   /**
    * Check system resources
    */
-  private async checkSystemResources(): Promise<SystemHealthStatus['resources']> {// TODO: Implement actual system resource monitoringreturn {
+  private async checkSystemResources(): Promise<SystemHealthStatus['resources']> {
+    // TODO: Implement actual system resource monitoring
+    return {
       cpu: {
         usage: 25,
         available: 75,
         total: 100,
-        status: 'NORMAL',trend: 'STABLE',threshold: { warning: 70, critical: 90 },},
+        status: 'NORMAL',
+        trend: 'STABLE',
+        threshold: { warning: 70, critical: 90 },
+      },
       memory: {
         usage: 60,
         available: 40,
         total: 100,
-        status: 'NORMAL',trend: 'STABLE',threshold: { warning: 80, critical: 95 },},
+        status: 'NORMAL',
+        trend: 'STABLE',
+        threshold: { warning: 80, critical: 95 },
+      },
       disk: {
         usage: 45,
         available: 55,
         total: 100,
-        status: 'NORMAL',trend: 'STABLE',threshold: { warning: 85, critical: 95 },},
+        status: 'NORMAL',
+        trend: 'STABLE',
+        threshold: { warning: 85, critical: 95 },
+      },
       network: {
         usage: 15,
         available: 85,
         total: 100,
-        status: 'NORMAL',trend: 'STABLE',threshold: { warning: 80, critical: 95 },},
+        status: 'NORMAL',
+        trend: 'STABLE',
+        threshold: { warning: 80, critical: 95 },
+      },
     };
   }
 
