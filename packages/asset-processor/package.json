@@ -1,0 +1,51 @@
+{
+  "name": "@bytebot/asset-processor",
+  "version": "0.0.1",
+  "description": "Asset Processing Engine - Transformation Pipeline and Format Conversion",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "private": true,
+  "license": "UNLICENSED",
+  "scripts": {
+    "build": "npx tsc -p tsconfig.build.json",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "lint": "npx eslint \"src/**/*.ts\" --fix",
+    "test": "jest --config jest.config.js",
+    "test:watch": "jest --config jest.config.js --watch",
+    "test:coverage": "jest --config jest.config.js --coverage",
+    "start:dev": "npx ts-node -r tsconfig-paths/register src/index.ts"
+  },
+  "dependencies": {
+    "@bytebot/shared": "workspace:*",
+    "@nestjs/common": "^11.1.6",
+    "@nestjs/core": "^11.1.6",
+    "sharp": "^0.33.5",
+    "ffmpeg-static": "^5.2.0",
+    "fluent-ffmpeg": "^2.1.3",
+    "file-type": "^19.8.1",
+    "mime-types": "^2.1.35",
+    "archiver": "^7.0.0",
+    "unzipper": "^0.12.6",
+    "pdf-parse": "^1.1.1",
+    "exifr": "^7.1.3",
+    "uuid": "^11.0.5",
+    "rxjs": "^7.8.2",
+    "class-validator": "^0.14.2",
+    "class-transformer": "^0.5.1"
+  },
+  "devDependencies": {
+    "@types/archiver": "^6.0.2",
+    "@types/fluent-ffmpeg": "^2.1.27",
+    "@types/jest": "^30.0.0",
+    "@types/mime-types": "^2.1.4",
+    "@types/node": "^22.10.7",
+    "@types/uuid": "^10.0.0",
+    "jest": "^30.1.3",
+    "ts-jest": "^29.4.1",
+    "typescript": "^5.9.2",
+    "eslint": "^9.18.0",
+    "prettier": "^3.4.2",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0"
+  }
+}

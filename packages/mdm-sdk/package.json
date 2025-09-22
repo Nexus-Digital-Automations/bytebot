@@ -1,0 +1,41 @@
+{
+  "name": "@bytebot/mdm-sdk",
+  "version": "0.0.1",
+  "description": "MDM SDK - Client SDK for Mobile Device Management Platform",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "license": "UNLICENSED",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "eslint src --ext ts --fix",
+    "test": "jest",
+    "test:coverage": "jest --coverage",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "axios": "^1.7.7",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.14",
+    "@types/ws": "^8.5.5",
+    "@typescript-eslint/eslint-plugin": "^8.20.0",
+    "@typescript-eslint/parser": "^8.20.0",
+    "eslint": "^9.18.0",
+    "jest": "^30.1.3",
+    "typescript": "^5.9.2"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "keywords": [
+    "mdm",
+    "mobile",
+    "device",
+    "management",
+    "sdk",
+    "client"
+  ]
+}
