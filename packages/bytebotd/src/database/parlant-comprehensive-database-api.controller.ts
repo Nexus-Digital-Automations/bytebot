@@ -35,6 +35,17 @@ import {
   HttpCode,
   Request
 } from '@nestjs/common';
+
+// Request interface for proper typing
+interface AuthenticatedRequest {
+  user?: { id: string };
+  sessionId?: string;
+  headers?: Record<string, string>;
+  ip?: string;
+  route?: { path: string };
+  url?: string;
+  method?: string;
+}
 import {
   ApiTags,
   ApiOperation,
@@ -197,7 +208,7 @@ export class ParlantComprehensiveDatabaseApiController {
       timeout?: number;
       securityClassification?: DataClassification;
     },
-    @Request() req: any
+    @Request() req: AuthenticatedRequest
   ): Promise<DatabaseOperationResponse> {
     const operationId = this.generateOperationId();
     this.logger.log(`Executing query with PARLANT validation: ${operationId}`);
@@ -302,7 +313,7 @@ export class ParlantComprehensiveDatabaseApiController {
       transactionMode?: 'SINGLE' | 'INDIVIDUAL';
       continueOnError?: boolean;
     },
-    @Request() req: any
+    @Request() req: AuthenticatedRequest
   ): Promise<DatabaseOperationResponse[]> {
     const operationId = this.generateOperationId();
     this.logger.log(`Executing batch queries with PARLANT validation: ${operationId}`);
@@ -356,8 +367,8 @@ export class ParlantComprehensiveDatabaseApiController {
               auditTrail: {
                 auditId: `audit_error_${Date.now()}`,
                 timestamp: new Date(),
-                userId: String((req as any).user?.id) || 'unknown',
-                sessionId: String((req as any).sessionId) || 'unknown',
+                userId: String(req.user?.id) || 'unknown',
+                sessionId: String(req.sessionId) || 'unknown',
                 operation: {
                   operationType: DatabaseOperationType.SELECT,
                   tableName: 'unknown',
@@ -433,7 +444,7 @@ export class ParlantComprehensiveDatabaseApiController {
   @ApiResponse({ status: 403, description: 'Modification rejected by PARLANT validation' })
   async modifyData(
     @Body() modificationRequest: DataModificationRequest,
-    @Request() req: any
+    @Request() req: AuthenticatedRequest
   ): Promise<DatabaseOperationResponse> {
     const operationId = this.generateOperationId();
     this.logger.log(`Modifying data with PARLANT validation: ${operationId}`);
@@ -520,7 +531,7 @@ export class ParlantComprehensiveDatabaseApiController {
   @ApiResponse({ status: 403, description: 'Bulk operation rejected by validation' })
   async executeBulkOperations(
     @Body() bulkRequest: BulkOperationRequest,
-    @Request() req: any
+    @Request() req: AuthenticatedRequest
   ): Promise<DatabaseOperationResponse> {
     const operationId = this.generateOperationId();
     this.logger.log(`Executing bulk operations with PARLANT validation: ${operationId}`);
@@ -605,7 +616,7 @@ export class ParlantComprehensiveDatabaseApiController {
   @ApiResponse({ status: 403, description: 'Administration operation rejected by validation' })
   async executeAdminOperation(
     @Body() adminRequest: DatabaseAdminRequest,
-    @Request() req: any
+    @Request() req: AuthenticatedRequest
   ): Promise<DatabaseOperationResponse> {
     const operationId = this.generateOperationId();
     this.logger.log(`Executing admin operation with PARLANT validation: ${operationId}`);
@@ -704,7 +715,7 @@ export class ParlantComprehensiveDatabaseApiController {
       includeConstraints?: boolean;
       includeStatistics?: boolean;
     },
-    @Request() req: any
+    @Request() req: AuthenticatedRequest
   ): Promise<DatabaseOperationResponse> {
     const operationId = this.generateOperationId();
     this.logger.log(`Getting table schema with PARLANT validation: ${operationId}`);
@@ -781,7 +792,7 @@ export class ParlantComprehensiveDatabaseApiController {
     description: 'Check database health and PARLANT validation service status'
   })
   @ApiResponse({ status: 200, description: 'Health check completed successfully' })
-  getDatabaseHealth(@Request() req: any): {
+  getDatabaseHealth(@Request() req: AuthenticatedRequest): {
     database: 'healthy' | 'degraded' | 'unhealthy';
     parlantValidation: 'healthy' | 'degraded' | 'unhealthy';
     timestamp: Date;
@@ -841,11 +852,11 @@ export class ParlantComprehensiveDatabaseApiController {
     return `db_op_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
   }
 
-  private buildConversationContext(req: any, operationId: string): ParlantConversationContext {
+  private buildConversationContext(req: AuthenticatedRequest, operationId: string): ParlantConversationContext {
     return {
       conversationId: `db_conv_${operationId}`,
-      userId: String((req as any).user?.id) || 'anonymous',
-      sessionId: String((req as any).sessionId) || `session_${Date.now()}`,
+      userId: String(req.user?.id) || 'anonymous',
+      sessionId: String(req.sessionId) || `session_${Date.now()}`,
       state: ConversationState._ACTIVE,
       participants: [],
       createdAt: new Date(),
@@ -929,7 +940,7 @@ export class ParlantComprehensiveDatabaseApiController {
   }
 
   private executeValidatedQuery(query: string, validationResult: ParlantDatabaseValidationResponse): {
-    rows: any[];
+    rows: Record<string, unknown>[];
     rowCount: number;
   } {
     // Mock query execution - in production, this would use actual database connection
@@ -969,7 +980,7 @@ export class ParlantComprehensiveDatabaseApiController {
   private executeValidatedAdminOperation(
     request: DatabaseAdminRequest,
     validationResult: ParlantDatabaseValidationResponse
-  ): any {
+  ): Record<string, unknown> {
     // Mock admin operation execution - in production, this would execute actual admin commands
     this.logger.debug(`Executing validated admin operation: ${request.operation}`);
 
@@ -983,9 +994,9 @@ export class ParlantComprehensiveDatabaseApiController {
 
   private getValidatedTableSchema(
     tableName: string,
-    options: any,
+    options: { includeIndexes?: boolean; includeConstraints?: boolean; includeStatistics?: boolean },
     validationResult: ParlantDatabaseValidationResponse
-  ): any {
+  ): Record<string, unknown> {
     // Mock schema retrieval - in production, this would query information schema
     this.logger.debug(`Retrieving validated table schema: ${tableName}`);
 

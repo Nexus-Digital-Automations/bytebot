@@ -275,7 +275,7 @@ export class DatabaseApiController {
       limit,
       offset,
       userId: user.id,
-      conversationId: conversationContext && typeof conversationContext === 'object' && 'conversationId' in conversationContext ? conversationContext.conversationId : undefined,
+      conversationId: conversationContext && typeof conversationContext === 'object' && 'conversationId' in conversationContext ? (conversationContext as { conversationId: string }).conversationId : undefined,
       validationApproved: true
     });
 
@@ -359,7 +359,7 @@ export class DatabaseApiController {
       operationId,
       tableName,
       userId: user.id,
-      conversationId: conversationContext?.conversationId
+      conversationId: conversationContext && typeof conversationContext === 'object' && 'conversationId' in conversationContext ? (conversationContext as { conversationId: string }).conversationId : undefined
     });
 
     // Mock implementation - would integrate with actual database schema inspection
@@ -462,9 +462,9 @@ export class DatabaseApiController {
       operation: modificationDto.operation,
       justification: modificationDto.justification,
       userId: user.id,
-      conversationId: conversationContext && typeof conversationContext === 'object' && 'conversationId' in conversationContext ? conversationContext.conversationId : undefined,
+      conversationId: conversationContext && typeof conversationContext === 'object' && 'conversationId' in conversationContext ? (conversationContext as { conversationId: string }).conversationId : undefined,
       validationApproved: true,
-      securityLevel: conversationContext && typeof conversationContext === 'object' && 'securityContext' in conversationContext && conversationContext.securityContext && 'accessLevel' in conversationContext.securityContext ? conversationContext.securityContext.accessLevel : SecurityLevel.MEDIUM
+      securityLevel: conversationContext && typeof conversationContext === 'object' && 'securityContext' in conversationContext && conversationContext.securityContext && typeof conversationContext.securityContext === 'object' && 'accessLevel' in conversationContext.securityContext ? (conversationContext.securityContext as { accessLevel: SecurityLevel }).accessLevel : SecurityLevel.MEDIUM
     });
 
     try {
@@ -588,7 +588,7 @@ export class DatabaseApiController {
       description: schemaDto.description,
       reversible: schemaDto.reversible,
       userId: user.id,
-      conversationId: conversationContext && typeof conversationContext === 'object' && 'conversationId' in conversationContext ? conversationContext.conversationId : undefined,
+      conversationId: conversationContext && typeof conversationContext === 'object' && 'conversationId' in conversationContext ? (conversationContext as { conversationId: string }).conversationId : undefined,
       validationApproved: true
     });
 
@@ -672,7 +672,7 @@ export class DatabaseApiController {
       type: backupDto.type,
       encrypt: backupDto.encrypt,
       userId: user.id,
-      conversationId: conversationContext?.conversationId
+      conversationId: conversationContext && typeof conversationContext === 'object' && 'conversationId' in conversationContext ? (conversationContext as { conversationId: string }).conversationId : undefined
     });
 
     // Mock backup implementation
@@ -725,7 +725,7 @@ export class DatabaseApiController {
       operationId,
       timeRange: analyticsDto.timeRange,
       userId: user.id,
-      conversationId: conversationContext?.conversationId
+      conversationId: conversationContext && typeof conversationContext === 'object' && 'conversationId' in conversationContext ? (conversationContext as { conversationId: string }).conversationId : undefined
     });
 
     return {
