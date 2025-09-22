@@ -33,11 +33,7 @@ import {
   ParlantValidationRequest,
   ParlantValidationResponse,
 } from '@bytebot/shared/src/parlant/parlant-integration.service';
-import {
-  RiskLevel,
-  SecurityLevel,
-  UserRole,
-} from '@bytebot/shared';
+import { RiskLevel, SecurityLevel, UserRole } from '@bytebot/shared';
 import { User, UserSession } from '@prisma/client';
 import {
   JwtPayload,

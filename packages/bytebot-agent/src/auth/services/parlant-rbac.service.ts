@@ -30,16 +30,9 @@ import {
   ParlantIntegrationService,
   ParlantConversationContext,
   ParlantValidationRequest,
-  ParlantValidationResponse,
   ConversationalValidationError,
 } from '@bytebot/shared/src/parlant/parlant-integration.service';
-import {
-  SecurityClassification,
-  RiskLevel,
-  SecurityLevel,
-  UserRole,
-  Permission,
-} from '@bytebot/shared';
+import { RiskLevel, SecurityLevel, UserRole } from '@bytebot/shared';
 import { User } from '@prisma/client';
 
 // ===== RBAC INTERFACES =====

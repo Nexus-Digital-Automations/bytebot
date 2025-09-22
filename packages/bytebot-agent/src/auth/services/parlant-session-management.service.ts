@@ -26,16 +26,10 @@ import {
   ParlantConversationContext,
   ParlantValidationRequest,
   ParlantValidationResponse,
-  ConversationalValidationError,
 } from '@bytebot/shared/src/parlant/parlant-integration.service';
-import {
-  SecurityClassification,
-  RiskLevel,
-  SecurityLevel,
-  UserRole,
-} from '@bytebot/shared';
-import { User, UserSession } from '@prisma/client';
-import { createHash } from 'crypto';
+import { RiskLevel, SecurityLevel } from '@bytebot/shared';
+// User and UserSession are available but not currently used in interface signatures
+import { createHash as _createHash } from 'crypto';
 
 // ===== SESSION MANAGEMENT INTERFACES =====
 

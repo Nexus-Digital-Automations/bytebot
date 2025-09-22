@@ -30,17 +30,11 @@ import {
   ParlantIntegrationService,
   ParlantConversationContext,
   ParlantValidationRequest,
-  ParlantValidationResponse,
   ConversationalValidationError,
 } from '@bytebot/shared/src/parlant/parlant-integration.service';
-import {
-  SecurityClassification,
-  RiskLevel,
-  SecurityLevel,
-  UserRole,
-} from '@bytebot/shared';
+import { RiskLevel, SecurityLevel } from '@bytebot/shared';
 import { User } from '@prisma/client';
-import { randomBytes, createHash } from 'crypto';
+import { randomBytes as _randomBytes, createHash as _createHash } from 'crypto';
 import * as speakeasy from 'speakeasy';
 import * as QRCode from 'qrcode';
 
@@ -1004,7 +998,7 @@ export class ParlantMFAService {
 
   private async generateMFAChallenge(
     factor: MFAFactor,
-    mfaSession: ConversationalMFASession,
+    _mfaSession: ConversationalMFASession,
   ): Promise<MFAChallengeData> {
     const challengeId = `challenge_${Date.now()}_${Math.random().toString(36).substring(7)}`;
 
@@ -1023,7 +1017,7 @@ export class ParlantMFAService {
           },
         };
 
-      case MFAFactorType.SMS:
+      case MFAFactorType.SMS: {
         const smsCode = this.generateNumericCode(6);
         // In production, send SMS here
         return {
@@ -1038,6 +1032,7 @@ export class ParlantMFAService {
             code: smsCode,
           },
         };
+      }
 
       case MFAFactorType.BACKUP_CODES:
         return {
@@ -1356,7 +1351,7 @@ export class ParlantMFAService {
 
   private calculateTrustScore(
     availableFactors: MFAFactor[],
-    context: any,
+    _context: any,
   ): number {
     let trustScore = 0.1; // Base trust
 
