@@ -381,7 +381,7 @@ describe('WebSocket Integration Tests', () => {
     it('should handle session lifecycle events', () => {
 
   // Test session creation and trackingconst initialStats = conversationalService.getServerStatistics();
-      expect(initialStats.server.activeSessions).toBe(0);
+      expect((initialStats as { server: { activeSessions: number } }).server.activeSessions).toBe(0);
 
       // In a real integration test, we would:
       // 1. Connect client

@@ -814,9 +814,15 @@ describe('Error Handling and Recovery Tests', () => {
         maxReconnectionAttempts: 5,
         clientId: 'auto-reconnect-test',
 });const connectionEvents: string[] = [];
-      const recoveryEvents: any[] = [];
+      const recoveryEvents: Array<{
+        type: string;
+        attempt?: number;
+        timestamp?: number;
+        delay?: number;
+        [key: string]: unknown;
+      }> = [];
 
-      client.on('connected', () => connectionEvents.push('connected'));client.on('disconnected', () => connectionEvents.push('disconnected'));client.on('reconnection-scheduled', (event) => recoveryEvents.push({ type: 'scheduled', ...event }));client.on('recovery-success', (event) => recoveryEvents.push({ type: 'success', ...event }));// Initial connectionawait client.connect();
+      client.on('connected', () => connectionEvents.push('connected'));client.on('disconnected', () => connectionEvents.push('disconnected'));client.on('reconnection-scheduled', (event: Record<string, unknown>) => recoveryEvents.push({ type: 'scheduled', ...event }));client.on('recovery-success', (event: Record<string, unknown>) => recoveryEvents.push({ type: 'success', ...event }));// Initial connectionawait client.connect();
       expect(client.isConnected()).toBe(true);
 
       // Simulate connection drop
@@ -951,9 +957,9 @@ expect(circuitBreakerEvents).toContain('opened');await client.disconnect();});
   it('should queue messages during disconnection and replay on reconnect', async () => { const client = new ResilientWebSocketClient(TEST_URL, {autoReconnect: true,
         queueMessages: true,
         clientId: 'message-queue-test',
-});const messageEvents: Array<{ type: string; message?: any }> = [];
+});const messageEvents: Array<{ type: string; message?: ConversationalMessage; queueSize?: number }> = [];
 
-      client.on('message-sent', (msg) => messageEvents.push({ type: 'sent', message: msg }));client.on('message-queued', (msg) => messageEvents.push({ type: 'queued', message: msg }));client.on('processing-queue', (event) => messageEvents.push({ type: 'processing', ...event }));
+      client.on('message-sent', (msg: ConversationalMessage) => messageEvents.push({ type: 'sent', message: msg }));client.on('message-queued', (msg: ConversationalMessage) => messageEvents.push({ type: 'queued', message: msg }));client.on('processing-queue', (event: { queueSize: number }) => messageEvents.push({ type: 'processing', queueSize: event.queueSize }));
 
       // Connect initially
       await client.connect();
@@ -1118,9 +1124,9 @@ expect(client.getQueueSize()).toBeLessThanOrEqual(1); // Should process most/all
 
       const responseTimesBefore: number[] = [];
       const responseTimesDuring: number[] = [];
-      const responsesReceived: any[] = [];
+      const responsesReceived: Array<ConversationalMessage & { receivedAt: number }> = [];
 
-      client.on('message', (response) => {
+      client.on('message', (response: ConversationalMessage) => {
   responsesReceived.push({
           ...response,
           receivedAt: Date.now(),
@@ -1155,7 +1161,8 @@ expect(client.getQueueSize()).toBeLessThanOrEqual(1); // Should process most/all
 
       // Calculate baseline response times
       responsesReceived
-        .filter(r => r.payload?.originalMessage?.payload?.beforeOverload)
+        .filter((r): r is ConversationalMessage & { receivedAt: number; payload: { originalMessage: { payload: { sentAt: number; beforeOverload?: boolean } } } } =>
+          Boolean(r.payload?.originalMessage?.payload && 'beforeOverload' in r.payload.originalMessage.payload && r.payload.originalMessage.payload.beforeOverload))
         .forEach(r => {
   const responseTime = r.receivedAt - r.payload.originalMessage.payload.sentAt;
           responseTimesBefore.push(responseTime);
@@ -1190,7 +1197,8 @@ expect(client.getQueueSize()).toBeLessThanOrEqual(1); // Should process most/all
 
       // Calculate overload response times
       responsesReceived
-        .filter(r => r.payload?.originalMessage?.payload?.duringOverload)
+        .filter((r): r is ConversationalMessage & { receivedAt: number; payload: { originalMessage: { payload: { sentAt: number; duringOverload?: boolean } } } } =>
+          Boolean(r.payload?.originalMessage?.payload && 'duringOverload' in r.payload.originalMessage.payload && r.payload.originalMessage.payload.duringOverload))
         .forEach(r => {
   const responseTime = r.receivedAt - r.payload.originalMessage.payload.sentAt;
           responseTimesDuring.push(responseTime);
@@ -1250,14 +1258,15 @@ x` : 'N/A',responsesReceived: responsesReceived.length,});
 
         try {
           // Send raw malformed data
-          if (client.isConnected() && (client as any).ws) {
-            (client as any).ws.send(malformedData);
+          if (client.isConnected() && (client as unknown as { ws?: WebSocket.WebSocket }).ws) {
+            (client as unknown as { ws: WebSocket.WebSocket }).ws.send(malformedData);
           
 }
 
           await new Promise(resolve => setTimeout(resolve, 200));
-        } catch (error) {
-          errorEvents.push({ type: 'send_error', error: error.message, data: malformedData });
+        } catch (error: unknown) {
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          errorEvents.push({ type: 'send_error', error: errorMessage, data: malformedData });
         }
       }
 
@@ -1348,7 +1357,7 @@ x` : 'N/A',responsesReceived: responsesReceived.length,});
       await new Promise(resolve => setTimeout(resolve, 12000));
 
       const totalRecoveryTime = recoveryEndTime > recoveryStartTime ? recoveryEndTime - recoveryStartTime : 0;
-      const recoveryMetrics = client.getRecoveryMetrics();
+      const recoveryMetrics = client.getRecoveryMetrics() as ErrorRecoveryMetrics;
 
       console.log('Network Partition Recovery Results:', {
         partitionDuration: '3000ms',
