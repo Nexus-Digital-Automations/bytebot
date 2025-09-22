@@ -261,7 +261,7 @@ export class BrowserRateLimitingService {
     }> = [];
 
     // Analyze trackers for statistics
-    for (const [key, tracker] of this.rateLimitTrackers.entries()) {
+    for (const [key, tracker] of Array.from(this.rateLimitTrackers.entries())) {
       // Extract user ID and IP from key if possible
       const keyParts = key.split(':');
       if (keyParts.length >= 2) {
@@ -296,7 +296,7 @@ export class BrowserRateLimitingService {
   async resetRateLimit(userId?: string, ipAddress?: string): Promise<boolean> {
     let resetCount = 0;
 
-    for (const [key, tracker] of this.rateLimitTrackers.entries()) {
+    for (const [key, tracker] of Array.from(this.rateLimitTrackers.entries())) {
       const keyParts = key.split(':');
       const trackerUserId = keyParts[0];
       const trackerIpAddress = keyParts[1];
@@ -546,7 +546,7 @@ export class BrowserRateLimitingService {
 
       // Calculate exponential backoff for repeat violators
       const backoffMs = this.calculateBackoff(tracker.violations);
-      tracker.backoffUntil = now + backoffMs;
+      tracker.backoffUntil = new Date(now + backoffMs);
 
       return {
         allowed: false,
@@ -621,7 +621,7 @@ export class BrowserRateLimitingService {
     const maxAge = 3600000; // 1 hour
     let removedCount = 0;
 
-    for (const [key, tracker] of this.rateLimitTrackers.entries()) {
+    for (const [key, tracker] of Array.from(this.rateLimitTrackers.entries())) {
       if (now - tracker.lastRequest.getTime() > maxAge) {
         this.rateLimitTrackers.delete(key);
         removedCount++;

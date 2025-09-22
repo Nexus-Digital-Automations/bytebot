@@ -437,7 +437,7 @@ export const BrowserAdminSecurity = () => {
     BrowserMaximumSecurity(),
     BrowserPermissions(
       Permission._COMPUTER_CONTROL,
-      Permission._ADMIN_PERMISSION,
+      Permission._WRITE,
     ),
     ApiResponse({
       status: 403,
