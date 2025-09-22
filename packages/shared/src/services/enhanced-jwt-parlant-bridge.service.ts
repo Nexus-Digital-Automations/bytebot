@@ -461,8 +461,8 @@ export class EnhancedJwtParlantBridgeService
         action: "token_exchange_success",
         user: {
           id: identityMapping.aigentUserId,
-          username: sourcePayload.username || "unknown",
-          roles: sourcePayload.roles || [],
+          username: String(sourcePayload.username || "unknown"),
+          roles: Array.isArray(sourcePayload.roles) ? sourcePayload.roles : [],
         },
         outcome: "success",
         securityContext: {
@@ -890,12 +890,12 @@ export class EnhancedJwtParlantBridgeService
 
       const report = {
         reportId,
-        reportType,
+        reportType: reportType as string,
         generatedAt: new Date(),
         period: { start: startDate, end: endDate },
         complianceScore,
         findings,
-        metrics: { ...this.performanceMetrics },
+        metrics: { ...this.performanceMetrics } as any,
         auditTrail: {
           totalEvents: auditAnalysis.totalEvents,
           securityEvents: auditAnalysis.securityEvents,
@@ -917,7 +917,7 @@ export class EnhancedJwtParlantBridgeService
         },
       );
 
-      return report;
+      return report as any;
     } catch (error) {
       this.logger.error(
         `[${operationId}] Compliance report generation failed`,
@@ -1062,7 +1062,11 @@ export class EnhancedJwtParlantBridgeService
   ): Promise<Record<string, unknown>> {
     // Token parsing implementation
     try {
-      return jwt.decode(token);
+      const decoded = jwt.decode(token);
+      if (typeof decoded === 'string' || decoded === null) {
+        throw new UnauthorizedException("Invalid token payload type");
+      }
+      return decoded as Record<string, unknown>;
     } catch (_error) {
       throw new UnauthorizedException("Invalid source token format");
     }
@@ -1274,7 +1278,13 @@ export class EnhancedJwtParlantBridgeService
   private async generateComplianceFindings(
     _reportType: string,
     _auditAnalysis: Record<string, unknown>,
-  ): Promise<unknown[]> {
+  ): Promise<Array<{
+    category: string;
+    severity: "low" | "medium" | "high" | "critical";
+    description: string;
+    evidence: string[];
+    remediation: string[];
+  }>> {
     // Compliance findings generation
     return [];
   }

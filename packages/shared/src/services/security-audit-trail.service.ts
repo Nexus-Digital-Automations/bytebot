@@ -967,7 +967,7 @@ export class SecurityAuditTrailService
     category: AuditCategory,
     severity: AuditSeverity,
     outcome: AuditOutcome,
-  ): string {
+  ): "low" | "medium" | "high" | "critical" | "minimal" | "extreme" {
     return "medium";
   }
 

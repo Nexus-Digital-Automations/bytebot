@@ -435,11 +435,8 @@ export class EnterpriseAPIGatewayService implements EnterpriseAPIGateway {
 
       const securityResult = this.aggregateSecurityResults(securityChecks);
 
-      // Apply additional security measures based on risk level
-      if (
-        securityResult.riskLevel === "HIGH" ||
-        securityResult.riskLevel === "CRITICAL"
-      ) {
+      // Apply additional security measures based on security requirements
+      if (!securityResult.allowed || securityResult.authenticationRequired) {
         await this.applyEnhancedSecurityMeasures(request, securityResult);
       }
 
@@ -494,18 +491,13 @@ export class EnterpriseAPIGatewayService implements EnterpriseAPIGateway {
     try {
       // TODO: Integrate with actual Parlant client for conversational validation
       const conversationalValidation =
-        await this.performConversationalValidation({
-          requestId: request.id,
-          userContext: request.userContext,
-          operationContext: request.operation,
-          businessRules: await this.getBusinessRules(request),
-        });
+        await this.performConversationalValidation(request);
 
       // Validate request structure and format
       const structuralValidation = await this.validateRequestStructure(request);
 
       // Validate business logic and constraints
-      const businessValidation = await this.validateBusinessLogic(request);
+      const businessValidation = await this.validateBusinessLogic(request, {});
 
       // Combine validation results
       const overallValid =
@@ -537,20 +529,9 @@ export class EnterpriseAPIGatewayService implements EnterpriseAPIGateway {
 
       return {
         valid: overallValid,
+        isValid: overallValid,
         errors: allErrors,
         warnings: allWarnings,
-        conversationalExplanation: await this.generateValidationExplanation(
-          overallValid,
-          allErrors,
-          allWarnings,
-          request.userContext,
-        ),
-        validationSummary: this.generateValidationSummary(
-          overallValid,
-          allErrors.length,
-          allWarnings.length,
-        ),
-        processingTime: validationTime,
       };
     } catch (error) {
       const validationTime = performance.now() - validationStartTime;
@@ -563,16 +544,16 @@ export class EnterpriseAPIGatewayService implements EnterpriseAPIGateway {
 
       return {
         valid: false,
+        isValid: false,
         errors: [
           {
-            type: "VALIDATION_SYSTEM_ERROR",
+            field: "system",
+            code: "VALIDATION_SYSTEM_ERROR",
             message: `Validation system failure: ${error instanceof Error ? error.message : String(error)}`,
             severity: "CRITICAL",
           },
         ],
         warnings: [],
-        validationSummary: "Validation system error occurred",
-        processingTime: validationTime,
       };
     }
   }
@@ -637,7 +618,7 @@ export class EnterpriseAPIGatewayService implements EnterpriseAPIGateway {
 
       const overallHealth = this.calculateOverallHealth(healthChecks);
       const performanceMetrics = await this.collectClusterPerformanceMetrics();
-      const capacity = await this.analyzeClusterCapacity();
+      const capacity = await this.analyzeClusterCapacity(performanceMetrics);
 
       return {
         clusterId: "enterprise-api-cluster",
@@ -706,10 +687,10 @@ export class EnterpriseAPIGatewayService implements EnterpriseAPIGateway {
         success: true,
         newTargetInstance: replacementInstance,
         failoverTime: failoverTime,
-        impactAssessment: await this.assessFailoverImpact(
+        impactAssessment: await this.assessFailoverImpact({
           failedInstance,
           replacementInstance,
-        ),
+        }),
       };
     } catch (error) {
       const failoverTime = performance.now() - failoverStartTime;
@@ -780,7 +761,13 @@ export class EnterpriseAPIGatewayService implements EnterpriseAPIGateway {
       processingTime: performance.now() - startTime,
       routingPath: [],
       validationResult: validation,
-      securityEnforcement: { allowed: true, riskLevel: "LOW" },
+      securityEnforcement: {
+        allowed: true,
+        authenticationRequired: false,
+        authorizationPolicies: [],
+        encryptionLevel: 'BASIC',
+        auditLevel: 'STANDARD',
+      },
     };
   }
 
@@ -796,7 +783,13 @@ export class EnterpriseAPIGatewayService implements EnterpriseAPIGateway {
       processingTime: performance.now() - startTime,
       routingPath: [],
       validationResult: { isValid: true, valid: true, errors: [], warnings: [] },
-      securityEnforcement: { allowed: true, riskLevel: "LOW" },
+      securityEnforcement: {
+        allowed: true,
+        authenticationRequired: false,
+        authorizationPolicies: [],
+        encryptionLevel: 'BASIC',
+        auditLevel: 'STANDARD',
+      },
     };
   }
 
@@ -815,7 +808,13 @@ export class EnterpriseAPIGatewayService implements EnterpriseAPIGateway {
       processingTime,
       routingPath: [],
       validationResult: { isValid: false, valid: false, errors: [], warnings: [] },
-      securityEnforcement: { allowed: false, riskLevel: "HIGH" },
+      securityEnforcement: {
+        allowed: false,
+        authenticationRequired: true,
+        authorizationPolicies: ['SECURITY_FAILURE'],
+        encryptionLevel: 'ENTERPRISE',
+        auditLevel: 'COMPREHENSIVE',
+      },
     };
   }
 
@@ -845,7 +844,13 @@ export class EnterpriseAPIGatewayService implements EnterpriseAPIGateway {
       processingTime: params.processingTime,
       routingPath: [],
       validationResult: { isValid: true, valid: true, errors: [], warnings: [] },
-      securityEnforcement: { allowed: true, riskLevel: "LOW" },
+      securityEnforcement: {
+        allowed: true,
+        authenticationRequired: false,
+        authorizationPolicies: [],
+        encryptionLevel: 'BASIC',
+        auditLevel: 'STANDARD',
+      },
     };
   }
 

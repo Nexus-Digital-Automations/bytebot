@@ -12,17 +12,8 @@
  * @version 2.0.0
  */
 
-import { expect, jest } from "@jest/globals";
-
-// Global test hooks
-declare const beforeEach: (fn: () => void) => void;
-declare const afterEach: (fn: () => void) => void;
-
-// Type declarations for Jest custom matchers
-interface CustomMatcherResult {
-  pass: boolean;
-  message: () => string;
-}
+import { expect, jest, beforeEach, afterEach } from "@jest/globals";
+import type { CustomMatcherResult } from 'expect';
 
 declare global {
   namespace jest {
@@ -270,7 +261,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  const testName = expect.getState().currentTestName || "unknown";
+  const testName = (expect.getState().currentTestName as string) || "unknown";
   const duration = Date.now() - testStartTime;
   const endMemory = process.memoryUsage();
 

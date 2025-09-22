@@ -299,22 +299,35 @@ export class ParlantConversationalErrorMiddleware implements NestMiddleware {
     };
 
     // Intercept JSON responses for error transformation
-    res.json = async function(body: any) {
+    const middlewareInstance = this;
+    res.json = function(body: any): Response {
       if (hasErrorResponse || statusCode >= 400) {
-        body = await this.transformErrorResponse(body, req, statusCode);
+        // Handle async transformation synchronously by queuing it
+        middlewareInstance.transformErrorResponse(body, req, statusCode).then((transformedBody: any) => {
+          originalJson.call(this, transformedBody);
+        }).catch(() => {
+          originalJson.call(this, body);
+        });
+        return this;
       }
       return originalJson.call(this, body);
-    }.bind(this);
+    };
 
     // Intercept send responses for error transformation
-    res.send = async function(body: any) {
+    res.send = function(body: any): Response {
       if (hasErrorResponse || statusCode >= 400) {
         if (typeof body === 'object') {
-          body = await this.transformErrorResponse(body, req, statusCode);
+          // Handle async transformation synchronously by queuing it
+          middlewareInstance.transformErrorResponse(body, req, statusCode).then((transformedBody: any) => {
+            originalSend.call(this, transformedBody);
+          }).catch(() => {
+            originalSend.call(this, body);
+          });
+          return this;
         }
       }
       return originalSend.call(this, body);
-    }.bind(this);
+    };
 
     // Check for PARLANT error context from universal middleware
     if (res.locals.parlantError) {
@@ -521,7 +534,7 @@ export class ParlantConversationalErrorMiddleware implements NestMiddleware {
    * Determine error severity
    */
   private determineSeverity(errorType: ErrorCategory, error: Error): ErrorSeverity {
-    const config = this.errorConfig.errorCategories[errorType];
+    const config = this.errorConfig.errorCategories[errorType as keyof typeof this.errorConfig.errorCategories];
     if (config) {
       return config.severity;
     }

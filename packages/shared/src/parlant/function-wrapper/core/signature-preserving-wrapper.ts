@@ -162,7 +162,7 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
         );
 
         return {
-          result: null as ReturnType<T>,
+          result: undefined as ReturnType<T>,
           metadata: executionMetadata,
           success: false,
           error: wrapperError
@@ -418,8 +418,8 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
         // Async function - await the promise
         return await (result as Promise<U>);
       } else {
-        // Sync function - wrap in resolved promise and return
-        return Promise.resolve(result as U).then(val => val);
+        // Sync function - return directly as it's already the correct type
+        return result as U;
       }
 
     } finally {

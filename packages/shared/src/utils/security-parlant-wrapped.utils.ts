@@ -42,7 +42,7 @@ const registry = ParlantWrapperRegistry.getInstance();
  * CRITICAL security function for authentication
  */
 export const verifyPassword = parlantWrapper(
-  SecurityUtils.verifyPassword,
+  SecurityUtils.verifyPassword as (..._args: unknown[]) => unknown,
   parlantService,
 )
   .validationMode(ValidationMode._INTERACTIVE)
@@ -59,7 +59,7 @@ export const verifyPassword = parlantWrapper(
  * CRITICAL security function for authentication tokens
  */
 export const generateAccessToken = parlantWrapper(
-  SecurityUtils.generateAccessToken,
+  SecurityUtils.generateAccessToken as (..._args: unknown[]) => unknown,
   parlantService,
 )
   .validationMode(ValidationMode._INTERACTIVE)
@@ -76,7 +76,7 @@ export const generateAccessToken = parlantWrapper(
  * CRITICAL security function for refresh tokens
  */
 export const generateRefreshToken = parlantWrapper(
-  SecurityUtils.generateRefreshToken,
+  SecurityUtils.generateRefreshToken as (..._args: unknown[]) => unknown,
   parlantService,
 )
   .validationMode(ValidationMode._INTERACTIVE)
@@ -93,7 +93,7 @@ export const generateRefreshToken = parlantWrapper(
  * CRITICAL security function for token validation
  */
 export const verifyToken = parlantWrapper(
-  SecurityUtils.verifyToken,
+  SecurityUtils.verifyToken as (..._args: unknown[]) => unknown,
   parlantService,
 )
   .validationMode(ValidationMode._INTERACTIVE)
@@ -114,7 +114,7 @@ export const verifyToken = parlantWrapper(
  * HIGH security function for password policy enforcement
  */
 export const validatePassword = parlantWrapper(
-  SecurityUtils.validatePassword,
+  SecurityUtils.validatePassword as (..._args: unknown[]) => unknown,
   parlantService,
 )
   .validationMode(ValidationMode._INTERACTIVE)
@@ -131,7 +131,7 @@ export const validatePassword = parlantWrapper(
  * HIGH security function for password generation
  */
 export const generateSecurePassword = parlantWrapper(
-  SecurityUtils.generateSecurePassword,
+  SecurityUtils.generateSecurePassword as (..._args: unknown[]) => unknown,
   parlantService,
 )
   .validationMode(ValidationMode._INTERACTIVE)
@@ -148,7 +148,7 @@ export const generateSecurePassword = parlantWrapper(
  * HIGH security function for XSS prevention
  */
 export const sanitizeInput = parlantWrapper(
-  SecurityUtils.sanitizeInput,
+  SecurityUtils.sanitizeInput as (..._args: unknown[]) => unknown,
   parlantService,
 )
   .validationMode(ValidationMode._AUTOMATED)
@@ -165,7 +165,7 @@ export const sanitizeInput = parlantWrapper(
  * HIGH security function for comprehensive object sanitization
  */
 export const sanitizeObject = parlantWrapper(
-  SecurityUtils.sanitizeObject,
+  SecurityUtils.sanitizeObject as (..._args: unknown[]) => unknown,
   parlantService,
 )
   .validationMode(ValidationMode._AUTOMATED)
@@ -181,7 +181,7 @@ export const sanitizeObject = parlantWrapper(
  * Parlant-wrapped XSS detection with conversational AI validation
  * HIGH security function for XSS threat detection
  */
-export const detectXSS = parlantWrapper(SecurityUtils.detectXSS, parlantService)
+export const detectXSS = parlantWrapper(SecurityUtils.detectXSS as (..._args: unknown[]) => unknown, parlantService)
   .validationMode(ValidationMode._AUTOMATED)
   .approvalLevel(ApprovalLevel._SINGLE_APPROVAL)
   .securityLevel(FunctionSecurityLevel._CONFIDENTIAL)
@@ -200,7 +200,7 @@ export const detectXSS = parlantWrapper(SecurityUtils.detectXSS, parlantService)
  * MEDIUM security function for SQL injection prevention
  */
 export const detectSQLInjection = parlantWrapper(
-  SecurityUtils.detectSQLInjection,
+  SecurityUtils.detectSQLInjection as (..._args: unknown[]) => unknown,
   parlantService,
 )
   .validationMode(ValidationMode._AUTOMATED)
@@ -217,7 +217,7 @@ export const detectSQLInjection = parlantWrapper(
  * MEDIUM security function for command injection prevention
  */
 export const detectCommandInjection = parlantWrapper(
-  SecurityUtils.detectCommandInjection,
+  SecurityUtils.detectCommandInjection as (..._args: unknown[]) => unknown,
   parlantService,
 )
   .validationMode(ValidationMode._AUTOMATED)
@@ -234,7 +234,7 @@ export const detectCommandInjection = parlantWrapper(
  * MEDIUM security function for path traversal prevention
  */
 export const detectPathTraversal = parlantWrapper(
-  SecurityUtils.detectPathTraversal,
+  SecurityUtils.detectPathTraversal as (..._args: unknown[]) => unknown,
   parlantService,
 )
   .validationMode(ValidationMode._AUTOMATED)
@@ -251,7 +251,7 @@ export const detectPathTraversal = parlantWrapper(
  * CRITICAL security function requiring dual approval for password operations
  */
 export const hashPassword = parlantWrapper(
-  SecurityUtils.hashPassword,
+  SecurityUtils.hashPassword as (..._args: unknown[]) => unknown,
   parlantService,
 )
   .validationMode(ValidationMode._INTERACTIVE)
@@ -267,7 +267,7 @@ export const hashPassword = parlantWrapper(
  * Parlant-wrapped data hashing with conversational AI validation
  * HIGH security function for data integrity operations
  */
-export const hashData = parlantWrapper(SecurityUtils.hashData, parlantService)
+export const hashData = parlantWrapper(SecurityUtils.hashData as (..._args: unknown[]) => unknown, parlantService)
   .validationMode(ValidationMode._INTERACTIVE)
   .approvalLevel(ApprovalLevel._SINGLE_APPROVAL)
   .securityLevel(FunctionSecurityLevel._CONFIDENTIAL)
@@ -282,7 +282,7 @@ export const hashData = parlantWrapper(SecurityUtils.hashData, parlantService)
  * CRITICAL security function for cryptographic signatures
  */
 export const generateHMAC = parlantWrapper(
-  SecurityUtils.generateHMAC,
+  SecurityUtils.generateHMAC as (..._args: unknown[]) => unknown,
   parlantService,
 )
   .validationMode(ValidationMode._INTERACTIVE)
@@ -299,7 +299,7 @@ export const generateHMAC = parlantWrapper(
  * CRITICAL security function for signature validation
  */
 export const verifyHMAC = parlantWrapper(
-  SecurityUtils.verifyHMAC,
+  SecurityUtils.verifyHMAC as (..._args: unknown[]) => unknown,
   parlantService,
 )
   .validationMode(ValidationMode._INTERACTIVE)
@@ -316,7 +316,7 @@ export const verifyHMAC = parlantWrapper(
  * HIGH security function for secure random generation
  */
 export const generateRandomString = parlantWrapper(
-  SecurityUtils.generateRandomString,
+  SecurityUtils.generateRandomString as (..._args: unknown[]) => unknown,
   parlantService,
 )
   .validationMode(ValidationMode._INTERACTIVE)
@@ -337,7 +337,7 @@ export const generateRandomString = parlantWrapper(
  * HIGH security function for access control
  */
 export const hasPermission = parlantWrapper(
-  SecurityUtils.hasPermission,
+  SecurityUtils.hasPermission as (..._args: unknown[]) => unknown,
   parlantService,
 )
   .validationMode(ValidationMode._AUTOMATED)
@@ -353,7 +353,7 @@ export const hasPermission = parlantWrapper(
  * Parlant-wrapped role checking with conversational AI validation
  * HIGH security function for role-based access control
  */
-export const hasRole = parlantWrapper(SecurityUtils.hasRole, parlantService)
+export const hasRole = parlantWrapper(SecurityUtils.hasRole as (..._args: unknown[]) => unknown, parlantService)
   .validationMode(ValidationMode._AUTOMATED)
   .approvalLevel(ApprovalLevel._SINGLE_APPROVAL)
   .securityLevel(FunctionSecurityLevel._CONFIDENTIAL)
@@ -372,7 +372,7 @@ export const hasRole = parlantWrapper(SecurityUtils.hasRole, parlantService)
  * HIGH security function for audit trail generation
  */
 export const createSecurityEvent = parlantWrapper(
-  SecurityUtils.createSecurityEvent,
+  SecurityUtils.createSecurityEvent as (..._args: unknown[]) => unknown,
   parlantService,
 )
   .validationMode(ValidationMode._AUTOMATED)
@@ -389,7 +389,7 @@ export const createSecurityEvent = parlantWrapper(
  * MEDIUM security function for unique identifier generation
  */
 export const generateEventId = parlantWrapper(
-  SecurityUtils.generateEventId,
+  SecurityUtils.generateEventId as (..._args: unknown[]) => unknown,
   parlantService,
 )
   .validationMode(ValidationMode._AUTOMATED)
@@ -406,7 +406,7 @@ export const generateEventId = parlantWrapper(
  * HIGH security function for threat assessment
  */
 export const calculateRiskScore = parlantWrapper(
-  SecurityUtils.calculateRiskScore,
+  SecurityUtils.calculateRiskScore as (..._args: unknown[]) => unknown,
   parlantService,
 )
   .validationMode(ValidationMode._AUTOMATED)
@@ -427,7 +427,7 @@ export const calculateRiskScore = parlantWrapper(
  * MEDIUM security function for rate limiting configuration
  */
 export const getRateLimitConfig = parlantWrapper(
-  SecurityUtils.getRateLimitConfig,
+  SecurityUtils.getRateLimitConfig as (..._args: unknown[]) => unknown,
   parlantService,
 )
   .validationMode(ValidationMode._AUTOMATED)
@@ -444,7 +444,7 @@ export const getRateLimitConfig = parlantWrapper(
  * MEDIUM security function for rate limiting key generation
  */
 export const generateRateLimitKey = parlantWrapper(
-  SecurityUtils.generateRateLimitKey,
+  SecurityUtils.generateRateLimitKey as (..._args: unknown[]) => unknown,
   parlantService,
 )
   .validationMode(ValidationMode._AUTOMATED)
@@ -465,7 +465,7 @@ export const generateRateLimitKey = parlantWrapper(
  * CRITICAL security function for file content analysis
  */
 export const detectMaliciousFileContent = parlantWrapper(
-  SecurityUtils.detectMaliciousFileContent,
+  SecurityUtils.detectMaliciousFileContent as (..._args: unknown[]) => unknown,
   parlantService,
 )
   .validationMode(ValidationMode._INTERACTIVE)
@@ -482,7 +482,7 @@ export const detectMaliciousFileContent = parlantWrapper(
  * HIGH security function for path validation
  */
 export const validateFilePath = parlantWrapper(
-  SecurityUtils.validateFilePath,
+  SecurityUtils.validateFilePath as (..._args: unknown[]) => unknown,
   parlantService,
 )
   .validationMode(ValidationMode._AUTOMATED)
@@ -499,7 +499,7 @@ export const validateFilePath = parlantWrapper(
  * HIGH security function for comprehensive file analysis
  */
 export const scanFileContent = parlantWrapper(
-  SecurityUtils.scanFileContent,
+  SecurityUtils.scanFileContent as (..._args: unknown[]) => unknown,
   parlantService,
 )
   .validationMode(ValidationMode._INTERACTIVE)
@@ -520,7 +520,7 @@ export const scanFileContent = parlantWrapper(
  * LOW security function for data validation
  */
 export const validateCoordinates = parlantWrapper(
-  SecurityUtils.validateCoordinates,
+  SecurityUtils.validateCoordinates as (..._args: unknown[]) => unknown,
   parlantService,
 )
   .validationMode(ValidationMode._AUTOMATED)
@@ -541,7 +541,7 @@ export const validateCoordinates = parlantWrapper(
  * HIGH security function for sophisticated XSS analysis
  */
 export const detectAdvancedXSS = parlantWrapper(
-  SecurityUtils.detectAdvancedXSS,
+  SecurityUtils.detectAdvancedXSS as (..._args: unknown[]) => unknown,
   parlantService,
 )
   .validationMode(ValidationMode._AUTOMATED)
