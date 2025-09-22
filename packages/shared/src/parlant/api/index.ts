@@ -13,8 +13,11 @@ export { ConversationalAPIPatternsService } from "./core/conversational-api-patt
 // Pre-execution validation workflows
 export { PreExecutionValidatorService } from "./validation/pre-execution-validator.service";
 
-// Real-time API monitoring
+// Real-time API monitoring (Legacy)
 export { RealTimeMonitorService } from "./monitoring/real-time-monitor.service";
+
+// PARLANT Phase 1 - Enhanced Real-Time Monitoring System
+export * from "./real-time-monitoring";
 
 // High-throughput performance optimization
 export { HighThroughputOptimizerService } from "./performance/high-throughput-optimizer.service";
