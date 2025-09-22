@@ -10,11 +10,9 @@
  * @author Auto Registration Agent #4
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import {
-  RegistrationResult
-} from '../core/registry.interface';
+import { Injectable, Logger } from "@nestjs/common";
+import { EventEmitter2 } from "@nestjs/event-emitter";
+import { RegistrationResult } from "../core/registry.interface";
 import {
   FunctionDiscoveryEntry,
   FunctionRegistryEntry,
@@ -46,38 +44,38 @@ import {
   FunctionSecurityAssessment,
   SecurityConsideration,
   SecurityConsiderationType,
-  SecuritySeverity
-} from '../core/registry.types';
+  SecuritySeverity,
+} from "../core/registry.types";
 import {
   FunctionSecurityLevel,
   RiskLevel,
   ValidationMode,
   ApprovalLevel,
   AuthorInfo,
-  SecurityConstraint
-} from '../../../types/parlant-integration.types';
+  SecurityConstraint,
+} from "../../../types/parlant-integration.types";
 
 /**
  * Registration conflict types
  */
 export enum RegistrationConflictType {
-  _FUNCTION_EXISTS = 'function_exists',
-  _NAME_COLLISION = 'name_collision',
-  _SIGNATURE_MISMATCH = 'signature_mismatch',
-  _LOCATION_CONFLICT = 'location_conflict',
-  _VERSION_CONFLICT = 'version_conflict'
+  _FUNCTION_EXISTS = "function_exists",
+  _NAME_COLLISION = "name_collision",
+  _SIGNATURE_MISMATCH = "signature_mismatch",
+  _LOCATION_CONFLICT = "location_conflict",
+  _VERSION_CONFLICT = "version_conflict",
 }
 
 /**
  * Registration conflict resolution strategies
  */
 export enum ConflictResolutionStrategy {
-  _SKIP = 'skip',
-  _OVERWRITE = 'overwrite',
-  _MERGE = 'merge',
-  _VERSION_INCREMENT = 'version_increment',
-  _RENAME = 'rename',
-  _MANUAL_REVIEW = 'manual_review'
+  _SKIP = "skip",
+  _OVERWRITE = "overwrite",
+  _MERGE = "merge",
+  _VERSION_INCREMENT = "version_increment",
+  _RENAME = "rename",
+  _MANUAL_REVIEW = "manual_review",
 }
 
 /**
@@ -94,10 +92,10 @@ export interface RegistrationConflict {
 }
 
 export enum ConflictSeverity {
-  _LOW = 'low',
-  _MEDIUM = 'medium',
-  _HIGH = 'high',
-  _CRITICAL = 'critical'
+  _LOW = "low",
+  _MEDIUM = "medium",
+  _HIGH = "high",
+  _CRITICAL = "critical",
 }
 
 /**
@@ -209,21 +207,21 @@ export interface RegistrationStatistics {
 export class AutoRegistrationService {
   private readonly logger = new Logger(AutoRegistrationService.name);
 
-  constructor(
-    private readonly eventEmitter: EventEmitter2
-  ) {}
+  constructor(private readonly eventEmitter: EventEmitter2) {}
 
   /**
    * Automatically register discovered functions
    */
   async registerFunctions(
     discoveredFunctions: FunctionDiscoveryEntry[],
-    config: AutoRegistrationConfig
+    config: AutoRegistrationConfig,
   ): Promise<AutoRegistrationResult> {
     const startTime = Date.now();
     const batchId = this.generateBatchId();
 
-    this.logger.log(`Starting auto registration batch ${batchId} with ${discoveredFunctions.length} functions`);
+    this.logger.log(
+      `Starting auto registration batch ${batchId} with ${discoveredFunctions.length} functions`,
+    );
 
     const result: AutoRegistrationResult = {
       totalProcessed: 0,
@@ -232,23 +230,27 @@ export class AutoRegistrationService {
       conflicts: [],
       statistics: this.initializeStatistics(),
       duration: 0,
-      batchId
+      batchId,
     };
 
     try {
       // Filter functions by confidence threshold
       const qualifiedFunctions = discoveredFunctions.filter(
-        func => func.confidence >= config.confidenceThreshold
+        (func) => func.confidence >= config.confidenceThreshold,
       );
 
-      this.logger.debug(`${qualifiedFunctions.length} functions meet confidence threshold of ${config.confidenceThreshold}`);
+      this.logger.debug(
+        `${qualifiedFunctions.length} functions meet confidence threshold of ${config.confidenceThreshold}`,
+      );
 
       // Process functions in batches
       const batches = this.createBatches(qualifiedFunctions, config.batchSize);
 
       for (let i = 0; i < batches.length; i++) {
         const batch = batches[i];
-        this.logger.debug(`Processing batch ${i + 1}/${batches.length} with ${batch.length} functions`);
+        this.logger.debug(
+          `Processing batch ${i + 1}/${batches.length} with ${batch.length} functions`,
+        );
 
         await this.processBatch(batch, config, result);
       }
@@ -264,20 +266,25 @@ export class AutoRegistrationService {
       }
 
       // Emit events
-      this.eventEmitter.emit('auto-registration.completed', result);
+      this.eventEmitter.emit("auto-registration.completed", result);
 
       this.logger.log(
         `Auto registration batch ${batchId} completed: ` +
-        `${result.successfulRegistrations.length} successful, ` +
-        `${result.failedRegistrations.length} failed, ` +
-        `${result.conflicts.length} conflicts`
+          `${result.successfulRegistrations.length} successful, ` +
+          `${result.failedRegistrations.length} failed, ` +
+          `${result.conflicts.length} conflicts`,
       );
 
       return result;
-
     } catch (error) {
-      this.logger.error(`Auto registration batch ${batchId} failed: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
-      this.eventEmitter.emit('auto-registration.failed', { batchId, error: error instanceof Error ? error.message : String(error) });
+      this.logger.error(
+        `Auto registration batch ${batchId} failed: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
+      this.eventEmitter.emit("auto-registration.failed", {
+        batchId,
+        error: error instanceof Error ? error.message : String(error),
+      });
       throw error;
     }
   }
@@ -287,7 +294,7 @@ export class AutoRegistrationService {
    */
   async registerFunction(
     discoveredFunction: FunctionDiscoveryEntry,
-    config: AutoRegistrationConfig
+    config: AutoRegistrationConfig,
   ): Promise<RegistrationResult> {
     const functionId = this.generateFunctionId(discoveredFunction);
 
@@ -298,7 +305,10 @@ export class AutoRegistrationService {
       const existingFunction = await this.checkExistingFunction(functionId);
 
       if (existingFunction) {
-        const conflict = await this.detectConflict(discoveredFunction, existingFunction);
+        const conflict = await this.detectConflict(
+          discoveredFunction,
+          existingFunction,
+        );
         if (conflict) {
           return await this.handleConflict(conflict, config);
         }
@@ -306,39 +316,45 @@ export class AutoRegistrationService {
 
       // Validate function if enabled
       if (config.validateBeforeRegistration) {
-        const validationResult = await this.validateFunction(discoveredFunction);
+        const validationResult =
+          await this.validateFunction(discoveredFunction);
         if (!validationResult.valid) {
           return {
             success: false,
             functionId,
-            message: `Validation failed: ${validationResult.errors.join(', ')}`,
+            message: `Validation failed: ${validationResult.errors.join(", ")}`,
             warnings: validationResult.warnings,
-            metadata: { validationErrors: validationResult.errors }
+            metadata: { validationErrors: validationResult.errors },
           };
         }
       }
 
       // Create registry entry
-      const registryEntry = await this.createRegistryEntry(discoveredFunction, config);
+      const registryEntry = await this.createRegistryEntry(
+        discoveredFunction,
+        config,
+      );
 
       // Register the function
       const registrationResult = await this.performRegistration(registryEntry);
 
       // Emit success event
-      this.eventEmitter.emit('function.registered', {
+      this.eventEmitter.emit("function.registered", {
         functionId,
         method: discoveredFunction.method,
-        confidence: discoveredFunction.confidence
+        confidence: discoveredFunction.confidence,
       });
 
       return registrationResult;
-
     } catch (error) {
-      this.logger.error(`Failed to register function ${functionId}: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
+      this.logger.error(
+        `Failed to register function ${functionId}: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
 
-      this.eventEmitter.emit('function.registration-failed', {
+      this.eventEmitter.emit("function.registration-failed", {
         functionId,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
 
       return {
@@ -346,7 +362,9 @@ export class AutoRegistrationService {
         functionId,
         message: `Registration failed: ${error instanceof Error ? error.message : String(error)}`,
         warnings: [],
-        metadata: { error: error instanceof Error ? error.message : String(error) }
+        metadata: {
+          error: error instanceof Error ? error.message : String(error),
+        },
       };
     }
   }
@@ -356,7 +374,7 @@ export class AutoRegistrationService {
    */
   async detectAndResolveConflicts(
     discoveredFunctions: FunctionDiscoveryEntry[],
-    resolutionStrategy: ConflictResolutionStrategy
+    resolutionStrategy: ConflictResolutionStrategy,
   ): Promise<RegistrationConflict[]> {
     const conflicts: RegistrationConflict[] = [];
 
@@ -365,7 +383,10 @@ export class AutoRegistrationService {
       const existingFunction = await this.checkExistingFunction(functionId);
 
       if (existingFunction) {
-        const conflict = await this.detectConflict(discoveredFunction, existingFunction);
+        const conflict = await this.detectConflict(
+          discoveredFunction,
+          existingFunction,
+        );
         if (conflict) {
           conflicts.push(conflict);
 
@@ -392,9 +413,11 @@ export class AutoRegistrationService {
   /**
    * Generate function ID from discovery entry
    */
-  private generateFunctionId(discoveredFunction: FunctionDiscoveryEntry): string {
+  private generateFunctionId(
+    discoveredFunction: FunctionDiscoveryEntry,
+  ): string {
     const { name, location } = discoveredFunction;
-    const cleanPath = location.filePath.replace(/[^a-zA-Z0-9]/g, '_');
+    const cleanPath = location.filePath.replace(/[^a-zA-Z0-9]/g, "_");
     return `${location.packageName}_${location.moduleName}_${name}_${cleanPath}_${location.lineNumber}`;
   }
 
@@ -407,7 +430,7 @@ export class AutoRegistrationService {
       bySecurityLevel: {},
       byPackage: {},
       averageConfidence: 0,
-      averageProcessingTime: 0
+      averageProcessingTime: 0,
     };
   }
 
@@ -428,33 +451,41 @@ export class AutoRegistrationService {
   private async processBatch(
     batch: FunctionDiscoveryEntry[],
     config: AutoRegistrationConfig,
-    result: AutoRegistrationResult
+    result: AutoRegistrationResult,
   ): Promise<void> {
     const promises = batch.map(async (discoveredFunction) => {
       const functionId = this.generateFunctionId(discoveredFunction);
       const startTime = Date.now();
 
       try {
-        const registrationResult = await this.registerFunction(discoveredFunction, config);
+        const registrationResult = await this.registerFunction(
+          discoveredFunction,
+          config,
+        );
 
         if (registrationResult.success) {
           result.successfulRegistrations.push(functionId);
-          this.updateStatistics(result.statistics, discoveredFunction, Date.now() - startTime);
+          this.updateStatistics(
+            result.statistics,
+            discoveredFunction,
+            Date.now() - startTime,
+          );
         } else {
           result.failedRegistrations.push({
             functionId,
             error: registrationResult.message,
             details: registrationResult.metadata || {},
-            retryable: this.isRetryableError(registrationResult.message)
+            retryable: this.isRetryableError(registrationResult.message),
           });
         }
-
       } catch (error) {
         result.failedRegistrations.push({
           functionId,
           error: error instanceof Error ? error.message : String(error),
           details: { stack: error instanceof Error ? error.stack : undefined },
-          retryable: this.isRetryableError(error instanceof Error ? error.message : String(error))
+          retryable: this.isRetryableError(
+            error instanceof Error ? error.message : String(error),
+          ),
         });
       }
     });
@@ -465,7 +496,9 @@ export class AutoRegistrationService {
   /**
    * Check if function already exists in registry
    */
-  private async checkExistingFunction(functionId: string): Promise<FunctionRegistryEntry | null> {
+  private async checkExistingFunction(
+    functionId: string,
+  ): Promise<FunctionRegistryEntry | null> {
     // This would query the actual registry
     // For now, return null (no existing function)
     return null;
@@ -476,7 +509,7 @@ export class AutoRegistrationService {
    */
   private async detectConflict(
     discoveredFunction: FunctionDiscoveryEntry,
-    existingFunction: FunctionRegistryEntry
+    existingFunction: FunctionRegistryEntry,
   ): Promise<RegistrationConflict | null> {
     const conflicts: RegistrationConflictType[] = [];
 
@@ -507,9 +540,12 @@ export class AutoRegistrationService {
       functionId: existingFunction.id,
       existing: existingFunction,
       incoming: discoveredFunction,
-      recommendedStrategy: this.recommendResolutionStrategy(conflicts, severity),
+      recommendedStrategy: this.recommendResolutionStrategy(
+        conflicts,
+        severity,
+      ),
       description: this.generateConflictDescription(conflicts),
-      severity
+      severity,
     };
   }
 
@@ -518,13 +554,16 @@ export class AutoRegistrationService {
    */
   private hasSignatureMismatch(
     discoveredFunction: FunctionDiscoveryEntry,
-    existingFunction: FunctionRegistryEntry
+    existingFunction: FunctionRegistryEntry,
   ): boolean {
     const discoveredParams = discoveredFunction.signature.parameters.length;
     const existingParams = existingFunction.signature.parameters.length;
 
-    return discoveredParams !== existingParams ||
-           discoveredFunction.signature.isAsync !== existingFunction.signature.isAsync;
+    return (
+      discoveredParams !== existingParams ||
+      discoveredFunction.signature.isAsync !==
+        existingFunction.signature.isAsync
+    );
   }
 
   /**
@@ -532,7 +571,7 @@ export class AutoRegistrationService {
    */
   private hasLocationConflict(
     discoveredFunction: FunctionDiscoveryEntry,
-    existingFunction: FunctionRegistryEntry
+    existingFunction: FunctionRegistryEntry,
   ): boolean {
     // This would check if the same function appears in different locations
     return false; // Simplified for now
@@ -541,7 +580,9 @@ export class AutoRegistrationService {
   /**
    * Assess conflict severity
    */
-  private assessConflictSeverity(conflicts: RegistrationConflictType[]): ConflictSeverity {
+  private assessConflictSeverity(
+    conflicts: RegistrationConflictType[],
+  ): ConflictSeverity {
     if (conflicts.includes(RegistrationConflictType._SIGNATURE_MISMATCH)) {
       return ConflictSeverity._HIGH;
     }
@@ -556,7 +597,7 @@ export class AutoRegistrationService {
    */
   private recommendResolutionStrategy(
     conflicts: RegistrationConflictType[],
-    severity: ConflictSeverity
+    severity: ConflictSeverity,
   ): ConflictResolutionStrategy {
     if (severity === ConflictSeverity._HIGH) {
       return ConflictResolutionStrategy._MANUAL_REVIEW;
@@ -570,16 +611,22 @@ export class AutoRegistrationService {
   /**
    * Generate conflict description
    */
-  private generateConflictDescription(conflicts: RegistrationConflictType[]): string {
+  private generateConflictDescription(
+    conflicts: RegistrationConflictType[],
+  ): string {
     const descriptions = {
-      [RegistrationConflictType._FUNCTION_EXISTS]: 'Function already exists in registry',
-      [RegistrationConflictType._NAME_COLLISION]: 'Function name collision detected',
-      [RegistrationConflictType._SIGNATURE_MISMATCH]: 'Function signature mismatch',
-      [RegistrationConflictType._LOCATION_CONFLICT]: 'Function location conflict',
-      [RegistrationConflictType._VERSION_CONFLICT]: 'Function version conflict'
+      [RegistrationConflictType._FUNCTION_EXISTS]:
+        "Function already exists in registry",
+      [RegistrationConflictType._NAME_COLLISION]:
+        "Function name collision detected",
+      [RegistrationConflictType._SIGNATURE_MISMATCH]:
+        "Function signature mismatch",
+      [RegistrationConflictType._LOCATION_CONFLICT]:
+        "Function location conflict",
+      [RegistrationConflictType._VERSION_CONFLICT]: "Function version conflict",
     };
 
-    return conflicts.map(conflict => descriptions[conflict]).join('; ');
+    return conflicts.map((conflict) => descriptions[conflict]).join("; ");
   }
 
   /**
@@ -587,11 +634,12 @@ export class AutoRegistrationService {
    */
   private async handleConflict(
     conflict: RegistrationConflict,
-    config: AutoRegistrationConfig
+    config: AutoRegistrationConfig,
   ): Promise<RegistrationResult> {
-    const strategy = config.conflictResolution !== ConflictResolutionStrategy._MANUAL_REVIEW
-      ? config.conflictResolution
-      : conflict.recommendedStrategy;
+    const strategy =
+      config.conflictResolution !== ConflictResolutionStrategy._MANUAL_REVIEW
+        ? config.conflictResolution
+        : conflict.recommendedStrategy;
 
     return await this.applyConflictResolution(conflict, strategy);
   }
@@ -601,7 +649,7 @@ export class AutoRegistrationService {
    */
   private async applyConflictResolution(
     conflict: RegistrationConflict,
-    strategy: ConflictResolutionStrategy
+    strategy: ConflictResolutionStrategy,
   ): Promise<RegistrationResult> {
     const functionId = conflict.functionId;
 
@@ -610,9 +658,9 @@ export class AutoRegistrationService {
         return {
           success: false,
           functionId,
-          message: 'Function registration skipped due to conflict',
+          message: "Function registration skipped due to conflict",
           warnings: [`Conflict: ${conflict.description}`],
-          metadata: { conflict, strategy }
+          metadata: { conflict, strategy },
         };
 
       case ConflictResolutionStrategy._OVERWRITE:
@@ -620,9 +668,9 @@ export class AutoRegistrationService {
         return {
           success: true,
           functionId,
-          message: 'Function overwritten',
+          message: "Function overwritten",
           warnings: [`Overwrote existing function: ${conflict.description}`],
-          metadata: { conflict, strategy }
+          metadata: { conflict, strategy },
         };
 
       case ConflictResolutionStrategy._MERGE:
@@ -630,9 +678,9 @@ export class AutoRegistrationService {
         return {
           success: true,
           functionId,
-          message: 'Function information merged',
+          message: "Function information merged",
           warnings: [`Merged with existing function: ${conflict.description}`],
-          metadata: { conflict, strategy }
+          metadata: { conflict, strategy },
         };
 
       case ConflictResolutionStrategy._VERSION_INCREMENT:
@@ -640,9 +688,11 @@ export class AutoRegistrationService {
         return {
           success: true,
           functionId: `${functionId}_v2`,
-          message: 'Function registered as new version',
-          warnings: [`Created new version due to conflict: ${conflict.description}`],
-          metadata: { conflict, strategy }
+          message: "Function registered as new version",
+          warnings: [
+            `Created new version due to conflict: ${conflict.description}`,
+          ],
+          metadata: { conflict, strategy },
         };
 
       case ConflictResolutionStrategy._RENAME:
@@ -650,9 +700,9 @@ export class AutoRegistrationService {
         return {
           success: true,
           functionId: `${functionId}_alt`,
-          message: 'Function registered with alternate name',
+          message: "Function registered with alternate name",
           warnings: [`Renamed due to conflict: ${conflict.description}`],
-          metadata: { conflict, strategy }
+          metadata: { conflict, strategy },
         };
 
       case ConflictResolutionStrategy._MANUAL_REVIEW:
@@ -660,9 +710,9 @@ export class AutoRegistrationService {
         return {
           success: false,
           functionId,
-          message: 'Function requires manual review',
+          message: "Function requires manual review",
           warnings: [`Manual review required: ${conflict.description}`],
-          metadata: { conflict, strategy, requiresManualReview: true }
+          metadata: { conflict, strategy, requiresManualReview: true },
         };
     }
   }
@@ -670,7 +720,9 @@ export class AutoRegistrationService {
   /**
    * Validate function before registration
    */
-  private async validateFunction(discoveredFunction: FunctionDiscoveryEntry): Promise<{
+  private async validateFunction(
+    discoveredFunction: FunctionDiscoveryEntry,
+  ): Promise<{
     valid: boolean;
     errors: string[];
     warnings: string[];
@@ -679,29 +731,35 @@ export class AutoRegistrationService {
     const warnings: string[] = [];
 
     // Validate function name
-    if (!discoveredFunction.name || discoveredFunction.name.trim() === '') {
-      errors.push('Function name is required');
+    if (!discoveredFunction.name || discoveredFunction.name.trim() === "") {
+      errors.push("Function name is required");
     }
 
     // Validate location
     if (!discoveredFunction.location.filePath) {
-      errors.push('Function file path is required');
+      errors.push("Function file path is required");
     }
 
     // Validate confidence
-    if (discoveredFunction.confidence < 0 || discoveredFunction.confidence > 1) {
-      errors.push('Function confidence must be between 0 and 1');
+    if (
+      discoveredFunction.confidence < 0 ||
+      discoveredFunction.confidence > 1
+    ) {
+      errors.push("Function confidence must be between 0 and 1");
     }
 
     // Check for suspicious patterns
-    if (discoveredFunction.name.includes('test') || discoveredFunction.name.includes('mock')) {
-      warnings.push('Function appears to be test or mock code');
+    if (
+      discoveredFunction.name.includes("test") ||
+      discoveredFunction.name.includes("mock")
+    ) {
+      warnings.push("Function appears to be test or mock code");
     }
 
     return {
       valid: errors.length === 0,
       errors,
-      warnings
+      warnings,
     };
   }
 
@@ -710,7 +768,7 @@ export class AutoRegistrationService {
    */
   private async createRegistryEntry(
     discoveredFunction: FunctionDiscoveryEntry,
-    config: AutoRegistrationConfig
+    config: AutoRegistrationConfig,
   ): Promise<FunctionRegistryEntry> {
     const functionId = this.generateFunctionId(discoveredFunction);
     const now = new Date();
@@ -718,21 +776,23 @@ export class AutoRegistrationService {
     // Create metadata
     const metadata: FunctionMetadata = {
       description: `Auto-discovered function: ${discoveredFunction.name}`,
-      purpose: 'Automatically discovered function',
+      purpose: "Automatically discovered function",
       examples: [],
-      tags: ['auto-discovered', discoveredFunction.method],
+      tags: ["auto-discovered", discoveredFunction.method],
       relatedFunctions: [],
       performance: this.createDefaultPerformanceCharacteristics(),
       author: this.createDefaultAuthorInfo(),
       documentation: [],
-      deprecation: undefined
+      deprecation: undefined,
     };
 
     // Create security assessment
-    const security: FunctionSecurityAssessment = await this.assessSecurity(discoveredFunction);
+    const security: FunctionSecurityAssessment =
+      await this.assessSecurity(discoveredFunction);
 
     // Create registration configuration
-    const registrationConfig: FunctionRegistrationConfig = this.createDefaultConfiguration(config);
+    const registrationConfig: FunctionRegistrationConfig =
+      this.createDefaultConfiguration(config);
 
     // Create dependency info
     const dependencies: FunctionDependencyInfo = {
@@ -745,8 +805,8 @@ export class AutoRegistrationService {
         depth: 0,
         breadth: 0,
         circularDependencies: false,
-        criticalPath: []
-      }
+        criticalPath: [],
+      },
     };
 
     // Create health status
@@ -754,51 +814,55 @@ export class AutoRegistrationService {
       score: 0.8, // Default healthy score
       indicators: [],
       lastCheck: now,
-      trend: 'unknown' as any,
-      history: []
+      trend: "unknown" as any,
+      history: [],
     };
 
     // Create version info
     const version: FunctionVersionInfo = {
-      current: '1.0.0',
-      history: [{
-        version: '1.0.0',
-        timestamp: now,
-        author: 'auto-discovery',
-        changes: [{
-          type: 'feature' as any,
-          description: 'Initial auto-discovery',
-          breaking: false,
-          impact: 'none' as any
-        }],
-        tags: ['initial', 'auto-discovered']
-      }],
+      current: "1.0.0",
+      history: [
+        {
+          version: "1.0.0",
+          timestamp: now,
+          author: "auto-discovery",
+          changes: [
+            {
+              type: "feature" as any,
+              description: "Initial auto-discovery",
+              breaking: false,
+              impact: "none" as any,
+            },
+          ],
+          tags: ["initial", "auto-discovered"],
+        },
+      ],
       comparison: {
         previousVersion: {
-          version: '',
+          version: "",
           differences: [],
           compatible: true,
-          migrationRequired: false
+          migrationRequired: false,
         },
         latestStable: {
-          version: '1.0.0',
+          version: "1.0.0",
           differences: [],
           compatible: true,
-          migrationRequired: false
+          migrationRequired: false,
         },
         compatibility: {
-          backward: 'full' as any,
-          forward: 'full' as any,
-          api: 'full' as any,
-          binary: 'full' as any
-        }
+          backward: "full" as any,
+          forward: "full" as any,
+          api: "full" as any,
+          binary: "full" as any,
+        },
       },
       migration: {
         required: false,
         steps: [],
-        complexity: 'trivial' as any,
-        estimatedDuration: '0 minutes'
-      }
+        complexity: "trivial" as any,
+        estimatedDuration: "0 minutes",
+      },
     };
 
     // Create timestamps
@@ -807,7 +871,7 @@ export class AutoRegistrationService {
       updated: now,
       accessed: now,
       healthCheck: now,
-      validated: now
+      validated: now,
     };
 
     return {
@@ -822,7 +886,7 @@ export class AutoRegistrationService {
       health,
       version,
       timestamps,
-      status: RegistrationStatus._ACTIVE
+      status: RegistrationStatus._ACTIVE,
     };
   }
 
@@ -831,13 +895,13 @@ export class AutoRegistrationService {
    */
   private createDefaultPerformanceCharacteristics(): PerformanceCharacteristics {
     return {
-      timeComplexity: 'O(1)',
-      spaceComplexity: 'O(1)',
+      timeComplexity: "O(1)",
+      spaceComplexity: "O(1)",
       averageExecutionTime: undefined,
       memoryUsage: undefined,
       cpuIntensity: IntensityLevel._LOW,
       ioIntensity: IntensityLevel._LOW,
-      networkUsage: IntensityLevel._NONE
+      networkUsage: IntensityLevel._NONE,
     };
   }
 
@@ -846,9 +910,9 @@ export class AutoRegistrationService {
    */
   private createDefaultAuthorInfo(): AuthorInfo {
     return {
-      name: 'Auto Discovery System',
+      name: "Auto Discovery System",
       email: undefined,
-      team: 'PARLANT Registry',
+      team: "PARLANT Registry",
       createdAt: new Date(),
     };
   }
@@ -856,7 +920,9 @@ export class AutoRegistrationService {
   /**
    * Assess function security
    */
-  private async assessSecurity(discoveredFunction: FunctionDiscoveryEntry): Promise<FunctionSecurityAssessment> {
+  private async assessSecurity(
+    discoveredFunction: FunctionDiscoveryEntry,
+  ): Promise<FunctionSecurityAssessment> {
     // Simplified security assessment
     const functionName = discoveredFunction.name.toLowerCase();
 
@@ -865,25 +931,39 @@ export class AutoRegistrationService {
     const considerations: SecurityConsideration[] = [];
 
     // Check for sensitive patterns
-    if (functionName.includes('auth') || functionName.includes('login') || functionName.includes('password')) {
+    if (
+      functionName.includes("auth") ||
+      functionName.includes("login") ||
+      functionName.includes("password")
+    ) {
       securityLevel = FunctionSecurityLevel._RESTRICTED;
       riskLevel = RiskLevel._HIGH;
       considerations.push({
         type: SecurityConsiderationType._AUTHENTICATION_BYPASS,
-        description: 'Function appears to handle authentication',
+        description: "Function appears to handle authentication",
         severity: SecuritySeverity._HIGH,
-        mitigations: ['Require multi-factor authentication', 'Add audit logging']
+        mitigations: [
+          "Require multi-factor authentication",
+          "Add audit logging",
+        ],
       });
     }
 
-    if (functionName.includes('admin') || functionName.includes('delete') || functionName.includes('drop')) {
+    if (
+      functionName.includes("admin") ||
+      functionName.includes("delete") ||
+      functionName.includes("drop")
+    ) {
       securityLevel = FunctionSecurityLevel._CONFIDENTIAL;
       riskLevel = RiskLevel._HIGH;
       considerations.push({
         type: SecurityConsiderationType._PRIVILEGE_ESCALATION,
-        description: 'Function appears to have administrative privileges',
+        description: "Function appears to have administrative privileges",
         severity: SecuritySeverity._HIGH,
-        mitigations: ['Require explicit approval', 'Implement role-based access control']
+        mitigations: [
+          "Require explicit approval",
+          "Implement role-based access control",
+        ],
       });
     }
 
@@ -891,26 +971,32 @@ export class AutoRegistrationService {
       level: securityLevel,
       risk: riskLevel,
       considerations,
-      permissions: [{
-        name: 'execute',
-        scope: PermissionScope._EXECUTE,
-        description: 'Permission to execute the function',
-        required: true
-      }],
+      permissions: [
+        {
+          name: "execute",
+          scope: PermissionScope._EXECUTE,
+          description: "Permission to execute the function",
+          required: true,
+        },
+      ],
       constraints: [],
-      auditRequirements: [{
-        type: AuditType._ACCESS_LOG,
-        level: AuditLevel._BASIC,
-        retentionPeriod: 90,
-        description: 'Log function access attempts'
-      }]
+      auditRequirements: [
+        {
+          type: AuditType._ACCESS_LOG,
+          level: AuditLevel._BASIC,
+          retentionPeriod: 90,
+          description: "Log function access attempts",
+        },
+      ],
     };
   }
 
   /**
    * Create default registration configuration
    */
-  private createDefaultConfiguration(config: AutoRegistrationConfig): FunctionRegistrationConfig {
+  private createDefaultConfiguration(
+    config: AutoRegistrationConfig,
+  ): FunctionRegistrationConfig {
     return {
       enabled: true,
       defaultValidationMode: ValidationMode._STRICT,
@@ -920,22 +1006,22 @@ export class AutoRegistrationService {
         enabled: true,
         ttl: 3600,
         strategy: CacheStrategy._FUNCTION_LEVEL,
-        keyPattern: '{functionId}:{parameters}',
-        storageType: CacheStorageType._MEMORY
+        keyPattern: "{functionId}:{parameters}",
+        storageType: CacheStorageType._MEMORY,
       },
       monitoring: {
         enabled: true,
         metrics: [
           MonitoringMetric._EXECUTION_TIME,
           MonitoringMetric._ERROR_RATE,
-          MonitoringMetric._CALL_FREQUENCY
+          MonitoringMetric._CALL_FREQUENCY,
         ],
         alerting: {
           enabled: true,
           thresholds: [],
-          channels: []
+          channels: [],
         },
-        samplingRate: 0.1
+        samplingRate: 0.1,
       },
       errorHandling: {
         strategy: ErrorHandlingStrategy._RETRY,
@@ -944,44 +1030,46 @@ export class AutoRegistrationService {
           initialDelay: 1000,
           delayMultiplier: 2,
           maxDelay: 10000,
-          jitter: true
+          jitter: true,
         },
         circuitBreaker: {
           failureThreshold: 5,
           successThreshold: 3,
           timeout: 60000,
-          retryDelay: 30000
+          retryDelay: 30000,
         },
         fallback: {
           strategy: FallbackStrategy._RETURN_ERROR,
-          config: {}
-        }
+          config: {},
+        },
       },
-      overrides: []
+      overrides: [],
     };
   }
 
   /**
    * Perform actual function registration
    */
-  private async performRegistration(registryEntry: FunctionRegistryEntry): Promise<RegistrationResult> {
+  private async performRegistration(
+    registryEntry: FunctionRegistryEntry,
+  ): Promise<RegistrationResult> {
     // This would interact with the actual registry service
     // For now, simulate successful registration
 
     this.logger.debug(`Registering function ${registryEntry.id} in registry`);
 
     // Simulate registration delay
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await new Promise((resolve) => setTimeout(resolve, 10));
 
     return {
       success: true,
       functionId: registryEntry.id,
-      message: 'Function registered successfully',
+      message: "Function registered successfully",
       warnings: [],
       metadata: {
         registrationTime: new Date().toISOString(),
-        confidence: 0.9
-      }
+        confidence: 0.9,
+      },
     };
   }
 
@@ -991,15 +1079,17 @@ export class AutoRegistrationService {
   private updateStatistics(
     statistics: RegistrationStatistics,
     discoveredFunction: FunctionDiscoveryEntry,
-    processingTime: number
+    processingTime: number,
   ): void {
     // Update by discovery method
     const method = discoveredFunction.method;
-    statistics.byDiscoveryMethod[method] = (statistics.byDiscoveryMethod[method] || 0) + 1;
+    statistics.byDiscoveryMethod[method] =
+      (statistics.byDiscoveryMethod[method] || 0) + 1;
 
     // Update by package
     const packageName = discoveredFunction.location.packageName;
-    statistics.byPackage[packageName] = (statistics.byPackage[packageName] || 0) + 1;
+    statistics.byPackage[packageName] =
+      (statistics.byPackage[packageName] || 0) + 1;
 
     // Update confidence and processing time (would need proper accumulation)
     statistics.averageConfidence = discoveredFunction.confidence;
@@ -1023,15 +1113,15 @@ export class AutoRegistrationService {
    */
   private isRetryableError(errorMessage: string): boolean {
     const retryablePatterns = [
-      'timeout',
-      'connection',
-      'network',
-      'temporary',
-      'rate limit'
+      "timeout",
+      "connection",
+      "network",
+      "temporary",
+      "rate limit",
     ];
 
-    return retryablePatterns.some(pattern =>
-      errorMessage.toLowerCase().includes(pattern)
+    return retryablePatterns.some((pattern) =>
+      errorMessage.toLowerCase().includes(pattern),
     );
   }
 
@@ -1040,36 +1130,40 @@ export class AutoRegistrationService {
    */
   private async sendNotifications(
     result: AutoRegistrationResult,
-    config: NotificationConfig
+    config: NotificationConfig,
   ): Promise<void> {
     if (!config.enabled) return;
 
-    const notifications: Array<{ type: string; message: string; data: any }> = [];
+    const notifications: Array<{ type: string; message: string; data: any }> =
+      [];
 
     // Success notifications
     if (config.notifyOnSuccess && result.successfulRegistrations.length > 0) {
       notifications.push({
-        type: 'success',
+        type: "success",
         message: `Successfully registered ${result.successfulRegistrations.length} functions`,
-        data: { batchId: result.batchId, count: result.successfulRegistrations.length }
+        data: {
+          batchId: result.batchId,
+          count: result.successfulRegistrations.length,
+        },
       });
     }
 
     // Failure notifications
     if (config.notifyOnFailures && result.failedRegistrations.length > 0) {
       notifications.push({
-        type: 'failure',
+        type: "failure",
         message: `Failed to register ${result.failedRegistrations.length} functions`,
-        data: { batchId: result.batchId, failures: result.failedRegistrations }
+        data: { batchId: result.batchId, failures: result.failedRegistrations },
       });
     }
 
     // Conflict notifications
     if (config.notifyOnConflicts && result.conflicts.length > 0) {
       notifications.push({
-        type: 'conflict',
+        type: "conflict",
         message: `Detected ${result.conflicts.length} registration conflicts`,
-        data: { batchId: result.batchId, conflicts: result.conflicts }
+        data: { batchId: result.batchId, conflicts: result.conflicts },
       });
     }
 
@@ -1079,7 +1173,9 @@ export class AutoRegistrationService {
         try {
           await this.sendNotification(channel, notification);
         } catch (error) {
-          this.logger.warn(`Failed to send notification to ${channel}: ${error instanceof Error ? error.message : String(error)}`);
+          this.logger.warn(
+            `Failed to send notification to ${channel}: ${error instanceof Error ? error.message : String(error)}`,
+          );
         }
       }
     }
@@ -1088,8 +1184,13 @@ export class AutoRegistrationService {
   /**
    * Send notification to specific channel
    */
-  private async sendNotification(channel: string, notification: any): Promise<void> {
+  private async sendNotification(
+    channel: string,
+    notification: any,
+  ): Promise<void> {
     // This would integrate with actual notification services
-    this.logger.log(`Sending ${notification.type} notification to ${channel}: ${notification.message}`);
+    this.logger.log(
+      `Sending ${notification.type} notification to ${channel}: ${notification.message}`,
+    );
   }
 }

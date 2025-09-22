@@ -27,7 +27,7 @@
  * @since 2024-09-22
  */
 
-import 'reflect-metadata';
+import "reflect-metadata";
 import {
   SetMetadata,
   applyDecorators,
@@ -35,10 +35,10 @@ import {
   UseInterceptors,
   ExecutionContext,
   createParamDecorator,
-} from '@nestjs/common';
-import { ApiOperation, ApiSecurity, ApiResponse } from '@nestjs/swagger';
-import { Type } from '@nestjs/common';
-import { performance } from 'perf_hooks';
+} from "@nestjs/common";
+import { ApiOperation, ApiSecurity, ApiResponse } from "@nestjs/swagger";
+import { Type } from "@nestjs/common";
+import { performance } from "perf_hooks";
 
 // Import existing types and extend them
 import {
@@ -48,7 +48,7 @@ import {
   RiskLevel,
   ConversationPriority,
   FunctionSecurityLevel,
-} from '../../types/parlant.types';
+} from "../../types/parlant.types";
 
 // Enhanced decorator configuration interfaces
 export interface EnhancedParlantValidationConfig {
@@ -84,7 +84,7 @@ export interface EnhancedParlantValidationConfig {
 export interface CachingStrategy {
   enabled: boolean;
   ttl: number;
-  scope: 'global' | 'user' | 'session' | 'method';
+  scope: "global" | "user" | "session" | "method";
   keyGenerator?: (context: ExecutionContext, args: any[]) => string;
   invalidationTriggers?: string[];
   compressionEnabled?: boolean;
@@ -139,21 +139,26 @@ export interface CustomErrorHandling {
 
 export interface EscalationRule {
   condition: (error: Error, context: ExecutionContext) => boolean;
-  escalationLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  escalationLevel: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
   notificationTargets: string[];
   requiresHumanIntervention: boolean;
 }
 
 export interface FallbackStrategy {
   enabled: boolean;
-  strategy: 'ALLOW' | 'DENY' | 'CACHE' | 'SIMPLE_VALIDATION' | 'MANUAL_APPROVAL';
+  strategy:
+    | "ALLOW"
+    | "DENY"
+    | "CACHE"
+    | "SIMPLE_VALIDATION"
+    | "MANUAL_APPROVAL";
   fallbackFunction?: (context: ExecutionContext, args: any[]) => any;
   fallbackCache?: boolean;
 }
 
 export interface RetryPolicy {
   maxAttempts: number;
-  backoffStrategy: 'exponential' | 'linear' | 'fixed';
+  backoffStrategy: "exponential" | "linear" | "fixed";
   baseDelay: number;
   maxDelay: number;
   retryConditions: RetryCondition[];
@@ -167,22 +172,30 @@ export interface RetryCondition {
 
 export interface ParameterValidator {
   name: string;
-  validate: (value: any, context: ExecutionContext) => boolean | Promise<boolean>;
+  validate: (
+    value: any,
+    context: ExecutionContext,
+  ) => boolean | Promise<boolean>;
   errorMessage: string;
 }
 
 export interface ReturnValueValidator {
   name: string;
-  validate: (value: any, context: ExecutionContext) => boolean | Promise<boolean>;
+  validate: (
+    value: any,
+    context: ExecutionContext,
+  ) => boolean | Promise<boolean>;
   errorMessage: string;
 }
 
 // Enhanced decorator metadata keys
-export const ENHANCED_PARLANT_METADATA_KEY = Symbol('enhanced-parlant-validation');
-export const PARLANT_PERFORMANCE_METADATA_KEY = Symbol('parlant-performance');
-export const PARLANT_AUDIT_METADATA_KEY = Symbol('parlant-audit');
-export const PARLANT_CACHE_METADATA_KEY = Symbol('parlant-cache');
-export const PARLANT_TYPE_METADATA_KEY = Symbol('parlant-types');
+export const ENHANCED_PARLANT_METADATA_KEY = Symbol(
+  "enhanced-parlant-validation",
+);
+export const PARLANT_PERFORMANCE_METADATA_KEY = Symbol("parlant-performance");
+export const PARLANT_AUDIT_METADATA_KEY = Symbol("parlant-audit");
+export const PARLANT_CACHE_METADATA_KEY = Symbol("parlant-cache");
+export const PARLANT_TYPE_METADATA_KEY = Symbol("parlant-types");
 
 // Enhanced performance tracking interface
 export interface MethodPerformanceMetrics {
@@ -225,21 +238,42 @@ export interface MethodAuditEvent {
  * This decorator extends the existing @ParlantValidated decorator with
  * enterprise-grade features while maintaining backward compatibility.
  */
-export function EnhancedParlantValidated(config: EnhancedParlantValidationConfig) {
-  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+export function EnhancedParlantValidated(
+  config: EnhancedParlantValidationConfig,
+) {
+  return function (
+    target: any,
+    propertyKey: string,
+    descriptor: PropertyDescriptor,
+  ) {
     // Store enhanced metadata
-    Reflect.defineMetadata(ENHANCED_PARLANT_METADATA_KEY, config, target, propertyKey);
+    Reflect.defineMetadata(
+      ENHANCED_PARLANT_METADATA_KEY,
+      config,
+      target,
+      propertyKey,
+    );
 
     // Store type information for validation
-    const paramTypes = Reflect.getMetadata('design:paramtypes', target, propertyKey) || [];
-    const returnType = Reflect.getMetadata('design:returntype', target, propertyKey);
+    const paramTypes =
+      Reflect.getMetadata("design:paramtypes", target, propertyKey) || [];
+    const returnType = Reflect.getMetadata(
+      "design:returntype",
+      target,
+      propertyKey,
+    );
 
-    Reflect.defineMetadata(PARLANT_TYPE_METADATA_KEY, {
-      paramTypes,
-      returnType,
-      methodName: propertyKey,
-      className: target.constructor.name,
-    }, target, propertyKey);
+    Reflect.defineMetadata(
+      PARLANT_TYPE_METADATA_KEY,
+      {
+        paramTypes,
+        returnType,
+        methodName: propertyKey,
+        className: target.constructor.name,
+      },
+      target,
+      propertyKey,
+    );
 
     // Initialize performance tracking
     if (config.enableMetrics !== false) {
@@ -264,22 +298,40 @@ export function EnhancedParlantValidated(config: EnhancedParlantValidationConfig
 
       try {
         // Pre-execution validation
-        await performPreExecutionValidation(this, propertyKey, args, config, operationId);
+        await performPreExecutionValidation(
+          this,
+          propertyKey,
+          args,
+          config,
+          operationId,
+        );
 
         // Execute original method
         result = await originalMethod.apply(this, args);
         success = true;
 
         // Post-execution validation
-        await performPostExecutionValidation(this, propertyKey, result, config, operationId);
+        await performPostExecutionValidation(
+          this,
+          propertyKey,
+          result,
+          config,
+          operationId,
+        );
 
         return result;
-
       } catch (error) {
         errorMessage = error instanceof Error ? error.message : String(error);
 
         // Handle error with enhanced context
-        await handleEnhancedMethodError(error, this, propertyKey, args, config, operationId);
+        await handleEnhancedMethodError(
+          error,
+          this,
+          propertyKey,
+          args,
+          config,
+          operationId,
+        );
 
         throw error;
       } finally {
@@ -298,7 +350,10 @@ export function EnhancedParlantValidated(config: EnhancedParlantValidationConfig
             methodName: propertyKey,
             className: target.constructor.name,
             parameters: sanitizeParameters(args, config.parameterValidation),
-            returnValue: sanitizeReturnValue(result, config.returnValueValidation),
+            returnValue: sanitizeReturnValue(
+              result,
+              config.returnValueValidation,
+            ),
             executionTime,
             success,
             errorMessage,
@@ -319,13 +374,20 @@ export function EnhancedParlantValidated(config: EnhancedParlantValidationConfig
  *
  * Provides runtime type validation with TypeScript type preservation.
  */
-export function TypeSafeValidation(validationConfig?: ParameterValidationConfig) {
-  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+export function TypeSafeValidation(
+  validationConfig?: ParameterValidationConfig,
+) {
+  return function (
+    target: any,
+    propertyKey: string,
+    descriptor: PropertyDescriptor,
+  ) {
     const originalMethod = descriptor.value;
 
     descriptor.value = async function (...args: any[]) {
       // Get type metadata
-      const paramTypes = Reflect.getMetadata('design:paramtypes', target, propertyKey) || [];
+      const paramTypes =
+        Reflect.getMetadata("design:paramtypes", target, propertyKey) || [];
 
       // Validate parameters against TypeScript types
       for (let i = 0; i < args.length; i++) {
@@ -335,7 +397,7 @@ export function TypeSafeValidation(validationConfig?: ParameterValidationConfig)
         if (!validateParameterType(arg, expectedType, validationConfig)) {
           throw new TypeError(
             `Parameter ${i} of method ${propertyKey} failed type validation. ` +
-            `Expected: ${expectedType?.name || 'unknown'}, Got: ${typeof arg}`
+              `Expected: ${expectedType?.name || "unknown"}, Got: ${typeof arg}`,
           );
         }
       }
@@ -353,7 +415,11 @@ export function TypeSafeValidation(validationConfig?: ParameterValidationConfig)
  * Tracks method execution performance with detailed metrics.
  */
 export function PerformanceMonitored(targetTime?: number) {
-  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+  return function (
+    target: any,
+    propertyKey: string,
+    descriptor: PropertyDescriptor,
+  ) {
     const originalMethod = descriptor.value;
 
     descriptor.value = async function (...args: any[]) {
@@ -369,8 +435,10 @@ export function PerformanceMonitored(targetTime?: number) {
 
         // Log performance metrics
         if (targetTime && executionTime > targetTime) {
-          console.warn(`Performance warning: ${target.constructor.name}.${propertyKey} ` +
-                      `took ${executionTime.toFixed(2)}ms (target: ${targetTime}ms)`);
+          console.warn(
+            `Performance warning: ${target.constructor.name}.${propertyKey} ` +
+              `took ${executionTime.toFixed(2)}ms (target: ${targetTime}ms)`,
+          );
         }
 
         // Store detailed metrics
@@ -406,7 +474,11 @@ export function PerformanceMonitored(targetTime?: number) {
  * Provides method-level caching with type-aware serialization.
  */
 export function IntelligentCache(cacheConfig: CachingStrategy) {
-  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+  return function (
+    target: any,
+    propertyKey: string,
+    descriptor: PropertyDescriptor,
+  ) {
     const originalMethod = descriptor.value;
     const cache = new Map<string, { value: any; timestamp: number }>();
 
@@ -422,7 +494,7 @@ export function IntelligentCache(cacheConfig: CachingStrategy) {
 
       // Check cache
       const cached = cache.get(cacheKey);
-      if (cached && (Date.now() - cached.timestamp) < cacheConfig.ttl) {
+      if (cached && Date.now() - cached.timestamp < cacheConfig.ttl) {
         return cached.value;
       }
 
@@ -450,7 +522,11 @@ export function IntelligentCache(cacheConfig: CachingStrategy) {
  * Provides intelligent authorization based on user context and method metadata.
  */
 export function ContextAwareAuth(requirements: ContextRequirements) {
-  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+  return function (
+    target: any,
+    propertyKey: string,
+    descriptor: PropertyDescriptor,
+  ) {
     const originalMethod = descriptor.value;
 
     descriptor.value = async function (...args: any[]) {
@@ -459,32 +535,41 @@ export function ContextAwareAuth(requirements: ContextRequirements) {
 
       // Validate authentication
       if (requirements.requireAuthentication && !context.user) {
-        throw new Error('Authentication required');
+        throw new Error("Authentication required");
       }
 
       // Validate roles
       if (requirements.requiredRoles && requirements.requiredRoles.length > 0) {
-        const hasRequiredRole = requirements.requiredRoles.some(role =>
-          context.user?.roles?.includes(role)
+        const hasRequiredRole = requirements.requiredRoles.some((role) =>
+          context.user?.roles?.includes(role),
         );
         if (!hasRequiredRole) {
-          throw new Error(`Required roles: ${requirements.requiredRoles.join(', ')}`);
+          throw new Error(
+            `Required roles: ${requirements.requiredRoles.join(", ")}`,
+          );
         }
       }
 
       // Validate permissions
-      if (requirements.requiredPermissions && requirements.requiredPermissions.length > 0) {
-        const hasRequiredPermission = requirements.requiredPermissions.some(permission =>
-          context.user?.permissions?.includes(permission)
+      if (
+        requirements.requiredPermissions &&
+        requirements.requiredPermissions.length > 0
+      ) {
+        const hasRequiredPermission = requirements.requiredPermissions.some(
+          (permission) => context.user?.permissions?.includes(permission),
         );
         if (!hasRequiredPermission) {
-          throw new Error(`Required permissions: ${requirements.requiredPermissions.join(', ')}`);
+          throw new Error(
+            `Required permissions: ${requirements.requiredPermissions.join(", ")}`,
+          );
         }
       }
 
       // Time-based restrictions
       if (requirements.organizationalConstraints?.timeBasedRestrictions) {
-        validateTimeBasedRestrictions(requirements.organizationalConstraints.timeBasedRestrictions);
+        validateTimeBasedRestrictions(
+          requirements.organizationalConstraints.timeBasedRestrictions,
+        );
       }
 
       return await originalMethod.apply(this, args);
@@ -519,7 +604,7 @@ export const EnhancedUser = createParamDecorator(
       securityContext: request.parlant,
       requestMetadata: {
         ip: request.ip,
-        userAgent: request.get('User-Agent'),
+        userAgent: request.get("User-Agent"),
         timestamp: new Date(),
       },
     };
@@ -566,7 +651,7 @@ async function performPreExecutionValidation(
   methodName: string,
   args: any[],
   config: EnhancedParlantValidationConfig,
-  operationId: string
+  operationId: string,
 ): Promise<void> {
   // Parameter validation
   if (config.parameterValidation?.validateTypes) {
@@ -578,7 +663,9 @@ async function performPreExecutionValidation(
     for (const validator of config.parameterValidation.customValidators) {
       for (const arg of args) {
         if (!(await validator.validate(arg, null as any))) {
-          throw new Error(`Parameter validation failed: ${validator.errorMessage}`);
+          throw new Error(
+            `Parameter validation failed: ${validator.errorMessage}`,
+          );
         }
       }
     }
@@ -586,11 +673,14 @@ async function performPreExecutionValidation(
 
   // This would integrate with the actual PARLANT validation service
   // For now, we'll just log the validation request
-  console.debug(`Pre-execution validation for ${instance.constructor.name}.${methodName}`, {
-    operationId,
-    securityLevel: config.securityLevel,
-    parameterCount: args.length,
-  });
+  console.debug(
+    `Pre-execution validation for ${instance.constructor.name}.${methodName}`,
+    {
+      operationId,
+      securityLevel: config.securityLevel,
+      parameterCount: args.length,
+    },
+  );
 }
 
 async function performPostExecutionValidation(
@@ -598,7 +688,7 @@ async function performPostExecutionValidation(
   methodName: string,
   result: any,
   config: EnhancedParlantValidationConfig,
-  operationId: string
+  operationId: string,
 ): Promise<void> {
   // Return value validation
   if (config.returnValueValidation?.validateTypes) {
@@ -609,16 +699,21 @@ async function performPostExecutionValidation(
   if (config.returnValueValidation?.customValidators) {
     for (const validator of config.returnValueValidation.customValidators) {
       if (!(await validator.validate(result, null as any))) {
-        throw new Error(`Return value validation failed: ${validator.errorMessage}`);
+        throw new Error(
+          `Return value validation failed: ${validator.errorMessage}`,
+        );
       }
     }
   }
 
-  console.debug(`Post-execution validation for ${instance.constructor.name}.${methodName}`, {
-    operationId,
-    hasReturnValue: result !== undefined,
-    returnValueType: typeof result,
-  });
+  console.debug(
+    `Post-execution validation for ${instance.constructor.name}.${methodName}`,
+    {
+      operationId,
+      hasReturnValue: result !== undefined,
+      returnValueType: typeof result,
+    },
+  );
 }
 
 async function handleEnhancedMethodError(
@@ -627,7 +722,7 @@ async function handleEnhancedMethodError(
   methodName: string,
   args: any[],
   config: EnhancedParlantValidationConfig,
-  operationId: string
+  operationId: string,
 ): Promise<void> {
   const errorMessage = error instanceof Error ? error.message : String(error);
 
@@ -645,7 +740,9 @@ async function handleEnhancedMethodError(
         // Trigger notifications if needed
         if (rule.notificationTargets.length > 0) {
           // This would integrate with notification system
-          console.warn(`Notifications would be sent to: ${rule.notificationTargets.join(', ')}`);
+          console.warn(
+            `Notifications would be sent to: ${rule.notificationTargets.join(", ")}`,
+          );
         }
       }
     }
@@ -653,30 +750,38 @@ async function handleEnhancedMethodError(
 
   // Apply fallback strategy if configured
   if (config.fallbackStrategy?.enabled) {
-    console.warn(`Applying fallback strategy: ${config.fallbackStrategy.strategy}`, {
-      operationId,
-      methodName,
-      originalError: errorMessage,
-    });
+    console.warn(
+      `Applying fallback strategy: ${config.fallbackStrategy.strategy}`,
+      {
+        operationId,
+        methodName,
+        originalError: errorMessage,
+      },
+    );
   }
 }
 
 function validateParameterType(
   value: any,
   expectedType: any,
-  config?: ParameterValidationConfig
+  config?: ParameterValidationConfig,
 ): boolean {
   if (!expectedType) return true;
 
   // Basic type checking
-  if (expectedType === String && typeof value !== 'string') return false;
-  if (expectedType === Number && typeof value !== 'number') return false;
-  if (expectedType === Boolean && typeof value !== 'boolean') return false;
+  if (expectedType === String && typeof value !== "string") return false;
+  if (expectedType === Number && typeof value !== "number") return false;
+  if (expectedType === Boolean && typeof value !== "boolean") return false;
   if (expectedType === Array && !Array.isArray(value)) return false;
-  if (expectedType === Object && (typeof value !== 'object' || value === null)) return false;
+  if (expectedType === Object && (typeof value !== "object" || value === null))
+    return false;
 
   // Additional validation based on config
-  if (config?.maxSize && typeof value === 'string' && value.length > config.maxSize) {
+  if (
+    config?.maxSize &&
+    typeof value === "string" &&
+    value.length > config.maxSize
+  ) {
     return false;
   }
 
@@ -690,26 +795,39 @@ function validateParameterType(
   return true;
 }
 
-function validateParameterTypes(instance: any, methodName: string, args: any[]): void {
-  const paramTypes = Reflect.getMetadata('design:paramtypes', instance, methodName) || [];
+function validateParameterTypes(
+  instance: any,
+  methodName: string,
+  args: any[],
+): void {
+  const paramTypes =
+    Reflect.getMetadata("design:paramtypes", instance, methodName) || [];
 
   for (let i = 0; i < args.length; i++) {
     if (paramTypes[i] && !validateParameterType(args[i], paramTypes[i])) {
       throw new TypeError(
         `Parameter ${i} of method ${methodName} failed type validation. ` +
-        `Expected: ${paramTypes[i]?.name || 'unknown'}, Got: ${typeof args[i]}`
+          `Expected: ${paramTypes[i]?.name || "unknown"}, Got: ${typeof args[i]}`,
       );
     }
   }
 }
 
-function validateReturnValueType(instance: any, methodName: string, result: any): void {
-  const returnType = Reflect.getMetadata('design:returntype', instance, methodName);
+function validateReturnValueType(
+  instance: any,
+  methodName: string,
+  result: any,
+): void {
+  const returnType = Reflect.getMetadata(
+    "design:returntype",
+    instance,
+    methodName,
+  );
 
   if (returnType && !validateParameterType(result, returnType)) {
     throw new TypeError(
       `Return value of method ${methodName} failed type validation. ` +
-      `Expected: ${returnType?.name || 'unknown'}, Got: ${typeof result}`
+        `Expected: ${returnType?.name || "unknown"}, Got: ${typeof result}`,
     );
   }
 }
@@ -718,7 +836,7 @@ function recordMethodPerformance(
   target: any,
   methodName: string,
   executionTime: number,
-  success: boolean
+  success: boolean,
 ): void {
   const key = `${target.constructor.name}.${methodName}`;
   const metrics = performanceMetricsStore.get(key);
@@ -726,9 +844,16 @@ function recordMethodPerformance(
   if (metrics) {
     metrics.invocationCount++;
     metrics.totalExecutionTime += executionTime;
-    metrics.averageExecutionTime = metrics.totalExecutionTime / metrics.invocationCount;
-    metrics.maxExecutionTime = Math.max(metrics.maxExecutionTime, executionTime);
-    metrics.minExecutionTime = Math.min(metrics.minExecutionTime, executionTime);
+    metrics.averageExecutionTime =
+      metrics.totalExecutionTime / metrics.invocationCount;
+    metrics.maxExecutionTime = Math.max(
+      metrics.maxExecutionTime,
+      executionTime,
+    );
+    metrics.minExecutionTime = Math.min(
+      metrics.minExecutionTime,
+      executionTime,
+    );
     metrics.lastInvocation = new Date();
 
     if (!success) {
@@ -737,12 +862,23 @@ function recordMethodPerformance(
   }
 }
 
-function recordDetailedPerformanceMetrics(target: any, methodName: string, metrics: any): void {
+function recordDetailedPerformanceMetrics(
+  target: any,
+  methodName: string,
+  metrics: any,
+): void {
   // This would integrate with a more comprehensive metrics system
-  console.debug(`Performance metrics for ${target.constructor.name}.${methodName}`, metrics);
+  console.debug(
+    `Performance metrics for ${target.constructor.name}.${methodName}`,
+    metrics,
+  );
 }
 
-function recordAuditEvent(target: any, methodName: string, event: MethodAuditEvent): void {
+function recordAuditEvent(
+  target: any,
+  methodName: string,
+  event: MethodAuditEvent,
+): void {
   const key = `${target.constructor.name}.${methodName}`;
   const auditTrail = auditTrailStore.get(key) || [];
 
@@ -756,13 +892,16 @@ function recordAuditEvent(target: any, methodName: string, event: MethodAuditEve
   auditTrailStore.set(key, auditTrail);
 }
 
-function sanitizeParameters(args: any[], config?: ParameterValidationConfig): Record<string, any> {
+function sanitizeParameters(
+  args: any[],
+  config?: ParameterValidationConfig,
+): Record<string, any> {
   const sanitized: Record<string, any> = {};
 
   args.forEach((arg, index) => {
     if (config?.sanitizeInputs) {
       // Basic sanitization - remove sensitive fields
-      if (typeof arg === 'object' && arg !== null) {
+      if (typeof arg === "object" && arg !== null) {
         const cleaned = { ...arg };
         delete cleaned.password;
         delete cleaned.token;
@@ -779,12 +918,15 @@ function sanitizeParameters(args: any[], config?: ParameterValidationConfig): Re
   return sanitized;
 }
 
-function sanitizeReturnValue(value: any, config?: ReturnValueValidationConfig): any {
+function sanitizeReturnValue(
+  value: any,
+  config?: ReturnValueValidationConfig,
+): any {
   if (!config?.sanitizeOutputs) {
     return typeof value;
   }
 
-  if (typeof value === 'object' && value !== null) {
+  if (typeof value === "object" && value !== null) {
     const cleaned = { ...value };
     delete cleaned.password;
     delete cleaned.token;
@@ -795,9 +937,13 @@ function sanitizeReturnValue(value: any, config?: ReturnValueValidationConfig): 
   return value;
 }
 
-function generateDefaultCacheKey(className: string, methodName: string, args: any[]): string {
+function generateDefaultCacheKey(
+  className: string,
+  methodName: string,
+  args: any[],
+): string {
   const argsHash = JSON.stringify(args);
-  return `${className}.${methodName}:${Buffer.from(argsHash).toString('base64url')}`;
+  return `${className}.${methodName}:${Buffer.from(argsHash).toString("base64url")}`;
 }
 
 function cleanupCache(cache: Map<string, any>, ttl: number): void {
@@ -818,7 +964,9 @@ function getCurrentExecutionContext(): any {
   };
 }
 
-function validateTimeBasedRestrictions(restrictions: TimeBasedRestrictions): void {
+function validateTimeBasedRestrictions(
+  restrictions: TimeBasedRestrictions,
+): void {
   const now = new Date();
 
   // Check allowed hours
@@ -841,8 +989,8 @@ function validateTimeBasedRestrictions(restrictions: TimeBasedRestrictions): voi
   // Check excluded dates
   if (restrictions.excludedDates) {
     const todayStr = now.toDateString();
-    const isExcluded = restrictions.excludedDates.some(date =>
-      date.toDateString() === todayStr
+    const isExcluded = restrictions.excludedDates.some(
+      (date) => date.toDateString() === todayStr,
     );
     if (isExcluded) {
       throw new Error(`Access not allowed on current date: ${todayStr}`);

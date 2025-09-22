@@ -11,15 +11,15 @@
  * @created 2025-09-20
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { EventEmitter } from 'events';
-import * as perf_hooks from 'perf_hooks';
+import { Injectable, Logger } from "@nestjs/common";
+import { EventEmitter } from "events";
+import * as perf_hooks from "perf_hooks";
 import {
   DatabaseFunction,
   TestFrameworkConfig,
   TestResult,
-  TestStatus
-} from '../types/framework.types';
+  TestStatus,
+} from "../types/framework.types";
 import {
   PerformanceTestConfig,
   PerformanceTestResult,
@@ -28,8 +28,8 @@ import {
   ThroughputTestResult,
   PerformanceBenchmark,
   PerformanceMetrics,
-  ResourceUsageMetrics
-} from '../types/performance-testing.types';
+  ResourceUsageMetrics,
+} from "../types/performance-testing.types";
 
 /**
  * Performance test execution context
@@ -59,11 +59,11 @@ export interface PerformanceTestScenario {
  * Load test configuration
  */
 export interface LoadTestConfig {
-  readonly rampUpDuration: number;    // milliseconds
-  readonly sustainDuration: number;   // milliseconds
-  readonly rampDownDuration: number;  // milliseconds
+  readonly rampUpDuration: number; // milliseconds
+  readonly sustainDuration: number; // milliseconds
+  readonly rampDownDuration: number; // milliseconds
   readonly maxConcurrency: number;
-  readonly targetThroughput: number;  // requests per second
+  readonly targetThroughput: number; // requests per second
   readonly acceptableErrorRate: number; // percentage
 }
 
@@ -90,7 +90,7 @@ export class PerformanceTestingSuite extends EventEmitter {
    * Initialize performance testing suite
    */
   async initialize(config: PerformanceTestConfig): Promise<void> {
-    this.logger.log('Initializing Performance Testing Suite...');
+    this.logger.log("Initializing Performance Testing Suite...");
 
     this.config = config;
 
@@ -105,12 +105,16 @@ export class PerformanceTestingSuite extends EventEmitter {
       this.initializeTestScenarios();
 
       this.isInitialized = true;
-      this.logger.log('Performance Testing Suite initialized successfully');
-      this.emit('suite:initialized', { config });
-
+      this.logger.log("Performance Testing Suite initialized successfully");
+      this.emit("suite:initialized", { config });
     } catch (error) {
-      this.logger.error('Failed to initialize Performance Testing Suite', error);
-      throw new Error(`Performance testing initialization failed: ${error.message}`);
+      this.logger.error(
+        "Failed to initialize Performance Testing Suite",
+        error,
+      );
+      throw new Error(
+        `Performance testing initialization failed: ${error.message}`,
+      );
     }
   }
 
@@ -120,7 +124,7 @@ export class PerformanceTestingSuite extends EventEmitter {
   async executeResponseTimeTest(
     func: DatabaseFunction,
     scenario: PerformanceTestScenario,
-    testData?: any[]
+    testData?: any[],
   ): Promise<PerformanceTestResult> {
     this.ensureInitialized();
 
@@ -128,7 +132,7 @@ export class PerformanceTestingSuite extends EventEmitter {
     this.logger.log(`Executing response time test: ${testId}`, {
       function: func.name,
       iterations: scenario.iterations,
-      expectedResponseTime: scenario.expectedResponseTime
+      expectedResponseTime: scenario.expectedResponseTime,
     });
 
     const context: PerformanceTestContext = {
@@ -136,10 +140,10 @@ export class PerformanceTestingSuite extends EventEmitter {
       functionName: func.name,
       startTime: Date.now(),
       config: this.config,
-      metrics: this.initializeMetrics()
+      metrics: this.initializeMetrics(),
     };
 
-    this.emit('test:started', context);
+    this.emit("test:started", context);
 
     try {
       // Warmup phase
@@ -154,7 +158,7 @@ export class PerformanceTestingSuite extends EventEmitter {
         const iteration = await this.executePerformanceIteration(
           func,
           i,
-          testData?.[i % (testData?.length || 1)]
+          testData?.[i % (testData?.length || 1)],
         );
         iterations.push(iteration);
 
@@ -163,21 +167,25 @@ export class PerformanceTestingSuite extends EventEmitter {
           this.logger.warn(`Response time threshold exceeded`, {
             iteration: i,
             responseTime: iteration.responseTime,
-            threshold: scenario.expectedResponseTime
+            threshold: scenario.expectedResponseTime,
           });
         }
 
         // Emit progress
-        this.emit('test:progress', {
+        this.emit("test:progress", {
           testId,
           iteration: i + 1,
           totalIterations: scenario.iterations,
-          currentResponseTime: iteration.responseTime
+          currentResponseTime: iteration.responseTime,
         });
       }
 
       // Calculate results
-      const result = this.calculateResponseTimeResult(context, scenario, iterations);
+      const result = this.calculateResponseTimeResult(
+        context,
+        scenario,
+        iterations,
+      );
 
       // Store benchmark
       await this.storeBenchmark(func, result);
@@ -189,12 +197,11 @@ export class PerformanceTestingSuite extends EventEmitter {
       this.logger.log(`Response time test completed: ${testId}`, {
         averageResponseTime: result.averageResponseTime,
         maxResponseTime: result.maxResponseTime,
-        passed: result.passed
+        passed: result.passed,
       });
 
-      this.emit('test:completed', result);
+      this.emit("test:completed", result);
       return result;
-
     } catch (error) {
       this.logger.error(`Response time test failed: ${testId}`, error);
       const failedResult: PerformanceTestResult = {
@@ -209,9 +216,9 @@ export class PerformanceTestingSuite extends EventEmitter {
         throughput: 0,
         startTime: context.startTime,
         endTime: Date.now(),
-        error: error.message
+        error: error.message,
       };
-      this.emit('test:failed', failedResult);
+      this.emit("test:failed", failedResult);
       throw error;
     }
   }
@@ -222,7 +229,7 @@ export class PerformanceTestingSuite extends EventEmitter {
   async executeLoadTest(
     func: DatabaseFunction,
     loadConfig: LoadTestConfig,
-    testData?: any[]
+    testData?: any[],
   ): Promise<LoadTestResult> {
     this.ensureInitialized();
 
@@ -230,17 +237,21 @@ export class PerformanceTestingSuite extends EventEmitter {
     this.logger.log(`Executing load test: ${testId}`, {
       function: func.name,
       maxConcurrency: loadConfig.maxConcurrency,
-      targetThroughput: loadConfig.targetThroughput
+      targetThroughput: loadConfig.targetThroughput,
     });
 
     const startTime = Date.now();
-    this.emit('load-test:started', { testId, function: func.name, config: loadConfig });
+    this.emit("load-test:started", {
+      testId,
+      function: func.name,
+      config: loadConfig,
+    });
 
     try {
       const phases = [
-        { name: 'ramp-up', duration: loadConfig.rampUpDuration },
-        { name: 'sustain', duration: loadConfig.sustainDuration },
-        { name: 'ramp-down', duration: loadConfig.rampDownDuration }
+        { name: "ramp-up", duration: loadConfig.rampUpDuration },
+        { name: "sustain", duration: loadConfig.sustainDuration },
+        { name: "ramp-down", duration: loadConfig.rampDownDuration },
       ];
 
       const phaseResults: LoadTestPhaseResult[] = [];
@@ -251,31 +262,36 @@ export class PerformanceTestingSuite extends EventEmitter {
           func,
           phase,
           loadConfig,
-          testData
+          testData,
         );
         phaseResults.push(phaseResult);
 
-        this.emit('load-test:phase-completed', {
+        this.emit("load-test:phase-completed", {
           testId,
           phase: phase.name,
-          result: phaseResult
+          result: phaseResult,
         });
       }
 
       // Aggregate results
-      const result = this.aggregateLoadTestResults(testId, func, loadConfig, phaseResults, startTime);
+      const result = this.aggregateLoadTestResults(
+        testId,
+        func,
+        loadConfig,
+        phaseResults,
+        startTime,
+      );
 
       this.logger.log(`Load test completed: ${testId}`, {
         totalRequests: result.totalRequests,
         successfulRequests: result.successfulRequests,
         averageResponseTime: result.averageResponseTime,
         throughput: result.actualThroughput,
-        passed: result.passed
+        passed: result.passed,
       });
 
-      this.emit('load-test:completed', result);
+      this.emit("load-test:completed", result);
       return result;
-
     } catch (error) {
       this.logger.error(`Load test failed: ${testId}`, error);
       throw error;
@@ -288,7 +304,7 @@ export class PerformanceTestingSuite extends EventEmitter {
   async executeStressTest(
     func: DatabaseFunction,
     stressConfig: StressTestConfig,
-    testData?: any[]
+    testData?: any[],
   ): Promise<StressTestResult> {
     this.ensureInitialized();
 
@@ -296,39 +312,51 @@ export class PerformanceTestingSuite extends EventEmitter {
     this.logger.log(`Executing stress test: ${testId}`, {
       function: func.name,
       startConcurrency: stressConfig.startConcurrency,
-      maxConcurrency: stressConfig.maxConcurrency
+      maxConcurrency: stressConfig.maxConcurrency,
     });
 
     const startTime = Date.now();
-    this.emit('stress-test:started', { testId, function: func.name, config: stressConfig });
+    this.emit("stress-test:started", {
+      testId,
+      function: func.name,
+      config: stressConfig,
+    });
 
     try {
       const stressResults: StressTestStepResult[] = [];
       let currentConcurrency = stressConfig.startConcurrency;
       let breakingPointFound = false;
 
-      while (currentConcurrency <= stressConfig.maxConcurrency && !breakingPointFound) {
+      while (
+        currentConcurrency <= stressConfig.maxConcurrency &&
+        !breakingPointFound
+      ) {
         this.logger.log(`Testing concurrency level: ${currentConcurrency}`);
 
         const stepResult = await this.executeStressTestStep(
           func,
           currentConcurrency,
           stressConfig.stepDuration,
-          testData
+          testData,
         );
 
         stressResults.push(stepResult);
 
         // Check for breaking point
-        if (stressConfig.breakingPointDetection && this.isBreakingPoint(stepResult)) {
+        if (
+          stressConfig.breakingPointDetection &&
+          this.isBreakingPoint(stepResult)
+        ) {
           breakingPointFound = true;
-          this.logger.warn(`Breaking point detected at concurrency: ${currentConcurrency}`);
+          this.logger.warn(
+            `Breaking point detected at concurrency: ${currentConcurrency}`,
+          );
         }
 
-        this.emit('stress-test:step-completed', {
+        this.emit("stress-test:step-completed", {
           testId,
           concurrency: currentConcurrency,
-          result: stepResult
+          result: stepResult,
         });
 
         currentConcurrency += stressConfig.incrementStep;
@@ -337,7 +365,11 @@ export class PerformanceTestingSuite extends EventEmitter {
       // Recovery testing if enabled
       let recoveryResult: StressTestStepResult | undefined;
       if (stressConfig.recoveryTesting && breakingPointFound) {
-        recoveryResult = await this.executeRecoveryTest(func, stressConfig, testData);
+        recoveryResult = await this.executeRecoveryTest(
+          func,
+          stressConfig,
+          testData,
+        );
       }
 
       // Aggregate results
@@ -347,18 +379,17 @@ export class PerformanceTestingSuite extends EventEmitter {
         stressConfig,
         stressResults,
         recoveryResult,
-        startTime
+        startTime,
       );
 
       this.logger.log(`Stress test completed: ${testId}`, {
         maxSuccessfulConcurrency: result.maxSuccessfulConcurrency,
         breakingPoint: result.breakingPoint,
-        passed: result.passed
+        passed: result.passed,
       });
 
-      this.emit('stress-test:completed', result);
+      this.emit("stress-test:completed", result);
       return result;
-
     } catch (error) {
       this.logger.error(`Stress test failed: ${testId}`, error);
       throw error;
@@ -372,7 +403,7 @@ export class PerformanceTestingSuite extends EventEmitter {
     func: DatabaseFunction,
     duration: number,
     concurrency: number,
-    testData?: any[]
+    testData?: any[],
   ): Promise<ThroughputTestResult> {
     this.ensureInitialized();
 
@@ -380,11 +411,11 @@ export class PerformanceTestingSuite extends EventEmitter {
     this.logger.log(`Executing throughput test: ${testId}`, {
       function: func.name,
       duration,
-      concurrency
+      concurrency,
     });
 
     const startTime = Date.now();
-    this.emit('throughput-test:started', { testId, function: func.name });
+    this.emit("throughput-test:started", { testId, function: func.name });
 
     try {
       const promises: Promise<PerformanceIteration>[] = [];
@@ -397,7 +428,7 @@ export class PerformanceTestingSuite extends EventEmitter {
           func,
           endTime,
           testData,
-          requestCount
+          requestCount,
         );
         promises.push(workerPromise);
       }
@@ -408,7 +439,7 @@ export class PerformanceTestingSuite extends EventEmitter {
 
       // Calculate throughput metrics
       const totalRequests = allIterations.length;
-      const successfulRequests = allIterations.filter(i => i.success).length;
+      const successfulRequests = allIterations.filter((i) => i.success).length;
       const totalDuration = Date.now() - startTime;
       const actualThroughput = (totalRequests / totalDuration) * 1000; // requests per second
 
@@ -422,22 +453,21 @@ export class PerformanceTestingSuite extends EventEmitter {
         throughput: actualThroughput,
         concurrency,
         averageResponseTime: this.calculateAverageResponseTime(allIterations),
-        maxResponseTime: Math.max(...allIterations.map(i => i.responseTime)),
-        minResponseTime: Math.min(...allIterations.map(i => i.responseTime)),
+        maxResponseTime: Math.max(...allIterations.map((i) => i.responseTime)),
+        minResponseTime: Math.min(...allIterations.map((i) => i.responseTime)),
         passed: successfulRequests >= totalRequests * 0.95, // 95% success rate
         startTime,
-        endTime: Date.now()
+        endTime: Date.now(),
       };
 
       this.logger.log(`Throughput test completed: ${testId}`, {
         throughput: result.throughput,
         totalRequests: result.totalRequests,
-        successRate: (result.successfulRequests / result.totalRequests) * 100
+        successRate: (result.successfulRequests / result.totalRequests) * 100,
       });
 
-      this.emit('throughput-test:completed', result);
+      this.emit("throughput-test:completed", result);
       return result;
-
     } catch (error) {
       this.logger.error(`Throughput test failed: ${testId}`, error);
       throw error;
@@ -456,7 +486,7 @@ export class PerformanceTestingSuite extends EventEmitter {
    */
   compareWithBenchmark(
     functionName: string,
-    currentResult: PerformanceTestResult
+    currentResult: PerformanceTestResult,
   ): PerformanceComparison {
     const benchmark = this.benchmarks.get(functionName);
 
@@ -465,11 +495,14 @@ export class PerformanceTestingSuite extends EventEmitter {
         hasBenchmark: false,
         improvement: null,
         regression: false,
-        recommendation: 'No benchmark available. This result will be used as baseline.'
+        recommendation:
+          "No benchmark available. This result will be used as baseline.",
       };
     }
 
-    const improvement = (benchmark.averageResponseTime - currentResult.averageResponseTime) / benchmark.averageResponseTime;
+    const improvement =
+      (benchmark.averageResponseTime - currentResult.averageResponseTime) /
+      benchmark.averageResponseTime;
     const isRegression = improvement < -0.1; // 10% regression threshold
 
     return {
@@ -478,7 +511,10 @@ export class PerformanceTestingSuite extends EventEmitter {
       currentResponseTime: currentResult.averageResponseTime,
       improvement,
       regression: isRegression,
-      recommendation: this.generatePerformanceRecommendation(improvement, isRegression)
+      recommendation: this.generatePerformanceRecommendation(
+        improvement,
+        isRegression,
+      ),
     };
   }
 
@@ -486,26 +522,39 @@ export class PerformanceTestingSuite extends EventEmitter {
 
   private ensureInitialized(): void {
     if (!this.isInitialized) {
-      throw new Error('Performance Testing Suite not initialized. Call initialize() first.');
+      throw new Error(
+        "Performance Testing Suite not initialized. Call initialize() first.",
+      );
     }
   }
 
   private setupPerformanceMonitoring(): void {
     // Enable high-resolution timing
     if (perf_hooks.performance.timeOrigin === undefined) {
-      this.logger.warn('High-resolution timing not available. Performance measurements may be less accurate.');
+      this.logger.warn(
+        "High-resolution timing not available. Performance measurements may be less accurate.",
+      );
     }
   }
 
   private async loadPerformanceBenchmarks(): Promise<void> {
     // In a real implementation, this would load benchmarks from a database or file
-    this.logger.log('Loading performance benchmarks...');
+    this.logger.log("Loading performance benchmarks...");
 
     // Mock benchmarks for now
     const mockBenchmarks = new Map([
-      ['getPrismaClient', { averageResponseTime: 50, maxResponseTime: 100, throughput: 1000 }],
-      ['executeRawQuery', { averageResponseTime: 200, maxResponseTime: 500, throughput: 500 }],
-      ['prismaTransaction', { averageResponseTime: 300, maxResponseTime: 1000, throughput: 100 }]
+      [
+        "getPrismaClient",
+        { averageResponseTime: 50, maxResponseTime: 100, throughput: 1000 },
+      ],
+      [
+        "executeRawQuery",
+        { averageResponseTime: 200, maxResponseTime: 500, throughput: 500 },
+      ],
+      [
+        "prismaTransaction",
+        { averageResponseTime: 300, maxResponseTime: 1000, throughput: 100 },
+      ],
     ]);
 
     mockBenchmarks.forEach((benchmark, functionName) => {
@@ -515,7 +564,7 @@ export class PerformanceTestingSuite extends EventEmitter {
 
   private initializeTestScenarios(): void {
     // Initialize standard test scenarios
-    this.logger.log('Initializing performance test scenarios...');
+    this.logger.log("Initializing performance test scenarios...");
   }
 
   private initializeMetrics(): PerformanceMetrics {
@@ -532,21 +581,24 @@ export class PerformanceTestingSuite extends EventEmitter {
         cpuUsage: 0,
         memoryUsage: 0,
         networkUsage: 0,
-        diskUsage: 0
-      }
+        diskUsage: 0,
+      },
     };
   }
 
   private async executeWarmup(
     func: DatabaseFunction,
     iterations: number,
-    testData?: any[]
+    testData?: any[],
   ): Promise<void> {
     this.logger.log(`Executing warmup with ${iterations} iterations`);
 
     for (let i = 0; i < iterations; i++) {
       try {
-        await this.executeFunctionCall(func, testData?.[i % (testData?.length || 1)]);
+        await this.executeFunctionCall(
+          func,
+          testData?.[i % (testData?.length || 1)],
+        );
       } catch (error) {
         // Ignore warmup errors
       }
@@ -556,7 +608,7 @@ export class PerformanceTestingSuite extends EventEmitter {
   private async executePerformanceIteration(
     func: DatabaseFunction,
     iteration: number,
-    testData?: any
+    testData?: any,
   ): Promise<PerformanceIteration> {
     const startTime = perf_hooks.performance.now();
 
@@ -572,9 +624,8 @@ export class PerformanceTestingSuite extends EventEmitter {
         result,
         startTime,
         endTime,
-        resourceUsage: this.captureResourceUsage()
+        resourceUsage: this.captureResourceUsage(),
       };
-
     } catch (error) {
       const endTime = perf_hooks.performance.now();
       const responseTime = endTime - startTime;
@@ -586,18 +637,22 @@ export class PerformanceTestingSuite extends EventEmitter {
         error: error.message,
         startTime,
         endTime,
-        resourceUsage: this.captureResourceUsage()
+        resourceUsage: this.captureResourceUsage(),
       };
     }
   }
 
-  private async executeFunctionCall(func: DatabaseFunction, testData?: any): Promise<any> {
+  private async executeFunctionCall(
+    func: DatabaseFunction,
+    testData?: any,
+  ): Promise<any> {
     // Mock function execution - in real implementation, this would call the actual function
-    await new Promise(resolve => setTimeout(resolve, Math.random() * 100));
+    await new Promise((resolve) => setTimeout(resolve, Math.random() * 100));
 
     // Simulate occasional errors
-    if (Math.random() < 0.05) { // 5% error rate
-      throw new Error('Simulated function error');
+    if (Math.random() < 0.05) {
+      // 5% error rate
+      throw new Error("Simulated function error");
     }
 
     return { success: true, data: testData };
@@ -606,18 +661,21 @@ export class PerformanceTestingSuite extends EventEmitter {
   private calculateResponseTimeResult(
     context: PerformanceTestContext,
     scenario: PerformanceTestScenario,
-    iterations: PerformanceIteration[]
+    iterations: PerformanceIteration[],
   ): PerformanceTestResult {
-    const responseTimes = iterations.map(i => i.responseTime);
-    const successfulIterations = iterations.filter(i => i.success);
+    const responseTimes = iterations.map((i) => i.responseTime);
+    const successfulIterations = iterations.filter((i) => i.success);
 
-    const averageResponseTime = responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length;
+    const averageResponseTime =
+      responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length;
     const maxResponseTime = Math.max(...responseTimes);
     const minResponseTime = Math.min(...responseTimes);
-    const throughput = (successfulIterations.length / context.metrics.totalRequests) * 1000;
+    const throughput =
+      (successfulIterations.length / context.metrics.totalRequests) * 1000;
 
-    const passed = averageResponseTime <= scenario.expectedResponseTime &&
-                   maxResponseTime <= scenario.expectedResponseTime * 2; // Allow 2x threshold for max
+    const passed =
+      averageResponseTime <= scenario.expectedResponseTime &&
+      maxResponseTime <= scenario.expectedResponseTime * 2; // Allow 2x threshold for max
 
     return {
       testId: context.testId,
@@ -632,7 +690,10 @@ export class PerformanceTestingSuite extends EventEmitter {
       startTime: context.startTime,
       endTime: 0, // Will be set by caller
       successRate: (successfulIterations.length / iterations.length) * 100,
-      errorRate: ((iterations.length - successfulIterations.length) / iterations.length) * 100
+      errorRate:
+        ((iterations.length - successfulIterations.length) /
+          iterations.length) *
+        100,
     };
   }
 
@@ -640,7 +701,7 @@ export class PerformanceTestingSuite extends EventEmitter {
     func: DatabaseFunction,
     phase: { name: string; duration: number },
     config: LoadTestConfig,
-    testData?: any[]
+    testData?: any[],
   ): Promise<LoadTestPhaseResult> {
     const startTime = Date.now();
     const endTime = startTime + phase.duration;
@@ -649,7 +710,7 @@ export class PerformanceTestingSuite extends EventEmitter {
     const targetConcurrency = config.maxConcurrency;
     const iterations: PerformanceIteration[] = [];
 
-    if (phase.name === 'ramp-up') {
+    if (phase.name === "ramp-up") {
       // Gradually increase concurrency
       const rampUpSteps = 10;
       const stepDuration = phase.duration / rampUpSteps;
@@ -661,17 +722,17 @@ export class PerformanceTestingSuite extends EventEmitter {
           func,
           currentConcurrency,
           stepDuration,
-          testData
+          testData,
         );
         iterations.push(...stepIterations);
       }
-    } else if (phase.name === 'sustain') {
+    } else if (phase.name === "sustain") {
       // Maintain target concurrency
       const stepIterations = await this.executeLoadTestStep(
         func,
         targetConcurrency,
         phase.duration,
-        testData
+        testData,
       );
       iterations.push(...stepIterations);
     } else {
@@ -680,19 +741,21 @@ export class PerformanceTestingSuite extends EventEmitter {
       const stepDuration = phase.duration / rampDownSteps;
 
       for (let step = rampDownSteps; step > 0; step--) {
-        currentConcurrency = Math.floor((step / rampDownSteps) * targetConcurrency);
+        currentConcurrency = Math.floor(
+          (step / rampDownSteps) * targetConcurrency,
+        );
         const stepIterations = await this.executeLoadTestStep(
           func,
           Math.max(1, currentConcurrency),
           stepDuration,
-          testData
+          testData,
         );
         iterations.push(...stepIterations);
       }
     }
 
     const totalRequests = iterations.length;
-    const successfulRequests = iterations.filter(i => i.success).length;
+    const successfulRequests = iterations.filter((i) => i.success).length;
     const averageResponseTime = this.calculateAverageResponseTime(iterations);
 
     return {
@@ -702,7 +765,7 @@ export class PerformanceTestingSuite extends EventEmitter {
       successfulRequests,
       averageResponseTime,
       maxConcurrency: targetConcurrency,
-      actualThroughput: (totalRequests / phase.duration) * 1000
+      actualThroughput: (totalRequests / phase.duration) * 1000,
     };
   }
 
@@ -710,13 +773,18 @@ export class PerformanceTestingSuite extends EventEmitter {
     func: DatabaseFunction,
     concurrency: number,
     duration: number,
-    testData?: any[]
+    testData?: any[],
   ): Promise<PerformanceIteration[]> {
     const promises: Promise<PerformanceIteration[]>[] = [];
     const endTime = Date.now() + duration;
 
     for (let i = 0; i < concurrency; i++) {
-      const workerPromise = this.executeThroughputWorker(func, endTime, testData, i);
+      const workerPromise = this.executeThroughputWorker(
+        func,
+        endTime,
+        testData,
+        i,
+      );
       promises.push(workerPromise);
     }
 
@@ -729,17 +797,27 @@ export class PerformanceTestingSuite extends EventEmitter {
     func: DatabaseFunction,
     config: LoadTestConfig,
     phaseResults: LoadTestPhaseResult[],
-    startTime: number
+    startTime: number,
   ): LoadTestResult {
-    const totalRequests = phaseResults.reduce((sum, phase) => sum + phase.totalRequests, 0);
-    const successfulRequests = phaseResults.reduce((sum, phase) => sum + phase.successfulRequests, 0);
+    const totalRequests = phaseResults.reduce(
+      (sum, phase) => sum + phase.totalRequests,
+      0,
+    );
+    const successfulRequests = phaseResults.reduce(
+      (sum, phase) => sum + phase.successfulRequests,
+      0,
+    );
     const totalDuration = Date.now() - startTime;
-    const averageResponseTime = phaseResults.reduce((sum, phase) => sum + phase.averageResponseTime, 0) / phaseResults.length;
+    const averageResponseTime =
+      phaseResults.reduce((sum, phase) => sum + phase.averageResponseTime, 0) /
+      phaseResults.length;
     const actualThroughput = (totalRequests / totalDuration) * 1000;
 
-    const errorRate = ((totalRequests - successfulRequests) / totalRequests) * 100;
-    const passed = errorRate <= config.acceptableErrorRate &&
-                   actualThroughput >= config.targetThroughput * 0.8; // 80% of target
+    const errorRate =
+      ((totalRequests - successfulRequests) / totalRequests) * 100;
+    const passed =
+      errorRate <= config.acceptableErrorRate &&
+      actualThroughput >= config.targetThroughput * 0.8; // 80% of target
 
     return {
       testId,
@@ -755,7 +833,7 @@ export class PerformanceTestingSuite extends EventEmitter {
       passed,
       phases: phaseResults,
       startTime,
-      endTime: Date.now()
+      endTime: Date.now(),
     };
   }
 
@@ -763,15 +841,21 @@ export class PerformanceTestingSuite extends EventEmitter {
     func: DatabaseFunction,
     concurrency: number,
     duration: number,
-    testData?: any[]
+    testData?: any[],
   ): Promise<StressTestStepResult> {
-    const iterations = await this.executeLoadTestStep(func, concurrency, duration, testData);
+    const iterations = await this.executeLoadTestStep(
+      func,
+      concurrency,
+      duration,
+      testData,
+    );
 
     const totalRequests = iterations.length;
-    const successfulRequests = iterations.filter(i => i.success).length;
+    const successfulRequests = iterations.filter((i) => i.success).length;
     const averageResponseTime = this.calculateAverageResponseTime(iterations);
-    const maxResponseTime = Math.max(...iterations.map(i => i.responseTime));
-    const errorRate = ((totalRequests - successfulRequests) / totalRequests) * 100;
+    const maxResponseTime = Math.max(...iterations.map((i) => i.responseTime));
+    const errorRate =
+      ((totalRequests - successfulRequests) / totalRequests) * 100;
 
     return {
       concurrency,
@@ -781,28 +865,35 @@ export class PerformanceTestingSuite extends EventEmitter {
       maxResponseTime,
       errorRate,
       throughput: (totalRequests / duration) * 1000,
-      systemStable: errorRate < 10 && averageResponseTime < 5000 // Basic stability criteria
+      systemStable: errorRate < 10 && averageResponseTime < 5000, // Basic stability criteria
     };
   }
 
   private isBreakingPoint(stepResult: StressTestStepResult): boolean {
-    return stepResult.errorRate > 50 || // High error rate
-           stepResult.averageResponseTime > 10000 || // Very slow responses
-           !stepResult.systemStable; // System instability
+    return (
+      stepResult.errorRate > 50 || // High error rate
+      stepResult.averageResponseTime > 10000 || // Very slow responses
+      !stepResult.systemStable
+    ); // System instability
   }
 
   private async executeRecoveryTest(
     func: DatabaseFunction,
     config: StressTestConfig,
-    testData?: any[]
+    testData?: any[],
   ): Promise<StressTestStepResult> {
-    this.logger.log('Executing recovery test...');
+    this.logger.log("Executing recovery test...");
 
     // Wait for system to stabilize
-    await new Promise(resolve => setTimeout(resolve, 5000));
+    await new Promise((resolve) => setTimeout(resolve, 5000));
 
     // Test with low concurrency
-    return this.executeStressTestStep(func, config.startConcurrency, config.stepDuration, testData);
+    return this.executeStressTestStep(
+      func,
+      config.startConcurrency,
+      config.stepDuration,
+      testData,
+    );
   }
 
   private aggregateStressTestResults(
@@ -811,14 +902,25 @@ export class PerformanceTestingSuite extends EventEmitter {
     config: StressTestConfig,
     stepResults: StressTestStepResult[],
     recoveryResult: StressTestStepResult | undefined,
-    startTime: number
+    startTime: number,
   ): StressTestResult {
-    const lastSuccessfulStep = stepResults.reverse().find(step => step.systemStable);
-    const maxSuccessfulConcurrency = lastSuccessfulStep?.concurrency || config.startConcurrency;
-    const breakingPoint = stepResults.find(step => !step.systemStable)?.concurrency;
+    const lastSuccessfulStep = stepResults
+      .reverse()
+      .find((step) => step.systemStable);
+    const maxSuccessfulConcurrency =
+      lastSuccessfulStep?.concurrency || config.startConcurrency;
+    const breakingPoint = stepResults.find(
+      (step) => !step.systemStable,
+    )?.concurrency;
 
-    const totalRequests = stepResults.reduce((sum, step) => sum + step.totalRequests, 0);
-    const successfulRequests = stepResults.reduce((sum, step) => sum + step.successfulRequests, 0);
+    const totalRequests = stepResults.reduce(
+      (sum, step) => sum + step.totalRequests,
+      0,
+    );
+    const successfulRequests = stepResults.reduce(
+      (sum, step) => sum + step.successfulRequests,
+      0,
+    );
 
     return {
       testId,
@@ -832,7 +934,7 @@ export class PerformanceTestingSuite extends EventEmitter {
       systemRecovered: recoveryResult?.systemStable || false,
       passed: maxSuccessfulConcurrency >= config.startConcurrency * 2, // At least 2x scaling
       startTime,
-      endTime: Date.now()
+      endTime: Date.now(),
     };
   }
 
@@ -840,14 +942,18 @@ export class PerformanceTestingSuite extends EventEmitter {
     func: DatabaseFunction,
     endTime: number,
     testData?: any[],
-    workerId: number = 0
+    workerId: number = 0,
   ): Promise<PerformanceIteration[]> {
     const iterations: PerformanceIteration[] = [];
     let iterationCount = 0;
 
     while (Date.now() < endTime) {
       const data = testData?.[iterationCount % (testData?.length || 1)];
-      const iteration = await this.executePerformanceIteration(func, iterationCount, data);
+      const iteration = await this.executePerformanceIteration(
+        func,
+        iterationCount,
+        data,
+      );
       iterations.push(iteration);
       iterationCount++;
     }
@@ -855,7 +961,9 @@ export class PerformanceTestingSuite extends EventEmitter {
     return iterations;
   }
 
-  private calculateAverageResponseTime(iterations: PerformanceIteration[]): number {
+  private calculateAverageResponseTime(
+    iterations: PerformanceIteration[],
+  ): number {
     if (iterations.length === 0) return 0;
     const totalTime = iterations.reduce((sum, i) => sum + i.responseTime, 0);
     return totalTime / iterations.length;
@@ -869,33 +977,39 @@ export class PerformanceTestingSuite extends EventEmitter {
       cpuUsage: cpuUsage.user + cpuUsage.system,
       memoryUsage: memUsage.heapUsed,
       networkUsage: 0, // Would need additional monitoring
-      diskUsage: 0     // Would need additional monitoring
+      diskUsage: 0, // Would need additional monitoring
     };
   }
 
-  private async storeBenchmark(func: DatabaseFunction, result: PerformanceTestResult): Promise<void> {
+  private async storeBenchmark(
+    func: DatabaseFunction,
+    result: PerformanceTestResult,
+  ): Promise<void> {
     const benchmark: PerformanceBenchmark = {
       functionName: func.name,
       averageResponseTime: result.averageResponseTime,
       maxResponseTime: result.maxResponseTime,
       throughput: result.throughput,
       timestamp: Date.now(),
-      testId: result.testId
+      testId: result.testId,
     };
 
     this.benchmarks.set(func.name, benchmark);
     this.logger.log(`Stored performance benchmark for ${func.name}`, benchmark);
   }
 
-  private generatePerformanceRecommendation(improvement: number, isRegression: boolean): string {
+  private generatePerformanceRecommendation(
+    improvement: number,
+    isRegression: boolean,
+  ): string {
     if (isRegression) {
-      return 'Performance regression detected. Consider investigating recent changes or optimizing the function.';
+      return "Performance regression detected. Consider investigating recent changes or optimizing the function.";
     } else if (improvement > 0.2) {
-      return 'Significant performance improvement detected. Consider updating benchmark.';
+      return "Significant performance improvement detected. Consider updating benchmark.";
     } else if (improvement > 0) {
-      return 'Minor performance improvement. Function is performing well.';
+      return "Minor performance improvement. Function is performing well.";
     } else {
-      return 'Performance is stable within expected range.';
+      return "Performance is stable within expected range.";
     }
   }
 }

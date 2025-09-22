@@ -10,7 +10,11 @@
  * @created 2025-09-20
  */
 
-import { ValidationLevel, ErrorCategory, WrapperError } from '../../function-wrapper/interfaces/wrapper-types';
+import {
+  ValidationLevel,
+  ErrorCategory,
+  WrapperError,
+} from "../../function-wrapper/interfaces/wrapper-types";
 
 /**
  * Quality Gate Status Enumeration
@@ -18,22 +22,22 @@ import { ValidationLevel, ErrorCategory, WrapperError } from '../../function-wra
  */
 export enum QualityGateStatus {
   /** Gate is passing all criteria */
-  PASSED = 'passed',
+  PASSED = "passed",
 
   /** Gate is failing but not blocking */
-  WARNING = 'warning',
+  WARNING = "warning",
 
   /** Gate is failing and blocking deployment */
-  FAILED = 'failed',
+  FAILED = "failed",
 
   /** Gate is currently being evaluated */
-  EVALUATING = 'evaluating',
+  EVALUATING = "evaluating",
 
   /** Gate evaluation was skipped */
-  SKIPPED = 'skipped',
+  SKIPPED = "skipped",
 
   /** Gate evaluation encountered an error */
-  ERROR = 'error'
+  ERROR = "error",
 }
 
 /**
@@ -42,22 +46,22 @@ export enum QualityGateStatus {
  */
 export enum QualityGateType {
   /** Performance-related gates */
-  PERFORMANCE = 'performance',
+  PERFORMANCE = "performance",
 
   /** Security validation gates */
-  SECURITY = 'security',
+  SECURITY = "security",
 
   /** Test coverage gates */
-  COVERAGE = 'coverage',
+  COVERAGE = "coverage",
 
   /** Function wrapper integrity gates */
-  INTEGRITY = 'integrity',
+  INTEGRITY = "integrity",
 
   /** Compliance validation gates */
-  COMPLIANCE = 'compliance',
+  COMPLIANCE = "compliance",
 
   /** Custom business logic gates */
-  CUSTOM = 'custom'
+  CUSTOM = "custom",
 }
 
 /**
@@ -66,16 +70,16 @@ export enum QualityGateType {
  */
 export enum QualityGatePriority {
   /** Critical gates that must pass - block on failure */
-  CRITICAL = 'critical',
+  CRITICAL = "critical",
 
   /** High priority gates - warn on failure */
-  HIGH = 'high',
+  HIGH = "high",
 
   /** Medium priority gates - log on failure */
-  MEDIUM = 'medium',
+  MEDIUM = "medium",
 
   /** Low priority gates - informational */
-  LOW = 'low'
+  LOW = "low",
 }
 
 /**
@@ -84,19 +88,19 @@ export enum QualityGatePriority {
  */
 export enum RollbackStrategy {
   /** Immediate rollback on failure */
-  IMMEDIATE = 'immediate',
+  IMMEDIATE = "immediate",
 
   /** Gradual rollback over time */
-  GRADUAL = 'gradual',
+  GRADUAL = "gradual",
 
   /** Canary rollback to subset */
-  CANARY = 'canary',
+  CANARY = "canary",
 
   /** Blue-green deployment rollback */
-  BLUE_GREEN = 'blue_green',
+  BLUE_GREEN = "blue_green",
 
   /** Manual rollback only */
-  MANUAL = 'manual'
+  MANUAL = "manual",
 }
 
 /**
@@ -105,19 +109,19 @@ export enum RollbackStrategy {
  */
 export enum ApprovalState {
   /** Pending approval */
-  PENDING = 'pending',
+  PENDING = "pending",
 
   /** Approved by authorized user */
-  APPROVED = 'approved',
+  APPROVED = "approved",
 
   /** Rejected by authorized user */
-  REJECTED = 'rejected',
+  REJECTED = "rejected",
 
   /** Approval expired */
-  EXPIRED = 'expired',
+  EXPIRED = "expired",
 
   /** Approval revoked */
-  REVOKED = 'revoked'
+  REVOKED = "revoked",
 }
 
 /**
@@ -234,14 +238,14 @@ export interface QualityGateThreshold {
  * Operators for threshold comparisons
  */
 export enum ThresholdOperator {
-  LESS_THAN = 'lt',
-  LESS_THAN_OR_EQUAL = 'lte',
-  GREATER_THAN = 'gt',
-  GREATER_THAN_OR_EQUAL = 'gte',
-  EQUALS = 'eq',
-  NOT_EQUALS = 'ne',
-  BETWEEN = 'between',
-  NOT_BETWEEN = 'not_between'
+  LESS_THAN = "lt",
+  LESS_THAN_OR_EQUAL = "lte",
+  GREATER_THAN = "gt",
+  GREATER_THAN_OR_EQUAL = "gte",
+  EQUALS = "eq",
+  NOT_EQUALS = "ne",
+  BETWEEN = "between",
+  NOT_BETWEEN = "not_between",
 }
 
 /**
@@ -508,7 +512,7 @@ export interface ValidationStep {
   readonly stepName: string;
 
   /** Step status */
-  readonly status: 'passed' | 'failed' | 'skipped' | 'error';
+  readonly status: "passed" | "failed" | "skipped" | "error";
 
   /** Step execution time */
   readonly executionTime: number;
@@ -529,7 +533,7 @@ export interface QualityGateLogEntry {
   readonly timestamp: Date;
 
   /** Log level */
-  readonly level: 'debug' | 'info' | 'warn' | 'error';
+  readonly level: "debug" | "info" | "warn" | "error";
 
   /** Log message */
   readonly message: string;
@@ -663,16 +667,16 @@ export interface QualityGatePipelineConfig {
  */
 export enum PipelineExecutionMode {
   /** Execute all gates regardless of failures */
-  CONTINUE_ALL = 'continue_all',
+  CONTINUE_ALL = "continue_all",
 
   /** Stop on first critical failure */
-  FAIL_FAST = 'fail_fast',
+  FAIL_FAST = "fail_fast",
 
   /** Stop on any failure */
-  STOP_ON_FAILURE = 'stop_on_failure',
+  STOP_ON_FAILURE = "stop_on_failure",
 
   /** Execute based on gate priorities */
-  PRIORITY_BASED = 'priority_based'
+  PRIORITY_BASED = "priority_based",
 }
 
 /**
@@ -785,17 +789,17 @@ export interface QualityAssessment {
  * Quality grades for assessments
  */
 export enum QualityGrade {
-  A_PLUS = 'A+',
-  A = 'A',
-  A_MINUS = 'A-',
-  B_PLUS = 'B+',
-  B = 'B',
-  B_MINUS = 'B-',
-  C_PLUS = 'C+',
-  C = 'C',
-  C_MINUS = 'C-',
-  D = 'D',
-  F = 'F'
+  A_PLUS = "A+",
+  A = "A",
+  A_MINUS = "A-",
+  B_PLUS = "B+",
+  B = "B",
+  B_MINUS = "B-",
+  C_PLUS = "C+",
+  C = "C",
+  C_MINUS = "C-",
+  D = "D",
+  F = "F",
 }
 
 /**
@@ -824,10 +828,10 @@ export interface QualityTrends {
  * Direction of quality trends
  */
 export enum TrendDirection {
-  IMPROVING = 'improving',
-  STABLE = 'stable',
-  DECLINING = 'declining',
-  UNKNOWN = 'unknown'
+  IMPROVING = "improving",
+  STABLE = "stable",
+  DECLINING = "declining",
+  UNKNOWN = "unknown",
 }
 
 /**
@@ -857,7 +861,7 @@ export interface QualityDataPoint {
  */
 export interface ComplianceStatus {
   /** Overall compliance state */
-  readonly status: 'compliant' | 'non_compliant' | 'partial' | 'unknown';
+  readonly status: "compliant" | "non_compliant" | "partial" | "unknown";
 
   /** Compliance frameworks */
   readonly frameworks: readonly ComplianceFrameworkStatus[];
@@ -878,7 +882,7 @@ export interface ComplianceFrameworkStatus {
   readonly framework: string;
 
   /** Compliance status */
-  readonly status: 'compliant' | 'non_compliant' | 'partial';
+  readonly status: "compliant" | "non_compliant" | "partial";
 
   /** Compliance score */
   readonly score: number;
@@ -938,22 +942,22 @@ export interface RollbackTrigger {
  */
 export enum RollbackCondition {
   /** Error rate exceeds threshold */
-  ERROR_RATE_THRESHOLD = 'error_rate_threshold',
+  ERROR_RATE_THRESHOLD = "error_rate_threshold",
 
   /** Response time exceeds threshold */
-  RESPONSE_TIME_THRESHOLD = 'response_time_threshold',
+  RESPONSE_TIME_THRESHOLD = "response_time_threshold",
 
   /** Security violation detected */
-  SECURITY_VIOLATION = 'security_violation',
+  SECURITY_VIOLATION = "security_violation",
 
   /** Critical gate failure */
-  CRITICAL_GATE_FAILURE = 'critical_gate_failure',
+  CRITICAL_GATE_FAILURE = "critical_gate_failure",
 
   /** Manual rollback request */
-  MANUAL_REQUEST = 'manual_request',
+  MANUAL_REQUEST = "manual_request",
 
   /** Health check failure */
-  HEALTH_CHECK_FAILURE = 'health_check_failure'
+  HEALTH_CHECK_FAILURE = "health_check_failure",
 }
 
 /**
@@ -1007,22 +1011,22 @@ export interface RecoveryStep {
  */
 export enum RecoveryStepType {
   /** Execute script or command */
-  SCRIPT = 'script',
+  SCRIPT = "script",
 
   /** Call API endpoint */
-  API_CALL = 'api_call',
+  API_CALL = "api_call",
 
   /** Database operation */
-  DATABASE = 'database',
+  DATABASE = "database",
 
   /** Service restart */
-  SERVICE_RESTART = 'service_restart',
+  SERVICE_RESTART = "service_restart",
 
   /** Configuration change */
-  CONFIG_CHANGE = 'config_change',
+  CONFIG_CHANGE = "config_change",
 
   /** Custom action */
-  CUSTOM = 'custom'
+  CUSTOM = "custom",
 }
 
 /**
@@ -1037,7 +1041,7 @@ export interface RecoveryRetryConfig {
   readonly delay: number;
 
   /** Backoff strategy */
-  readonly backoffStrategy: 'fixed' | 'linear' | 'exponential';
+  readonly backoffStrategy: "fixed" | "linear" | "exponential";
 
   /** Maximum delay between retries */
   readonly maxDelay: number;
@@ -1066,11 +1070,11 @@ export interface RollbackNotificationSettings {
  * Available notification channels
  */
 export enum NotificationChannel {
-  EMAIL = 'email',
-  SLACK = 'slack',
-  SMS = 'sms',
-  WEBHOOK = 'webhook',
-  PAGER_DUTY = 'pager_duty'
+  EMAIL = "email",
+  SLACK = "slack",
+  SMS = "sms",
+  WEBHOOK = "webhook",
+  PAGER_DUTY = "pager_duty",
 }
 
 /**
@@ -1210,10 +1214,10 @@ export interface ApproverDefinition {
  * Types of approvers
  */
 export enum ApproverType {
-  USER = 'user',
-  GROUP = 'group',
-  ROLE = 'role',
-  SERVICE_ACCOUNT = 'service_account'
+  USER = "user",
+  GROUP = "group",
+  ROLE = "role",
+  SERVICE_ACCOUNT = "service_account",
 }
 
 /**
@@ -1240,19 +1244,19 @@ export interface ApprovalCondition {
  */
 export enum ApprovalConditionType {
   /** Production environment deployment */
-  PRODUCTION_DEPLOYMENT = 'production_deployment',
+  PRODUCTION_DEPLOYMENT = "production_deployment",
 
   /** High risk change */
-  HIGH_RISK_CHANGE = 'high_risk_change',
+  HIGH_RISK_CHANGE = "high_risk_change",
 
   /** Security policy violation */
-  SECURITY_VIOLATION = 'security_violation',
+  SECURITY_VIOLATION = "security_violation",
 
   /** Performance degradation */
-  PERFORMANCE_DEGRADATION = 'performance_degradation',
+  PERFORMANCE_DEGRADATION = "performance_degradation",
 
   /** Custom condition */
-  CUSTOM = 'custom'
+  CUSTOM = "custom",
 }
 
 /**
@@ -1381,7 +1385,7 @@ export interface ApprovalRecord {
   readonly approver: ApproverInfo;
 
   /** Approval decision */
-  readonly decision: 'approved' | 'rejected';
+  readonly decision: "approved" | "rejected";
 
   /** Approval timestamp */
   readonly timestamp: Date;
@@ -1461,10 +1465,10 @@ export interface ApprovalTimelineEvent {
  * Types of approval events
  */
 export enum ApprovalEventType {
-  REQUESTED = 'requested',
-  APPROVED = 'approved',
-  REJECTED = 'rejected',
-  EXPIRED = 'expired',
-  ESCALATED = 'escalated',
-  WITHDRAWN = 'withdrawn'
+  REQUESTED = "requested",
+  APPROVED = "approved",
+  REJECTED = "rejected",
+  EXPIRED = "expired",
+  ESCALATED = "escalated",
+  WITHDRAWN = "withdrawn",
 }

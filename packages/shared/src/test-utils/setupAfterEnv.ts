@@ -13,7 +13,7 @@
  */
 
 import { expect, jest, beforeEach, afterEach } from "@jest/globals";
-import type { CustomMatcherResult } from 'expect';
+import type { CustomMatcherResult } from "expect";
 
 declare global {
   namespace jest {
@@ -456,7 +456,9 @@ export const TestUtils = {
       if (typeof obj[key] === "function") {
         (mock as any)[key] = jest.fn();
       } else if (typeof obj[key] === "object" && obj[key] !== null) {
-        (mock as any)[key] = TestUtils.createMock(obj[key] as Record<string, unknown>);
+        (mock as any)[key] = TestUtils.createMock(
+          obj[key] as Record<string, unknown>,
+        );
       } else {
         (mock as any)[key] = obj[key];
       }

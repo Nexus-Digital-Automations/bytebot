@@ -795,11 +795,17 @@ export class ParlantEnhancedAuthService {
 
     // Determine risk level
     let riskLevel: RiskLevel;
-    if (totalRiskScore >= 80) {riskLevel = RiskLevel._CRITICAL;}
-    else if (totalRiskScore >= 60) {riskLevel = RiskLevel._HIGH;}
-    else if (totalRiskScore >= 40) {riskLevel = RiskLevel._MODERATE;}
-    else if (totalRiskScore >= 20) {riskLevel = RiskLevel._LOW;}
-    else {riskLevel = RiskLevel._MINIMAL;}
+    if (totalRiskScore >= 80) {
+      riskLevel = RiskLevel._CRITICAL;
+    } else if (totalRiskScore >= 60) {
+      riskLevel = RiskLevel._HIGH;
+    } else if (totalRiskScore >= 40) {
+      riskLevel = RiskLevel._MODERATE;
+    } else if (totalRiskScore >= 20) {
+      riskLevel = RiskLevel._LOW;
+    } else {
+      riskLevel = RiskLevel._MINIMAL;
+    }
 
     return {
       overallRiskScore: totalRiskScore,

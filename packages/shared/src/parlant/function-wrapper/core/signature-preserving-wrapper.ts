@@ -11,7 +11,7 @@
  * @created 2025-09-19
  */
 
-import { Logger } from '@nestjs/common';
+import { Logger } from "@nestjs/common";
 // ConversationState is imported from wrapper-types below
 import {
   AnyFunction,
@@ -34,14 +34,14 @@ import {
   BusinessImpact,
   ValidationLevel,
   ConversationContext,
-  ConversationState
-} from '../interfaces/wrapper-types';
+  ConversationState,
+} from "../interfaces/wrapper-types";
 
 // Import types needed for PARLANT integration
 import {
   ParlantValidationResponse,
-  SecurityLevel
-} from '../../monitoring/parlant-integration.service';
+  SecurityLevel,
+} from "../../monitoring/parlant-integration.service";
 
 /**
  * Core signature-preserving wrapper implementation
@@ -72,11 +72,16 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
     const description = this.config.description;
 
     // Create wrapped function with preserved signature using TypeScript magic
-    const wrappedFunction = async function (...args: Parameters<T>): Promise<WrapperResult<ReturnType<T>>> {
+    const wrappedFunction = async function (
+      ...args: Parameters<T>
+    ): Promise<WrapperResult<ReturnType<T>>> {
       const executionId = wrapper.generateExecutionId();
       const startTime = Date.now();
 
-      wrapper.logger.debug(`Starting execution ${executionId} for ${functionName} with args:`, args);
+      wrapper.logger.debug(
+        `Starting execution ${executionId} for ${functionName} with args:`,
+        args,
+      );
 
       try {
         // Step 1: Capture execution context
@@ -85,22 +90,23 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
           functionName,
           args,
           userContext,
-          executionId
+          executionId,
         );
 
         // Step 2: Pre-execution validation through PARLANT
-        const validationResult = wrapper.performParlantValidation(
-          validationContext
-        );
+        const validationResult =
+          wrapper.performParlantValidation(validationContext);
 
         if (!validationResult.approved) {
-          const error = new Error(`Function execution rejected: ${validationResult.reason}`);
-          (error as any).code = 'VALIDATION_REJECTED';
+          const error = new Error(
+            `Function execution rejected: ${validationResult.reason}`,
+          );
+          (error as any).code = "VALIDATION_REJECTED";
           (error as any).category = ErrorCategory.VALIDATION_ERROR;
           (error as any).metadata = {
             validationId: validationResult.validationId,
             functionName,
-            arguments: args
+            arguments: args,
           };
           throw error;
         }
@@ -109,7 +115,7 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
         const functionResult = await wrapper.executeWithMonitoring(
           wrapper.originalFunction,
           args,
-          executionId
+          executionId,
         );
 
         // Step 4: Post-execution processing
@@ -117,7 +123,7 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
           executionId,
           startTime,
           validationResult,
-          functionResult
+          functionResult,
         );
 
         // Step 5: Generate audit trail
@@ -128,7 +134,7 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
           userContext,
           validationResult,
           functionResult,
-          startTime
+          startTime,
         );
 
         // Step 6: Log successful execution
@@ -136,15 +142,14 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
           executionId,
           functionName,
           executionMetadata,
-          auditTrail
+          auditTrail,
         );
 
         return {
           result: functionResult,
           metadata: executionMetadata,
-          success: true
+          success: true,
         };
-
       } catch (error) {
         // Error handling with comprehensive logging
         const wrapperError = wrapper.handleExecutionError(
@@ -152,40 +157,40 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
           executionId,
           functionName,
           args,
-          startTime
+          startTime,
         );
 
         const executionMetadata = wrapper.createErrorExecutionMetadata(
           executionId,
           startTime,
-          wrapperError
+          wrapperError,
         );
 
         return {
           result: undefined as ReturnType<T>,
           metadata: executionMetadata,
           success: false,
-          error: wrapperError
+          error: wrapperError,
         };
       }
     } as WrapFunction<T>;
 
     // Preserve function metadata for debugging
-    Object.defineProperty(wrappedFunction, 'name', {
+    Object.defineProperty(wrappedFunction, "name", {
       value: `wrapped_${functionName}`,
-      configurable: false
+      configurable: false,
     });
 
-    Object.defineProperty(wrappedFunction, '__original', {
+    Object.defineProperty(wrappedFunction, "__original", {
       value: this.originalFunction,
       configurable: false,
-      writable: false
+      writable: false,
     });
 
-    Object.defineProperty(wrappedFunction, '__config', {
+    Object.defineProperty(wrappedFunction, "__config", {
       value: this.config,
       configurable: false,
-      writable: false
+      writable: false,
     });
 
     return wrappedFunction;
@@ -224,14 +229,14 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
     // TODO: Integrate with actual authentication service
     // For now, return mock context - will be replaced with real implementation
     return {
-      userId: 'system',
-      authToken: 'mock-token',
-      permissions: ['execute'],
+      userId: "system",
+      authToken: "mock-token",
+      permissions: ["execute"],
       sessionMetadata: {
-        sessionId: 'mock-session',
-        ipAddress: '127.0.0.1',
-        userAgent: 'Node.js'
-      }
+        sessionId: "mock-session",
+        ipAddress: "127.0.0.1",
+        userAgent: "Node.js",
+      },
     };
   }
 
@@ -248,7 +253,7 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
     functionName: string,
     parameters: readonly any[],
     userContext: UserContext,
-    executionId: string
+    executionId: string,
   ): ValidationContext {
     return {
       functionName,
@@ -261,8 +266,8 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
         executionId,
         functionId: this.config.functionId,
         validationLevel: this.config.validationLevel,
-        description: this.config.description
-      }
+        description: this.config.description,
+      },
     };
   }
 
@@ -273,7 +278,7 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
    * @returns Validation result
    */
   private performParlantValidation(
-    context: ValidationContext
+    context: ValidationContext,
   ): ValidationResult {
     const startTime = Date.now();
 
@@ -288,20 +293,22 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
         messages: [
           {
             id: `msg_${Date.now()}`,
-            role: 'system',
+            role: "system",
             content: `Validating execution of ${context.functionName}`,
-            timestamp: new Date()
+            timestamp: new Date(),
           },
           {
             id: `msg_${Date.now() + 1}`,
-            role: 'assistant',
-            content: approved ? 'Execution approved' : 'Execution rejected',
-            timestamp: new Date()
-          }
+            role: "assistant",
+            content: approved ? "Execution approved" : "Execution rejected",
+            timestamp: new Date(),
+          },
         ],
-        appliedGuidelines: ['security-validation', 'parameter-safety'],
-        toolsInvoked: ['parameter-validator', 'permission-checker'],
-        state: approved ? ConversationState.APPROVED : ConversationState.REJECTED
+        appliedGuidelines: ["security-validation", "parameter-safety"],
+        toolsInvoked: ["parameter-validator", "permission-checker"],
+        state: approved
+          ? ConversationState.APPROVED
+          : ConversationState.REJECTED,
       };
 
       return {
@@ -316,14 +323,17 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
         metadata: {
           validationLevel: this.config.validationLevel,
           parameterCount: context.parameters.length,
-          userPermissions: context.userContext.permissions
-        }
+          userPermissions: context.userContext.permissions,
+        },
       };
-
     } catch (error) {
-      this.logger.error(`PARLANT validation failed for ${context.functionName}:`, error);
+      this.logger.error(
+        `PARLANT validation failed for ${context.functionName}:`,
+        error,
+      );
 
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       // Return rejection on validation error
       return {
         approved: false,
@@ -334,11 +344,11 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
           messages: [],
           appliedGuidelines: [],
           toolsInvoked: [],
-          state: ConversationState.ERROR
+          state: ConversationState.ERROR,
         },
         confidence: 0.0,
         executionTime: Date.now() - startTime,
-        metadata: { error: errorMessage }
+        metadata: { error: errorMessage },
       };
     }
   }
@@ -355,15 +365,15 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
     switch (this.config.validationLevel) {
       case ValidationLevel.CRITICAL:
         // Critical operations require explicit approval
-        return this.hasPermission(context.userContext, 'critical-execute');
+        return this.hasPermission(context.userContext, "critical-execute");
 
       case ValidationLevel.HIGH:
         // High operations require enhanced validation
-        return this.hasPermission(context.userContext, 'high-execute');
+        return this.hasPermission(context.userContext, "high-execute");
 
       case ValidationLevel.MEDIUM:
         // Medium operations require basic validation
-        return this.hasPermission(context.userContext, 'execute');
+        return this.hasPermission(context.userContext, "execute");
 
       case ValidationLevel.LOW:
         // Low operations require minimal validation
@@ -386,9 +396,11 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
    * @returns Permission check result
    */
   private hasPermission(userContext: UserContext, permission: string): boolean {
-    return userContext.permissions.includes(permission) ||
-           userContext.permissions.includes('admin') ||
-           userContext.permissions.includes('*');
+    return (
+      userContext.permissions.includes(permission) ||
+      userContext.permissions.includes("admin") ||
+      userContext.permissions.includes("*")
+    );
   }
 
   /**
@@ -402,7 +414,7 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
   private async executeWithMonitoring<U>(
     func: (...args: any[]) => U | Promise<U>,
     args: any[],
-    executionId: string
+    executionId: string,
   ): Promise<U> {
     const startTime = Date.now();
     const memoryBefore = this.getMemoryUsage();
@@ -414,14 +426,13 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
       const result = func.apply(null, args);
 
       // Type guard for Promise-like objects
-      if (result && typeof (result as any).then === 'function') {
+      if (result && typeof (result as any).then === "function") {
         // Async function - await the promise
         return await (result as Promise<U>);
       } else {
         // Sync function - return directly as it's already the correct type
         return result as U;
       }
-
     } finally {
       const memoryAfter = this.getMemoryUsage();
       const executionTime = Date.now() - startTime;
@@ -436,8 +447,8 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
         databaseQueries: 0, // TODO: Implement database query tracking
         customMetrics: {
           executionTime,
-          memoryUsage: memoryAfter
-        }
+          memoryUsage: memoryAfter,
+        },
       };
 
       this.performanceHistory.push(metrics);
@@ -468,20 +479,22 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
     executionId: string,
     startTime: number,
     validationResult: ValidationResult,
-    functionResult: any
+    functionResult: any,
   ): ExecutionMetadata {
     const totalExecutionTime = Date.now() - startTime;
     const validationExecutionTime = validationResult.executionTime;
     const functionExecutionTime = totalExecutionTime - validationExecutionTime;
 
-    const performanceMetrics = this.performanceHistory[this.performanceHistory.length - 1] || {
+    const performanceMetrics = this.performanceHistory[
+      this.performanceHistory.length - 1
+    ] || {
       memoryBefore: 0,
       memoryAfter: 0,
       memoryDelta: 0,
       cpuTime: functionExecutionTime,
       networkRequests: 0,
       databaseQueries: 0,
-      customMetrics: {}
+      customMetrics: {},
     };
 
     // Create audit trail
@@ -492,7 +505,7 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
       this.captureUserContext(),
       validationResult,
       functionResult,
-      startTime
+      startTime,
     );
 
     return {
@@ -503,7 +516,7 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
       cacheStatus: CacheStatus.MISS, // TODO: Implement cache integration
       validationResult,
       performanceMetrics,
-      auditTrail
+      auditTrail,
     };
   }
 
@@ -518,7 +531,7 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
   private createErrorExecutionMetadata(
     executionId: string,
     startTime: number,
-    error: WrapperError
+    error: WrapperError,
   ): ExecutionMetadata {
     const totalExecutionTime = Date.now() - startTime;
 
@@ -526,17 +539,17 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
     const validationResult: ValidationResult = {
       approved: false,
       validationId: `val_error_${executionId}`,
-      reason: 'Execution failed',
+      reason: "Execution failed",
       conversationContext: {
         sessionId: executionId,
         messages: [],
         appliedGuidelines: [],
         toolsInvoked: [],
-        state: ConversationState.ERROR
+        state: ConversationState.ERROR,
       },
       confidence: 0.0,
       executionTime: 0,
-      metadata: { error: error.message }
+      metadata: { error: error.message },
     };
 
     const auditTrail = this.generateAuditTrail(
@@ -546,7 +559,7 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
       this.captureUserContext(),
       validationResult,
       null,
-      startTime
+      startTime,
     );
 
     return {
@@ -563,9 +576,14 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
         cpuTime: totalExecutionTime,
         networkRequests: 0,
         databaseQueries: 0,
-        customMetrics: { errorCode: typeof error.code === 'string' ? parseInt(error.code) || 500 : error.code }
+        customMetrics: {
+          errorCode:
+            typeof error.code === "string"
+              ? parseInt(error.code) || 500
+              : error.code,
+        },
       },
-      auditTrail
+      auditTrail,
     };
   }
 
@@ -588,7 +606,7 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
     userContext: UserContext,
     validationResult: ValidationResult,
     result: any,
-    startTime: number
+    startTime: number,
   ): AuditTrail {
     const endTime = new Date();
     const startTimeDate = new Date(startTime);
@@ -596,35 +614,35 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
     const functionCall: FunctionCall = {
       functionName,
       parameters: args,
-      parameterTypes: args.map(arg => typeof arg),
-      returnType: result ? typeof result : 'undefined'
+      parameterTypes: args.map((arg) => typeof arg),
+      returnType: result ? typeof result : "undefined",
     };
 
     const validationSteps: ValidationStep[] = [
       {
         stepId: `step_context_${executionId}`,
-        description: 'Create validation context',
-        result: 'passed',
+        description: "Create validation context",
+        result: "passed",
         executionTime: 5,
-        metadata: { step: 'context-creation' }
+        metadata: { step: "context-creation" },
       },
       {
         stepId: `step_validation_${executionId}`,
-        description: 'PARLANT conversational validation',
-        result: validationResult.approved ? 'passed' : 'failed',
+        description: "PARLANT conversational validation",
+        result: validationResult.approved ? "passed" : "failed",
         executionTime: validationResult.executionTime,
         metadata: {
           validationId: validationResult.validationId,
-          confidence: validationResult.confidence
-        }
-      }
+          confidence: validationResult.confidence,
+        },
+      },
     ];
 
     const resultSummary: ResultSummary = {
       success: validationResult.approved && result !== null,
-      resultType: result ? typeof result : 'error',
+      resultType: result ? typeof result : "error",
       resultSize: result ? JSON.stringify(result).length : 0,
-      businessImpact: this.assessBusinessImpact(functionName, result)
+      businessImpact: this.assessBusinessImpact(functionName, result),
     };
 
     return {
@@ -638,8 +656,8 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
         executionId,
         configurationUsed: this.config.functionId,
         validationLevel: this.config.validationLevel,
-        cacheEnabled: this.config.cacheable || false
-      }
+        cacheEnabled: this.config.cacheable || false,
+      },
     };
   }
 
@@ -650,32 +668,37 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
    * @param result - Function result
    * @returns Business impact assessment
    */
-  private assessBusinessImpact(functionName: string, result: any): BusinessImpact {
+  private assessBusinessImpact(
+    functionName: string,
+    result: any,
+  ): BusinessImpact {
     // Simple business impact assessment based on function type
-    const isWriteOperation = functionName.toLowerCase().includes('write') ||
-                           functionName.toLowerCase().includes('create') ||
-                           functionName.toLowerCase().includes('update') ||
-                           functionName.toLowerCase().includes('delete');
+    const isWriteOperation =
+      functionName.toLowerCase().includes("write") ||
+      functionName.toLowerCase().includes("create") ||
+      functionName.toLowerCase().includes("update") ||
+      functionName.toLowerCase().includes("delete");
 
-    const isCriticalSystem = functionName.toLowerCase().includes('auth') ||
-                           functionName.toLowerCase().includes('security') ||
-                           functionName.toLowerCase().includes('payment');
+    const isCriticalSystem =
+      functionName.toLowerCase().includes("auth") ||
+      functionName.toLowerCase().includes("security") ||
+      functionName.toLowerCase().includes("payment");
 
-    let level: 'low' | 'medium' | 'high' | 'critical' = 'low';
+    let level: "low" | "medium" | "high" | "critical" = "low";
 
     if (isCriticalSystem) {
-      level = 'critical';
+      level = "critical";
     } else if (isWriteOperation) {
-      level = 'high';
+      level = "high";
     } else {
-      level = 'medium';
+      level = "medium";
     }
 
     return {
       level,
-      affectedSystems: [functionName.split('.')[0] || 'unknown'],
-      dataSensitivity: isCriticalSystem ? 'restricted' : 'internal',
-      complianceRequirements: isCriticalSystem ? ['GDPR', 'SOX'] : []
+      affectedSystems: [functionName.split(".")[0] || "unknown"],
+      dataSensitivity: isCriticalSystem ? "restricted" : "internal",
+      complianceRequirements: isCriticalSystem ? ["GDPR", "SOX"] : [],
     };
   }
 
@@ -694,42 +717,42 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
     executionId: string,
     functionName: string,
     args: any[],
-    startTime: number
+    startTime: number,
   ): WrapperError {
     this.logger.error(`Function execution failed: ${functionName}`, {
       executionId,
       error: error.message,
       args,
-      executionTime: Date.now() - startTime
+      executionTime: Date.now() - startTime,
     });
 
     // Determine error category
     let category: ErrorCategory;
-    if (error.code === 'VALIDATION_REJECTED') {
+    if (error.code === "VALIDATION_REJECTED") {
       category = ErrorCategory.VALIDATION_ERROR;
-    } else if (error.name === 'TimeoutError') {
+    } else if (error.name === "TimeoutError") {
       category = ErrorCategory.TIMEOUT_ERROR;
-    } else if (error.name === 'PermissionError') {
+    } else if (error.name === "PermissionError") {
       category = ErrorCategory.PERMISSION_ERROR;
-    } else if (error.name === 'NetworkError') {
+    } else if (error.name === "NetworkError") {
       category = ErrorCategory.NETWORK_ERROR;
     } else {
       category = ErrorCategory.SYSTEM_ERROR;
     }
 
     return {
-      code: error.code || 'EXECUTION_ERROR',
-      message: error.message || 'Unknown execution error',
+      code: error.code || "EXECUTION_ERROR",
+      message: error.message || "Unknown execution error",
       originalError: error,
       category,
       metadata: {
         executionId,
         functionName,
         argumentCount: args.length,
-        executionTime: Date.now() - startTime
+        executionTime: Date.now() - startTime,
       },
       recoverySuggestions: this.generateRecoverySuggestions(category),
-      stackTrace: error.stack
+      stackTrace: error.stack,
     };
   }
 
@@ -743,33 +766,33 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
     switch (category) {
       case ErrorCategory.VALIDATION_ERROR:
         return [
-          'Verify user permissions',
-          'Check function parameters',
-          'Review validation configuration'
+          "Verify user permissions",
+          "Check function parameters",
+          "Review validation configuration",
         ];
       case ErrorCategory.TIMEOUT_ERROR:
         return [
-          'Increase timeout configuration',
-          'Optimize function performance',
-          'Check system resources'
+          "Increase timeout configuration",
+          "Optimize function performance",
+          "Check system resources",
         ];
       case ErrorCategory.PERMISSION_ERROR:
         return [
-          'Verify user authentication',
-          'Check role assignments',
-          'Review access control policies'
+          "Verify user authentication",
+          "Check role assignments",
+          "Review access control policies",
         ];
       case ErrorCategory.NETWORK_ERROR:
         return [
-          'Check network connectivity',
-          'Verify service endpoints',
-          'Review firewall settings'
+          "Check network connectivity",
+          "Verify service endpoints",
+          "Review firewall settings",
         ];
       default:
         return [
-          'Check system logs',
-          'Verify system configuration',
-          'Contact system administrator'
+          "Check system logs",
+          "Verify system configuration",
+          "Contact system administrator",
         ];
     }
   }
@@ -786,7 +809,7 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
     executionId: string,
     functionName: string,
     metadata: ExecutionMetadata,
-    auditTrail: AuditTrail
+    auditTrail: AuditTrail,
   ): void {
     this.logger.log(`Function execution successful: ${functionName}`, {
       executionId,
@@ -794,7 +817,7 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
       validationTime: metadata.validationExecutionTime,
       functionTime: metadata.functionExecutionTime,
       validationApproved: metadata.validationResult.approved,
-      cacheStatus: metadata.cacheStatus
+      cacheStatus: metadata.cacheStatus,
     });
 
     // TODO: Send audit trail to audit service
@@ -807,16 +830,26 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
    * @returns Wrapper statistics
    */
   public getStatistics(): WrapperStatistics {
-    const totalExecutions = Array.from(this.executionCount.values())
-      .reduce((sum, count) => sum + count, 0);
+    const totalExecutions = Array.from(this.executionCount.values()).reduce(
+      (sum, count) => sum + count,
+      0,
+    );
 
-    const avgExecutionTime = this.performanceHistory.length > 0
-      ? this.performanceHistory.reduce((sum, metric) => sum + metric.cpuTime, 0) / this.performanceHistory.length
-      : 0;
+    const avgExecutionTime =
+      this.performanceHistory.length > 0
+        ? this.performanceHistory.reduce(
+            (sum, metric) => sum + metric.cpuTime,
+            0,
+          ) / this.performanceHistory.length
+        : 0;
 
-    const avgMemoryUsage = this.performanceHistory.length > 0
-      ? this.performanceHistory.reduce((sum, metric) => sum + metric.memoryAfter, 0) / this.performanceHistory.length
-      : 0;
+    const avgMemoryUsage =
+      this.performanceHistory.length > 0
+        ? this.performanceHistory.reduce(
+            (sum, metric) => sum + metric.memoryAfter,
+            0,
+          ) / this.performanceHistory.length
+        : 0;
 
     return {
       functionId: this.config.functionId,
@@ -825,9 +858,7 @@ export class SignaturePreservingWrapper<T extends AnyFunction> {
       averageMemoryUsage: avgMemoryUsage,
       validationLevel: this.config.validationLevel,
       cacheEnabled: this.config.cacheable || false,
-      lastExecutionTime: this.performanceHistory.length > 0
-        ? new Date()
-        : null
+      lastExecutionTime: this.performanceHistory.length > 0 ? new Date() : null,
     };
   }
 
@@ -881,10 +912,12 @@ export class FunctionSignatureInspector {
    * @param func - Function to inspect
    * @returns Function signature information
    */
-  public static extractSignature<T extends AnyFunction>(func: T): FunctionSignature<T> {
-    const name = func.name || 'anonymous';
+  public static extractSignature<T extends AnyFunction>(
+    func: T,
+  ): FunctionSignature<T> {
+    const name = func.name || "anonymous";
     const parameterCount = func.length;
-    const isAsync = func.constructor.name === 'AsyncFunction';
+    const isAsync = func.constructor.name === "AsyncFunction";
     const source = func.toString();
 
     // Extract parameter names from function source
@@ -899,8 +932,8 @@ export class FunctionSignatureInspector {
       parameterNames,
       isAsync,
       returnTypeHint,
-      source: source.substring(0, 200) + (source.length > 200 ? '...' : ''),
-      originalFunction: func
+      source: source.substring(0, 200) + (source.length > 200 ? "..." : ""),
+      originalFunction: func,
     };
   }
 
@@ -919,12 +952,12 @@ export class FunctionSignatureInspector {
       }
 
       return match[1]
-        .split(',')
-        .map(param => param.trim().split(/\s+/)[0].split(':')[0])
-        .filter(param => param.length > 0 && param !== '...');
-
+        .split(",")
+        .map((param) => param.trim().split(/\s+/)[0].split(":")[0])
+        .filter((param) => param.length > 0 && param !== "...");
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       this.logger.warn(`Failed to extract parameter names: ${errorMessage}`);
       return [];
     }
@@ -945,16 +978,16 @@ export class FunctionSignatureInspector {
       }
 
       // Check for async function
-      if (source.includes('async')) {
-        return 'Promise<unknown>';
+      if (source.includes("async")) {
+        return "Promise<unknown>";
       }
 
-      return 'unknown';
-
+      return "unknown";
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       this.logger.warn(`Failed to infer return type: ${errorMessage}`);
-      return 'unknown';
+      return "unknown";
     }
   }
 
@@ -964,27 +997,33 @@ export class FunctionSignatureInspector {
    * @param func - Function to validate
    * @returns Compatibility result
    */
-  public static validateCompatibility<T extends AnyFunction>(func: T): CompatibilityResult {
+  public static validateCompatibility<T extends AnyFunction>(
+    func: T,
+  ): CompatibilityResult {
     const signature = this.extractSignature(func);
     const issues: string[] = [];
     const warnings: string[] = [];
 
     // Check for common compatibility issues
     if (signature.parameterCount > 10) {
-      warnings.push(`Function has ${signature.parameterCount} parameters, consider reducing for better performance`);
+      warnings.push(
+        `Function has ${signature.parameterCount} parameters, consider reducing for better performance`,
+      );
     }
 
-    if (signature.source.includes('eval(')) {
-      issues.push('Function contains eval() which is not supported');
+    if (signature.source.includes("eval(")) {
+      issues.push("Function contains eval() which is not supported");
     }
 
-    if (signature.source.includes('with(')) {
-      issues.push('Function contains with() statement which is not supported');
+    if (signature.source.includes("with(")) {
+      issues.push("Function contains with() statement which is not supported");
     }
 
     // Check for arrow function edge cases
-    if (signature.source.startsWith('(') && !signature.name) {
-      warnings.push('Anonymous arrow functions may have limited debugging information');
+    if (signature.source.startsWith("(") && !signature.name) {
+      warnings.push(
+        "Anonymous arrow functions may have limited debugging information",
+      );
     }
 
     const isCompatible = issues.length === 0;
@@ -994,7 +1033,11 @@ export class FunctionSignatureInspector {
       signature,
       issues,
       warnings,
-      recommendations: this.generateRecommendations(signature, issues, warnings)
+      recommendations: this.generateRecommendations(
+        signature,
+        issues,
+        warnings,
+      ),
     };
   }
 
@@ -1009,28 +1052,34 @@ export class FunctionSignatureInspector {
   private static generateRecommendations(
     signature: FunctionSignature<any>,
     issues: string[],
-    warnings: string[]
+    warnings: string[],
   ): string[] {
     const recommendations: string[] = [];
 
     if (!signature.name) {
-      recommendations.push('Consider naming the function for better debugging');
+      recommendations.push("Consider naming the function for better debugging");
     }
 
     if (signature.parameterCount === 0) {
-      recommendations.push('Consider adding meaningful parameters or documenting why none are needed');
+      recommendations.push(
+        "Consider adding meaningful parameters or documenting why none are needed",
+      );
     }
 
     if (signature.parameterCount > 5) {
-      recommendations.push('Consider using object parameters to reduce parameter count');
+      recommendations.push(
+        "Consider using object parameters to reduce parameter count",
+      );
     }
 
-    if (!signature.isAsync && signature.source.includes('Promise')) {
-      recommendations.push('Consider making the function async for better Promise handling');
+    if (!signature.isAsync && signature.source.includes("Promise")) {
+      recommendations.push(
+        "Consider making the function async for better Promise handling",
+      );
     }
 
     if (issues.length > 0) {
-      recommendations.push('Resolve compatibility issues before wrapping');
+      recommendations.push("Resolve compatibility issues before wrapping");
     }
 
     return recommendations;
@@ -1101,18 +1150,24 @@ export class TypeSafeWrapperCreator {
    */
   public static createWrapper<T extends AnyFunction>(
     originalFunction: T,
-    config: WrapperConfig
+    config: WrapperConfig,
   ): WrapFunction<T> {
     // Validate compatibility
-    const compatibility = FunctionSignatureInspector.validateCompatibility(originalFunction);
+    const compatibility =
+      FunctionSignatureInspector.validateCompatibility(originalFunction);
 
     if (!compatibility.compatible) {
-      throw new Error(`Function is not compatible with wrapper: ${compatibility.issues.join(', ')}`);
+      throw new Error(
+        `Function is not compatible with wrapper: ${compatibility.issues.join(", ")}`,
+      );
     }
 
     // Log warnings
     if (compatibility.warnings.length > 0) {
-      this.logger.warn(`Function wrapper warnings for ${config.functionId}:`, compatibility.warnings);
+      this.logger.warn(
+        `Function wrapper warnings for ${config.functionId}:`,
+        compatibility.warnings,
+      );
     }
 
     // Create signature-preserving wrapper
@@ -1131,7 +1186,7 @@ export class TypeSafeWrapperCreator {
   public static createValidatedWrapper<T extends AnyFunction>(
     originalFunction: T,
     config: WrapperConfig,
-    typeValidator?: TypeValidator<T>
+    typeValidator?: TypeValidator<T>,
   ): WrapFunction<T> {
     const wrappedFunction = this.createWrapper(originalFunction, config);
 
@@ -1152,13 +1207,15 @@ export class TypeSafeWrapperCreator {
    */
   private static addTypeValidation<T extends AnyFunction>(
     wrappedFunction: WrapFunction<T>,
-    typeValidator: TypeValidator<T>
+    typeValidator: TypeValidator<T>,
   ): WrapFunction<T> {
     return (async (...args: Parameters<T>) => {
       // Validate input types
       const inputValidation = typeValidator.validateInputs(args);
       if (!inputValidation.valid) {
-        throw new Error(`Type validation failed: ${inputValidation.errors.join(', ')}`);
+        throw new Error(
+          `Type validation failed: ${inputValidation.errors.join(", ")}`,
+        );
       }
 
       // Execute wrapped function
@@ -1168,7 +1225,10 @@ export class TypeSafeWrapperCreator {
       if (result.success && typeValidator.validateOutput) {
         const outputValidation = typeValidator.validateOutput(result.result);
         if (!outputValidation.valid) {
-          this.logger.warn(`Output type validation failed:`, outputValidation.errors);
+          this.logger.warn(
+            `Output type validation failed:`,
+            outputValidation.errors,
+          );
         }
       }
 

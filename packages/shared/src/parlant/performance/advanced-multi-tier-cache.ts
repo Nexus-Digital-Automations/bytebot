@@ -17,14 +17,14 @@
  * @created 2025-09-21
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { EventEmitter } from 'events';
-import { createHash } from 'crypto';
-import { performance } from 'perf_hooks';
-import { LRUCache } from 'lru-cache';
-import { Redis } from 'ioredis';
-import * as cluster from 'cluster';
-import { Worker, isMainThread, parentPort, workerData } from 'worker_threads';
+import { Injectable, Logger } from "@nestjs/common";
+import { EventEmitter } from "events";
+import { createHash } from "crypto";
+import { performance } from "perf_hooks";
+import { LRUCache } from "lru-cache";
+import { Redis } from "ioredis";
+import * as cluster from "cluster";
+import { Worker, isMainThread, parentPort, workerData } from "worker_threads";
 
 // Type guard utilities
 function isError(error: unknown): error is Error {
@@ -33,8 +33,8 @@ function isError(error: unknown): error is Error {
 
 function getErrorMessage(error: unknown): string {
   if (isError(error)) return error.message;
-  if (typeof error === 'string') return error;
-  return 'An unknown error occurred';
+  if (typeof error === "string") return error;
+  return "An unknown error occurred";
 }
 
 /**
@@ -46,8 +46,8 @@ interface CacheTierConfig {
   updateAgeOnGet: boolean;
   allowStale: boolean;
   compression: boolean;
-  serialization: 'json' | 'msgpack' | 'binary';
-  evictionPolicy: 'lru' | 'lfu' | 'ttl';
+  serialization: "json" | "msgpack" | "binary";
+  evictionPolicy: "lru" | "lfu" | "ttl";
 }
 
 /**
@@ -55,7 +55,7 @@ interface CacheTierConfig {
  */
 interface CacheResult<T = any> {
   data: T;
-  tier: 'L1' | 'L2' | 'L3';
+  tier: "L1" | "L2" | "L3";
   hitTime: number;
   metadata: {
     created: Date;
@@ -141,7 +141,7 @@ export class AdvancedMultiTierCacheService {
   private readonly cacheWarmer: CacheWarmingService;
 
   constructor() {
-    this.logger.log('Initializing Advanced Multi-Tier Cache System');
+    this.logger.log("Initializing Advanced Multi-Tier Cache System");
 
     // Initialize L1 Cache (Edge Memory)
     this.l1Cache = new LRUCache({
@@ -150,27 +150,30 @@ export class AdvancedMultiTierCacheService {
       sizeCalculation: (value: any) => JSON.stringify(value).length,
       ttl: 5 * 60 * 1000, // 5 minutes
       updateAgeOnGet: true,
-      allowStale: false
+      allowStale: false,
     });
 
     // Initialize L2 Cache (Distributed Redis)
-    this.l2Cache = new Redis.Cluster([
-      { host: 'redis-node-1', port: 6379 },
-      { host: 'redis-node-2', port: 6379 },
-      { host: 'redis-node-3', port: 6379 }
-    ], {
-      enableReadyCheck: true,
-      redisOptions: {
-        password: process.env.REDIS_PASSWORD,
-        db: 0,
-        connectTimeout: 1000,
-        commandTimeout: 2000,
-        retryDelayOnFailover: 100,
-        maxRetriesPerRequest: 3
+    this.l2Cache = new Redis.Cluster(
+      [
+        { host: "redis-node-1", port: 6379 },
+        { host: "redis-node-2", port: 6379 },
+        { host: "redis-node-3", port: 6379 },
+      ],
+      {
+        enableReadyCheck: true,
+        redisOptions: {
+          password: process.env.REDIS_PASSWORD,
+          db: 0,
+          connectTimeout: 1000,
+          commandTimeout: 2000,
+          retryDelayOnFailover: 100,
+          maxRetriesPerRequest: 3,
+        },
+        clusterRetryDelay: 1000,
+        enableOfflineQueue: false,
       },
-      clusterRetryDelay: 1000,
-      enableOfflineQueue: false
-    });
+    );
 
     // Initialize L3 Cache Pool
     this.l3CachePool = new Map();
@@ -198,8 +201,8 @@ export class AdvancedMultiTierCacheService {
       // L1: Edge memory cache (fastest - <5ms target)
       const l1Result = await this.getFromL1<T>(key);
       if (l1Result) {
-        this.recordHit('L1', performance.now() - startTime);
-        this.updateAccessPatterns(key, 'L1');
+        this.recordHit("L1", performance.now() - startTime);
+        this.updateAccessPatterns(key, "L1");
         return l1Result;
       }
 
@@ -208,8 +211,8 @@ export class AdvancedMultiTierCacheService {
       if (l2Result) {
         // Promote to L1 for faster future access
         await this.promoteToL1(key, l2Result.data);
-        this.recordHit('L2', performance.now() - startTime);
-        this.updateAccessPatterns(key, 'L2');
+        this.recordHit("L2", performance.now() - startTime);
+        this.updateAccessPatterns(key, "L2");
         return l2Result;
       }
 
@@ -218,18 +221,19 @@ export class AdvancedMultiTierCacheService {
       if (l3Result) {
         // Promote to upper levels based on strategy
         await this.promoteToUpperLevels(key, l3Result.data);
-        this.recordHit('L3', performance.now() - startTime);
-        this.updateAccessPatterns(key, 'L3');
+        this.recordHit("L3", performance.now() - startTime);
+        this.updateAccessPatterns(key, "L3");
         return l3Result;
       }
 
       // Cache miss across all tiers
       this.recordMiss(performance.now() - startTime);
       return null;
-
     } catch (error) {
-      this.logger.error(`Cache get error for key ${key}: ${getErrorMessage(error)}`);
-      this.recordError('get', error);
+      this.logger.error(
+        `Cache get error for key ${key}: ${getErrorMessage(error)}`,
+      );
+      this.recordError("get", error);
       return null;
     }
   }
@@ -237,12 +241,16 @@ export class AdvancedMultiTierCacheService {
   /**
    * Set data across appropriate cache tiers
    */
-  async set<T>(key: string, value: T, options?: {
-    ttl?: number;
-    tier?: 'L1' | 'L2' | 'L3' | 'all';
-    priority?: number;
-    tags?: string[];
-  }): Promise<boolean> {
+  async set<T>(
+    key: string,
+    value: T,
+    options?: {
+      ttl?: number;
+      tier?: "L1" | "L2" | "L3" | "all";
+      priority?: number;
+      tags?: string[];
+    },
+  ): Promise<boolean> {
     const startTime = performance.now();
 
     try {
@@ -250,33 +258,36 @@ export class AdvancedMultiTierCacheService {
       const ttl = options?.ttl || this.calculateOptimalTTL(key, value);
 
       switch (tier) {
-        case 'L1':
+        case "L1":
           return await this.setInL1(key, value, ttl);
 
-        case 'L2':
+        case "L2":
           return await this.setInL2(key, value, ttl);
 
-        case 'L3':
+        case "L3":
           return await this.setInL3(key, value, ttl);
 
-        case 'all':
+        case "all":
           const results = await Promise.allSettled([
             this.setInL1(key, value, ttl),
             this.setInL2(key, value, ttl),
-            this.setInL3(key, value, ttl)
+            this.setInL3(key, value, ttl),
           ]);
-          return results.every(result => result.status === 'fulfilled' && result.value);
+          return results.every(
+            (result) => result.status === "fulfilled" && result.value,
+          );
 
         default:
           return await this.setInL2(key, value, ttl); // Default to L2
       }
-
     } catch (error) {
-      this.logger.error(`Cache set error for key ${key}: ${getErrorMessage(error)}`);
-      this.recordError('set', error);
+      this.logger.error(
+        `Cache set error for key ${key}: ${getErrorMessage(error)}`,
+      );
+      this.recordError("set", error);
       return false;
     } finally {
-      this.recordOperation('set', performance.now() - startTime);
+      this.recordOperation("set", performance.now() - startTime);
     }
   }
 
@@ -289,19 +300,23 @@ export class AdvancedMultiTierCacheService {
 
     return {
       data: value,
-      tier: 'L1',
+      tier: "L1",
       hitTime: performance.now(),
       metadata: {
         created: new Date(),
         accessed: new Date(),
         hits: 1,
         size: JSON.stringify(value).length,
-        ttl: this.l1Cache.getRemainingTTL(key) || 0
-      }
+        ttl: this.l1Cache.getRemainingTTL(key) || 0,
+      },
     };
   }
 
-  private async setInL1<T>(key: string, value: T, ttl?: number): Promise<boolean> {
+  private async setInL1<T>(
+    key: string,
+    value: T,
+    ttl?: number,
+  ): Promise<boolean> {
     try {
       this.l1Cache.set(key, value, { ttl });
       return true;
@@ -326,15 +341,15 @@ export class AdvancedMultiTierCacheService {
 
       return {
         data,
-        tier: 'L2',
+        tier: "L2",
         hitTime: accessTime,
         metadata: {
           created: new Date(),
           accessed: new Date(),
           hits: 1,
           size: result.length,
-          ttl: await this.l2Cache.ttl(key)
-        }
+          ttl: await this.l2Cache.ttl(key),
+        },
       };
     } catch (error) {
       this.logger.error(`L2 cache get error: ${getErrorMessage(error)}`);
@@ -342,7 +357,11 @@ export class AdvancedMultiTierCacheService {
     }
   }
 
-  private async setInL2<T>(key: string, value: T, ttl?: number): Promise<boolean> {
+  private async setInL2<T>(
+    key: string,
+    value: T,
+    ttl?: number,
+  ): Promise<boolean> {
     try {
       const serialized = JSON.stringify(value);
       if (ttl) {
@@ -371,15 +390,15 @@ export class AdvancedMultiTierCacheService {
 
       return {
         data: result.data,
-        tier: 'L3',
+        tier: "L3",
         hitTime: accessTime,
         metadata: {
           created: result.created,
           accessed: new Date(),
           hits: result.hits + 1,
           size: result.size,
-          ttl: result.ttl
-        }
+          ttl: result.ttl,
+        },
       };
     } catch (error) {
       this.logger.error(`L3 cache get error: ${getErrorMessage(error)}`);
@@ -387,14 +406,18 @@ export class AdvancedMultiTierCacheService {
     }
   }
 
-  private async setInL3<T>(key: string, value: T, ttl?: number): Promise<boolean> {
+  private async setInL3<T>(
+    key: string,
+    value: T,
+    ttl?: number,
+  ): Promise<boolean> {
     try {
       this.l3CachePool.set(key, {
         data: value,
         created: new Date(),
         hits: 0,
         size: JSON.stringify(value).length,
-        ttl: ttl || 3600
+        ttl: ttl || 3600,
       });
       return true;
     } catch (error) {
@@ -439,7 +462,10 @@ export class AdvancedMultiTierCacheService {
     );
   }
 
-  private calculatePromotionStrategy<T>(key: string, value: T): PromotionStrategy {
+  private calculatePromotionStrategy<T>(
+    key: string,
+    value: T,
+  ): PromotionStrategy {
     const accessPattern = this.getAccessPattern(key);
 
     return {
@@ -447,14 +473,14 @@ export class AdvancedMultiTierCacheService {
       recency: 1 / (Date.now() - accessPattern.lastAccess),
       size: 1 / JSON.stringify(value).length,
       cost: this.calculateStorageCost(value),
-      prediction: this.predictionEngine.predictAccess(key)
+      prediction: this.predictionEngine.predictAccess(key),
     };
   }
 
   /**
    * Performance monitoring and metrics
    */
-  private recordHit(tier: 'L1' | 'L2' | 'L3', responseTime: number): void {
+  private recordHit(tier: "L1" | "L2" | "L3", responseTime: number): void {
     this.metrics[tier.toLowerCase() as keyof CacheMetrics].hits++;
     this.updateResponseTime(tier, responseTime);
     this.updateHitRates();
@@ -481,9 +507,11 @@ export class AdvancedMultiTierCacheService {
     this.metrics.l3.hitRate = l3Total > 0 ? this.metrics.l3.hits / l3Total : 0;
 
     // Overall hit rate
-    const totalHits = this.metrics.l1.hits + this.metrics.l2.hits + this.metrics.l3.hits;
+    const totalHits =
+      this.metrics.l1.hits + this.metrics.l2.hits + this.metrics.l3.hits;
     const totalRequests = totalHits + this.metrics.l1.misses;
-    this.metrics.overall.overallHitRate = totalRequests > 0 ? totalHits / totalRequests : 0;
+    this.metrics.overall.overallHitRate =
+      totalRequests > 0 ? totalHits / totalRequests : 0;
   }
 
   /**
@@ -513,43 +541,73 @@ export class AdvancedMultiTierCacheService {
   } {
     return {
       l1HitRate: this.metrics.l1.hitRate >= 0.95, // >95% target
-      overallHitRate: this.metrics.overall.overallHitRate >= 0.90, // >90% target
+      overallHitRate: this.metrics.overall.overallHitRate >= 0.9, // >90% target
       averageResponseTime: this.metrics.overall.averageResponseTime <= 200, // <200ms P50
       l1AccessTime: this.metrics.l1.averageAccessTime <= 5, // <5ms
       l2AccessTime: this.metrics.l2.averageAccessTime <= 15, // <15ms
-      l3AccessTime: this.metrics.l3.averageAccessTime <= 50 // <50ms
+      l3AccessTime: this.metrics.l3.averageAccessTime <= 50, // <50ms
     };
   }
 
   // Helper methods
   private initializeMetrics(): CacheMetrics {
     return {
-      l1: { hits: 0, misses: 0, hitRate: 0, averageAccessTime: 0, size: 0, evictions: 0 },
-      l2: { hits: 0, misses: 0, hitRate: 0, averageAccessTime: 0, connections: 0, latency: 0 },
-      l3: { hits: 0, misses: 0, hitRate: 0, averageAccessTime: 0, queryTime: 0, connectionPool: 0 },
-      overall: { totalHits: 0, totalMisses: 0, overallHitRate: 0, averageResponseTime: 0, throughput: 0 }
+      l1: {
+        hits: 0,
+        misses: 0,
+        hitRate: 0,
+        averageAccessTime: 0,
+        size: 0,
+        evictions: 0,
+      },
+      l2: {
+        hits: 0,
+        misses: 0,
+        hitRate: 0,
+        averageAccessTime: 0,
+        connections: 0,
+        latency: 0,
+      },
+      l3: {
+        hits: 0,
+        misses: 0,
+        hitRate: 0,
+        averageAccessTime: 0,
+        queryTime: 0,
+        connectionPool: 0,
+      },
+      overall: {
+        totalHits: 0,
+        totalMisses: 0,
+        overallHitRate: 0,
+        averageResponseTime: 0,
+        throughput: 0,
+      },
     };
   }
 
-  private determineOptimalTier<T>(key: string, value: T): 'L1' | 'L2' | 'L3' {
+  private determineOptimalTier<T>(key: string, value: T): "L1" | "L2" | "L3" {
     const size = JSON.stringify(value).length;
     const accessPattern = this.getAccessPattern(key);
 
-    if (size <= 1024 && accessPattern.frequency > 0.8) return 'L1';
-    if (size <= 1024 * 1024 && accessPattern.frequency > 0.4) return 'L2';
-    return 'L3';
+    if (size <= 1024 && accessPattern.frequency > 0.8) return "L1";
+    if (size <= 1024 * 1024 && accessPattern.frequency > 0.4) return "L2";
+    return "L3";
   }
 
   private calculateOptimalTTL<T>(key: string, value: T): number {
     // Implement intelligent TTL calculation based on access patterns
     const accessPattern = this.getAccessPattern(key);
-    const baseT
+    const baseT;
     const baseTTL = 300; // 5 minutes
 
     return Math.round(baseTTL * (1 + accessPattern.frequency));
   }
 
-  private getAccessPattern(key: string): { frequency: number; lastAccess: number } {
+  private getAccessPattern(key: string): {
+    frequency: number;
+    lastAccess: number;
+  } {
     // Placeholder for access pattern tracking
     return { frequency: 0.5, lastAccess: Date.now() };
   }
@@ -562,10 +620,14 @@ export class AdvancedMultiTierCacheService {
     // Update access patterns for AI-driven optimization
   }
 
-  private updateResponseTime(tier: 'L1' | 'L2' | 'L3', responseTime: number): void {
+  private updateResponseTime(
+    tier: "L1" | "L2" | "L3",
+    responseTime: number,
+  ): void {
     const tierMetrics = this.metrics[tier.toLowerCase() as keyof CacheMetrics];
-    if ('averageAccessTime' in tierMetrics) {
-      tierMetrics.averageAccessTime = (tierMetrics.averageAccessTime + responseTime) / 2;
+    if ("averageAccessTime" in tierMetrics) {
+      tierMetrics.averageAccessTime =
+        (tierMetrics.averageAccessTime + responseTime) / 2;
     }
   }
 
@@ -578,19 +640,19 @@ export class AdvancedMultiTierCacheService {
   }
 
   private setupEventListeners(): void {
-    this.eventEmitter.on('cache-hit', (tier: string) => {
+    this.eventEmitter.on("cache-hit", (tier: string) => {
       this.logger.debug(`Cache hit on ${tier}`);
     });
 
-    this.eventEmitter.on('cache-miss', () => {
-      this.logger.debug('Cache miss across all tiers');
+    this.eventEmitter.on("cache-miss", () => {
+      this.logger.debug("Cache miss across all tiers");
     });
   }
 
   private startPerformanceMonitoring(): void {
     setInterval(() => {
       const targets = this.validatePerformanceTargets();
-      this.logger.log('Cache Performance Status:', targets);
+      this.logger.log("Cache Performance Status:", targets);
     }, 30000); // Every 30 seconds
   }
 }
@@ -623,7 +685,9 @@ class CacheWarmingService {
         // Implement cache warming logic
         await this.preloadKey(key);
       } catch (error) {
-        this.logger.error(`Failed to warm key ${key}: ${getErrorMessage(error)}`);
+        this.logger.error(
+          `Failed to warm key ${key}: ${getErrorMessage(error)}`,
+        );
       }
     }
   }

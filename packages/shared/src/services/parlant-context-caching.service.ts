@@ -84,7 +84,13 @@ export interface CacheAccessCondition {
   /** Condition value */
   value: unknown;
   /** Condition operator */
-  operator: "equals" | "not_equals" | "greater_than" | "less_than" | "contains" | "in_range";
+  operator:
+    | "equals"
+    | "not_equals"
+    | "greater_than"
+    | "less_than"
+    | "contains"
+    | "in_range";
 }
 
 /**
@@ -233,7 +239,12 @@ export enum EvictionPolicy {
  */
 export interface CacheSecurityRequirement {
   /** Requirement type */
-  type: "encryption" | "access_control" | "audit" | "integrity" | "anonymization";
+  type:
+    | "encryption"
+    | "access_control"
+    | "audit"
+    | "integrity"
+    | "anonymization";
   /** Requirement level */
   level: "optional" | "recommended" | "mandatory";
   /** Configuration */
@@ -341,7 +352,10 @@ export class ParlantContextCachingService
 
   // Security and encryption
   private readonly cacheEncryptionKey = this.generateCacheEncryptionKey();
-  private readonly securityValidator = new Map<string, (entry: SecureCacheEntry, user: ParlantUserContext) => boolean>();
+  private readonly securityValidator = new Map<
+    string,
+    (entry: SecureCacheEntry, user: ParlantUserContext) => boolean
+  >();
 
   // Performance monitoring
   private readonly cacheStats: CacheStatistics = {
@@ -391,7 +405,10 @@ export class ParlantContextCachingService
       this.logger.log("✅ Context Caching Service initialized successfully");
       this.emit("caching:service:initialized");
     } catch (error) {
-      this.logger.error("❌ Failed to initialize Context Caching Service", error);
+      this.logger.error(
+        "❌ Failed to initialize Context Caching Service",
+        error,
+      );
       throw new ParlantIntegrationError(
         "Context Caching initialization failed",
         "CACHING_INIT_ERROR",
@@ -431,7 +448,11 @@ export class ParlantContextCachingService
 
     try {
       // Determine cache policy
-      const policy = await this.determineCachePolicy(data, userContext, options);
+      const policy = await this.determineCachePolicy(
+        data,
+        userContext,
+        options,
+      );
 
       // Validate security requirements
       await this.validateCacheSecurityRequirements(data, userContext, policy);
@@ -473,7 +494,10 @@ export class ParlantContextCachingService
       throw new ParlantIntegrationError(
         "Cache set operation failed",
         "CACHE_SET_ERROR",
-        { cacheKey, error: error instanceof Error ? error.message : String(error) },
+        {
+          cacheKey,
+          error: error instanceof Error ? error.message : String(error),
+        },
       );
     }
   }
@@ -500,7 +524,11 @@ export class ParlantContextCachingService
       }
 
       // Validate access permissions
-      const hasAccess = await this.validateCacheAccess(entry, userContext, "read");
+      const hasAccess = await this.validateCacheAccess(
+        entry,
+        userContext,
+        "read",
+      );
       if (!hasAccess) {
         this.emit("cache:unauthorized", {
           cacheKey,
@@ -524,7 +552,12 @@ export class ParlantContextCachingService
       const decryptedData = await this.decryptCacheData(entry);
 
       // Update access metadata
-      await this.updateCacheAccess(entry, userContext, "read", performance.now() - startTime);
+      await this.updateCacheAccess(
+        entry,
+        userContext,
+        "read",
+        performance.now() - startTime,
+      );
 
       // Update performance metrics
       this.cacheStats.totalHits++;
@@ -551,7 +584,10 @@ export class ParlantContextCachingService
       throw new ParlantIntegrationError(
         "Cache get operation failed",
         "CACHE_GET_ERROR",
-        { cacheKey, error: error instanceof Error ? error.message : String(error) },
+        {
+          cacheKey,
+          error: error instanceof Error ? error.message : String(error),
+        },
       );
     }
   }
@@ -573,7 +609,11 @@ export class ParlantContextCachingService
       }
 
       // Validate invalidation permissions
-      const hasAccess = await this.validateCacheAccess(entry, userContext, "delete");
+      const hasAccess = await this.validateCacheAccess(
+        entry,
+        userContext,
+        "delete",
+      );
       if (!hasAccess) {
         this.emit("cache:invalidation:unauthorized", {
           cacheKey,
@@ -590,7 +630,12 @@ export class ParlantContextCachingService
       this.removeCacheFromIndexes(entry);
 
       // Update access metadata
-      await this.updateCacheAccess(entry, userContext, "invalidate", performance.now() - startTime);
+      await this.updateCacheAccess(
+        entry,
+        userContext,
+        "invalidate",
+        performance.now() - startTime,
+      );
 
       // Update statistics
       this.cacheStats.totalEntries--;
@@ -614,7 +659,11 @@ export class ParlantContextCachingService
       throw new ParlantIntegrationError(
         "Cache invalidation failed",
         "CACHE_INVALIDATE_ERROR",
-        { cacheKey, reason, error: error instanceof Error ? error.message : String(error) },
+        {
+          cacheKey,
+          reason,
+          error: error instanceof Error ? error.message : String(error),
+        },
       );
     }
   }
@@ -628,14 +677,17 @@ export class ParlantContextCachingService
     const startTime = performance.now();
 
     try {
-      const { type, target, reason, requestingUser, cascadeInvalidation } = invalidationRequest;
+      const { type, target, reason, requestingUser, cascadeInvalidation } =
+        invalidationRequest;
       let keysToInvalidate: string[] = [];
       const errors: string[] = [];
 
       // Determine keys to invalidate based on type
       switch (type) {
         case "key":
-          keysToInvalidate = Array.isArray(target) ? target : [target as string];
+          keysToInvalidate = Array.isArray(target)
+            ? target
+            : [target as string];
           break;
 
         case "pattern":
@@ -643,7 +695,9 @@ export class ParlantContextCachingService
           break;
 
         case "tag":
-          keysToInvalidate = await this.findKeysByTags(Array.isArray(target) ? target : [target as string]);
+          keysToInvalidate = await this.findKeysByTags(
+            Array.isArray(target) ? target : [target as string],
+          );
           break;
 
         case "user":
@@ -651,7 +705,9 @@ export class ParlantContextCachingService
           break;
 
         case "security_level":
-          keysToInvalidate = await this.findKeysBySecurityLevel(target as SecurityLevel);
+          keysToInvalidate = await this.findKeysBySecurityLevel(
+            target as SecurityLevel,
+          );
           break;
 
         case "global":
@@ -666,7 +722,11 @@ export class ParlantContextCachingService
       let invalidatedCount = 0;
       for (const key of keysToInvalidate) {
         try {
-          const success = await this.invalidateCacheEntry(key, requestingUser, reason);
+          const success = await this.invalidateCacheEntry(
+            key,
+            requestingUser,
+            reason,
+          );
           if (success) {
             invalidatedCount++;
 
@@ -674,13 +734,19 @@ export class ParlantContextCachingService
             if (cascadeInvalidation) {
               const relatedKeys = await this.findRelatedKeys(key);
               for (const relatedKey of relatedKeys) {
-                await this.invalidateCacheEntry(relatedKey, requestingUser, `cascade_from_${key}`);
+                await this.invalidateCacheEntry(
+                  relatedKey,
+                  requestingUser,
+                  `cascade_from_${key}`,
+                );
                 invalidatedCount++;
               }
             }
           }
         } catch (error) {
-          errors.push(`Failed to invalidate ${key}: ${error instanceof Error ? error.message : String(error)}`);
+          errors.push(
+            `Failed to invalidate ${key}: ${error instanceof Error ? error.message : String(error)}`,
+          );
         }
       }
 
@@ -703,7 +769,10 @@ export class ParlantContextCachingService
       throw new ParlantIntegrationError(
         "Bulk cache invalidation failed",
         "CACHE_BULK_INVALIDATE_ERROR",
-        { invalidationRequest, error: error instanceof Error ? error.message : String(error) },
+        {
+          invalidationRequest,
+          error: error instanceof Error ? error.message : String(error),
+        },
       );
     }
   }
@@ -774,7 +843,9 @@ export class ParlantContextCachingService
   /**
    * Get cache entries by user
    */
-  async getCacheEntriesByUser(userId: string): Promise<Array<{ key: string; metadata: CacheMetadata }>> {
+  async getCacheEntriesByUser(
+    userId: string,
+  ): Promise<Array<{ key: string; metadata: CacheMetadata }>> {
     try {
       const userKeys = this.userCacheIndex.get(userId) || new Set();
       const entries: Array<{ key: string; metadata: CacheMetadata }> = [];
@@ -789,7 +860,10 @@ export class ParlantContextCachingService
         }
       }
 
-      return entries.sort((a, b) => b.metadata.lastAccessed.getTime() - a.metadata.lastAccessed.getTime());
+      return entries.sort(
+        (a, b) =>
+          b.metadata.lastAccessed.getTime() - a.metadata.lastAccessed.getTime(),
+      );
     } catch (error) {
       this.logger.error("❌ Failed to get cache entries by user", error);
       return [];
@@ -801,7 +875,10 @@ export class ParlantContextCachingService
    */
 
   private generateCacheEncryptionKey(): string {
-    return process.env.PARLANT_CACHE_ENCRYPTION_KEY || crypto.randomBytes(32).toString("hex");
+    return (
+      process.env.PARLANT_CACHE_ENCRYPTION_KEY ||
+      crypto.randomBytes(32).toString("hex")
+    );
   }
 
   private async createSecureCacheEntry(
@@ -824,7 +901,8 @@ export class ParlantContextCachingService
     const encryptedData = await this.encryptCacheData(data);
 
     // Create integrity validation
-    const integrityValidation = await this.createIntegrityValidation(encryptedData);
+    const integrityValidation =
+      await this.createIntegrityValidation(encryptedData);
 
     // Create cache entry
     const entry: SecureCacheEntry = {
@@ -834,11 +912,18 @@ export class ParlantContextCachingService
       securityMetadata: {
         securityLevel: options?.securityLevel || SecurityLevel._MEDIUM,
         creatorContext: { ...userContext },
-        accessPermissions: await this.createAccessPermissions(userContext, policy),
+        accessPermissions: await this.createAccessPermissions(
+          userContext,
+          policy,
+        ),
         encryptionMetadata: {
           algorithm: "AES-256-GCM",
           keyDerivation: "PBKDF2",
-          keyHash: crypto.createHash("sha256").update(this.cacheEncryptionKey).digest("hex").substring(0, 16),
+          keyHash: crypto
+            .createHash("sha256")
+            .update(this.cacheEncryptionKey)
+            .digest("hex")
+            .substring(0, 16),
           initializationVector: crypto.randomBytes(16).toString("hex"),
           encryptedAt: now,
         },
@@ -871,32 +956,54 @@ export class ParlantContextCachingService
     return entry;
   }
 
-  private async encryptCacheData(data: Record<string, unknown>): Promise<string> {
+  private async encryptCacheData(
+    data: Record<string, unknown>,
+  ): Promise<string> {
     try {
       const jsonData = JSON.stringify(data);
-      const cipher = crypto.createCipher("aes-256-gcm", this.cacheEncryptionKey);
+      const cipher = crypto.createCipher(
+        "aes-256-gcm",
+        this.cacheEncryptionKey,
+      );
       let encrypted = cipher.update(jsonData, "utf8", "hex");
       encrypted += cipher.final("hex");
       return encrypted;
     } catch (error) {
-      throw new Error(`Cache data encryption failed: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(
+        `Cache data encryption failed: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 
-  private async decryptCacheData(entry: SecureCacheEntry): Promise<Record<string, unknown>> {
+  private async decryptCacheData(
+    entry: SecureCacheEntry,
+  ): Promise<Record<string, unknown>> {
     try {
-      const decipher = crypto.createDecipher("aes-256-gcm", this.cacheEncryptionKey);
+      const decipher = crypto.createDecipher(
+        "aes-256-gcm",
+        this.cacheEncryptionKey,
+      );
       let decrypted = decipher.update(entry.encryptedData, "hex", "utf8");
       decrypted += decipher.final("utf8");
       return JSON.parse(decrypted);
     } catch (error) {
-      throw new Error(`Cache data decryption failed: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(
+        `Cache data decryption failed: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 
-  private async createIntegrityValidation(encryptedData: string): Promise<CacheIntegrityValidation> {
-    const integrityHash = crypto.createHash("sha256").update(encryptedData).digest("hex");
-    const validationSignature = crypto.createHmac("sha256", this.cacheEncryptionKey).update(integrityHash).digest("hex");
+  private async createIntegrityValidation(
+    encryptedData: string,
+  ): Promise<CacheIntegrityValidation> {
+    const integrityHash = crypto
+      .createHash("sha256")
+      .update(encryptedData)
+      .digest("hex");
+    const validationSignature = crypto
+      .createHmac("sha256", this.cacheEncryptionKey)
+      .update(integrityHash)
+      .digest("hex");
 
     return {
       integrityHash,
@@ -938,13 +1045,17 @@ export class ParlantContextCachingService
     accessType: "read" | "write" | "delete",
   ): Promise<boolean> {
     try {
-      const permission = entry.securityMetadata.accessPermissions.find(p => p.type === accessType);
+      const permission = entry.securityMetadata.accessPermissions.find(
+        (p) => p.type === accessType,
+      );
       if (!permission) {
         return false;
       }
 
       // Check roles
-      const hasRequiredRole = permission.requiredRoles.some(role => userContext.roles.includes(role));
+      const hasRequiredRole = permission.requiredRoles.some((role) =>
+        userContext.roles.includes(role),
+      );
       if (!hasRequiredRole) {
         return false;
       }
@@ -957,7 +1068,7 @@ export class ParlantContextCachingService
 
       // Check conditions
       for (const condition of permission.conditions) {
-        if (!await this.evaluateAccessCondition(condition, userContext)) {
+        if (!(await this.evaluateAccessCondition(condition, userContext))) {
           return false;
         }
       }
@@ -990,18 +1101,24 @@ export class ParlantContextCachingService
     switch (condition.type) {
       case "security_level":
         const userLevel = this.getUserSecurityLevel(userContext);
-        return condition.operator === "equals" ? userLevel === condition.value : userLevel !== condition.value;
+        return condition.operator === "equals"
+          ? userLevel === condition.value
+          : userLevel !== condition.value;
 
       case "user_attribute":
         const attributeValue = userContext.metadata[condition.value as string];
-        return condition.operator === "equals" ? attributeValue === condition.value : attributeValue !== condition.value;
+        return condition.operator === "equals"
+          ? attributeValue === condition.value
+          : attributeValue !== condition.value;
 
       default:
         return true;
     }
   }
 
-  private async findCacheEntry(cacheKey: string): Promise<SecureCacheEntry | null> {
+  private async findCacheEntry(
+    cacheKey: string,
+  ): Promise<SecureCacheEntry | null> {
     // Search across all cache tiers
     return (
       this.memoryCacheStore.get(cacheKey) ||
@@ -1011,7 +1128,10 @@ export class ParlantContextCachingService
     );
   }
 
-  private async storeInCacheTier(entry: SecureCacheEntry, tier: CacheTier): Promise<void> {
+  private async storeInCacheTier(
+    entry: SecureCacheEntry,
+    tier: CacheTier,
+  ): Promise<void> {
     switch (tier) {
       case CacheTier.MEMORY:
         this.memoryCacheStore.set(entry.cacheKey, entry);
@@ -1103,7 +1223,9 @@ export class ParlantContextCachingService
     // Update performance metrics
     entry.performanceMetrics.accessCount++;
     entry.performanceMetrics.averageAccessTime =
-      (entry.performanceMetrics.averageAccessTime * (entry.performanceMetrics.accessCount - 1) + duration) /
+      (entry.performanceMetrics.averageAccessTime *
+        (entry.performanceMetrics.accessCount - 1) +
+        duration) /
       entry.performanceMetrics.accessCount;
     entry.performanceMetrics.lastUpdated = new Date();
 
@@ -1113,47 +1235,65 @@ export class ParlantContextCachingService
 
     entry.performanceMetrics.hitRate =
       entry.performanceMetrics.accessCount > 0
-        ? (entry.performanceMetrics.hitCount / entry.performanceMetrics.accessCount) * 100
+        ? (entry.performanceMetrics.hitCount /
+            entry.performanceMetrics.accessCount) *
+          100
         : 0;
 
     // Update cache metadata
     entry.cacheMetadata.lastAccessed = new Date();
   }
 
-  private updateCacheMetrics(entry: SecureCacheEntry, operation: "read" | "write", duration: number): void {
+  private updateCacheMetrics(
+    entry: SecureCacheEntry,
+    operation: "read" | "write",
+    duration: number,
+  ): void {
     this.updateAverageAccessTime(duration);
   }
 
   private updateHitRate(): void {
-    const totalRequests = this.cacheStats.totalHits + this.cacheStats.totalMisses;
-    this.cacheStats.overallHitRate = totalRequests > 0 ? (this.cacheStats.totalHits / totalRequests) * 100 : 0;
+    const totalRequests =
+      this.cacheStats.totalHits + this.cacheStats.totalMisses;
+    this.cacheStats.overallHitRate =
+      totalRequests > 0 ? (this.cacheStats.totalHits / totalRequests) * 100 : 0;
   }
 
   private updateAverageAccessTime(duration: number): void {
-    const totalAccesses = this.cacheStats.totalHits + this.cacheStats.totalMisses;
+    const totalAccesses =
+      this.cacheStats.totalHits + this.cacheStats.totalMisses;
     this.cacheStats.averageAccessTime =
       totalAccesses > 0
-        ? (this.cacheStats.averageAccessTime * (totalAccesses - 1) + duration) / totalAccesses
+        ? (this.cacheStats.averageAccessTime * (totalAccesses - 1) + duration) /
+          totalAccesses
         : duration;
   }
 
   private updateCacheStatistics(): void {
     // Calculate memory usage
-    this.cacheStats.memoryUsage = (
-      this.memoryCacheStore.size +
-      this.redisCacheStore.size +
-      this.persistentCacheStore.size
-    ) * 2048; // Rough estimate
+    this.cacheStats.memoryUsage =
+      (this.memoryCacheStore.size +
+        this.redisCacheStore.size +
+        this.persistentCacheStore.size) *
+      2048; // Rough estimate
 
     // Calculate efficiency score
     this.cacheStats.efficiencyScore = Math.round(
-      (this.cacheStats.overallHitRate * 0.6) +
-      (Math.max(0, 100 - (this.cacheStats.averageAccessTime / 10)) * 0.3) +
-      (Math.max(0, 100 - (this.cacheStats.totalEvictions / Math.max(1, this.cacheStats.totalEntries)) * 100) * 0.1)
+      this.cacheStats.overallHitRate * 0.6 +
+        Math.max(0, 100 - this.cacheStats.averageAccessTime / 10) * 0.3 +
+        Math.max(
+          0,
+          100 -
+            (this.cacheStats.totalEvictions /
+              Math.max(1, this.cacheStats.totalEntries)) *
+              100,
+        ) *
+          0.1,
     );
 
     // Calculate security compliance score
-    this.cacheStats.securityComplianceScore = this.calculateSecurityComplianceScore();
+    this.cacheStats.securityComplianceScore =
+      this.calculateSecurityComplianceScore();
   }
 
   private calculateSecurityComplianceScore(): number {
@@ -1222,7 +1362,9 @@ export class ParlantContextCachingService
             // Always audited
             break;
           default:
-            throw new Error(`Unsupported mandatory requirement: ${requirement.type}`);
+            throw new Error(
+              `Unsupported mandatory requirement: ${requirement.type}`,
+            );
         }
       }
     }
@@ -1257,7 +1399,7 @@ export class ParlantContextCachingService
     const keys = new Set<string>();
     for (const tag of tags) {
       const tagKeys = this.cacheKeyIndex.get(tag) || new Set();
-      tagKeys.forEach(key => keys.add(key));
+      tagKeys.forEach((key) => keys.add(key));
     }
     return Array.from(keys);
   }
@@ -1267,10 +1409,16 @@ export class ParlantContextCachingService
     return Array.from(userKeys);
   }
 
-  private async findKeysBySecurityLevel(securityLevel: SecurityLevel): Promise<string[]> {
+  private async findKeysBySecurityLevel(
+    securityLevel: SecurityLevel,
+  ): Promise<string[]> {
     const keys: string[] = [];
 
-    const allStores = [this.memoryCacheStore, this.redisCacheStore, this.persistentCacheStore];
+    const allStores = [
+      this.memoryCacheStore,
+      this.redisCacheStore,
+      this.persistentCacheStore,
+    ];
     for (const store of allStores) {
       for (const [key, entry] of store.entries()) {
         if (entry.securityMetadata.securityLevel === securityLevel) {
@@ -1298,7 +1446,7 @@ export class ParlantContextCachingService
     const keyPrefix = key.split(":")[0];
 
     if (keyPrefix !== key) {
-      relatedKeys.push(...await this.findKeysByPattern(`${keyPrefix}:*`));
+      relatedKeys.push(...(await this.findKeysByPattern(`${keyPrefix}:*`)));
     }
 
     return relatedKeys;

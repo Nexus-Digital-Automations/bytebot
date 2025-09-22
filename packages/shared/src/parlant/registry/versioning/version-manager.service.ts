@@ -10,8 +10,8 @@
  * @author Version Management Agent #7
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Injectable, Logger } from "@nestjs/common";
+import { EventEmitter2 } from "@nestjs/event-emitter";
 import {
   IVersionManager,
   VersionCreationData,
@@ -46,37 +46,37 @@ import {
   VersionComparison,
   CompatibilityLevel,
   MigrationInfo,
-  MigrationComplexity
-} from '../core/registry.interface';
+  MigrationComplexity,
+} from "../core/registry.interface";
 
 import {
   AutomationLevel,
   StepValidation,
   ValidationCriteria,
   CriteriaType,
-  ValidationMethod
-} from '../core/registry.types';
+  ValidationMethod,
+} from "../core/registry.types";
 
 /**
  * Version comparison algorithm types
  */
 export enum VersionComparisonAlgorithm {
-  _SEMANTIC = 'semantic',
-  _SIGNATURE_BASED = 'signature_based',
-  _BEHAVIOR_BASED = 'behavior_based',
-  _DEPENDENCY_AWARE = 'dependency_aware',
-  _COMPREHENSIVE = 'comprehensive'
+  _SEMANTIC = "semantic",
+  _SIGNATURE_BASED = "signature_based",
+  _BEHAVIOR_BASED = "behavior_based",
+  _DEPENDENCY_AWARE = "dependency_aware",
+  _COMPREHENSIVE = "comprehensive",
 }
 
 /**
  * Migration strategy types
  */
 export enum MigrationStrategy {
-  _DIRECT = 'direct',
-  _INCREMENTAL = 'incremental',
-  _PARALLEL = 'parallel',
-  _CANARY = 'canary',
-  _BLUE_GREEN = 'blue_green'
+  _DIRECT = "direct",
+  _INCREMENTAL = "incremental",
+  _PARALLEL = "parallel",
+  _CANARY = "canary",
+  _BLUE_GREEN = "blue_green",
 }
 
 /**
@@ -84,12 +84,17 @@ export enum MigrationStrategy {
  */
 export interface IVersionStorage {
   getVersionInfo(functionId: string): Promise<FunctionVersionInfo | null>;
-  setVersionInfo(functionId: string, versionInfo: FunctionVersionInfo): Promise<void>;
+  setVersionInfo(
+    functionId: string,
+    versionInfo: FunctionVersionInfo,
+  ): Promise<void>;
   getVersionHistory(functionId: string): Promise<VersionEntry[]>;
   addVersionEntry(functionId: string, entry: VersionEntry): Promise<void>;
   getMigrationPlans(functionId?: string): Promise<MigrationPlan[]>;
   saveMigrationPlan(plan: MigrationPlan): Promise<void>;
-  getMigrationExecution(planId: string): Promise<MigrationExecutionResult | null>;
+  getMigrationExecution(
+    planId: string,
+  ): Promise<MigrationExecutionResult | null>;
   saveMigrationExecution(result: MigrationExecutionResult): Promise<void>;
 }
 
@@ -111,10 +116,10 @@ export interface VersionValidationError {
 }
 
 export enum ValidationSeverity {
-  _INFO = 'info',
-  _WARNING = 'warning',
-  _ERROR = 'error',
-  _CRITICAL = 'critical'
+  _INFO = "info",
+  _WARNING = "warning",
+  _ERROR = "error",
+  _CRITICAL = "critical",
 }
 
 /**
@@ -142,7 +147,7 @@ export class VersionManagerService implements IVersionManager {
 
   constructor(
     private readonly eventEmitter: EventEmitter2,
-    private readonly storage: IVersionStorage
+    private readonly storage: IVersionStorage,
   ) {
     this.initializeService();
   }
@@ -150,7 +155,9 @@ export class VersionManagerService implements IVersionManager {
   /**
    * Get function version information
    */
-  async getVersionInfo(functionId: string): Promise<FunctionVersionInfo | null> {
+  async getVersionInfo(
+    functionId: string,
+  ): Promise<FunctionVersionInfo | null> {
     this.logger.debug(`Getting version info for function: ${functionId}`);
 
     try {
@@ -167,9 +174,11 @@ export class VersionManagerService implements IVersionManager {
       }
 
       return versionInfo;
-
     } catch (error) {
-      this.logger.error(`Failed to get version info for function ${functionId}: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to get version info for function ${functionId}: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -179,31 +188,41 @@ export class VersionManagerService implements IVersionManager {
    */
   async createVersion(
     functionId: string,
-    versionData: VersionCreationData
+    versionData: VersionCreationData,
   ): Promise<VersionCreationResult> {
-    this.logger.log(`Creating new version ${versionData.version} for function: ${functionId}`);
+    this.logger.log(
+      `Creating new version ${versionData.version} for function: ${functionId}`,
+    );
 
     try {
       // Get current version info
       const currentVersionInfo = await this.getVersionInfo(functionId);
 
       // Validate new version
-      const validationResult = await this.validateVersionCreation(functionId, versionData, currentVersionInfo);
+      const validationResult = await this.validateVersionCreation(
+        functionId,
+        versionData,
+        currentVersionInfo,
+      );
 
       if (!validationResult.valid) {
         return {
           success: false,
-          versionId: '',
-          conflicts: validationResult.errors.map(error => ({
+          versionId: "",
+          conflicts: validationResult.errors.map((error) => ({
             type: this.mapErrorToConflictType(error.code),
             description: error.message,
-            resolution: ConflictResolution._MANUAL_REQUIRED
-          }))
+            resolution: ConflictResolution._MANUAL_REQUIRED,
+          })),
         };
       }
 
       // Detect conflicts with existing versions
-      const conflicts = await this.detectVersionConflicts(functionId, versionData, currentVersionInfo);
+      const conflicts = await this.detectVersionConflicts(
+        functionId,
+        versionData,
+        currentVersionInfo,
+      );
 
       // Create version entry
       const versionEntry: VersionEntry = {
@@ -211,19 +230,26 @@ export class VersionManagerService implements IVersionManager {
         timestamp: new Date(),
         author: versionData.author,
         changes: versionData.changes,
-        tags: this.generateVersionTags(versionData)
+        tags: this.generateVersionTags(versionData),
       };
 
       // Update version info
-      const updatedVersionInfo = await this.updateVersionInfo(functionId, versionEntry, currentVersionInfo);
+      const updatedVersionInfo = await this.updateVersionInfo(
+        functionId,
+        versionEntry,
+        currentVersionInfo,
+      );
 
       // Generate migration plan if needed
       let migrationPlan: MigrationPlan | undefined;
-      if (versionData.breaking || this.hasBreakingChanges(versionData.changes)) {
+      if (
+        versionData.breaking ||
+        this.hasBreakingChanges(versionData.changes)
+      ) {
         migrationPlan = await this.generateMigrationPlan(
           functionId,
-          currentVersionInfo?.current || '0.0.0',
-          versionData.version
+          currentVersionInfo?.current || "0.0.0",
+          versionData.version,
         );
       }
 
@@ -239,25 +265,29 @@ export class VersionManagerService implements IVersionManager {
       this.versionCache.set(functionId, updatedVersionInfo);
 
       // Emit events
-      this.eventEmitter.emit('version.created', {
+      this.eventEmitter.emit("version.created", {
         functionId,
         version: versionData.version,
         breaking: versionData.breaking,
         author: versionData.author,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
-      this.logger.log(`Version ${versionData.version} created successfully for function: ${functionId}`);
+      this.logger.log(
+        `Version ${versionData.version} created successfully for function: ${functionId}`,
+      );
 
       return {
         success: true,
         versionId: this.generateVersionId(functionId, versionData.version),
         conflicts,
-        migrationPlan
+        migrationPlan,
       };
-
     } catch (error) {
-      this.logger.error(`Failed to create version for function ${functionId}: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to create version for function ${functionId}: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -268,9 +298,11 @@ export class VersionManagerService implements IVersionManager {
   async compareVersions(
     functionId: string,
     version1: string,
-    version2: string
+    version2: string,
   ): Promise<VersionComparisonResult> {
-    this.logger.log(`Comparing versions ${version1} and ${version2} for function: ${functionId}`);
+    this.logger.log(
+      `Comparing versions ${version1} and ${version2} for function: ${functionId}`,
+    );
 
     try {
       const versionInfo = await this.getVersionInfo(functionId);
@@ -283,7 +315,9 @@ export class VersionManagerService implements IVersionManager {
       const entry2 = this.findVersionEntry(versionInfo, version2);
 
       if (!entry1 || !entry2) {
-        throw new Error(`One or both versions not found: ${version1}, ${version2}`);
+        throw new Error(
+          `One or both versions not found: ${version1}, ${version2}`,
+        );
       }
 
       // Perform comparison using multiple algorithms
@@ -297,15 +331,19 @@ export class VersionManagerService implements IVersionManager {
         version1,
         version2,
         differences,
-        compatibility
+        compatibility,
       };
 
-      this.logger.log(`Version comparison completed for function: ${functionId}`);
+      this.logger.log(
+        `Version comparison completed for function: ${functionId}`,
+      );
 
       return result;
-
     } catch (error) {
-      this.logger.error(`Failed to compare versions for function ${functionId}: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to compare versions for function ${functionId}: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -316,28 +354,40 @@ export class VersionManagerService implements IVersionManager {
   async getMigrationPlan(
     functionId: string,
     fromVersion: string,
-    toVersion: string
+    toVersion: string,
   ): Promise<MigrationPlan> {
-    this.logger.log(`Getting migration plan from ${fromVersion} to ${toVersion} for function: ${functionId}`);
+    this.logger.log(
+      `Getting migration plan from ${fromVersion} to ${toVersion} for function: ${functionId}`,
+    );
 
     try {
       // Check if plan already exists
-      const planId = this.generateMigrationPlanId(functionId, fromVersion, toVersion);
+      const planId = this.generateMigrationPlanId(
+        functionId,
+        fromVersion,
+        toVersion,
+      );
 
       if (this.migrationPlansCache.has(planId)) {
         return this.migrationPlansCache.get(planId)!;
       }
 
       // Generate new migration plan
-      const migrationPlan = await this.generateMigrationPlan(functionId, fromVersion, toVersion);
+      const migrationPlan = await this.generateMigrationPlan(
+        functionId,
+        fromVersion,
+        toVersion,
+      );
 
       // Cache the plan
       this.migrationPlansCache.set(planId, migrationPlan);
 
       return migrationPlan;
-
     } catch (error) {
-      this.logger.error(`Failed to get migration plan for function ${functionId}: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to get migration plan for function ${functionId}: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -345,7 +395,9 @@ export class VersionManagerService implements IVersionManager {
   /**
    * Execute migration
    */
-  async executeMigration(migrationPlan: MigrationPlan): Promise<MigrationExecutionResult> {
+  async executeMigration(
+    migrationPlan: MigrationPlan,
+  ): Promise<MigrationExecutionResult> {
     this.logger.log(`Executing migration plan: ${migrationPlan.planId}`);
 
     const startTime = Date.now();
@@ -357,12 +409,12 @@ export class VersionManagerService implements IVersionManager {
       const context: MigrationExecutionContext = {
         planId: migrationPlan.planId,
         functionId: migrationPlan.functionId,
-        environment: process.env.NODE_ENV || 'development',
+        environment: process.env.NODE_ENV || "development",
         dryRun: false,
         rollbackOnFailure: true,
         notifications: true,
         timeout: 300000, // 5 minutes
-        metadata: {}
+        metadata: {},
       };
 
       // Execute migration steps
@@ -373,18 +425,19 @@ export class VersionManagerService implements IVersionManager {
           await this.executeMigrationStep(step, context);
           completedSteps.push(step.stepId);
 
-          this.eventEmitter.emit('migration.step.completed', {
+          this.eventEmitter.emit("migration.step.completed", {
             planId: migrationPlan.planId,
             stepId: step.stepId,
-            timestamp: new Date()
+            timestamp: new Date(),
           });
-
         } catch (stepError) {
           this.logger.error(`Migration step failed: ${step.stepId}`, stepError);
           failedSteps.push(step.stepId);
 
           if (context.rollbackOnFailure) {
-            this.logger.warn(`Rolling back due to step failure: ${step.stepId}`);
+            this.logger.warn(
+              `Rolling back due to step failure: ${step.stepId}`,
+            );
             await this.rollbackMigrationSteps(completedSteps, migrationPlan);
             break;
           }
@@ -399,26 +452,30 @@ export class VersionManagerService implements IVersionManager {
         completedSteps,
         failedSteps,
         rollbackRequired: !success && context.rollbackOnFailure,
-        duration
+        duration,
       };
 
       // Save execution result
       await this.storage.saveMigrationExecution(result);
 
       // Emit completion event
-      this.eventEmitter.emit('migration.completed', {
+      this.eventEmitter.emit("migration.completed", {
         planId: migrationPlan.planId,
         success,
         duration,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
-      this.logger.log(`Migration execution ${success ? 'completed successfully' : 'failed'}: ${migrationPlan.planId}`);
+      this.logger.log(
+        `Migration execution ${success ? "completed successfully" : "failed"}: ${migrationPlan.planId}`,
+      );
 
       return result;
-
     } catch (error) {
-      this.logger.error(`Migration execution failed: ${migrationPlan.planId}`, error);
+      this.logger.error(
+        `Migration execution failed: ${migrationPlan.planId}`,
+        error,
+      );
       throw error;
     }
   }
@@ -428,9 +485,11 @@ export class VersionManagerService implements IVersionManager {
    */
   async rollbackVersion(
     functionId: string,
-    targetVersion: string
+    targetVersion: string,
   ): Promise<RollbackResult> {
-    this.logger.log(`Rolling back function ${functionId} to version: ${targetVersion}`);
+    this.logger.log(
+      `Rolling back function ${functionId} to version: ${targetVersion}`,
+    );
 
     try {
       const versionInfo = await this.getVersionInfo(functionId);
@@ -442,11 +501,17 @@ export class VersionManagerService implements IVersionManager {
       const targetEntry = this.findVersionEntry(versionInfo, targetVersion);
 
       if (!targetEntry) {
-        throw new Error(`Target version ${targetVersion} not found for function: ${functionId}`);
+        throw new Error(
+          `Target version ${targetVersion} not found for function: ${functionId}`,
+        );
       }
 
       // Create rollback migration plan
-      const rollbackPlan = await this.generateRollbackPlan(functionId, currentVersion, targetVersion);
+      const rollbackPlan = await this.generateRollbackPlan(
+        functionId,
+        currentVersion,
+        targetVersion,
+      );
 
       // Execute rollback
       const executionResult = await this.executeMigration(rollbackPlan);
@@ -459,29 +524,36 @@ export class VersionManagerService implements IVersionManager {
       }
 
       // Verify rollback
-      const verificationResults = await this.verifyRollback(functionId, targetVersion);
+      const verificationResults = await this.verifyRollback(
+        functionId,
+        targetVersion,
+      );
 
       const result: RollbackResult = {
         success: executionResult.success,
         rolledBackVersion: targetVersion,
         affectedComponents: [functionId], // Would include dependencies in real implementation
-        verificationResults
+        verificationResults,
       };
 
-      this.eventEmitter.emit('version.rollback', {
+      this.eventEmitter.emit("version.rollback", {
         functionId,
         fromVersion: currentVersion,
         toVersion: targetVersion,
         success: result.success,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
-      this.logger.log(`Rollback ${result.success ? 'completed successfully' : 'failed'} for function: ${functionId}`);
+      this.logger.log(
+        `Rollback ${result.success ? "completed successfully" : "failed"} for function: ${functionId}`,
+      );
 
       return result;
-
     } catch (error) {
-      this.logger.error(`Failed to rollback function ${functionId}: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to rollback function ${functionId}: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -489,7 +561,9 @@ export class VersionManagerService implements IVersionManager {
   /**
    * Get version compatibility matrix
    */
-  async getCompatibilityMatrix(functionId: string): Promise<CompatibilityMatrix> {
+  async getCompatibilityMatrix(
+    functionId: string,
+  ): Promise<CompatibilityMatrix> {
     this.logger.log(`Getting compatibility matrix for function: ${functionId}`);
 
     try {
@@ -498,7 +572,7 @@ export class VersionManagerService implements IVersionManager {
         throw new Error(`Version info not found for function: ${functionId}`);
       }
 
-      const versions = versionInfo.history.map(entry => entry.version);
+      const versions = versionInfo.history.map((entry) => entry.version);
       const matrix: CompatibilityEntry[][] = [];
 
       // Build compatibility matrix
@@ -508,7 +582,7 @@ export class VersionManagerService implements IVersionManager {
           const compatibility = await this.assessPairwiseCompatibility(
             functionId,
             versions[i],
-            versions[j]
+            versions[j],
           );
           matrix[i][j] = compatibility;
         }
@@ -517,11 +591,13 @@ export class VersionManagerService implements IVersionManager {
       return {
         functionId,
         versions,
-        matrix
+        matrix,
       };
-
     } catch (error) {
-      this.logger.error(`Failed to get compatibility matrix for function ${functionId}: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to get compatibility matrix for function ${functionId}: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -531,9 +607,11 @@ export class VersionManagerService implements IVersionManager {
    */
   async archiveVersions(
     functionId: string,
-    retentionPolicy: RetentionPolicy
+    retentionPolicy: RetentionPolicy,
   ): Promise<ArchivalResult> {
-    this.logger.log(`Archiving versions for function ${functionId} with policy: ${JSON.stringify(retentionPolicy)}`);
+    this.logger.log(
+      `Archiving versions for function ${functionId} with policy: ${JSON.stringify(retentionPolicy)}`,
+    );
 
     try {
       const versionInfo = await this.getVersionInfo(functionId);
@@ -542,17 +620,23 @@ export class VersionManagerService implements IVersionManager {
       }
 
       // Determine versions to archive
-      const { toArchive, toPreserve } = this.selectVersionsForArchival(versionInfo, retentionPolicy);
+      const { toArchive, toPreserve } = this.selectVersionsForArchival(
+        versionInfo,
+        retentionPolicy,
+      );
 
       // Calculate space saved
       const spaceSaved = await this.calculateArchivalSpace(toArchive);
 
       // Perform archival
-      const archivedVersions = await this.performArchival(functionId, toArchive);
+      const archivedVersions = await this.performArchival(
+        functionId,
+        toArchive,
+      );
 
       // Update version info
-      const updatedHistory = versionInfo.history.filter(entry =>
-        !archivedVersions.includes(entry.version)
+      const updatedHistory = versionInfo.history.filter(
+        (entry) => !archivedVersions.includes(entry.version),
       );
 
       const updatedVersionInfo = { ...versionInfo, history: updatedHistory };
@@ -563,23 +647,27 @@ export class VersionManagerService implements IVersionManager {
         success: true,
         archivedVersions,
         preservedVersions: toPreserve,
-        spaceSaved
+        spaceSaved,
       };
 
-      this.eventEmitter.emit('versions.archived', {
+      this.eventEmitter.emit("versions.archived", {
         functionId,
         archivedCount: archivedVersions.length,
         preservedCount: toPreserve.length,
         spaceSaved,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
-      this.logger.log(`Archived ${archivedVersions.length} versions for function: ${functionId}`);
+      this.logger.log(
+        `Archived ${archivedVersions.length} versions for function: ${functionId}`,
+      );
 
       return result;
-
     } catch (error) {
-      this.logger.error(`Failed to archive versions for function ${functionId}: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to archive versions for function ${functionId}: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -592,14 +680,16 @@ export class VersionManagerService implements IVersionManager {
    * Initialize the service
    */
   private async initializeService(): Promise<void> {
-    this.logger.log('Initializing Version Manager Service');
+    this.logger.log("Initializing Version Manager Service");
 
     try {
       // Initialize caches and load initial data
-      this.logger.log('Version Manager Service initialized successfully');
-
+      this.logger.log("Version Manager Service initialized successfully");
     } catch (error) {
-      this.logger.error(`Failed to initialize Version Manager Service: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to initialize Version Manager Service: ${error.message}`,
+        error.stack,
+      );
     }
   }
 
@@ -609,7 +699,7 @@ export class VersionManagerService implements IVersionManager {
   private async validateVersionCreation(
     functionId: string,
     versionData: VersionCreationData,
-    currentVersionInfo: FunctionVersionInfo | null
+    currentVersionInfo: FunctionVersionInfo | null,
   ): Promise<VersionValidationResult> {
     const errors: VersionValidationError[] = [];
     const warnings: string[] = [];
@@ -618,47 +708,60 @@ export class VersionManagerService implements IVersionManager {
     // Validate version format
     if (!this.isValidVersionFormat(versionData.version)) {
       errors.push({
-        code: 'INVALID_VERSION_FORMAT',
-        message: 'Version must follow semantic versioning format (e.g., 1.2.3)',
-        field: 'version',
-        severity: ValidationSeverity._ERROR
+        code: "INVALID_VERSION_FORMAT",
+        message: "Version must follow semantic versioning format (e.g., 1.2.3)",
+        field: "version",
+        severity: ValidationSeverity._ERROR,
       });
     }
 
     // Check for duplicate version
-    if (currentVersionInfo && this.findVersionEntry(currentVersionInfo, versionData.version)) {
+    if (
+      currentVersionInfo &&
+      this.findVersionEntry(currentVersionInfo, versionData.version)
+    ) {
       errors.push({
-        code: 'DUPLICATE_VERSION',
+        code: "DUPLICATE_VERSION",
         message: `Version ${versionData.version} already exists`,
-        field: 'version',
-        severity: ValidationSeverity._ERROR
+        field: "version",
+        severity: ValidationSeverity._ERROR,
       });
     }
 
     // Validate version progression
-    if (currentVersionInfo && !this.isValidVersionProgression(currentVersionInfo.current, versionData.version)) {
-      warnings.push(`Version ${versionData.version} does not follow semantic versioning progression`);
+    if (
+      currentVersionInfo &&
+      !this.isValidVersionProgression(
+        currentVersionInfo.current,
+        versionData.version,
+      )
+    ) {
+      warnings.push(
+        `Version ${versionData.version} does not follow semantic versioning progression`,
+      );
     }
 
     // Validate breaking changes
     if (versionData.breaking && !this.hasBreakingChanges(versionData.changes)) {
-      warnings.push('Version marked as breaking but no breaking changes detected');
+      warnings.push(
+        "Version marked as breaking but no breaking changes detected",
+      );
     }
 
     // Generate suggestions
     if (versionData.description.length < 10) {
-      suggestions.push('Consider adding a more detailed version description');
+      suggestions.push("Consider adding a more detailed version description");
     }
 
     if (versionData.changes.length === 0) {
-      suggestions.push('Consider documenting the changes made in this version');
+      suggestions.push("Consider documenting the changes made in this version");
     }
 
     return {
       valid: errors.length === 0,
       errors,
       warnings,
-      suggestions
+      suggestions,
     };
   }
 
@@ -666,14 +769,18 @@ export class VersionManagerService implements IVersionManager {
    * Check if version format is valid
    */
   private isValidVersionFormat(version: string): boolean {
-    const semverRegex = /^\d+\.\d+\.\d+(?:-[a-zA-Z0-9-]+)?(?:\+[a-zA-Z0-9-]+)?$/;
+    const semverRegex =
+      /^\d+\.\d+\.\d+(?:-[a-zA-Z0-9-]+)?(?:\+[a-zA-Z0-9-]+)?$/;
     return semverRegex.test(version);
   }
 
   /**
    * Check if version progression is valid
    */
-  private isValidVersionProgression(currentVersion: string, newVersion: string): boolean {
+  private isValidVersionProgression(
+    currentVersion: string,
+    newVersion: string,
+  ): boolean {
     // Simplified version comparison
     const current = this.parseVersion(currentVersion);
     const newVer = this.parseVersion(newVersion);
@@ -681,19 +788,25 @@ export class VersionManagerService implements IVersionManager {
     return (
       newVer.major > current.major ||
       (newVer.major === current.major && newVer.minor > current.minor) ||
-      (newVer.major === current.major && newVer.minor === current.minor && newVer.patch > current.patch)
+      (newVer.major === current.major &&
+        newVer.minor === current.minor &&
+        newVer.patch > current.patch)
     );
   }
 
   /**
    * Parse version string
    */
-  private parseVersion(version: string): { major: number; minor: number; patch: number } {
-    const parts = version.split('.').map(Number);
+  private parseVersion(version: string): {
+    major: number;
+    minor: number;
+    patch: number;
+  } {
+    const parts = version.split(".").map(Number);
     return {
       major: parts[0] || 0,
       minor: parts[1] || 0,
-      patch: parts[2] || 0
+      patch: parts[2] || 0,
     };
   }
 
@@ -701,7 +814,9 @@ export class VersionManagerService implements IVersionManager {
    * Check if changes include breaking changes
    */
   private hasBreakingChanges(changes: VersionChange[]): boolean {
-    return changes.some(change => change.breaking || change.impact === ChangeImpact._BREAKING);
+    return changes.some(
+      (change) => change.breaking || change.impact === ChangeImpact._BREAKING,
+    );
   }
 
   /**
@@ -710,16 +825,19 @@ export class VersionManagerService implements IVersionManager {
   private async detectVersionConflicts(
     functionId: string,
     versionData: VersionCreationData,
-    currentVersionInfo: FunctionVersionInfo | null
+    currentVersionInfo: FunctionVersionInfo | null,
   ): Promise<VersionConflict[]> {
     const conflicts: VersionConflict[] = [];
 
     // Check for version conflicts
-    if (currentVersionInfo && this.findVersionEntry(currentVersionInfo, versionData.version)) {
+    if (
+      currentVersionInfo &&
+      this.findVersionEntry(currentVersionInfo, versionData.version)
+    ) {
       conflicts.push({
         type: ConflictType._VERSION_EXISTS,
         description: `Version ${versionData.version} already exists`,
-        resolution: ConflictResolution._MANUAL_REQUIRED
+        resolution: ConflictResolution._MANUAL_REQUIRED,
       });
     }
 
@@ -727,8 +845,8 @@ export class VersionManagerService implements IVersionManager {
     if (versionData.breaking && currentVersionInfo) {
       conflicts.push({
         type: ConflictType._INCOMPATIBLE_CHANGE,
-        description: 'Breaking changes may affect dependent functions',
-        resolution: ConflictResolution._USE_TEMPLATE
+        description: "Breaking changes may affect dependent functions",
+        resolution: ConflictResolution._USE_TEMPLATE,
       });
     }
 
@@ -740,9 +858,9 @@ export class VersionManagerService implements IVersionManager {
    */
   private mapErrorToConflictType(errorCode: string): ConflictType {
     switch (errorCode) {
-      case 'DUPLICATE_VERSION':
+      case "DUPLICATE_VERSION":
         return ConflictType._VERSION_EXISTS;
-      case 'INCOMPATIBLE_CHANGE':
+      case "INCOMPATIBLE_CHANGE":
         return ConflictType._INCOMPATIBLE_CHANGE;
       default:
         return ConflictType._VERSION_EXISTS;
@@ -756,22 +874,22 @@ export class VersionManagerService implements IVersionManager {
     const tags: string[] = [];
 
     if (versionData.breaking) {
-      tags.push('breaking');
+      tags.push("breaking");
     }
 
-    versionData.changes.forEach(change => {
+    versionData.changes.forEach((change) => {
       switch (change.type) {
         case ChangeType._FEATURE:
-          tags.push('feature');
+          tags.push("feature");
           break;
         case ChangeType._BUGFIX:
-          tags.push('bugfix');
+          tags.push("bugfix");
           break;
         case ChangeType._PERFORMANCE:
-          tags.push('performance');
+          tags.push("performance");
           break;
         case ChangeType._SECURITY:
-          tags.push('security');
+          tags.push("security");
           break;
       }
     });
@@ -785,7 +903,7 @@ export class VersionManagerService implements IVersionManager {
   private async updateVersionInfo(
     functionId: string,
     versionEntry: VersionEntry,
-    currentVersionInfo: FunctionVersionInfo | null
+    currentVersionInfo: FunctionVersionInfo | null,
   ): Promise<FunctionVersionInfo> {
     if (!currentVersionInfo) {
       // Create new version info
@@ -794,30 +912,30 @@ export class VersionManagerService implements IVersionManager {
         history: [versionEntry],
         comparison: {
           previousVersion: {
-            version: '',
+            version: "",
             differences: [],
             compatible: true,
-            migrationRequired: false
+            migrationRequired: false,
           },
           latestStable: {
             version: versionEntry.version,
             differences: [],
             compatible: true,
-            migrationRequired: false
+            migrationRequired: false,
           },
           compatibility: {
             backward: CompatibilityLevel._FULL,
             forward: CompatibilityLevel._FULL,
             api: CompatibilityLevel._FULL,
-            binary: CompatibilityLevel._FULL
-          }
+            binary: CompatibilityLevel._FULL,
+          },
         },
         migration: {
           required: false,
           steps: [],
           complexity: MigrationComplexity._TRIVIAL,
-          estimatedDuration: '0 minutes'
-        }
+          estimatedDuration: "0 minutes",
+        },
       };
     }
 
@@ -829,7 +947,11 @@ export class VersionManagerService implements IVersionManager {
       ...currentVersionInfo,
       current: versionEntry.version,
       history: updatedHistory,
-      comparison: await this.updateVersionComparison(functionId, previousVersion, versionEntry.version)
+      comparison: await this.updateVersionComparison(
+        functionId,
+        previousVersion,
+        versionEntry.version,
+      ),
     };
   }
 
@@ -839,7 +961,7 @@ export class VersionManagerService implements IVersionManager {
   private async updateVersionComparison(
     functionId: string,
     previousVersion: string,
-    currentVersion: string
+    currentVersion: string,
   ): Promise<VersionComparison> {
     // This would perform actual version comparison
     return {
@@ -847,20 +969,20 @@ export class VersionManagerService implements IVersionManager {
         version: previousVersion,
         differences: [],
         compatible: true,
-        migrationRequired: false
+        migrationRequired: false,
       },
       latestStable: {
         version: currentVersion,
         differences: [],
         compatible: true,
-        migrationRequired: false
+        migrationRequired: false,
       },
       compatibility: {
         backward: CompatibilityLevel._FULL,
         forward: CompatibilityLevel._FULL,
         api: CompatibilityLevel._FULL,
-        binary: CompatibilityLevel._FULL
-      }
+        binary: CompatibilityLevel._FULL,
+      },
     };
   }
 
@@ -868,14 +990,19 @@ export class VersionManagerService implements IVersionManager {
    * Generate version ID
    */
   private generateVersionId(functionId: string, version: string): string {
-    return `${functionId}_v${version.replace(/\./g, '_')}`;
+    return `${functionId}_v${version.replace(/\./g, "_")}`;
   }
 
   /**
    * Find version entry by version string
    */
-  private findVersionEntry(versionInfo: FunctionVersionInfo, version: string): VersionEntry | null {
-    return versionInfo.history.find(entry => entry.version === version) || null;
+  private findVersionEntry(
+    versionInfo: FunctionVersionInfo,
+    version: string,
+  ): VersionEntry | null {
+    return (
+      versionInfo.history.find((entry) => entry.version === version) || null
+    );
   }
 
   /**
@@ -883,13 +1010,17 @@ export class VersionManagerService implements IVersionManager {
    */
   private async compareVersionEntries(
     entry1: VersionEntry,
-    entry2: VersionEntry
+    entry2: VersionEntry,
   ): Promise<VersionDifference[]> {
     const differences: VersionDifference[] = [];
 
     // Compare changes
-    const allChanges1 = new Set(entry1.changes.map(c => `${c.type}:${c.description}`));
-    const allChanges2 = new Set(entry2.changes.map(c => `${c.type}:${c.description}`));
+    const allChanges1 = new Set(
+      entry1.changes.map((c) => `${c.type}:${c.description}`),
+    );
+    const allChanges2 = new Set(
+      entry2.changes.map((c) => `${c.type}:${c.description}`),
+    );
 
     // Find differences in changes
     for (const change1 of Array.from(allChanges1)) {
@@ -898,7 +1029,7 @@ export class VersionManagerService implements IVersionManager {
           category: DifferenceCategory._BEHAVIOR,
           description: `Change present in ${entry1.version} but not in ${entry2.version}: ${change1}`,
           impact: ImpactLevel._MEDIUM,
-          breaking: entry1.changes.some(c => c.breaking)
+          breaking: entry1.changes.some((c) => c.breaking),
         });
       }
     }
@@ -909,7 +1040,7 @@ export class VersionManagerService implements IVersionManager {
           category: DifferenceCategory._BEHAVIOR,
           description: `Change present in ${entry2.version} but not in ${entry1.version}: ${change2}`,
           impact: ImpactLevel._MEDIUM,
-          breaking: entry2.changes.some(c => c.breaking)
+          breaking: entry2.changes.some((c) => c.breaking),
         });
       }
     }
@@ -920,15 +1051,23 @@ export class VersionManagerService implements IVersionManager {
   /**
    * Assess version compatibility
    */
-  private assessVersionCompatibility(differences: VersionDifference[]): CompatibilityAssessment {
-    const hasBreakingChanges = differences.some(diff => diff.breaking);
-    const hasHighImpactChanges = differences.some(diff => diff.impact === ImpactLevel._HIGH);
+  private assessVersionCompatibility(
+    differences: VersionDifference[],
+  ): CompatibilityAssessment {
+    const hasBreakingChanges = differences.some((diff) => diff.breaking);
+    const hasHighImpactChanges = differences.some(
+      (diff) => diff.impact === ImpactLevel._HIGH,
+    );
 
     return {
       backwardCompatible: !hasBreakingChanges,
       forwardCompatible: !hasBreakingChanges,
       migrationRequired: hasBreakingChanges || hasHighImpactChanges,
-      riskLevel: hasBreakingChanges ? RiskLevel._HIGH : hasHighImpactChanges ? RiskLevel._MEDIUM : RiskLevel._LOW
+      riskLevel: hasBreakingChanges
+        ? RiskLevel._HIGH
+        : hasHighImpactChanges
+          ? RiskLevel._MEDIUM
+          : RiskLevel._LOW,
     };
   }
 
@@ -938,12 +1077,20 @@ export class VersionManagerService implements IVersionManager {
   private async generateMigrationPlan(
     functionId: string,
     fromVersion: string,
-    toVersion: string
+    toVersion: string,
   ): Promise<MigrationPlan> {
-    const planId = this.generateMigrationPlanId(functionId, fromVersion, toVersion);
+    const planId = this.generateMigrationPlanId(
+      functionId,
+      fromVersion,
+      toVersion,
+    );
 
     // Analyze changes between versions
-    const comparison = await this.compareVersions(functionId, fromVersion, toVersion);
+    const comparison = await this.compareVersions(
+      functionId,
+      fromVersion,
+      toVersion,
+    );
 
     // Generate migration steps
     const steps = this.generateMigrationSteps(comparison);
@@ -958,7 +1105,7 @@ export class VersionManagerService implements IVersionManager {
       targetVersion: toVersion,
       steps,
       estimatedDuration: this.estimateMigrationDuration(steps),
-      riskAssessment
+      riskAssessment,
     };
 
     return plan;
@@ -967,25 +1114,31 @@ export class VersionManagerService implements IVersionManager {
   /**
    * Generate migration plan ID
    */
-  private generateMigrationPlanId(functionId: string, fromVersion: string, toVersion: string): string {
+  private generateMigrationPlanId(
+    functionId: string,
+    fromVersion: string,
+    toVersion: string,
+  ): string {
     return `migration_${functionId}_${fromVersion}_to_${toVersion}_${Date.now()}`;
   }
 
   /**
    * Generate migration steps
    */
-  private generateMigrationSteps(comparison: VersionComparisonResult): MigrationStep[] {
+  private generateMigrationSteps(
+    comparison: VersionComparisonResult,
+  ): MigrationStep[] {
     const steps: MigrationStep[] = [];
 
     // Preparation step
     steps.push({
-      stepId: 'prepare',
+      stepId: "prepare",
       order: 1,
-      description: 'Prepare environment for migration',
+      description: "Prepare environment for migration",
       type: MigrationStepType._PREPARATION,
       automated: true,
       duration: 30000, // 30 seconds
-      dependencies: []
+      dependencies: [],
     });
 
     // Code update steps based on differences
@@ -998,31 +1151,33 @@ export class VersionManagerService implements IVersionManager {
           type: MigrationStepType._CODE_UPDATE,
           automated: diff.impact !== ImpactLevel._HIGH,
           duration: 60000, // 1 minute
-          dependencies: ['prepare']
+          dependencies: ["prepare"],
         });
       }
     });
 
     // Testing step
     steps.push({
-      stepId: 'test',
+      stepId: "test",
       order: steps.length + 1,
-      description: 'Run validation tests',
+      description: "Run validation tests",
       type: MigrationStepType._TESTING,
       automated: true,
       duration: 120000, // 2 minutes
-      dependencies: steps.filter(s => s.type === MigrationStepType._CODE_UPDATE).map(s => s.stepId)
+      dependencies: steps
+        .filter((s) => s.type === MigrationStepType._CODE_UPDATE)
+        .map((s) => s.stepId),
     });
 
     // Verification step
     steps.push({
-      stepId: 'verify',
+      stepId: "verify",
       order: steps.length + 1,
-      description: 'Verify migration success',
+      description: "Verify migration success",
       type: MigrationStepType._VERIFICATION,
       automated: true,
       duration: 30000, // 30 seconds
-      dependencies: ['test']
+      dependencies: ["test"],
     });
 
     return steps;
@@ -1031,19 +1186,26 @@ export class VersionManagerService implements IVersionManager {
   /**
    * Assess migration risk
    */
-  private assessMigrationRisk(comparison: VersionComparisonResult, steps: MigrationStep[]): RiskAssessment {
+  private assessMigrationRisk(
+    comparison: VersionComparisonResult,
+    steps: MigrationStep[],
+  ): RiskAssessment {
     const riskFactors: RiskFactor[] = [];
 
     // Assess based on differences
-    const breakingChanges = comparison.differences.filter(d => d.breaking).length;
-    const highImpactChanges = comparison.differences.filter(d => d.impact === ImpactLevel._HIGH).length;
+    const breakingChanges = comparison.differences.filter(
+      (d) => d.breaking,
+    ).length;
+    const highImpactChanges = comparison.differences.filter(
+      (d) => d.impact === ImpactLevel._HIGH,
+    ).length;
 
     if (breakingChanges > 0) {
       riskFactors.push({
         category: RiskCategory._TECHNICAL,
         description: `${breakingChanges} breaking changes detected`,
         likelihood: Likelihood._HIGH,
-        impact: ImpactLevel._HIGH
+        impact: ImpactLevel._HIGH,
       });
     }
 
@@ -1052,33 +1214,33 @@ export class VersionManagerService implements IVersionManager {
         category: RiskCategory._OPERATIONAL,
         description: `${highImpactChanges} high-impact changes detected`,
         likelihood: Likelihood._MEDIUM,
-        impact: ImpactLevel._MEDIUM
+        impact: ImpactLevel._MEDIUM,
       });
     }
 
     // Assess based on automation level
-    const manualSteps = steps.filter(s => !s.automated).length;
+    const manualSteps = steps.filter((s) => !s.automated).length;
     if (manualSteps > 0) {
       riskFactors.push({
         category: RiskCategory._OPERATIONAL,
         description: `${manualSteps} manual steps required`,
         likelihood: Likelihood._MEDIUM,
-        impact: ImpactLevel._MEDIUM
+        impact: ImpactLevel._MEDIUM,
       });
     }
 
     // Determine overall risk
     let overallRisk = RiskLevel._LOW;
-    if (riskFactors.some(f => f.impact === ImpactLevel._HIGH)) {
+    if (riskFactors.some((f) => f.impact === ImpactLevel._HIGH)) {
       overallRisk = RiskLevel._HIGH;
-    } else if (riskFactors.some(f => f.impact === ImpactLevel._MEDIUM)) {
+    } else if (riskFactors.some((f) => f.impact === ImpactLevel._MEDIUM)) {
       overallRisk = RiskLevel._MEDIUM;
     }
 
     return {
       overallRisk,
       riskFactors,
-      mitigationStrategies: this.generateMitigationStrategies(riskFactors)
+      mitigationStrategies: this.generateMitigationStrategies(riskFactors),
     };
   }
 
@@ -1088,19 +1250,19 @@ export class VersionManagerService implements IVersionManager {
   private generateMitigationStrategies(riskFactors: RiskFactor[]): string[] {
     const strategies: string[] = [];
 
-    if (riskFactors.some(f => f.category === RiskCategory._TECHNICAL)) {
-      strategies.push('Perform thorough testing before migration');
-      strategies.push('Create rollback plan before starting migration');
+    if (riskFactors.some((f) => f.category === RiskCategory._TECHNICAL)) {
+      strategies.push("Perform thorough testing before migration");
+      strategies.push("Create rollback plan before starting migration");
     }
 
-    if (riskFactors.some(f => f.category === RiskCategory._OPERATIONAL)) {
-      strategies.push('Execute migration during maintenance window');
-      strategies.push('Have technical support team available during migration');
+    if (riskFactors.some((f) => f.category === RiskCategory._OPERATIONAL)) {
+      strategies.push("Execute migration during maintenance window");
+      strategies.push("Have technical support team available during migration");
     }
 
-    if (riskFactors.some(f => f.impact === ImpactLevel._HIGH)) {
-      strategies.push('Consider canary deployment strategy');
-      strategies.push('Implement real-time monitoring during migration');
+    if (riskFactors.some((f) => f.impact === ImpactLevel._HIGH)) {
+      strategies.push("Consider canary deployment strategy");
+      strategies.push("Implement real-time monitoring during migration");
     }
 
     return strategies;
@@ -1116,8 +1278,13 @@ export class VersionManagerService implements IVersionManager {
   /**
    * Execute migration step
    */
-  private async executeMigrationStep(step: MigrationStep, context: MigrationExecutionContext): Promise<void> {
-    this.logger.debug(`Executing migration step: ${step.stepId} (${step.type})`);
+  private async executeMigrationStep(
+    step: MigrationStep,
+    context: MigrationExecutionContext,
+  ): Promise<void> {
+    this.logger.debug(
+      `Executing migration step: ${step.stepId} (${step.type})`,
+    );
 
     // Simulate step execution based on type
     switch (step.type) {
@@ -1143,33 +1310,45 @@ export class VersionManagerService implements IVersionManager {
   /**
    * Execute preparation step
    */
-  private async executePrepationStep(step: MigrationStep, context: MigrationExecutionContext): Promise<void> {
+  private async executePrepationStep(
+    step: MigrationStep,
+    context: MigrationExecutionContext,
+  ): Promise<void> {
     // Simulate preparation activities
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
   }
 
   /**
    * Execute code update step
    */
-  private async executeCodeUpdateStep(step: MigrationStep, context: MigrationExecutionContext): Promise<void> {
+  private async executeCodeUpdateStep(
+    step: MigrationStep,
+    context: MigrationExecutionContext,
+  ): Promise<void> {
     // Simulate code updates
-    await new Promise(resolve => setTimeout(resolve, 200));
+    await new Promise((resolve) => setTimeout(resolve, 200));
   }
 
   /**
    * Execute testing step
    */
-  private async executeTestingStep(step: MigrationStep, context: MigrationExecutionContext): Promise<void> {
+  private async executeTestingStep(
+    step: MigrationStep,
+    context: MigrationExecutionContext,
+  ): Promise<void> {
     // Simulate testing
-    await new Promise(resolve => setTimeout(resolve, 300));
+    await new Promise((resolve) => setTimeout(resolve, 300));
   }
 
   /**
    * Execute verification step
    */
-  private async executeVerificationStep(step: MigrationStep, context: MigrationExecutionContext): Promise<void> {
+  private async executeVerificationStep(
+    step: MigrationStep,
+    context: MigrationExecutionContext,
+  ): Promise<void> {
     // Simulate verification
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
   }
 
   /**
@@ -1177,19 +1356,24 @@ export class VersionManagerService implements IVersionManager {
    */
   private async simulateStepExecution(step: MigrationStep): Promise<void> {
     // Simulate execution time
-    await new Promise(resolve => setTimeout(resolve, step.duration * 0.001)); // Scale down for simulation
+    await new Promise((resolve) => setTimeout(resolve, step.duration * 0.001)); // Scale down for simulation
   }
 
   /**
    * Rollback migration steps
    */
-  private async rollbackMigrationSteps(completedSteps: string[], migrationPlan: MigrationPlan): Promise<void> {
-    this.logger.warn(`Rolling back ${completedSteps.length} completed migration steps`);
+  private async rollbackMigrationSteps(
+    completedSteps: string[],
+    migrationPlan: MigrationPlan,
+  ): Promise<void> {
+    this.logger.warn(
+      `Rolling back ${completedSteps.length} completed migration steps`,
+    );
 
     // Execute rollback in reverse order
     for (let i = completedSteps.length - 1; i >= 0; i--) {
       const stepId = completedSteps[i];
-      const step = migrationPlan.steps.find(s => s.stepId === stepId);
+      const step = migrationPlan.steps.find((s) => s.stepId === stepId);
 
       if (step) {
         this.logger.debug(`Rolling back step: ${stepId}`);
@@ -1203,7 +1387,7 @@ export class VersionManagerService implements IVersionManager {
    */
   private async rollbackStep(step: MigrationStep): Promise<void> {
     // Simulate rollback
-    await new Promise(resolve => setTimeout(resolve, 50));
+    await new Promise((resolve) => setTimeout(resolve, 50));
   }
 
   /**
@@ -1212,44 +1396,51 @@ export class VersionManagerService implements IVersionManager {
   private async generateRollbackPlan(
     functionId: string,
     currentVersion: string,
-    targetVersion: string
+    targetVersion: string,
   ): Promise<MigrationPlan> {
     // Generate a reverse migration plan
-    const forwardPlan = await this.generateMigrationPlan(functionId, targetVersion, currentVersion);
+    const forwardPlan = await this.generateMigrationPlan(
+      functionId,
+      targetVersion,
+      currentVersion,
+    );
 
     return {
       ...forwardPlan,
       planId: `rollback_${forwardPlan.planId}`,
       sourceVersion: currentVersion,
-      targetVersion: targetVersion
+      targetVersion: targetVersion,
     };
   }
 
   /**
    * Verify rollback
    */
-  private async verifyRollback(functionId: string, targetVersion: string): Promise<VerificationResult[]> {
+  private async verifyRollback(
+    functionId: string,
+    targetVersion: string,
+  ): Promise<VerificationResult[]> {
     const results: VerificationResult[] = [];
 
     // Verify function registration
     results.push({
-      component: 'function_registration',
+      component: "function_registration",
       verified: true,
-      issues: []
+      issues: [],
     });
 
     // Verify configuration
     results.push({
-      component: 'configuration',
+      component: "configuration",
       verified: true,
-      issues: []
+      issues: [],
     });
 
     // Verify dependencies
     results.push({
-      component: 'dependencies',
+      component: "dependencies",
       verified: true,
-      issues: []
+      issues: [],
     });
 
     return results;
@@ -1261,15 +1452,23 @@ export class VersionManagerService implements IVersionManager {
   private async assessPairwiseCompatibility(
     functionId: string,
     version1: string,
-    version2: string
-  ): Promise<{ compatible: boolean; migrationRequired: boolean; riskLevel: RiskLevel }> {
+    version2: string,
+  ): Promise<{
+    compatible: boolean;
+    migrationRequired: boolean;
+    riskLevel: RiskLevel;
+  }> {
     // Simplified compatibility assessment
-    const comparison = await this.compareVersions(functionId, version1, version2);
+    const comparison = await this.compareVersions(
+      functionId,
+      version1,
+      version2,
+    );
 
     return {
       compatible: comparison.compatibility.backwardCompatible,
       migrationRequired: comparison.compatibility.migrationRequired,
-      riskLevel: comparison.compatibility.riskLevel
+      riskLevel: comparison.compatibility.riskLevel,
     };
   }
 
@@ -1278,9 +1477,9 @@ export class VersionManagerService implements IVersionManager {
    */
   private selectVersionsForArchival(
     versionInfo: FunctionVersionInfo,
-    retentionPolicy: RetentionPolicy
+    retentionPolicy: RetentionPolicy,
   ): { toArchive: string[]; toPreserve: string[] } {
-    const allVersions = versionInfo.history.map(entry => entry.version);
+    const allVersions = versionInfo.history.map((entry) => entry.version);
     const toPreserve: string[] = [];
     const toArchive: string[] = [];
 
@@ -1292,15 +1491,17 @@ export class VersionManagerService implements IVersionManager {
 
     // Keep maxVersions most recent
     const recentVersions = sortedVersions.slice(0, retentionPolicy.maxVersions);
-    recentVersions.forEach(entry => {
+    recentVersions.forEach((entry) => {
       if (!toPreserve.includes(entry.version)) {
         toPreserve.push(entry.version);
       }
     });
 
     // Keep versions based on age
-    const cutoffDate = new Date(Date.now() - retentionPolicy.maxAge * 24 * 60 * 60 * 1000);
-    versionInfo.history.forEach(entry => {
+    const cutoffDate = new Date(
+      Date.now() - retentionPolicy.maxAge * 24 * 60 * 60 * 1000,
+    );
+    versionInfo.history.forEach((entry) => {
       if (entry.timestamp > cutoffDate && !toPreserve.includes(entry.version)) {
         toPreserve.push(entry.version);
       }
@@ -1308,16 +1509,19 @@ export class VersionManagerService implements IVersionManager {
 
     // Preserve release versions
     if (retentionPolicy.preserveReleases) {
-      versionInfo.history.forEach(entry => {
-        if (entry.tags.includes('release') && !toPreserve.includes(entry.version)) {
+      versionInfo.history.forEach((entry) => {
+        if (
+          entry.tags.includes("release") &&
+          !toPreserve.includes(entry.version)
+        ) {
           toPreserve.push(entry.version);
         }
       });
     }
 
     // Preserve tagged versions
-    retentionPolicy.preserveTags.forEach(tag => {
-      versionInfo.history.forEach(entry => {
+    retentionPolicy.preserveTags.forEach((tag) => {
+      versionInfo.history.forEach((entry) => {
         if (entry.tags.includes(tag) && !toPreserve.includes(entry.version)) {
           toPreserve.push(entry.version);
         }
@@ -1325,7 +1529,7 @@ export class VersionManagerService implements IVersionManager {
     });
 
     // Determine versions to archive
-    allVersions.forEach(version => {
+    allVersions.forEach((version) => {
       if (!toPreserve.includes(version)) {
         toArchive.push(version);
       }
@@ -1338,13 +1542,17 @@ export class VersionManagerService implements IVersionManager {
    * Sort versions by date
    */
   private sortVersionsByDate(history: VersionEntry[]): VersionEntry[] {
-    return [...history].sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+    return [...history].sort(
+      (a, b) => b.timestamp.getTime() - a.timestamp.getTime(),
+    );
   }
 
   /**
    * Calculate archival space
    */
-  private async calculateArchivalSpace(versionsToArchive: string[]): Promise<number> {
+  private async calculateArchivalSpace(
+    versionsToArchive: string[],
+  ): Promise<number> {
     // Simulate space calculation
     return versionsToArchive.length * 1024; // 1KB per version
   }
@@ -1352,7 +1560,10 @@ export class VersionManagerService implements IVersionManager {
   /**
    * Perform archival
    */
-  private async performArchival(functionId: string, versionsToArchive: string[]): Promise<string[]> {
+  private async performArchival(
+    functionId: string,
+    versionsToArchive: string[],
+  ): Promise<string[]> {
     // Simulate archival process
     return versionsToArchive;
   }

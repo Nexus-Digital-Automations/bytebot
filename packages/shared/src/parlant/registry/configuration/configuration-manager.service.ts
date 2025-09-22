@@ -10,8 +10,8 @@
  * @author Configuration Management Agent #5
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Injectable, Logger } from "@nestjs/common";
+import { EventEmitter2 } from "@nestjs/event-emitter";
 import {
   IConfigurationManager,
   FunctionRegistrationConfig,
@@ -41,25 +41,25 @@ import {
   RollbackPlan,
   RollbackStep,
   RollbackAction,
-  RiskLevel
-} from '../core/registry.interface';
+  RiskLevel,
+} from "../core/registry.interface";
 import {
   ValidationMode,
   ApprovalLevel,
-  SecurityLevel
-} from '../../../types/parlant-integration.types';
+  SecurityLevel,
+} from "../../../types/parlant-integration.types";
 
 /**
  * Configuration change types
  */
 export enum ConfigurationChangeType {
-  _CREATE = 'create',
-  _UPDATE = 'update',
-  _DELETE = 'delete',
-  _RESET = 'reset',
-  _TEMPLATE_APPLY = 'template_apply',
-  _OVERRIDE_ADD = 'override_add',
-  _OVERRIDE_REMOVE = 'override_remove'
+  _CREATE = "create",
+  _UPDATE = "update",
+  _DELETE = "delete",
+  _RESET = "reset",
+  _TEMPLATE_APPLY = "template_apply",
+  _OVERRIDE_ADD = "override_add",
+  _OVERRIDE_REMOVE = "override_remove",
 }
 
 /**
@@ -99,11 +99,11 @@ export interface ConfigurationChange {
 }
 
 export enum ChangeImpact {
-  _NONE = 'none',
-  _LOW = 'low',
-  _MEDIUM = 'medium',
-  _HIGH = 'high',
-  _BREAKING = 'breaking'
+  _NONE = "none",
+  _LOW = "low",
+  _MEDIUM = "medium",
+  _HIGH = "high",
+  _BREAKING = "breaking",
 }
 
 export interface RollbackInfo {
@@ -114,10 +114,10 @@ export interface RollbackInfo {
 }
 
 export enum RollbackComplexity {
-  _TRIVIAL = 'trivial',
-  _SIMPLE = 'simple',
-  _MODERATE = 'moderate',
-  _COMPLEX = 'complex'
+  _TRIVIAL = "trivial",
+  _SIMPLE = "simple",
+  _MODERATE = "moderate",
+  _COMPLEX = "complex",
 }
 
 /**
@@ -136,8 +136,13 @@ export interface ValidationContext {
  * Configuration storage interface
  */
 export interface IConfigurationStorage {
-  getConfiguration(functionId: string): Promise<FunctionRegistrationConfig | null>;
-  setConfiguration(functionId: string, config: FunctionRegistrationConfig): Promise<void>;
+  getConfiguration(
+    functionId: string,
+  ): Promise<FunctionRegistrationConfig | null>;
+  setConfiguration(
+    functionId: string,
+    config: FunctionRegistrationConfig,
+  ): Promise<void>;
   deleteConfiguration(functionId: string): Promise<void>;
   getGlobalConfiguration(): Promise<GlobalConfiguration>;
   setGlobalConfiguration(config: GlobalConfiguration): Promise<void>;
@@ -152,13 +157,16 @@ export interface IConfigurationStorage {
 @Injectable()
 export class ConfigurationManagerService implements IConfigurationManager {
   private readonly logger = new Logger(ConfigurationManagerService.name);
-  private readonly configurationCache = new Map<string, FunctionRegistrationConfig>();
+  private readonly configurationCache = new Map<
+    string,
+    FunctionRegistrationConfig
+  >();
   private readonly templateCache = new Map<string, ConfigurationTemplate>();
   private globalConfigurationCache: GlobalConfiguration | null = null;
 
   constructor(
     private readonly eventEmitter: EventEmitter2,
-    private readonly storage: IConfigurationStorage
+    private readonly storage: IConfigurationStorage,
   ) {
     this.initializeService();
   }
@@ -166,13 +174,17 @@ export class ConfigurationManagerService implements IConfigurationManager {
   /**
    * Get function configuration
    */
-  async getConfiguration(functionId: string): Promise<FunctionRegistrationConfig | null> {
+  async getConfiguration(
+    functionId: string,
+  ): Promise<FunctionRegistrationConfig | null> {
     this.logger.debug(`Getting configuration for function: ${functionId}`);
 
     try {
       // Check cache first
       if (this.configurationCache.has(functionId)) {
-        this.logger.debug(`Configuration found in cache for function: ${functionId}`);
+        this.logger.debug(
+          `Configuration found in cache for function: ${functionId}`,
+        );
         return this.configurationCache.get(functionId)!;
       }
 
@@ -182,17 +194,23 @@ export class ConfigurationManagerService implements IConfigurationManager {
       if (config) {
         // Cache the configuration
         this.configurationCache.set(functionId, config);
-        this.logger.debug(`Configuration loaded from storage for function: ${functionId}`);
+        this.logger.debug(
+          `Configuration loaded from storage for function: ${functionId}`,
+        );
         return config;
       }
 
       // Return default configuration if not found
       const defaultConfig = await this.getDefaultConfiguration();
-      this.logger.debug(`Returning default configuration for function: ${functionId}`);
+      this.logger.debug(
+        `Returning default configuration for function: ${functionId}`,
+      );
       return defaultConfig;
-
     } catch (error) {
-      this.logger.error(`Failed to get configuration for function ${functionId}: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
+      this.logger.error(
+        `Failed to get configuration for function ${functionId}: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
       throw error;
     }
   }
@@ -202,7 +220,7 @@ export class ConfigurationManagerService implements IConfigurationManager {
    */
   async updateConfiguration(
     functionId: string,
-    config: Partial<FunctionRegistrationConfig>
+    config: Partial<FunctionRegistrationConfig>,
   ): Promise<ConfigurationUpdateResult> {
     this.logger.log(`Updating configuration for function: ${functionId}`);
 
@@ -215,19 +233,25 @@ export class ConfigurationManagerService implements IConfigurationManager {
 
       // Validate the update
       const mergedConfig = { ...currentConfig, ...config };
-      const validationResult = await this.validateConfiguration(mergedConfig, functionId);
+      const validationResult = await this.validateConfiguration(
+        mergedConfig,
+        functionId,
+      );
 
       if (!validationResult.valid) {
         return {
           success: false,
           updatedFields: [],
           validationErrors: validationResult.errors,
-          rollbackRequired: false
+          rollbackRequired: false,
         };
       }
 
       // Check for conflicts
-      const conflicts = await this.detectConfigurationConflicts(functionId, config);
+      const conflicts = await this.detectConfigurationConflicts(
+        functionId,
+        config,
+      );
 
       // Apply the configuration update
       const updatedFields = Object.keys(config);
@@ -241,32 +265,36 @@ export class ConfigurationManagerService implements IConfigurationManager {
         functionId,
         changeType: ConfigurationChangeType._UPDATE,
         changes: this.createConfigurationChanges(currentConfig, mergedConfig),
-        user: 'system', // Would be actual user in real implementation
+        user: "system", // Would be actual user in real implementation
         timestamp: new Date(),
-        reason: 'Configuration update via API',
-        approved: true
+        reason: "Configuration update via API",
+        approved: true,
       });
 
       // Emit change event
-      this.eventEmitter.emit('configuration.updated', {
+      this.eventEmitter.emit("configuration.updated", {
         functionId,
         changeType: ConfigurationChangeType._UPDATE,
         previousConfig: currentConfig,
         newConfig: mergedConfig,
-        timestamp: new Date()
+        timestamp: new Date(),
       } as ConfigurationChangeEvent);
 
-      this.logger.log(`Configuration updated successfully for function: ${functionId}`);
+      this.logger.log(
+        `Configuration updated successfully for function: ${functionId}`,
+      );
 
       return {
         success: true,
         updatedFields,
         validationErrors: [],
-        rollbackRequired: false
+        rollbackRequired: false,
       };
-
     } catch (error) {
-      this.logger.error(`Failed to update configuration for function ${functionId}: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
+      this.logger.error(
+        `Failed to update configuration for function ${functionId}: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
       throw error;
     }
   }
@@ -274,7 +302,9 @@ export class ConfigurationManagerService implements IConfigurationManager {
   /**
    * Reset configuration to defaults
    */
-  async resetConfiguration(functionId: string): Promise<ConfigurationResetResult> {
+  async resetConfiguration(
+    functionId: string,
+  ): Promise<ConfigurationResetResult> {
     this.logger.log(`Resetting configuration for function: ${functionId}`);
 
     try {
@@ -294,34 +324,40 @@ export class ConfigurationManagerService implements IConfigurationManager {
       await this.createAuditEntry({
         functionId,
         changeType: ConfigurationChangeType._RESET,
-        changes: currentConfig ? this.createConfigurationChanges(currentConfig, defaultConfig) : [],
-        user: 'system',
+        changes: currentConfig
+          ? this.createConfigurationChanges(currentConfig, defaultConfig)
+          : [],
+        user: "system",
         timestamp: new Date(),
-        reason: 'Configuration reset to defaults',
-        approved: true
+        reason: "Configuration reset to defaults",
+        approved: true,
       });
 
       // Emit change event
-      this.eventEmitter.emit('configuration.reset', {
+      this.eventEmitter.emit("configuration.reset", {
         functionId,
         changeType: ConfigurationChangeType._RESET,
         previousConfig: currentConfig,
         newConfig: defaultConfig,
-        timestamp: new Date()
+        timestamp: new Date(),
       } as ConfigurationChangeEvent);
 
       const resetFields = currentConfig ? Object.keys(defaultConfig) : [];
 
-      this.logger.log(`Configuration reset successfully for function: ${functionId}`);
+      this.logger.log(
+        `Configuration reset successfully for function: ${functionId}`,
+      );
 
       return {
         success: true,
         resetFields,
-        backupCreated: true
+        backupCreated: true,
       };
-
     } catch (error) {
-      this.logger.error(`Failed to reset configuration for function ${functionId}: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
+      this.logger.error(
+        `Failed to reset configuration for function ${functionId}: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
       throw error;
     }
   }
@@ -330,7 +366,7 @@ export class ConfigurationManagerService implements IConfigurationManager {
    * Get global configuration
    */
   async getGlobalConfiguration(): Promise<GlobalConfiguration> {
-    this.logger.debug('Getting global configuration');
+    this.logger.debug("Getting global configuration");
 
     try {
       // Check cache first
@@ -345,9 +381,11 @@ export class ConfigurationManagerService implements IConfigurationManager {
       this.globalConfigurationCache = globalConfig;
 
       return globalConfig;
-
     } catch (error) {
-      this.logger.error(`Failed to get global configuration: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
+      this.logger.error(
+        `Failed to get global configuration: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
       throw error;
     }
   }
@@ -356,9 +394,9 @@ export class ConfigurationManagerService implements IConfigurationManager {
    * Update global configuration
    */
   async updateGlobalConfiguration(
-    config: Partial<GlobalConfiguration>
+    config: Partial<GlobalConfiguration>,
   ): Promise<GlobalConfigurationUpdateResult> {
-    this.logger.log('Updating global configuration');
+    this.logger.log("Updating global configuration");
 
     try {
       // Get current global configuration
@@ -368,10 +406,13 @@ export class ConfigurationManagerService implements IConfigurationManager {
       const mergedConfig = this.mergeGlobalConfiguration(currentConfig, config);
 
       // Validate the merged configuration
-      const validationResult = await this.validateGlobalConfiguration(mergedConfig);
+      const validationResult =
+        await this.validateGlobalConfiguration(mergedConfig);
 
       if (!validationResult.valid) {
-        throw new Error(`Global configuration validation failed: ${validationResult.errors.map(e => e.message).join(', ')}`);
+        throw new Error(
+          `Global configuration validation failed: ${validationResult.errors.map((e) => e.message).join(", ")}`,
+        );
       }
 
       // Apply the configuration
@@ -387,24 +428,26 @@ export class ConfigurationManagerService implements IConfigurationManager {
       const rollbackPlan = this.createRollbackPlan(currentConfig, mergedConfig);
 
       // Emit change event
-      this.eventEmitter.emit('global-configuration.updated', {
+      this.eventEmitter.emit("global-configuration.updated", {
         previousConfig: currentConfig,
         newConfig: mergedConfig,
         affectedFunctions,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
-      this.logger.log('Global configuration updated successfully');
+      this.logger.log("Global configuration updated successfully");
 
       return {
         success: true,
         affectedFunctions,
         migrationRequired: this.isMigrationRequired(config),
-        rollbackPlan
+        rollbackPlan,
       };
-
     } catch (error) {
-      this.logger.error(`Failed to update global configuration: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
+      this.logger.error(
+        `Failed to update global configuration: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
       throw error;
     }
   }
@@ -414,7 +457,7 @@ export class ConfigurationManagerService implements IConfigurationManager {
    */
   async validateConfiguration(
     config: FunctionRegistrationConfig,
-    functionId?: string
+    functionId?: string,
   ): Promise<ConfigurationValidationResult> {
     const errors: Array<{ field: string; message: string; code: string }> = [];
     const warnings: string[] = [];
@@ -423,12 +466,14 @@ export class ConfigurationManagerService implements IConfigurationManager {
     try {
       // Get validation context
       const context: ValidationContext = {
-        functionId: functionId || 'unknown',
-        currentConfig: functionId ? (await this.getConfiguration(functionId)) || undefined : undefined,
+        functionId: functionId || "unknown",
+        currentConfig: functionId
+          ? (await this.getConfiguration(functionId)) || undefined
+          : undefined,
         globalConfig: await this.getGlobalConfiguration(),
         enforcementPolicies: await this.getEnforcementPolicies(),
         userPermissions: [], // Would be populated from actual user context
-        environment: process.env.NODE_ENV || 'development'
+        environment: process.env.NODE_ENV || "development",
       };
 
       // Validate basic structure
@@ -449,22 +494,24 @@ export class ConfigurationManagerService implements IConfigurationManager {
         valid: errors.length === 0,
         errors,
         warnings,
-        recommendations
+        recommendations,
       };
-
     } catch (error) {
-      this.logger.error(`Configuration validation failed: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
+      this.logger.error(
+        `Configuration validation failed: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
       errors.push({
-        field: 'general',
+        field: "general",
         message: `Validation error: ${error instanceof Error ? error.message : String(error)}`,
-        code: 'VALIDATION_ERROR'
+        code: "VALIDATION_ERROR",
       });
 
       return {
         valid: false,
         errors,
         warnings,
-        recommendations
+        recommendations,
       };
     }
   }
@@ -474,9 +521,11 @@ export class ConfigurationManagerService implements IConfigurationManager {
    */
   async applyTemplate(
     functionId: string,
-    templateName: string
+    templateName: string,
   ): Promise<TemplateApplicationResult> {
-    this.logger.log(`Applying template ${templateName} to function: ${functionId}`);
+    this.logger.log(
+      `Applying template ${templateName} to function: ${functionId}`,
+    );
 
     try {
       // Get the template
@@ -492,22 +541,36 @@ export class ConfigurationManagerService implements IConfigurationManager {
       }
 
       // Check template applicability
-      const applicabilityCheck = await this.checkTemplateApplicability(functionId, template);
+      const applicabilityCheck = await this.checkTemplateApplicability(
+        functionId,
+        template,
+      );
       if (!applicabilityCheck.applicable) {
-        throw new Error(`Template ${templateName} is not applicable to function ${functionId}: ${applicabilityCheck.reason}`);
+        throw new Error(
+          `Template ${templateName} is not applicable to function ${functionId}: ${applicabilityCheck.reason}`,
+        );
       }
 
       // Detect conflicts
       const conflicts = this.detectTemplateConflicts(currentConfig, template);
 
       // Apply template settings
-      const updatedConfig = this.applyTemplateSettings(currentConfig, template, conflicts);
+      const updatedConfig = this.applyTemplateSettings(
+        currentConfig,
+        template,
+        conflicts,
+      );
 
       // Update configuration
-      const updateResult = await this.updateConfiguration(functionId, updatedConfig);
+      const updateResult = await this.updateConfiguration(
+        functionId,
+        updatedConfig,
+      );
 
       if (!updateResult.success) {
-        throw new Error(`Failed to apply template: ${updateResult.validationErrors?.map(e => e.message).join(', ')}`);
+        throw new Error(
+          `Failed to apply template: ${updateResult.validationErrors?.map((e) => e.message).join(", ")}`,
+        );
       }
 
       // Create audit entry
@@ -515,22 +578,26 @@ export class ConfigurationManagerService implements IConfigurationManager {
         functionId,
         changeType: ConfigurationChangeType._TEMPLATE_APPLY,
         changes: this.createConfigurationChanges(currentConfig, updatedConfig),
-        user: 'system',
+        user: "system",
         timestamp: new Date(),
         reason: `Applied template: ${templateName}`,
-        approved: true
+        approved: true,
       });
 
-      this.logger.log(`Template ${templateName} applied successfully to function: ${functionId}`);
+      this.logger.log(
+        `Template ${templateName} applied successfully to function: ${functionId}`,
+      );
 
       return {
         success: true,
         appliedSettings: Object.keys(template.settings),
-        conflicts
+        conflicts,
       };
-
     } catch (error) {
-      this.logger.error(`Failed to apply template ${templateName} to function ${functionId}: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
+      this.logger.error(
+        `Failed to apply template ${templateName} to function ${functionId}: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
       throw error;
     }
   }
@@ -539,7 +606,7 @@ export class ConfigurationManagerService implements IConfigurationManager {
    * Get available configuration templates
    */
   async getTemplates(): Promise<ConfigurationTemplate[]> {
-    this.logger.debug('Getting available configuration templates');
+    this.logger.debug("Getting available configuration templates");
 
     try {
       // Check cache first
@@ -551,14 +618,16 @@ export class ConfigurationManagerService implements IConfigurationManager {
       const templates = await this.storage.getTemplates();
 
       // Cache templates
-      templates.forEach(template => {
+      templates.forEach((template) => {
         this.templateCache.set(template.name, template);
       });
 
       return templates;
-
     } catch (error) {
-      this.logger.error(`Failed to get templates: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
+      this.logger.error(
+        `Failed to get templates: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
       throw error;
     }
   }
@@ -571,7 +640,7 @@ export class ConfigurationManagerService implements IConfigurationManager {
    * Initialize the service
    */
   private async initializeService(): Promise<void> {
-    this.logger.log('Initializing Configuration Manager Service');
+    this.logger.log("Initializing Configuration Manager Service");
 
     try {
       // Pre-load global configuration
@@ -580,10 +649,12 @@ export class ConfigurationManagerService implements IConfigurationManager {
       // Pre-load templates
       await this.getTemplates();
 
-      this.logger.log('Configuration Manager Service initialized successfully');
-
+      this.logger.log("Configuration Manager Service initialized successfully");
     } catch (error) {
-      this.logger.error(`Failed to initialize Configuration Manager Service: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
+      this.logger.error(
+        `Failed to initialize Configuration Manager Service: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
     }
   }
 
@@ -600,7 +671,7 @@ export class ConfigurationManagerService implements IConfigurationManager {
    */
   private async detectConfigurationConflicts(
     functionId: string,
-    config: Partial<FunctionRegistrationConfig>
+    config: Partial<FunctionRegistrationConfig>,
   ): Promise<ConfigurationConflict[]> {
     const conflicts: ConfigurationConflict[] = [];
 
@@ -615,13 +686,13 @@ export class ConfigurationManagerService implements IConfigurationManager {
    */
   private createConfigurationChanges(
     oldConfig: FunctionRegistrationConfig,
-    newConfig: FunctionRegistrationConfig
+    newConfig: FunctionRegistrationConfig,
   ): ConfigurationChange[] {
     const changes: ConfigurationChange[] = [];
 
     // Compare configurations and identify changes
     // This is a simplified implementation
-    Object.keys(newConfig).forEach(key => {
+    Object.keys(newConfig).forEach((key) => {
       const oldValue = (oldConfig as any)[key];
       const newValue = (newConfig as any)[key];
 
@@ -630,7 +701,7 @@ export class ConfigurationManagerService implements IConfigurationManager {
           field: key,
           oldValue,
           newValue,
-          impact: this.assessChangeImpact(key, oldValue, newValue)
+          impact: this.assessChangeImpact(key, oldValue, newValue),
         });
       }
     });
@@ -641,16 +712,24 @@ export class ConfigurationManagerService implements IConfigurationManager {
   /**
    * Assess change impact
    */
-  private assessChangeImpact(field: string, oldValue: unknown, newValue: unknown): ChangeImpact {
+  private assessChangeImpact(
+    field: string,
+    oldValue: unknown,
+    newValue: unknown,
+  ): ChangeImpact {
     // Critical fields that have high impact
-    const criticalFields = ['enabled', 'defaultApprovalLevel', 'defaultValidationMode'];
+    const criticalFields = [
+      "enabled",
+      "defaultApprovalLevel",
+      "defaultValidationMode",
+    ];
 
     if (criticalFields.includes(field)) {
       return ChangeImpact._HIGH;
     }
 
     // Performance-related fields
-    const performanceFields = ['defaultTimeout', 'cache', 'monitoring'];
+    const performanceFields = ["defaultTimeout", "cache", "monitoring"];
 
     if (performanceFields.includes(field)) {
       return ChangeImpact._MEDIUM;
@@ -662,10 +741,12 @@ export class ConfigurationManagerService implements IConfigurationManager {
   /**
    * Create audit entry
    */
-  private async createAuditEntry(entry: Omit<ConfigurationAuditEntry, 'id'>): Promise<void> {
+  private async createAuditEntry(
+    entry: Omit<ConfigurationAuditEntry, "id">,
+  ): Promise<void> {
     const auditEntry: ConfigurationAuditEntry = {
       id: this.generateAuditId(),
-      ...entry
+      ...entry,
     };
 
     await this.storage.addAuditEntry(auditEntry);
@@ -683,7 +764,7 @@ export class ConfigurationManagerService implements IConfigurationManager {
    */
   private mergeGlobalConfiguration(
     current: GlobalConfiguration,
-    updates: Partial<GlobalConfiguration>
+    updates: Partial<GlobalConfiguration>,
   ): GlobalConfiguration {
     return {
       ...current,
@@ -691,33 +772,38 @@ export class ConfigurationManagerService implements IConfigurationManager {
       defaultSettings: updates.defaultSettings
         ? { ...current.defaultSettings, ...updates.defaultSettings }
         : current.defaultSettings,
-      enforcementPolicies: updates.enforcementPolicies || current.enforcementPolicies,
+      enforcementPolicies:
+        updates.enforcementPolicies || current.enforcementPolicies,
       securitySettings: updates.securitySettings
         ? { ...current.securitySettings, ...updates.securitySettings }
         : current.securitySettings,
       performanceSettings: updates.performanceSettings
         ? { ...current.performanceSettings, ...updates.performanceSettings }
-        : current.performanceSettings
+        : current.performanceSettings,
     };
   }
 
   /**
    * Validate global configuration
    */
-  private async validateGlobalConfiguration(config: GlobalConfiguration): Promise<ConfigurationValidationResult> {
+  private async validateGlobalConfiguration(
+    config: GlobalConfiguration,
+  ): Promise<ConfigurationValidationResult> {
     const errors: Array<{ field: string; message: string; code: string }> = [];
 
     // Validate default settings
-    const defaultValidation = await this.validateConfiguration(config.defaultSettings);
+    const defaultValidation = await this.validateConfiguration(
+      config.defaultSettings,
+    );
     errors.push(...defaultValidation.errors);
 
     // Validate enforcement policies
     config.enforcementPolicies.forEach((policy, index) => {
-      if (!policy.name || policy.name.trim() === '') {
+      if (!policy.name || policy.name.trim() === "") {
         errors.push({
           field: `enforcementPolicies[${index}].name`,
-          message: 'Policy name is required',
-          code: 'POLICY_NAME_REQUIRED'
+          message: "Policy name is required",
+          code: "POLICY_NAME_REQUIRED",
         });
       }
     });
@@ -726,14 +812,16 @@ export class ConfigurationManagerService implements IConfigurationManager {
       valid: errors.length === 0,
       errors,
       warnings: [],
-      recommendations: []
+      recommendations: [],
     };
   }
 
   /**
    * Get affected functions for global configuration change
    */
-  private async getAffectedFunctions(config: Partial<GlobalConfiguration>): Promise<string[]> {
+  private async getAffectedFunctions(
+    config: Partial<GlobalConfiguration>,
+  ): Promise<string[]> {
     // This would query the registry to find affected functions
     // For now, return empty array
     return [];
@@ -744,10 +832,13 @@ export class ConfigurationManagerService implements IConfigurationManager {
    */
   private isMigrationRequired(config: Partial<GlobalConfiguration>): boolean {
     // Check if any breaking changes require migration
-    const breakingFields = ['defaultSettings.defaultValidationMode', 'securitySettings.encryptionEnabled'];
+    const breakingFields = [
+      "defaultSettings.defaultValidationMode",
+      "securitySettings.encryptionEnabled",
+    ];
 
-    return breakingFields.some(field => {
-      const keys = field.split('.');
+    return breakingFields.some((field) => {
+      const keys = field.split(".");
       let value = config;
       for (const key of keys) {
         value = (value as any)?.[key];
@@ -762,27 +853,27 @@ export class ConfigurationManagerService implements IConfigurationManager {
    */
   private createRollbackPlan(
     currentConfig: GlobalConfiguration,
-    newConfig: GlobalConfiguration
+    newConfig: GlobalConfiguration,
   ): RollbackPlan {
     const steps: RollbackStep[] = [
       {
         order: 1,
-        description: 'Restore global configuration',
+        description: "Restore global configuration",
         action: RollbackAction._RESTORE_CONFIG,
-        parameters: { config: currentConfig }
+        parameters: { config: currentConfig },
       },
       {
         order: 2,
-        description: 'Clear configuration cache',
+        description: "Clear configuration cache",
         action: RollbackAction._CLEAR_CACHE,
-        parameters: {}
-      }
+        parameters: {},
+      },
     ];
 
     return {
       steps,
       estimatedDuration: 30000, // 30 seconds
-      riskLevel: RiskLevel._LOW
+      riskLevel: RiskLevel._LOW,
     };
   }
 
@@ -799,21 +890,21 @@ export class ConfigurationManagerService implements IConfigurationManager {
    */
   private validateBasicStructure(
     config: FunctionRegistrationConfig,
-    errors: Array<{ field: string; message: string; code: string }>
+    errors: Array<{ field: string; message: string; code: string }>,
   ): void {
-    if (typeof config.enabled !== 'boolean') {
+    if (typeof config.enabled !== "boolean") {
       errors.push({
-        field: 'enabled',
-        message: 'Enabled must be a boolean value',
-        code: 'INVALID_ENABLED_TYPE'
+        field: "enabled",
+        message: "Enabled must be a boolean value",
+        code: "INVALID_ENABLED_TYPE",
       });
     }
 
     if (config.defaultTimeout <= 0) {
       errors.push({
-        field: 'defaultTimeout',
-        message: 'Default timeout must be greater than 0',
-        code: 'INVALID_TIMEOUT'
+        field: "defaultTimeout",
+        message: "Default timeout must be greater than 0",
+        code: "INVALID_TIMEOUT",
       });
     }
   }
@@ -824,18 +915,20 @@ export class ConfigurationManagerService implements IConfigurationManager {
   private validateCacheConfig(
     cache: CacheConfig,
     errors: Array<{ field: string; message: string; code: string }>,
-    warnings: string[]
+    warnings: string[],
   ): void {
     if (cache.enabled && cache.ttl <= 0) {
       errors.push({
-        field: 'cache.ttl',
-        message: 'Cache TTL must be greater than 0 when caching is enabled',
-        code: 'INVALID_CACHE_TTL'
+        field: "cache.ttl",
+        message: "Cache TTL must be greater than 0 when caching is enabled",
+        code: "INVALID_CACHE_TTL",
       });
     }
 
     if (cache.enabled && cache.ttl > 86400) {
-      warnings.push('Cache TTL is very long (> 24 hours), consider reducing it');
+      warnings.push(
+        "Cache TTL is very long (> 24 hours), consider reducing it",
+      );
     }
   }
 
@@ -845,17 +938,17 @@ export class ConfigurationManagerService implements IConfigurationManager {
   private validateMonitoringConfig(
     monitoring: MonitoringConfig,
     errors: Array<{ field: string; message: string; code: string }>,
-    warnings: string[]
+    warnings: string[],
   ): void {
     if (monitoring.enabled && monitoring.metrics.length === 0) {
-      warnings.push('Monitoring is enabled but no metrics are configured');
+      warnings.push("Monitoring is enabled but no metrics are configured");
     }
 
     if (monitoring.samplingRate < 0 || monitoring.samplingRate > 1) {
       errors.push({
-        field: 'monitoring.samplingRate',
-        message: 'Sampling rate must be between 0 and 1',
-        code: 'INVALID_SAMPLING_RATE'
+        field: "monitoring.samplingRate",
+        message: "Sampling rate must be between 0 and 1",
+        code: "INVALID_SAMPLING_RATE",
       });
     }
   }
@@ -866,18 +959,18 @@ export class ConfigurationManagerService implements IConfigurationManager {
   private validateErrorHandlingConfig(
     errorHandling: ErrorHandlingConfig,
     errors: Array<{ field: string; message: string; code: string }>,
-    warnings: string[]
+    warnings: string[],
   ): void {
     if (errorHandling.retry.maxAttempts < 0) {
       errors.push({
-        field: 'errorHandling.retry.maxAttempts',
-        message: 'Max retry attempts must be non-negative',
-        code: 'INVALID_MAX_ATTEMPTS'
+        field: "errorHandling.retry.maxAttempts",
+        message: "Max retry attempts must be non-negative",
+        code: "INVALID_MAX_ATTEMPTS",
       });
     }
 
     if (errorHandling.retry.maxAttempts > 10) {
-      warnings.push('High number of retry attempts may impact performance');
+      warnings.push("High number of retry attempts may impact performance");
     }
   }
 
@@ -888,7 +981,7 @@ export class ConfigurationManagerService implements IConfigurationManager {
     config: FunctionRegistrationConfig,
     context: ValidationContext,
     errors: Array<{ field: string; message: string; code: string }>,
-    warnings: string[]
+    warnings: string[],
   ): Promise<void> {
     for (const policy of context.enforcementPolicies) {
       for (const rule of policy.rules) {
@@ -898,9 +991,9 @@ export class ConfigurationManagerService implements IConfigurationManager {
           switch (policy.enforcement) {
             case EnforcementLevel._BLOCKING:
               errors.push({
-                field: result.field || 'policy',
+                field: result.field || "policy",
                 message: `Policy violation: ${result.message}`,
-                code: 'POLICY_VIOLATION'
+                code: "POLICY_VIOLATION",
               });
               break;
             case EnforcementLevel._WARNING:
@@ -922,26 +1015,26 @@ export class ConfigurationManagerService implements IConfigurationManager {
   private async evaluatePolicyRule(
     rule: PolicyRule,
     config: FunctionRegistrationConfig,
-    context: ValidationContext
+    context: ValidationContext,
   ): Promise<{ passed: boolean; message: string; field?: string }> {
     // Simplified policy rule evaluation
     // In a real implementation, this would use a rule engine
 
     switch (rule.action) {
       case PolicyAction._DENY:
-        return { passed: false, message: 'Action denied by policy' };
+        return { passed: false, message: "Action denied by policy" };
       case PolicyAction._REQUIRE_APPROVAL:
         if (config.defaultApprovalLevel === ApprovalLevel._AUTOMATIC) {
           return {
             passed: false,
-            message: 'Policy requires manual approval',
-            field: 'defaultApprovalLevel'
+            message: "Policy requires manual approval",
+            field: "defaultApprovalLevel",
           };
         }
         break;
     }
 
-    return { passed: true, message: 'Policy check passed' };
+    return { passed: true, message: "Policy check passed" };
   }
 
   /**
@@ -950,29 +1043,35 @@ export class ConfigurationManagerService implements IConfigurationManager {
   private generateRecommendations(
     config: FunctionRegistrationConfig,
     context: ValidationContext,
-    recommendations: string[]
+    recommendations: string[],
   ): void {
     // Generate smart recommendations based on configuration
 
     if (config.cache.enabled && config.cache.ttl < 300) {
-      recommendations.push('Consider increasing cache TTL for better performance');
+      recommendations.push(
+        "Consider increasing cache TTL for better performance",
+      );
     }
 
     if (!config.monitoring.enabled) {
-      recommendations.push('Enable monitoring for better observability');
+      recommendations.push("Enable monitoring for better observability");
     }
 
     if (config.defaultTimeout > 60000) {
-      recommendations.push('Consider reducing timeout for better responsiveness');
+      recommendations.push(
+        "Consider reducing timeout for better responsiveness",
+      );
     }
   }
 
   /**
    * Get template by name
    */
-  private async getTemplate(templateName: string): Promise<ConfigurationTemplate | null> {
+  private async getTemplate(
+    templateName: string,
+  ): Promise<ConfigurationTemplate | null> {
     const templates = await this.getTemplates();
-    return templates.find(t => t.name === templateName) || null;
+    return templates.find((t) => t.name === templateName) || null;
   }
 
   /**
@@ -980,7 +1079,7 @@ export class ConfigurationManagerService implements IConfigurationManager {
    */
   private async checkTemplateApplicability(
     functionId: string,
-    template: ConfigurationTemplate
+    template: ConfigurationTemplate,
   ): Promise<{ applicable: boolean; reason?: string }> {
     // Simplified applicability check
     // In a real implementation, this would check function metadata, security level, etc.
@@ -993,7 +1092,7 @@ export class ConfigurationManagerService implements IConfigurationManager {
    */
   private detectTemplateConflicts(
     currentConfig: FunctionRegistrationConfig,
-    template: ConfigurationTemplate
+    template: ConfigurationTemplate,
   ): ConfigurationConflict[] {
     const conflicts: ConfigurationConflict[] = [];
 
@@ -1001,13 +1100,19 @@ export class ConfigurationManagerService implements IConfigurationManager {
     Object.entries(template.settings).forEach(([key, templateValue]) => {
       const currentValue = (currentConfig as any)[key];
 
-      if (currentValue !== undefined &&
-          JSON.stringify(currentValue) !== JSON.stringify(templateValue)) {
+      if (
+        currentValue !== undefined &&
+        JSON.stringify(currentValue) !== JSON.stringify(templateValue)
+      ) {
         conflicts.push({
           setting: key,
           templateValue,
           currentValue,
-          resolution: this.determineConflictResolution(key, currentValue, templateValue)
+          resolution: this.determineConflictResolution(
+            key,
+            currentValue,
+            templateValue,
+          ),
         });
       }
     });
@@ -1021,10 +1126,14 @@ export class ConfigurationManagerService implements IConfigurationManager {
   private determineConflictResolution(
     setting: string,
     currentValue: unknown,
-    templateValue: unknown
+    templateValue: unknown,
   ): ConflictResolution {
     // Simple conflict resolution logic
-    const criticalSettings = ['enabled', 'defaultValidationMode', 'defaultApprovalLevel'];
+    const criticalSettings = [
+      "enabled",
+      "defaultValidationMode",
+      "defaultApprovalLevel",
+    ];
 
     if (criticalSettings.includes(setting)) {
       return ConflictResolution._MANUAL_REQUIRED;
@@ -1039,21 +1148,24 @@ export class ConfigurationManagerService implements IConfigurationManager {
   private applyTemplateSettings(
     currentConfig: FunctionRegistrationConfig,
     template: ConfigurationTemplate,
-    conflicts: ConfigurationConflict[]
+    conflicts: ConfigurationConflict[],
   ): Partial<FunctionRegistrationConfig> {
     const updates: Partial<FunctionRegistrationConfig> = {};
 
     // Apply template settings, respecting conflict resolutions
     Object.entries(template.settings).forEach(([key, value]) => {
-      const conflict = conflicts.find(c => c.setting === key);
+      const conflict = conflicts.find((c) => c.setting === key);
 
-      if (!conflict || conflict.resolution === ConflictResolution._USE_TEMPLATE) {
+      if (
+        !conflict ||
+        conflict.resolution === ConflictResolution._USE_TEMPLATE
+      ) {
         (updates as any)[key] = value;
       } else if (conflict.resolution === ConflictResolution._MERGE) {
         // Implement merge logic for specific types
         (updates as any)[key] = this.mergeConfigurationValues(
           (currentConfig as any)[key],
-          value
+          value,
         );
       }
       // For KEEP_CURRENT and MANUAL_REQUIRED, don't apply the template value
@@ -1065,10 +1177,17 @@ export class ConfigurationManagerService implements IConfigurationManager {
   /**
    * Merge configuration values
    */
-  private mergeConfigurationValues(currentValue: unknown, templateValue: unknown): unknown {
-    if (typeof currentValue === 'object' && typeof templateValue === 'object' &&
-        currentValue !== null && templateValue !== null) {
-      return { ...currentValue as object, ...templateValue as object };
+  private mergeConfigurationValues(
+    currentValue: unknown,
+    templateValue: unknown,
+  ): unknown {
+    if (
+      typeof currentValue === "object" &&
+      typeof templateValue === "object" &&
+      currentValue !== null &&
+      templateValue !== null
+    ) {
+      return { ...(currentValue as object), ...(templateValue as object) };
     }
     return templateValue;
   }

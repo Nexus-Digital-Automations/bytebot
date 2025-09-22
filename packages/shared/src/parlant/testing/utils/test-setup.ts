@@ -30,19 +30,19 @@
  * @classification Enterprise Testing Infrastructure
  */
 
-import { jest } from '@jest/globals';
-import { testingFrameworkConfig } from '../config/testing-framework.config';
-import { MockManager } from '../mocks/mock-manager';
-import { DatabaseTestHelper } from '../utils/database-test-helper';
-import { NetworkTestHelper } from '../utils/network-test-helper';
-import { PerformanceMonitor } from '../utils/performance-monitor';
+import { jest } from "@jest/globals";
+import { testingFrameworkConfig } from "../config/testing-framework.config";
+import { MockManager } from "../mocks/mock-manager";
+import { DatabaseTestHelper } from "../utils/database-test-helper";
+import { NetworkTestHelper } from "../utils/network-test-helper";
+import { PerformanceMonitor } from "../utils/performance-monitor";
 
 export interface TestSetupOptions {
   enableDatabase?: boolean;
   enableNetworkMocking?: boolean;
   enablePerformanceMonitoring?: boolean;
   customMocks?: Record<string, any>;
-  isolationLevel?: 'strict' | 'relaxed';
+  isolationLevel?: "strict" | "relaxed";
 }
 
 export class TestSetupManager {
@@ -76,7 +76,7 @@ export class TestSetupManager {
     }
 
     try {
-      console.log('🔧 Initializing PARLANT Testing Framework...');
+      console.log("🔧 Initializing PARLANT Testing Framework...");
 
       // Set global test timeout
       jest.setTimeout(testingFrameworkConfig.global.timeout);
@@ -94,10 +94,9 @@ export class TestSetupManager {
       this.setupTestIsolation();
 
       this.isInitialized = true;
-      console.log('✅ PARLANT Testing Framework initialized successfully');
-
+      console.log("✅ PARLANT Testing Framework initialized successfully");
     } catch (error) {
-      console.error('❌ Failed to initialize testing framework:', error);
+      console.error("❌ Failed to initialize testing framework:", error);
       throw error;
     }
   }
@@ -105,7 +104,10 @@ export class TestSetupManager {
   /**
    * Setup test environment for specific test suite
    */
-  public async setupTestSuite(suiteName: string, options: TestSetupOptions = {}): Promise<void> {
+  public async setupTestSuite(
+    suiteName: string,
+    options: TestSetupOptions = {},
+  ): Promise<void> {
     const startTime = performance.now();
 
     try {
@@ -132,11 +134,10 @@ export class TestSetupManager {
       }
 
       // Configure test isolation
-      this.configureTestIsolation(options.isolationLevel || 'strict');
+      this.configureTestIsolation(options.isolationLevel || "strict");
 
       const setupTime = performance.now() - startTime;
       console.log(`✅ Test suite setup completed in ${setupTime.toFixed(2)}ms`);
-
     } catch (error) {
       console.error(`❌ Failed to setup test suite ${suiteName}:`, error);
       throw error;
@@ -167,7 +168,6 @@ export class TestSetupManager {
       jest.restoreAllMocks();
 
       console.log(`✅ Test suite teardown completed: ${suiteName}`);
-
     } catch (error) {
       console.error(`❌ Failed to teardown test suite ${suiteName}:`, error);
       throw error;
@@ -189,7 +189,6 @@ export class TestSetupManager {
       if (testingFrameworkConfig.integration.databaseSetup.resetBetweenTests) {
         await this.databaseHelper.resetTestData();
       }
-
     } catch (error) {
       console.error(`❌ Failed to setup test ${testName}:`, error);
       throw error;
@@ -206,7 +205,6 @@ export class TestSetupManager {
 
       // Clear test-specific resources
       await this.mockManager.clearTestMocks();
-
     } catch (error) {
       console.error(`❌ Failed to teardown test ${testName}:`, error);
       throw error;
@@ -218,7 +216,7 @@ export class TestSetupManager {
    */
   public async generateTestReport(): Promise<void> {
     try {
-      console.log('📊 Generating comprehensive test report...');
+      console.log("📊 Generating comprehensive test report...");
 
       const performanceReport = await this.performanceMonitor.generateReport();
       const coverageReport = await this.generateCoverageReport();
@@ -229,16 +227,15 @@ export class TestSetupManager {
         performance: performanceReport,
         coverage: coverageReport,
         quality: qualityReport,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
 
       // Save report to configured output directory
       await this.saveTestReport(comprehensiveReport);
 
-      console.log('✅ Test report generated successfully');
-
+      console.log("✅ Test report generated successfully");
     } catch (error) {
-      console.error('❌ Failed to generate test report:', error);
+      console.error("❌ Failed to generate test report:", error);
       throw error;
     }
   }
@@ -247,11 +244,12 @@ export class TestSetupManager {
    * Private helper methods
    */
   private setupEnvironmentVariables(): void {
-    process.env.NODE_ENV = 'test';
-    process.env.LOG_LEVEL = 'error';
-    process.env.PARLANT_TEST_MODE = 'true';
-    process.env.JWT_SECRET = 'test-secret-key';
-    process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/parlant_test';
+    process.env.NODE_ENV = "test";
+    process.env.LOG_LEVEL = "error";
+    process.env.PARLANT_TEST_MODE = "true";
+    process.env.JWT_SECRET = "test-secret-key";
+    process.env.DATABASE_URL =
+      "postgresql://test:test@localhost:5432/parlant_test";
   }
 
   private async initializeCoreComponents(): Promise<void> {
@@ -263,13 +261,13 @@ export class TestSetupManager {
 
   private setupGlobalErrorHandlers(): void {
     // Handle unhandled promise rejections
-    process.on('unhandledRejection', (reason, promise) => {
-      console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+    process.on("unhandledRejection", (reason, promise) => {
+      console.error("Unhandled Rejection at:", promise, "reason:", reason);
     });
 
     // Handle uncaught exceptions
-    process.on('uncaughtException', (error) => {
-      console.error('Uncaught Exception:', error);
+    process.on("uncaughtException", (error) => {
+      console.error("Uncaught Exception:", error);
     });
   }
 
@@ -280,8 +278,8 @@ export class TestSetupManager {
     });
   }
 
-  private configureTestIsolation(level: 'strict' | 'relaxed'): void {
-    if (level === 'strict') {
+  private configureTestIsolation(level: "strict" | "relaxed"): void {
+    if (level === "strict") {
       // Enable strict isolation
       jest.resetModules();
       jest.clearAllMocks();
@@ -296,7 +294,7 @@ export class TestSetupManager {
       statements: 96.2,
       branches: 94.8,
       functions: 95.1,
-      lines: 95.9
+      lines: 95.9,
     };
   }
 
@@ -306,19 +304,19 @@ export class TestSetupManager {
       testsPassed: 150,
       testsFailed: 2,
       testsSkipped: 1,
-      performance: 'excellent',
-      security: 'secure',
-      compatibility: 'compatible'
+      performance: "excellent",
+      security: "secure",
+      compatibility: "compatible",
     };
   }
 
   private async saveTestReport(report: any): Promise<void> {
-    const fs = await import('fs/promises');
-    const path = await import('path');
+    const fs = await import("fs/promises");
+    const path = await import("path");
 
     const reportPath = path.join(
       testingFrameworkConfig.global.reporting.outputDir,
-      `parlant-test-report-${Date.now()}.json`
+      `parlant-test-report-${Date.now()}.json`,
     );
 
     await fs.writeFile(reportPath, JSON.stringify(report, null, 2));
@@ -331,7 +329,10 @@ export const setupGlobalTestEnvironment = async (): Promise<void> => {
   await manager.initializeGlobalTestEnvironment();
 };
 
-export const setupTestSuite = async (suiteName: string, options?: TestSetupOptions): Promise<void> => {
+export const setupTestSuite = async (
+  suiteName: string,
+  options?: TestSetupOptions,
+): Promise<void> => {
   const manager = TestSetupManager.getInstance();
   await manager.setupTestSuite(suiteName, options);
 };

@@ -310,7 +310,9 @@ export class WarningDetails {
     description: 'Warning severity',
     enum: ['info', 'warning', 'deprecated'],
   })
-  @IsEnum(['info', 'warning', 'deprecated'], { message: 'Invalid warning severity' })
+  @IsEnum(['info', 'warning', 'deprecated'], {
+    message: 'Invalid warning severity',
+  })
   severity!: string;
 
   @ApiPropertyOptional({
@@ -374,7 +376,9 @@ export class ResponseMetadata {
     enum: ['development', 'staging', 'production'],
   })
   @IsOptional()
-  @IsEnum(['development', 'staging', 'production'], { message: 'Invalid environment' })
+  @IsEnum(['development', 'staging', 'production'], {
+    message: 'Invalid environment',
+  })
   environment?: string;
 
   @ApiPropertyOptional({
@@ -573,7 +577,9 @@ export class BaseEnhancedResponseDto<T = any> {
 /**
  * List Response DTO with pagination
  */
-export class EnhancedListResponseDto<T = any> extends BaseEnhancedResponseDto<T[]> {
+export class EnhancedListResponseDto<T = any> extends BaseEnhancedResponseDto<
+  T[]
+> {
   @ApiProperty({
     description: 'Array of items',
     isArray: true,
@@ -614,7 +620,9 @@ export class EnhancedListResponseDto<T = any> extends BaseEnhancedResponseDto<T[
 /**
  * Create/Update Response DTO
  */
-export class CreateUpdateResponseDto<T = any> extends BaseEnhancedResponseDto<T> {
+export class CreateUpdateResponseDto<
+  T = any,
+> extends BaseEnhancedResponseDto<T> {
   @ApiProperty({
     description: 'Created/updated resource identifier',
   })
@@ -684,7 +692,9 @@ export class StatusResponseDto extends BaseEnhancedResponseDto<any> {
     description: 'Overall system health status',
     enum: ['healthy', 'warning', 'critical', 'maintenance'],
   })
-  @IsEnum(['healthy', 'warning', 'critical', 'maintenance'], { message: 'Invalid health status' })
+  @IsEnum(['healthy', 'warning', 'critical', 'maintenance'], {
+    message: 'Invalid health status',
+  })
   healthStatus!: string;
 
   @ApiProperty({

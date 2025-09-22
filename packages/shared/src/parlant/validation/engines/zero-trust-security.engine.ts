@@ -5,7 +5,7 @@
  * threat detection, and least-privilege access enforcement
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from "@nestjs/common";
 import {
   ZeroTrustSecurityValidator,
   ConversationalValidationRequest,
@@ -24,8 +24,8 @@ import {
   SecurityLevel,
   ThreatLevel,
   SecurityEvent,
-  SecuritySeverity
-} from '../types/conversational-validation.types';
+  SecuritySeverity,
+} from "../types/conversational-validation.types";
 
 @Injectable()
 export class ZeroTrustSecurityEngine implements ZeroTrustSecurityValidator {
@@ -50,7 +50,7 @@ export class ZeroTrustSecurityEngine implements ZeroTrustSecurityValidator {
     lowRiskThreshold: 0.2,
     maxContinuousSessionTime: 3600000, // 1 hour
     maxInactivityTime: 1800000, // 30 minutes
-    anomalyDetectionThreshold: 0.6
+    anomalyDetectionThreshold: 0.6,
   };
 
   constructor() {
@@ -62,55 +62,59 @@ export class ZeroTrustSecurityEngine implements ZeroTrustSecurityValidator {
    */
   async validateZeroTrust(
     request: ConversationalValidationRequest,
-    securityPolicy: ZeroTrustPolicy
+    securityPolicy: ZeroTrustPolicy,
   ): Promise<ZeroTrustValidationResult> {
     const startTime = Date.now();
 
     try {
-      this.logger.log(`Zero-trust validation for request: ${request.requestId}`);
+      this.logger.log(
+        `Zero-trust validation for request: ${request.requestId}`,
+      );
 
       // Step 1: Identity verification and authentication strength assessment
       const identityVerification = await this.verifyIdentity(
         request.userContext,
-        securityPolicy.identityRequirements
+        securityPolicy.identityRequirements,
       );
 
       // Step 2: Device trust and security posture assessment
       const deviceTrustAssessment = await this.assessDeviceTrust(
         request.userContext.deviceInfo,
-        securityPolicy.deviceRequirements
+        securityPolicy.deviceRequirements,
       );
 
       // Step 3: Network security and location analysis
       const networkSecurityAssessment = await this.assessNetworkSecurity(
         request.userContext,
-        securityPolicy.networkRequirements
+        securityPolicy.networkRequirements,
       );
 
       // Step 4: Application context and security validation
-      const applicationSecurityValidation = await this.validateApplicationSecurity(
-        request,
-        securityPolicy.applicationRequirements
-      );
+      const applicationSecurityValidation =
+        await this.validateApplicationSecurity(
+          request,
+          securityPolicy.applicationRequirements,
+        );
 
       // Step 5: Data classification and protection validation
       const dataProtectionValidation = await this.validateDataProtection(
         request.operation,
-        securityPolicy.dataProtectionRequirements
+        securityPolicy.dataProtectionRequirements,
       );
 
       // Step 6: Behavioral pattern analysis
       const behavioralAnalysis = await this.analyzeBehavioralPatterns(
         request.userContext,
         request.conversationContext,
-        securityPolicy.behavioralRequirements
+        securityPolicy.behavioralRequirements,
       );
 
       // Step 7: Threat intelligence correlation
-      const threatIntelligenceCorrelation = await this.correlateThreatIntelligence(
-        request,
-        securityPolicy.threatIntelligenceRequirements
-      );
+      const threatIntelligenceCorrelation =
+        await this.correlateThreatIntelligence(
+          request,
+          securityPolicy.threatIntelligenceRequirements,
+        );
 
       // Step 8: Policy compliance validation
       const policyCompliance = await this.validatePolicyCompliance(
@@ -123,8 +127,8 @@ export class ZeroTrustSecurityEngine implements ZeroTrustSecurityValidator {
           applicationSecurityValidation,
           dataProtectionValidation,
           behavioralAnalysis,
-          threatIntelligenceCorrelation
-        }
+          threatIntelligenceCorrelation,
+        },
       );
 
       // Step 9: Calculate overall trust score
@@ -135,15 +139,16 @@ export class ZeroTrustSecurityEngine implements ZeroTrustSecurityValidator {
         applicationSecurityValidation,
         dataProtectionValidation,
         behavioralAnalysis,
-        threatIntelligenceCorrelation
+        threatIntelligenceCorrelation,
       );
 
       // Step 10: Generate security recommendations
-      const securityRecommendations = await this.generateSecurityRecommendations(
-        trustScore,
-        policyCompliance,
-        securityPolicy
-      );
+      const securityRecommendations =
+        await this.generateSecurityRecommendations(
+          trustScore,
+          policyCompliance,
+          securityPolicy,
+        );
 
       const validationTime = Date.now() - startTime;
 
@@ -160,14 +165,24 @@ export class ZeroTrustSecurityEngine implements ZeroTrustSecurityValidator {
         threatIntelligenceCorrelation,
         policyCompliance,
         securityRecommendations,
-        approved: this.determineApproval(trustScore, policyCompliance, securityPolicy),
+        approved: this.determineApproval(
+          trustScore,
+          policyCompliance,
+          securityPolicy,
+        ),
         validationTime,
         securityEvents: await this.generateSecurityEvents(request, trustScore),
-        auditTrail: await this.generateSecurityAuditTrail(request, trustScore, policyCompliance)
+        auditTrail: await this.generateSecurityAuditTrail(
+          request,
+          trustScore,
+          policyCompliance,
+        ),
       };
-
     } catch (error) {
-      this.logger.error(`Zero-trust validation failed: ${error.message}`, error.stack);
+      this.logger.error(
+        `Zero-trust validation failed: ${error.message}`,
+        error.stack,
+      );
       throw new Error(`Zero-trust validation failed: ${error.message}`);
     }
   }
@@ -177,48 +192,52 @@ export class ZeroTrustSecurityEngine implements ZeroTrustSecurityValidator {
    */
   async continuousVerification(
     userContext: UserContext,
-    behavioralBaseline: BehavioralBaseline
+    behavioralBaseline: BehavioralBaseline,
   ): Promise<ContinuousVerificationResult> {
     const startTime = Date.now();
 
     try {
-      this.logger.log(`Continuous verification for user: ${userContext.userId}`);
+      this.logger.log(
+        `Continuous verification for user: ${userContext.userId}`,
+      );
 
       // Step 1: Identity consistency verification
-      const identityConsistency = await this.identityVerifier.verifyIdentityConsistency(
-        userContext,
-        behavioralBaseline.identityBaseline
-      );
+      const identityConsistency =
+        await this.identityVerifier.verifyIdentityConsistency(
+          userContext,
+          behavioralBaseline.identityBaseline,
+        );
 
       // Step 2: Behavioral pattern analysis
-      const behavioralDeviationAnalysis = await this.behavioralAnalyzer.analyzeBehavioralDeviations(
-        userContext.behavioralProfile,
-        behavioralBaseline
-      );
+      const behavioralDeviationAnalysis =
+        await this.behavioralAnalyzer.analyzeBehavioralDeviations(
+          userContext.behavioralProfile,
+          behavioralBaseline,
+        );
 
       // Step 3: Session integrity validation
       const sessionIntegrityValidation = await this.validateSessionIntegrity(
         userContext.sessionId,
         userContext.deviceInfo,
-        behavioralBaseline
+        behavioralBaseline,
       );
 
       // Step 4: Device fingerprint consistency
       const deviceConsistencyCheck = await this.validateDeviceConsistency(
         userContext.deviceInfo,
-        behavioralBaseline.deviceBaseline
+        behavioralBaseline.deviceBaseline,
       );
 
       // Step 5: Location and network consistency
       const locationConsistencyCheck = await this.validateLocationConsistency(
         userContext.location,
-        behavioralBaseline.locationBaseline
+        behavioralBaseline.locationBaseline,
       );
 
       // Step 6: Temporal pattern analysis
       const temporalPatternAnalysis = await this.analyzeTemporalPatterns(
         userContext,
-        behavioralBaseline.temporalBaseline
+        behavioralBaseline.temporalBaseline,
       );
 
       // Step 7: Risk accumulation assessment
@@ -231,8 +250,8 @@ export class ZeroTrustSecurityEngine implements ZeroTrustSecurityValidator {
           sessionIntegrityValidation,
           deviceConsistencyCheck,
           locationConsistencyCheck,
-          temporalPatternAnalysis
-        }
+          temporalPatternAnalysis,
+        },
       );
 
       // Step 8: Continuous trust score calculation
@@ -243,14 +262,15 @@ export class ZeroTrustSecurityEngine implements ZeroTrustSecurityValidator {
         deviceConsistencyCheck,
         locationConsistencyCheck,
         temporalPatternAnalysis,
-        riskAccumulationAssessment
+        riskAccumulationAssessment,
       );
 
       // Step 9: Generate verification recommendations
-      const verificationRecommendations = await this.generateVerificationRecommendations(
-        continuousTrustScore,
-        riskAccumulationAssessment
-      );
+      const verificationRecommendations =
+        await this.generateVerificationRecommendations(
+          continuousTrustScore,
+          riskAccumulationAssessment,
+        );
 
       const verificationTime = Date.now() - startTime;
 
@@ -266,14 +286,21 @@ export class ZeroTrustSecurityEngine implements ZeroTrustSecurityValidator {
         temporalPatternAnalysis,
         riskAccumulationAssessment,
         verificationRecommendations,
-        verificationStatus: this.determineVerificationStatus(continuousTrustScore),
+        verificationStatus:
+          this.determineVerificationStatus(continuousTrustScore),
         verificationTime,
-        nextVerificationInterval: this.calculateNextVerificationInterval(continuousTrustScore),
-        securityAlerts: await this.generateSecurityAlerts(continuousTrustScore, riskAccumulationAssessment)
+        nextVerificationInterval:
+          this.calculateNextVerificationInterval(continuousTrustScore),
+        securityAlerts: await this.generateSecurityAlerts(
+          continuousTrustScore,
+          riskAccumulationAssessment,
+        ),
       };
-
     } catch (error) {
-      this.logger.error(`Continuous verification failed: ${error.message}`, error.stack);
+      this.logger.error(
+        `Continuous verification failed: ${error.message}`,
+        error.stack,
+      );
       throw new Error(`Continuous verification failed: ${error.message}`);
     }
   }
@@ -283,53 +310,56 @@ export class ZeroTrustSecurityEngine implements ZeroTrustSecurityValidator {
    */
   async detectThreats(
     interactionData: InteractionData,
-    threatIntelligence: ThreatIntelligence
+    threatIntelligence: ThreatIntelligence,
   ): Promise<ThreatDetectionResult> {
     const startTime = Date.now();
 
     try {
-      this.logger.log('Detecting threats in interaction data');
+      this.logger.log("Detecting threats in interaction data");
 
       // Step 1: Signature-based threat detection
-      const signatureBasedDetection = await this.threatDetector.detectKnownThreats(
-        interactionData,
-        threatIntelligence.knownSignatures
-      );
+      const signatureBasedDetection =
+        await this.threatDetector.detectKnownThreats(
+          interactionData,
+          threatIntelligence.knownSignatures,
+        );
 
       // Step 2: Behavioral anomaly detection
-      const behavioralAnomalyDetection = await this.threatDetector.detectBehavioralAnomalies(
-        interactionData,
-        threatIntelligence.behavioralBaselines
-      );
+      const behavioralAnomalyDetection =
+        await this.threatDetector.detectBehavioralAnomalies(
+          interactionData,
+          threatIntelligence.behavioralBaselines,
+        );
 
       // Step 3: Machine learning threat detection
       const mlThreatDetection = await this.threatDetector.detectMLThreats(
         interactionData,
-        threatIntelligence.mlModels
+        threatIntelligence.mlModels,
       );
 
       // Step 4: Communication pattern analysis
-      const communicationPatternAnalysis = await this.analyzeCommunicationPatterns(
-        interactionData,
-        threatIntelligence.communicationBaselines
-      );
+      const communicationPatternAnalysis =
+        await this.analyzeCommunicationPatterns(
+          interactionData,
+          threatIntelligence.communicationBaselines,
+        );
 
       // Step 5: Data exfiltration detection
       const dataExfiltrationDetection = await this.detectDataExfiltration(
         interactionData,
-        threatIntelligence.dataClassifications
+        threatIntelligence.dataClassifications,
       );
 
       // Step 6: Social engineering detection
       const socialEngineeringDetection = await this.detectSocialEngineering(
         interactionData,
-        threatIntelligence.socialEngineeringPatterns
+        threatIntelligence.socialEngineeringPatterns,
       );
 
       // Step 7: Advanced persistent threat (APT) detection
       const aptDetection = await this.detectAdvancedPersistentThreats(
         interactionData,
-        threatIntelligence.aptIndicators
+        threatIntelligence.aptIndicators,
       );
 
       // Step 8: Threat correlation and fusion
@@ -340,21 +370,22 @@ export class ZeroTrustSecurityEngine implements ZeroTrustSecurityValidator {
         communicationPatternAnalysis,
         dataExfiltrationDetection,
         socialEngineeringDetection,
-        aptDetection
+        aptDetection,
       );
 
       // Step 9: Threat risk assessment
       const threatRiskAssessment = await this.assessThreatRisk(
         threatCorrelation,
         interactionData,
-        threatIntelligence
+        threatIntelligence,
       );
 
       // Step 10: Generate threat response recommendations
-      const responseRecommendations = await this.generateThreatResponseRecommendations(
-        threatRiskAssessment,
-        threatCorrelation
-      );
+      const responseRecommendations =
+        await this.generateThreatResponseRecommendations(
+          threatRiskAssessment,
+          threatCorrelation,
+        );
 
       const detectionTime = Date.now() - startTime;
 
@@ -374,11 +405,16 @@ export class ZeroTrustSecurityEngine implements ZeroTrustSecurityValidator {
         immediateAction: this.determineImmediateAction(threatRiskAssessment),
         detectionTime,
         threatIndicators: await this.extractThreatIndicators(threatCorrelation),
-        forensicData: await this.collectForensicData(interactionData, threatCorrelation)
+        forensicData: await this.collectForensicData(
+          interactionData,
+          threatCorrelation,
+        ),
       };
-
     } catch (error) {
-      this.logger.error(`Threat detection failed: ${error.message}`, error.stack);
+      this.logger.error(
+        `Threat detection failed: ${error.message}`,
+        error.stack,
+      );
       throw new Error(`Threat detection failed: ${error.message}`);
     }
   }
@@ -389,75 +425,79 @@ export class ZeroTrustSecurityEngine implements ZeroTrustSecurityValidator {
   async enforceLeastPrivilege(
     requestedPermissions: Permission[],
     userContext: UserContext,
-    operationContext: OperationContext
+    operationContext: OperationContext,
   ): Promise<PrivilegeValidationResult> {
     const startTime = Date.now();
 
     try {
       this.logger.log(
-        `Enforcing least privilege for ${requestedPermissions.length} permissions`
+        `Enforcing least privilege for ${requestedPermissions.length} permissions`,
       );
 
       // Step 1: Analyze current user permissions
-      const currentPermissionsAnalysis = await this.privilegeEnforcer.analyzeCurrentPermissions(
-        userContext.permissions,
-        userContext.roles
-      );
+      const currentPermissionsAnalysis =
+        await this.privilegeEnforcer.analyzeCurrentPermissions(
+          userContext.permissions,
+          userContext.roles,
+        );
 
       // Step 2: Validate permission necessity
-      const permissionNecessityAnalysis = await this.validatePermissionNecessity(
-        requestedPermissions,
-        operationContext
-      );
+      const permissionNecessityAnalysis =
+        await this.validatePermissionNecessity(
+          requestedPermissions,
+          operationContext,
+        );
 
       // Step 3: Risk assessment for each permission
       const permissionRiskAssessment = await this.assessPermissionRisks(
         requestedPermissions,
         userContext,
-        operationContext
+        operationContext,
       );
 
       // Step 4: Temporal access validation
       const temporalAccessValidation = await this.validateTemporalAccess(
         requestedPermissions,
         userContext,
-        operationContext
+        operationContext,
       );
 
       // Step 5: Context-based access control
       const contextBasedValidation = await this.validateContextBasedAccess(
         requestedPermissions,
         userContext,
-        operationContext
+        operationContext,
       );
 
       // Step 6: Privilege escalation detection
       const privilegeEscalationDetection = await this.detectPrivilegeEscalation(
         requestedPermissions,
         currentPermissionsAnalysis,
-        userContext
+        userContext,
       );
 
       // Step 7: Generate minimum required permissions
-      const minimumRequiredPermissions = await this.calculateMinimumRequiredPermissions(
-        operationContext,
-        permissionNecessityAnalysis
-      );
+      const minimumRequiredPermissions =
+        await this.calculateMinimumRequiredPermissions(
+          operationContext,
+          permissionNecessityAnalysis,
+        );
 
       // Step 8: Access decision and justification
       const accessDecision = await this.makeAccessDecision(
         requestedPermissions,
         minimumRequiredPermissions,
         permissionRiskAssessment,
-        privilegeEscalationDetection
+        privilegeEscalationDetection,
       );
 
       // Step 9: Generate privilege recommendations
-      const privilegeRecommendations = await this.generatePrivilegeRecommendations(
-        accessDecision,
-        minimumRequiredPermissions,
-        requestedPermissions
-      );
+      const privilegeRecommendations =
+        await this.generatePrivilegeRecommendations(
+          accessDecision,
+          minimumRequiredPermissions,
+          requestedPermissions,
+        );
 
       const enforcementTime = Date.now() - startTime;
 
@@ -476,11 +516,16 @@ export class ZeroTrustSecurityEngine implements ZeroTrustSecurityValidator {
         enforcementTime,
         grantedPermissions: accessDecision.grantedPermissions,
         deniedPermissions: accessDecision.deniedPermissions,
-        auditRequirements: await this.generatePrivilegeAuditRequirements(accessDecision, userContext)
+        auditRequirements: await this.generatePrivilegeAuditRequirements(
+          accessDecision,
+          userContext,
+        ),
       };
-
     } catch (error) {
-      this.logger.error(`Least privilege enforcement failed: ${error.message}`, error.stack);
+      this.logger.error(
+        `Least privilege enforcement failed: ${error.message}`,
+        error.stack,
+      );
       throw new Error(`Least privilege enforcement failed: ${error.message}`);
     }
   }
@@ -490,67 +535,72 @@ export class ZeroTrustSecurityEngine implements ZeroTrustSecurityValidator {
   private async initializeSecurityComponents(): Promise<void> {
     // Initialize continuous identity verifier
     this.identityVerifier = new ContinuousIdentityVerifier({
-      verificationMethods: ['biometric', 'behavioral', 'device-binding'],
+      verificationMethods: ["biometric", "behavioral", "device-binding"],
       verificationInterval: 300000, // 5 minutes
       identityConfidenceThreshold: 0.8,
-      anomalyDetection: true
+      anomalyDetection: true,
     });
 
     // Initialize advanced threat detector
     this.threatDetector = new AdvancedThreatDetector({
-      detectionMethods: ['signature', 'anomaly', 'machine-learning', 'heuristic'],
-      threatIntelligenceSources: ['internal', 'commercial', 'open-source'],
+      detectionMethods: [
+        "signature",
+        "anomaly",
+        "machine-learning",
+        "heuristic",
+      ],
+      threatIntelligenceSources: ["internal", "commercial", "open-source"],
       realTimeProcessing: true,
-      threatScoring: 'weighted-ensemble'
+      threatScoring: "weighted-ensemble",
     });
 
     // Initialize least privilege enforcer
     this.privilegeEnforcer = new LeastPrivilegeEnforcer({
-      accessControlModel: 'attribute-based',
-      permissionGranularity: 'fine-grained',
+      accessControlModel: "attribute-based",
+      permissionGranularity: "fine-grained",
       temporalControls: true,
       contextAwareness: true,
-      riskBasedDecisions: true
+      riskBasedDecisions: true,
     });
 
     // Initialize behavioral security analyzer
     this.behavioralAnalyzer = new BehavioralSecurityAnalyzer({
-      baselineModelType: 'ensemble-lstm',
+      baselineModelType: "ensemble-lstm",
       anomalyDetectionThreshold: 0.6,
       adaptiveLearning: true,
-      realTimeAnalysis: true
+      realTimeAnalysis: true,
     });
 
     // Initialize security context analyzer
     this.contextAnalyzer = new SecurityContextAnalyzer({
-      contextFactors: ['location', 'time', 'device', 'network', 'application'],
-      riskWeighting: 'dynamic',
+      contextFactors: ["location", "time", "device", "network", "application"],
+      riskWeighting: "dynamic",
       environmentalFactors: true,
-      businessContext: true
+      businessContext: true,
     });
 
     // Initialize dynamic risk calculator
     this.riskCalculator = new DynamicRiskCalculator({
-      riskFactors: ['identity', 'behavior', 'context', 'threat-intelligence'],
-      calculationMethod: 'bayesian-network',
+      riskFactors: ["identity", "behavior", "context", "threat-intelligence"],
+      calculationMethod: "bayesian-network",
       adaptiveWeighting: true,
-      realTimeUpdates: true
+      realTimeUpdates: true,
     });
 
     // Initialize zero-trust policy engine
     this.policyEngine = new ZeroTrustPolicyEngine({
-      policyLanguage: 'attribute-based-policy-language',
-      policyEvaluation: 'real-time',
-      policyUpdates: 'dynamic',
-      complianceFrameworks: ['nist-zero-trust', 'iso-27001']
+      policyLanguage: "attribute-based-policy-language",
+      policyEvaluation: "real-time",
+      policyUpdates: "dynamic",
+      complianceFrameworks: ["nist-zero-trust", "iso-27001"],
     });
 
     // Initialize security audit tracker
     this.auditTracker = new SecurityAuditTracker({
-      auditLevels: ['basic', 'standard', 'detailed', 'forensic'],
-      retentionPeriod: '7-years',
+      auditLevels: ["basic", "standard", "detailed", "forensic"],
+      retentionPeriod: "7-years",
       encryptionRequired: true,
-      integrityProtection: true
+      integrityProtection: true,
     });
 
     await Promise.all([
@@ -561,19 +611,21 @@ export class ZeroTrustSecurityEngine implements ZeroTrustSecurityValidator {
       this.contextAnalyzer.initialize(),
       this.riskCalculator.initialize(),
       this.policyEngine.initialize(),
-      this.auditTracker.initialize()
+      this.auditTracker.initialize(),
     ]);
 
-    this.logger.log('Zero-trust security components initialized successfully');
+    this.logger.log("Zero-trust security components initialized successfully");
   }
 
   private async verifyIdentity(
     userContext: UserContext,
-    identityRequirements: any
+    identityRequirements: any,
   ): Promise<IdentityVerificationResult> {
     // Multi-factor identity verification
-    const authenticationStrength = await this.assessAuthenticationStrength(userContext);
-    const biometricVerification = await this.performBiometricVerification(userContext);
+    const authenticationStrength =
+      await this.assessAuthenticationStrength(userContext);
+    const biometricVerification =
+      await this.performBiometricVerification(userContext);
     const deviceBinding = await this.verifyDeviceBinding(userContext);
     const sessionValidation = await this.validateSession(userContext);
 
@@ -586,10 +638,10 @@ export class ZeroTrustSecurityEngine implements ZeroTrustSecurityValidator {
         authenticationStrength,
         biometricVerification,
         deviceBinding,
-        sessionValidation
+        sessionValidation,
       ),
-      verificationMethods: ['password', 'mfa', 'biometric', 'device-binding'],
-      riskFactors: await this.identifyIdentityRiskFactors(userContext)
+      verificationMethods: ["password", "mfa", "biometric", "device-binding"],
+      riskFactors: await this.identifyIdentityRiskFactors(userContext),
     };
   }
 
@@ -600,7 +652,7 @@ export class ZeroTrustSecurityEngine implements ZeroTrustSecurityValidator {
     applicationSecurityValidation: any,
     dataProtectionValidation: any,
     behavioralAnalysis: any,
-    threatIntelligenceCorrelation: any
+    threatIntelligenceCorrelation: any,
   ): Promise<number> {
     const weights = {
       identity: 0.25,
@@ -609,18 +661,18 @@ export class ZeroTrustSecurityEngine implements ZeroTrustSecurityValidator {
       application: 0.15,
       dataProtection: 0.1,
       behavioral: 0.15,
-      threatIntelligence: 0.1
+      threatIntelligence: 0.1,
     };
 
-    const weightedScore = (
+    const weightedScore =
       identityVerification.overallConfidence * weights.identity +
       deviceTrustAssessment.trustScore * weights.device +
       networkSecurityAssessment.securityScore * weights.network +
       applicationSecurityValidation.securityScore * weights.application +
       dataProtectionValidation.complianceScore * weights.dataProtection +
       behavioralAnalysis.trustScore * weights.behavioral +
-      (1 - threatIntelligenceCorrelation.riskScore) * weights.threatIntelligence
-    );
+      (1 - threatIntelligenceCorrelation.riskScore) *
+        weights.threatIntelligence;
 
     return Math.max(0, Math.min(1, weightedScore));
   }
@@ -645,7 +697,7 @@ export class ZeroTrustSecurityEngine implements ZeroTrustSecurityValidator {
   private determineApproval(
     trustScore: number,
     policyCompliance: any,
-    securityPolicy: ZeroTrustPolicy
+    securityPolicy: ZeroTrustPolicy,
   ): boolean {
     return (
       trustScore >= securityPolicy.minimumTrustScore &&
@@ -655,13 +707,15 @@ export class ZeroTrustSecurityEngine implements ZeroTrustSecurityValidator {
   }
 
   private determineVerificationStatus(continuousTrustScore: number): string {
-    if (continuousTrustScore >= 0.8) return 'verified';
-    if (continuousTrustScore >= 0.6) return 'conditional';
-    if (continuousTrustScore >= 0.4) return 'requires-verification';
-    return 'verification-failed';
+    if (continuousTrustScore >= 0.8) return "verified";
+    if (continuousTrustScore >= 0.6) return "conditional";
+    if (continuousTrustScore >= 0.4) return "requires-verification";
+    return "verification-failed";
   }
 
-  private calculateNextVerificationInterval(continuousTrustScore: number): number {
+  private calculateNextVerificationInterval(
+    continuousTrustScore: number,
+  ): number {
     // Adaptive verification intervals based on trust score
     const baseInterval = 300000; // 5 minutes
 
@@ -674,11 +728,11 @@ export class ZeroTrustSecurityEngine implements ZeroTrustSecurityValidator {
   private determineImmediateAction(threatRiskAssessment: any): string {
     const riskScore = threatRiskAssessment.overallRiskScore;
 
-    if (riskScore >= 0.9) return 'block-and-isolate';
-    if (riskScore >= 0.7) return 'block-and-investigate';
-    if (riskScore >= 0.5) return 'flag-and-monitor';
-    if (riskScore >= 0.3) return 'monitor';
-    return 'allow';
+    if (riskScore >= 0.9) return "block-and-isolate";
+    if (riskScore >= 0.7) return "block-and-investigate";
+    if (riskScore >= 0.5) return "flag-and-monitor";
+    if (riskScore >= 0.3) return "monitor";
+    return "allow";
   }
 
   // Additional private methods would be implemented here...
@@ -686,24 +740,36 @@ export class ZeroTrustSecurityEngine implements ZeroTrustSecurityValidator {
 
 // Supporting interfaces
 interface ContinuousIdentityVerifier {
-  verifyIdentityConsistency(userContext: UserContext, baseline: any): Promise<any>;
+  verifyIdentityConsistency(
+    userContext: UserContext,
+    baseline: any,
+  ): Promise<any>;
   initialize(): Promise<void>;
 }
 
 interface AdvancedThreatDetector {
   detectKnownThreats(data: InteractionData, signatures: any): Promise<any>;
-  detectBehavioralAnomalies(data: InteractionData, baselines: any): Promise<any>;
+  detectBehavioralAnomalies(
+    data: InteractionData,
+    baselines: any,
+  ): Promise<any>;
   detectMLThreats(data: InteractionData, models: any): Promise<any>;
   initialize(): Promise<void>;
 }
 
 interface LeastPrivilegeEnforcer {
-  analyzeCurrentPermissions(permissions: string[], roles: string[]): Promise<any>;
+  analyzeCurrentPermissions(
+    permissions: string[],
+    roles: string[],
+  ): Promise<any>;
   initialize(): Promise<void>;
 }
 
 interface BehavioralSecurityAnalyzer {
-  analyzeBehavioralDeviations(profile: any, baseline: BehavioralBaseline): Promise<any>;
+  analyzeBehavioralDeviations(
+    profile: any,
+    baseline: BehavioralBaseline,
+  ): Promise<any>;
   initialize(): Promise<void>;
 }
 

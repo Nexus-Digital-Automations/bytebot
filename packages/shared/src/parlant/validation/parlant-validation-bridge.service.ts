@@ -19,12 +19,12 @@
  * @author AIgent Integration Team
  */
 
-import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter } from 'events';
-import { performance } from 'perf_hooks';
-import { ParlantWebSocketManager } from './websocket/parlant-websocket-manager.service';
-import { ConversationContextBuilder } from './context/conversation-context-builder.service';
+import { Injectable, Logger, OnApplicationShutdown } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { EventEmitter } from "events";
+import { performance } from "perf_hooks";
+import { ParlantWebSocketManager } from "./websocket/parlant-websocket-manager.service";
+import { ConversationContextBuilder } from "./context/conversation-context-builder.service";
 import {
   ValidationRequest,
   ValidationResponse,
@@ -33,7 +33,7 @@ import {
   ValidationLayerError,
   DatabaseOperationType,
   SecurityLevel,
-} from './types/validation-layer.types';
+} from "./types/validation-layer.types";
 
 // ===== BRIDGE CONFIGURATION =====
 
@@ -94,22 +94,22 @@ interface ValidationWorkflow {
 }
 
 enum WorkflowStage {
-  INITIATED = 'initiated',
-  CONTEXT_BUILDING = 'context_building',
-  CACHE_CHECK = 'cache_check',
-  PARLANT_VALIDATION = 'parlant_validation',
-  RESPONSE_PROCESSING = 'response_processing',
-  CACHE_UPDATE = 'cache_update',
-  COMPLETED = 'completed',
-  FAILED = 'failed',
-  BYPASSED = 'bypassed',
+  INITIATED = "initiated",
+  CONTEXT_BUILDING = "context_building",
+  CACHE_CHECK = "cache_check",
+  PARLANT_VALIDATION = "parlant_validation",
+  RESPONSE_PROCESSING = "response_processing",
+  CACHE_UPDATE = "cache_update",
+  COMPLETED = "completed",
+  FAILED = "failed",
+  BYPASSED = "bypassed",
 }
 
 interface WorkflowContext {
   /** Cache key for request */
   cacheKey: string;
   /** Cache hit/miss status */
-  cacheStatus: 'hit' | 'miss' | 'stale' | 'disabled';
+  cacheStatus: "hit" | "miss" | "stale" | "disabled";
   /** Bypass decision */
   bypassDecision?: BypassDecision;
   /** Conversation context */
@@ -134,7 +134,10 @@ interface WorkflowMetrics {
 // ===== PARLANT VALIDATION BRIDGE SERVICE =====
 
 @Injectable()
-export class ParlantValidationBridge extends EventEmitter implements OnApplicationShutdown {
+export class ParlantValidationBridge
+  extends EventEmitter
+  implements OnApplicationShutdown
+{
   private readonly logger = new Logger(ParlantValidationBridge.name);
   private config!: ValidationBridgeConfig;
   private activeWorkflows = new Map<string, ValidationWorkflow>();
@@ -160,26 +163,39 @@ export class ParlantValidationBridge extends EventEmitter implements OnApplicati
    */
   private initializeConfiguration(): void {
     this.config = {
-      enabled: this.configService.get<boolean>('PARLANT_VALIDATION_ENABLED') !== false,
-      defaultTimeoutMs: this.configService.get<number>('PARLANT_DEFAULT_TIMEOUT') || 5000,
-      cachingEnabled: this.configService.get<boolean>('PARLANT_CACHING_ENABLED') !== false,
-      cacheHitRateTarget: this.configService.get<number>('PARLANT_CACHE_HIT_TARGET') || 85,
-      bypassEnabled: this.configService.get<boolean>('PARLANT_BYPASS_ENABLED') !== false,
+      enabled:
+        this.configService.get<boolean>("PARLANT_VALIDATION_ENABLED") !== false,
+      defaultTimeoutMs:
+        this.configService.get<number>("PARLANT_DEFAULT_TIMEOUT") || 5000,
+      cachingEnabled:
+        this.configService.get<boolean>("PARLANT_CACHING_ENABLED") !== false,
+      cacheHitRateTarget:
+        this.configService.get<number>("PARLANT_CACHE_HIT_TARGET") || 85,
+      bypassEnabled:
+        this.configService.get<boolean>("PARLANT_BYPASS_ENABLED") !== false,
       performanceMonitoring: {
-        enabled: this.configService.get<boolean>('PARLANT_PERF_MONITORING') !== false,
-        metricsIntervalMs: this.configService.get<number>('PARLANT_METRICS_INTERVAL') || 60000,
-        p95TargetMs: this.configService.get<number>('PARLANT_P95_TARGET') || 1000,
-        errorRateThreshold: this.configService.get<number>('PARLANT_ERROR_THRESHOLD') || 5.0,
+        enabled:
+          this.configService.get<boolean>("PARLANT_PERF_MONITORING") !== false,
+        metricsIntervalMs:
+          this.configService.get<number>("PARLANT_METRICS_INTERVAL") || 60000,
+        p95TargetMs:
+          this.configService.get<number>("PARLANT_P95_TARGET") || 1000,
+        errorRateThreshold:
+          this.configService.get<number>("PARLANT_ERROR_THRESHOLD") || 5.0,
       },
       circuitBreaker: {
-        enabled: this.configService.get<boolean>('PARLANT_CIRCUIT_BREAKER') !== false,
-        failureThreshold: this.configService.get<number>('PARLANT_CB_FAILURE_THRESHOLD') || 5,
-        successThreshold: this.configService.get<number>('PARLANT_CB_SUCCESS_THRESHOLD') || 3,
-        timeoutMs: this.configService.get<number>('PARLANT_CB_TIMEOUT') || 60000,
+        enabled:
+          this.configService.get<boolean>("PARLANT_CIRCUIT_BREAKER") !== false,
+        failureThreshold:
+          this.configService.get<number>("PARLANT_CB_FAILURE_THRESHOLD") || 5,
+        successThreshold:
+          this.configService.get<number>("PARLANT_CB_SUCCESS_THRESHOLD") || 3,
+        timeoutMs:
+          this.configService.get<number>("PARLANT_CB_TIMEOUT") || 60000,
       },
     };
 
-    this.logger.log('Validation bridge configured', {
+    this.logger.log("Validation bridge configured", {
       enabled: this.config.enabled,
       caching: this.config.cachingEnabled,
       bypass: this.config.bypassEnabled,
@@ -209,12 +225,12 @@ export class ParlantValidationBridge extends EventEmitter implements OnApplicati
    */
   async initialize(): Promise<void> {
     if (!this.config.enabled) {
-      this.logger.warn('Validation bridge disabled in configuration');
+      this.logger.warn("Validation bridge disabled in configuration");
       return;
     }
 
     if (this.isInitialized) {
-      this.logger.warn('Validation bridge already initialized');
+      this.logger.warn("Validation bridge already initialized");
       return;
     }
 
@@ -228,10 +244,9 @@ export class ParlantValidationBridge extends EventEmitter implements OnApplicati
       }
 
       this.isInitialized = true;
-      this.logger.log('Validation bridge initialized successfully');
-
+      this.logger.log("Validation bridge initialized successfully");
     } catch (error) {
-      this.logger.error('Failed to initialize validation bridge', {
+      this.logger.error("Failed to initialize validation bridge", {
         error: (error as Error).message,
       });
       throw error;
@@ -248,14 +263,14 @@ export class ParlantValidationBridge extends EventEmitter implements OnApplicati
     parameters: Record<string, unknown>,
     userContext: UserValidationContext,
     securityLevel: SecurityLevel = SecurityLevel._MEDIUM,
-    timeoutMs?: number
+    timeoutMs?: number,
   ): Promise<ValidationResponse> {
     if (!this.isInitialized) {
       await this.initialize();
     }
 
     if (!this.config.enabled) {
-      return this.createBypassResponse('validation_disabled');
+      return this.createBypassResponse("validation_disabled");
     }
 
     const startTime = performance.now();
@@ -274,17 +289,17 @@ export class ParlantValidationBridge extends EventEmitter implements OnApplicati
       timeoutMs: timeoutMs || this.config.defaultTimeoutMs,
       conversationMeta: {
         priority: this.determinePriority(operationType, securityLevel),
-        responseTypes: ['detailed'],
-        language: 'en',
+        responseTypes: ["detailed"],
+        language: "en",
         interfacePreferences: {
-          preferredMode: 'text',
+          preferredMode: "text",
           accessibility: {
             screenReader: false,
             highContrast: false,
             largeText: false,
             keyboardOnly: false,
           },
-          responseFormat: 'json',
+          responseFormat: "json",
         },
       },
     };
@@ -297,11 +312,11 @@ export class ParlantValidationBridge extends EventEmitter implements OnApplicati
       stage: WorkflowStage.INITIATED,
       context: {
         cacheKey: this.generateCacheKey(request),
-        cacheStatus: 'disabled',
+        cacheStatus: "disabled",
         sessionContext: {
           sessionId: this.generateSessionId(),
           userId: userContext.userId,
-          authToken: this.configService.get<string>('PARLANT_AUTH_TOKEN') || '',
+          authToken: this.configService.get<string>("PARLANT_AUTH_TOKEN") || "",
         },
       },
       metrics: {
@@ -321,7 +336,7 @@ export class ParlantValidationBridge extends EventEmitter implements OnApplicati
       // Update metrics
       this.updateMetrics(workflow, response, true);
 
-      this.logger.debug('Validation completed successfully', {
+      this.logger.debug("Validation completed successfully", {
         workflowId,
         requestId: request.id,
         decision: response.decision,
@@ -330,7 +345,6 @@ export class ParlantValidationBridge extends EventEmitter implements OnApplicati
       });
 
       return response;
-
     } catch (error) {
       workflow.stage = WorkflowStage.FAILED;
       workflow.metrics.errorOccurred = true;
@@ -341,7 +355,7 @@ export class ParlantValidationBridge extends EventEmitter implements OnApplicati
       // Handle circuit breaker
       this.handleCircuitBreakerFailure();
 
-      this.logger.error('Validation failed', {
+      this.logger.error("Validation failed", {
         workflowId,
         requestId: request.id,
         error: (error as Error).message,
@@ -349,14 +363,19 @@ export class ParlantValidationBridge extends EventEmitter implements OnApplicati
       });
 
       // Try emergency bypass if enabled
-      if (this.config.bypassEnabled && this.shouldAttemptBypass(error as Error)) {
-        const bypassResponse = this.createBypassResponse('validation_error', error as Error);
+      if (
+        this.config.bypassEnabled &&
+        this.shouldAttemptBypass(error as Error)
+      ) {
+        const bypassResponse = this.createBypassResponse(
+          "validation_error",
+          error as Error,
+        );
         this.updateMetrics(workflow, bypassResponse, true);
         return bypassResponse;
       }
 
       throw error;
-
     } finally {
       this.activeWorkflows.delete(workflowId);
     }
@@ -365,7 +384,9 @@ export class ParlantValidationBridge extends EventEmitter implements OnApplicati
   /**
    * Execute complete validation workflow
    */
-  private async executeValidationWorkflow(workflow: ValidationWorkflow): Promise<ValidationResponse> {
+  private async executeValidationWorkflow(
+    workflow: ValidationWorkflow,
+  ): Promise<ValidationResponse> {
     const { request } = workflow;
 
     // Stage 1: Context Building
@@ -375,7 +396,10 @@ export class ParlantValidationBridge extends EventEmitter implements OnApplicati
     const conversationContext = await this.contextBuilder.buildContext(request);
     workflow.context.conversationContext = conversationContext;
 
-    workflow.metrics.stageTimings.set(WorkflowStage.CONTEXT_BUILDING, performance.now() - contextStartTime);
+    workflow.metrics.stageTimings.set(
+      WorkflowStage.CONTEXT_BUILDING,
+      performance.now() - contextStartTime,
+    );
 
     // Stage 2: Cache Check (if enabled)
     if (this.config.cachingEnabled) {
@@ -384,18 +408,27 @@ export class ParlantValidationBridge extends EventEmitter implements OnApplicati
 
       const cachedResponse = await this.checkCache(workflow.context.cacheKey);
       if (cachedResponse) {
-        workflow.context.cacheStatus = 'hit';
+        workflow.context.cacheStatus = "hit";
         workflow.metrics.cacheHit = true;
         workflow.stage = WorkflowStage.COMPLETED;
 
-        const response = this.enhanceResponseWithMetrics(cachedResponse, workflow);
-        workflow.metrics.stageTimings.set(WorkflowStage.CACHE_CHECK, performance.now() - cacheStartTime);
+        const response = this.enhanceResponseWithMetrics(
+          cachedResponse,
+          workflow,
+        );
+        workflow.metrics.stageTimings.set(
+          WorkflowStage.CACHE_CHECK,
+          performance.now() - cacheStartTime,
+        );
 
         return response;
       }
 
-      workflow.context.cacheStatus = 'miss';
-      workflow.metrics.stageTimings.set(WorkflowStage.CACHE_CHECK, performance.now() - cacheStartTime);
+      workflow.context.cacheStatus = "miss";
+      workflow.metrics.stageTimings.set(
+        WorkflowStage.CACHE_CHECK,
+        performance.now() - cacheStartTime,
+      );
     }
 
     // Stage 3: PARLANT Validation
@@ -405,38 +438,53 @@ export class ParlantValidationBridge extends EventEmitter implements OnApplicati
     // Check circuit breaker
     if (this.circuitBreakerState === CircuitBreakerState.OPEN) {
       if (this.config.bypassEnabled) {
-        return this.createBypassResponse('circuit_breaker_open');
+        return this.createBypassResponse("circuit_breaker_open");
       } else {
         throw new ValidationLayerError(
-          'Circuit breaker open - validation temporarily unavailable',
-          'CIRCUIT_BREAKER_OPEN'
+          "Circuit breaker open - validation temporarily unavailable",
+          "CIRCUIT_BREAKER_OPEN",
         );
       }
     }
 
     const parlantResponse = await this.webSocketManager.sendValidationRequest(
       request,
-      workflow.context.sessionContext
+      workflow.context.sessionContext,
     );
 
-    workflow.metrics.stageTimings.set(WorkflowStage.PARLANT_VALIDATION, performance.now() - validationStartTime);
+    workflow.metrics.stageTimings.set(
+      WorkflowStage.PARLANT_VALIDATION,
+      performance.now() - validationStartTime,
+    );
 
     // Stage 4: Response Processing
     workflow.stage = WorkflowStage.RESPONSE_PROCESSING;
     const processingStartTime = performance.now();
 
-    const processedResponse = await this.processValidationResponse(parlantResponse, workflow);
+    const processedResponse = await this.processValidationResponse(
+      parlantResponse,
+      workflow,
+    );
 
-    workflow.metrics.stageTimings.set(WorkflowStage.RESPONSE_PROCESSING, performance.now() - processingStartTime);
+    workflow.metrics.stageTimings.set(
+      WorkflowStage.RESPONSE_PROCESSING,
+      performance.now() - processingStartTime,
+    );
 
     // Stage 5: Cache Update (if enabled and successful)
-    if (this.config.cachingEnabled && processedResponse.decision === ValidationDecision.APPROVE) {
+    if (
+      this.config.cachingEnabled &&
+      processedResponse.decision === ValidationDecision.APPROVE
+    ) {
       workflow.stage = WorkflowStage.CACHE_UPDATE;
       const cacheUpdateStartTime = performance.now();
 
       await this.updateCache(workflow.context.cacheKey, processedResponse);
 
-      workflow.metrics.stageTimings.set(WorkflowStage.CACHE_UPDATE, performance.now() - cacheUpdateStartTime);
+      workflow.metrics.stageTimings.set(
+        WorkflowStage.CACHE_UPDATE,
+        performance.now() - cacheUpdateStartTime,
+      );
     }
 
     workflow.stage = WorkflowStage.COMPLETED;
@@ -450,7 +498,9 @@ export class ParlantValidationBridge extends EventEmitter implements OnApplicati
   /**
    * Check cache for existing validation
    */
-  private async checkCache(cacheKey: string): Promise<ValidationResponse | null> {
+  private async checkCache(
+    cacheKey: string,
+  ): Promise<ValidationResponse | null> {
     // This would integrate with actual cache implementation
     // For now, return null (cache miss)
     return null;
@@ -459,7 +509,10 @@ export class ParlantValidationBridge extends EventEmitter implements OnApplicati
   /**
    * Update cache with validation response
    */
-  private async updateCache(cacheKey: string, response: ValidationResponse): Promise<void> {
+  private async updateCache(
+    cacheKey: string,
+    response: ValidationResponse,
+  ): Promise<void> {
     // This would integrate with actual cache implementation
     // Implementation would depend on cache backend (Redis, etc.)
   }
@@ -469,20 +522,22 @@ export class ParlantValidationBridge extends EventEmitter implements OnApplicati
    */
   private async processValidationResponse(
     parlantResponse: ValidationResponse,
-    workflow: ValidationWorkflow
+    workflow: ValidationWorkflow,
   ): Promise<ValidationResponse> {
     // Enhance response with workflow context
     const enhancedResponse: ValidationResponse = {
       ...parlantResponse,
       metadata: {
         ...parlantResponse.metadata,
-        source: 'parlant_live' as ValidationSource,
-        pipelineStages: Array.from(workflow.metrics.stageTimings.entries()).map(([stage, duration]) => ({
-          name: stage,
-          duration,
-          status: 'completed' as const,
-          metadata: {},
-        })),
+        source: "parlant_live" as ValidationSource,
+        pipelineStages: Array.from(workflow.metrics.stageTimings.entries()).map(
+          ([stage, duration]) => ({
+            name: stage,
+            duration,
+            status: "completed" as const,
+            metadata: {},
+          }),
+        ),
         performanceMetrics: {
           responseTime: performance.now() - workflow.startTime,
           throughput: 1,
@@ -496,10 +551,10 @@ export class ParlantValidationBridge extends EventEmitter implements OnApplicati
         },
         qualityIndicators: [
           {
-            metric: 'confidence',
+            metric: "confidence",
             value: parlantResponse.confidence,
             threshold: 0.7,
-            status: parlantResponse.confidence >= 0.7 ? 'good' : 'warning',
+            status: parlantResponse.confidence >= 0.7 ? "good" : "warning",
           },
         ],
       },
@@ -511,7 +566,10 @@ export class ParlantValidationBridge extends EventEmitter implements OnApplicati
   /**
    * Enhance response with workflow metrics
    */
-  private enhanceResponseWithMetrics(response: ValidationResponse, workflow: ValidationWorkflow): ValidationResponse {
+  private enhanceResponseWithMetrics(
+    response: ValidationResponse,
+    workflow: ValidationWorkflow,
+  ): ValidationResponse {
     const totalTime = performance.now() - workflow.startTime;
     workflow.metrics.totalProcessingTime = totalTime;
 
@@ -520,13 +578,17 @@ export class ParlantValidationBridge extends EventEmitter implements OnApplicati
       processingTimeMs: totalTime,
       cacheInfo: {
         status: workflow.context.cacheStatus as CacheStatus,
-        strategy: 'adaptive' as CacheStrategy,
-        tier: workflow.metrics.cacheHit ? 'l1_memory' as CacheTier : 'l1_memory' as CacheTier,
+        strategy: "adaptive" as CacheStrategy,
+        tier: workflow.metrics.cacheHit
+          ? ("l1_memory" as CacheTier)
+          : ("l1_memory" as CacheTier),
         ttlRemainingMs: 0,
       },
       metadata: {
         ...response.metadata,
-        source: workflow.metrics.cacheHit ? 'cache_l1' as ValidationSource : response.metadata.source,
+        source: workflow.metrics.cacheHit
+          ? ("cache_l1" as ValidationSource)
+          : response.metadata.source,
         performanceMetrics: {
           responseTime: totalTime,
           throughput: 1,
@@ -545,7 +607,10 @@ export class ParlantValidationBridge extends EventEmitter implements OnApplicati
   /**
    * Create bypass response for emergency situations
    */
-  private createBypassResponse(reason: string, error?: Error): ValidationResponse {
+  private createBypassResponse(
+    reason: string,
+    error?: Error,
+  ): ValidationResponse {
     const response: ValidationResponse = {
       requestId: this.generateRequestId(),
       decision: ValidationDecision.BYPASS,
@@ -555,22 +620,22 @@ export class ParlantValidationBridge extends EventEmitter implements OnApplicati
       timestamp: new Date(),
       processingTimeMs: 1,
       cacheInfo: {
-        status: 'miss' as CacheStatus,
-        strategy: 'disabled' as CacheStrategy,
-        tier: 'l1_memory' as CacheTier,
+        status: "miss" as CacheStatus,
+        strategy: "disabled" as CacheStrategy,
+        tier: "l1_memory" as CacheTier,
         ttlRemainingMs: 0,
       },
       metadata: {
         startTime: new Date(),
         endTime: new Date(),
         processingTime: 1,
-        cacheStatus: 'miss' as CacheStatus,
-        source: 'bypass' as ValidationSource,
+        cacheStatus: "miss" as CacheStatus,
+        source: "bypass" as ValidationSource,
         riskAssessment: {
           level: SecurityLevel._HIGH,
-          factors: ['emergency_bypass', reason],
+          factors: ["emergency_bypass", reason],
           score: 80,
-          mitigations: ['comprehensive_audit', 'immediate_review'],
+          mitigations: ["comprehensive_audit", "immediate_review"],
         },
         pipelineStages: [],
         performanceMetrics: {
@@ -588,7 +653,7 @@ export class ParlantValidationBridge extends EventEmitter implements OnApplicati
       },
     };
 
-    this.logger.warn('Emergency bypass activated', {
+    this.logger.warn("Emergency bypass activated", {
       reason,
       error: error?.message,
       responseId: response.requestId,
@@ -600,26 +665,39 @@ export class ParlantValidationBridge extends EventEmitter implements OnApplicati
   /**
    * Determine priority based on operation and security level
    */
-  private determinePriority(operationType: DatabaseOperationType, securityLevel: SecurityLevel): ConversationPriority {
-    if (operationType === DatabaseOperationType.SCHEMA_CHANGE || securityLevel === SecurityLevel._CRITICAL) {
-      return 'urgent' as ConversationPriority;
+  private determinePriority(
+    operationType: DatabaseOperationType,
+    securityLevel: SecurityLevel,
+  ): ConversationPriority {
+    if (
+      operationType === DatabaseOperationType.SCHEMA_CHANGE ||
+      securityLevel === SecurityLevel._CRITICAL
+    ) {
+      return "urgent" as ConversationPriority;
     }
 
-    if (operationType === DatabaseOperationType.DELETE || operationType === DatabaseOperationType.ADMIN_OPERATION) {
-      return 'high' as ConversationPriority;
+    if (
+      operationType === DatabaseOperationType.DELETE ||
+      operationType === DatabaseOperationType.ADMIN_OPERATION
+    ) {
+      return "high" as ConversationPriority;
     }
 
     if (securityLevel === SecurityLevel._HIGH) {
-      return 'high' as ConversationPriority;
+      return "high" as ConversationPriority;
     }
 
-    return 'normal' as ConversationPriority;
+    return "normal" as ConversationPriority;
   }
 
   /**
    * Update validation metrics
    */
-  private updateMetrics(workflow: ValidationWorkflow, response: ValidationResponse | null, success: boolean): void {
+  private updateMetrics(
+    workflow: ValidationWorkflow,
+    response: ValidationResponse | null,
+    success: boolean,
+  ): void {
     this.validationMetrics.totalRequests++;
 
     if (success) {
@@ -630,8 +708,11 @@ export class ParlantValidationBridge extends EventEmitter implements OnApplicati
 
     if (workflow.metrics.cacheHit) {
       // Update cache hit rate
-      const totalHits = this.validationMetrics.successfulValidations * (this.validationMetrics.cacheHitRate / 100);
-      this.validationMetrics.cacheHitRate = ((totalHits + 1) / this.validationMetrics.totalRequests) * 100;
+      const totalHits =
+        this.validationMetrics.successfulValidations *
+        (this.validationMetrics.cacheHitRate / 100);
+      this.validationMetrics.cacheHitRate =
+        ((totalHits + 1) / this.validationMetrics.totalRequests) * 100;
     }
 
     if (workflow.metrics.bypassUsed) {
@@ -640,8 +721,12 @@ export class ParlantValidationBridge extends EventEmitter implements OnApplicati
 
     if (workflow.metrics.totalProcessingTime !== undefined) {
       // Update average response time
-      const currentTotal = this.validationMetrics.averageResponseTimeMs * (this.validationMetrics.totalRequests - 1);
-      this.validationMetrics.averageResponseTimeMs = (currentTotal + workflow.metrics.totalProcessingTime) / this.validationMetrics.totalRequests;
+      const currentTotal =
+        this.validationMetrics.averageResponseTimeMs *
+        (this.validationMetrics.totalRequests - 1);
+      this.validationMetrics.averageResponseTimeMs =
+        (currentTotal + workflow.metrics.totalProcessingTime) /
+        this.validationMetrics.totalRequests;
     }
   }
 
@@ -654,9 +739,12 @@ export class ParlantValidationBridge extends EventEmitter implements OnApplicati
     this.circuitBreakerFailureCount++;
     this.circuitBreakerLastFailure = Date.now();
 
-    if (this.circuitBreakerFailureCount >= this.config.circuitBreaker.failureThreshold) {
+    if (
+      this.circuitBreakerFailureCount >=
+      this.config.circuitBreaker.failureThreshold
+    ) {
       this.circuitBreakerState = CircuitBreakerState.OPEN;
-      this.logger.warn('Circuit breaker opened', {
+      this.logger.warn("Circuit breaker opened", {
         failureCount: this.circuitBreakerFailureCount,
         threshold: this.config.circuitBreaker.failureThreshold,
       });
@@ -665,7 +753,7 @@ export class ParlantValidationBridge extends EventEmitter implements OnApplicati
       setTimeout(() => {
         if (this.circuitBreakerState === CircuitBreakerState.OPEN) {
           this.circuitBreakerState = CircuitBreakerState.HALF_OPEN;
-          this.logger.log('Circuit breaker half-open');
+          this.logger.log("Circuit breaker half-open");
         }
       }, this.config.circuitBreaker.timeoutMs);
     }
@@ -680,10 +768,13 @@ export class ParlantValidationBridge extends EventEmitter implements OnApplicati
     if (this.circuitBreakerState === CircuitBreakerState.HALF_OPEN) {
       this.circuitBreakerState = CircuitBreakerState.CLOSED;
       this.circuitBreakerFailureCount = 0;
-      this.logger.log('Circuit breaker closed');
+      this.logger.log("Circuit breaker closed");
     } else if (this.circuitBreakerState === CircuitBreakerState.CLOSED) {
       // Decay failure count on success
-      this.circuitBreakerFailureCount = Math.max(0, this.circuitBreakerFailureCount - 1);
+      this.circuitBreakerFailureCount = Math.max(
+        0,
+        this.circuitBreakerFailureCount - 1,
+      );
     }
   }
 
@@ -695,13 +786,15 @@ export class ParlantValidationBridge extends EventEmitter implements OnApplicati
 
     // Bypass on connection errors, timeouts, etc.
     const bypassableErrors = [
-      'CONNECTION_ERROR',
-      'TIMEOUT_ERROR',
-      'CIRCUIT_BREAKER_OPEN',
-      'MAX_ATTEMPTS_EXCEEDED',
+      "CONNECTION_ERROR",
+      "TIMEOUT_ERROR",
+      "CIRCUIT_BREAKER_OPEN",
+      "MAX_ATTEMPTS_EXCEEDED",
     ];
 
-    return bypassableErrors.some(errorCode => error.message.includes(errorCode));
+    return bypassableErrors.some((errorCode) =>
+      error.message.includes(errorCode),
+    );
   }
 
   /**
@@ -712,7 +805,7 @@ export class ParlantValidationBridge extends EventEmitter implements OnApplicati
       this.collectPerformanceMetrics();
     }, this.config.performanceMonitoring.metricsIntervalMs);
 
-    this.logger.debug('Performance monitoring started');
+    this.logger.debug("Performance monitoring started");
   }
 
   /**
@@ -722,8 +815,10 @@ export class ParlantValidationBridge extends EventEmitter implements OnApplicati
     const metrics = this.getValidationMetrics();
 
     // Check performance thresholds
-    if (metrics.p95ResponseTimeMs > this.config.performanceMonitoring.p95TargetMs) {
-      this.logger.warn('P95 response time exceeded target', {
+    if (
+      metrics.p95ResponseTimeMs > this.config.performanceMonitoring.p95TargetMs
+    ) {
+      this.logger.warn("P95 response time exceeded target", {
         current: metrics.p95ResponseTimeMs,
         target: this.config.performanceMonitoring.p95TargetMs,
       });
@@ -731,20 +826,20 @@ export class ParlantValidationBridge extends EventEmitter implements OnApplicati
 
     const errorRate = (metrics.failedValidations / metrics.totalRequests) * 100;
     if (errorRate > this.config.performanceMonitoring.errorRateThreshold) {
-      this.logger.warn('Error rate exceeded threshold', {
+      this.logger.warn("Error rate exceeded threshold", {
         current: errorRate,
         threshold: this.config.performanceMonitoring.errorRateThreshold,
       });
     }
 
     if (metrics.cacheHitRate < this.config.cacheHitRateTarget) {
-      this.logger.warn('Cache hit rate below target', {
+      this.logger.warn("Cache hit rate below target", {
         current: metrics.cacheHitRate,
         target: this.config.cacheHitRateTarget,
       });
     }
 
-    this.emit('metricsCollected', metrics);
+    this.emit("metricsCollected", metrics);
   }
 
   /**
@@ -788,7 +883,9 @@ export class ParlantValidationBridge extends EventEmitter implements OnApplicati
    */
   private hashParameters(parameters: Record<string, unknown>): string {
     // Simple hash implementation - in production, use crypto.createHash
-    return btoa(JSON.stringify(parameters)).replace(/[^a-zA-Z0-9]/g, '').substr(0, 16);
+    return btoa(JSON.stringify(parameters))
+      .replace(/[^a-zA-Z0-9]/g, "")
+      .substr(0, 16);
   }
 
   /**
@@ -796,7 +893,9 @@ export class ParlantValidationBridge extends EventEmitter implements OnApplicati
    */
   private hashObject(obj: object): string {
     // Simple hash implementation - in production, use crypto.createHash
-    return btoa(JSON.stringify(obj)).replace(/[^a-zA-Z0-9]/g, '').substr(0, 32);
+    return btoa(JSON.stringify(obj))
+      .replace(/[^a-zA-Z0-9]/g, "")
+      .substr(0, 32);
   }
 
   /**
@@ -828,7 +927,7 @@ export class ParlantValidationBridge extends EventEmitter implements OnApplicati
    * Application shutdown handler
    */
   async onApplicationShutdown(): Promise<void> {
-    this.logger.log('Shutting down validation bridge');
+    this.logger.log("Shutting down validation bridge");
 
     if (this.metricsTimer) {
       clearInterval(this.metricsTimer);
@@ -838,25 +937,30 @@ export class ParlantValidationBridge extends EventEmitter implements OnApplicati
     const shutdownTimeout = 30000; // 30 seconds
     const shutdownStart = Date.now();
 
-    while (this.activeWorkflows.size > 0 && (Date.now() - shutdownStart) < shutdownTimeout) {
-      await new Promise(resolve => setTimeout(resolve, 100));
+    while (
+      this.activeWorkflows.size > 0 &&
+      Date.now() - shutdownStart < shutdownTimeout
+    ) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
     }
 
     if (this.activeWorkflows.size > 0) {
-      this.logger.warn(`Shutting down with ${this.activeWorkflows.size} active workflows`);
+      this.logger.warn(
+        `Shutting down with ${this.activeWorkflows.size} active workflows`,
+      );
     }
 
     this.activeWorkflows.clear();
-    this.logger.log('Validation bridge shutdown complete');
+    this.logger.log("Validation bridge shutdown complete");
   }
 }
 
 // ===== SUPPORTING ENUMS AND INTERFACES =====
 
 enum CircuitBreakerState {
-  CLOSED = 'closed',
-  OPEN = 'open',
-  HALF_OPEN = 'half_open',
+  CLOSED = "closed",
+  OPEN = "open",
+  HALF_OPEN = "half_open",
 }
 
 interface BridgeStatus {

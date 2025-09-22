@@ -47,10 +47,9 @@ import {
   ValidationRule,
   ValidationRuleType,
 } from "../types/parlant.types";
-import {
-  ParlantValidationRequest,
-  ParlantDecoratorOptions,
-} from "../types/parlant-integration.types";
+import {} from // ParlantValidationRequest,
+// ParlantDecoratorOptions,
+"../types/parlant-integration.types";
 
 // Enhanced metadata keys for universal system
 export const PARLANT_AUTO_KEY = "parlant:auto";
@@ -351,7 +350,7 @@ interface PerformanceRequirements {
  */
 export function ParlantAuto(config: ParlantAutoConfig = {}): MethodDecorator {
   return function (
-    target: any,
+    target: Record<string, unknown>,
     propertyKey: string | symbol,
     descriptor: PropertyDescriptor,
   ) {
@@ -412,7 +411,7 @@ export function ParlantUniversal(
   config: Partial<ParlantUniversalConfig>,
 ): MethodDecorator {
   return function (
-    target: any,
+    target: Record<string, unknown>,
     propertyKey: string | symbol,
     descriptor: PropertyDescriptor,
   ) {
@@ -484,7 +483,7 @@ export function ParlantAdaptive(
   config: ParlantAdaptiveConfig,
 ): MethodDecorator {
   return function (
-    target: any,
+    target: Record<string, unknown>,
     propertyKey: string | symbol,
     descriptor: PropertyDescriptor,
   ) {
@@ -527,7 +526,7 @@ export function ParlantBusiness(
   config: ParlantBusinessConfig,
 ): MethodDecorator {
   return function (
-    target: any,
+    target: Record<string, unknown>,
     propertyKey: string | symbol,
     descriptor: PropertyDescriptor,
   ) {
@@ -556,7 +555,7 @@ export function ParlantCompliance(
   config: ParlantComplianceConfig,
 ): MethodDecorator {
   return function (
-    target: any,
+    target: Record<string, unknown>,
     propertyKey: string | symbol,
     descriptor: PropertyDescriptor,
   ) {
@@ -608,7 +607,7 @@ export function ParlantPerformance(
   config: ParlantPerformanceConfig,
 ): MethodDecorator {
   return function (
-    target: any,
+    target: Record<string, unknown>,
     propertyKey: string | symbol,
     descriptor: PropertyDescriptor,
   ) {
@@ -642,7 +641,7 @@ export function ParlantEmergency(
   config: ParlantEmergencyConfig,
 ): MethodDecorator {
   return function (
-    target: any,
+    target: Record<string, unknown>,
     propertyKey: string | symbol,
     descriptor: PropertyDescriptor,
   ) {
@@ -669,7 +668,7 @@ export function ParlantEmergency(
  */
 export function ParlantAudit(config: ParlantAuditConfig): MethodDecorator {
   return function (
-    target: any,
+    target: Record<string, unknown>,
     propertyKey: string | symbol,
     descriptor: PropertyDescriptor,
   ) {
@@ -689,7 +688,7 @@ export function ParlantConfigOverride(
   overrides: Partial<ParlantUniversalConfig>,
 ): MethodDecorator {
   return function (
-    target: any,
+    target: Record<string, unknown>,
     propertyKey: string | symbol,
     descriptor: PropertyDescriptor,
   ) {
@@ -745,17 +744,17 @@ export const UniversalPerformanceParam = createParamDecorator(
  * Analyzes endpoint characteristics for intelligent configuration
  */
 function analyzeEndpoint(
-  target: any,
+  target: Record<string, unknown>,
   propertyKey: string | symbol,
-  descriptor: PropertyDescriptor,
+  _descriptor: PropertyDescriptor,
 ): EndpointAnalysis {
   const methodName = String(propertyKey);
   const className = target.constructor.name;
 
   // Extract parameter types and analyze method signature
-  const paramTypes =
+  const _paramTypes =
     Reflect.getMetadata("design:paramtypes", target, propertyKey) || [];
-  const returnType = Reflect.getMetadata(
+  const _returnType = Reflect.getMetadata(
     "design:returntype",
     target,
     propertyKey,
@@ -850,7 +849,7 @@ function analyzeEndpoint(
 function generateDynamicConfiguration(
   analysis: EndpointAnalysis,
   autoConfig: ParlantAutoConfig,
-): any {
+): Record<string, unknown> {
   let securityLevel = SecurityLevel._LOW;
   let validationMode = ValidationMode._AUTOMATED;
   let approvalLevel = ApprovalLevel._AUTOMATIC;
@@ -1073,10 +1072,10 @@ function buildUniversalConfiguration(
 
 // Configuration application functions
 function applyDynamicParlantConfiguration(
-  target: any,
+  target: Record<string, unknown>,
   propertyKey: string | symbol,
   descriptor: PropertyDescriptor,
-  config: any,
+  config: Record<string, unknown>,
 ): void {
   // Apply the existing PARLANT decorators with dynamic configuration
   const validationConfig = {
@@ -1102,7 +1101,7 @@ function applyDynamicParlantConfiguration(
 }
 
 function applyValidationConfiguration(
-  target: any,
+  target: Record<string, unknown>,
   propertyKey: string | symbol,
   descriptor: PropertyDescriptor,
   config: ParlantValidationConfig,
@@ -1111,7 +1110,7 @@ function applyValidationConfiguration(
 }
 
 function applyConversationConfiguration(
-  target: any,
+  target: Record<string, unknown>,
   propertyKey: string | symbol,
   descriptor: PropertyDescriptor,
   config: ParlantConversationConfig,
@@ -1120,7 +1119,7 @@ function applyConversationConfiguration(
 }
 
 function applySecurityConfiguration(
-  target: any,
+  target: Record<string, unknown>,
   propertyKey: string | symbol,
   descriptor: PropertyDescriptor,
   config: ParlantSecurityConfig,
@@ -1129,7 +1128,7 @@ function applySecurityConfiguration(
 }
 
 function applyAuditConfiguration(
-  target: any,
+  target: Record<string, unknown>,
   propertyKey: string | symbol,
   descriptor: PropertyDescriptor,
   config: ParlantAuditConfig,
@@ -1138,7 +1137,7 @@ function applyAuditConfiguration(
 }
 
 function applyPerformanceConfiguration(
-  target: any,
+  target: Record<string, unknown>,
   propertyKey: string | symbol,
   descriptor: PropertyDescriptor,
   config: ParlantPerformanceConfig,
@@ -1147,7 +1146,7 @@ function applyPerformanceConfiguration(
 }
 
 function applyBusinessConfiguration(
-  target: any,
+  target: Record<string, unknown>,
   propertyKey: string | symbol,
   descriptor: PropertyDescriptor,
   config: ParlantBusinessConfig,
@@ -1156,7 +1155,7 @@ function applyBusinessConfiguration(
 }
 
 function applyComplianceConfiguration(
-  target: any,
+  target: Record<string, unknown>,
   propertyKey: string | symbol,
   descriptor: PropertyDescriptor,
   config: ParlantComplianceConfig,
@@ -1165,7 +1164,7 @@ function applyComplianceConfiguration(
 }
 
 function applyEmergencyConfiguration(
-  target: any,
+  target: Record<string, unknown>,
   propertyKey: string | symbol,
   descriptor: PropertyDescriptor,
   config: ParlantEmergencyConfig,
@@ -1311,29 +1310,44 @@ function generateEmergencyValidationConfig(
 }
 
 // Parameter extraction functions
-function extractConversationContext(request: any, data: unknown): any {
+function extractConversationContext(
+  request: Record<string, unknown>,
+  _data: unknown,
+): Record<string, unknown> {
   return request.parlantConversation || request.conversationContext;
 }
 
-function extractValidationContext(request: any, data: unknown): any {
+function extractValidationContext(
+  request: Record<string, unknown>,
+  _data: unknown,
+): Record<string, unknown> {
   return request.parlantValidationRequest || request.validationContext;
 }
 
-function extractUserContext(request: any, data: unknown): any {
+function extractUserContext(
+  request: Record<string, unknown>,
+  _data: unknown,
+): Record<string, unknown> {
   return request.parlantUserContext || request.user;
 }
 
-function extractAuditContext(request: any, data: unknown): any {
+function extractAuditContext(
+  request: Record<string, unknown>,
+  _data: unknown,
+): Record<string, unknown> {
   return request.parlantAuditContext || request.auditTrail;
 }
 
-function extractPerformanceContext(request: any, data: unknown): any {
+function extractPerformanceContext(
+  request: Record<string, unknown>,
+  _data: unknown,
+): Record<string, unknown> {
   return request.parlantPerformanceContext || request.performanceMetrics;
 }
 
 // Learning system initialization
 function initializeAdaptiveLearning(
-  target: any,
+  target: Record<string, unknown>,
   propertyKey: string | symbol,
   config: ParlantAdaptiveConfig,
 ): void {
@@ -1346,9 +1360,9 @@ function initializeAdaptiveLearning(
 
 // Utility functions for metadata retrieval
 export function getAllParlantUniversalMetadata(
-  target: any,
+  target: Record<string, unknown>,
   propertyKey: string,
-): any {
+): Record<string, unknown> {
   const reflector = new Reflector();
 
   return {
@@ -1366,8 +1380,8 @@ export function getAllParlantUniversalMetadata(
 }
 
 export function hasUniversalParlantValidation(
-  target: any,
-  propertyKey: string,
+  target: Record<string, unknown>,
+  _propertyKey: string,
 ): boolean {
   const metadata = getAllParlantUniversalMetadata(target, propertyKey);
   return !!(

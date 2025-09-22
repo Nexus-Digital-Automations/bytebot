@@ -25,9 +25,9 @@ import {
   UnauthorizedException,
   ForbiddenException,
   NotFoundException,
-  InternalServerErrorException
-} from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
+  InternalServerErrorException,
+} from "@nestjs/common";
+import { EventEmitter2 } from "@nestjs/event-emitter";
 
 // ===== CORE INTERFACES =====
 
@@ -39,7 +39,7 @@ export interface ConversationalErrorContext {
   userId?: string;
   sessionId?: string;
   userLanguage?: string;
-  userExpertiseLevel?: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | 'EXPERT';
+  userExpertiseLevel?: "BEGINNER" | "INTERMEDIATE" | "ADVANCED" | "EXPERT";
 
   /** Request context */
   endpoint?: string;
@@ -66,13 +66,13 @@ export interface ConversationalErrorContext {
  */
 export enum ConversationalErrorSeverity {
   /** Minor issues that don't affect functionality */
-  INFO = 'INFO',
+  INFO = "INFO",
   /** Issues that might affect user experience */
-  WARNING = 'WARNING',
+  WARNING = "WARNING",
   /** Errors that prevent specific operations */
-  ERROR = 'ERROR',
+  ERROR = "ERROR",
   /** Critical system failures requiring immediate attention */
-  CRITICAL = 'CRITICAL'
+  CRITICAL = "CRITICAL",
 }
 
 /**
@@ -80,21 +80,21 @@ export enum ConversationalErrorSeverity {
  */
 export enum ConversationalErrorCategory {
   /** User input validation and format errors */
-  USER_INPUT = 'USER_INPUT',
+  USER_INPUT = "USER_INPUT",
   /** Authentication and login issues */
-  AUTHENTICATION = 'AUTHENTICATION',
+  AUTHENTICATION = "AUTHENTICATION",
   /** Permission and access control issues */
-  AUTHORIZATION = 'AUTHORIZATION',
+  AUTHORIZATION = "AUTHORIZATION",
   /** Business logic and rule violations */
-  BUSINESS_LOGIC = 'BUSINESS_LOGIC',
+  BUSINESS_LOGIC = "BUSINESS_LOGIC",
   /** External system integration failures */
-  INTEGRATION = 'INTEGRATION',
+  INTEGRATION = "INTEGRATION",
   /** Performance and timeout issues */
-  PERFORMANCE = 'PERFORMANCE',
+  PERFORMANCE = "PERFORMANCE",
   /** System and infrastructure errors */
-  SYSTEM = 'SYSTEM',
+  SYSTEM = "SYSTEM",
   /** Rate limiting and quota issues */
-  RATE_LIMITING = 'RATE_LIMITING'
+  RATE_LIMITING = "RATE_LIMITING",
 }
 
 /**
@@ -102,15 +102,15 @@ export enum ConversationalErrorCategory {
  */
 export enum RecoveryStage {
   /** Immediate automated fixes */
-  IMMEDIATE = 'IMMEDIATE',
+  IMMEDIATE = "IMMEDIATE",
   /** User-guided fixes with suggestions */
-  GUIDED = 'GUIDED',
+  GUIDED = "GUIDED",
   /** Manual intervention required */
-  MANUAL = 'MANUAL',
+  MANUAL = "MANUAL",
   /** System-level fixes needed */
-  SYSTEM = 'SYSTEM',
+  SYSTEM = "SYSTEM",
   /** Escalation to support team */
-  ESCALATION = 'ESCALATION'
+  ESCALATION = "ESCALATION",
 }
 
 /**
@@ -132,7 +132,7 @@ export interface ConversationalGuidance {
   alternatives: Array<{
     title: string;
     description: string;
-    difficulty: 'EASY' | 'MEDIUM' | 'ADVANCED';
+    difficulty: "EASY" | "MEDIUM" | "ADVANCED";
     estimatedTime: string;
     steps: string[];
   }>;
@@ -141,7 +141,7 @@ export interface ConversationalGuidance {
   preventionTips: Array<{
     tip: string;
     rationale: string;
-    category: 'BEST_PRACTICE' | 'SECURITY' | 'PERFORMANCE' | 'USABILITY';
+    category: "BEST_PRACTICE" | "SECURITY" | "PERFORMANCE" | "USABILITY";
   }>;
 
   /** When and how to escalate */
@@ -155,8 +155,8 @@ export interface ConversationalGuidance {
   resources: Array<{
     title: string;
     url: string;
-    type: 'DOCUMENTATION' | 'TUTORIAL' | 'VIDEO' | 'FAQ';
-    difficulty: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
+    type: "DOCUMENTATION" | "TUTORIAL" | "VIDEO" | "FAQ";
+    difficulty: "BEGINNER" | "INTERMEDIATE" | "ADVANCED";
   }>;
 }
 
@@ -242,7 +242,7 @@ export class ErrorNaturalLanguageProcessor {
    */
   async processErrorToNaturalLanguage(
     error: Error,
-    context: ConversationalErrorContext
+    context: ConversationalErrorContext,
   ): Promise<string> {
     const startTime = Date.now();
 
@@ -253,13 +253,13 @@ export class ErrorNaturalLanguageProcessor {
       // Generate context-aware explanation
       const explanation = this.generateContextualExplanation(
         errorAnalysis,
-        context
+        context,
       );
 
       // Adjust language complexity based on user expertise
       const adjustedExplanation = this.adjustLanguageComplexity(
         explanation,
-        context.userExpertiseLevel || 'INTERMEDIATE'
+        context.userExpertiseLevel || "INTERMEDIATE",
       );
 
       const processingTime = Date.now() - startTime;
@@ -267,7 +267,7 @@ export class ErrorNaturalLanguageProcessor {
 
       return adjustedExplanation;
     } catch (nlpError) {
-      this.logger.error('NLP processing failed', nlpError);
+      this.logger.error("NLP processing failed", nlpError);
       return this.getFallbackExplanation(error);
     }
   }
@@ -285,34 +285,34 @@ export class ErrorNaturalLanguageProcessor {
     const errorName = error.name.toLowerCase();
 
     // Determine error type
-    let type = 'UNKNOWN';
+    let type = "UNKNOWN";
     let severity = ConversationalErrorSeverity.ERROR;
     let category = ConversationalErrorCategory.SYSTEM;
 
     if (error instanceof BadRequestException) {
-      type = 'VALIDATION_ERROR';
+      type = "VALIDATION_ERROR";
       category = ConversationalErrorCategory.USER_INPUT;
       severity = ConversationalErrorSeverity.WARNING;
     } else if (error instanceof UnauthorizedException) {
-      type = 'AUTHENTICATION_ERROR';
+      type = "AUTHENTICATION_ERROR";
       category = ConversationalErrorCategory.AUTHENTICATION;
       severity = ConversationalErrorSeverity.ERROR;
     } else if (error instanceof ForbiddenException) {
-      type = 'AUTHORIZATION_ERROR';
+      type = "AUTHORIZATION_ERROR";
       category = ConversationalErrorCategory.AUTHORIZATION;
       severity = ConversationalErrorSeverity.ERROR;
     } else if (error instanceof NotFoundException) {
-      type = 'RESOURCE_NOT_FOUND';
+      type = "RESOURCE_NOT_FOUND";
       category = ConversationalErrorCategory.USER_INPUT;
       severity = ConversationalErrorSeverity.WARNING;
     } else if (error instanceof InternalServerErrorException) {
-      type = 'SYSTEM_ERROR';
+      type = "SYSTEM_ERROR";
       category = ConversationalErrorCategory.SYSTEM;
       severity = ConversationalErrorSeverity.CRITICAL;
     }
 
     // Extract keywords for context
-    const keywords = this.extractKeywords(errorMessage + ' ' + errorName);
+    const keywords = this.extractKeywords(errorMessage + " " + errorName);
 
     return { type, severity, category, keywords };
   }
@@ -322,7 +322,7 @@ export class ErrorNaturalLanguageProcessor {
    */
   private generateContextualExplanation(
     analysis: any,
-    context: ConversationalErrorContext
+    context: ConversationalErrorContext,
   ): string {
     const { type, category } = analysis;
 
@@ -345,15 +345,17 @@ export class ErrorNaturalLanguageProcessor {
    */
   private generateUserInputExplanation(
     analysis: any,
-    context: ConversationalErrorContext
+    context: ConversationalErrorContext,
   ): string {
-    const action = context.method?.toLowerCase() || 'action';
-    const endpoint = context.endpoint || 'this operation';
+    const action = context.method?.toLowerCase() || "action";
+    const endpoint = context.endpoint || "this operation";
 
-    return `There seems to be an issue with the information you provided for ${endpoint}. ` +
-           `The system couldn't process your ${action} request because some of the data ` +
-           `doesn't match what's expected. This is usually a simple formatting issue that ` +
-           `can be fixed quickly.`;
+    return (
+      `There seems to be an issue with the information you provided for ${endpoint}. ` +
+      `The system couldn't process your ${action} request because some of the data ` +
+      `doesn't match what's expected. This is usually a simple formatting issue that ` +
+      `can be fixed quickly.`
+    );
   }
 
   /**
@@ -361,11 +363,13 @@ export class ErrorNaturalLanguageProcessor {
    */
   private generateAuthenticationExplanation(
     analysis: any,
-    context: ConversationalErrorContext
+    context: ConversationalErrorContext,
   ): string {
-    return `You need to sign in to access this feature. Your current session may have ` +
-           `expired or you might not be logged in yet. This is a security measure to ` +
-           `protect your account and data.`;
+    return (
+      `You need to sign in to access this feature. Your current session may have ` +
+      `expired or you might not be logged in yet. This is a security measure to ` +
+      `protect your account and data.`
+    );
   }
 
   /**
@@ -373,11 +377,13 @@ export class ErrorNaturalLanguageProcessor {
    */
   private generateAuthorizationExplanation(
     analysis: any,
-    context: ConversationalErrorContext
+    context: ConversationalErrorContext,
   ): string {
-    return `You don't have permission to perform this action. Your account may not have ` +
-           `the necessary privileges, or you might be trying to access a restricted area. ` +
-           `This is normal - different users have different access levels for security reasons.`;
+    return (
+      `You don't have permission to perform this action. Your account may not have ` +
+      `the necessary privileges, or you might be trying to access a restricted area. ` +
+      `This is normal - different users have different access levels for security reasons.`
+    );
   }
 
   /**
@@ -385,11 +391,13 @@ export class ErrorNaturalLanguageProcessor {
    */
   private generateSystemExplanation(
     analysis: any,
-    context: ConversationalErrorContext
+    context: ConversationalErrorContext,
   ): string {
-    return `We're experiencing a technical issue on our end that's preventing this action ` +
-           `from completing. This isn't something you did wrong - it's a system problem ` +
-           `that our team needs to resolve.`;
+    return (
+      `We're experiencing a technical issue on our end that's preventing this action ` +
+      `from completing. This isn't something you did wrong - it's a system problem ` +
+      `that our team needs to resolve.`
+    );
   }
 
   /**
@@ -397,10 +405,12 @@ export class ErrorNaturalLanguageProcessor {
    */
   private generateGenericExplanation(
     analysis: any,
-    context: ConversationalErrorContext
+    context: ConversationalErrorContext,
   ): string {
-    return `Something unexpected happened while processing your request. The system ` +
-           `encountered an issue that prevented the operation from completing successfully.`;
+    return (
+      `Something unexpected happened while processing your request. The system ` +
+      `encountered an issue that prevented the operation from completing successfully.`
+    );
   }
 
   /**
@@ -408,12 +418,12 @@ export class ErrorNaturalLanguageProcessor {
    */
   private adjustLanguageComplexity(
     explanation: string,
-    expertiseLevel: string
+    expertiseLevel: string,
   ): string {
     switch (expertiseLevel) {
-      case 'BEGINNER':
+      case "BEGINNER":
         return this.simplifyLanguage(explanation);
-      case 'EXPERT':
+      case "EXPERT":
         return this.addTechnicalDetails(explanation);
       default:
         return explanation;
@@ -425,28 +435,44 @@ export class ErrorNaturalLanguageProcessor {
    */
   private simplifyLanguage(explanation: string): string {
     return explanation
-      .replace(/operation/g, 'action')
-      .replace(/encounter/g, 'find')
-      .replace(/authorization/g, 'permission')
-      .replace(/authentication/g, 'login')
-      .replace(/privileges/g, 'rights');
+      .replace(/operation/g, "action")
+      .replace(/encounter/g, "find")
+      .replace(/authorization/g, "permission")
+      .replace(/authentication/g, "login")
+      .replace(/privileges/g, "rights");
   }
 
   /**
    * Add technical details for experts
    */
   private addTechnicalDetails(explanation: string): string {
-    return explanation + ' Check the response headers and status codes for additional diagnostic information.';
+    return (
+      explanation +
+      " Check the response headers and status codes for additional diagnostic information."
+    );
   }
 
   /**
    * Extract keywords from error message
    */
   private extractKeywords(text: string): string[] {
-    const commonWords = ['the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with'];
-    const words = text.toLowerCase().split(/\s+/).filter(word =>
-      word.length > 2 && !commonWords.includes(word)
-    );
+    const commonWords = [
+      "the",
+      "and",
+      "or",
+      "but",
+      "in",
+      "on",
+      "at",
+      "to",
+      "for",
+      "of",
+      "with",
+    ];
+    const words = text
+      .toLowerCase()
+      .split(/\s+/)
+      .filter((word) => word.length > 2 && !commonWords.includes(word));
     return Array.from(new Set(words));
   }
 
@@ -454,8 +480,10 @@ export class ErrorNaturalLanguageProcessor {
    * Get fallback explanation when NLP fails
    */
   private getFallbackExplanation(error: Error): string {
-    return `An error occurred while processing your request: ${error.message}. ` +
-           `Please try again or contact support if the problem persists.`;
+    return (
+      `An error occurred while processing your request: ${error.message}. ` +
+      `Please try again or contact support if the problem persists.`
+    );
   }
 }
 
@@ -470,9 +498,11 @@ export class ConversationalErrorHandler {
 
   constructor(
     private readonly nlpProcessor: ErrorNaturalLanguageProcessor,
-    private readonly eventEmitter: EventEmitter2
+    private readonly eventEmitter: EventEmitter2,
   ) {
-    this.logger.log('ConversationalErrorHandler initialized with NLP capabilities');
+    this.logger.log(
+      "ConversationalErrorHandler initialized with NLP capabilities",
+    );
   }
 
   /**
@@ -480,7 +510,7 @@ export class ConversationalErrorHandler {
    */
   async processError(
     error: Error,
-    context: ConversationalErrorContext
+    context: ConversationalErrorContext,
   ): Promise<ConversationalErrorResponse> {
     const startTime = Date.now();
     const errorId = this.generateErrorId();
@@ -491,7 +521,7 @@ export class ConversationalErrorHandler {
       // Generate natural language explanation
       const explanation = await this.nlpProcessor.processErrorToNaturalLanguage(
         error,
-        context
+        context,
       );
 
       // Classify error
@@ -501,15 +531,12 @@ export class ConversationalErrorHandler {
       const guidance = await this.generateConversationalGuidance(
         error,
         context,
-        explanation
+        explanation,
       );
 
       // Generate recovery recommendations
-      const recoveryRecommendations = await this.generateRecoveryRecommendations(
-        error,
-        context,
-        severity
-      );
+      const recoveryRecommendations =
+        await this.generateRecoveryRecommendations(error, context, severity);
 
       // Calculate processing metrics
       const processingTime = Date.now() - startTime;
@@ -526,33 +553,38 @@ export class ConversationalErrorHandler {
         guidance,
         recoveryRecommendations,
         context,
-        technicalDetails: context.userExpertiseLevel === 'EXPERT' ? {
-          errorCode: error.name,
-          stackTrace: error.stack,
-          systemInfo: this.collectSystemInfo()
-        } : undefined,
+        technicalDetails:
+          context.userExpertiseLevel === "EXPERT"
+            ? {
+                errorCode: error.name,
+                stackTrace: error.stack,
+                systemInfo: this.collectSystemInfo(),
+              }
+            : undefined,
         tracking: {
           timestamp: new Date(),
           processingTime,
           similarErrorsCount,
-          resolutionRate
-        }
+          resolutionRate,
+        },
       };
 
       // Emit analytics event
-      this.eventEmitter.emit('error.processed', {
+      this.eventEmitter.emit("error.processed", {
         errorId,
         category,
         severity,
         processingTime,
-        userId: context.userId
+        userId: context.userId,
       });
 
       this.logger.log(`Error ${errorId} processed in ${processingTime}ms`);
       return response;
-
     } catch (processingError) {
-      this.logger.error(`Error processing failed for ${errorId}`, processingError);
+      this.logger.error(
+        `Error processing failed for ${errorId}`,
+        processingError,
+      );
       return this.generateFallbackResponse(error, context, errorId);
     }
   }
@@ -567,42 +599,42 @@ export class ConversationalErrorHandler {
     if (error instanceof BadRequestException) {
       return {
         severity: ConversationalErrorSeverity.WARNING,
-        category: ConversationalErrorCategory.USER_INPUT
+        category: ConversationalErrorCategory.USER_INPUT,
       };
     }
 
     if (error instanceof UnauthorizedException) {
       return {
         severity: ConversationalErrorSeverity.ERROR,
-        category: ConversationalErrorCategory.AUTHENTICATION
+        category: ConversationalErrorCategory.AUTHENTICATION,
       };
     }
 
     if (error instanceof ForbiddenException) {
       return {
         severity: ConversationalErrorSeverity.ERROR,
-        category: ConversationalErrorCategory.AUTHORIZATION
+        category: ConversationalErrorCategory.AUTHORIZATION,
       };
     }
 
     if (error instanceof NotFoundException) {
       return {
         severity: ConversationalErrorSeverity.WARNING,
-        category: ConversationalErrorCategory.USER_INPUT
+        category: ConversationalErrorCategory.USER_INPUT,
       };
     }
 
     if (error instanceof InternalServerErrorException) {
       return {
         severity: ConversationalErrorSeverity.CRITICAL,
-        category: ConversationalErrorCategory.SYSTEM
+        category: ConversationalErrorCategory.SYSTEM,
       };
     }
 
     // Default classification
     return {
       severity: ConversationalErrorSeverity.ERROR,
-      category: ConversationalErrorCategory.SYSTEM
+      category: ConversationalErrorCategory.SYSTEM,
     };
   }
 
@@ -612,17 +644,25 @@ export class ConversationalErrorHandler {
   private async generateConversationalGuidance(
     error: Error,
     context: ConversationalErrorContext,
-    explanation: string
+    explanation: string,
   ): Promise<ConversationalGuidance> {
     const { category } = this.classifyError(error);
 
     return {
       explanation,
-      immediateActions: await this.generateImmediateActions(error, context, category),
+      immediateActions: await this.generateImmediateActions(
+        error,
+        context,
+        category,
+      ),
       alternatives: await this.generateAlternatives(error, context, category),
-      preventionTips: await this.generatePreventionTips(error, context, category),
+      preventionTips: await this.generatePreventionTips(
+        error,
+        context,
+        category,
+      ),
       escalationGuidance: this.generateEscalationGuidance(category),
-      resources: await this.generateResources(error, context, category)
+      resources: await this.generateResources(error, context, category),
     };
   }
 
@@ -632,8 +672,15 @@ export class ConversationalErrorHandler {
   private async generateImmediateActions(
     error: Error,
     context: ConversationalErrorContext,
-    category: ConversationalErrorCategory
-  ): Promise<Array<{ step: number; action: string; example?: string; estimatedTime?: string; }>> {
+    category: ConversationalErrorCategory,
+  ): Promise<
+    Array<{
+      step: number;
+      action: string;
+      example?: string;
+      estimatedTime?: string;
+    }>
+  > {
     switch (category) {
       case ConversationalErrorCategory.USER_INPUT:
         return [
@@ -641,14 +688,15 @@ export class ConversationalErrorHandler {
             step: 1,
             action: "Check your input format and try again",
             example: "Make sure all required fields are filled out correctly",
-            estimatedTime: "30 seconds"
+            estimatedTime: "30 seconds",
           },
           {
             step: 2,
             action: "Verify the data matches expected formats",
-            example: "Email addresses should contain @ symbol, dates should be in correct format",
-            estimatedTime: "1 minute"
-          }
+            example:
+              "Email addresses should contain @ symbol, dates should be in correct format",
+            estimatedTime: "1 minute",
+          },
         ];
 
       case ConversationalErrorCategory.AUTHENTICATION:
@@ -657,14 +705,14 @@ export class ConversationalErrorHandler {
             step: 1,
             action: "Try logging in again",
             example: "Click the login button and enter your credentials",
-            estimatedTime: "30 seconds"
+            estimatedTime: "30 seconds",
           },
           {
             step: 2,
             action: "Check if your session has expired",
             example: "Refresh the page and log in if prompted",
-            estimatedTime: "1 minute"
-          }
+            estimatedTime: "1 minute",
+          },
         ];
 
       default:
@@ -672,13 +720,13 @@ export class ConversationalErrorHandler {
           {
             step: 1,
             action: "Refresh the page and try again",
-            estimatedTime: "30 seconds"
+            estimatedTime: "30 seconds",
           },
           {
             step: 2,
             action: "Wait a moment and retry the operation",
-            estimatedTime: "2 minutes"
-          }
+            estimatedTime: "2 minutes",
+          },
         ];
     }
   }
@@ -689,37 +737,39 @@ export class ConversationalErrorHandler {
   private async generateAlternatives(
     error: Error,
     context: ConversationalErrorContext,
-    category: ConversationalErrorCategory
-  ): Promise<Array<{
-    title: string;
-    description: string;
-    difficulty: 'EASY' | 'MEDIUM' | 'ADVANCED';
-    estimatedTime: string;
-    steps: string[];
-  }>> {
+    category: ConversationalErrorCategory,
+  ): Promise<
+    Array<{
+      title: string;
+      description: string;
+      difficulty: "EASY" | "MEDIUM" | "ADVANCED";
+      estimatedTime: string;
+      steps: string[];
+    }>
+  > {
     return [
       {
         title: "Basic Retry Approach",
         description: "Simple retry with a short delay",
-        difficulty: 'EASY',
+        difficulty: "EASY",
         estimatedTime: "2 minutes",
         steps: [
           "Wait 30 seconds",
           "Refresh your browser",
-          "Try the action again"
-        ]
+          "Try the action again",
+        ],
       },
       {
         title: "Alternative Method",
         description: "Use a different approach to achieve the same goal",
-        difficulty: 'MEDIUM',
+        difficulty: "MEDIUM",
         estimatedTime: "5 minutes",
         steps: [
           "Navigate to an alternative section",
           "Try using a different feature",
-          "Contact support if needed"
-        ]
-      }
+          "Contact support if needed",
+        ],
+      },
     ];
   }
 
@@ -729,41 +779,46 @@ export class ConversationalErrorHandler {
   private async generatePreventionTips(
     error: Error,
     context: ConversationalErrorContext,
-    category: ConversationalErrorCategory
-  ): Promise<Array<{
-    tip: string;
-    rationale: string;
-    category: 'BEST_PRACTICE' | 'SECURITY' | 'PERFORMANCE' | 'USABILITY';
-  }>> {
+    category: ConversationalErrorCategory,
+  ): Promise<
+    Array<{
+      tip: string;
+      rationale: string;
+      category: "BEST_PRACTICE" | "SECURITY" | "PERFORMANCE" | "USABILITY";
+    }>
+  > {
     return [
       {
         tip: "Save your work frequently",
         rationale: "Prevents data loss if errors occur",
-        category: 'BEST_PRACTICE'
+        category: "BEST_PRACTICE",
       },
       {
         tip: "Keep your session active",
         rationale: "Reduces authentication-related issues",
-        category: 'SECURITY'
+        category: "SECURITY",
       },
       {
         tip: "Use stable internet connection",
         rationale: "Prevents network-related errors",
-        category: 'PERFORMANCE'
-      }
+        category: "PERFORMANCE",
+      },
     ];
   }
 
   /**
    * Generate escalation guidance
    */
-  private generateEscalationGuidance(
-    category: ConversationalErrorCategory
-  ): { when: string; how: string; expectedResponse: string; } {
+  private generateEscalationGuidance(category: ConversationalErrorCategory): {
+    when: string;
+    how: string;
+    expectedResponse: string;
+  } {
     return {
       when: "If the error persists after trying the suggested solutions",
       how: "Contact our support team with the error ID and description of what you were trying to do",
-      expectedResponse: "Our team typically responds within 2-4 hours during business hours"
+      expectedResponse:
+        "Our team typically responds within 2-4 hours during business hours",
     };
   }
 
@@ -773,26 +828,28 @@ export class ConversationalErrorHandler {
   private async generateResources(
     error: Error,
     context: ConversationalErrorContext,
-    category: ConversationalErrorCategory
-  ): Promise<Array<{
-    title: string;
-    url: string;
-    type: 'DOCUMENTATION' | 'TUTORIAL' | 'VIDEO' | 'FAQ';
-    difficulty: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
-  }>> {
+    category: ConversationalErrorCategory,
+  ): Promise<
+    Array<{
+      title: string;
+      url: string;
+      type: "DOCUMENTATION" | "TUTORIAL" | "VIDEO" | "FAQ";
+      difficulty: "BEGINNER" | "INTERMEDIATE" | "ADVANCED";
+    }>
+  > {
     return [
       {
         title: "Error Handling Guide",
         url: "/docs/error-handling",
-        type: 'DOCUMENTATION',
-        difficulty: 'BEGINNER'
+        type: "DOCUMENTATION",
+        difficulty: "BEGINNER",
       },
       {
         title: "Troubleshooting FAQ",
         url: "/docs/faq",
-        type: 'FAQ',
-        difficulty: 'BEGINNER'
-      }
+        type: "FAQ",
+        difficulty: "BEGINNER",
+      },
     ];
   }
 
@@ -802,42 +859,50 @@ export class ConversationalErrorHandler {
   private async generateRecoveryRecommendations(
     error: Error,
     context: ConversationalErrorContext,
-    severity: ConversationalErrorSeverity
+    severity: ConversationalErrorSeverity,
   ): Promise<ErrorRecoveryRecommendation[]> {
     const recommendations: ErrorRecoveryRecommendation[] = [];
 
     // Immediate automated recovery
     recommendations.push({
-      strategy: 'IMMEDIATE_RETRY',
-      description: 'Automatically retry the operation with exponential backoff',
+      strategy: "IMMEDIATE_RETRY",
+      description: "Automatically retry the operation with exponential backoff",
       confidence: 0.7,
-      estimatedTime: '30 seconds',
-      requiredActions: ['Wait for automatic retry'],
-      successCriteria: ['Operation completes successfully'],
-      stage: RecoveryStage.IMMEDIATE
+      estimatedTime: "30 seconds",
+      requiredActions: ["Wait for automatic retry"],
+      successCriteria: ["Operation completes successfully"],
+      stage: RecoveryStage.IMMEDIATE,
     });
 
     // User-guided recovery
     recommendations.push({
-      strategy: 'USER_GUIDED_FIX',
-      description: 'Follow step-by-step guidance to resolve the issue',
+      strategy: "USER_GUIDED_FIX",
+      description: "Follow step-by-step guidance to resolve the issue",
       confidence: 0.9,
-      estimatedTime: '2-5 minutes',
-      requiredActions: ['Follow provided guidance steps', 'Verify inputs', 'Retry operation'],
-      successCriteria: ['All validation passes', 'Operation completes'],
-      stage: RecoveryStage.GUIDED
+      estimatedTime: "2-5 minutes",
+      requiredActions: [
+        "Follow provided guidance steps",
+        "Verify inputs",
+        "Retry operation",
+      ],
+      successCriteria: ["All validation passes", "Operation completes"],
+      stage: RecoveryStage.GUIDED,
     });
 
     // Manual intervention if needed
     if (severity === ConversationalErrorSeverity.CRITICAL) {
       recommendations.push({
-        strategy: 'MANUAL_INTERVENTION',
-        description: 'Manual review and intervention required',
+        strategy: "MANUAL_INTERVENTION",
+        description: "Manual review and intervention required",
         confidence: 0.95,
-        estimatedTime: '10-30 minutes',
-        requiredActions: ['Contact support', 'Provide error details', 'Wait for assistance'],
-        successCriteria: ['Support acknowledges issue', 'Resolution provided'],
-        stage: RecoveryStage.MANUAL
+        estimatedTime: "10-30 minutes",
+        requiredActions: [
+          "Contact support",
+          "Provide error details",
+          "Wait for assistance",
+        ],
+        successCriteria: ["Support acknowledges issue", "Resolution provided"],
+        stage: RecoveryStage.MANUAL,
       });
     }
 
@@ -849,7 +914,7 @@ export class ConversationalErrorHandler {
    */
   private generateUserFriendlyTitle(
     error: Error,
-    category: ConversationalErrorCategory
+    category: ConversationalErrorCategory,
   ): string {
     switch (category) {
       case ConversationalErrorCategory.USER_INPUT:
@@ -885,19 +950,21 @@ export class ConversationalErrorHandler {
   /**
    * Get resolution rate for error category
    */
-  private async getResolutionRate(category: ConversationalErrorCategory): Promise<number> {
+  private async getResolutionRate(
+    category: ConversationalErrorCategory,
+  ): Promise<number> {
     // Implementation would query analytics for category resolution rates
     const rates = {
       [ConversationalErrorCategory.USER_INPUT]: 0.95,
-      [ConversationalErrorCategory.AUTHENTICATION]: 0.90,
+      [ConversationalErrorCategory.AUTHENTICATION]: 0.9,
       [ConversationalErrorCategory.AUTHORIZATION]: 0.85,
       [ConversationalErrorCategory.BUSINESS_LOGIC]: 0.88,
       [ConversationalErrorCategory.INTEGRATION]: 0.82,
       [ConversationalErrorCategory.PERFORMANCE]: 0.78,
       [ConversationalErrorCategory.SYSTEM]: 0.75,
-      [ConversationalErrorCategory.RATE_LIMITING]: 0.85
+      [ConversationalErrorCategory.RATE_LIMITING]: 0.85,
     };
-    return rates[category] || 0.80;
+    return rates[category] || 0.8;
   }
 
   /**
@@ -908,7 +975,7 @@ export class ConversationalErrorHandler {
       nodeVersion: process.version,
       platform: process.platform,
       uptime: process.uptime(),
-      memoryUsage: process.memoryUsage()
+      memoryUsage: process.memoryUsage(),
     };
   }
 
@@ -918,12 +985,13 @@ export class ConversationalErrorHandler {
   private generateFallbackResponse(
     error: Error,
     context: ConversationalErrorContext,
-    errorId: string
+    errorId: string,
   ): ConversationalErrorResponse {
     return {
       errorId,
       title: "System Error",
-      message: "An unexpected error occurred. Our team has been notified and is working on a solution.",
+      message:
+        "An unexpected error occurred. Our team has been notified and is working on a solution.",
       severity: ConversationalErrorSeverity.ERROR,
       category: ConversationalErrorCategory.SYSTEM,
       guidance: {
@@ -932,45 +1000,49 @@ export class ConversationalErrorHandler {
           {
             step: 1,
             action: "Please try again in a few minutes",
-            estimatedTime: "2 minutes"
-          }
+            estimatedTime: "2 minutes",
+          },
         ],
         alternatives: [
           {
             title: "Contact Support",
             description: "Get direct help from our support team",
-            difficulty: 'EASY',
+            difficulty: "EASY",
             estimatedTime: "5 minutes",
-            steps: ["Use the contact form", "Include this error ID", "Describe what you were trying to do"]
-          }
+            steps: [
+              "Use the contact form",
+              "Include this error ID",
+              "Describe what you were trying to do",
+            ],
+          },
         ],
         preventionTips: [
           {
             tip: "Try refreshing the page before retrying",
             rationale: "Ensures you have the latest page state",
-            category: 'BEST_PRACTICE'
-          }
+            category: "BEST_PRACTICE",
+          },
         ],
-        resources: []
+        resources: [],
       },
       recoveryRecommendations: [
         {
-          strategy: 'BASIC_RETRY',
-          description: 'Wait and try again',
+          strategy: "BASIC_RETRY",
+          description: "Wait and try again",
           confidence: 0.6,
-          estimatedTime: '2 minutes',
-          requiredActions: ['Wait 2 minutes', 'Try again'],
-          successCriteria: ['Operation completes'],
-          stage: RecoveryStage.IMMEDIATE
-        }
+          estimatedTime: "2 minutes",
+          requiredActions: ["Wait 2 minutes", "Try again"],
+          successCriteria: ["Operation completes"],
+          stage: RecoveryStage.IMMEDIATE,
+        },
       ],
       context,
       tracking: {
         timestamp: new Date(),
         processingTime: 0,
         similarErrorsCount: 0,
-        resolutionRate: 0.8
-      }
+        resolutionRate: 0.8,
+      },
     };
   }
 }

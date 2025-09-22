@@ -9,7 +9,7 @@
  * @compliance GDPR, SOX, HIPAA, SOC2
  */
 
-import { z } from 'zod';
+import { z } from "zod";
 
 // =============================================================================
 // BYPASS AUTHORIZATION TYPES
@@ -20,19 +20,19 @@ import { z } from 'zod';
  */
 export enum BypassAuthorizationLevel {
   /** System-level automatic bypass for critical operations */
-  SYSTEM_CRITICAL = 'system_critical',
+  SYSTEM_CRITICAL = "system_critical",
 
   /** Emergency authorization requiring single admin approval */
-  EMERGENCY_SINGLE = 'emergency_single',
+  EMERGENCY_SINGLE = "emergency_single",
 
   /** High-risk operations requiring dual authorization */
-  EMERGENCY_DUAL = 'emergency_dual',
+  EMERGENCY_DUAL = "emergency_dual",
 
   /** Committee-level approval for sensitive operations */
-  COMMITTEE_APPROVAL = 'committee_approval',
+  COMMITTEE_APPROVAL = "committee_approval",
 
   /** Board-level approval for top-secret operations */
-  BOARD_APPROVAL = 'board_approval'
+  BOARD_APPROVAL = "board_approval",
 }
 
 /**
@@ -40,22 +40,22 @@ export enum BypassAuthorizationLevel {
  */
 export enum BypassRole {
   /** System administrator with emergency privileges */
-  EMERGENCY_ADMIN = 'emergency_admin',
+  EMERGENCY_ADMIN = "emergency_admin",
 
   /** Security administrator */
-  SECURITY_ADMIN = 'security_admin',
+  SECURITY_ADMIN = "security_admin",
 
   /** Database administrator */
-  DATABASE_ADMIN = 'database_admin',
+  DATABASE_ADMIN = "database_admin",
 
   /** System operator */
-  SYSTEM_OPERATOR = 'system_operator',
+  SYSTEM_OPERATOR = "system_operator",
 
   /** Emergency responder */
-  EMERGENCY_RESPONDER = 'emergency_responder',
+  EMERGENCY_RESPONDER = "emergency_responder",
 
   /** Audit administrator */
-  AUDIT_ADMIN = 'audit_admin'
+  AUDIT_ADMIN = "audit_admin",
 }
 
 /**
@@ -63,22 +63,22 @@ export enum BypassRole {
  */
 export enum BypassOperationType {
   /** Critical database operations */
-  DATABASE_CRITICAL = 'database_critical',
+  DATABASE_CRITICAL = "database_critical",
 
   /** User authentication operations */
-  AUTH_CRITICAL = 'auth_critical',
+  AUTH_CRITICAL = "auth_critical",
 
   /** System configuration changes */
-  CONFIG_CRITICAL = 'config_critical',
+  CONFIG_CRITICAL = "config_critical",
 
   /** Security incident response */
-  SECURITY_INCIDENT = 'security_incident',
+  SECURITY_INCIDENT = "security_incident",
 
   /** Data recovery operations */
-  DATA_RECOVERY = 'data_recovery',
+  DATA_RECOVERY = "data_recovery",
 
   /** System maintenance */
-  MAINTENANCE = 'maintenance'
+  MAINTENANCE = "maintenance",
 }
 
 // =============================================================================
@@ -140,22 +140,22 @@ export interface EmergencyBypassToken {
  */
 export enum EmergencyTokenStatus {
   /** Token is pending approval */
-  PENDING = 'pending',
+  PENDING = "pending",
 
   /** Token is active and can be used */
-  ACTIVE = 'active',
+  ACTIVE = "active",
 
   /** Token has expired */
-  EXPIRED = 'expired',
+  EXPIRED = "expired",
 
   /** Token has been revoked */
-  REVOKED = 'revoked',
+  REVOKED = "revoked",
 
   /** Token has reached maximum operations */
-  EXHAUSTED = 'exhausted',
+  EXHAUSTED = "exhausted",
 
   /** Token is suspended due to security concerns */
-  SUSPENDED = 'suspended'
+  SUSPENDED = "suspended",
 }
 
 /**
@@ -185,9 +185,9 @@ export interface TokenApproval {
  * Approval decisions
  */
 export enum ApprovalDecision {
-  APPROVED = 'approved',
-  DENIED = 'denied',
-  REQUIRES_ESCALATION = 'requires_escalation'
+  APPROVED = "approved",
+  DENIED = "denied",
+  REQUIRES_ESCALATION = "requires_escalation",
 }
 
 /**
@@ -216,47 +216,40 @@ export interface TokenSecurityMetadata {
   tokenHash: string;
 }
 
-
-
-
-
-
-
-
 /**
  * Violation severity levels
  */
 export enum ViolationSeverity {
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  CRITICAL = 'critical',
+  LOW = "low",
+  MEDIUM = "medium",
+  HIGH = "high",
+  CRITICAL = "critical",
 }
 
 /**
  * Workflow status
  */
 export enum WorkflowStatus {
-  PENDING = 'pending',
-  RUNNING = 'running',
-  IN_PROGRESS = 'in_progress',
-  COMPLETED = 'completed',
-  APPROVED = 'approved',
-  DENIED = 'denied',
-  FAILED = 'failed',
-  TIMEOUT = 'timeout',
-  CANCELLED = 'cancelled',
+  PENDING = "pending",
+  RUNNING = "running",
+  IN_PROGRESS = "in_progress",
+  COMPLETED = "completed",
+  APPROVED = "approved",
+  DENIED = "denied",
+  FAILED = "failed",
+  TIMEOUT = "timeout",
+  CANCELLED = "cancelled",
 }
 
 /**
  * Security flags for tokens
  */
 export enum SecurityFlag {
-  HIGH_RISK_USER = 'high_risk_user',
-  UNUSUAL_LOCATION = 'unusual_location',
-  SUSPICIOUS_TIMING = 'suspicious_timing',
-  MULTIPLE_REQUESTS = 'multiple_requests',
-  ESCALATED_PRIVILEGES = 'escalated_privileges'
+  HIGH_RISK_USER = "high_risk_user",
+  UNUSUAL_LOCATION = "unusual_location",
+  SUSPICIOUS_TIMING = "suspicious_timing",
+  MULTIPLE_REQUESTS = "multiple_requests",
+  ESCALATED_PRIVILEGES = "escalated_privileges",
 }
 
 // =============================================================================
@@ -318,28 +311,28 @@ export interface EmergencyBypassRequest {
  */
 export enum BypassPriority {
   /** Immediate system failure */
-  CRITICAL = 'critical',
+  CRITICAL = "critical",
 
   /** High business impact */
-  HIGH = 'high',
+  HIGH = "high",
 
   /** Medium business impact */
-  MEDIUM = 'medium',
+  MEDIUM = "medium",
 
   /** Low impact, maintenance */
-  LOW = 'low'
+  LOW = "low",
 }
 
 /**
  * Bypass request status
  */
 export enum BypassRequestStatus {
-  SUBMITTED = 'submitted',
-  UNDER_REVIEW = 'under_review',
-  APPROVED = 'approved',
-  DENIED = 'denied',
-  EXPIRED = 'expired',
-  WITHDRAWN = 'withdrawn'
+  SUBMITTED = "submitted",
+  UNDER_REVIEW = "under_review",
+  APPROVED = "approved",
+  DENIED = "denied",
+  EXPIRED = "expired",
+  WITHDRAWN = "withdrawn",
 }
 
 /**
@@ -369,32 +362,32 @@ export interface BypassRequestContext {
  * System health status
  */
 export enum SystemHealthStatus {
-  HEALTHY = 'healthy',
-  DEGRADED = 'degraded',
-  CRITICAL = 'critical',
-  DOWN = 'down'
+  HEALTHY = "healthy",
+  DEGRADED = "degraded",
+  CRITICAL = "critical",
+  DOWN = "down",
 }
 
 /**
  * Service status enumeration
  */
 export enum ServiceStatus {
-  OPERATIONAL = 'operational',
-  DEGRADED = 'degraded',
-  PARTIAL_OUTAGE = 'partial_outage',
-  MAJOR_OUTAGE = 'major_outage',
-  MAINTENANCE = 'maintenance'
+  OPERATIONAL = "operational",
+  DEGRADED = "degraded",
+  PARTIAL_OUTAGE = "partial_outage",
+  MAJOR_OUTAGE = "major_outage",
+  MAINTENANCE = "maintenance",
 }
 
 /**
  * Business impact levels
  */
 export enum BusinessImpactLevel {
-  NONE = 'none',
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  CRITICAL = 'critical'
+  NONE = "none",
+  LOW = "low",
+  MEDIUM = "medium",
+  HIGH = "high",
+  CRITICAL = "critical",
 }
 
 // =============================================================================
@@ -460,13 +453,12 @@ export interface ApprovalStep {
  * Approval step status
  */
 export enum ApprovalStepStatus {
-  PENDING = 'pending',
-  IN_PROGRESS = 'in_progress',
-  COMPLETED = 'completed',
-  TIMEOUT = 'timeout',
-  SKIPPED = 'skipped'
+  PENDING = "pending",
+  IN_PROGRESS = "in_progress",
+  COMPLETED = "completed",
+  TIMEOUT = "timeout",
+  SKIPPED = "skipped",
 }
-
 
 /**
  * Workflow metadata
@@ -512,20 +504,20 @@ export interface EscalationRule {
  * Escalation triggers
  */
 export enum EscalationTrigger {
-  TIMEOUT = 'timeout',
-  NO_RESPONSE = 'no_response',
-  DENIAL = 'denial',
-  HIGH_PRIORITY = 'high_priority'
+  TIMEOUT = "timeout",
+  NO_RESPONSE = "no_response",
+  DENIAL = "denial",
+  HIGH_PRIORITY = "high_priority",
 }
 
 /**
  * Escalation actions
  */
 export enum EscalationAction {
-  NOTIFY = 'notify',
-  REASSIGN = 'reassign',
-  AUTO_APPROVE = 'auto_approve',
-  ESCALATE_LEVEL = 'escalate_level'
+  NOTIFY = "notify",
+  REASSIGN = "reassign",
+  AUTO_APPROVE = "auto_approve",
+  ESCALATE_LEVEL = "escalate_level",
 }
 
 /**
@@ -549,23 +541,23 @@ export interface NotificationSetting {
  * Notification triggers
  */
 export enum NotificationTrigger {
-  REQUEST_SUBMITTED = 'request_submitted',
-  APPROVAL_REQUIRED = 'approval_required',
-  APPROVED = 'approved',
-  DENIED = 'denied',
-  TIMEOUT = 'timeout',
-  ESCALATED = 'escalated'
+  REQUEST_SUBMITTED = "request_submitted",
+  APPROVAL_REQUIRED = "approval_required",
+  APPROVED = "approved",
+  DENIED = "denied",
+  TIMEOUT = "timeout",
+  ESCALATED = "escalated",
 }
 
 /**
  * Notification methods
  */
 export enum NotificationMethod {
-  EMAIL = 'email',
-  SMS = 'sms',
-  SLACK = 'slack',
-  WEBHOOK = 'webhook',
-  IN_APP = 'in_app'
+  EMAIL = "email",
+  SMS = "sms",
+  SLACK = "slack",
+  WEBHOOK = "webhook",
+  IN_APP = "in_app",
 }
 
 // =============================================================================
@@ -705,13 +697,12 @@ export interface SecurityViolation {
  * Security violation types
  */
 export enum SecurityViolationType {
-  UNAUTHORIZED_ACCESS = 'unauthorized_access',
-  PRIVILEGE_ESCALATION = 'privilege_escalation',
-  SUSPICIOUS_PATTERN = 'suspicious_pattern',
-  POLICY_VIOLATION = 'policy_violation',
-  ANOMALOUS_BEHAVIOR = 'anomalous_behavior'
+  UNAUTHORIZED_ACCESS = "unauthorized_access",
+  PRIVILEGE_ESCALATION = "privilege_escalation",
+  SUSPICIOUS_PATTERN = "suspicious_pattern",
+  POLICY_VIOLATION = "policy_violation",
+  ANOMALOUS_BEHAVIOR = "anomalous_behavior",
 }
-
 
 /**
  * Fraud detection result
@@ -731,21 +722,21 @@ export interface FraudDetectionResult {
  * Fraud indicators
  */
 export enum FraudIndicator {
-  VELOCITY_ABUSE = 'velocity_abuse',
-  LOCATION_ANOMALY = 'location_anomaly',
-  DEVICE_SPOOFING = 'device_spoofing',
-  BEHAVIORAL_ANOMALY = 'behavioral_anomaly',
-  CREDENTIAL_STUFFING = 'credential_stuffing'
+  VELOCITY_ABUSE = "velocity_abuse",
+  LOCATION_ANOMALY = "location_anomaly",
+  DEVICE_SPOOFING = "device_spoofing",
+  BEHAVIORAL_ANOMALY = "behavioral_anomaly",
+  CREDENTIAL_STUFFING = "credential_stuffing",
 }
 
 /**
  * Fraud recommendations
  */
 export enum FraudRecommendation {
-  ALLOW = 'allow',
-  CHALLENGE = 'challenge',
-  BLOCK = 'block',
-  REVIEW = 'review'
+  ALLOW = "allow",
+  CHALLENGE = "challenge",
+  BLOCK = "block",
+  REVIEW = "review",
 }
 
 // =============================================================================
@@ -768,14 +759,16 @@ export const EmergencyBypassTokenSchema = z.object({
   maxOperations: z.number().positive(),
   operationsPerformed: z.number().min(0),
   status: z.nativeEnum(EmergencyTokenStatus),
-  approvals: z.array(z.object({
-    approverId: z.string(),
-    approverRole: z.nativeEnum(BypassRole),
-    approvedAt: z.date(),
-    decision: z.nativeEnum(ApprovalDecision),
-    reason: z.string(),
-    signature: z.string()
-  })),
+  approvals: z.array(
+    z.object({
+      approverId: z.string(),
+      approverRole: z.nativeEnum(BypassRole),
+      approvedAt: z.date(),
+      decision: z.nativeEnum(ApprovalDecision),
+      reason: z.string(),
+      signature: z.string(),
+    }),
+  ),
   reason: z.string().min(10),
   securityMetadata: z.object({
     requestedFromIp: z.string().ip(),
@@ -784,8 +777,8 @@ export const EmergencyBypassTokenSchema = z.object({
     riskScore: z.number().min(0).max(100),
     securityFlags: z.array(z.nativeEnum(SecurityFlag)),
     encryptionAlgorithm: z.string(),
-    tokenHash: z.string()
-  })
+    tokenHash: z.string(),
+  }),
 });
 
 /**
@@ -804,7 +797,7 @@ export const EmergencyBypassRequestSchema = z.object({
   requestedAuthLevel: z.nativeEnum(BypassAuthorizationLevel),
   durationMinutes: z.number().min(5).max(1440), // 5 minutes to 24 hours
   priority: z.nativeEnum(BypassPriority),
-  status: z.nativeEnum(BypassRequestStatus)
+  status: z.nativeEnum(BypassRequestStatus),
 });
 
 // =============================================================================

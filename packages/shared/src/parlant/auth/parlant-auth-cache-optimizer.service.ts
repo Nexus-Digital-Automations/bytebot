@@ -28,10 +28,15 @@
  * @created 2025-09-20
  */
 
-import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import { EventEmitter } from 'events';
-import { performance } from 'perf_hooks';
-import { ParlantContext } from './parlant-jwt-bridge.service';
+import {
+  Injectable,
+  Logger,
+  OnModuleInit,
+  OnModuleDestroy,
+} from "@nestjs/common";
+import { EventEmitter } from "events";
+import { performance } from "perf_hooks";
+import { ParlantContext } from "./parlant-jwt-bridge.service";
 
 /**
  * Cache configuration settings
@@ -103,8 +108,12 @@ export interface CacheEntry<T = any> {
   accessCount: number;
   volatilityScore: number; // Data volatility score (0-1)
   metadata: {
-    source: 'token_exchange' | 'session_data' | 'security_validation' | 'user_context';
-    priority: 'high' | 'medium' | 'low';
+    source:
+      | "token_exchange"
+      | "session_data"
+      | "security_validation"
+      | "user_context";
+    priority: "high" | "medium" | "low";
     dataSize: number; // Size in bytes
     compressionRatio?: number;
   };
@@ -157,7 +166,7 @@ export interface CacheOperationResult<T = any> {
   success: boolean;
   value?: T;
   hit: boolean; // Whether it was a cache hit
-  source: 'l1' | 'l2' | 'l3' | 'miss'; // Where the value was found
+  source: "l1" | "l2" | "l3" | "miss"; // Where the value was found
   latency: number; // Operation latency in milliseconds
   metadata?: {
     ttlRemaining: number; // TTL remaining in milliseconds
@@ -170,7 +179,7 @@ export interface CacheOperationResult<T = any> {
  * Cache invalidation strategy
  */
 export interface InvalidationStrategy {
-  type: 'ttl' | 'manual' | 'pattern' | 'dependency' | 'event';
+  type: "ttl" | "manual" | "pattern" | "dependency" | "event";
   pattern?: string; // Pattern for pattern-based invalidation
   dependencies?: string[]; // Dependencies for dependency-based invalidation
   eventTriggers?: string[]; // Events that trigger invalidation
@@ -181,25 +190,32 @@ export interface InvalidationStrategy {
  */
 export interface CacheOptimizationRecommendation {
   id: string;
-  type: 'ttl_adjustment' | 'memory_optimization' | 'warming_strategy' | 'eviction_policy';
-  priority: 'critical' | 'high' | 'medium' | 'low';
+  type:
+    | "ttl_adjustment"
+    | "memory_optimization"
+    | "warming_strategy"
+    | "eviction_policy";
+  priority: "critical" | "high" | "medium" | "low";
   description: string;
   expectedImprovement: string;
   currentMetric: number;
   targetMetric: number;
-  implementationComplexity: 'low' | 'medium' | 'high';
-  affectedLayers: Array<'l1' | 'l2' | 'l3'>;
+  implementationComplexity: "low" | "medium" | "high";
+  affectedLayers: Array<"l1" | "l2" | "l3">;
   implementation: {
     steps: string[];
     estimatedTime: string;
-    riskLevel: 'low' | 'medium' | 'high';
+    riskLevel: "low" | "medium" | "high";
   };
   validationCriteria: string[];
   timestamp: Date;
 }
 
 @Injectable()
-export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleInit, OnModuleDestroy {
+export class ParlantAuthCacheOptimizer
+  extends EventEmitter
+  implements OnModuleInit, OnModuleDestroy
+{
   private readonly logger = new Logger(ParlantAuthCacheOptimizer.name);
 
   // Configuration
@@ -212,12 +228,23 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
 
   // Performance tracking
   private readonly metrics: CacheMetrics;
-  private readonly operationHistory: Array<{ operation: string; latency: number; timestamp: Date }> = [];
-  private readonly optimizationRecommendations: CacheOptimizationRecommendation[] = [];
+  private readonly operationHistory: Array<{
+    operation: string;
+    latency: number;
+    timestamp: Date;
+  }> = [];
+  private readonly optimizationRecommendations: CacheOptimizationRecommendation[] =
+    [];
 
   // Adaptive TTL tracking
-  private readonly accessPatterns = new Map<string, Array<{ timestamp: Date; hit: boolean }>>();
-  private readonly volatilityTracking = new Map<string, Array<{ timestamp: Date; value: any }>>();
+  private readonly accessPatterns = new Map<
+    string,
+    Array<{ timestamp: Date; hit: boolean }>
+  >();
+  private readonly volatilityTracking = new Map<
+    string,
+    Array<{ timestamp: Date; value: any }>
+  >();
 
   // Monitoring intervals
   private metricsCollectionInterval?: NodeJS.Timeout;
@@ -235,7 +262,7 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
     this.config = this.createDefaultConfig(config);
     this.metrics = this.initializeMetrics();
 
-    this.logger.log('PARLANT Authentication Cache Optimizer initialized');
+    this.logger.log("PARLANT Authentication Cache Optimizer initialized");
   }
 
   async onModuleInit(): Promise<void> {
@@ -251,10 +278,13 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
   /**
    * Get value from cache with intelligent lookup across all layers
    */
-  async get<T = any>(key: string, options?: {
-    updateAccessPattern?: boolean;
-    preferredLayer?: 'l1' | 'l2' | 'l3';
-  }): Promise<CacheOperationResult<T>> {
+  async get<T = any>(
+    key: string,
+    options?: {
+      updateAccessPattern?: boolean;
+      preferredLayer?: "l1" | "l2" | "l3";
+    },
+  ): Promise<CacheOperationResult<T>> {
     const startTime = performance.now();
     const updateAccessPattern = options?.updateAccessPattern !== false;
 
@@ -263,7 +293,7 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
       const l1Result = await this.getFromL1<T>(key);
       if (l1Result.hit) {
         const latency = performance.now() - startTime;
-        this.recordOperation('get', latency, 'l1', true);
+        this.recordOperation("get", latency, "l1", true);
 
         if (updateAccessPattern) {
           this.updateAccessPattern(key, true);
@@ -273,7 +303,7 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
           success: true,
           value: l1Result.value,
           hit: true,
-          source: 'l1',
+          source: "l1",
           latency,
           metadata: l1Result.metadata,
         };
@@ -283,7 +313,7 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
       const l2Result = await this.getFromL2<T>(key);
       if (l2Result.hit) {
         const latency = performance.now() - startTime;
-        this.recordOperation('get', latency, 'l2', true);
+        this.recordOperation("get", latency, "l2", true);
 
         // Promote to L1 for faster future access
         await this.promoteToL1(key, l2Result.value as T, l2Result.metadata);
@@ -296,7 +326,7 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
           success: true,
           value: l2Result.value,
           hit: true,
-          source: 'l2',
+          source: "l2",
           latency,
           metadata: l2Result.metadata,
         };
@@ -306,7 +336,7 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
       const l3Result = await this.getFromL3<T>(key);
       if (l3Result.hit) {
         const latency = performance.now() - startTime;
-        this.recordOperation('get', latency, 'l3', true);
+        this.recordOperation("get", latency, "l3", true);
 
         // Promote to L2 and L1 for faster future access
         await this.promoteToL2(key, l3Result.value as T, l3Result.metadata);
@@ -320,7 +350,7 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
           success: true,
           value: l3Result.value,
           hit: true,
-          source: 'l3',
+          source: "l3",
           latency,
           metadata: l3Result.metadata,
         };
@@ -328,7 +358,7 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
 
       // Cache miss
       const latency = performance.now() - startTime;
-      this.recordOperation('get', latency, 'miss', false);
+      this.recordOperation("get", latency, "miss", false);
 
       if (updateAccessPattern) {
         this.updateAccessPattern(key, false);
@@ -337,10 +367,9 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
       return {
         success: false,
         hit: false,
-        source: 'miss',
+        source: "miss",
         latency,
       };
-
     } catch (error) {
       const latency = performance.now() - startTime;
       this.logger.error(`Cache get operation failed for key ${key}:`, error);
@@ -348,7 +377,7 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
       return {
         success: false,
         hit: false,
-        source: 'miss',
+        source: "miss",
         latency,
       };
     }
@@ -362,20 +391,24 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
     value: T,
     options?: {
       ttl?: number;
-      priority?: 'high' | 'medium' | 'low';
-      source?: 'token_exchange' | 'session_data' | 'security_validation' | 'user_context';
+      priority?: "high" | "medium" | "low";
+      source?:
+        | "token_exchange"
+        | "session_data"
+        | "security_validation"
+        | "user_context";
       skipL1?: boolean;
       skipL2?: boolean;
       skipL3?: boolean;
-    }
+    },
   ): Promise<CacheOperationResult> {
     const startTime = performance.now();
 
     try {
       // Calculate adaptive TTL if not provided
-      const ttl = options?.ttl || await this.calculateAdaptiveTtl(key, value);
-      const priority = options?.priority || 'medium';
-      const source = options?.source || 'token_exchange';
+      const ttl = options?.ttl || (await this.calculateAdaptiveTtl(key, value));
+      const priority = options?.priority || "medium";
+      const source = options?.source || "token_exchange";
 
       // Calculate data size for memory management
       const dataSize = this.calculateDataSize(value);
@@ -418,12 +451,12 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
       this.updateVolatilityTracking(key, value);
 
       const latency = performance.now() - startTime;
-      this.recordOperation('set', latency, 'all', true);
+      this.recordOperation("set", latency, "all", true);
 
       return {
         success: true,
         hit: false, // Set operations are not cache hits
-        source: 'l1', // Primary source for new entries
+        source: "l1", // Primary source for new entries
         latency,
         metadata: {
           ttlRemaining: ttl,
@@ -431,7 +464,6 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
           volatilityScore: entry.volatilityScore,
         },
       };
-
     } catch (error) {
       const latency = performance.now() - startTime;
       this.logger.error(`Cache set operation failed for key ${key}:`, error);
@@ -439,7 +471,7 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
       return {
         success: false,
         hit: false,
-        source: 'miss',
+        source: "miss",
         latency,
       };
     }
@@ -466,15 +498,14 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
       this.volatilityTracking.delete(key);
 
       const latency = performance.now() - startTime;
-      this.recordOperation('delete', latency, 'all', true);
+      this.recordOperation("delete", latency, "all", true);
 
       return {
         success: true,
         hit: false,
-        source: 'l1',
+        source: "l1",
         latency,
       };
-
     } catch (error) {
       const latency = performance.now() - startTime;
       this.logger.error(`Cache delete operation failed for key ${key}:`, error);
@@ -482,7 +513,7 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
       return {
         success: false,
         hit: false,
-        source: 'miss',
+        source: "miss",
         latency,
       };
     }
@@ -500,43 +531,46 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
 
     try {
       switch (strategy.type) {
-        case 'pattern':
+        case "pattern":
           if (strategy.pattern) {
             invalidatedCount = await this.invalidateByPattern(strategy.pattern);
           }
           break;
 
-        case 'dependency':
+        case "dependency":
           if (strategy.dependencies) {
-            invalidatedCount = await this.invalidateByDependencies(strategy.dependencies);
+            invalidatedCount = await this.invalidateByDependencies(
+              strategy.dependencies,
+            );
           }
           break;
 
-        case 'event':
+        case "event":
           if (strategy.eventTriggers) {
-            invalidatedCount = await this.invalidateByEvents(strategy.eventTriggers);
+            invalidatedCount = await this.invalidateByEvents(
+              strategy.eventTriggers,
+            );
           }
           break;
 
-        case 'manual':
+        case "manual":
           // Manual invalidation would be handled by specific delete operations
           break;
 
-        case 'ttl':
+        case "ttl":
           invalidatedCount = await this.invalidateExpiredEntries();
           break;
       }
 
       const latency = performance.now() - startTime;
-      this.recordOperation('invalidate', latency, 'all', true);
+      this.recordOperation("invalidate", latency, "all", true);
 
-      this.emit('cache.invalidated', { strategy, invalidatedCount, latency });
+      this.emit("cache.invalidated", { strategy, invalidatedCount, latency });
 
       return { invalidatedCount, latency };
-
     } catch (error) {
       const latency = performance.now() - startTime;
-      this.logger.error('Cache invalidation failed:', error);
+      this.logger.error("Cache invalidation failed:", error);
       return { invalidatedCount: 0, latency };
     }
   }
@@ -567,7 +601,9 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
         const batchPromises = batch.map(async (key) => {
           try {
             // Check if already cached
-            const existing = await this.get(key, { updateAccessPattern: false });
+            const existing = await this.get(key, {
+              updateAccessPattern: false,
+            });
             if (existing.hit) {
               skippedCount++;
               return;
@@ -576,7 +612,7 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
             // Generate warm data (in production, this would fetch from authoritative source)
             const warmData = await this.generateWarmData(key);
             if (warmData) {
-              await this.set(key, warmData, { priority: 'medium' });
+              await this.set(key, warmData, { priority: "medium" });
               warmedCount++;
             }
           } catch (error) {
@@ -589,21 +625,22 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
 
         // Small delay between batches
         if (i + batchSize < keysToWarm.length) {
-          await new Promise(resolve => setTimeout(resolve, 50));
+          await new Promise((resolve) => setTimeout(resolve, 50));
         }
       }
 
       const latency = performance.now() - startTime;
-      this.recordOperation('warm', latency, 'all', true);
+      this.recordOperation("warm", latency, "all", true);
 
-      this.emit('cache.warmed', { warmedCount, skippedCount, latency });
-      this.logger.log(`✅ Cache warming completed: ${warmedCount} warmed, ${skippedCount} skipped`);
+      this.emit("cache.warmed", { warmedCount, skippedCount, latency });
+      this.logger.log(
+        `✅ Cache warming completed: ${warmedCount} warmed, ${skippedCount} skipped`,
+      );
 
       return { warmedCount, skippedCount, latency };
-
     } catch (error) {
       const latency = performance.now() - startTime;
-      this.logger.error('Cache warming failed:', error);
+      this.logger.error("Cache warming failed:", error);
       return { warmedCount: 0, skippedCount: 0, latency };
     }
   }
@@ -634,7 +671,7 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
     overview: {
       overallHealthScore: number;
       primaryConcerns: string[];
-      performanceGrade: 'A' | 'B' | 'C' | 'D' | 'F';
+      performanceGrade: "A" | "B" | "C" | "D" | "F";
     };
     metrics: CacheMetrics;
     layerAnalysis: {
@@ -644,9 +681,9 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
     };
     recommendations: CacheOptimizationRecommendation[];
     trends: {
-      hitRateTrend: 'improving' | 'stable' | 'degrading';
-      latencyTrend: 'improving' | 'stable' | 'degrading';
-      memoryTrend: 'improving' | 'stable' | 'degrading';
+      hitRateTrend: "improving" | "stable" | "degrading";
+      latencyTrend: "improving" | "stable" | "degrading";
+      memoryTrend: "improving" | "stable" | "degrading";
     };
   } {
     const metrics = this.getCacheMetrics();
@@ -656,12 +693,12 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
     const healthScore = this.calculateHealthScore(metrics);
 
     // Determine performance grade
-    let performanceGrade: 'A' | 'B' | 'C' | 'D' | 'F';
-    if (healthScore >= 90) performanceGrade = 'A';
-    else if (healthScore >= 80) performanceGrade = 'B';
-    else if (healthScore >= 70) performanceGrade = 'C';
-    else if (healthScore >= 60) performanceGrade = 'D';
-    else performanceGrade = 'F';
+    let performanceGrade: "A" | "B" | "C" | "D" | "F";
+    if (healthScore >= 90) performanceGrade = "A";
+    else if (healthScore >= 80) performanceGrade = "B";
+    else if (healthScore >= 70) performanceGrade = "C";
+    else if (healthScore >= 60) performanceGrade = "D";
+    else performanceGrade = "F";
 
     // Identify primary concerns
     const primaryConcerns = this.identifyPrimaryConcerns(metrics);
@@ -690,7 +727,9 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
   /**
    * Create default configuration
    */
-  private createDefaultConfig(overrides?: Partial<CacheOptimizerConfig>): CacheOptimizerConfig {
+  private createDefaultConfig(
+    overrides?: Partial<CacheOptimizerConfig>,
+  ): CacheOptimizerConfig {
     const defaultConfig: CacheOptimizerConfig = {
       l1Cache: {
         maxSize: 10000,
@@ -699,7 +738,7 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
         cleanupInterval: 60 * 1000, // 1 minute
       },
       l2Cache: {
-        host: 'localhost',
+        host: "localhost",
         port: 6379,
         defaultTtl: 30 * 60 * 1000, // 30 minutes
         maxConnections: 100,
@@ -707,7 +746,7 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
         commandTimeout: 3000,
       },
       l3Cache: {
-        tableName: 'parlant_auth_cache',
+        tableName: "parlant_auth_cache",
         defaultTtl: 2 * 60 * 60 * 1000, // 2 hours
         cleanupInterval: 10 * 60 * 1000, // 10 minutes
         maxEntries: 100000,
@@ -721,7 +760,7 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
       },
       cacheWarming: {
         enabled: true,
-        warmupSchedule: '0 */6 * * *', // Every 6 hours
+        warmupSchedule: "0 */6 * * *", // Every 6 hours
         preloadThreshold: 0.8, // Preload when hit rate drops below 80%
         warmupBatchSize: 100,
       },
@@ -773,7 +812,7 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
    * Initialize cache layers
    */
   private async initializeCacheLayers(): Promise<void> {
-    this.logger.log('🔧 Initializing cache layers...');
+    this.logger.log("🔧 Initializing cache layers...");
 
     try {
       // Initialize L2 Redis cache (mock implementation)
@@ -792,9 +831,9 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
         exists: async (key: string) => false,
       };
 
-      this.logger.log('✅ Cache layers initialized successfully');
+      this.logger.log("✅ Cache layers initialized successfully");
     } catch (error) {
-      this.logger.error('❌ Failed to initialize cache layers:', error);
+      this.logger.error("❌ Failed to initialize cache layers:", error);
       throw error;
     }
   }
@@ -804,49 +843,49 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
    */
   private async startOptimization(): Promise<void> {
     if (this.isOptimizing) {
-      this.logger.warn('Cache optimization is already running');
+      this.logger.warn("Cache optimization is already running");
       return;
     }
 
-    this.logger.log('🚀 Starting cache optimization processes');
+    this.logger.log("🚀 Starting cache optimization processes");
 
     // Start metrics collection
     this.metricsCollectionInterval = setInterval(
       () => this.collectMetrics(),
-      this.config.monitoring.metricsCollectionInterval
+      this.config.monitoring.metricsCollectionInterval,
     );
 
     // Start cleanup processes
     this.cleanupInterval = setInterval(
       () => this.cleanupExpiredEntries(),
-      this.config.l1Cache.cleanupInterval
+      this.config.l1Cache.cleanupInterval,
     );
 
     // Start optimization analysis
     this.optimizationAnalysisInterval = setInterval(
       () => this.analyzeOptimizationOpportunities(),
-      5 * 60 * 1000 // Every 5 minutes
+      5 * 60 * 1000, // Every 5 minutes
     );
 
     // Start cache warming if enabled
     if (this.config.cacheWarming.enabled) {
       this.cacheWarmingInterval = setInterval(
         () => this.scheduledCacheWarming(),
-        60 * 60 * 1000 // Every hour
+        60 * 60 * 1000, // Every hour
       );
     }
 
     this.isOptimizing = true;
-    this.emit('optimization.started');
+    this.emit("optimization.started");
 
-    this.logger.log('✅ Cache optimization started successfully');
+    this.logger.log("✅ Cache optimization started successfully");
   }
 
   /**
    * Stop cache optimization processes
    */
   private async stopOptimization(): Promise<void> {
-    this.logger.log('🛑 Stopping cache optimization processes');
+    this.logger.log("🛑 Stopping cache optimization processes");
 
     // Clear all intervals
     if (this.metricsCollectionInterval) {
@@ -870,16 +909,16 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
     }
 
     this.isOptimizing = false;
-    this.emit('optimization.stopped');
+    this.emit("optimization.stopped");
 
-    this.logger.log('✅ Cache optimization stopped successfully');
+    this.logger.log("✅ Cache optimization stopped successfully");
   }
 
   /**
    * Shutdown cache layers
    */
   private async shutdownCacheLayers(): Promise<void> {
-    this.logger.log('🔧 Shutting down cache layers...');
+    this.logger.log("🔧 Shutting down cache layers...");
 
     try {
       // Close L2 Redis connections
@@ -895,9 +934,9 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
       // Clear L1 cache
       this.l1Cache.clear();
 
-      this.logger.log('✅ Cache layers shut down successfully');
+      this.logger.log("✅ Cache layers shut down successfully");
     } catch (error) {
-      this.logger.error('❌ Failed to shutdown cache layers:', error);
+      this.logger.error("❌ Failed to shutdown cache layers:", error);
     }
   }
 
@@ -906,7 +945,7 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
     const entry = this.l1Cache.get(key);
 
     if (!entry) {
-      return { success: false, hit: false, source: 'l1', latency: 0 };
+      return { success: false, hit: false, source: "l1", latency: 0 };
     }
 
     // Check if expired
@@ -915,7 +954,7 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
 
     if (now > expiryTime) {
       this.l1Cache.delete(key);
-      return { success: false, hit: false, source: 'l1', latency: 0 };
+      return { success: false, hit: false, source: "l1", latency: 0 };
     }
 
     // Update access information
@@ -925,7 +964,7 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
     return {
       success: true,
       hit: true,
-      source: 'l1',
+      source: "l1",
       latency: 1, // Very fast for memory
       value: entry.value as T,
       metadata: {
@@ -969,7 +1008,7 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
   // L2 Cache operations (Redis) - Mock implementations
   private async getFromL2<T>(key: string): Promise<CacheOperationResult<T>> {
     // Mock L2 cache implementation
-    return { success: false, hit: false, source: 'l2', latency: 20 };
+    return { success: false, hit: false, source: "l2", latency: 20 };
   }
 
   private async setInL2<T>(entry: CacheEntry<T>): Promise<void> {
@@ -983,7 +1022,7 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
   // L3 Cache operations (Database) - Mock implementations
   private async getFromL3<T>(key: string): Promise<CacheOperationResult<T>> {
     // Mock L3 cache implementation
-    return { success: false, hit: false, source: 'l3', latency: 50 };
+    return { success: false, hit: false, source: "l3", latency: 50 };
   }
 
   private async setInL3<T>(entry: CacheEntry<T>): Promise<void> {
@@ -995,7 +1034,11 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
   }
 
   // Promotion methods
-  private async promoteToL1<T>(key: string, value: T, metadata?: any): Promise<void> {
+  private async promoteToL1<T>(
+    key: string,
+    value: T,
+    metadata?: any,
+  ): Promise<void> {
     const entry: CacheEntry<T> = {
       key,
       value,
@@ -1005,8 +1048,8 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
       accessCount: 1,
       volatilityScore: 0.5,
       metadata: metadata || {
-        source: 'token_exchange',
-        priority: 'medium',
+        source: "token_exchange",
+        priority: "medium",
         dataSize: this.calculateDataSize(value),
       },
     };
@@ -1014,7 +1057,11 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
     await this.setInL1(entry);
   }
 
-  private async promoteToL2<T>(key: string, value: T, metadata?: any): Promise<void> {
+  private async promoteToL2<T>(
+    key: string,
+    value: T,
+    metadata?: any,
+  ): Promise<void> {
     const entry: CacheEntry<T> = {
       key,
       value,
@@ -1024,8 +1071,8 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
       accessCount: 1,
       volatilityScore: 0.5,
       metadata: metadata || {
-        source: 'token_exchange',
-        priority: 'medium',
+        source: "token_exchange",
+        priority: "medium",
         dataSize: this.calculateDataSize(value),
       },
     };
@@ -1054,7 +1101,10 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
     // Calculate how often the value changes
     let changes = 0;
     for (let i = 1; i < history.length; i++) {
-      if (JSON.stringify(history[i].value) !== JSON.stringify(history[i - 1].value)) {
+      if (
+        JSON.stringify(history[i].value) !==
+        JSON.stringify(history[i - 1].value)
+      ) {
         changes++;
       }
     }
@@ -1079,8 +1129,8 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
       this.config.adaptiveTtl.minTtl,
       Math.min(
         this.config.adaptiveTtl.maxTtl,
-        baseTtl * volatilityFactor * accessFactor
-      )
+        baseTtl * volatilityFactor * accessFactor,
+      ),
     );
 
     return adaptiveTtl;
@@ -1091,8 +1141,10 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
     patterns.push({ timestamp: new Date(), hit });
 
     // Keep only recent patterns
-    const cutoff = new Date(Date.now() - this.config.adaptiveTtl.accessPatternAnalysisWindow);
-    const recentPatterns = patterns.filter(p => p.timestamp >= cutoff);
+    const cutoff = new Date(
+      Date.now() - this.config.adaptiveTtl.accessPatternAnalysisWindow,
+    );
+    const recentPatterns = patterns.filter((p) => p.timestamp >= cutoff);
 
     this.accessPatterns.set(key, recentPatterns);
   }
@@ -1103,7 +1155,7 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
 
     // Keep only recent tracking data
     const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000); // 24 hours
-    const recentTracking = tracking.filter(t => t.timestamp >= cutoff);
+    const recentTracking = tracking.filter((t) => t.timestamp >= cutoff);
 
     this.volatilityTracking.set(key, recentTracking);
   }
@@ -1112,10 +1164,10 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
     operation: string,
     latency: number,
     source: string,
-    success: boolean
+    success: boolean,
   ): void {
     this.operationHistory.push({
-      operation: `${operation}_${source}_${success ? 'success' : 'failure'}`,
+      operation: `${operation}_${source}_${success ? "success" : "failure"}`,
       latency,
       timestamp: new Date(),
     });
@@ -1141,7 +1193,7 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
     const recentOps = this.operationHistory.slice(-1000); // Last 1000 operations
     this.updateMetricsFromOperations(recentOps);
 
-    this.emit('metrics.updated', this.metrics);
+    this.emit("metrics.updated", this.metrics);
   }
 
   private calculateL1MemoryUsage(): number {
@@ -1152,25 +1204,38 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
     return totalSize / 1024 / 1024; // Convert to MB
   }
 
-  private updateMetricsFromOperations(operations: typeof this.operationHistory): void {
+  private updateMetricsFromOperations(
+    operations: typeof this.operationHistory,
+  ): void {
     if (operations.length === 0) return;
 
-    const getOps = operations.filter(op => op.operation.startsWith('get'));
-    const hits = getOps.filter(op => op.operation.includes('success') && !op.operation.includes('miss'));
+    const getOps = operations.filter((op) => op.operation.startsWith("get"));
+    const hits = getOps.filter(
+      (op) =>
+        op.operation.includes("success") && !op.operation.includes("miss"),
+    );
 
     this.metrics.hitRate = getOps.length > 0 ? hits.length / getOps.length : 0;
     this.metrics.missRate = 1 - this.metrics.hitRate;
 
     // Calculate average latencies
-    const allLatencies = operations.map(op => op.latency);
-    this.metrics.averageLatency = allLatencies.reduce((sum, lat) => sum + lat, 0) / allLatencies.length;
+    const allLatencies = operations.map((op) => op.latency);
+    this.metrics.averageLatency =
+      allLatencies.reduce((sum, lat) => sum + lat, 0) / allLatencies.length;
 
     // Calculate operations per second
-    const timeSpan = (operations[operations.length - 1].timestamp.getTime() - operations[0].timestamp.getTime()) / 1000;
+    const timeSpan =
+      (operations[operations.length - 1].timestamp.getTime() -
+        operations[0].timestamp.getTime()) /
+      1000;
     if (timeSpan > 0) {
       this.metrics.getsPerSecond = getOps.length / timeSpan;
-      this.metrics.setsPerSecond = operations.filter(op => op.operation.startsWith('set')).length / timeSpan;
-      this.metrics.deletesPerSecond = operations.filter(op => op.operation.startsWith('delete')).length / timeSpan;
+      this.metrics.setsPerSecond =
+        operations.filter((op) => op.operation.startsWith("set")).length /
+        timeSpan;
+      this.metrics.deletesPerSecond =
+        operations.filter((op) => op.operation.startsWith("delete")).length /
+        timeSpan;
     }
 
     // Calculate cache efficiency
@@ -1179,8 +1244,12 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
 
   private calculateCacheEfficiency(): number {
     const hitRateScore = this.metrics.hitRate * 40; // 40% weight
-    const latencyScore = Math.max(0, 40 - (this.metrics.averageLatency / 10)) * 30; // 30% weight
-    const memoryScore = Math.max(0, 30 - (this.metrics.l1MemoryUsage / this.config.l1Cache.maxMemoryMB * 30)); // 30% weight
+    const latencyScore =
+      Math.max(0, 40 - this.metrics.averageLatency / 10) * 30; // 30% weight
+    const memoryScore = Math.max(
+      0,
+      30 - (this.metrics.l1MemoryUsage / this.config.l1Cache.maxMemoryMB) * 30,
+    ); // 30% weight
 
     return hitRateScore + latencyScore + memoryScore;
   }
@@ -1219,7 +1288,9 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
     return invalidatedCount;
   }
 
-  private async invalidateByDependencies(dependencies: string[]): Promise<number> {
+  private async invalidateByDependencies(
+    dependencies: string[],
+  ): Promise<number> {
     // Mock implementation for dependency-based invalidation
     return 0;
   }
@@ -1234,11 +1305,12 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
     const candidates: string[] = [];
 
     for (const [key, pattern] of this.accessPatterns.entries()) {
-      const recentAccesses = pattern.filter(p =>
-        p.timestamp.getTime() > Date.now() - 24 * 60 * 60 * 1000 // Last 24 hours
+      const recentAccesses = pattern.filter(
+        (p) => p.timestamp.getTime() > Date.now() - 24 * 60 * 60 * 1000, // Last 24 hours
       );
 
-      if (recentAccesses.length > 10) { // Frequently accessed
+      if (recentAccesses.length > 10) {
+        // Frequently accessed
         candidates.push(key);
       }
     }
@@ -1259,46 +1331,57 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
     const metrics = this.getCacheMetrics();
 
     // Analyze hit rate optimization opportunities
-    if (metrics.hitRate < this.config.monitoring.alertThresholds.hitRateThreshold) {
+    if (
+      metrics.hitRate < this.config.monitoring.alertThresholds.hitRateThreshold
+    ) {
       this.generateHitRateOptimizationRecommendation(metrics);
     }
 
     // Analyze latency optimization opportunities
-    if (metrics.averageLatency > this.config.monitoring.alertThresholds.latencyThreshold) {
+    if (
+      metrics.averageLatency >
+      this.config.monitoring.alertThresholds.latencyThreshold
+    ) {
       this.generateLatencyOptimizationRecommendation(metrics);
     }
 
     // Analyze memory optimization opportunities
-    if (metrics.l1MemoryUsage > this.config.monitoring.alertThresholds.memoryThreshold) {
+    if (
+      metrics.l1MemoryUsage >
+      this.config.monitoring.alertThresholds.memoryThreshold
+    ) {
       this.generateMemoryOptimizationRecommendation(metrics);
     }
   }
 
-  private generateHitRateOptimizationRecommendation(metrics: CacheMetrics): void {
+  private generateHitRateOptimizationRecommendation(
+    metrics: CacheMetrics,
+  ): void {
     const recommendation: CacheOptimizationRecommendation = {
       id: `hit_rate_opt_${Date.now()}`,
-      type: 'warming_strategy',
-      priority: 'high',
-      description: 'Low cache hit rate detected - implement proactive cache warming',
+      type: "warming_strategy",
+      priority: "high",
+      description:
+        "Low cache hit rate detected - implement proactive cache warming",
       expectedImprovement: `Increase hit rate from ${(metrics.hitRate * 100).toFixed(1)}% to 85%+`,
       currentMetric: metrics.hitRate * 100,
       targetMetric: 85,
-      implementationComplexity: 'medium',
-      affectedLayers: ['l1', 'l2'],
+      implementationComplexity: "medium",
+      affectedLayers: ["l1", "l2"],
       implementation: {
         steps: [
-          'Analyze access patterns for frequently requested data',
-          'Implement predictive cache warming based on usage patterns',
-          'Increase cache warming frequency during peak hours',
-          'Monitor hit rate improvements',
+          "Analyze access patterns for frequently requested data",
+          "Implement predictive cache warming based on usage patterns",
+          "Increase cache warming frequency during peak hours",
+          "Monitor hit rate improvements",
         ],
-        estimatedTime: '2-3 days',
-        riskLevel: 'low',
+        estimatedTime: "2-3 days",
+        riskLevel: "low",
       },
       validationCriteria: [
-        'Hit rate increased to >85%',
-        'No degradation in cache latency',
-        'Memory usage remains within limits',
+        "Hit rate increased to >85%",
+        "No degradation in cache latency",
+        "Memory usage remains within limits",
       ],
       timestamp: new Date(),
     };
@@ -1306,31 +1389,34 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
     this.addOptimizationRecommendation(recommendation);
   }
 
-  private generateLatencyOptimizationRecommendation(metrics: CacheMetrics): void {
+  private generateLatencyOptimizationRecommendation(
+    metrics: CacheMetrics,
+  ): void {
     const recommendation: CacheOptimizationRecommendation = {
       id: `latency_opt_${Date.now()}`,
-      type: 'memory_optimization',
-      priority: 'medium',
-      description: 'Cache latency exceeds target - optimize data structures and access patterns',
+      type: "memory_optimization",
+      priority: "medium",
+      description:
+        "Cache latency exceeds target - optimize data structures and access patterns",
       expectedImprovement: `Reduce latency from ${metrics.averageLatency.toFixed(1)}ms to <50ms`,
       currentMetric: metrics.averageLatency,
       targetMetric: 50,
-      implementationComplexity: 'high',
-      affectedLayers: ['l1'],
+      implementationComplexity: "high",
+      affectedLayers: ["l1"],
       implementation: {
         steps: [
-          'Profile cache access patterns and bottlenecks',
-          'Optimize data serialization and compression',
-          'Implement more efficient data structures',
-          'Reduce cache entry metadata overhead',
+          "Profile cache access patterns and bottlenecks",
+          "Optimize data serialization and compression",
+          "Implement more efficient data structures",
+          "Reduce cache entry metadata overhead",
         ],
-        estimatedTime: '1-2 weeks',
-        riskLevel: 'medium',
+        estimatedTime: "1-2 weeks",
+        riskLevel: "medium",
       },
       validationCriteria: [
-        'Average latency reduced to <50ms',
-        'P95 latency remains <100ms',
-        'Hit rate not negatively affected',
+        "Average latency reduced to <50ms",
+        "P95 latency remains <100ms",
+        "Hit rate not negatively affected",
       ],
       timestamp: new Date(),
     };
@@ -1338,31 +1424,34 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
     this.addOptimizationRecommendation(recommendation);
   }
 
-  private generateMemoryOptimizationRecommendation(metrics: CacheMetrics): void {
+  private generateMemoryOptimizationRecommendation(
+    metrics: CacheMetrics,
+  ): void {
     const recommendation: CacheOptimizationRecommendation = {
       id: `memory_opt_${Date.now()}`,
-      type: 'memory_optimization',
-      priority: 'high',
-      description: 'Memory usage exceeds threshold - implement compression and efficient eviction',
+      type: "memory_optimization",
+      priority: "high",
+      description:
+        "Memory usage exceeds threshold - implement compression and efficient eviction",
       expectedImprovement: `Reduce memory usage from ${metrics.l1MemoryUsage.toFixed(1)}MB to <150MB`,
       currentMetric: metrics.l1MemoryUsage,
       targetMetric: 150,
-      implementationComplexity: 'medium',
-      affectedLayers: ['l1'],
+      implementationComplexity: "medium",
+      affectedLayers: ["l1"],
       implementation: {
         steps: [
-          'Implement data compression for large cache entries',
-          'Optimize eviction policy to prioritize memory efficiency',
-          'Add memory pressure monitoring and automatic cleanup',
-          'Implement cache entry size limits',
+          "Implement data compression for large cache entries",
+          "Optimize eviction policy to prioritize memory efficiency",
+          "Add memory pressure monitoring and automatic cleanup",
+          "Implement cache entry size limits",
         ],
-        estimatedTime: '3-5 days',
-        riskLevel: 'low',
+        estimatedTime: "3-5 days",
+        riskLevel: "low",
       },
       validationCriteria: [
-        'Memory usage reduced to <150MB',
-        'Compression ratio >70%',
-        'Hit rate maintained or improved',
+        "Memory usage reduced to <150MB",
+        "Compression ratio >70%",
+        "Hit rate maintained or improved",
       ],
       timestamp: new Date(),
     };
@@ -1370,22 +1459,27 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
     this.addOptimizationRecommendation(recommendation);
   }
 
-  private addOptimizationRecommendation(recommendation: CacheOptimizationRecommendation): void {
+  private addOptimizationRecommendation(
+    recommendation: CacheOptimizationRecommendation,
+  ): void {
     // Check for duplicates
     const exists = this.optimizationRecommendations.some(
-      existing => existing.type === recommendation.type &&
-                 existing.description === recommendation.description
+      (existing) =>
+        existing.type === recommendation.type &&
+        existing.description === recommendation.description,
     );
 
     if (!exists) {
       this.optimizationRecommendations.push(recommendation);
-      this.emit('optimization.recommendation', recommendation);
+      this.emit("optimization.recommendation", recommendation);
 
       // Cleanup old recommendations
       const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
       this.optimizationRecommendations.splice(
         0,
-        this.optimizationRecommendations.findIndex(rec => rec.timestamp >= oneWeekAgo)
+        this.optimizationRecommendations.findIndex(
+          (rec) => rec.timestamp >= oneWeekAgo,
+        ),
       );
     }
   }
@@ -1395,40 +1489,56 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
       const currentHitRate = this.metrics.hitRate;
 
       if (currentHitRate < this.config.cacheWarming.preloadThreshold) {
-        this.logger.log(`🔥 Triggering cache warming (hit rate: ${(currentHitRate * 100).toFixed(1)}%)`);
+        this.logger.log(
+          `🔥 Triggering cache warming (hit rate: ${(currentHitRate * 100).toFixed(1)}%)`,
+        );
         await this.warmCache();
       }
     } catch (error) {
-      this.logger.error('Scheduled cache warming failed:', error);
+      this.logger.error("Scheduled cache warming failed:", error);
     }
   }
 
   private calculateHealthScore(metrics: CacheMetrics): number {
     const hitRateScore = Math.min(metrics.hitRate / 0.85, 1) * 40; // 40% weight, target 85%
-    const latencyScore = Math.max(0, 1 - (metrics.averageLatency / 100)) * 30; // 30% weight, target <100ms
-    const memoryScore = Math.max(0, 1 - (metrics.l1MemoryUsage / this.config.l1Cache.maxMemoryMB)) * 20; // 20% weight
+    const latencyScore = Math.max(0, 1 - metrics.averageLatency / 100) * 30; // 30% weight, target <100ms
+    const memoryScore =
+      Math.max(0, 1 - metrics.l1MemoryUsage / this.config.l1Cache.maxMemoryMB) *
+      20; // 20% weight
     const efficiencyScore = (metrics.cacheEfficiency / 100) * 10; // 10% weight
 
-    return (hitRateScore + latencyScore + memoryScore + efficiencyScore);
+    return hitRateScore + latencyScore + memoryScore + efficiencyScore;
   }
 
   private identifyPrimaryConcerns(metrics: CacheMetrics): string[] {
     const concerns: string[] = [];
 
-    if (metrics.hitRate < this.config.monitoring.alertThresholds.hitRateThreshold) {
-      concerns.push(`Low cache hit rate: ${(metrics.hitRate * 100).toFixed(1)}%`);
+    if (
+      metrics.hitRate < this.config.monitoring.alertThresholds.hitRateThreshold
+    ) {
+      concerns.push(
+        `Low cache hit rate: ${(metrics.hitRate * 100).toFixed(1)}%`,
+      );
     }
 
-    if (metrics.averageLatency > this.config.monitoring.alertThresholds.latencyThreshold) {
-      concerns.push(`High average latency: ${metrics.averageLatency.toFixed(1)}ms`);
+    if (
+      metrics.averageLatency >
+      this.config.monitoring.alertThresholds.latencyThreshold
+    ) {
+      concerns.push(
+        `High average latency: ${metrics.averageLatency.toFixed(1)}ms`,
+      );
     }
 
-    if (metrics.l1MemoryUsage > this.config.monitoring.alertThresholds.memoryThreshold) {
+    if (
+      metrics.l1MemoryUsage >
+      this.config.monitoring.alertThresholds.memoryThreshold
+    ) {
       concerns.push(`High memory usage: ${metrics.l1MemoryUsage.toFixed(1)}MB`);
     }
 
     if (concerns.length === 0) {
-      concerns.push('No critical issues detected');
+      concerns.push("No critical issues detected");
     }
 
     return concerns;
@@ -1442,7 +1552,10 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
     return {
       l1: {
         efficiency: metrics.l1HitRate * 100,
-        issues: metrics.l1MemoryUsage > this.config.l1Cache.maxMemoryMB * 0.8 ? ['High memory usage'] : [],
+        issues:
+          metrics.l1MemoryUsage > this.config.l1Cache.maxMemoryMB * 0.8
+            ? ["High memory usage"]
+            : [],
       },
       l2: {
         efficiency: metrics.l2HitRate * 100,
@@ -1456,15 +1569,15 @@ export class ParlantAuthCacheOptimizer extends EventEmitter implements OnModuleI
   }
 
   private analyzeCacheTrends(): {
-    hitRateTrend: 'improving' | 'stable' | 'degrading';
-    latencyTrend: 'improving' | 'stable' | 'degrading';
-    memoryTrend: 'improving' | 'stable' | 'degrading';
+    hitRateTrend: "improving" | "stable" | "degrading";
+    latencyTrend: "improving" | "stable" | "degrading";
+    memoryTrend: "improving" | "stable" | "degrading";
   } {
     // Simplified trend analysis - would implement more sophisticated analysis in production
     return {
-      hitRateTrend: 'stable',
-      latencyTrend: 'stable',
-      memoryTrend: 'stable',
+      hitRateTrend: "stable",
+      latencyTrend: "stable",
+      memoryTrend: "stable",
     };
   }
 }

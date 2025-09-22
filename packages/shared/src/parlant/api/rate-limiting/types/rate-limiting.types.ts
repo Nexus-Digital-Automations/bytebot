@@ -8,7 +8,11 @@
  * @since 2025-09-22
  */
 
-import { UserContext, SecurityLevel, RiskLevel } from '../../interfaces/conversational-api.interface';
+import {
+  UserContext,
+  SecurityLevel,
+  RiskLevel,
+} from "../../interfaces/conversational-api.interface";
 
 // Core Rate Limiting Types
 
@@ -172,10 +176,16 @@ export interface PenaltyCalculationConfig {
 
 export interface FairQueuingConfig {
   enabled: boolean;
-  algorithm: 'WEIGHTED_FAIR_QUEUING' | 'DEFICIT_ROUND_ROBIN' | 'CLASS_BASED_QUEUING';
+  algorithm:
+    | "WEIGHTED_FAIR_QUEUING"
+    | "DEFICIT_ROUND_ROBIN"
+    | "CLASS_BASED_QUEUING";
   weights: Record<string, number>;
   maxQueueSize: number;
-  dropStrategy: 'TAIL_DROP' | 'RANDOM_EARLY_DETECTION' | 'WEIGHTED_RANDOM_EARLY_DETECTION';
+  dropStrategy:
+    | "TAIL_DROP"
+    | "RANDOM_EARLY_DETECTION"
+    | "WEIGHTED_RANDOM_EARLY_DETECTION";
 }
 
 export interface PriorityManagementConfig {
@@ -211,14 +221,14 @@ export interface CacheConfig {
   enabled: boolean;
   ttl: number;
   maxSize: number;
-  algorithm: 'LRU' | 'LFU' | 'FIFO' | 'ADAPTIVE';
+  algorithm: "LRU" | "LFU" | "FIFO" | "ADAPTIVE";
   distributedCache: DistributedCacheConfig;
 }
 
 export interface DistributedCacheConfig {
   enabled: boolean;
   replicationFactor: number;
-  consistencyLevel: 'EVENTUAL' | 'STRONG' | 'WEAK';
+  consistencyLevel: "EVENTUAL" | "STRONG" | "WEAK";
   partitioningStrategy: string;
 }
 
@@ -239,7 +249,7 @@ export interface ConnectionPoolConfig {
 
 export interface ConversationalConfig {
   naturalLanguageEnabled: boolean;
-  explanationLevel: 'BASIC' | 'DETAILED' | 'TECHNICAL';
+  explanationLevel: "BASIC" | "DETAILED" | "TECHNICAL";
   negotiationEnabled: boolean;
   alternativeSuggestions: boolean;
   userEducationEnabled: boolean;
@@ -268,7 +278,7 @@ export interface RateLimitContext {
 export interface RateLimitHistory {
   timestamp: Date;
   endpoint: string;
-  outcome: 'ALLOWED' | 'DENIED' | 'THROTTLED';
+  outcome: "ALLOWED" | "DENIED" | "THROTTLED";
   reason?: string;
   waitTime?: number;
 }
@@ -312,8 +322,8 @@ export interface ProjectedUsage {
 }
 
 export interface UsageTrend {
-  period: 'MINUTE' | 'HOUR' | 'DAY';
-  direction: 'INCREASING' | 'DECREASING' | 'STABLE';
+  period: "MINUTE" | "HOUR" | "DAY";
+  direction: "INCREASING" | "DECREASING" | "STABLE";
   rate: number;
   confidence: number;
 }
@@ -322,7 +332,7 @@ export interface QuotaStatus {
   remainingRequests: number;
   resetTime: Date;
   utilizationPercentage: number;
-  quotaType: 'USER' | 'API' | 'OPERATION' | 'GLOBAL';
+  quotaType: "USER" | "API" | "OPERATION" | "GLOBAL";
 }
 
 export interface ThrottlingStatus {
@@ -344,7 +354,7 @@ export interface QueueStatus {
 // Rate Limiting Decisions and Responses
 
 export interface RateLimitDecision {
-  decision: 'ALLOW' | 'DENY' | 'THROTTLE' | 'QUEUE';
+  decision: "ALLOW" | "DENY" | "THROTTLE" | "QUEUE";
   reason: string;
   code: string;
   timestamp: Date;
@@ -373,7 +383,7 @@ export interface RateLimitDecision {
 }
 
 export interface RateLimitAlternative {
-  type: 'ENDPOINT' | 'METHOD' | 'TIMING' | 'BATCH';
+  type: "ENDPOINT" | "METHOD" | "TIMING" | "BATCH";
   description: string;
   endpoint?: string;
   method?: string;
@@ -415,9 +425,9 @@ export interface RateLimitAnalytics {
 }
 
 export interface ImpactAssessment {
-  userImpact: 'LOW' | 'MEDIUM' | 'HIGH';
-  systemImpact: 'LOW' | 'MEDIUM' | 'HIGH';
-  businessImpact: 'LOW' | 'MEDIUM' | 'HIGH';
+  userImpact: "LOW" | "MEDIUM" | "HIGH";
+  systemImpact: "LOW" | "MEDIUM" | "HIGH";
+  businessImpact: "LOW" | "MEDIUM" | "HIGH";
   estimatedRevenueLoss: number;
   userSatisfactionImpact: number;
 }
@@ -443,7 +453,7 @@ export interface SystemHealthIndicators {
   capacityUtilization: number;
   errorRate: number;
   responseTime: number;
-  alertLevel: 'GREEN' | 'YELLOW' | 'ORANGE' | 'RED';
+  alertLevel: "GREEN" | "YELLOW" | "ORANGE" | "RED";
 }
 
 // Rate Limiting Events and Monitoring
@@ -457,15 +467,15 @@ export interface RateLimitEvent {
 }
 
 export type RateLimitEventType =
-  | 'REQUEST_EVALUATED'
-  | 'LIMIT_EXCEEDED'
-  | 'THROTTLE_APPLIED'
-  | 'QUEUE_ADDED'
-  | 'EMERGENCY_MODE_TRIGGERED'
-  | 'CONFIGURATION_CHANGED'
-  | 'ABUSE_DETECTED'
-  | 'SLA_VIOLATION'
-  | 'CAPACITY_THRESHOLD_REACHED';
+  | "REQUEST_EVALUATED"
+  | "LIMIT_EXCEEDED"
+  | "THROTTLE_APPLIED"
+  | "QUEUE_ADDED"
+  | "EMERGENCY_MODE_TRIGGERED"
+  | "CONFIGURATION_CHANGED"
+  | "ABUSE_DETECTED"
+  | "SLA_VIOLATION"
+  | "CAPACITY_THRESHOLD_REACHED";
 
 export interface RateLimitingMetrics {
   // Request metrics
@@ -529,7 +539,7 @@ export interface DynamicRateLimitAdjustment {
 }
 
 export interface AdjustmentTrigger {
-  type: 'LOAD_BASED' | 'TIME_BASED' | 'EVENT_BASED' | 'MANUAL';
+  type: "LOAD_BASED" | "TIME_BASED" | "EVENT_BASED" | "MANUAL";
   condition: string;
   threshold: number;
   sensitivity: number;
@@ -539,7 +549,7 @@ export interface ConfigurationAdjustment {
   path: string;
   oldValue: any;
   newValue: any;
-  adjustmentType: 'ABSOLUTE' | 'RELATIVE' | 'PERCENTAGE';
+  adjustmentType: "ABSOLUTE" | "RELATIVE" | "PERCENTAGE";
 }
 
 // Enterprise Features
@@ -553,7 +563,7 @@ export interface EnterpriseRateLimitFeatures {
 
 export interface MultiTenantConfig {
   enabled: boolean;
-  tenantIsolation: 'STRICT' | 'SHARED' | 'HYBRID';
+  tenantIsolation: "STRICT" | "SHARED" | "HYBRID";
   resourceAllocation: TenantResourceAllocation[];
   crossTenantLimits: CrossTenantLimits;
 }
@@ -574,7 +584,7 @@ export interface CrossTenantLimits {
 
 export interface GeographicConfig {
   regions: RegionConfig[];
-  routingStrategy: 'LATENCY_BASED' | 'CAPACITY_BASED' | 'REGULATORY_BASED';
+  routingStrategy: "LATENCY_BASED" | "CAPACITY_BASED" | "REGULATORY_BASED";
   failoverConfig: FailoverConfig;
 }
 
@@ -598,7 +608,7 @@ export interface FailoverConfig {
   triggerThreshold: number;
   failoverTime: number;
   backupRegions: string[];
-  dataReplication: 'SYNC' | 'ASYNC' | 'EVENTUAL';
+  dataReplication: "SYNC" | "ASYNC" | "EVENTUAL";
 }
 
 export interface ComplianceReportingConfig {
@@ -659,14 +669,14 @@ export interface IntegrationEndpoint {
 }
 
 export interface IntegrationAuth {
-  type: 'NONE' | 'API_KEY' | 'OAUTH2' | 'JWT' | 'CERTIFICATE';
+  type: "NONE" | "API_KEY" | "OAUTH2" | "JWT" | "CERTIFICATE";
   credentials: Record<string, string>;
   refreshInterval?: number;
 }
 
 export interface RetryPolicy {
   maxRetries: number;
-  backoffStrategy: 'FIXED' | 'EXPONENTIAL' | 'LINEAR';
+  backoffStrategy: "FIXED" | "EXPONENTIAL" | "LINEAR";
   baseDelay: number;
   maxDelay: number;
   jitter: boolean;

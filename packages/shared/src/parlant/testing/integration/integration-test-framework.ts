@@ -31,13 +31,13 @@
  * @classification Enterprise Testing Infrastructure
  */
 
-import { testingFrameworkConfig } from '../config/testing-framework.config';
-import { TestSetupManager } from '../utils/test-setup';
-import { DatabaseTestHelper } from '../utils/database-test-helper';
-import { NetworkTestHelper } from '../utils/network-test-helper';
-import { ApiTestClient } from '../utils/api-test-client';
-import { WebSocketTestClient } from '../utils/websocket-test-client';
-import { ContractValidator } from '../utils/contract-validator';
+import { testingFrameworkConfig } from "../config/testing-framework.config";
+import { TestSetupManager } from "../utils/test-setup";
+import { DatabaseTestHelper } from "../utils/database-test-helper";
+import { NetworkTestHelper } from "../utils/network-test-helper";
+import { ApiTestClient } from "../utils/api-test-client";
+import { WebSocketTestClient } from "../utils/websocket-test-client";
+import { ContractValidator } from "../utils/contract-validator";
 
 export interface IntegrationTestSuite {
   name: string;
@@ -99,7 +99,9 @@ export class IntegrationTestFramework {
   /**
    * Execute comprehensive integration test suite
    */
-  public async executeIntegrationTestSuite(testSuite: IntegrationTestSuite): Promise<void> {
+  public async executeIntegrationTestSuite(
+    testSuite: IntegrationTestSuite,
+  ): Promise<void> {
     this.activeTestSuite = testSuite.name;
 
     try {
@@ -125,10 +127,14 @@ export class IntegrationTestFramework {
       // Validate error propagation
       await this.validateErrorPropagation(testSuite);
 
-      console.log(`✅ Integration Test Suite completed successfully: ${testSuite.name}`);
-
+      console.log(
+        `✅ Integration Test Suite completed successfully: ${testSuite.name}`,
+      );
     } catch (error) {
-      console.error(`❌ Integration Test Suite failed: ${testSuite.name}`, error);
+      console.error(
+        `❌ Integration Test Suite failed: ${testSuite.name}`,
+        error,
+      );
       throw error;
     } finally {
       // Cleanup test environment
@@ -140,7 +146,9 @@ export class IntegrationTestFramework {
   /**
    * Execute individual integration test scenario
    */
-  private async executeIntegrationTestScenario(scenario: IntegrationTestScenario): Promise<void> {
+  private async executeIntegrationTestScenario(
+    scenario: IntegrationTestScenario,
+  ): Promise<void> {
     console.log(`🧪 Executing Integration Scenario: ${scenario.name}`);
 
     const startTime = performance.now();
@@ -170,12 +178,11 @@ export class IntegrationTestFramework {
           scenario.performanceThresholds,
           startTime,
           initialMemory,
-          initialCpu
+          initialCpu,
         );
       }
 
       console.log(`✅ Integration Scenario completed: ${scenario.name}`);
-
     } catch (error) {
       console.error(`❌ Integration Scenario failed: ${scenario.name}`, error);
       throw error;
@@ -185,29 +192,31 @@ export class IntegrationTestFramework {
   /**
    * Execute individual integration test step
    */
-  private async executeIntegrationTestStep(step: IntegrationTestStep): Promise<any> {
+  private async executeIntegrationTestStep(
+    step: IntegrationTestStep,
+  ): Promise<any> {
     console.log(`  📋 Executing Step: ${step.action} on ${step.component}`);
 
     try {
       let result: any;
 
       switch (step.action) {
-        case 'api_call':
+        case "api_call":
           result = await this.executeApiCall(step);
           break;
-        case 'websocket_message':
+        case "websocket_message":
           result = await this.executeWebSocketMessage(step);
           break;
-        case 'database_operation':
+        case "database_operation":
           result = await this.executeDatabaseOperation(step);
           break;
-        case 'component_method':
+        case "component_method":
           result = await this.executeComponentMethod(step);
           break;
-        case 'event_trigger':
+        case "event_trigger":
           result = await this.executeEventTrigger(step);
           break;
-        case 'external_service':
+        case "external_service":
           result = await this.executeExternalServiceCall(step);
           break;
         default:
@@ -220,7 +229,6 @@ export class IntegrationTestFramework {
       }
 
       return result;
-
     } catch (error) {
       console.error(`❌ Integration Step failed: ${step.action}`, error);
       throw error;
@@ -230,23 +238,26 @@ export class IntegrationTestFramework {
   /**
    * Validate cross-component interactions
    */
-  private async validateComponentInteractions(components: string[]): Promise<void> {
-    console.log('🔗 Validating Cross-Component Interactions...');
+  private async validateComponentInteractions(
+    components: string[],
+  ): Promise<void> {
+    console.log("🔗 Validating Cross-Component Interactions...");
 
-    const interactions = await this.generateComponentInteractionTests(components);
+    const interactions =
+      await this.generateComponentInteractionTests(components);
 
     for (const interaction of interactions) {
       await this.validateComponentInteraction(interaction);
     }
 
-    console.log('✅ Cross-Component Interactions validated successfully');
+    console.log("✅ Cross-Component Interactions validated successfully");
   }
 
   /**
    * Validate service contracts
    */
   private async validateServiceContracts(components: string[]): Promise<void> {
-    console.log('📄 Validating Service Contracts...');
+    console.log("📄 Validating Service Contracts...");
 
     for (const component of components) {
       const contracts = await this.loadServiceContracts(component);
@@ -256,42 +267,51 @@ export class IntegrationTestFramework {
       }
     }
 
-    console.log('✅ Service Contracts validated successfully');
+    console.log("✅ Service Contracts validated successfully");
   }
 
   /**
    * Validate data flow integrity
    */
-  private async validateDataFlowIntegrity(testSuite: IntegrationTestSuite): Promise<void> {
-    console.log('🌊 Validating Data Flow Integrity...');
+  private async validateDataFlowIntegrity(
+    testSuite: IntegrationTestSuite,
+  ): Promise<void> {
+    console.log("🌊 Validating Data Flow Integrity...");
 
     // Create test data
     const testData = await this.generateTestData(testSuite);
 
     // Trace data flow through components
-    const dataFlowTrace = await this.traceDataFlow(testData, testSuite.components);
+    const dataFlowTrace = await this.traceDataFlow(
+      testData,
+      testSuite.components,
+    );
 
     // Validate data integrity at each step
     for (const step of dataFlowTrace) {
       await this.validateDataIntegrityAtStep(step);
     }
 
-    console.log('✅ Data Flow Integrity validated successfully');
+    console.log("✅ Data Flow Integrity validated successfully");
   }
 
   /**
    * Validate error propagation
    */
-  private async validateErrorPropagation(testSuite: IntegrationTestSuite): Promise<void> {
-    console.log('🚨 Validating Error Propagation...');
+  private async validateErrorPropagation(
+    testSuite: IntegrationTestSuite,
+  ): Promise<void> {
+    console.log("🚨 Validating Error Propagation...");
 
-    const errorScenarios = await this.generateErrorScenarios(testSuite.components);
+    const errorScenarios = await this.generateErrorScenarios(
+      testSuite.components,
+    );
 
     for (const scenario of errorScenarios) {
       await this.validateErrorScenario(scenario);
     }
 
-    console.log('✅ Error Propagation validated successfully');
+    console.log("✅ Error Propagation validated successfully");
   }
 
   /**
@@ -305,20 +325,24 @@ export class IntegrationTestFramework {
       url: endpoint,
       headers,
       data: body,
-      timeout: step.timeout || testingFrameworkConfig.integration.networkTesting.timeoutMs
+      timeout:
+        step.timeout ||
+        testingFrameworkConfig.integration.networkTesting.timeoutMs,
     });
 
     return {
       status: response.status,
       headers: response.headers,
-      data: response.data
+      data: response.data,
     };
   }
 
   /**
    * WebSocket Integration Testing Methods
    */
-  private async executeWebSocketMessage(step: IntegrationTestStep): Promise<any> {
+  private async executeWebSocketMessage(
+    step: IntegrationTestStep,
+  ): Promise<any> {
     const { endpoint, message } = step.input;
 
     await this.websocketClient.connect(endpoint);
@@ -331,17 +355,19 @@ export class IntegrationTestFramework {
   /**
    * Database Integration Testing Methods
    */
-  private async executeDatabaseOperation(step: IntegrationTestStep): Promise<any> {
+  private async executeDatabaseOperation(
+    step: IntegrationTestStep,
+  ): Promise<any> {
     const { operation, table, data, conditions } = step.input;
 
     switch (operation) {
-      case 'insert':
+      case "insert":
         return await this.databaseHelper.insert(table, data);
-      case 'select':
+      case "select":
         return await this.databaseHelper.select(table, conditions);
-      case 'update':
+      case "update":
         return await this.databaseHelper.update(table, data, conditions);
-      case 'delete':
+      case "delete":
         return await this.databaseHelper.delete(table, conditions);
       default:
         throw new Error(`Unknown database operation: ${operation}`);
@@ -351,7 +377,9 @@ export class IntegrationTestFramework {
   /**
    * Component Method Testing
    */
-  private async executeComponentMethod(step: IntegrationTestStep): Promise<any> {
+  private async executeComponentMethod(
+    step: IntegrationTestStep,
+  ): Promise<any> {
     const { method, args } = step.input;
     const component = await this.loadComponent(step.component);
 
@@ -381,7 +409,9 @@ export class IntegrationTestFramework {
   /**
    * External Service Testing
    */
-  private async executeExternalServiceCall(step: IntegrationTestStep): Promise<any> {
+  private async executeExternalServiceCall(
+    step: IntegrationTestStep,
+  ): Promise<any> {
     // Use network helper to mock external services
     return await this.networkHelper.callExternalService(step.input);
   }
@@ -389,7 +419,9 @@ export class IntegrationTestFramework {
   /**
    * Test Environment Setup/Teardown
    */
-  private async setupIntegrationTestEnvironment(testSuite: IntegrationTestSuite): Promise<void> {
+  private async setupIntegrationTestEnvironment(
+    testSuite: IntegrationTestSuite,
+  ): Promise<void> {
     // Setup database
     await this.databaseHelper.setupTestDatabase();
 
@@ -405,7 +437,9 @@ export class IntegrationTestFramework {
     await this.initializeComponents(testSuite.components);
   }
 
-  private async teardownIntegrationTestEnvironment(testSuite: IntegrationTestSuite): Promise<void> {
+  private async teardownIntegrationTestEnvironment(
+    testSuite: IntegrationTestSuite,
+  ): Promise<void> {
     // Cleanup test data
     if (testSuite.teardownData) {
       await this.cleanupTestData(testSuite.teardownData);
@@ -424,12 +458,16 @@ export class IntegrationTestFramework {
   /**
    * Helper Methods
    */
-  private async generateComponentInteractionTests(components: string[]): Promise<ComponentInteraction[]> {
+  private async generateComponentInteractionTests(
+    components: string[],
+  ): Promise<ComponentInteraction[]> {
     // Implementation to generate component interaction tests
     return [];
   }
 
-  private async validateComponentInteraction(interaction: ComponentInteraction): Promise<void> {
+  private async validateComponentInteraction(
+    interaction: ComponentInteraction,
+  ): Promise<void> {
     // Implementation to validate component interaction
   }
 
@@ -438,12 +476,17 @@ export class IntegrationTestFramework {
     return [];
   }
 
-  private async generateTestData(testSuite: IntegrationTestSuite): Promise<any> {
+  private async generateTestData(
+    testSuite: IntegrationTestSuite,
+  ): Promise<any> {
     // Implementation to generate test data
     return {};
   }
 
-  private async traceDataFlow(testData: any, components: string[]): Promise<any[]> {
+  private async traceDataFlow(
+    testData: any,
+    components: string[],
+  ): Promise<any[]> {
     // Implementation to trace data flow
     return [];
   }
@@ -461,11 +504,17 @@ export class IntegrationTestFramework {
     // Implementation to validate error scenario
   }
 
-  private async validateStepAssertions(step: IntegrationTestStep, result: any): Promise<void> {
+  private async validateStepAssertions(
+    step: IntegrationTestStep,
+    result: any,
+  ): Promise<void> {
     // Implementation to validate step assertions
   }
 
-  private async validateScenarioOutcome(scenario: IntegrationTestScenario, results: any[]): Promise<void> {
+  private async validateScenarioOutcome(
+    scenario: IntegrationTestScenario,
+    results: any[],
+  ): Promise<void> {
     // Implementation to validate scenario outcome
   }
 
@@ -473,7 +522,7 @@ export class IntegrationTestFramework {
     thresholds: any,
     startTime: number,
     initialMemory: any,
-    initialCpu: any
+    initialCpu: any,
   ): Promise<void> {
     const endTime = performance.now();
     const finalMemory = process.memoryUsage();
@@ -484,15 +533,21 @@ export class IntegrationTestFramework {
     const cpuUsage = finalCpu.user + finalCpu.system;
 
     if (responseTime > thresholds.maxResponseTime) {
-      throw new Error(`Response time ${responseTime}ms exceeds threshold ${thresholds.maxResponseTime}ms`);
+      throw new Error(
+        `Response time ${responseTime}ms exceeds threshold ${thresholds.maxResponseTime}ms`,
+      );
     }
 
     if (memoryUsage > thresholds.maxMemoryUsage) {
-      throw new Error(`Memory usage ${memoryUsage} exceeds threshold ${thresholds.maxMemoryUsage}`);
+      throw new Error(
+        `Memory usage ${memoryUsage} exceeds threshold ${thresholds.maxMemoryUsage}`,
+      );
     }
 
     if (cpuUsage > thresholds.maxCpuUsage) {
-      throw new Error(`CPU usage ${cpuUsage} exceeds threshold ${thresholds.maxCpuUsage}`);
+      throw new Error(
+        `CPU usage ${cpuUsage} exceeds threshold ${thresholds.maxCpuUsage}`,
+      );
     }
   }
 
@@ -527,7 +582,9 @@ export class IntegrationTestFramework {
 export const integrationTestFramework = new IntegrationTestFramework();
 
 // Convenience methods for integration testing
-export const createIntegrationTestSuite = (testSuite: IntegrationTestSuite): void => {
+export const createIntegrationTestSuite = (
+  testSuite: IntegrationTestSuite,
+): void => {
   describe(`Integration Test Suite: ${testSuite.name}`, () => {
     beforeAll(async () => {
       await integrationTestFramework.executeIntegrationTestSuite(testSuite);
@@ -538,7 +595,7 @@ export const createIntegrationTestSuite = (testSuite: IntegrationTestSuite): voi
 export const createCrossComponentTest = (
   componentA: string,
   componentB: string,
-  interaction: ComponentInteraction
+  interaction: ComponentInteraction,
 ): void => {
   it(`should handle interaction between ${componentA} and ${componentB}`, async () => {
     // Implementation for cross-component testing

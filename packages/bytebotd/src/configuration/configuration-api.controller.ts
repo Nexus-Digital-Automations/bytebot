@@ -327,8 +327,7 @@ export interface IntegrationConfigurationDto {
 export class ConfigurationApiController {
   private readonly logger = new Logger(ConfigurationApiController.name);
 
-  constructor() // Configuration services would be injected here
-  {
+  constructor() { // Configuration services would be injected here
     this.logger.log(
       'Configuration API Controller initialized with comprehensive PARLANT validation',
     );

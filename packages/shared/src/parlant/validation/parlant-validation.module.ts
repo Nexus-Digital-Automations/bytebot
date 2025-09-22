@@ -17,29 +17,26 @@
  * @author AIgent Integration Team
  */
 
-import { Module, Logger, OnApplicationShutdown } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { HealthCheckService, TerminusModule } from '@nestjs/terminus';
+import { Module, Logger, OnApplicationShutdown } from "@nestjs/common";
+import { ConfigModule, ConfigService } from "@nestjs/config";
+import { HealthCheckService, TerminusModule } from "@nestjs/terminus";
 
 // Core services
-import { ParlantValidationBridge } from './parlant-validation-bridge.service';
-import { ParlantWebSocketClient } from './websocket/parlant-websocket-client.service';
-import { ParlantWebSocketManager } from './websocket/parlant-websocket-manager.service';
-import { ConversationContextBuilder } from './context/conversation-context-builder.service';
+import { ParlantValidationBridge } from "./parlant-validation-bridge.service";
+import { ParlantWebSocketClient } from "./websocket/parlant-websocket-client.service";
+import { ParlantWebSocketManager } from "./websocket/parlant-websocket-manager.service";
+import { ConversationContextBuilder } from "./context/conversation-context-builder.service";
 
 // Configuration
-import { ValidationLayerConfigService } from './config/validation-layer.config';
+import { ValidationLayerConfigService } from "./config/validation-layer.config";
 
 // Health check
-import { ParlantValidationHealthIndicator } from './health/parlant-validation-health.indicator';
+import { ParlantValidationHealthIndicator } from "./health/parlant-validation-health.indicator";
 
 // ===== MODULE CONFIGURATION =====
 
 @Module({
-  imports: [
-    ConfigModule,
-    TerminusModule,
-  ],
+  imports: [ConfigModule, TerminusModule],
   providers: [
     // Configuration
     ValidationLayerConfigService,
@@ -55,7 +52,7 @@ import { ParlantValidationHealthIndicator } from './health/parlant-validation-he
 
     // Factory for configuration-based service initialization
     {
-      provide: 'PARLANT_VALIDATION_CONFIG',
+      provide: "PARLANT_VALIDATION_CONFIG",
       useFactory: (configService: ValidationLayerConfigService) => {
         return configService.getConfig();
       },
@@ -64,7 +61,7 @@ import { ParlantValidationHealthIndicator } from './health/parlant-validation-he
 
     // Factory for conditional service activation
     {
-      provide: 'PARLANT_VALIDATION_ENABLED',
+      provide: "PARLANT_VALIDATION_ENABLED",
       useFactory: (configService: ValidationLayerConfigService) => {
         return configService.isValidationEnabled();
       },
@@ -89,8 +86,8 @@ import { ParlantValidationHealthIndicator } from './health/parlant-validation-he
     ParlantValidationHealthIndicator,
 
     // Configuration constants
-    'PARLANT_VALIDATION_CONFIG',
-    'PARLANT_VALIDATION_ENABLED',
+    "PARLANT_VALIDATION_CONFIG",
+    "PARLANT_VALIDATION_ENABLED",
   ],
 })
 export class ParlantValidationModule implements OnApplicationShutdown {
@@ -109,34 +106,36 @@ export class ParlantValidationModule implements OnApplicationShutdown {
    */
   private async initializeModule(): Promise<void> {
     try {
-      this.logger.log('Initializing PARLANT Validation Module');
+      this.logger.log("Initializing PARLANT Validation Module");
 
       // Validate configuration
       const configValidation = this.configService.validateConfiguration();
       if (!configValidation.valid) {
-        this.logger.error('Configuration validation failed', {
+        this.logger.error("Configuration validation failed", {
           errors: configValidation.errors,
         });
-        throw new Error(`Configuration validation failed: ${configValidation.errors.join(', ')}`);
+        throw new Error(
+          `Configuration validation failed: ${configValidation.errors.join(", ")}`,
+        );
       }
 
       // Check if validation is enabled
       if (!this.configService.isValidationEnabled()) {
-        this.logger.warn('PARLANT validation is disabled in configuration');
+        this.logger.warn("PARLANT validation is disabled in configuration");
         return;
       }
 
       // Initialize validation bridge
       await this.validationBridge.initialize();
 
-      this.logger.log('PARLANT Validation Module initialized successfully', {
+      this.logger.log("PARLANT Validation Module initialized successfully", {
         caching: this.configService.isCachingEnabled(),
         bypass: this.configService.isBypassEnabled(),
-        websocketServers: this.configService.getWebSocketConfig().serverUrls.length,
+        websocketServers:
+          this.configService.getWebSocketConfig().serverUrls.length,
       });
-
     } catch (error) {
-      this.logger.error('Failed to initialize PARLANT Validation Module', {
+      this.logger.error("Failed to initialize PARLANT Validation Module", {
         error: (error as Error).message,
       });
       throw error;
@@ -147,7 +146,9 @@ export class ParlantValidationModule implements OnApplicationShutdown {
    * Application shutdown handler
    */
   async onApplicationShutdown(signal?: string): Promise<void> {
-    this.logger.log(`Shutting down PARLANT Validation Module (signal: ${signal})`);
+    this.logger.log(
+      `Shutting down PARLANT Validation Module (signal: ${signal})`,
+    );
 
     try {
       // Graceful shutdown with timeout
@@ -160,14 +161,13 @@ export class ParlantValidationModule implements OnApplicationShutdown {
       await Promise.race([
         Promise.all(shutdownPromises),
         new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Shutdown timeout')), 30000)
+          setTimeout(() => reject(new Error("Shutdown timeout")), 30000),
         ),
       ]);
 
-      this.logger.log('PARLANT Validation Module shutdown complete');
-
+      this.logger.log("PARLANT Validation Module shutdown complete");
     } catch (error) {
-      this.logger.error('Error during module shutdown', {
+      this.logger.error("Error during module shutdown", {
         error: (error as Error).message,
       });
     }
@@ -183,10 +183,7 @@ export class ParlantValidationModuleFactory {
   static forRoot(options?: ParlantValidationModuleOptions): DynamicModule {
     return {
       module: ParlantValidationModule,
-      imports: [
-        ConfigModule.forRoot(options?.configOptions),
-        TerminusModule,
-      ],
+      imports: [ConfigModule.forRoot(options?.configOptions), TerminusModule],
       providers: [
         ValidationLayerConfigService,
         ParlantValidationBridge,
@@ -195,7 +192,7 @@ export class ParlantValidationModuleFactory {
         ConversationContextBuilder,
         ParlantValidationHealthIndicator,
         {
-          provide: 'PARLANT_VALIDATION_OPTIONS',
+          provide: "PARLANT_VALIDATION_OPTIONS",
           useValue: options || {},
         },
       ],
@@ -211,7 +208,9 @@ export class ParlantValidationModuleFactory {
     };
   }
 
-  static forRootAsync(options: ParlantValidationModuleAsyncOptions): DynamicModule {
+  static forRootAsync(
+    options: ParlantValidationModuleAsyncOptions,
+  ): DynamicModule {
     return {
       module: ParlantValidationModule,
       imports: [
@@ -240,11 +239,13 @@ export class ParlantValidationModuleFactory {
     };
   }
 
-  private static createAsyncProviders(options: ParlantValidationModuleAsyncOptions): Provider[] {
+  private static createAsyncProviders(
+    options: ParlantValidationModuleAsyncOptions,
+  ): Provider[] {
     if (options.useFactory) {
       return [
         {
-          provide: 'PARLANT_VALIDATION_OPTIONS',
+          provide: "PARLANT_VALIDATION_OPTIONS",
           useFactory: options.useFactory,
           inject: options.inject || [],
         },
@@ -254,7 +255,7 @@ export class ParlantValidationModuleFactory {
     if (options.useClass) {
       return [
         {
-          provide: 'PARLANT_VALIDATION_OPTIONS',
+          provide: "PARLANT_VALIDATION_OPTIONS",
           useClass: options.useClass,
         },
       ];
@@ -263,7 +264,7 @@ export class ParlantValidationModuleFactory {
     if (options.useExisting) {
       return [
         {
-          provide: 'PARLANT_VALIDATION_OPTIONS',
+          provide: "PARLANT_VALIDATION_OPTIONS",
           useExisting: options.useExisting,
         },
       ];
@@ -292,7 +293,9 @@ interface ParlantValidationModuleAsyncOptions {
   /** Modules to import */
   imports?: any[];
   /** Factory function for options */
-  useFactory?: (...args: any[]) => Promise<ParlantValidationModuleOptions> | ParlantValidationModuleOptions;
+  useFactory?: (
+    ...args: any[]
+  ) => Promise<ParlantValidationModuleOptions> | ParlantValidationModuleOptions;
   /** Dependencies to inject into factory */
   inject?: any[];
   /** Class to use for options */
@@ -303,5 +306,5 @@ interface ParlantValidationModuleAsyncOptions {
 
 // ===== TYPE IMPORTS =====
 
-import { DynamicModule, Provider, Type } from '@nestjs/common';
-import { ValidationLayerConfig } from './config/validation-layer.config';
+import { DynamicModule, Provider, Type } from "@nestjs/common";
+import { ValidationLayerConfig } from "./config/validation-layer.config";

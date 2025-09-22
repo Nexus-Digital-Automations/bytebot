@@ -9,9 +9,9 @@
  * @compliance GDPR, SOX, HIPAA, SOC2
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { EventEmitter } from 'events';
-import { createHash } from 'crypto';
+import { Injectable, Logger } from "@nestjs/common";
+import { EventEmitter } from "events";
+import { createHash } from "crypto";
 import {
   BypassRole,
   BypassOperationType,
@@ -20,8 +20,8 @@ import {
   SecurityFlag,
   ViolationSeverity,
   FraudIndicator,
-  FraudRecommendation
-} from '../types/bypass-core.types';
+  FraudRecommendation,
+} from "../types/bypass-core.types";
 
 /**
  * Abuse detection pattern
@@ -62,12 +62,12 @@ export interface AbusePattern {
  * Detection algorithm types
  */
 export enum DetectionAlgorithm {
-  VELOCITY_ANALYSIS = 'velocity_analysis',
-  BEHAVIORAL_ANALYSIS = 'behavioral_analysis',
-  ANOMALY_DETECTION = 'anomaly_detection',
-  PATTERN_MATCHING = 'pattern_matching',
-  STATISTICAL_ANALYSIS = 'statistical_analysis',
-  ML_CLASSIFICATION = 'ml_classification'
+  VELOCITY_ANALYSIS = "velocity_analysis",
+  BEHAVIORAL_ANALYSIS = "behavioral_analysis",
+  ANOMALY_DETECTION = "anomaly_detection",
+  PATTERN_MATCHING = "pattern_matching",
+  STATISTICAL_ANALYSIS = "statistical_analysis",
+  ML_CLASSIFICATION = "ml_classification",
 }
 
 /**
@@ -195,23 +195,23 @@ export interface TimePattern {
  * Behavior flags
  */
 export enum BehaviorFlag {
-  VELOCITY_ABUSE = 'velocity_abuse',
-  UNUSUAL_TIMING = 'unusual_timing',
-  LOCATION_ANOMALY = 'location_anomaly',
-  OPERATION_ANOMALY = 'operation_anomaly',
-  SUCCESS_RATE_DROP = 'success_rate_drop',
-  CONCURRENT_SESSIONS = 'concurrent_sessions'
+  VELOCITY_ABUSE = "velocity_abuse",
+  UNUSUAL_TIMING = "unusual_timing",
+  LOCATION_ANOMALY = "location_anomaly",
+  OPERATION_ANOMALY = "operation_anomaly",
+  SUCCESS_RATE_DROP = "success_rate_drop",
+  CONCURRENT_SESSIONS = "concurrent_sessions",
 }
 
 /**
  * Trust levels
  */
 export enum TrustLevel {
-  VERY_LOW = 'very_low',
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  VERY_HIGH = 'very_high'
+  VERY_LOW = "very_low",
+  LOW = "low",
+  MEDIUM = "medium",
+  HIGH = "high",
+  VERY_HIGH = "very_high",
 }
 
 /**
@@ -369,13 +369,13 @@ export interface AnomalyDetails {
  * Prevention actions
  */
 export enum PreventionAction {
-  MONITOR = 'monitor',
-  WARN = 'warn',
-  RATE_LIMIT = 'rate_limit',
-  REQUIRE_APPROVAL = 'require_approval',
-  SUSPEND_USER = 'suspend_user',
-  BLOCK_OPERATIONS = 'block_operations',
-  EMERGENCY_LOCKDOWN = 'emergency_lockdown'
+  MONITOR = "monitor",
+  WARN = "warn",
+  RATE_LIMIT = "rate_limit",
+  REQUIRE_APPROVAL = "require_approval",
+  SUSPEND_USER = "suspend_user",
+  BLOCK_OPERATIONS = "block_operations",
+  EMERGENCY_LOCKDOWN = "emergency_lockdown",
 }
 
 /**
@@ -393,7 +393,10 @@ export class BypassAbuseDetectionService extends EventEmitter {
   private readonly logger = new Logger(BypassAbuseDetectionService.name);
   private readonly abusePatterns = new Map<string, AbusePattern>();
   private readonly userProfiles = new Map<string, UserBehaviorProfile>();
-  private readonly recentOperations = new Map<string, BypassOperationResult[]>();
+  private readonly recentOperations = new Map<
+    string,
+    BypassOperationResult[]
+  >();
   private readonly blockedUsers = new Set<string>();
   private readonly rateLimitedUsers = new Map<string, RateLimitInfo>();
 
@@ -406,8 +409,12 @@ export class BypassAbuseDetectionService extends EventEmitter {
   /**
    * Analyze bypass operation for abuse patterns
    */
-  async analyzeOperation(operation: BypassOperationResult): Promise<AbuseDetectionEvent | null> {
-    this.logger.debug(`Analyzing operation ${operation.operationId} for abuse patterns`);
+  async analyzeOperation(
+    operation: BypassOperationResult,
+  ): Promise<AbuseDetectionEvent | null> {
+    this.logger.debug(
+      `Analyzing operation ${operation.operationId} for abuse patterns`,
+    );
 
     // Record operation
     await this.recordOperation(operation);
@@ -426,7 +433,7 @@ export class BypassAbuseDetectionService extends EventEmitter {
       await this.executePrevention(event);
 
       // Emit event
-      this.emit('abuse-detected', event);
+      this.emit("abuse-detected", event);
 
       return event;
     }
@@ -465,48 +472,69 @@ export class BypassAbuseDetectionService extends EventEmitter {
   /**
    * Update user trust level
    */
-  async updateUserTrustLevel(userId: string, trustLevel: TrustLevel, reason: string): Promise<void> {
+  async updateUserTrustLevel(
+    userId: string,
+    trustLevel: TrustLevel,
+    reason: string,
+  ): Promise<void> {
     const profile = this.userProfiles.get(userId);
     if (profile) {
       profile.trustLevel = trustLevel;
       profile.updatedAt = new Date();
-      this.logger.warn(`User ${userId} trust level updated to ${trustLevel}: ${reason}`);
+      this.logger.warn(
+        `User ${userId} trust level updated to ${trustLevel}: ${reason}`,
+      );
     }
   }
 
   /**
    * Block user for security violation
    */
-  async blockUser(userId: string, reason: string, durationMinutes?: number): Promise<void> {
+  async blockUser(
+    userId: string,
+    reason: string,
+    durationMinutes?: number,
+  ): Promise<void> {
     this.blockedUsers.add(userId);
     this.logger.error(`User ${userId} blocked: ${reason}`);
 
     if (durationMinutes) {
-      setTimeout(() => {
-        this.blockedUsers.delete(userId);
-        this.logger.warn(`User ${userId} unblocked after ${durationMinutes} minutes`);
-      }, durationMinutes * 60 * 1000);
+      setTimeout(
+        () => {
+          this.blockedUsers.delete(userId);
+          this.logger.warn(
+            `User ${userId} unblocked after ${durationMinutes} minutes`,
+          );
+        },
+        durationMinutes * 60 * 1000,
+      );
     }
 
-    this.emit('user-blocked', { userId, reason, durationMinutes });
+    this.emit("user-blocked", { userId, reason, durationMinutes });
   }
 
   /**
    * Apply rate limiting to user
    */
-  async applyRateLimit(userId: string, maxOperationsPerHour: number, durationMinutes: number): Promise<void> {
+  async applyRateLimit(
+    userId: string,
+    maxOperationsPerHour: number,
+    durationMinutes: number,
+  ): Promise<void> {
     const rateLimitInfo: RateLimitInfo = {
       userId,
       maxOperationsPerHour,
       currentOperations: 0,
       windowStart: new Date(),
-      expiresAt: new Date(Date.now() + durationMinutes * 60 * 1000)
+      expiresAt: new Date(Date.now() + durationMinutes * 60 * 1000),
     };
 
     this.rateLimitedUsers.set(userId, rateLimitInfo);
-    this.logger.warn(`Rate limit applied to user ${userId}: ${maxOperationsPerHour} ops/hour for ${durationMinutes} minutes`);
+    this.logger.warn(
+      `Rate limit applied to user ${userId}: ${maxOperationsPerHour} ops/hour for ${durationMinutes} minutes`,
+    );
 
-    this.emit('user-rate-limited', rateLimitInfo);
+    this.emit("user-rate-limited", rateLimitInfo);
   }
 
   /**
@@ -520,11 +548,14 @@ export class BypassAbuseDetectionService extends EventEmitter {
       totalUsers: profiles.length,
       blockedUsers: this.blockedUsers.size,
       rateLimitedUsers: this.rateLimitedUsers.size,
-      highRiskUsers: profiles.filter(p => p.riskScore > 70).length,
+      highRiskUsers: profiles.filter((p) => p.riskScore > 70).length,
       detectionPatterns: patterns.length,
-      enabledPatterns: patterns.filter(p => p.enabled).length,
-      averageRiskScore: profiles.reduce((sum, p) => sum + p.riskScore, 0) / profiles.length || 0,
-      totalOperationsAnalyzed: Array.from(this.recentOperations.values()).flat().length
+      enabledPatterns: patterns.filter((p) => p.enabled).length,
+      averageRiskScore:
+        profiles.reduce((sum, p) => sum + p.riskScore, 0) / profiles.length ||
+        0,
+      totalOperationsAnalyzed: Array.from(this.recentOperations.values()).flat()
+        .length,
     };
   }
 
@@ -537,83 +568,89 @@ export class BypassAbuseDetectionService extends EventEmitter {
    */
   private initializeDetectionPatterns(): void {
     // Velocity abuse pattern
-    this.abusePatterns.set('velocity_abuse', {
-      patternId: 'velocity_abuse',
-      name: 'Velocity Abuse',
-      description: 'Detects unusually high operation velocity',
+    this.abusePatterns.set("velocity_abuse", {
+      patternId: "velocity_abuse",
+      name: "Velocity Abuse",
+      description: "Detects unusually high operation velocity",
       algorithm: DetectionAlgorithm.VELOCITY_ANALYSIS,
       riskThreshold: 80,
       severity: ViolationSeverity.HIGH,
       parameters: {
         timeWindowMinutes: 60,
         minEvents: 10,
-        maxRate: 30 // 30 operations per hour
+        maxRate: 30, // 30 operations per hour
       },
       enabled: true,
       falsePositiveRate: 0.05,
-      accuracy: 0.92
+      accuracy: 0.92,
     });
 
     // Behavioral anomaly pattern
-    this.abusePatterns.set('behavioral_anomaly', {
-      patternId: 'behavioral_anomaly',
-      name: 'Behavioral Anomaly',
-      description: 'Detects deviations from established behavior patterns',
+    this.abusePatterns.set("behavioral_anomaly", {
+      patternId: "behavioral_anomaly",
+      name: "Behavioral Anomaly",
+      description: "Detects deviations from established behavior patterns",
       algorithm: DetectionAlgorithm.BEHAVIORAL_ANALYSIS,
       riskThreshold: 75,
       severity: ViolationSeverity.MEDIUM,
       parameters: {
         timeWindowMinutes: 1440, // 24 hours
         minEvents: 5,
-        deviationThreshold: 2.5 // 2.5 standard deviations
+        deviationThreshold: 2.5, // 2.5 standard deviations
       },
       enabled: true,
       falsePositiveRate: 0.08,
-      accuracy: 0.88
+      accuracy: 0.88,
     });
 
     // Geographic impossibility pattern
-    this.abusePatterns.set('geographic_impossibility', {
-      patternId: 'geographic_impossibility',
-      name: 'Geographic Impossibility',
-      description: 'Detects impossible travel between locations',
+    this.abusePatterns.set("geographic_impossibility", {
+      patternId: "geographic_impossibility",
+      name: "Geographic Impossibility",
+      description: "Detects impossible travel between locations",
       algorithm: DetectionAlgorithm.ANOMALY_DETECTION,
       riskThreshold: 90,
       severity: ViolationSeverity.CRITICAL,
       parameters: {
         timeWindowMinutes: 60,
-        minEvents: 2
+        minEvents: 2,
       },
       enabled: true,
       falsePositiveRate: 0.02,
-      accuracy: 0.95
+      accuracy: 0.95,
     });
 
     // Privilege escalation pattern
-    this.abusePatterns.set('privilege_escalation', {
-      patternId: 'privilege_escalation',
-      name: 'Privilege Escalation',
-      description: 'Detects attempts to escalate privileges',
+    this.abusePatterns.set("privilege_escalation", {
+      patternId: "privilege_escalation",
+      name: "Privilege Escalation",
+      description: "Detects attempts to escalate privileges",
       algorithm: DetectionAlgorithm.PATTERN_MATCHING,
       riskThreshold: 85,
       severity: ViolationSeverity.CRITICAL,
       parameters: {
         timeWindowMinutes: 120,
         minEvents: 3,
-        patternSequence: ['database_critical', 'auth_critical', 'config_critical']
+        patternSequence: [
+          "database_critical",
+          "auth_critical",
+          "config_critical",
+        ],
       },
       enabled: true,
       falsePositiveRate: 0.03,
-      accuracy: 0.93
+      accuracy: 0.93,
     });
 
-    this.logger.warn('Abuse detection patterns initialized');
+    this.logger.warn("Abuse detection patterns initialized");
   }
 
   /**
    * Record operation for analysis
    */
-  private async recordOperation(operation: BypassOperationResult): Promise<void> {
+  private async recordOperation(
+    operation: BypassOperationResult,
+  ): Promise<void> {
     const userId = this.extractUserIdFromOperation(operation);
     if (!userId) return;
 
@@ -622,7 +659,9 @@ export class BypassAbuseDetectionService extends EventEmitter {
 
     // Keep only recent operations (last 24 hours)
     const cutoff = Date.now() - 24 * 60 * 60 * 1000;
-    userOperations = userOperations.filter(op => op.executedAt.getTime() > cutoff);
+    userOperations = userOperations.filter(
+      (op) => op.executedAt.getTime() > cutoff,
+    );
 
     this.recentOperations.set(userId, userOperations);
   }
@@ -630,7 +669,9 @@ export class BypassAbuseDetectionService extends EventEmitter {
   /**
    * Update user behavior profile
    */
-  private async updateUserProfile(operation: BypassOperationResult): Promise<void> {
+  private async updateUserProfile(
+    operation: BypassOperationResult,
+  ): Promise<void> {
     const userId = this.extractUserIdFromOperation(operation);
     if (!userId) return;
 
@@ -659,7 +700,9 @@ export class BypassAbuseDetectionService extends EventEmitter {
   /**
    * Run detection algorithms
    */
-  private async runDetectionAlgorithms(operation: BypassOperationResult): Promise<DetectionResult> {
+  private async runDetectionAlgorithms(
+    operation: BypassOperationResult,
+  ): Promise<DetectionResult> {
     const userId = this.extractUserIdFromOperation(operation);
     const userOperations = this.recentOperations.get(userId!) || [];
     const userProfile = this.userProfiles.get(userId!);
@@ -671,7 +714,12 @@ export class BypassAbuseDetectionService extends EventEmitter {
     for (const pattern of this.abusePatterns.values()) {
       if (!pattern.enabled) continue;
 
-      const detectionResult = await this.runSingleDetection(pattern, operation, userOperations, userProfile);
+      const detectionResult = await this.runSingleDetection(
+        pattern,
+        operation,
+        userOperations,
+        userProfile,
+      );
 
       if (detectionResult.detected) {
         totalRiskScore += pattern.riskThreshold * detectionResult.confidence;
@@ -680,13 +728,16 @@ export class BypassAbuseDetectionService extends EventEmitter {
     }
 
     // Normalize risk score
-    const normalizedRiskScore = Math.min(100, totalRiskScore / detectedPatterns.length || 0);
+    const normalizedRiskScore = Math.min(
+      100,
+      totalRiskScore / detectedPatterns.length || 0,
+    );
 
     return {
       riskScore: normalizedRiskScore,
       detectedPatterns,
       evidence: evidence as DetectionEvidence,
-      confidence: this.calculateOverallConfidence(detectedPatterns)
+      confidence: this.calculateOverallConfidence(detectedPatterns),
     };
   }
 
@@ -697,7 +748,7 @@ export class BypassAbuseDetectionService extends EventEmitter {
     pattern: AbusePattern,
     operation: BypassOperationResult,
     userOperations: BypassOperationResult[],
-    userProfile?: UserBehaviorProfile
+    userProfile?: UserBehaviorProfile,
   ): Promise<SingleDetectionResult> {
     switch (pattern.algorithm) {
       case DetectionAlgorithm.VELOCITY_ANALYSIS:
@@ -713,7 +764,11 @@ export class BypassAbuseDetectionService extends EventEmitter {
         return this.runPatternMatching(pattern, userOperations);
 
       case DetectionAlgorithm.STATISTICAL_ANALYSIS:
-        return this.runStatisticalAnalysis(pattern, userOperations, userProfile);
+        return this.runStatisticalAnalysis(
+          pattern,
+          userOperations,
+          userProfile,
+        );
 
       case DetectionAlgorithm.ML_CLASSIFICATION:
         return this.runMLClassification(pattern, operation, userProfile);
@@ -726,12 +781,18 @@ export class BypassAbuseDetectionService extends EventEmitter {
   /**
    * Velocity analysis algorithm
    */
-  private runVelocityAnalysis(pattern: AbusePattern, userOperations: BypassOperationResult[]): SingleDetectionResult {
+  private runVelocityAnalysis(
+    pattern: AbusePattern,
+    userOperations: BypassOperationResult[],
+  ): SingleDetectionResult {
     const timeWindow = pattern.parameters.timeWindowMinutes * 60 * 1000;
     const cutoff = Date.now() - timeWindow;
-    const recentOps = userOperations.filter(op => op.executedAt.getTime() > cutoff);
+    const recentOps = userOperations.filter(
+      (op) => op.executedAt.getTime() > cutoff,
+    );
 
-    const currentRate = recentOps.length / (pattern.parameters.timeWindowMinutes / 60);
+    const currentRate =
+      recentOps.length / (pattern.parameters.timeWindowMinutes / 60);
     const maxRate = pattern.parameters.maxRate || 30;
 
     const detected = currentRate > maxRate;
@@ -746,7 +807,7 @@ export class BypassAbuseDetectionService extends EventEmitter {
   private runBehavioralAnalysis(
     pattern: AbusePattern,
     operation: BypassOperationResult,
-    userProfile?: UserBehaviorProfile
+    userProfile?: UserBehaviorProfile,
   ): SingleDetectionResult {
     if (!userProfile || !userProfile.baseline) {
       return { detected: false, confidence: 0 };
@@ -756,7 +817,9 @@ export class BypassAbuseDetectionService extends EventEmitter {
     const recent = userProfile.recent;
 
     // Check for significant deviations
-    const operationRateDeviation = Math.abs(recent.operationsLastHour - baseline.avgOperationsPerHour) / baseline.avgOperationsPerHour;
+    const operationRateDeviation =
+      Math.abs(recent.operationsLastHour - baseline.avgOperationsPerHour) /
+      baseline.avgOperationsPerHour;
     const threshold = pattern.parameters.deviationThreshold || 2.5;
 
     const detected = operationRateDeviation > threshold;
@@ -771,10 +834,10 @@ export class BypassAbuseDetectionService extends EventEmitter {
   private runAnomalyDetection(
     pattern: AbusePattern,
     operation: BypassOperationResult,
-    userOperations: BypassOperationResult[]
+    userOperations: BypassOperationResult[],
   ): SingleDetectionResult {
     // Geographic impossibility check
-    if (pattern.patternId === 'geographic_impossibility') {
+    if (pattern.patternId === "geographic_impossibility") {
       return this.checkGeographicImpossibility(userOperations);
     }
 
@@ -788,15 +851,21 @@ export class BypassAbuseDetectionService extends EventEmitter {
   /**
    * Pattern matching algorithm
    */
-  private runPatternMatching(pattern: AbusePattern, userOperations: BypassOperationResult[]): SingleDetectionResult {
+  private runPatternMatching(
+    pattern: AbusePattern,
+    userOperations: BypassOperationResult[],
+  ): SingleDetectionResult {
     const sequence = pattern.parameters.patternSequence || [];
     if (sequence.length === 0) return { detected: false, confidence: 0 };
 
     // Look for sequence in recent operations
-    const recentTypes = userOperations.slice(-sequence.length).map(op => this.getOperationType(op));
+    const recentTypes = userOperations
+      .slice(-sequence.length)
+      .map((op) => this.getOperationType(op));
 
-    const matches = sequence.every((expectedType, index) =>
-      recentTypes[index] && recentTypes[index].includes(expectedType)
+    const matches = sequence.every(
+      (expectedType, index) =>
+        recentTypes[index] && recentTypes[index].includes(expectedType),
     );
 
     return { detected: matches, confidence: matches ? 1.0 : 0.0 };
@@ -808,7 +877,7 @@ export class BypassAbuseDetectionService extends EventEmitter {
   private runStatisticalAnalysis(
     pattern: AbusePattern,
     userOperations: BypassOperationResult[],
-    userProfile?: UserBehaviorProfile
+    userProfile?: UserBehaviorProfile,
   ): SingleDetectionResult {
     if (!userProfile || userOperations.length < pattern.parameters.minEvents) {
       return { detected: false, confidence: 0 };
@@ -830,7 +899,7 @@ export class BypassAbuseDetectionService extends EventEmitter {
   private runMLClassification(
     pattern: AbusePattern,
     operation: BypassOperationResult,
-    userProfile?: UserBehaviorProfile
+    userProfile?: UserBehaviorProfile,
   ): SingleDetectionResult {
     // Simplified ML classification using feature weights
     const features = this.extractFeatures(operation, userProfile);
@@ -854,7 +923,7 @@ export class BypassAbuseDetectionService extends EventEmitter {
    */
   private async createAbuseEvent(
     operation: BypassOperationResult,
-    detectionResult: DetectionResult
+    detectionResult: DetectionResult,
   ): Promise<AbuseDetectionEvent> {
     const eventId = `abuse_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const userId = this.extractUserIdFromOperation(operation);
@@ -866,12 +935,16 @@ export class BypassAbuseDetectionService extends EventEmitter {
       detectedPatterns: detectionResult.detectedPatterns,
       riskScore: detectionResult.riskScore,
       evidence: detectionResult.evidence,
-      recommendedAction: this.determinePreventionAction(detectionResult.riskScore),
+      recommendedAction: this.determinePreventionAction(
+        detectionResult.riskScore,
+      ),
       severity: this.determineSeverity(detectionResult.riskScore),
-      confidence: detectionResult.confidence
+      confidence: detectionResult.confidence,
     };
 
-    this.logger.error(`Abuse detected for user ${userId}: Risk ${detectionResult.riskScore} (Event: ${eventId})`);
+    this.logger.error(
+      `Abuse detected for user ${userId}: Risk ${detectionResult.riskScore} (Event: ${eventId})`,
+    );
 
     return event;
   }
@@ -882,11 +955,16 @@ export class BypassAbuseDetectionService extends EventEmitter {
   private async executePrevention(event: AbuseDetectionEvent): Promise<void> {
     switch (event.recommendedAction) {
       case PreventionAction.MONITOR:
-        this.logger.warn(`Monitoring user ${event.userId} for suspicious activity`);
+        this.logger.warn(
+          `Monitoring user ${event.userId} for suspicious activity`,
+        );
         break;
 
       case PreventionAction.WARN:
-        this.emit('user-warning', { userId: event.userId, reason: 'Suspicious behavior detected' });
+        this.emit("user-warning", {
+          userId: event.userId,
+          reason: "Suspicious behavior detected",
+        });
         break;
 
       case PreventionAction.RATE_LIMIT:
@@ -898,16 +976,23 @@ export class BypassAbuseDetectionService extends EventEmitter {
         break;
 
       case PreventionAction.SUSPEND_USER:
-        await this.blockUser(event.userId, 'Abuse pattern detected', 60); // 1 hour
+        await this.blockUser(event.userId, "Abuse pattern detected", 60); // 1 hour
         break;
 
       case PreventionAction.BLOCK_OPERATIONS:
-        await this.blockUser(event.userId, 'High-risk abuse pattern detected', 240); // 4 hours
+        await this.blockUser(
+          event.userId,
+          "High-risk abuse pattern detected",
+          240,
+        ); // 4 hours
         break;
 
       case PreventionAction.EMERGENCY_LOCKDOWN:
-        await this.blockUser(event.userId, 'Critical security violation detected');
-        this.emit('emergency-lockdown', { userId: event.userId, event });
+        await this.blockUser(
+          event.userId,
+          "Critical security violation detected",
+        );
+        this.emit("emergency-lockdown", { userId: event.userId, event });
         break;
     }
   }
@@ -915,12 +1000,17 @@ export class BypassAbuseDetectionService extends EventEmitter {
   /**
    * Helper methods
    */
-  private extractUserIdFromOperation(operation: BypassOperationResult): string | null {
+  private extractUserIdFromOperation(
+    operation: BypassOperationResult,
+  ): string | null {
     // Extract user ID from operation metadata or token
-    return `user_${operation.tokenId.split('_')[1] || 'unknown'}`;
+    return `user_${operation.tokenId.split("_")[1] || "unknown"}`;
   }
 
-  private async createNewUserProfile(userId: string, operation: BypassOperationResult): Promise<UserBehaviorProfile> {
+  private async createNewUserProfile(
+    userId: string,
+    operation: BypassOperationResult,
+  ): Promise<UserBehaviorProfile> {
     return {
       userId,
       userRole: BypassRole.SYSTEM_OPERATOR, // Default role
@@ -932,7 +1022,7 @@ export class BypassAbuseDetectionService extends EventEmitter {
         timePatterns: [],
         commonIpAddresses: [],
         avgSessionDuration: 1800000, // 30 minutes
-        successRate: 0.95
+        successRate: 0.95,
       },
       recent: {
         operationsLastHour: 0,
@@ -941,35 +1031,49 @@ export class BypassAbuseDetectionService extends EventEmitter {
         failedAttempts: 0,
         avgTimeBetweenOps: 0,
         recentOperationTypes: [],
-        geoLocations: []
+        geoLocations: [],
       },
       riskScore: 30, // Medium risk for new users
       flags: [],
-      trustLevel: TrustLevel.MEDIUM
+      trustLevel: TrustLevel.MEDIUM,
     };
   }
 
-  private calculateRecentMetrics(operations: BypassOperationResult[]): BehaviorMetrics {
+  private calculateRecentMetrics(
+    operations: BypassOperationResult[],
+  ): BehaviorMetrics {
     const now = Date.now();
     const hourAgo = now - 60 * 60 * 1000;
     const dayAgo = now - 24 * 60 * 60 * 1000;
 
     return {
-      operationsLastHour: operations.filter(op => op.executedAt.getTime() > hourAgo).length,
-      operationsLastDay: operations.filter(op => op.executedAt.getTime() > dayAgo).length,
-      uniqueIpsUsed: new Set(operations.map(op => 'ip_placeholder')).size,
-      failedAttempts: operations.filter(op => !op.success).length,
+      operationsLastHour: operations.filter(
+        (op) => op.executedAt.getTime() > hourAgo,
+      ).length,
+      operationsLastDay: operations.filter(
+        (op) => op.executedAt.getTime() > dayAgo,
+      ).length,
+      uniqueIpsUsed: new Set(operations.map((op) => "ip_placeholder")).size,
+      failedAttempts: operations.filter((op) => !op.success).length,
       avgTimeBetweenOps: this.calculateAvgTimeBetween(operations),
-      recentOperationTypes: operations.slice(-10).map(op => this.getOperationType(op)),
-      geoLocations: ['location_placeholder']
+      recentOperationTypes: operations
+        .slice(-10)
+        .map((op) => this.getOperationType(op)),
+      geoLocations: ["location_placeholder"],
     };
   }
 
-  private calculateRiskScore(profile: UserBehaviorProfile, operation: BypassOperationResult): number {
+  private calculateRiskScore(
+    profile: UserBehaviorProfile,
+    operation: BypassOperationResult,
+  ): number {
     let riskScore = profile.riskScore || 30;
 
     // Adjust based on recent behavior
-    if (profile.recent.operationsLastHour > profile.baseline.avgOperationsPerHour * 2) {
+    if (
+      profile.recent.operationsLastHour >
+      profile.baseline.avgOperationsPerHour * 2
+    ) {
       riskScore += 20;
     }
 
@@ -984,10 +1088,16 @@ export class BypassAbuseDetectionService extends EventEmitter {
     return Math.min(100, Math.max(0, riskScore));
   }
 
-  private async updateBehaviorFlags(profile: UserBehaviorProfile, operation: BypassOperationResult): Promise<BehaviorFlag[]> {
+  private async updateBehaviorFlags(
+    profile: UserBehaviorProfile,
+    operation: BypassOperationResult,
+  ): Promise<BehaviorFlag[]> {
     const flags: BehaviorFlag[] = [];
 
-    if (profile.recent.operationsLastHour > profile.baseline.avgOperationsPerHour * 3) {
+    if (
+      profile.recent.operationsLastHour >
+      profile.baseline.avgOperationsPerHour * 3
+    ) {
       flags.push(BehaviorFlag.VELOCITY_ABUSE);
     }
 
@@ -1013,32 +1123,45 @@ export class BypassAbuseDetectionService extends EventEmitter {
     return patterns.reduce((sum, p) => sum + p.accuracy, 0) / patterns.length;
   }
 
-  private checkGeographicImpossibility(operations: BypassOperationResult[]): SingleDetectionResult {
+  private checkGeographicImpossibility(
+    operations: BypassOperationResult[],
+  ): SingleDetectionResult {
     // Simplified geographic impossibility check
     // In reality, this would check actual geographic coordinates and travel times
     const detected = false; // Mock implementation
     return { detected, confidence: 0 };
   }
 
-  private calculateAnomalyScore(operation: BypassOperationResult, operations: BypassOperationResult[]): number {
+  private calculateAnomalyScore(
+    operation: BypassOperationResult,
+    operations: BypassOperationResult[],
+  ): number {
     // Simplified anomaly scoring
     return Math.random() * 0.5; // Mock implementation
   }
 
-  private getOperationType(operation: BypassOperationResult): BypassOperationType {
+  private getOperationType(
+    operation: BypassOperationResult,
+  ): BypassOperationType {
     // Extract operation type from function name
-    if (operation.functionName.includes('database') || operation.functionName.includes('db')) {
+    if (
+      operation.functionName.includes("database") ||
+      operation.functionName.includes("db")
+    ) {
       return BypassOperationType.DATABASE_CRITICAL;
-    } else if (operation.functionName.includes('auth')) {
+    } else if (operation.functionName.includes("auth")) {
       return BypassOperationType.AUTH_CRITICAL;
-    } else if (operation.functionName.includes('config')) {
+    } else if (operation.functionName.includes("config")) {
       return BypassOperationType.CONFIG_CRITICAL;
     } else {
       return BypassOperationType.MAINTENANCE;
     }
   }
 
-  private calculateZScore(operations: BypassOperationResult[], baseline: BehaviorBaseline): number {
+  private calculateZScore(
+    operations: BypassOperationResult[],
+    baseline: BehaviorBaseline,
+  ): number {
     const currentRate = operations.length;
     const meanRate = baseline.avgOperationsPerHour;
     const stdDev = meanRate * 0.3; // Assume 30% standard deviation
@@ -1046,7 +1169,10 @@ export class BypassAbuseDetectionService extends EventEmitter {
     return (currentRate - meanRate) / stdDev;
   }
 
-  private extractFeatures(operation: BypassOperationResult, profile?: UserBehaviorProfile): Record<string, number> {
+  private extractFeatures(
+    operation: BypassOperationResult,
+    profile?: UserBehaviorProfile,
+  ): Record<string, number> {
     return {
       success_rate: operation.success ? 1 : 0,
       execution_time: operation.performanceMetrics.duration / 1000, // Convert to seconds
@@ -1078,7 +1204,9 @@ export class BypassAbuseDetectionService extends EventEmitter {
 
     let totalTime = 0;
     for (let i = 1; i < operations.length; i++) {
-      totalTime += operations[i].executedAt.getTime() - operations[i - 1].executedAt.getTime();
+      totalTime +=
+        operations[i].executedAt.getTime() -
+        operations[i - 1].executedAt.getTime();
     }
 
     return totalTime / (operations.length - 1);
@@ -1086,17 +1214,22 @@ export class BypassAbuseDetectionService extends EventEmitter {
 
   private async requireApprovalForUser(userId: string): Promise<void> {
     // Set flag requiring approval for all operations
-    this.logger.warn(`User ${userId} now requires approval for all bypass operations`);
-    this.emit('approval-required', { userId });
+    this.logger.warn(
+      `User ${userId} now requires approval for all bypass operations`,
+    );
+    this.emit("approval-required", { userId });
   }
 
   private startContinuousMonitoring(): void {
     // Clean up old data every hour
-    setInterval(() => {
-      this.cleanupOldData();
-    }, 60 * 60 * 1000);
+    setInterval(
+      () => {
+        this.cleanupOldData();
+      },
+      60 * 60 * 1000,
+    );
 
-    this.logger.warn('Continuous abuse monitoring started');
+    this.logger.warn("Continuous abuse monitoring started");
   }
 
   private cleanupOldData(): void {
@@ -1104,7 +1237,9 @@ export class BypassAbuseDetectionService extends EventEmitter {
 
     // Clean up old operations
     for (const [userId, operations] of this.recentOperations) {
-      const filtered = operations.filter(op => op.executedAt.getTime() > cutoff);
+      const filtered = operations.filter(
+        (op) => op.executedAt.getTime() > cutoff,
+      );
       if (filtered.length === 0) {
         this.recentOperations.delete(userId);
       } else {

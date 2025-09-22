@@ -10,7 +10,7 @@
  * @author PARLANT Testing Framework Agent
  */
 
-import { DatabaseFunction } from './framework.types';
+import { DatabaseFunction } from "./framework.types";
 
 // ============================================================================
 // Core Regression Testing Types
@@ -20,48 +20,48 @@ import { DatabaseFunction } from './framework.types';
  * Regression test execution status
  */
 export enum RegressionTestStatus {
-  PENDING = 'PENDING',
-  RUNNING = 'RUNNING',
-  PASSED = 'PASSED',
-  FAILED = 'FAILED',
-  WARNING = 'WARNING',
-  ERROR = 'ERROR',
-  SKIPPED = 'SKIPPED',
-  TIMEOUT = 'TIMEOUT'
+  PENDING = "PENDING",
+  RUNNING = "RUNNING",
+  PASSED = "PASSED",
+  FAILED = "FAILED",
+  WARNING = "WARNING",
+  ERROR = "ERROR",
+  SKIPPED = "SKIPPED",
+  TIMEOUT = "TIMEOUT",
 }
 
 /**
  * Change detection severity levels
  */
 export enum ChangeSeverity {
-  LOW = 'LOW',
-  MEDIUM = 'MEDIUM',
-  HIGH = 'HIGH',
-  CRITICAL = 'CRITICAL'
+  LOW = "LOW",
+  MEDIUM = "MEDIUM",
+  HIGH = "HIGH",
+  CRITICAL = "CRITICAL",
 }
 
 /**
  * Regression alert types
  */
 export enum RegressionAlertType {
-  FUNCTIONAL_REGRESSION = 'FUNCTIONAL_REGRESSION',
-  PERFORMANCE_REGRESSION = 'PERFORMANCE_REGRESSION',
-  COMPATIBILITY_ISSUE = 'COMPATIBILITY_ISSUE',
-  BASELINE_DEVIATION = 'BASELINE_DEVIATION',
-  STABILITY_CONCERN = 'STABILITY_CONCERN',
-  NEW_FAILURE = 'NEW_FAILURE'
+  FUNCTIONAL_REGRESSION = "FUNCTIONAL_REGRESSION",
+  PERFORMANCE_REGRESSION = "PERFORMANCE_REGRESSION",
+  COMPATIBILITY_ISSUE = "COMPATIBILITY_ISSUE",
+  BASELINE_DEVIATION = "BASELINE_DEVIATION",
+  STABILITY_CONCERN = "STABILITY_CONCERN",
+  NEW_FAILURE = "NEW_FAILURE",
 }
 
 /**
  * Change detection types
  */
 export enum ChangeType {
-  FUNCTIONAL = 'FUNCTIONAL',
-  PERFORMANCE = 'PERFORMANCE',
-  BEHAVIOR = 'BEHAVIOR',
-  OUTPUT = 'OUTPUT',
-  SIDE_EFFECTS = 'SIDE_EFFECTS',
-  ERROR_HANDLING = 'ERROR_HANDLING'
+  FUNCTIONAL = "FUNCTIONAL",
+  PERFORMANCE = "PERFORMANCE",
+  BEHAVIOR = "BEHAVIOR",
+  OUTPUT = "OUTPUT",
+  SIDE_EFFECTS = "SIDE_EFFECTS",
+  ERROR_HANDLING = "ERROR_HANDLING",
 }
 
 // ============================================================================
@@ -135,7 +135,7 @@ export interface RegressionTestConfig {
     minSeverity: ChangeSeverity;
 
     /** Alert notification channels */
-    notificationChannels: ('EMAIL' | 'SLACK' | 'WEBHOOK')[];
+    notificationChannels: ("EMAIL" | "SLACK" | "WEBHOOK")[];
 
     /** Alert throttling settings */
     throttling: {
@@ -157,7 +157,7 @@ export interface RegressionTestConfig {
     includeChangeAnalysis: boolean;
 
     /** Export formats for reports */
-    exportFormats: ('JSON' | 'HTML' | 'PDF' | 'XML')[];
+    exportFormats: ("JSON" | "HTML" | "PDF" | "XML")[];
   };
 
   /** Storage and retention */
@@ -342,10 +342,10 @@ export interface FunctionTestScenario {
   /** Scenario metadata */
   metadata: {
     /** Scenario type */
-    type: 'HAPPY_PATH' | 'EDGE_CASE' | 'ERROR_CASE' | 'BOUNDARY' | 'LOAD';
+    type: "HAPPY_PATH" | "EDGE_CASE" | "ERROR_CASE" | "BOUNDARY" | "LOAD";
 
     /** Priority level */
-    priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+    priority: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
 
     /** Execution weight */
     weight: number;
@@ -357,7 +357,7 @@ export interface FunctionTestScenario {
  */
 export interface TestCondition {
   /** Condition type */
-  type: 'PRE_CONDITION' | 'POST_CONDITION' | 'INVARIANT';
+  type: "PRE_CONDITION" | "POST_CONDITION" | "INVARIANT";
 
   /** Condition description */
   description: string;
@@ -377,7 +377,11 @@ export interface ValidationRule {
   ruleId: string;
 
   /** Rule type */
-  type: 'RESULT_VALIDATION' | 'PERFORMANCE_VALIDATION' | 'BEHAVIOR_VALIDATION' | 'STATE_VALIDATION';
+  type:
+    | "RESULT_VALIDATION"
+    | "PERFORMANCE_VALIDATION"
+    | "BEHAVIOR_VALIDATION"
+    | "STATE_VALIDATION";
 
   /** Rule description */
   description: string;
@@ -385,7 +389,13 @@ export interface ValidationRule {
   /** Validation criteria */
   criteria: {
     /** Comparison operator */
-    operator: 'EQUALS' | 'NOT_EQUALS' | 'GREATER_THAN' | 'LESS_THAN' | 'CONTAINS' | 'MATCHES_PATTERN';
+    operator:
+      | "EQUALS"
+      | "NOT_EQUALS"
+      | "GREATER_THAN"
+      | "LESS_THAN"
+      | "CONTAINS"
+      | "MATCHES_PATTERN";
 
     /** Expected value */
     expectedValue: unknown;
@@ -451,7 +461,7 @@ export interface FunctionRegressionTest {
   functionName: string;
 
   /** Test type */
-  testType: 'REGRESSION' | 'SMOKE' | 'SANITY' | 'CRITICAL_PATH';
+  testType: "REGRESSION" | "SMOKE" | "SANITY" | "CRITICAL_PATH";
 
   /** Baseline result reference */
   baselineResult: unknown;
@@ -485,7 +495,7 @@ export interface ValidationCriteria {
   /** Result validation */
   resultValidation: {
     /** Validation type */
-    type: 'EXACT_MATCH' | 'FUZZY_MATCH' | 'PATTERN_MATCH' | 'CUSTOM';
+    type: "EXACT_MATCH" | "FUZZY_MATCH" | "PATTERN_MATCH" | "CUSTOM";
 
     /** Tolerance for fuzzy matching */
     tolerance: number;
@@ -527,10 +537,14 @@ export interface ValidationCriteria {
  */
 export interface ChangeDetector {
   /** Detector type */
-  type: 'RESULT_CHANGE' | 'PERFORMANCE_CHANGE' | 'BEHAVIOR_CHANGE' | 'STATE_CHANGE';
+  type:
+    | "RESULT_CHANGE"
+    | "PERFORMANCE_CHANGE"
+    | "BEHAVIOR_CHANGE"
+    | "STATE_CHANGE";
 
   /** Detection sensitivity */
-  sensitivity: 'LOW' | 'MEDIUM' | 'HIGH';
+  sensitivity: "LOW" | "MEDIUM" | "HIGH";
 
   /** Detection threshold */
   threshold: number;
@@ -601,7 +615,7 @@ export interface RegressionTestResult {
   /** Execution metadata */
   metadata: {
     /** Triggered by */
-    triggeredBy: 'MANUAL' | 'AUTOMATED' | 'CI_CD' | 'SCHEDULED';
+    triggeredBy: "MANUAL" | "AUTOMATED" | "CI_CD" | "SCHEDULED";
 
     /** Commit hash */
     commitHash?: string;
@@ -675,7 +689,7 @@ export interface ValidationResult {
   ruleId: string;
 
   /** Validation status */
-  status: 'PASSED' | 'FAILED' | 'SKIPPED';
+  status: "PASSED" | "FAILED" | "SKIPPED";
 
   /** Expected value */
   expected: unknown;
@@ -729,7 +743,7 @@ export interface ChangeDetectionResult {
   changeCategories: Record<string, number>;
 
   /** Risk assessment */
-  riskAssessment: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  riskAssessment: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
 }
 
 /**
@@ -769,7 +783,7 @@ export interface ChangeDetail {
   baseline: unknown;
 
   /** Change type */
-  changeType: 'ADDITION' | 'REMOVAL' | 'MODIFICATION' | 'REORDERING';
+  changeType: "ADDITION" | "REMOVAL" | "MODIFICATION" | "REORDERING";
 
   /** Change location */
   location?: string;
@@ -795,12 +809,12 @@ export interface StabilityAnalysis {
   factors: string[];
 
   /** Stability recommendation */
-  recommendation: 'STABLE' | 'MONITOR' | 'INVESTIGATE' | 'CRITICAL';
+  recommendation: "STABLE" | "MONITOR" | "INVESTIGATE" | "CRITICAL";
 
   /** Historical stability trend */
   trend: {
     /** Trend direction */
-    direction: 'IMPROVING' | 'STABLE' | 'DEGRADING';
+    direction: "IMPROVING" | "STABLE" | "DEGRADING";
 
     /** Trend confidence */
     confidence: number;
@@ -867,7 +881,11 @@ export interface BaselineComparison {
   significantChanges: number;
 
   /** Overall assessment */
-  overallAssessment: 'FULLY_COMPATIBLE' | 'MOSTLY_COMPATIBLE' | 'PARTIALLY_COMPATIBLE' | 'INCOMPATIBLE';
+  overallAssessment:
+    | "FULLY_COMPATIBLE"
+    | "MOSTLY_COMPATIBLE"
+    | "PARTIALLY_COMPATIBLE"
+    | "INCOMPATIBLE";
 }
 
 /**
@@ -878,7 +896,7 @@ export interface FunctionComparison {
   functionName: string;
 
   /** Comparison status */
-  status: 'MATCH' | 'DIFFERENT' | 'NEW_FUNCTION' | 'MISSING_FUNCTION' | 'ERROR';
+  status: "MATCH" | "DIFFERENT" | "NEW_FUNCTION" | "MISSING_FUNCTION" | "ERROR";
 
   /** Functions match baseline */
   matches: boolean;
@@ -893,7 +911,7 @@ export interface FunctionComparison {
   baseline: unknown;
 
   /** Change significance */
-  significance: 'LOW' | 'MEDIUM' | 'HIGH';
+  significance: "LOW" | "MEDIUM" | "HIGH";
 
   /** Compatibility score */
   compatibilityScore: number;
@@ -916,10 +934,10 @@ export interface FunctionComparison {
  */
 export interface ComparisonDetail {
   /** Comparison type */
-  type: 'RESULT' | 'PERFORMANCE' | 'BEHAVIOR';
+  type: "RESULT" | "PERFORMANCE" | "BEHAVIOR";
 
   /** Comparison status */
-  status: 'IDENTICAL' | 'SIMILAR' | 'DIFFERENT' | 'INCOMPARABLE';
+  status: "IDENTICAL" | "SIMILAR" | "DIFFERENT" | "INCOMPARABLE";
 
   /** Current value */
   current: unknown;
@@ -952,7 +970,7 @@ export interface RegressionAlert {
   type: RegressionAlertType;
 
   /** Alert severity */
-  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
 
   /** Function name (or MULTIPLE for system-wide alerts) */
   functionName: string;
@@ -988,7 +1006,7 @@ export interface RegressionAlert {
   };
 
   /** Alert status */
-  status?: 'ACTIVE' | 'ACKNOWLEDGED' | 'RESOLVED' | 'SUPPRESSED';
+  status?: "ACTIVE" | "ACKNOWLEDGED" | "RESOLVED" | "SUPPRESSED";
 
   /** Resolution details */
   resolution?: {
@@ -1080,7 +1098,7 @@ export interface TrendAnalysis {
   }[];
 
   /** Trend direction */
-  trend: 'IMPROVING' | 'STABLE' | 'DEGRADING';
+  trend: "IMPROVING" | "STABLE" | "DEGRADING";
 
   /** Trend confidence */
   confidence: number;

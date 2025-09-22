@@ -9,8 +9,13 @@
  * @compliance GDPR, SOX, HIPAA, SOC2
  */
 
-import { Injectable, Logger, ForbiddenException, UnauthorizedException } from '@nestjs/common';
-import { createHash } from 'crypto';
+import {
+  Injectable,
+  Logger,
+  ForbiddenException,
+  UnauthorizedException,
+} from "@nestjs/common";
+import { createHash } from "crypto";
 import {
   BypassRole,
   BypassAuthorizationLevel,
@@ -26,8 +31,8 @@ import {
   SecurityFlag,
   BusinessImpactLevel,
   BypassPriority,
-  ApprovalDecision
-} from '../types/bypass-core.types';
+  ApprovalDecision,
+} from "../types/bypass-core.types";
 
 /**
  * Authorization request for bypass operations
@@ -131,12 +136,12 @@ export interface AuthorizationCondition {
  * Authorization condition types
  */
 export enum ConditionType {
-  TIME_LIMIT = 'time_limit',
-  OPERATION_LIMIT = 'operation_limit',
-  IP_RESTRICTION = 'ip_restriction',
-  FUNCTION_WHITELIST = 'function_whitelist',
-  APPROVAL_REQUIRED = 'approval_required',
-  MONITORING_REQUIRED = 'monitoring_required'
+  TIME_LIMIT = "time_limit",
+  OPERATION_LIMIT = "operation_limit",
+  IP_RESTRICTION = "ip_restriction",
+  FUNCTION_WHITELIST = "function_whitelist",
+  APPROVAL_REQUIRED = "approval_required",
+  MONITORING_REQUIRED = "monitoring_required",
 }
 
 /**
@@ -230,9 +235,13 @@ export class BypassAuthorizationEngineService {
   /**
    * Authorize bypass operation with comprehensive security validation
    */
-  async authorizeBypass(request: BypassAuthorizationRequest): Promise<BypassAuthorizationDecision> {
+  async authorizeBypass(
+    request: BypassAuthorizationRequest,
+  ): Promise<BypassAuthorizationDecision> {
     const startTime = Date.now();
-    this.logger.warn(`Bypass authorization requested for ${request.functionName} by ${request.userId}`);
+    this.logger.warn(
+      `Bypass authorization requested for ${request.functionName} by ${request.userId}`,
+    );
 
     try {
       // Generate decision ID
@@ -248,7 +257,10 @@ export class BypassAuthorizationEngineService {
       const permissionCheck = await this.checkPermissions(request);
 
       // Determine authorization level required
-      const requiredAuthLevel = this.determineRequiredAuthLevel(request, riskAssessment);
+      const requiredAuthLevel = this.determineRequiredAuthLevel(
+        request,
+        riskAssessment,
+      );
 
       // Make authorization decision
       const decision = await this.makeAuthorizationDecision(
@@ -257,17 +269,16 @@ export class BypassAuthorizationEngineService {
         permissionCheck,
         requiredAuthLevel,
         decisionId,
-        startTime
+        startTime,
       );
 
       // Log decision
       this.logAuthorizationDecision(request, decision);
 
       return decision;
-
     } catch (error) {
-      this.logger.error('Authorization error', error);
-      throw new ForbiddenException('Authorization failed');
+      this.logger.error("Authorization error", error);
+      throw new ForbiddenException("Authorization failed");
     }
   }
 
@@ -276,7 +287,7 @@ export class BypassAuthorizationEngineService {
    */
   async createApprovalWorkflow(
     request: EmergencyBypassRequest,
-    authLevel: BypassAuthorizationLevel
+    authLevel: BypassAuthorizationLevel,
   ): Promise<ApprovalWorkflow> {
     const workflowId = `workflow_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
@@ -288,16 +299,20 @@ export class BypassAuthorizationEngineService {
       status: WorkflowStatus.PENDING,
       metadata: {
         startedAt: new Date(),
-        expectedCompletionAt: new Date(Date.now() + this.getWorkflowTimeout(authLevel)),
+        expectedCompletionAt: new Date(
+          Date.now() + this.getWorkflowTimeout(authLevel),
+        ),
         totalTimeLimit: this.getWorkflowTimeout(authLevel),
         escalationRules: this.createEscalationRules(authLevel),
-        notifications: []
-      }
+        notifications: [],
+      },
     };
 
     this.activeWorkflows.set(workflowId, workflow);
 
-    this.logger.warn(`Approval workflow ${workflowId} created for ${authLevel} authorization`);
+    this.logger.warn(
+      `Approval workflow ${workflowId} created for ${authLevel} authorization`,
+    );
 
     return workflow;
   }
@@ -309,31 +324,34 @@ export class BypassAuthorizationEngineService {
     workflowId: string,
     stepNumber: number,
     approverId: string,
-    decision: 'approve' | 'deny',
-    reason: string
+    decision: "approve" | "deny",
+    reason: string,
   ): Promise<ApprovalWorkflow> {
     const workflow = this.activeWorkflows.get(workflowId);
     if (!workflow) {
-      throw new ForbiddenException('Workflow not found');
+      throw new ForbiddenException("Workflow not found");
     }
 
-    const step = workflow.steps.find(s => s.stepNumber === stepNumber);
+    const step = workflow.steps.find((s) => s.stepNumber === stepNumber);
     if (!step) {
-      throw new ForbiddenException('Step not found');
+      throw new ForbiddenException("Step not found");
     }
 
     if (step.status !== ApprovalStepStatus.PENDING) {
-      throw new ForbiddenException('Step already processed');
+      throw new ForbiddenException("Step already processed");
     }
 
     // Process step
     step.status = ApprovalStepStatus.COMPLETED;
     step.completedAt = new Date();
-    step.result = decision === 'approve' ? ApprovalDecision.APPROVED : ApprovalDecision.DENIED;
+    step.result =
+      decision === "approve"
+        ? ApprovalDecision.APPROVED
+        : ApprovalDecision.DENIED;
     step.reason = reason;
 
     // Update workflow status
-    if (decision === 'deny') {
+    if (decision === "deny") {
       workflow.status = WorkflowStatus.DENIED;
     } else if (this.isWorkflowComplete(workflow)) {
       workflow.status = WorkflowStatus.APPROVED;
@@ -345,7 +363,9 @@ export class BypassAuthorizationEngineService {
 
     this.activeWorkflows.set(workflowId, workflow);
 
-    this.logger.warn(`Approval step ${stepNumber} processed for workflow ${workflowId}: ${decision}`);
+    this.logger.warn(
+      `Approval step ${stepNumber} processed for workflow ${workflowId}: ${decision}`,
+    );
 
     return workflow;
   }
@@ -356,7 +376,7 @@ export class BypassAuthorizationEngineService {
   async checkBypassPermissions(
     userRole: BypassRole,
     operationType: BypassOperationType,
-    functionName: string
+    functionName: string,
   ): Promise<boolean> {
     const permissionKey = this.getPermissionKey(operationType, functionName);
     const permission = this.permissionMatrix[permissionKey]?.[userRole];
@@ -370,7 +390,7 @@ export class BypassAuthorizationEngineService {
   async getRequiredAuthorizationLevel(
     operationType: BypassOperationType,
     functionName: string,
-    riskScore: number
+    riskScore: number,
   ): Promise<BypassAuthorizationLevel> {
     // Base authorization level by operation type
     let baseLevel = this.getBaseAuthorizationLevel(operationType, functionName);
@@ -391,8 +411,8 @@ export class BypassAuthorizationEngineService {
    * List active approval workflows
    */
   async getActiveWorkflows(): Promise<ApprovalWorkflow[]> {
-    return Array.from(this.activeWorkflows.values()).filter(
-      w => [WorkflowStatus.PENDING, WorkflowStatus.IN_PROGRESS].includes(w.status)
+    return Array.from(this.activeWorkflows.values()).filter((w) =>
+      [WorkflowStatus.PENDING, WorkflowStatus.IN_PROGRESS].includes(w.status),
     );
   }
 
@@ -406,134 +426,236 @@ export class BypassAuthorizationEngineService {
   private initializePermissionMatrix(): PermissionMatrix {
     return {
       // Database critical operations
-      'database_critical:user_management': {
-        [BypassRole.EMERGENCY_ADMIN]: { allowed: true, authLevel: BypassAuthorizationLevel.EMERGENCY_SINGLE },
-        [BypassRole.DATABASE_ADMIN]: { allowed: true, authLevel: BypassAuthorizationLevel.EMERGENCY_SINGLE },
-        [BypassRole.SECURITY_ADMIN]: { allowed: true, authLevel: BypassAuthorizationLevel.EMERGENCY_DUAL },
-        [BypassRole.SYSTEM_OPERATOR]: { allowed: false, authLevel: BypassAuthorizationLevel.SYSTEM_CRITICAL },
-        [BypassRole.EMERGENCY_RESPONDER]: { allowed: false, authLevel: BypassAuthorizationLevel.EMERGENCY_DUAL },
-        [BypassRole.AUDIT_ADMIN]: { allowed: false, authLevel: BypassAuthorizationLevel.COMMITTEE_APPROVAL }
+      "database_critical:user_management": {
+        [BypassRole.EMERGENCY_ADMIN]: {
+          allowed: true,
+          authLevel: BypassAuthorizationLevel.EMERGENCY_SINGLE,
+        },
+        [BypassRole.DATABASE_ADMIN]: {
+          allowed: true,
+          authLevel: BypassAuthorizationLevel.EMERGENCY_SINGLE,
+        },
+        [BypassRole.SECURITY_ADMIN]: {
+          allowed: true,
+          authLevel: BypassAuthorizationLevel.EMERGENCY_DUAL,
+        },
+        [BypassRole.SYSTEM_OPERATOR]: {
+          allowed: false,
+          authLevel: BypassAuthorizationLevel.SYSTEM_CRITICAL,
+        },
+        [BypassRole.EMERGENCY_RESPONDER]: {
+          allowed: false,
+          authLevel: BypassAuthorizationLevel.EMERGENCY_DUAL,
+        },
+        [BypassRole.AUDIT_ADMIN]: {
+          allowed: false,
+          authLevel: BypassAuthorizationLevel.COMMITTEE_APPROVAL,
+        },
       },
-      'database_critical:data_modification': {
-        [BypassRole.EMERGENCY_ADMIN]: { allowed: true, authLevel: BypassAuthorizationLevel.EMERGENCY_DUAL },
-        [BypassRole.DATABASE_ADMIN]: { allowed: true, authLevel: BypassAuthorizationLevel.EMERGENCY_DUAL },
-        [BypassRole.SECURITY_ADMIN]: { allowed: true, authLevel: BypassAuthorizationLevel.COMMITTEE_APPROVAL },
-        [BypassRole.SYSTEM_OPERATOR]: { allowed: false, authLevel: BypassAuthorizationLevel.COMMITTEE_APPROVAL },
-        [BypassRole.EMERGENCY_RESPONDER]: { allowed: false, authLevel: BypassAuthorizationLevel.COMMITTEE_APPROVAL },
-        [BypassRole.AUDIT_ADMIN]: { allowed: false, authLevel: BypassAuthorizationLevel.BOARD_APPROVAL }
+      "database_critical:data_modification": {
+        [BypassRole.EMERGENCY_ADMIN]: {
+          allowed: true,
+          authLevel: BypassAuthorizationLevel.EMERGENCY_DUAL,
+        },
+        [BypassRole.DATABASE_ADMIN]: {
+          allowed: true,
+          authLevel: BypassAuthorizationLevel.EMERGENCY_DUAL,
+        },
+        [BypassRole.SECURITY_ADMIN]: {
+          allowed: true,
+          authLevel: BypassAuthorizationLevel.COMMITTEE_APPROVAL,
+        },
+        [BypassRole.SYSTEM_OPERATOR]: {
+          allowed: false,
+          authLevel: BypassAuthorizationLevel.COMMITTEE_APPROVAL,
+        },
+        [BypassRole.EMERGENCY_RESPONDER]: {
+          allowed: false,
+          authLevel: BypassAuthorizationLevel.COMMITTEE_APPROVAL,
+        },
+        [BypassRole.AUDIT_ADMIN]: {
+          allowed: false,
+          authLevel: BypassAuthorizationLevel.BOARD_APPROVAL,
+        },
       },
       // Authentication critical operations
-      'auth_critical:token_management': {
-        [BypassRole.EMERGENCY_ADMIN]: { allowed: true, authLevel: BypassAuthorizationLevel.EMERGENCY_SINGLE },
-        [BypassRole.SECURITY_ADMIN]: { allowed: true, authLevel: BypassAuthorizationLevel.EMERGENCY_SINGLE },
-        [BypassRole.DATABASE_ADMIN]: { allowed: false, authLevel: BypassAuthorizationLevel.EMERGENCY_DUAL },
-        [BypassRole.SYSTEM_OPERATOR]: { allowed: false, authLevel: BypassAuthorizationLevel.EMERGENCY_DUAL },
-        [BypassRole.EMERGENCY_RESPONDER]: { allowed: false, authLevel: BypassAuthorizationLevel.COMMITTEE_APPROVAL },
-        [BypassRole.AUDIT_ADMIN]: { allowed: false, authLevel: BypassAuthorizationLevel.COMMITTEE_APPROVAL }
+      "auth_critical:token_management": {
+        [BypassRole.EMERGENCY_ADMIN]: {
+          allowed: true,
+          authLevel: BypassAuthorizationLevel.EMERGENCY_SINGLE,
+        },
+        [BypassRole.SECURITY_ADMIN]: {
+          allowed: true,
+          authLevel: BypassAuthorizationLevel.EMERGENCY_SINGLE,
+        },
+        [BypassRole.DATABASE_ADMIN]: {
+          allowed: false,
+          authLevel: BypassAuthorizationLevel.EMERGENCY_DUAL,
+        },
+        [BypassRole.SYSTEM_OPERATOR]: {
+          allowed: false,
+          authLevel: BypassAuthorizationLevel.EMERGENCY_DUAL,
+        },
+        [BypassRole.EMERGENCY_RESPONDER]: {
+          allowed: false,
+          authLevel: BypassAuthorizationLevel.COMMITTEE_APPROVAL,
+        },
+        [BypassRole.AUDIT_ADMIN]: {
+          allowed: false,
+          authLevel: BypassAuthorizationLevel.COMMITTEE_APPROVAL,
+        },
       },
       // Security incident operations
-      'security_incident:response': {
-        [BypassRole.EMERGENCY_ADMIN]: { allowed: true, authLevel: BypassAuthorizationLevel.SYSTEM_CRITICAL },
-        [BypassRole.SECURITY_ADMIN]: { allowed: true, authLevel: BypassAuthorizationLevel.SYSTEM_CRITICAL },
-        [BypassRole.EMERGENCY_RESPONDER]: { allowed: true, authLevel: BypassAuthorizationLevel.EMERGENCY_SINGLE },
-        [BypassRole.DATABASE_ADMIN]: { allowed: true, authLevel: BypassAuthorizationLevel.EMERGENCY_SINGLE },
-        [BypassRole.SYSTEM_OPERATOR]: { allowed: true, authLevel: BypassAuthorizationLevel.EMERGENCY_DUAL },
-        [BypassRole.AUDIT_ADMIN]: { allowed: false, authLevel: BypassAuthorizationLevel.EMERGENCY_DUAL }
+      "security_incident:response": {
+        [BypassRole.EMERGENCY_ADMIN]: {
+          allowed: true,
+          authLevel: BypassAuthorizationLevel.SYSTEM_CRITICAL,
+        },
+        [BypassRole.SECURITY_ADMIN]: {
+          allowed: true,
+          authLevel: BypassAuthorizationLevel.SYSTEM_CRITICAL,
+        },
+        [BypassRole.EMERGENCY_RESPONDER]: {
+          allowed: true,
+          authLevel: BypassAuthorizationLevel.EMERGENCY_SINGLE,
+        },
+        [BypassRole.DATABASE_ADMIN]: {
+          allowed: true,
+          authLevel: BypassAuthorizationLevel.EMERGENCY_SINGLE,
+        },
+        [BypassRole.SYSTEM_OPERATOR]: {
+          allowed: true,
+          authLevel: BypassAuthorizationLevel.EMERGENCY_DUAL,
+        },
+        [BypassRole.AUDIT_ADMIN]: {
+          allowed: false,
+          authLevel: BypassAuthorizationLevel.EMERGENCY_DUAL,
+        },
       },
       // System maintenance operations
-      'maintenance:system_configuration': {
-        [BypassRole.EMERGENCY_ADMIN]: { allowed: true, authLevel: BypassAuthorizationLevel.EMERGENCY_SINGLE },
-        [BypassRole.SYSTEM_OPERATOR]: { allowed: true, authLevel: BypassAuthorizationLevel.EMERGENCY_SINGLE },
-        [BypassRole.DATABASE_ADMIN]: { allowed: true, authLevel: BypassAuthorizationLevel.EMERGENCY_DUAL },
-        [BypassRole.SECURITY_ADMIN]: { allowed: false, authLevel: BypassAuthorizationLevel.EMERGENCY_DUAL },
-        [BypassRole.EMERGENCY_RESPONDER]: { allowed: false, authLevel: BypassAuthorizationLevel.COMMITTEE_APPROVAL },
-        [BypassRole.AUDIT_ADMIN]: { allowed: false, authLevel: BypassAuthorizationLevel.COMMITTEE_APPROVAL }
-      }
+      "maintenance:system_configuration": {
+        [BypassRole.EMERGENCY_ADMIN]: {
+          allowed: true,
+          authLevel: BypassAuthorizationLevel.EMERGENCY_SINGLE,
+        },
+        [BypassRole.SYSTEM_OPERATOR]: {
+          allowed: true,
+          authLevel: BypassAuthorizationLevel.EMERGENCY_SINGLE,
+        },
+        [BypassRole.DATABASE_ADMIN]: {
+          allowed: true,
+          authLevel: BypassAuthorizationLevel.EMERGENCY_DUAL,
+        },
+        [BypassRole.SECURITY_ADMIN]: {
+          allowed: false,
+          authLevel: BypassAuthorizationLevel.EMERGENCY_DUAL,
+        },
+        [BypassRole.EMERGENCY_RESPONDER]: {
+          allowed: false,
+          authLevel: BypassAuthorizationLevel.COMMITTEE_APPROVAL,
+        },
+        [BypassRole.AUDIT_ADMIN]: {
+          allowed: false,
+          authLevel: BypassAuthorizationLevel.COMMITTEE_APPROVAL,
+        },
+      },
     };
   }
 
   /**
    * Validate authorization request
    */
-  private async validateAuthorizationRequest(request: BypassAuthorizationRequest): Promise<void> {
+  private async validateAuthorizationRequest(
+    request: BypassAuthorizationRequest,
+  ): Promise<void> {
     if (!request.userId || !request.functionName) {
-      throw new ForbiddenException('Invalid authorization request');
+      throw new ForbiddenException("Invalid authorization request");
     }
 
     if (!Object.values(BypassRole).includes(request.userRole)) {
-      throw new ForbiddenException('Invalid user role');
+      throw new ForbiddenException("Invalid user role");
     }
 
     if (!Object.values(BypassOperationType).includes(request.operationType)) {
-      throw new ForbiddenException('Invalid operation type');
+      throw new ForbiddenException("Invalid operation type");
     }
   }
 
   /**
    * Assess risk for bypass operation
    */
-  private async assessRisk(request: BypassAuthorizationRequest): Promise<RiskAssessment> {
+  private async assessRisk(
+    request: BypassAuthorizationRequest,
+  ): Promise<RiskAssessment> {
     const riskFactors: RiskFactor[] = [];
     let totalRisk = 0;
 
     // Operation type risk
     const operationRisk = this.getOperationTypeRisk(request.operationType);
     riskFactors.push({
-      name: 'operation_type',
+      name: "operation_type",
       contribution: operationRisk,
       description: `Risk from operation type: ${request.operationType}`,
-      evidence: { operationType: request.operationType }
+      evidence: { operationType: request.operationType },
     });
     totalRisk += operationRisk;
 
     // User role risk
     const roleRisk = this.getUserRoleRisk(request.userRole);
     riskFactors.push({
-      name: 'user_role',
+      name: "user_role",
       contribution: roleRisk,
       description: `Risk from user role: ${request.userRole}`,
-      evidence: { userRole: request.userRole }
+      evidence: { userRole: request.userRole },
     });
     totalRisk += roleRisk;
 
     // Time-based risk
     const timeRisk = this.getTimeBasedRisk(request.authContext.timestamp);
     riskFactors.push({
-      name: 'time_based',
+      name: "time_based",
       contribution: timeRisk,
-      description: 'Risk from timing of request',
-      evidence: { timestamp: request.authContext.timestamp }
+      description: "Risk from timing of request",
+      evidence: { timestamp: request.authContext.timestamp },
     });
     totalRisk += timeRisk;
 
     // Business impact risk
-    const impactRisk = this.getBusinessImpactRisk(request.authContext.businessImpact);
+    const impactRisk = this.getBusinessImpactRisk(
+      request.authContext.businessImpact,
+    );
     riskFactors.push({
-      name: 'business_impact',
+      name: "business_impact",
       contribution: impactRisk,
       description: `Risk from business impact: ${request.authContext.businessImpact}`,
-      evidence: { businessImpact: request.authContext.businessImpact }
+      evidence: { businessImpact: request.authContext.businessImpact },
     });
     totalRisk += impactRisk;
 
     return {
       riskScore: Math.min(100, totalRisk),
       riskFactors,
-      securityFlags: this.determineSecurityFlags(riskFactors)
+      securityFlags: this.determineSecurityFlags(riskFactors),
     };
   }
 
   /**
    * Check user permissions
    */
-  private async checkPermissions(request: BypassAuthorizationRequest): Promise<PermissionCheckResult> {
-    const permissionKey = this.getPermissionKey(request.operationType, request.functionName);
+  private async checkPermissions(
+    request: BypassAuthorizationRequest,
+  ): Promise<PermissionCheckResult> {
+    const permissionKey = this.getPermissionKey(
+      request.operationType,
+      request.functionName,
+    );
     const permission = this.permissionMatrix[permissionKey]?.[request.userRole];
 
     return {
       allowed: permission?.allowed || false,
-      authLevel: permission?.authLevel || BypassAuthorizationLevel.BOARD_APPROVAL,
-      conditions: permission?.conditions || []
+      authLevel:
+        permission?.authLevel || BypassAuthorizationLevel.BOARD_APPROVAL,
+      conditions: permission?.conditions || [],
     };
   }
 
@@ -542,9 +664,12 @@ export class BypassAuthorizationEngineService {
    */
   private determineRequiredAuthLevel(
     request: BypassAuthorizationRequest,
-    riskAssessment: RiskAssessment
+    riskAssessment: RiskAssessment,
   ): BypassAuthorizationLevel {
-    const baseLevel = this.getBaseAuthorizationLevel(request.operationType, request.functionName);
+    const baseLevel = this.getBaseAuthorizationLevel(
+      request.operationType,
+      request.functionName,
+    );
 
     // Escalate based on risk
     if (riskAssessment.riskScore > 90) {
@@ -567,29 +692,31 @@ export class BypassAuthorizationEngineService {
     permissionCheck: PermissionCheckResult,
     requiredAuthLevel: BypassAuthorizationLevel,
     decisionId: string,
-    startTime: number
+    startTime: number,
   ): Promise<BypassAuthorizationDecision> {
     const authorized = permissionCheck.allowed && riskAssessment.riskScore < 95;
 
     const decision: BypassAuthorizationDecision = {
       authorized,
       authorizationLevel: requiredAuthLevel,
-      reason: authorized ? 'Authorization granted' : 'Authorization denied due to insufficient permissions or high risk',
+      reason: authorized
+        ? "Authorization granted"
+        : "Authorization denied due to insufficient permissions or high risk",
       riskScore: riskAssessment.riskScore,
       securityFlags: riskAssessment.securityFlags,
       conditions: this.createAuthorizationConditions(request, riskAssessment),
       metadata: {
         decidedAt: new Date(),
         decisionId,
-        engineVersion: '1.0.0',
+        engineVersion: "1.0.0",
         riskFactors: riskAssessment.riskFactors,
         performanceMetrics: {
           decisionTime: Date.now() - startTime,
           riskAssessmentTime: 50, // Mock values
           policyEvaluationTime: 30,
-          databaseQueryTime: 20
-        }
-      }
+          databaseQueryTime: 20,
+        },
+      },
     };
 
     return decision;
@@ -598,7 +725,9 @@ export class BypassAuthorizationEngineService {
   /**
    * Create approval steps for workflow
    */
-  private createApprovalSteps(authLevel: BypassAuthorizationLevel): ApprovalStep[] {
+  private createApprovalSteps(
+    authLevel: BypassAuthorizationLevel,
+  ): ApprovalStep[] {
     const steps: ApprovalStep[] = [];
 
     switch (authLevel) {
@@ -608,7 +737,7 @@ export class BypassAuthorizationEngineService {
           requiredRole: BypassRole.EMERGENCY_ADMIN,
           requiredAuthLevel: authLevel,
           status: ApprovalStepStatus.PENDING,
-          timeLimit: 300000 // 5 minutes
+          timeLimit: 300000, // 5 minutes
         });
         break;
 
@@ -618,14 +747,14 @@ export class BypassAuthorizationEngineService {
           requiredRole: BypassRole.EMERGENCY_ADMIN,
           requiredAuthLevel: authLevel,
           status: ApprovalStepStatus.PENDING,
-          timeLimit: 300000
+          timeLimit: 300000,
         });
         steps.push({
           stepNumber: 2,
           requiredRole: BypassRole.SECURITY_ADMIN,
           requiredAuthLevel: authLevel,
           status: ApprovalStepStatus.PENDING,
-          timeLimit: 600000 // 10 minutes
+          timeLimit: 600000, // 10 minutes
         });
         break;
 
@@ -635,21 +764,21 @@ export class BypassAuthorizationEngineService {
           requiredRole: BypassRole.EMERGENCY_ADMIN,
           requiredAuthLevel: authLevel,
           status: ApprovalStepStatus.PENDING,
-          timeLimit: 300000
+          timeLimit: 300000,
         });
         steps.push({
           stepNumber: 2,
           requiredRole: BypassRole.SECURITY_ADMIN,
           requiredAuthLevel: authLevel,
           status: ApprovalStepStatus.PENDING,
-          timeLimit: 600000
+          timeLimit: 600000,
         });
         steps.push({
           stepNumber: 3,
           requiredRole: BypassRole.DATABASE_ADMIN,
           requiredAuthLevel: authLevel,
           status: ApprovalStepStatus.PENDING,
-          timeLimit: 900000 // 15 minutes
+          timeLimit: 900000, // 15 minutes
         });
         break;
 
@@ -661,7 +790,7 @@ export class BypassAuthorizationEngineService {
             requiredRole: BypassRole.EMERGENCY_ADMIN,
             requiredAuthLevel: authLevel,
             status: ApprovalStepStatus.PENDING,
-            timeLimit: 1800000 // 30 minutes each
+            timeLimit: 1800000, // 30 minutes each
           });
         }
         break;
@@ -673,20 +802,22 @@ export class BypassAuthorizationEngineService {
   /**
    * Create escalation rules
    */
-  private createEscalationRules(authLevel: BypassAuthorizationLevel): EscalationRule[] {
+  private createEscalationRules(
+    authLevel: BypassAuthorizationLevel,
+  ): EscalationRule[] {
     return [
       {
         trigger: EscalationTrigger.TIMEOUT,
         timeThreshold: this.getWorkflowTimeout(authLevel) * 0.8, // 80% of timeout
         action: EscalationAction.NOTIFY,
-        escalateTo: BypassRole.EMERGENCY_ADMIN
+        escalateTo: BypassRole.EMERGENCY_ADMIN,
       },
       {
         trigger: EscalationTrigger.NO_RESPONSE,
         timeThreshold: 600000, // 10 minutes
         action: EscalationAction.REASSIGN,
-        escalateTo: BypassRole.SECURITY_ADMIN
-      }
+        escalateTo: BypassRole.SECURITY_ADMIN,
+      },
     ];
   }
 
@@ -714,21 +845,32 @@ export class BypassAuthorizationEngineService {
    * Check if workflow is complete
    */
   private isWorkflowComplete(workflow: ApprovalWorkflow): boolean {
-    return workflow.steps.every(step => step.status === ApprovalStepStatus.COMPLETED);
+    return workflow.steps.every(
+      (step) => step.status === ApprovalStepStatus.COMPLETED,
+    );
   }
 
   /**
    * Get permission key for matrix lookup
    */
-  private getPermissionKey(operationType: BypassOperationType, functionName: string): string {
+  private getPermissionKey(
+    operationType: BypassOperationType,
+    functionName: string,
+  ): string {
     // Simplified mapping - in reality would be more sophisticated
-    if (functionName.includes('user') || functionName.includes('User')) {
+    if (functionName.includes("user") || functionName.includes("User")) {
       return `${operationType}:user_management`;
-    } else if (functionName.includes('data') || functionName.includes('Data')) {
+    } else if (functionName.includes("data") || functionName.includes("Data")) {
       return `${operationType}:data_modification`;
-    } else if (functionName.includes('token') || functionName.includes('Token')) {
+    } else if (
+      functionName.includes("token") ||
+      functionName.includes("Token")
+    ) {
       return `${operationType}:token_management`;
-    } else if (functionName.includes('config') || functionName.includes('Config')) {
+    } else if (
+      functionName.includes("config") ||
+      functionName.includes("Config")
+    ) {
       return `${operationType}:system_configuration`;
     } else {
       return `${operationType}:response`;
@@ -738,7 +880,10 @@ export class BypassAuthorizationEngineService {
   /**
    * Get base authorization level for operation
    */
-  private getBaseAuthorizationLevel(operationType: BypassOperationType, functionName: string): BypassAuthorizationLevel {
+  private getBaseAuthorizationLevel(
+    operationType: BypassOperationType,
+    functionName: string,
+  ): BypassAuthorizationLevel {
     switch (operationType) {
       case BypassOperationType.SECURITY_INCIDENT:
         return BypassAuthorizationLevel.SYSTEM_CRITICAL;
@@ -843,13 +988,16 @@ export class BypassAuthorizationEngineService {
   private determineSecurityFlags(riskFactors: RiskFactor[]): SecurityFlag[] {
     const flags: SecurityFlag[] = [];
 
-    const totalRisk = riskFactors.reduce((sum, factor) => sum + factor.contribution, 0);
+    const totalRisk = riskFactors.reduce(
+      (sum, factor) => sum + factor.contribution,
+      0,
+    );
 
     if (totalRisk > 80) {
       flags.push(SecurityFlag.HIGH_RISK_USER);
     }
 
-    const timeRisk = riskFactors.find(f => f.name === 'time_based');
+    const timeRisk = riskFactors.find((f) => f.name === "time_based");
     if (timeRisk && timeRisk.contribution > 10) {
       flags.push(SecurityFlag.SUSPICIOUS_TIMING);
     }
@@ -862,33 +1010,33 @@ export class BypassAuthorizationEngineService {
    */
   private createAuthorizationConditions(
     request: BypassAuthorizationRequest,
-    riskAssessment: RiskAssessment
+    riskAssessment: RiskAssessment,
   ): AuthorizationCondition[] {
     const conditions: AuthorizationCondition[] = [];
 
     // Time limit condition
     conditions.push({
       type: ConditionType.TIME_LIMIT,
-      description: 'Operation must complete within time limit',
-      validator: 'timeLimit',
-      parameters: { maxDuration: 3600000 } // 1 hour
+      description: "Operation must complete within time limit",
+      validator: "timeLimit",
+      parameters: { maxDuration: 3600000 }, // 1 hour
     });
 
     // Operation limit condition
     conditions.push({
       type: ConditionType.OPERATION_LIMIT,
-      description: 'Limited number of operations allowed',
-      validator: 'operationLimit',
-      parameters: { maxOperations: 10 }
+      description: "Limited number of operations allowed",
+      validator: "operationLimit",
+      parameters: { maxOperations: 10 },
     });
 
     // High-risk additional conditions
     if (riskAssessment.riskScore > 70) {
       conditions.push({
         type: ConditionType.MONITORING_REQUIRED,
-        description: 'Enhanced monitoring required for high-risk operation',
-        validator: 'monitoringRequired',
-        parameters: { monitoringLevel: 'enhanced' }
+        description: "Enhanced monitoring required for high-risk operation",
+        validator: "monitoringRequired",
+        parameters: { monitoringLevel: "enhanced" },
       });
     }
 
@@ -900,7 +1048,7 @@ export class BypassAuthorizationEngineService {
    */
   private generateDecisionId(request: BypassAuthorizationRequest): string {
     const data = `${request.userId}:${request.functionName}:${Date.now()}`;
-    return createHash('sha256').update(data).digest('hex').substr(0, 16);
+    return createHash("sha256").update(data).digest("hex").substr(0, 16);
   }
 
   /**
@@ -908,9 +1056,11 @@ export class BypassAuthorizationEngineService {
    */
   private logAuthorizationDecision(
     request: BypassAuthorizationRequest,
-    decision: BypassAuthorizationDecision
+    decision: BypassAuthorizationDecision,
   ): void {
-    this.logger.warn(`Authorization decision for ${request.functionName}: ${decision.authorized ? 'GRANTED' : 'DENIED'} (Risk: ${decision.riskScore})`);
+    this.logger.warn(
+      `Authorization decision for ${request.functionName}: ${decision.authorized ? "GRANTED" : "DENIED"} (Risk: ${decision.riskScore})`,
+    );
   }
 
   /**
@@ -929,12 +1079,17 @@ export class BypassAuthorizationEngineService {
     const now = Date.now();
 
     this.activeWorkflows.forEach((workflow, workflowId) => {
-      if (workflow.status === WorkflowStatus.IN_PROGRESS || workflow.status === WorkflowStatus.PENDING) {
+      if (
+        workflow.status === WorkflowStatus.IN_PROGRESS ||
+        workflow.status === WorkflowStatus.PENDING
+      ) {
         const timeElapsed = now - workflow.metadata.startedAt.getTime();
 
         if (timeElapsed > workflow.metadata.totalTimeLimit) {
           workflow.status = WorkflowStatus.TIMEOUT;
-          this.logger.warn(`Workflow ${workflowId} timed out after ${timeElapsed}ms`);
+          this.logger.warn(
+            `Workflow ${workflowId} timed out after ${timeElapsed}ms`,
+          );
         }
       }
     });

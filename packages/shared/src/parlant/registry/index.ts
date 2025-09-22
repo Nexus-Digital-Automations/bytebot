@@ -11,29 +11,29 @@
  */
 
 // Core Discovery Services
-export { FunctionDiscoveryService } from './discovery/function-discovery.service';
-export { AutoRegistrationService } from './discovery/auto-registration.service';
+export { FunctionDiscoveryService } from "./discovery/function-discovery.service";
+export { AutoRegistrationService } from "./discovery/auto-registration.service";
 
 // Configuration Management
-export { ConfigurationManagerService } from './configuration/configuration-manager.service';
+export { ConfigurationManagerService } from "./configuration/configuration-manager.service";
 
 // Metadata Management
-export { MetadataManagerService } from './metadata/metadata-manager.service';
+export { MetadataManagerService } from "./metadata/metadata-manager.service";
 
 // Version Management
-export { VersionManagerService } from './versioning/version-manager.service';
+export { VersionManagerService } from "./versioning/version-manager.service";
 
 // Health Monitoring
-export { HealthMonitorService } from './health/health-monitor.service';
+export { HealthMonitorService } from "./health/health-monitor.service";
 
 // Dependency Tracking
-export { DependencyTrackerService } from './dependencies/dependency-tracker.service';
+export { DependencyTrackerService } from "./dependencies/dependency-tracker.service";
 
 // Administrative Services
 // export { RegistryAdminService } from './admin/admin.service'; // TODO: Implement admin service
 
 // Core Types
-export * from './core/registry.types';
+export * from "./core/registry.types";
 
 // Default export for convenience
 export default {

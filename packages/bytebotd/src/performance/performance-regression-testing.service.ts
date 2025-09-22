@@ -379,8 +379,8 @@ export class PerformanceRegressionTestingService
   }
 
   async onModuleInit(): Promise<void> {
-    this.logger.log('Initializing Performance Regression Testing Framework');// Load existing baselines and historical dataawait this.loadBaselines();
-    await this.loadPerformanceHistory();
+    this.logger.log('Initializing Performance Regression Testing Framework');// Load existing baselines and historical datathis.loadBaselines();
+    this.loadPerformanceHistory();
 
     // Start real-time monitoring
     this.startRealTimeMonitoring();
@@ -389,8 +389,8 @@ export class PerformanceRegressionTestingService
     this.logger.log('Shutting down Performance Regression Testing Framework');// Stop monitoringthis.stopRealTimeMonitoring();
 
     // Save state
-    await this.saveBaselines();
-    await this.savePerformanceHistory();
+    this.saveBaselines();
+    this.savePerformanceHistory();
 
     this.logger.log('✅ Performance Regression Testing Framework shutdown complete');
   }
@@ -500,11 +500,11 @@ export class PerformanceRegressionTestingService
           break;
 
         case RegressionTestType.HISTORICAL_COMPARISON:
-          baseline = await this.getHistoricalComparison(currentMetrics);
+          baseline = this.getHistoricalComparison(currentMetrics);
           break;
 
         case RegressionTestType.SLIDING_WINDOW:
-          baseline = await this.getSlidingWindowBaseline();
+          baseline = this.getSlidingWindowBaseline();
           break;
 
         default:
@@ -521,7 +521,7 @@ export class PerformanceRegressionTestingService
       const regression = this.assessOverallRegression(analysis);
 
       // Perform root cause analysis
-      const rootCause = await this.performRootCauseAnalysis(baseline, currentMetrics, analysis);
+      const rootCause = this.performRootCauseAnalysis(baseline, currentMetrics, analysis);
 
       // Generate recommendations
       const recommendations = this.generateRegressionRecommendations(analysis, regression);
@@ -735,17 +735,17 @@ export class PerformanceRegressionTestingService
     try {
       // Email alerts
       if (this.alertConfig.delivery.email.enabled) {
-        await this.sendEmailAlert(result);
+        this.sendEmailAlert(result);
       }
 
       // Slack alerts
       if (this.alertConfig.delivery.slack.enabled) {
-        await this.sendSlackAlert(result);
+        this.sendSlackAlert(result);
       }
 
       // Webhook alerts
       if (this.alertConfig.delivery.webhook.enabled) {
-        await this.sendWebhookAlert(result);
+        this.sendWebhookAlert(result);
       }
 
       // Emit event for other services
@@ -1007,13 +1007,13 @@ Confidence: ${(regression.confidence * 100).toFixed(1)}%`;
 
   // ===== PLACEHOLDER METHODS (to be implemented) =====
 
-  private async loadBaselines(): Promise<void> { /* Implementation */ }
-  private async loadPerformanceHistory(): Promise<void> { /* Implementation */ }
-  private async saveBaselines(): Promise<void> { /* Implementation */ }
-  private async savePerformanceHistory(): Promise<void> { /* Implementation */ }
-  private async getHistoricalComparison(metrics: PerformanceMetrics): Promise<PerformanceMetrics> { return metrics; }
-  private async getSlidingWindowBaseline(): Promise<PerformanceMetrics> { return {} as PerformanceMetrics; }
-  private async performRootCauseAnalysis(baseline: PerformanceMetrics, current: PerformanceMetrics, analysis: any): Promise<any> {
+  private loadBaselines(): void { /* Implementation */ }
+  private loadPerformanceHistory(): void { /* Implementation */ }
+  private saveBaselines(): void { /* Implementation */ }
+  private savePerformanceHistory(): void { /* Implementation */ }
+  private getHistoricalComparison(metrics: PerformanceMetrics): PerformanceMetrics { return metrics; }
+  private getSlidingWindowBaseline(): PerformanceMetrics { return {} as PerformanceMetrics; }
+  private performRootCauseAnalysis(baseline: PerformanceMetrics, current: PerformanceMetrics, analysis: any): any {
     return {
       likelyCauses: ['Performance test variance'],evidenceStrength: 0.5,correlations: [],
     };
@@ -1021,9 +1021,9 @@ Confidence: ${(regression.confidence * 100).toFixed(1)}%`;
   private generateRegressionRecommendations(analysis: any, regression: any): any {
     return {
       immediate: ['Monitor performance closely'],investigation: ['Review recent code changes'],remediation: ['Consider performance optimization'],prevention: ['Implement performance monitoring'],};}
-  private async sendEmailAlert(result: RegressionAnalysisResult): Promise<void> { /* Implementation */ }
-  private async sendSlackAlert(result: RegressionAnalysisResult): Promise<void> { /* Implementation */ }
-  private async sendWebhookAlert(result: RegressionAnalysisResult): Promise<void> { /* Implementation */ }
+  private sendEmailAlert(result: RegressionAnalysisResult): void { /* Implementation */ }
+  private sendSlackAlert(result: RegressionAnalysisResult): void { /* Implementation */ }
+  private sendWebhookAlert(result: RegressionAnalysisResult): void { /* Implementation */ }
   private forecastPerformance(data: PerformanceMetrics[], days: number): any {
     return {
       expectedThroughput: 1000,

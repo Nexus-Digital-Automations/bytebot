@@ -434,8 +434,9 @@ export class ComputerUseController {
         },
       });
 
-      const searchResults =
-        await this.enhancedAsyncJobService.searchJobs(criteria) as JobSearchResultsDto;
+      const searchResults = (await this.enhancedAsyncJobService.searchJobs(
+        criteria,
+      )) as JobSearchResultsDto;
 
       const processingTime = Date.now() - startTime;
       this.logger.log(
@@ -539,8 +540,9 @@ export class ComputerUseController {
         username: user.username,
       });
 
-      const progressUpdate =
-        await this.enhancedAsyncJobService.getJobProgress(jobId) as JobProgressUpdateDto;
+      const progressUpdate = (await this.enhancedAsyncJobService.getJobProgress(
+        jobId,
+      )) as JobProgressUpdateDto;
 
       const processingTime = Date.now() - startTime;
       this.logger.log(
@@ -642,7 +644,9 @@ export class ComputerUseController {
         username: user.username,
       });
 
-      const analytics = await this.enhancedAsyncJobService.getJobAnalytics(24) as JobAnalyticsDto;
+      const analytics = (await this.enhancedAsyncJobService.getJobAnalytics(
+        24,
+      )) as JobAnalyticsDto;
 
       const processingTime = Date.now() - startTime;
       this.logger.log(
@@ -749,9 +753,9 @@ export class ComputerUseController {
         { operationId, batchId, userId: user.id, username: user.username },
       );
 
-      const results = await this.enhancedAsyncJobService.cancelJobsByCriteria({
+      const results = (await this.enhancedAsyncJobService.cancelJobsByCriteria({
         batchId,
-      }) as { cancelled: string[]; failed: string[] };
+      })) as { cancelled: string[]; failed: string[] };
 
       const processingTime = Date.now() - startTime;
       this.logger.log(
@@ -759,8 +763,10 @@ export class ComputerUseController {
         {
           operationId,
           batchId,
-          cancelledCount: (results as { cancelled: string[]; failed: string[] }).cancelled.length,
-          failedCount: (results as { cancelled: string[]; failed: string[] }).failed.length,
+          cancelledCount: (results as { cancelled: string[]; failed: string[] })
+            .cancelled.length,
+          failedCount: (results as { cancelled: string[]; failed: string[] })
+            .failed.length,
           processingTime,
           userId: user.id,
           username: user.username,
@@ -882,7 +888,8 @@ export class ComputerUseController {
 
     try {
       // Extract async options from the combined DTO
-      const { priority, timeout, useCache, metadata, ...actionParams } = params as AsyncActionSubmissionDto;
+      const { priority, timeout, useCache, metadata, ...actionParams } =
+        params as AsyncActionSubmissionDto;
 
       // Create safe copy for logging
       const paramsCopy = { ...actionParams } as Record<string, unknown>;

@@ -31,15 +31,12 @@ import {
   ParlantIntegrationService,
   ParlantConversationContext,
   ParlantValidationRequest,
-  ParlantValidationResponse,
   ConversationalValidationError,
 } from '@bytebot/shared/src/parlant/parlant-integration.service';
 import {
-  SecurityClassification,
   RiskLevel,
   SecurityLevel,
   UserRole,
-  Permission,
 } from '@bytebot/shared';
 import { LoginDto, RegisterDto, ChangePasswordDto } from '../dto/login.dto';
 import { TokenPair, JwtPayload } from '../types/jwt-payload.interface';
@@ -497,7 +494,7 @@ export class ParlantEnhancedAuthService {
       );
 
       // Remove password hash for response
-      const { passwordHash, ...userWithoutPassword } = user;
+      const { passwordHash: _passwordHash, ...userWithoutPassword } = user;
 
       return {
         success: true,
@@ -1097,7 +1094,7 @@ export class ParlantEnhancedAuthService {
       validation.conversationId,
     );
 
-    const { passwordHash, ...userWithoutPassword } = user;
+    const { passwordHash: _passwordHash, ...userWithoutPassword } = user;
 
     return {
       success: true,
@@ -1148,7 +1145,7 @@ export class ParlantEnhancedAuthService {
 
     this.recordAuthenticationHistory(loginDto.email, authContext, 'SUCCESS');
 
-    const { passwordHash, ...userWithoutPassword } = user;
+    const { passwordHash: _passwordHash, ...userWithoutPassword } = user;
 
     return {
       success: true,
@@ -1196,7 +1193,7 @@ export class ParlantEnhancedAuthService {
 
     this.recordAuthenticationHistory(loginDto.email, authContext, 'SUCCESS');
 
-    const { passwordHash, ...userWithoutPassword } = user;
+    const { passwordHash: _passwordHash, ...userWithoutPassword } = user;
 
     return {
       success: true,

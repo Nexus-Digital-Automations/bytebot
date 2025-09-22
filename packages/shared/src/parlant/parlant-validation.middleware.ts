@@ -23,19 +23,22 @@ import {
   NestMiddleware,
   Logger,
   HttpException,
-  HttpStatus
-} from '@nestjs/common';
-import { Request, Response, NextFunction } from 'express';
+  HttpStatus,
+} from "@nestjs/common";
+import { Request, Response, NextFunction } from "express";
 import {
   ParlantIntegrationService,
   ParlantValidationRequest,
   ParlantValidationResponse,
   RiskLevel,
   ConversationalValidationError,
-  ParlantConversationContext
-} from './monitoring/parlant-integration.service';
-import { SecurityLevel, ValidationMode } from './parlant-validation.decorator';
-import { ConversationPriority, ConversationState } from '../types/parlant.types';
+  ParlantConversationContext,
+} from "./monitoring/parlant-integration.service";
+import { SecurityLevel, ValidationMode } from "./parlant-validation.decorator";
+import {
+  ConversationPriority,
+  ConversationState,
+} from "../types/parlant.types";
 
 // ===== MIDDLEWARE INTERFACES =====
 
@@ -91,7 +94,7 @@ export interface RouteValidationConfig {
   customRules?: Array<{
     name: string;
     condition: (req: Request) => boolean;
-    action: 'APPROVE' | 'DENY' | 'REQUIRE_CONFIRMATION';
+    action: "APPROVE" | "DENY" | "REQUIRE_CONFIRMATION";
     priority: number;
   }>;
 }
@@ -115,20 +118,23 @@ interface MiddlewareMetrics {
 @Injectable()
 export class ParlantValidationMiddleware implements NestMiddleware {
   private readonly logger = new Logger(ParlantValidationMiddleware.name);
-  private readonly validationCache = new Map<string, {
-    response: ParlantValidationResponse;
-    timestamp: Date;
-    ttl: number;
-  }>();
+  private readonly validationCache = new Map<
+    string,
+    {
+      response: ParlantValidationResponse;
+      timestamp: Date;
+      ttl: number;
+    }
+  >();
 
   // Circuit breaker state
-  private circuitBreakerState: 'CLOSED' | 'OPEN' | 'HALF_OPEN' = 'CLOSED';
+  private circuitBreakerState: "CLOSED" | "OPEN" | "HALF_OPEN" = "CLOSED";
   private failureCount = 0;
   private lastFailureTime?: Date;
   private circuitBreakerConfig = {
     failureThreshold: 10,
     timeoutMs: 60000,
-    resetTimeoutMs: 300000
+    resetTimeoutMs: 300000,
   };
 
   // Performance metrics
@@ -140,215 +146,220 @@ export class ParlantValidationMiddleware implements NestMiddleware {
     averageValidationTime: 0,
     cacheHitRate: 0,
     errorRate: 0,
-    lastResetTime: new Date()
+    lastResetTime: new Date(),
   };
 
   // Route validation configurations
   private routeConfigs: RouteValidationConfig[] = [
     // Computer Use API Routes
     {
-      route: '/api/*/computer-use/action*',
-      methods: ['POST'],
+      route: "/api/*/computer-use/action*",
+      methods: ["POST"],
       securityLevel: SecurityLevel.CRITICAL,
       validationMode: ValidationMode.EXPLICIT,
-      businessCategory: 'COMPUTER_AUTOMATION',
-      intent: 'Execute computer automation action with system control',
+      businessCategory: "COMPUTER_AUTOMATION",
+      intent: "Execute computer automation action with system control",
       cacheable: false,
       timeout: 30000,
-      requiredRoles: ['OPERATOR', 'ADMIN'],
-      complianceFlags: ['HIGH_RISK', 'SYSTEM_CONTROL'],
+      requiredRoles: ["OPERATOR", "ADMIN"],
+      complianceFlags: ["HIGH_RISK", "SYSTEM_CONTROL"],
       customRules: [
         {
-          name: 'screenshot_validation',
-          condition: (req) => req.body?.action === 'screenshot',
-          action: 'REQUIRE_CONFIRMATION',
-          priority: 5
+          name: "screenshot_validation",
+          condition: (req) => req.body?.action === "screenshot",
+          action: "REQUIRE_CONFIRMATION",
+          priority: 5,
         },
         {
-          name: 'file_operation_validation',
-          condition: (req) => ['write_file', 'read_file'].includes(req.body?.action),
-          action: 'REQUIRE_CONFIRMATION',
-          priority: 8
-        }
-      ]
+          name: "file_operation_validation",
+          condition: (req) =>
+            ["write_file", "read_file"].includes(req.body?.action),
+          action: "REQUIRE_CONFIRMATION",
+          priority: 8,
+        },
+      ],
     },
     {
-      route: '/api/*/computer-use/jobs*',
-      methods: ['GET'],
+      route: "/api/*/computer-use/jobs*",
+      methods: ["GET"],
       securityLevel: SecurityLevel.MEDIUM,
       validationMode: ValidationMode.AUTOMATIC,
-      businessCategory: 'JOB_MONITORING',
-      intent: 'Monitor computer automation job status and progress',
+      businessCategory: "JOB_MONITORING",
+      intent: "Monitor computer automation job status and progress",
       cacheable: true,
       timeout: 5000,
-      complianceFlags: ['MONITORING']
+      complianceFlags: ["MONITORING"],
     },
 
     // Authentication API Routes
     {
-      route: '/api/*/auth/login',
-      methods: ['POST'],
+      route: "/api/*/auth/login",
+      methods: ["POST"],
       securityLevel: SecurityLevel.CRITICAL,
       validationMode: ValidationMode.CONVERSATIONAL,
-      businessCategory: 'AUTHENTICATION',
-      intent: 'User authentication with credential validation',
+      businessCategory: "AUTHENTICATION",
+      intent: "User authentication with credential validation",
       cacheable: false,
       timeout: 15000,
-      complianceFlags: ['AUTHENTICATION', 'SECURITY_CRITICAL']
+      complianceFlags: ["AUTHENTICATION", "SECURITY_CRITICAL"],
     },
     {
-      route: '/api/*/auth/register',
-      methods: ['POST'],
+      route: "/api/*/auth/register",
+      methods: ["POST"],
       securityLevel: SecurityLevel.HIGH,
       validationMode: ValidationMode.CONVERSATIONAL,
-      businessCategory: 'USER_REGISTRATION',
-      intent: 'Create new user account with secure registration',
+      businessCategory: "USER_REGISTRATION",
+      intent: "Create new user account with secure registration",
       cacheable: false,
       timeout: 20000,
-      complianceFlags: ['USER_CREATION', 'DATA_CREATION']
+      complianceFlags: ["USER_CREATION", "DATA_CREATION"],
     },
     {
-      route: '/api/*/auth/change-password',
-      methods: ['POST'],
+      route: "/api/*/auth/change-password",
+      methods: ["POST"],
       securityLevel: SecurityLevel.CRITICAL,
       validationMode: ValidationMode.EXPLICIT,
-      businessCategory: 'PASSWORD_MANAGEMENT',
-      intent: 'Change user password with security validation',
+      businessCategory: "PASSWORD_MANAGEMENT",
+      intent: "Change user password with security validation",
       cacheable: false,
       timeout: 15000,
-      requiredRoles: ['USER', 'OPERATOR', 'ADMIN'],
-      complianceFlags: ['PASSWORD_CHANGE', 'SECURITY_CRITICAL']
+      requiredRoles: ["USER", "OPERATOR", "ADMIN"],
+      complianceFlags: ["PASSWORD_CHANGE", "SECURITY_CRITICAL"],
     },
 
     // Browser Use API Routes
     {
-      route: '/api/*/browser-use/sessions/*/navigate',
-      methods: ['POST'],
+      route: "/api/*/browser-use/sessions/*/navigate",
+      methods: ["POST"],
       securityLevel: SecurityLevel.HIGH,
       validationMode: ValidationMode.CONVERSATIONAL,
-      businessCategory: 'BROWSER_NAVIGATION',
-      intent: 'Navigate browser session to specified URL',
+      businessCategory: "BROWSER_NAVIGATION",
+      intent: "Navigate browser session to specified URL",
       cacheable: false,
       timeout: 10000,
-      complianceFlags: ['BROWSER_CONTROL', 'URL_ACCESS']
+      complianceFlags: ["BROWSER_CONTROL", "URL_ACCESS"],
     },
     {
-      route: '/api/*/browser-use/sessions/*/click',
-      methods: ['POST'],
+      route: "/api/*/browser-use/sessions/*/click",
+      methods: ["POST"],
       securityLevel: SecurityLevel.HIGH,
       validationMode: ValidationMode.CONVERSATIONAL,
-      businessCategory: 'BROWSER_INTERACTION',
-      intent: 'Click DOM element in browser session',
+      businessCategory: "BROWSER_INTERACTION",
+      intent: "Click DOM element in browser session",
       cacheable: false,
       timeout: 8000,
-      complianceFlags: ['DOM_MANIPULATION', 'USER_SIMULATION']
+      complianceFlags: ["DOM_MANIPULATION", "USER_SIMULATION"],
     },
     {
-      route: '/api/*/browser-use/sessions/*/type',
-      methods: ['POST'],
+      route: "/api/*/browser-use/sessions/*/type",
+      methods: ["POST"],
       securityLevel: SecurityLevel.CRITICAL,
       validationMode: ValidationMode.EXPLICIT,
-      businessCategory: 'DATA_INPUT',
-      intent: 'Type text into browser input elements',
+      businessCategory: "DATA_INPUT",
+      intent: "Type text into browser input elements",
       cacheable: false,
       timeout: 10000,
-      complianceFlags: ['DATA_INPUT', 'FORM_INTERACTION'],
+      complianceFlags: ["DATA_INPUT", "FORM_INTERACTION"],
       customRules: [
         {
-          name: 'sensitive_data_detection',
+          name: "sensitive_data_detection",
           condition: (req) => this.detectSensitiveData(req.body?.text),
-          action: 'REQUIRE_CONFIRMATION',
-          priority: 10
-        }
-      ]
+          action: "REQUIRE_CONFIRMATION",
+          priority: 10,
+        },
+      ],
     },
 
     // Enterprise API Gateway Routes
     {
-      route: '/api/*/enterprise-api/*',
-      methods: ['GET', 'POST', 'PUT', 'DELETE'],
+      route: "/api/*/enterprise-api/*",
+      methods: ["GET", "POST", "PUT", "DELETE"],
       securityLevel: SecurityLevel.HIGH,
       validationMode: ValidationMode.CONVERSATIONAL,
-      businessCategory: 'ENTERPRISE_API',
-      intent: 'Execute enterprise API operation through gateway',
+      businessCategory: "ENTERPRISE_API",
+      intent: "Execute enterprise API operation through gateway",
       cacheable: true,
       timeout: 15000,
-      requiredRoles: ['OPERATOR', 'ADMIN'],
-      complianceFlags: ['ENTERPRISE_OPERATION', 'API_GATEWAY']
+      requiredRoles: ["OPERATOR", "ADMIN"],
+      complianceFlags: ["ENTERPRISE_OPERATION", "API_GATEWAY"],
     },
 
     // Database API Routes
     {
-      route: '/api/*/database/*',
-      methods: ['POST', 'PUT', 'DELETE'],
+      route: "/api/*/database/*",
+      methods: ["POST", "PUT", "DELETE"],
       securityLevel: SecurityLevel.CRITICAL,
       validationMode: ValidationMode.EXPLICIT,
-      businessCategory: 'DATABASE_MODIFICATION',
-      intent: 'Modify database data with validation and audit',
+      businessCategory: "DATABASE_MODIFICATION",
+      intent: "Modify database data with validation and audit",
       cacheable: false,
       timeout: 20000,
-      requiredRoles: ['ADMIN'],
-      complianceFlags: ['DATABASE_MODIFICATION', 'DATA_CHANGE']
+      requiredRoles: ["ADMIN"],
+      complianceFlags: ["DATABASE_MODIFICATION", "DATA_CHANGE"],
     },
     {
-      route: '/api/*/database/*',
-      methods: ['GET'],
+      route: "/api/*/database/*",
+      methods: ["GET"],
       securityLevel: SecurityLevel.MEDIUM,
       validationMode: ValidationMode.AUTOMATIC,
-      businessCategory: 'DATABASE_QUERY',
-      intent: 'Query database for information retrieval',
+      businessCategory: "DATABASE_QUERY",
+      intent: "Query database for information retrieval",
       cacheable: true,
       timeout: 10000,
-      complianceFlags: ['DATA_ACCESS']
+      complianceFlags: ["DATA_ACCESS"],
     },
 
     // Configuration API Routes
     {
-      route: '/api/*/config/*',
-      methods: ['POST', 'PUT', 'DELETE'],
+      route: "/api/*/config/*",
+      methods: ["POST", "PUT", "DELETE"],
       securityLevel: SecurityLevel.CRITICAL,
       validationMode: ValidationMode.EXPLICIT,
-      businessCategory: 'SYSTEM_CONFIGURATION',
-      intent: 'Modify system configuration settings',
+      businessCategory: "SYSTEM_CONFIGURATION",
+      intent: "Modify system configuration settings",
       cacheable: false,
       timeout: 30000,
-      requiredRoles: ['ADMIN'],
-      complianceFlags: ['SYSTEM_CHANGE', 'CONFIGURATION_CHANGE']
+      requiredRoles: ["ADMIN"],
+      complianceFlags: ["SYSTEM_CHANGE", "CONFIGURATION_CHANGE"],
     },
 
     // Health and Monitoring Routes (Low-risk)
     {
-      route: '/api/*/health*',
-      methods: ['GET'],
+      route: "/api/*/health*",
+      methods: ["GET"],
       securityLevel: SecurityLevel.MINIMAL,
       validationMode: ValidationMode.AUTOMATIC,
-      businessCategory: 'HEALTH_CHECK',
-      intent: 'Check system health and status',
+      businessCategory: "HEALTH_CHECK",
+      intent: "Check system health and status",
       cacheable: true,
       timeout: 2000,
-      complianceFlags: ['MONITORING']
+      complianceFlags: ["MONITORING"],
     },
     {
-      route: '/api/*/metrics*',
-      methods: ['GET'],
+      route: "/api/*/metrics*",
+      methods: ["GET"],
       securityLevel: SecurityLevel.LOW,
       validationMode: ValidationMode.AUTOMATIC,
-      businessCategory: 'METRICS_MONITORING',
-      intent: 'Retrieve system performance metrics',
+      businessCategory: "METRICS_MONITORING",
+      intent: "Retrieve system performance metrics",
       cacheable: true,
       timeout: 5000,
-      complianceFlags: ['MONITORING']
-    }
+      complianceFlags: ["MONITORING"],
+    },
   ];
 
-  constructor(
-    private readonly parlantService: ParlantIntegrationService
-  ) {
-    this.logger.log('PARLANT Validation Middleware initialized with comprehensive route coverage');
+  constructor(private readonly parlantService: ParlantIntegrationService) {
+    this.logger.log(
+      "PARLANT Validation Middleware initialized with comprehensive route coverage",
+    );
     this.startMetricsReporting();
   }
 
-  async use(req: ParlantValidatedRequest, res: Response, next: NextFunction): Promise<void> {
+  async use(
+    req: ParlantValidatedRequest,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
     const operationId = this.generateOperationId();
     const startTime = Date.now();
 
@@ -356,12 +367,14 @@ export class ParlantValidationMiddleware implements NestMiddleware {
 
     try {
       // Check circuit breaker
-      if (this.circuitBreakerState === 'OPEN') {
+      if (this.circuitBreakerState === "OPEN") {
         if (!this.shouldAttemptReset()) {
           return this.handleCircuitBreakerOpen(res, operationId);
         } else {
-          this.circuitBreakerState = 'HALF_OPEN';
-          this.logger.log(`[${operationId}] Circuit breaker moved to HALF_OPEN`);
+          this.circuitBreakerState = "HALF_OPEN";
+          this.logger.log(
+            `[${operationId}] Circuit breaker moved to HALF_OPEN`,
+          );
         }
       }
 
@@ -382,16 +395,25 @@ export class ParlantValidationMiddleware implements NestMiddleware {
           route: routeConfig.route,
           securityLevel: routeConfig.securityLevel,
           validationMode: routeConfig.validationMode,
-          businessCategory: routeConfig.businessCategory
-        }
+          businessCategory: routeConfig.businessCategory,
+        },
       );
 
       // Perform validation
-      const validationResult = await this.performValidation(req, routeConfig, operationId);
+      const validationResult = await this.performValidation(
+        req,
+        routeConfig,
+        operationId,
+      );
 
       if (!validationResult.approved) {
         this.metrics.deniedRequests++;
-        return this.handleValidationDenied(res, validationResult, routeConfig, operationId);
+        return this.handleValidationDenied(
+          res,
+          validationResult,
+          routeConfig,
+          operationId,
+        );
       }
 
       // Validation approved
@@ -406,7 +428,7 @@ export class ParlantValidationMiddleware implements NestMiddleware {
         securityLevel: routeConfig.securityLevel,
         validationTime,
         conversationId: validationResult.conversationId,
-        businessCategory: routeConfig.businessCategory
+        businessCategory: routeConfig.businessCategory,
       };
 
       // Update circuit breaker success
@@ -419,12 +441,11 @@ export class ParlantValidationMiddleware implements NestMiddleware {
           confidence: validationResult.confidence,
           conversationId: validationResult.conversationId,
           securityLevel: routeConfig.securityLevel,
-          validationTime
-        }
+          validationTime,
+        },
       );
 
       next();
-
     } catch (error) {
       const validationTime = Date.now() - startTime;
       this.metrics.errorRate++;
@@ -437,17 +458,20 @@ export class ParlantValidationMiddleware implements NestMiddleware {
    */
   private findMatchingRouteConfig(req: Request): RouteValidationConfig | null {
     for (const config of this.routeConfigs) {
-      if (this.matchesRoute(req.path, config.route) &&
-          config.methods.includes(req.method)) {
-
+      if (
+        this.matchesRoute(req.path, config.route) &&
+        config.methods.includes(req.method)
+      ) {
         // Check custom rules if any
         if (config.customRules) {
-          const applicableRule = config.customRules.find(rule => rule.condition(req));
-          if (applicableRule && applicableRule.action === 'DENY') {
+          const applicableRule = config.customRules.find((rule) =>
+            rule.condition(req),
+          );
+          if (applicableRule && applicableRule.action === "DENY") {
             throw new ConversationalValidationError(
-              'custom_rule_violation',
+              "custom_rule_violation",
               `Request denied by custom rule: ${applicableRule.name}`,
-              ['Review request parameters', 'Contact system administrator']
+              ["Review request parameters", "Contact system administrator"],
             );
           }
         }
@@ -463,9 +487,7 @@ export class ParlantValidationMiddleware implements NestMiddleware {
    */
   private matchesRoute(path: string, pattern: string): boolean {
     // Convert route pattern to regex
-    const regexPattern = pattern
-      .replace(/\*/g, '.*')
-      .replace(/\//g, '\\/');
+    const regexPattern = pattern.replace(/\*/g, ".*").replace(/\//g, "\\/");
     const regex = new RegExp(`^${regexPattern}$`);
     return regex.test(path);
   }
@@ -476,14 +498,14 @@ export class ParlantValidationMiddleware implements NestMiddleware {
   private async performValidation(
     req: Request,
     config: RouteValidationConfig,
-    operationId: string
+    operationId: string,
   ): Promise<ParlantValidationResponse> {
     // Check cache first if enabled
     if (config.cacheable) {
       const cacheKey = this.generateCacheKey(req, config);
       const cached = this.getCachedValidation(cacheKey);
       if (cached) {
-        this.metrics.cacheHitRate = (this.metrics.cacheHitRate * 0.9) + (1 * 0.1); // Rolling average
+        this.metrics.cacheHitRate = this.metrics.cacheHitRate * 0.9 + 1 * 0.1; // Rolling average
         this.logger.debug(`[${operationId}] Using cached validation result`);
         return cached;
       }
@@ -496,16 +518,20 @@ export class ParlantValidationMiddleware implements NestMiddleware {
       actionDescription: config.intent,
       context: this.buildConversationContext(req, config),
       riskLevel: this.mapSecurityLevelToRiskLevel(config.securityLevel),
-      operationId
+      operationId,
     };
 
     // Execute validation with timeout
-    const validationPromise = this.parlantService.validateFunctionExecution(validationRequest);
+    const validationPromise =
+      this.parlantService.validateFunctionExecution(validationRequest);
     const timeoutPromise = new Promise<never>((_, reject) => {
-      setTimeout(() => reject(new Error('Validation timeout')), config.timeout);
+      setTimeout(() => reject(new Error("Validation timeout")), config.timeout);
     });
 
-    const validationResult = await Promise.race([validationPromise, timeoutPromise]);
+    const validationResult = await Promise.race([
+      validationPromise,
+      timeoutPromise,
+    ]);
 
     // Cache result if approved and cacheable
     if (config.cacheable && validationResult.approved) {
@@ -528,10 +554,10 @@ export class ParlantValidationMiddleware implements NestMiddleware {
       query: req.query || {},
       body: this.sanitizeBody(req.body),
       headers: this.sanitizeHeaders(req.headers),
-      userAgent: req.headers?.['user-agent']?.substring(0, 100),
+      userAgent: req.headers?.["user-agent"]?.substring(0, 100),
       ipAddress: this.getClientIpAddress(req),
-      contentType: req.headers?.['content-type'],
-      contentLength: req.headers?.['content-length']
+      contentType: req.headers?.["content-type"],
+      contentLength: req.headers?.["content-length"],
     };
   }
 
@@ -540,22 +566,23 @@ export class ParlantValidationMiddleware implements NestMiddleware {
    */
   private buildConversationContext(
     req: Request,
-    config: RouteValidationConfig
+    config: RouteValidationConfig,
   ): ParlantConversationContext {
     const user = (req as any).user || {};
 
     const conversationId = this.generateOperationId();
     return {
       conversationId,
-      userId: user.id || 'anonymous',
-      sessionId: req.headers?.['x-session-id'] as string || `session_${Date.now()}`,
+      userId: user.id || "anonymous",
+      sessionId:
+        (req.headers?.["x-session-id"] as string) || `session_${Date.now()}`,
       state: ConversationState._ACTIVE,
       participants: [],
       createdAt: new Date(),
       updatedAt: new Date(),
       metadata: {
         priority: ConversationPriority._NORMAL,
-        tags: ['middleware-validation'],
+        tags: ["middleware-validation"],
         properties: {
           operationId: this.generateOperationId(),
           businessCategory: config.businessCategory,
@@ -566,10 +593,10 @@ export class ParlantValidationMiddleware implements NestMiddleware {
           requiredRoles: config.requiredRoles || [],
           routePattern: config.route,
           requestSize: JSON.stringify(req.body || {}).length,
-          cacheable: config.cacheable
+          cacheable: config.cacheable,
         },
-        history: []
-      }
+        history: [],
+      },
     };
   }
 
@@ -580,12 +607,12 @@ export class ParlantValidationMiddleware implements NestMiddleware {
     res: Response,
     validationResult: ParlantValidationResponse,
     config: RouteValidationConfig,
-    operationId: string
+    operationId: string,
   ): void {
     const errorResponse = {
       statusCode: HttpStatus.FORBIDDEN,
-      message: 'Request denied by conversational validation',
-      error: 'Conversational Validation Failed',
+      message: "Request denied by conversational validation",
+      error: "Conversational Validation Failed",
       details: {
         intent: config.intent,
         reasoning: validationResult.reason,
@@ -594,26 +621,23 @@ export class ParlantValidationMiddleware implements NestMiddleware {
         securityLevel: config.securityLevel,
         validationMode: config.validationMode,
         businessCategory: config.businessCategory,
-        complianceFlags: config.complianceFlags || []
+        complianceFlags: config.complianceFlags || [],
       },
       guidance: this.generateValidationGuidance(config, validationResult),
       metadata: {
         operationId,
         validationTimestamp: new Date(),
-        route: config.route
-      }
+        route: config.route,
+      },
     };
 
-    this.logger.warn(
-      `[${operationId}] Request denied by PARLANT validation`,
-      {
-        operationId,
-        reasoning: validationResult.reason,
-        conversationId: validationResult.conversationId,
-        securityLevel: config.securityLevel,
-        businessCategory: config.businessCategory
-      }
-    );
+    this.logger.warn(`[${operationId}] Request denied by PARLANT validation`, {
+      operationId,
+      reasoning: validationResult.reason,
+      conversationId: validationResult.conversationId,
+      securityLevel: config.securityLevel,
+      businessCategory: config.businessCategory,
+    });
 
     res.status(HttpStatus.FORBIDDEN).json(errorResponse);
   }
@@ -625,7 +649,7 @@ export class ParlantValidationMiddleware implements NestMiddleware {
     error: unknown,
     res: Response,
     operationId: string,
-    validationTime: number
+    validationTime: number,
   ): void {
     this.handleValidationFailure();
 
@@ -633,19 +657,19 @@ export class ParlantValidationMiddleware implements NestMiddleware {
       const errorResponse = {
         statusCode: HttpStatus.FORBIDDEN,
         message: error.message,
-        error: 'Conversational Validation Error',
+        error: "Conversational Validation Error",
         details: {
           conversationId: error.conversationId,
           reasoning: error.reasoning,
           suggestedAlternatives: error.suggestedAlternatives,
           confidence: error.confidence,
-          riskLevel: error.riskLevel
+          riskLevel: error.riskLevel,
         },
         metadata: {
           operationId,
           validationTime,
-          timestamp: new Date()
-        }
+          timestamp: new Date(),
+        },
       };
 
       res.status(HttpStatus.FORBIDDEN).json(errorResponse);
@@ -658,19 +682,19 @@ export class ParlantValidationMiddleware implements NestMiddleware {
         operationId,
         error: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined,
-        validationTime
-      }
+        validationTime,
+      },
     );
 
     const errorResponse = {
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-      message: 'Validation system error',
-      error: 'Internal Server Error',
+      message: "Validation system error",
+      error: "Internal Server Error",
       metadata: {
         operationId,
         timestamp: new Date(),
-        validationTime
-      }
+        validationTime,
+      },
     };
 
     res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(errorResponse);
@@ -684,16 +708,16 @@ export class ParlantValidationMiddleware implements NestMiddleware {
 
     const errorResponse = {
       statusCode: HttpStatus.SERVICE_UNAVAILABLE,
-      message: 'Validation service temporarily unavailable',
-      error: 'Service Unavailable',
+      message: "Validation service temporarily unavailable",
+      error: "Service Unavailable",
       details: {
-        circuitBreakerState: 'OPEN',
-        retryAfter: Math.ceil(this.circuitBreakerConfig.resetTimeoutMs / 1000)
+        circuitBreakerState: "OPEN",
+        retryAfter: Math.ceil(this.circuitBreakerConfig.resetTimeoutMs / 1000),
       },
       metadata: {
         operationId,
-        timestamp: new Date()
-      }
+        timestamp: new Date(),
+      },
     };
 
     res.status(HttpStatus.SERVICE_UNAVAILABLE).json(errorResponse);
@@ -704,7 +728,7 @@ export class ParlantValidationMiddleware implements NestMiddleware {
    */
   private generateValidationGuidance(
     config: RouteValidationConfig,
-    validationResult: ParlantValidationResponse
+    validationResult: ParlantValidationResponse,
   ): {
     nextSteps: string[];
     alternatives: string[];
@@ -718,29 +742,33 @@ export class ParlantValidationMiddleware implements NestMiddleware {
       contactInfo?: string;
     } = {
       nextSteps: [
-        'Review the request parameters and ensure they align with security policies',
-        'Verify you have appropriate permissions for this operation',
-        'Consider using alternative endpoints with lower security requirements'
+        "Review the request parameters and ensure they align with security policies",
+        "Verify you have appropriate permissions for this operation",
+        "Consider using alternative endpoints with lower security requirements",
       ],
       alternatives: validationResult.suggestedAlternatives || [
-        'Request explicit approval through the conversational interface',
-        'Use read-only alternatives if available',
-        'Break down the operation into smaller, safer steps'
+        "Request explicit approval through the conversational interface",
+        "Use read-only alternatives if available",
+        "Break down the operation into smaller, safer steps",
       ],
       securityNotes: [
         `This operation requires ${config.securityLevel} security clearance`,
         `Validation mode: ${config.validationMode}`,
-        'All operations are subject to conversational validation for security'
-      ]
+        "All operations are subject to conversational validation for security",
+      ],
     };
 
     if (config.securityLevel === SecurityLevel.CRITICAL) {
-      guidance.nextSteps.unshift('Contact system administrator for critical operation approval');
-      guidance.contactInfo = 'System Administrator: admin@company.com';
+      guidance.nextSteps.unshift(
+        "Contact system administrator for critical operation approval",
+      );
+      guidance.contactInfo = "System Administrator: admin@company.com";
     }
 
-    if (config.complianceFlags?.includes('HIGH_RISK')) {
-      guidance.securityNotes.push('This operation is classified as high-risk and requires additional verification');
+    if (config.complianceFlags?.includes("HIGH_RISK")) {
+      guidance.securityNotes.push(
+        "This operation is classified as high-risk and requires additional verification",
+      );
     }
 
     return guidance;
@@ -750,16 +778,25 @@ export class ParlantValidationMiddleware implements NestMiddleware {
 
   private mapSecurityLevelToRiskLevel(securityLevel: SecurityLevel): RiskLevel {
     switch (securityLevel) {
-      case SecurityLevel.MINIMAL: return RiskLevel._MINIMAL;
-      case SecurityLevel.LOW: return RiskLevel._LOW;
-      case SecurityLevel.MEDIUM: return RiskLevel._MODERATE;
-      case SecurityLevel.HIGH: return RiskLevel._HIGH;
-      case SecurityLevel.CRITICAL: return RiskLevel._CRITICAL;
-      default: return RiskLevel._MODERATE;
+      case SecurityLevel.MINIMAL:
+        return RiskLevel._MINIMAL;
+      case SecurityLevel.LOW:
+        return RiskLevel._LOW;
+      case SecurityLevel.MEDIUM:
+        return RiskLevel._MODERATE;
+      case SecurityLevel.HIGH:
+        return RiskLevel._HIGH;
+      case SecurityLevel.CRITICAL:
+        return RiskLevel._CRITICAL;
+      default:
+        return RiskLevel._MODERATE;
     }
   }
 
-  private generateCacheKey(req: Request, config: RouteValidationConfig): string {
+  private generateCacheKey(
+    req: Request,
+    config: RouteValidationConfig,
+  ): string {
     const user = (req as any).user || {};
     const keyData = {
       route: config.route,
@@ -768,12 +805,14 @@ export class ParlantValidationMiddleware implements NestMiddleware {
       securityLevel: config.securityLevel,
       businessCategory: config.businessCategory,
       params: req.params,
-      query: req.query
+      query: req.query,
     };
-    return Buffer.from(JSON.stringify(keyData)).toString('base64');
+    return Buffer.from(JSON.stringify(keyData)).toString("base64");
   }
 
-  private getCachedValidation(cacheKey: string): ParlantValidationResponse | null {
+  private getCachedValidation(
+    cacheKey: string,
+  ): ParlantValidationResponse | null {
     const cached = this.validationCache.get(cacheKey);
     if (cached && Date.now() - cached.timestamp.getTime() < cached.ttl) {
       return cached.response;
@@ -787,12 +826,12 @@ export class ParlantValidationMiddleware implements NestMiddleware {
   private setCachedValidation(
     cacheKey: string,
     response: ParlantValidationResponse,
-    ttl: number
+    ttl: number,
   ): void {
     this.validationCache.set(cacheKey, {
       response,
       timestamp: new Date(),
-      ttl
+      ttl,
     });
 
     // Cleanup old entries
@@ -808,11 +847,18 @@ export class ParlantValidationMiddleware implements NestMiddleware {
     if (!body) return {};
 
     const sanitized = { ...body };
-    const sensitiveFields = ['password', 'token', 'secret', 'key', 'credentials', 'auth'];
+    const sensitiveFields = [
+      "password",
+      "token",
+      "secret",
+      "key",
+      "credentials",
+      "auth",
+    ];
 
-    sensitiveFields.forEach(field => {
+    sensitiveFields.forEach((field) => {
       if (sanitized[field]) {
-        sanitized[field] = '[REDACTED]';
+        sanitized[field] = "[REDACTED]";
       }
     });
 
@@ -824,9 +870,11 @@ export class ParlantValidationMiddleware implements NestMiddleware {
 
     const sanitized: Record<string, string> = {};
     Object.entries(headers).forEach(([key, value]) => {
-      if (!key.toLowerCase().includes('authorization') &&
-          !key.toLowerCase().includes('cookie') &&
-          !key.toLowerCase().includes('token')) {
+      if (
+        !key.toLowerCase().includes("authorization") &&
+        !key.toLowerCase().includes("cookie") &&
+        !key.toLowerCase().includes("token")
+      ) {
         sanitized[key] = String(value);
       }
     });
@@ -836,11 +884,11 @@ export class ParlantValidationMiddleware implements NestMiddleware {
 
   private getClientIpAddress(req: Request): string {
     return (
-      req.headers?.['x-forwarded-for']?.toString().split(',')[0]?.trim() ||
-      req.headers?.['x-real-ip']?.toString() ||
+      req.headers?.["x-forwarded-for"]?.toString().split(",")[0]?.trim() ||
+      req.headers?.["x-real-ip"]?.toString() ||
       (req as any).connection?.remoteAddress ||
       (req as any).socket?.remoteAddress ||
-      'unknown'
+      "unknown"
     );
   }
 
@@ -851,10 +899,10 @@ export class ParlantValidationMiddleware implements NestMiddleware {
       /\b\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}\b/, // Credit card numbers
       /\b\d{3}-\d{2}-\d{4}\b/, // SSN
       /password|secret|token|key|auth/i, // Common sensitive terms
-      /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/ // Email addresses
+      /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/, // Email addresses
     ];
 
-    return sensitivePatterns.some(pattern => pattern.test(text));
+    return sensitivePatterns.some((pattern) => pattern.test(text));
   }
 
   private generateOperationId(): string {
@@ -864,11 +912,11 @@ export class ParlantValidationMiddleware implements NestMiddleware {
   // ===== CIRCUIT BREAKER METHODS =====
 
   private handleValidationSuccess(): void {
-    if (this.circuitBreakerState === 'HALF_OPEN') {
-      this.circuitBreakerState = 'CLOSED';
+    if (this.circuitBreakerState === "HALF_OPEN") {
+      this.circuitBreakerState = "CLOSED";
       this.failureCount = 0;
       delete this.lastFailureTime;
-      this.logger.log('Circuit breaker closed after successful validation');
+      this.logger.log("Circuit breaker closed after successful validation");
     }
   }
 
@@ -877,21 +925,26 @@ export class ParlantValidationMiddleware implements NestMiddleware {
     this.lastFailureTime = new Date();
 
     if (this.failureCount >= this.circuitBreakerConfig.failureThreshold) {
-      this.circuitBreakerState = 'OPEN';
-      this.logger.warn(`Circuit breaker opened after ${this.failureCount} failures`);
+      this.circuitBreakerState = "OPEN";
+      this.logger.warn(
+        `Circuit breaker opened after ${this.failureCount} failures`,
+      );
     }
   }
 
   private shouldAttemptReset(): boolean {
     if (!this.lastFailureTime) return true;
-    return Date.now() - this.lastFailureTime.getTime() > this.circuitBreakerConfig.resetTimeoutMs;
+    return (
+      Date.now() - this.lastFailureTime.getTime() >
+      this.circuitBreakerConfig.resetTimeoutMs
+    );
   }
 
   // ===== METRICS AND MONITORING =====
 
   private updateAverageValidationTime(validationTime: number): void {
     this.metrics.averageValidationTime =
-      (this.metrics.averageValidationTime * 0.9) + (validationTime * 0.1);
+      this.metrics.averageValidationTime * 0.9 + validationTime * 0.1;
   }
 
   private startMetricsReporting(): void {
@@ -902,24 +955,26 @@ export class ParlantValidationMiddleware implements NestMiddleware {
   }
 
   private logMetrics(): void {
-    const approvalRate = this.metrics.validatedRequests > 0
-      ? (this.metrics.approvedRequests / this.metrics.validatedRequests) * 100
-      : 0;
+    const approvalRate =
+      this.metrics.validatedRequests > 0
+        ? (this.metrics.approvedRequests / this.metrics.validatedRequests) * 100
+        : 0;
 
-    this.logger.log('PARLANT Middleware Performance Metrics', {
+    this.logger.log("PARLANT Middleware Performance Metrics", {
       totalRequests: this.metrics.totalRequests,
       validatedRequests: this.metrics.validatedRequests,
       approvalRate: `${approvalRate.toFixed(2)}%`,
       averageValidationTime: `${this.metrics.averageValidationTime.toFixed(2)}ms`,
       cacheHitRate: `${(this.metrics.cacheHitRate * 100).toFixed(2)}%`,
-      errorRate: `${(this.metrics.errorRate / this.metrics.totalRequests * 100).toFixed(2)}%`,
-      circuitBreakerState: this.circuitBreakerState
+      errorRate: `${((this.metrics.errorRate / this.metrics.totalRequests) * 100).toFixed(2)}%`,
+      circuitBreakerState: this.circuitBreakerState,
     });
   }
 
   private resetHourlyMetrics(): void {
     const now = new Date();
-    if (now.getTime() - this.metrics.lastResetTime.getTime() > 3600000) { // 1 hour
+    if (now.getTime() - this.metrics.lastResetTime.getTime() > 3600000) {
+      // 1 hour
       this.metrics = {
         totalRequests: 0,
         validatedRequests: 0,
@@ -928,7 +983,7 @@ export class ParlantValidationMiddleware implements NestMiddleware {
         averageValidationTime: 0,
         cacheHitRate: 0,
         errorRate: 0,
-        lastResetTime: now
+        lastResetTime: now,
       };
     }
   }
@@ -951,7 +1006,7 @@ export class ParlantValidationMiddleware implements NestMiddleware {
     return {
       state: this.circuitBreakerState,
       failureCount: this.failureCount,
-      lastFailureTime: this.lastFailureTime
+      lastFailureTime: this.lastFailureTime,
     };
   }
 }

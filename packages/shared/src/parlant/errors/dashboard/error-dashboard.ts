@@ -15,20 +15,20 @@
  * - Export capabilities (PDF, Excel, PNG)
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from "@nestjs/common";
 import {
   PerformanceMetrics,
   DetectedPattern,
   AnomalyDetection,
-  PredictiveAnalysis
-} from '../monitoring/performance-monitor';
+  PredictiveAnalysis,
+} from "../monitoring/performance-monitor";
 import {
   EnterpriseErrorContext,
   ErrorMetrics,
   EnterpriseErrorSeverity,
   EnterpriseErrorCategory,
-  NotificationUrgency
-} from '../types/error-types';
+  NotificationUrgency,
+} from "../types/error-types";
 
 // ===== DASHBOARD INTERFACES =====
 
@@ -44,7 +44,7 @@ export interface DashboardConfig {
     name: string;
     description: string;
     owner: string;
-    visibility: 'PRIVATE' | 'TEAM' | 'ORGANIZATION' | 'PUBLIC';
+    visibility: "PRIVATE" | "TEAM" | "ORGANIZATION" | "PUBLIC";
     tags: string[];
     createdAt: Date;
     updatedAt: Date;
@@ -52,10 +52,10 @@ export interface DashboardConfig {
 
   /** Layout configuration */
   layout: {
-    type: 'GRID' | 'FLOW' | 'TABS' | 'SIDEBAR';
+    type: "GRID" | "FLOW" | "TABS" | "SIDEBAR";
     columns: number;
     responsive: boolean;
-    theme: 'LIGHT' | 'DARK' | 'AUTO';
+    theme: "LIGHT" | "DARK" | "AUTO";
   };
 
   /** Widget configuration */
@@ -73,12 +73,17 @@ export interface DashboardConfig {
   filters: {
     global: Array<{
       field: string;
-      operator: 'EQUALS' | 'CONTAINS' | 'GREATER_THAN' | 'LESS_THAN' | 'BETWEEN';
+      operator:
+        | "EQUALS"
+        | "CONTAINS"
+        | "GREATER_THAN"
+        | "LESS_THAN"
+        | "BETWEEN";
       value: any;
       enabled: boolean;
     }>;
     timeRange: {
-      default: 'LAST_HOUR' | 'LAST_DAY' | 'LAST_WEEK' | 'LAST_MONTH' | 'CUSTOM';
+      default: "LAST_HOUR" | "LAST_DAY" | "LAST_WEEK" | "LAST_MONTH" | "CUSTOM";
       custom?: { start: Date; end: Date };
     };
   };
@@ -94,9 +99,9 @@ export interface DashboardConfig {
   /** Export settings */
   export: {
     enabled: boolean;
-    formats: Array<'PDF' | 'PNG' | 'EXCEL' | 'CSV' | 'JSON'>;
+    formats: Array<"PDF" | "PNG" | "EXCEL" | "CSV" | "JSON">;
     schedule?: {
-      frequency: 'DAILY' | 'WEEKLY' | 'MONTHLY';
+      frequency: "DAILY" | "WEEKLY" | "MONTHLY";
       recipients: string[];
       format: string;
     };
@@ -108,41 +113,41 @@ export interface DashboardConfig {
  */
 export enum DashboardWidgetType {
   // Metrics Widgets
-  ERROR_RATE_CHART = 'ERROR_RATE_CHART',
-  SEVERITY_DISTRIBUTION = 'SEVERITY_DISTRIBUTION',
-  CATEGORY_BREAKDOWN = 'CATEGORY_BREAKDOWN',
-  SERVICE_HEALTH_MAP = 'SERVICE_HEALTH_MAP',
-  PERFORMANCE_METRICS = 'PERFORMANCE_METRICS',
+  ERROR_RATE_CHART = "ERROR_RATE_CHART",
+  SEVERITY_DISTRIBUTION = "SEVERITY_DISTRIBUTION",
+  CATEGORY_BREAKDOWN = "CATEGORY_BREAKDOWN",
+  SERVICE_HEALTH_MAP = "SERVICE_HEALTH_MAP",
+  PERFORMANCE_METRICS = "PERFORMANCE_METRICS",
 
   // Time Series Widgets
-  ERROR_TIMELINE = 'ERROR_TIMELINE',
-  TREND_ANALYSIS = 'TREND_ANALYSIS',
-  PATTERN_DETECTION = 'PATTERN_DETECTION',
-  ANOMALY_TIMELINE = 'ANOMALY_TIMELINE',
+  ERROR_TIMELINE = "ERROR_TIMELINE",
+  TREND_ANALYSIS = "TREND_ANALYSIS",
+  PATTERN_DETECTION = "PATTERN_DETECTION",
+  ANOMALY_TIMELINE = "ANOMALY_TIMELINE",
 
   // Analytical Widgets
-  ROOT_CAUSE_ANALYSIS = 'ROOT_CAUSE_ANALYSIS',
-  CORRELATION_MATRIX = 'CORRELATION_MATRIX',
-  PREDICTIVE_ANALYSIS = 'PREDICTIVE_ANALYSIS',
-  IMPACT_ASSESSMENT = 'IMPACT_ASSESSMENT',
+  ROOT_CAUSE_ANALYSIS = "ROOT_CAUSE_ANALYSIS",
+  CORRELATION_MATRIX = "CORRELATION_MATRIX",
+  PREDICTIVE_ANALYSIS = "PREDICTIVE_ANALYSIS",
+  IMPACT_ASSESSMENT = "IMPACT_ASSESSMENT",
 
   // Operational Widgets
-  ACTIVE_INCIDENTS = 'ACTIVE_INCIDENTS',
-  RECOVERY_STATUS = 'RECOVERY_STATUS',
-  SLA_COMPLIANCE = 'SLA_COMPLIANCE',
-  ALERT_SUMMARY = 'ALERT_SUMMARY',
+  ACTIVE_INCIDENTS = "ACTIVE_INCIDENTS",
+  RECOVERY_STATUS = "RECOVERY_STATUS",
+  SLA_COMPLIANCE = "SLA_COMPLIANCE",
+  ALERT_SUMMARY = "ALERT_SUMMARY",
 
   // Executive Widgets
-  EXECUTIVE_SUMMARY = 'EXECUTIVE_SUMMARY',
-  KPI_SCORECARD = 'KPI_SCORECARD',
-  BUSINESS_IMPACT = 'BUSINESS_IMPACT',
-  COMPLIANCE_STATUS = 'COMPLIANCE_STATUS',
+  EXECUTIVE_SUMMARY = "EXECUTIVE_SUMMARY",
+  KPI_SCORECARD = "KPI_SCORECARD",
+  BUSINESS_IMPACT = "BUSINESS_IMPACT",
+  COMPLIANCE_STATUS = "COMPLIANCE_STATUS",
 
   // Interactive Widgets
-  ERROR_EXPLORER = 'ERROR_EXPLORER',
-  DRILL_DOWN_TABLE = 'DRILL_DOWN_TABLE',
-  FILTER_PANEL = 'FILTER_PANEL',
-  SEARCH_INTERFACE = 'SEARCH_INTERFACE'
+  ERROR_EXPLORER = "ERROR_EXPLORER",
+  DRILL_DOWN_TABLE = "DRILL_DOWN_TABLE",
+  FILTER_PANEL = "FILTER_PANEL",
+  SEARCH_INTERFACE = "SEARCH_INTERFACE",
 }
 
 /**
@@ -165,14 +170,14 @@ export interface WidgetData {
       name: string;
       data: Array<{ x: any; y: any; metadata?: any }>;
       color?: string;
-      type?: 'line' | 'bar' | 'area' | 'scatter' | 'pie';
+      type?: "line" | "bar" | "area" | "scatter" | "pie";
     }>;
 
     /** Summary statistics */
     summary?: {
       total: number;
       average: number;
-      trend: 'UP' | 'DOWN' | 'STABLE';
+      trend: "UP" | "DOWN" | "STABLE";
       changePercent: number;
       comparison?: {
         period: string;
@@ -187,7 +192,7 @@ export interface WidgetData {
         x: any;
         y?: any;
         text: string;
-        type: 'INFO' | 'WARNING' | 'ERROR' | 'SUCCESS';
+        type: "INFO" | "WARNING" | "ERROR" | "SUCCESS";
       }>;
       thresholds: Array<{
         value: number;
@@ -232,7 +237,7 @@ export interface DashboardUpdate {
   timestamp: Date;
 
   /** Update type */
-  type: 'DATA_REFRESH' | 'CONFIG_CHANGE' | 'ALERT' | 'STATUS_CHANGE';
+  type: "DATA_REFRESH" | "CONFIG_CHANGE" | "ALERT" | "STATUS_CHANGE";
 
   /** Updated widgets */
   widgets: Array<{
@@ -308,10 +313,10 @@ export interface DashboardAnalytics {
 
   /** Data insights */
   insights: Array<{
-    type: 'TREND' | 'ANOMALY' | 'PATTERN' | 'RECOMMENDATION';
+    type: "TREND" | "ANOMALY" | "PATTERN" | "RECOMMENDATION";
     description: string;
     confidence: number;
-    impact: 'LOW' | 'MEDIUM' | 'HIGH';
+    impact: "LOW" | "MEDIUM" | "HIGH";
     actionable: boolean;
   }>;
 }
@@ -329,7 +334,10 @@ export class EnterpriseDashboardManager {
 
   // Real-time subscriptions
   private readonly subscriptions = new Map<string, DashboardSubscription>();
-  private readonly websocketConnections = new Map<string, WebSocketConnection>();
+  private readonly websocketConnections = new Map<
+    string,
+    WebSocketConnection
+  >();
 
   // Data providers
   private readonly dataProviders = new Map<string, DataProvider>();
@@ -351,7 +359,7 @@ export class EnterpriseDashboardManager {
     name: string,
     description: string,
     owner: string,
-    template?: string
+    template?: string,
   ): Promise<string> {
     const dashboardId = this.generateDashboardId();
 
@@ -359,9 +367,20 @@ export class EnterpriseDashboardManager {
       let config: DashboardConfig;
 
       if (template) {
-        config = await this.createFromTemplate(dashboardId, template, name, description, owner);
+        config = await this.createFromTemplate(
+          dashboardId,
+          template,
+          name,
+          description,
+          owner,
+        );
       } else {
-        config = await this.createDefaultDashboard(dashboardId, name, description, owner);
+        config = await this.createDefaultDashboard(
+          dashboardId,
+          name,
+          description,
+          owner,
+        );
       }
 
       // Store dashboard configuration
@@ -376,7 +395,6 @@ export class EnterpriseDashboardManager {
       this.logger.info(`Dashboard created: ${dashboardId}`);
 
       return dashboardId;
-
     } catch (error) {
       this.logger.error(`Failed to create dashboard ${dashboardId}:`, error);
       throw error;
@@ -388,12 +406,12 @@ export class EnterpriseDashboardManager {
    */
   async getDashboardData(
     dashboardId: string,
-    filters?: Record<string, any>
+    filters?: Record<string, any>,
   ): Promise<{
     config: DashboardConfig;
     widgets: WidgetData[];
     lastUpdate: Date;
-    status: 'HEALTHY' | 'DEGRADED' | 'ERROR';
+    status: "HEALTHY" | "DEGRADED" | "ERROR";
   }> {
     try {
       const config = this.dashboards.get(dashboardId);
@@ -418,11 +436,13 @@ export class EnterpriseDashboardManager {
         config,
         widgets,
         lastUpdate: new Date(),
-        status
+        status,
       };
-
     } catch (error) {
-      this.logger.error(`Failed to get dashboard data for ${dashboardId}:`, error);
+      this.logger.error(
+        `Failed to get dashboard data for ${dashboardId}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -432,34 +452,39 @@ export class EnterpriseDashboardManager {
    */
   async generateErrorRateChart(
     timeRange: { start: Date; end: Date },
-    granularity: 'MINUTE' | 'HOUR' | 'DAY' = 'HOUR'
+    granularity: "MINUTE" | "HOUR" | "DAY" = "HOUR",
   ): Promise<WidgetData> {
     try {
       // Get error data for time range
-      const errorData = await this.getErrorDataForTimeRange(timeRange, granularity);
+      const errorData = await this.getErrorDataForTimeRange(
+        timeRange,
+        granularity,
+      );
 
       // Process data for chart
-      const series = [{
-        name: 'Error Rate',
-        data: errorData.map(point => ({
-          x: point.timestamp,
-          y: point.errorRate,
-          metadata: {
-            totalErrors: point.totalErrors,
-            totalRequests: point.totalRequests
-          }
-        })),
-        color: '#FF6B6B',
-        type: 'line' as const
-      }];
+      const series = [
+        {
+          name: "Error Rate",
+          data: errorData.map((point) => ({
+            x: point.timestamp,
+            y: point.errorRate,
+            metadata: {
+              totalErrors: point.totalErrors,
+              totalRequests: point.totalRequests,
+            },
+          })),
+          color: "#FF6B6B",
+          type: "line" as const,
+        },
+      ];
 
       // Calculate summary statistics
-      const values = errorData.map(p => p.errorRate);
+      const values = errorData.map((p) => p.errorRate);
       const average = values.reduce((a, b) => a + b, 0) / values.length;
       const trend = this.calculateTrend(values);
 
       return {
-        widgetId: 'error-rate-chart',
+        widgetId: "error-rate-chart",
         timestamp: new Date(),
         type: DashboardWidgetType.ERROR_RATE_CHART,
         data: {
@@ -468,29 +493,28 @@ export class EnterpriseDashboardManager {
             total: values.length,
             average,
             trend,
-            changePercent: this.calculateChange(values)
-          }
+            changePercent: this.calculateChange(values),
+          },
         },
         config: {
-          title: 'Error Rate Over Time',
+          title: "Error Rate Over Time",
           subtitle: `${granularity.toLowerCase()} granularity`,
           showLegend: true,
           showGrid: true,
           height: 300,
           width: 600,
           animation: true,
-          interactive: true
+          interactive: true,
         },
         quality: {
           completeness: 1.0,
           freshness: 0,
           accuracy: 1.0,
-          reliability: 1.0
-        }
+          reliability: 1.0,
+        },
       };
-
     } catch (error) {
-      this.logger.error('Failed to generate error rate chart:', error);
+      this.logger.error("Failed to generate error rate chart:", error);
       throw error;
     }
   }
@@ -498,30 +522,36 @@ export class EnterpriseDashboardManager {
   /**
    * Generate severity distribution widget
    */
-  async generateSeverityDistribution(
-    timeRange: { start: Date; end: Date }
-  ): Promise<WidgetData> {
+  async generateSeverityDistribution(timeRange: {
+    start: Date;
+    end: Date;
+  }): Promise<WidgetData> {
     try {
       // Get error data grouped by severity
       const severityData = await this.getErrorDataBySeverity(timeRange);
 
       // Process data for pie chart
-      const series = [{
-        name: 'Error Distribution',
-        data: Object.entries(severityData).map(([severity, count]) => ({
-          x: severity,
-          y: count,
-          metadata: {
-            percentage: (count / Object.values(severityData).reduce((a, b) => a + b, 0)) * 100
-          }
-        })),
-        type: 'pie' as const
-      }];
+      const series = [
+        {
+          name: "Error Distribution",
+          data: Object.entries(severityData).map(([severity, count]) => ({
+            x: severity,
+            y: count,
+            metadata: {
+              percentage:
+                (count /
+                  Object.values(severityData).reduce((a, b) => a + b, 0)) *
+                100,
+            },
+          })),
+          type: "pie" as const,
+        },
+      ];
 
       const total = Object.values(severityData).reduce((a, b) => a + b, 0);
 
       return {
-        widgetId: 'severity-distribution',
+        widgetId: "severity-distribution",
         timestamp: new Date(),
         type: DashboardWidgetType.SEVERITY_DISTRIBUTION,
         data: {
@@ -529,29 +559,28 @@ export class EnterpriseDashboardManager {
           summary: {
             total,
             average: total / Object.keys(severityData).length,
-            trend: 'STABLE',
-            changePercent: 0
-          }
+            trend: "STABLE",
+            changePercent: 0,
+          },
         },
         config: {
-          title: 'Error Severity Distribution',
+          title: "Error Severity Distribution",
           showLegend: true,
           showGrid: false,
           height: 300,
           width: 400,
           animation: true,
-          interactive: true
+          interactive: true,
         },
         quality: {
           completeness: 1.0,
           freshness: 0,
           accuracy: 1.0,
-          reliability: 1.0
-        }
+          reliability: 1.0,
+        },
       };
-
     } catch (error) {
-      this.logger.error('Failed to generate severity distribution:', error);
+      this.logger.error("Failed to generate severity distribution:", error);
       throw error;
     }
   }
@@ -565,54 +594,57 @@ export class EnterpriseDashboardManager {
       const serviceHealth = await this.getServiceHealthData();
 
       // Process data for heat map
-      const series = [{
-        name: 'Service Health',
-        data: serviceHealth.map(service => ({
-          x: service.name,
-          y: service.healthScore,
-          metadata: {
-            status: service.status,
-            errorRate: service.errorRate,
-            uptime: service.uptime,
-            lastCheck: service.lastCheck
-          }
-        })),
-        type: 'bar' as const
-      }];
+      const series = [
+        {
+          name: "Service Health",
+          data: serviceHealth.map((service) => ({
+            x: service.name,
+            y: service.healthScore,
+            metadata: {
+              status: service.status,
+              errorRate: service.errorRate,
+              uptime: service.uptime,
+              lastCheck: service.lastCheck,
+            },
+          })),
+          type: "bar" as const,
+        },
+      ];
 
       return {
-        widgetId: 'service-health-map',
+        widgetId: "service-health-map",
         timestamp: new Date(),
         type: DashboardWidgetType.SERVICE_HEALTH_MAP,
         data: {
           series,
           summary: {
             total: serviceHealth.length,
-            average: serviceHealth.reduce((sum, s) => sum + s.healthScore, 0) / serviceHealth.length,
-            trend: 'STABLE',
-            changePercent: 0
-          }
+            average:
+              serviceHealth.reduce((sum, s) => sum + s.healthScore, 0) /
+              serviceHealth.length,
+            trend: "STABLE",
+            changePercent: 0,
+          },
         },
         config: {
-          title: 'Service Health Map',
-          subtitle: 'Real-time service status overview',
+          title: "Service Health Map",
+          subtitle: "Real-time service status overview",
           showLegend: false,
           showGrid: true,
           height: 250,
           width: 800,
           animation: true,
-          interactive: true
+          interactive: true,
         },
         quality: {
           completeness: 1.0,
           freshness: 30, // 30 seconds
           accuracy: 0.95,
-          reliability: 0.98
-        }
+          reliability: 0.98,
+        },
       };
-
     } catch (error) {
-      this.logger.error('Failed to generate service health map:', error);
+      this.logger.error("Failed to generate service health map:", error);
       throw error;
     }
   }
@@ -620,27 +652,30 @@ export class EnterpriseDashboardManager {
   /**
    * Generate executive summary widget
    */
-  async generateExecutiveSummary(
-    timeRange: { start: Date; end: Date }
-  ): Promise<WidgetData> {
+  async generateExecutiveSummary(timeRange: {
+    start: Date;
+    end: Date;
+  }): Promise<WidgetData> {
     try {
       // Get summary metrics
       const metrics = await this.getExecutiveMetrics(timeRange);
 
       // Format for executive view
-      const series = [{
-        name: 'Key Metrics',
-        data: [
-          { x: 'Total Errors', y: metrics.totalErrors },
-          { x: 'Critical Issues', y: metrics.criticalIssues },
-          { x: 'Resolved Issues', y: metrics.resolvedIssues },
-          { x: 'SLA Compliance', y: metrics.slaCompliance }
-        ],
-        type: 'bar' as const
-      }];
+      const series = [
+        {
+          name: "Key Metrics",
+          data: [
+            { x: "Total Errors", y: metrics.totalErrors },
+            { x: "Critical Issues", y: metrics.criticalIssues },
+            { x: "Resolved Issues", y: metrics.resolvedIssues },
+            { x: "SLA Compliance", y: metrics.slaCompliance },
+          ],
+          type: "bar" as const,
+        },
+      ];
 
       return {
-        widgetId: 'executive-summary',
+        widgetId: "executive-summary",
         timestamp: new Date(),
         type: DashboardWidgetType.EXECUTIVE_SUMMARY,
         data: {
@@ -649,41 +684,41 @@ export class EnterpriseDashboardManager {
             total: metrics.totalErrors,
             average: metrics.averageResolutionTime,
             trend: metrics.trend,
-            changePercent: metrics.changeFromPrevious
+            changePercent: metrics.changeFromPrevious,
           },
           metadata: {
             annotations: [
               {
-                x: 'Critical Issues',
-                text: metrics.criticalIssues > 0 ? 'Immediate attention required' : 'All systems stable',
-                type: metrics.criticalIssues > 0 ? 'ERROR' : 'SUCCESS'
-              }
+                x: "Critical Issues",
+                text:
+                  metrics.criticalIssues > 0
+                    ? "Immediate attention required"
+                    : "All systems stable",
+                type: metrics.criticalIssues > 0 ? "ERROR" : "SUCCESS",
+              },
             ],
-            thresholds: [
-              { value: 95, label: 'SLA Target', color: '#4CAF50' }
-            ]
-          }
+            thresholds: [{ value: 95, label: "SLA Target", color: "#4CAF50" }],
+          },
         },
         config: {
-          title: 'Executive Summary',
+          title: "Executive Summary",
           subtitle: `Performance overview for ${timeRange.start.toDateString()} - ${timeRange.end.toDateString()}`,
           showLegend: false,
           showGrid: true,
           height: 200,
           width: 600,
           animation: false,
-          interactive: false
+          interactive: false,
         },
         quality: {
           completeness: 1.0,
           freshness: 60, // 1 minute
           accuracy: 1.0,
-          reliability: 1.0
-        }
+          reliability: 1.0,
+        },
       };
-
     } catch (error) {
-      this.logger.error('Failed to generate executive summary:', error);
+      this.logger.error("Failed to generate executive summary:", error);
       throw error;
     }
   }
@@ -702,9 +737,10 @@ export class EnterpriseDashboardManager {
       // Create subscription for real-time updates
       const subscription: DashboardSubscription = {
         dashboardId,
-        interval: Math.min(...config.widgets.map(w => w.refreshInterval)) * 1000,
+        interval:
+          Math.min(...config.widgets.map((w) => w.refreshInterval)) * 1000,
         lastUpdate: new Date(),
-        active: true
+        active: true,
       };
 
       this.subscriptions.set(dashboardId, subscription);
@@ -712,10 +748,14 @@ export class EnterpriseDashboardManager {
       // Start update loop
       this.startUpdateLoop(subscription);
 
-      this.logger.info(`Started real-time updates for dashboard ${dashboardId}`);
-
+      this.logger.info(
+        `Started real-time updates for dashboard ${dashboardId}`,
+      );
     } catch (error) {
-      this.logger.error(`Failed to start real-time updates for ${dashboardId}:`, error);
+      this.logger.error(
+        `Failed to start real-time updates for ${dashboardId}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -725,12 +765,12 @@ export class EnterpriseDashboardManager {
    */
   async exportDashboard(
     dashboardId: string,
-    format: 'PDF' | 'PNG' | 'EXCEL' | 'CSV' | 'JSON',
+    format: "PDF" | "PNG" | "EXCEL" | "CSV" | "JSON",
     options?: {
       includeFilters?: boolean;
       includeMetadata?: boolean;
       timeRange?: { start: Date; end: Date };
-    }
+    },
   ): Promise<{
     data: Buffer | string;
     filename: string;
@@ -748,20 +788,19 @@ export class EnterpriseDashboardManager {
 
       // Export based on format
       switch (format) {
-        case 'JSON':
+        case "JSON":
           return await this.exportToJSON(dashboardData, options);
-        case 'CSV':
+        case "CSV":
           return await this.exportToCSV(dashboardData, options);
-        case 'EXCEL':
+        case "EXCEL":
           return await this.exportToExcel(dashboardData, options);
-        case 'PDF':
+        case "PDF":
           return await this.exportToPDF(dashboardData, options);
-        case 'PNG':
+        case "PNG":
           return await this.exportToPNG(dashboardData, options);
         default:
           throw new Error(`Unsupported export format: ${format}`);
       }
-
     } catch (error) {
       this.logger.error(`Failed to export dashboard ${dashboardId}:`, error);
       throw error;
@@ -778,7 +817,7 @@ export class EnterpriseDashboardManager {
     dashboardId: string,
     name: string,
     description: string,
-    owner: string
+    owner: string,
   ): Promise<DashboardConfig> {
     return {
       dashboardId,
@@ -786,75 +825,131 @@ export class EnterpriseDashboardManager {
         name,
         description,
         owner,
-        visibility: 'PRIVATE',
+        visibility: "PRIVATE",
         tags: [],
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       },
       layout: {
-        type: 'GRID',
+        type: "GRID",
         columns: 12,
         responsive: true,
-        theme: 'LIGHT'
+        theme: "LIGHT",
       },
       widgets: [
         {
-          widgetId: 'error-rate-chart',
+          widgetId: "error-rate-chart",
           type: DashboardWidgetType.ERROR_RATE_CHART,
           position: { row: 0, column: 0, width: 6, height: 4 },
           config: {},
-          dataSource: 'error-metrics',
+          dataSource: "error-metrics",
           refreshInterval: 30,
-          visible: true
+          visible: true,
         },
         {
-          widgetId: 'severity-distribution',
+          widgetId: "severity-distribution",
           type: DashboardWidgetType.SEVERITY_DISTRIBUTION,
           position: { row: 0, column: 6, width: 6, height: 4 },
           config: {},
-          dataSource: 'error-metrics',
+          dataSource: "error-metrics",
           refreshInterval: 60,
-          visible: true
-        }
+          visible: true,
+        },
       ],
       filters: {
         global: [],
-        timeRange: { default: 'LAST_HOUR' }
+        timeRange: { default: "LAST_HOUR" },
       },
       access: {
         viewers: [],
         editors: [],
         administrators: [owner],
-        publicAccess: false
+        publicAccess: false,
       },
       export: {
         enabled: true,
-        formats: ['PDF', 'PNG', 'JSON']
-      }
+        formats: ["PDF", "PNG", "JSON"],
+      },
     };
   }
 
   // Additional helper method stubs
-  private initializeDataProviders(): void { /* ... */ }
-  private startRealTimeUpdates(): void { /* ... */ }
-  private initializeCacheManager(): void { /* ... */ }
-  private async createFromTemplate(dashboardId: string, template: string, name: string, description: string, owner: string): Promise<DashboardConfig> { return {} as DashboardConfig; }
-  private async initializeWidgetData(config: DashboardConfig): Promise<void> { /* ... */ }
-  private async startDataCollection(dashboardId: string): Promise<void> { /* ... */ }
-  private async getWidgetData(widgetConfig: any, filters?: Record<string, any>): Promise<WidgetData> { return {} as WidgetData; }
-  private async checkDashboardHealth(dashboardId: string): Promise<'HEALTHY' | 'DEGRADED' | 'ERROR'> { return 'HEALTHY'; }
-  private async getErrorDataForTimeRange(timeRange: any, granularity: string): Promise<any[]> { return []; }
-  private calculateTrend(values: number[]): 'UP' | 'DOWN' | 'STABLE' { return 'STABLE'; }
-  private calculateChange(values: number[]): number { return 0; }
-  private async getErrorDataBySeverity(timeRange: any): Promise<Record<string, number>> { return {}; }
-  private async getServiceHealthData(): Promise<any[]> { return []; }
-  private async getExecutiveMetrics(timeRange: any): Promise<any> { return {}; }
-  private startUpdateLoop(subscription: DashboardSubscription): void { /* ... */ }
-  private async exportToJSON(data: any, options?: any): Promise<any> { return {}; }
-  private async exportToCSV(data: any, options?: any): Promise<any> { return {}; }
-  private async exportToExcel(data: any, options?: any): Promise<any> { return {}; }
-  private async exportToPDF(data: any, options?: any): Promise<any> { return {}; }
-  private async exportToPNG(data: any, options?: any): Promise<any> { return {}; }
+  private initializeDataProviders(): void {
+    /* ... */
+  }
+  private startRealTimeUpdates(): void {
+    /* ... */
+  }
+  private initializeCacheManager(): void {
+    /* ... */
+  }
+  private async createFromTemplate(
+    dashboardId: string,
+    template: string,
+    name: string,
+    description: string,
+    owner: string,
+  ): Promise<DashboardConfig> {
+    return {} as DashboardConfig;
+  }
+  private async initializeWidgetData(config: DashboardConfig): Promise<void> {
+    /* ... */
+  }
+  private async startDataCollection(dashboardId: string): Promise<void> {
+    /* ... */
+  }
+  private async getWidgetData(
+    widgetConfig: any,
+    filters?: Record<string, any>,
+  ): Promise<WidgetData> {
+    return {} as WidgetData;
+  }
+  private async checkDashboardHealth(
+    dashboardId: string,
+  ): Promise<"HEALTHY" | "DEGRADED" | "ERROR"> {
+    return "HEALTHY";
+  }
+  private async getErrorDataForTimeRange(
+    timeRange: any,
+    granularity: string,
+  ): Promise<any[]> {
+    return [];
+  }
+  private calculateTrend(values: number[]): "UP" | "DOWN" | "STABLE" {
+    return "STABLE";
+  }
+  private calculateChange(values: number[]): number {
+    return 0;
+  }
+  private async getErrorDataBySeverity(
+    timeRange: any,
+  ): Promise<Record<string, number>> {
+    return {};
+  }
+  private async getServiceHealthData(): Promise<any[]> {
+    return [];
+  }
+  private async getExecutiveMetrics(timeRange: any): Promise<any> {
+    return {};
+  }
+  private startUpdateLoop(subscription: DashboardSubscription): void {
+    /* ... */
+  }
+  private async exportToJSON(data: any, options?: any): Promise<any> {
+    return {};
+  }
+  private async exportToCSV(data: any, options?: any): Promise<any> {
+    return {};
+  }
+  private async exportToExcel(data: any, options?: any): Promise<any> {
+    return {};
+  }
+  private async exportToPDF(data: any, options?: any): Promise<any> {
+    return {};
+  }
+  private async exportToPNG(data: any, options?: any): Promise<any> {
+    return {};
+  }
 }
 
 // ===== SUPPORTING INTERFACES =====

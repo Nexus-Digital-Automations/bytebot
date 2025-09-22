@@ -19,19 +19,24 @@
  * @author PARLANT Phase 1 Middleware Team
  */
 
-import { Injectable, Logger, NestMiddleware, SetMetadata } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
-import { Request, Response, NextFunction } from 'express';
-import { performance } from 'perf_hooks';
+import {
+  Injectable,
+  Logger,
+  NestMiddleware,
+  SetMetadata,
+} from "@nestjs/common";
+import { Reflector } from "@nestjs/core";
+import { Request, Response, NextFunction } from "express";
+import { performance } from "perf_hooks";
 import {
   PreExecutionValidationService,
   PreExecutionValidationRequest,
   PreExecutionValidationResponse,
   UserValidationContext,
   OperationRiskMetadata,
-  ValidationLevel
-} from './pre-execution-validation.service';
-import { SecurityLevel } from '../../validation/types/validation-layer.types';
+  ValidationLevel,
+} from "./pre-execution-validation.service";
+import { SecurityLevel } from "../../validation/types/validation-layer.types";
 
 // ===== DECORATOR METADATA AND CONFIGURATION =====
 
@@ -148,7 +153,7 @@ export interface ValidationMiddlewareConfig {
 /**
  * Metadata key for pre-execution validation configuration
  */
-export const PRE_EXECUTION_VALIDATION_KEY = 'pre-execution-validation';
+export const PRE_EXECUTION_VALIDATION_KEY = "pre-execution-validation";
 
 /**
  * Pre-execution validation decorator
@@ -168,11 +173,11 @@ export function PreExecutionValidation(config: PreExecutionValidationConfig) {
 export function ParlantCritical(description?: string) {
   return PreExecutionValidation({
     enabled: true,
-    securityLevel: 'RESTRICTED',
+    securityLevel: "RESTRICTED",
     description,
     cacheable: false,
     monitorPerformance: true,
-    complianceFrameworks: ['SOC2', 'GDPR']
+    complianceFrameworks: ["SOC2", "GDPR"],
   });
 }
 
@@ -182,10 +187,10 @@ export function ParlantCritical(description?: string) {
 export function ParlantSecure(description?: string) {
   return PreExecutionValidation({
     enabled: true,
-    securityLevel: 'CONFIDENTIAL',
+    securityLevel: "CONFIDENTIAL",
     description,
     cacheable: true,
-    monitorPerformance: true
+    monitorPerformance: true,
   });
 }
 
@@ -195,10 +200,10 @@ export function ParlantSecure(description?: string) {
 export function ParlantStandard(description?: string) {
   return PreExecutionValidation({
     enabled: true,
-    securityLevel: 'INTERNAL',
+    securityLevel: "INTERNAL",
     description,
     cacheable: true,
-    monitorPerformance: false
+    monitorPerformance: false,
   });
 }
 
@@ -208,7 +213,7 @@ export function ParlantStandard(description?: string) {
 export function ParlantBypass(reason?: string) {
   return SetMetadata(PRE_EXECUTION_VALIDATION_KEY, {
     enabled: false,
-    bypassReason: reason
+    bypassReason: reason,
   });
 }
 
@@ -234,29 +239,29 @@ export class PreExecutionValidationMiddleware implements NestMiddleware {
     slowValidations: 0,
     validationErrors: 0,
     cacheHits: 0,
-    cacheMisses: 0
+    cacheMisses: 0,
   };
 
   constructor(
     private readonly validationService: PreExecutionValidationService,
-    private readonly reflector: Reflector
+    private readonly reflector: Reflector,
   ) {
     this.config = this.loadMiddlewareConfiguration();
 
-    this.logger.log('PreExecutionValidationMiddleware initialized', {
-      version: '1.0.0',
+    this.logger.log("PreExecutionValidationMiddleware initialized", {
+      version: "1.0.0",
       features: [
-        'decorator_integration',
-        'performance_optimization',
-        'configuration_driven',
-        'seamless_integration',
-        'real_time_monitoring'
+        "decorator_integration",
+        "performance_optimization",
+        "configuration_driven",
+        "seamless_integration",
+        "real_time_monitoring",
       ],
       config: {
         enabled: this.config.enabled,
         defaultSecurityLevel: this.config.defaultSecurityLevel,
-        performanceMonitoring: this.config.performanceMonitoring.enabled
-      }
+        performanceMonitoring: this.config.performanceMonitoring.enabled,
+      },
     });
   }
 
@@ -279,9 +284,9 @@ export class PreExecutionValidationMiddleware implements NestMiddleware {
       // Check if path should be bypassed
       if (this.shouldBypassPath(httpContext.path, httpContext.method)) {
         this.metrics.bypassedRequests++;
-        this.logger.debug('Request bypassed by path/method configuration', {
+        this.logger.debug("Request bypassed by path/method configuration", {
           path: httpContext.path,
-          method: httpContext.method
+          method: httpContext.method,
         });
         return next();
       }
@@ -299,27 +304,27 @@ export class PreExecutionValidationMiddleware implements NestMiddleware {
       const validationStartTime = performance.now();
       const validationResult = await this.performPreExecutionValidation(
         httpContext,
-        validationConfig
+        validationConfig,
       );
 
       const validationTime = performance.now() - validationStartTime;
       this.updateValidationMetrics(validationTime);
 
       // Handle validation result
-      if (validationResult.result.decision === 'APPROVED') {
+      if (validationResult.result.decision === "APPROVED") {
         // Attach validation context to request for audit trail
         (req as any).parlantValidation = {
           validationId: validationResult.requestId,
           riskScore: validationResult.riskAssessment.riskScore,
           validationTime,
-          auditTrail: validationResult.auditTrail
+          auditTrail: validationResult.auditTrail,
         };
 
-        this.logger.debug('Request approved by pre-execution validation', {
+        this.logger.debug("Request approved by pre-execution validation", {
           requestId: validationResult.requestId,
           riskScore: validationResult.riskAssessment.riskScore,
           validationTime,
-          path: httpContext.path
+          path: httpContext.path,
         });
 
         return next();
@@ -328,39 +333,42 @@ export class PreExecutionValidationMiddleware implements NestMiddleware {
         this.handleValidationRejection(res, validationResult, httpContext);
         return; // Don't call next() - request is terminated
       }
-
     } catch (error) {
       this.metrics.validationErrors++;
-      this.logger.error('Pre-execution validation middleware error', {
+      this.logger.error("Pre-execution validation middleware error", {
         error: error.message,
         stack: error.stack,
         path: req.path,
-        method: req.method
+        method: req.method,
       });
 
       // Decide whether to continue or fail based on configuration
       if (this.config.errorHandling.continueOnValidationFailure) {
-        this.logger.warn('Continuing request despite validation error', {
+        this.logger.warn("Continuing request despite validation error", {
           path: req.path,
-          method: req.method
+          method: req.method,
         });
         return next();
       } else {
         res.status(500).json({
-          error: 'Validation system error',
-          message: this.config.errorHandling.returnDetailedErrors ? error.message : 'Internal validation error'
+          error: "Validation system error",
+          message: this.config.errorHandling.returnDetailedErrors
+            ? error.message
+            : "Internal validation error",
         });
         return;
       }
     } finally {
       const totalTime = performance.now() - startTime;
-      if (totalTime > this.config.performanceMonitoring.slowValidationThresholdMs) {
+      if (
+        totalTime > this.config.performanceMonitoring.slowValidationThresholdMs
+      ) {
         this.metrics.slowValidations++;
         if (this.config.performanceMonitoring.logSlowValidations) {
-          this.logger.warn('Slow validation detected', {
+          this.logger.warn("Slow validation detected", {
             totalTime,
             path: req.path,
-            method: req.method
+            method: req.method,
           });
         }
       }
@@ -372,7 +380,7 @@ export class PreExecutionValidationMiddleware implements NestMiddleware {
    */
   private async performPreExecutionValidation(
     httpContext: HttpValidationContext,
-    config: PreExecutionValidationConfig
+    config: PreExecutionValidationConfig,
   ): Promise<PreExecutionValidationResponse> {
     // Build validation request
     const validationRequest: PreExecutionValidationRequest = {
@@ -382,10 +390,13 @@ export class PreExecutionValidationMiddleware implements NestMiddleware {
       userContext: this.buildUserValidationContext(httpContext),
       conversationId: this.getOrCreateConversationId(httpContext),
       securityClassification: config.securityLevel,
-      naturalLanguageIntent: this.generateNaturalLanguageIntent(httpContext, config),
+      naturalLanguageIntent: this.generateNaturalLanguageIntent(
+        httpContext,
+        config,
+      ),
       riskMetadata: this.buildRiskMetadata(httpContext, config),
       timestamp: new Date(),
-      timeoutMs: config.timeoutMs || this.config.defaultTimeoutMs
+      timeoutMs: config.timeoutMs || this.config.defaultTimeoutMs,
     };
 
     // Perform validation
@@ -405,14 +416,16 @@ export class PreExecutionValidationMiddleware implements NestMiddleware {
       user: (req as any).user,
       session: (req as any).session,
       timestamp: new Date(),
-      requestId: this.generateRequestId(req)
+      requestId: this.generateRequestId(req),
     };
   }
 
   /**
    * Get validation configuration from decorators
    */
-  private getValidationConfiguration(req: Request): PreExecutionValidationConfig | null {
+  private getValidationConfiguration(
+    req: Request,
+  ): PreExecutionValidationConfig | null {
     // In a real implementation, this would extract decorator metadata
     // from the route handler using NestJS reflection
     // For this implementation, we'll simulate based on path patterns
@@ -425,30 +438,30 @@ export class PreExecutionValidationMiddleware implements NestMiddleware {
    */
   private simulateValidationConfigurationFromPath(
     path: string,
-    method: string
+    method: string,
   ): PreExecutionValidationConfig | null {
     // Simulate decorator-based configuration
     const pathPatterns = {
-      '/api/admin': {
+      "/api/admin": {
         enabled: true,
-        securityLevel: 'RESTRICTED' as SecurityLevel,
-        description: 'Administrative operation',
-        complianceFrameworks: ['SOC2', 'GDPR'],
-        cacheable: false
+        securityLevel: "RESTRICTED" as SecurityLevel,
+        description: "Administrative operation",
+        complianceFrameworks: ["SOC2", "GDPR"],
+        cacheable: false,
       },
-      '/api/database': {
+      "/api/database": {
         enabled: true,
-        securityLevel: 'CONFIDENTIAL' as SecurityLevel,
-        description: 'Database operation',
-        complianceFrameworks: ['SOC2'],
-        cacheable: true
+        securityLevel: "CONFIDENTIAL" as SecurityLevel,
+        description: "Database operation",
+        complianceFrameworks: ["SOC2"],
+        cacheable: true,
       },
-      '/api/user': {
+      "/api/user": {
         enabled: true,
-        securityLevel: 'INTERNAL' as SecurityLevel,
-        description: 'User operation',
-        cacheable: true
-      }
+        securityLevel: "INTERNAL" as SecurityLevel,
+        description: "User operation",
+        cacheable: true,
+      },
     };
 
     // Find matching pattern
@@ -457,19 +470,19 @@ export class PreExecutionValidationMiddleware implements NestMiddleware {
         return {
           ...config,
           monitorPerformance: true,
-          timeoutMs: 30000
+          timeoutMs: 30000,
         };
       }
     }
 
     // Default configuration for unmatched paths
-    if (method !== 'GET') {
+    if (method !== "GET") {
       return {
         enabled: true,
         securityLevel: this.config.defaultSecurityLevel,
         description: `${method} operation on ${path}`,
         cacheable: true,
-        monitorPerformance: false
+        monitorPerformance: false,
       };
     }
 
@@ -480,51 +493,55 @@ export class PreExecutionValidationMiddleware implements NestMiddleware {
    * Build function name for validation context
    */
   private buildFunctionName(httpContext: HttpValidationContext): string {
-    return `${httpContext.method}_${httpContext.path.replace(/\//g, '_')}`;
+    return `${httpContext.method}_${httpContext.path.replace(/\//g, "_")}`;
   }
 
   /**
    * Extract operation parameters from HTTP context
    */
-  private extractOperationParameters(httpContext: HttpValidationContext): Record<string, unknown> {
+  private extractOperationParameters(
+    httpContext: HttpValidationContext,
+  ): Record<string, unknown> {
     return {
       method: httpContext.method,
       path: httpContext.path,
       query: httpContext.query,
       body: httpContext.body,
       headers: {
-        'content-type': httpContext.headers['content-type'],
-        'user-agent': httpContext.headers['user-agent']
-      }
+        "content-type": httpContext.headers["content-type"],
+        "user-agent": httpContext.headers["user-agent"],
+      },
     };
   }
 
   /**
    * Build user validation context from HTTP context
    */
-  private buildUserValidationContext(httpContext: HttpValidationContext): UserValidationContext {
+  private buildUserValidationContext(
+    httpContext: HttpValidationContext,
+  ): UserValidationContext {
     const user = httpContext.user || {};
     const session = httpContext.session || {};
 
     return {
-      userId: user.id || user.sub || 'anonymous',
-      roles: user.roles || ['user'],
+      userId: user.id || user.sub || "anonymous",
+      roles: user.roles || ["user"],
       sessionContext: {
-        sessionId: session.id || 'no-session',
+        sessionId: session.id || "no-session",
         ipAddress: this.extractClientIp(httpContext),
-        userAgent: httpContext.headers['user-agent'] || 'unknown',
-        lastActivity: new Date()
+        userAgent: httpContext.headers["user-agent"] || "unknown",
+        lastActivity: new Date(),
       },
       conversationalPreferences: {
-        verbosityLevel: user.preferences?.verbosity || 'standard',
-        confirmationStyle: user.preferences?.confirmationStyle || 'thorough',
-        riskTolerance: user.preferences?.riskTolerance || 'moderate'
+        verbosityLevel: user.preferences?.verbosity || "standard",
+        confirmationStyle: user.preferences?.confirmationStyle || "thorough",
+        riskTolerance: user.preferences?.riskTolerance || "moderate",
       },
       validationHistory: {
         recentValidations: user.validationHistory?.recent || 0,
         successRate: user.validationHistory?.successRate || 0.95,
-        averageResponseTime: user.validationHistory?.avgResponseTime || 5000
-      }
+        averageResponseTime: user.validationHistory?.avgResponseTime || 5000,
+      },
     };
   }
 
@@ -533,36 +550,47 @@ export class PreExecutionValidationMiddleware implements NestMiddleware {
    */
   private buildRiskMetadata(
     httpContext: HttpValidationContext,
-    config: PreExecutionValidationConfig
+    config: PreExecutionValidationConfig,
   ): OperationRiskMetadata {
     // Analyze request to determine risk characteristics
     const bodySize = JSON.stringify(httpContext.body || {}).length;
-    const hasFileUpload = httpContext.headers['content-type']?.includes('multipart/form-data');
-    const isModifyingOperation = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(httpContext.method);
+    const hasFileUpload = httpContext.headers["content-type"]?.includes(
+      "multipart/form-data",
+    );
+    const isModifyingOperation = ["POST", "PUT", "PATCH", "DELETE"].includes(
+      httpContext.method,
+    );
 
     return {
-      dataSensitivity: this.mapSecurityLevelToDataSensitivity(config.securityLevel),
+      dataSensitivity: this.mapSecurityLevelToDataSensitivity(
+        config.securityLevel,
+      ),
       impactScope: {
         affectedRecords: this.estimateAffectedRecords(httpContext),
         dataVolume: this.categorizeDataVolume(bodySize, hasFileUpload),
-        systemComponents: this.identifySystemComponents(httpContext.path)
+        systemComponents: this.identifySystemComponents(httpContext.path),
       },
       reversibility: {
-        isReversible: this.isOperationReversible(httpContext.method, httpContext.path),
+        isReversible: this.isOperationReversible(
+          httpContext.method,
+          httpContext.path,
+        ),
         rollbackComplexity: this.assessRollbackComplexity(httpContext),
-        rollbackTimeEstimate: this.estimateRollbackTime(httpContext)
+        rollbackTimeEstimate: this.estimateRollbackTime(httpContext),
       },
       dependencies: {
         externalServices: this.identifyExternalServices(httpContext),
         affectedSystems: this.identifyAffectedSystems(httpContext.path),
-        potentialSideEffects: this.identifyPotentialSideEffects(httpContext)
+        potentialSideEffects: this.identifyPotentialSideEffects(httpContext),
       },
       compliance: {
-        requiresApproval: config.securityLevel === 'RESTRICTED' || config.securityLevel === 'CLASSIFIED',
+        requiresApproval:
+          config.securityLevel === "RESTRICTED" ||
+          config.securityLevel === "CLASSIFIED",
         auditRequired: true,
-        complianceFrameworks: config.complianceFrameworks || []
+        complianceFrameworks: config.complianceFrameworks || [],
       },
-      ...config.riskMetadata
+      ...config.riskMetadata,
     };
   }
 
@@ -571,7 +599,7 @@ export class PreExecutionValidationMiddleware implements NestMiddleware {
    */
   private generateNaturalLanguageIntent(
     httpContext: HttpValidationContext,
-    config: PreExecutionValidationConfig
+    config: PreExecutionValidationConfig,
   ): string {
     const method = httpContext.method;
     const path = httpContext.path;
@@ -583,14 +611,14 @@ export class PreExecutionValidationMiddleware implements NestMiddleware {
 
     // Generate intent based on HTTP method and path
     const methodIntents = {
-      'GET': 'retrieve data from',
-      'POST': 'create new data in',
-      'PUT': 'update data in',
-      'PATCH': 'modify data in',
-      'DELETE': 'delete data from'
+      GET: "retrieve data from",
+      POST: "create new data in",
+      PUT: "update data in",
+      PATCH: "modify data in",
+      DELETE: "delete data from",
     };
 
-    const intent = methodIntents[method] || 'perform operation on';
+    const intent = methodIntents[method] || "perform operation on";
     return `${intent} ${path}`;
   }
 
@@ -600,53 +628,53 @@ export class PreExecutionValidationMiddleware implements NestMiddleware {
   private handleValidationRejection(
     res: Response,
     validationResult: PreExecutionValidationResponse,
-    httpContext: HttpValidationContext
+    httpContext: HttpValidationContext,
   ): void {
     const decision = validationResult.result.decision;
 
-    this.logger.warn('Request rejected by pre-execution validation', {
+    this.logger.warn("Request rejected by pre-execution validation", {
       requestId: validationResult.requestId,
       decision,
       riskScore: validationResult.riskAssessment.riskScore,
       path: httpContext.path,
-      method: httpContext.method
+      method: httpContext.method,
     });
 
     switch (decision) {
-      case 'REJECTED':
+      case "REJECTED":
         res.status(403).json({
-          error: 'Operation not authorized',
-          message: 'Pre-execution validation rejected this operation',
+          error: "Operation not authorized",
+          message: "Pre-execution validation rejected this operation",
           validationId: validationResult.requestId,
           riskScore: validationResult.riskAssessment.riskScore,
-          recommendations: validationResult.followUpRecommendations
+          recommendations: validationResult.followUpRecommendations,
         });
         break;
 
-      case 'PENDING':
+      case "PENDING":
         res.status(202).json({
-          error: 'Operation pending approval',
-          message: 'This operation requires additional approval',
+          error: "Operation pending approval",
+          message: "This operation requires additional approval",
           validationId: validationResult.requestId,
           riskScore: validationResult.riskAssessment.riskScore,
-          requirements: validationResult.riskAssessment.validationRequirements
+          requirements: validationResult.riskAssessment.validationRequirements,
         });
         break;
 
-      case 'DEFERRED':
+      case "DEFERRED":
         res.status(429).json({
-          error: 'Operation deferred',
-          message: 'Please retry this operation later',
+          error: "Operation deferred",
+          message: "Please retry this operation later",
           validationId: validationResult.requestId,
-          retryAfter: 300 // 5 minutes
+          retryAfter: 300, // 5 minutes
         });
         break;
 
       default:
         res.status(500).json({
-          error: 'Validation error',
-          message: 'Unknown validation decision',
-          validationId: validationResult.requestId
+          error: "Validation error",
+          message: "Unknown validation decision",
+          validationId: validationResult.requestId,
         });
     }
   }
@@ -665,7 +693,9 @@ export class PreExecutionValidationMiddleware implements NestMiddleware {
     return this.config.bypassMethods.includes(method);
   }
 
-  private getOrCreateConversationId(httpContext: HttpValidationContext): string {
+  private getOrCreateConversationId(
+    httpContext: HttpValidationContext,
+  ): string {
     // Extract conversation ID from session or create new one
     const session = httpContext.session;
     if (session && session.parlantConversationId) {
@@ -686,7 +716,7 @@ export class PreExecutionValidationMiddleware implements NestMiddleware {
 
   private generateRequestId(req: Request): string {
     // Check if request ID already exists
-    const existingId = req.headers['x-request-id'] as string;
+    const existingId = req.headers["x-request-id"] as string;
     if (existingId) {
       return existingId;
     }
@@ -695,21 +725,25 @@ export class PreExecutionValidationMiddleware implements NestMiddleware {
   }
 
   private extractClientIp(httpContext: HttpValidationContext): string {
-    return httpContext.headers['x-forwarded-for']?.split(',')[0] ||
-           httpContext.headers['x-real-ip'] ||
-           'unknown';
+    return (
+      httpContext.headers["x-forwarded-for"]?.split(",")[0] ||
+      httpContext.headers["x-real-ip"] ||
+      "unknown"
+    );
   }
 
-  private mapSecurityLevelToDataSensitivity(securityLevel: SecurityLevel): 'public' | 'internal' | 'confidential' | 'restricted' {
+  private mapSecurityLevelToDataSensitivity(
+    securityLevel: SecurityLevel,
+  ): "public" | "internal" | "confidential" | "restricted" {
     const mapping = {
-      'PUBLIC': 'public' as const,
-      'INTERNAL': 'internal' as const,
-      'CONFIDENTIAL': 'confidential' as const,
-      'RESTRICTED': 'restricted' as const,
-      'CLASSIFIED': 'restricted' as const
+      PUBLIC: "public" as const,
+      INTERNAL: "internal" as const,
+      CONFIDENTIAL: "confidential" as const,
+      RESTRICTED: "restricted" as const,
+      CLASSIFIED: "restricted" as const,
     };
 
-    return mapping[securityLevel] || 'internal';
+    return mapping[securityLevel] || "internal";
   }
 
   private estimateAffectedRecords(httpContext: HttpValidationContext): number {
@@ -728,24 +762,32 @@ export class PreExecutionValidationMiddleware implements NestMiddleware {
     }
 
     // Check for bulk operation indicators in path
-    if (httpContext.path.includes('batch') || httpContext.path.includes('bulk')) {
+    if (
+      httpContext.path.includes("batch") ||
+      httpContext.path.includes("bulk")
+    ) {
       return 100; // Estimated
     }
 
     return 1; // Single record operation
   }
 
-  private categorizeDataVolume(bodySize: number, hasFileUpload: boolean): string {
+  private categorizeDataVolume(
+    bodySize: number,
+    hasFileUpload: boolean,
+  ): string {
     if (hasFileUpload) {
-      return 'large'; // File uploads are considered large
+      return "large"; // File uploads are considered large
     }
 
-    if (bodySize > 1024 * 1024) { // > 1MB
-      return 'large';
-    } else if (bodySize > 1024 * 10) { // > 10KB
-      return 'medium';
+    if (bodySize > 1024 * 1024) {
+      // > 1MB
+      return "large";
+    } else if (bodySize > 1024 * 10) {
+      // > 10KB
+      return "medium";
     } else {
-      return 'small';
+      return "small";
     }
   }
 
@@ -753,33 +795,33 @@ export class PreExecutionValidationMiddleware implements NestMiddleware {
     const components: string[] = [];
 
     // Analyze path to identify system components
-    if (path.includes('/database') || path.includes('/db')) {
-      components.push('database');
+    if (path.includes("/database") || path.includes("/db")) {
+      components.push("database");
     }
-    if (path.includes('/auth') || path.includes('/login')) {
-      components.push('authentication');
+    if (path.includes("/auth") || path.includes("/login")) {
+      components.push("authentication");
     }
-    if (path.includes('/user') || path.includes('/profile')) {
-      components.push('user-management');
+    if (path.includes("/user") || path.includes("/profile")) {
+      components.push("user-management");
     }
-    if (path.includes('/admin')) {
-      components.push('administration');
+    if (path.includes("/admin")) {
+      components.push("administration");
     }
-    if (path.includes('/api')) {
-      components.push('api-gateway');
+    if (path.includes("/api")) {
+      components.push("api-gateway");
     }
 
-    return components.length > 0 ? components : ['web-service'];
+    return components.length > 0 ? components : ["web-service"];
   }
 
   private isOperationReversible(method: string, path: string): boolean {
     // DELETE operations are generally not reversible
-    if (method === 'DELETE') {
+    if (method === "DELETE") {
       return false;
     }
 
     // Some paths indicate irreversible operations
-    const irreversiblePatterns = ['/deploy', '/execute', '/run', '/process'];
+    const irreversiblePatterns = ["/deploy", "/execute", "/run", "/process"];
     for (const pattern of irreversiblePatterns) {
       if (path.includes(pattern)) {
         return false;
@@ -789,15 +831,20 @@ export class PreExecutionValidationMiddleware implements NestMiddleware {
     return true;
   }
 
-  private assessRollbackComplexity(httpContext: HttpValidationContext): 'simple' | 'moderate' | 'complex' {
+  private assessRollbackComplexity(
+    httpContext: HttpValidationContext,
+  ): "simple" | "moderate" | "complex" {
     const systemComponents = this.identifySystemComponents(httpContext.path);
 
     if (systemComponents.length > 2) {
-      return 'complex'; // Multiple systems involved
-    } else if (systemComponents.includes('database') || systemComponents.includes('authentication')) {
-      return 'moderate'; // Critical systems involved
+      return "complex"; // Multiple systems involved
+    } else if (
+      systemComponents.includes("database") ||
+      systemComponents.includes("authentication")
+    ) {
+      return "moderate"; // Critical systems involved
     } else {
-      return 'simple';
+      return "simple";
     }
   }
 
@@ -806,9 +853,9 @@ export class PreExecutionValidationMiddleware implements NestMiddleware {
     const affectedRecords = this.estimateAffectedRecords(httpContext);
 
     const baseTime = {
-      'simple': 60000,    // 1 minute
-      'moderate': 300000, // 5 minutes
-      'complex': 1800000  // 30 minutes
+      simple: 60000, // 1 minute
+      moderate: 300000, // 5 minutes
+      complex: 1800000, // 30 minutes
     };
 
     // Adjust for affected records
@@ -817,26 +864,28 @@ export class PreExecutionValidationMiddleware implements NestMiddleware {
     return baseTime[complexity] * (1 + recordMultiplier);
   }
 
-  private identifyExternalServices(httpContext: HttpValidationContext): string[] {
+  private identifyExternalServices(
+    httpContext: HttpValidationContext,
+  ): string[] {
     const services: string[] = [];
 
     // Analyze headers and body for external service indicators
-    const userAgent = httpContext.headers['user-agent'];
-    if (userAgent && userAgent.includes('webhook')) {
-      services.push('webhook-service');
+    const userAgent = httpContext.headers["user-agent"];
+    if (userAgent && userAgent.includes("webhook")) {
+      services.push("webhook-service");
     }
 
     // Check for API keys or external service references in body
     const body = httpContext.body;
-    if (body && typeof body === 'object') {
+    if (body && typeof body === "object") {
       if (body.apiKey || body.api_key) {
-        services.push('external-api');
+        services.push("external-api");
       }
       if (body.email) {
-        services.push('email-service');
+        services.push("email-service");
       }
       if (body.notification) {
-        services.push('notification-service');
+        services.push("notification-service");
       }
     }
 
@@ -847,21 +896,34 @@ export class PreExecutionValidationMiddleware implements NestMiddleware {
     return this.identifySystemComponents(path);
   }
 
-  private identifyPotentialSideEffects(httpContext: HttpValidationContext): string[] {
+  private identifyPotentialSideEffects(
+    httpContext: HttpValidationContext,
+  ): string[] {
     const sideEffects: string[] = [];
     const method = httpContext.method;
     const path = httpContext.path;
 
-    if (method === 'POST' && path.includes('/user')) {
-      sideEffects.push('User notification email', 'Audit log entry', 'Permission assignment');
+    if (method === "POST" && path.includes("/user")) {
+      sideEffects.push(
+        "User notification email",
+        "Audit log entry",
+        "Permission assignment",
+      );
     }
 
-    if (method === 'DELETE') {
-      sideEffects.push('Cascade deletion', 'Reference cleanup', 'Cache invalidation');
+    if (method === "DELETE") {
+      sideEffects.push(
+        "Cascade deletion",
+        "Reference cleanup",
+        "Cache invalidation",
+      );
     }
 
-    if (path.includes('/admin')) {
-      sideEffects.push('System configuration change', 'User permission updates');
+    if (path.includes("/admin")) {
+      sideEffects.push(
+        "System configuration change",
+        "User permission updates",
+      );
     }
 
     return sideEffects;
@@ -871,46 +933,58 @@ export class PreExecutionValidationMiddleware implements NestMiddleware {
     this.metrics.validatedRequests++;
 
     // Update rolling average
-    const newAverage = (
-      this.metrics.averageValidationTime * (this.metrics.validatedRequests - 1) +
-      validationTime
-    ) / this.metrics.validatedRequests;
+    const newAverage =
+      (this.metrics.averageValidationTime *
+        (this.metrics.validatedRequests - 1) +
+        validationTime) /
+      this.metrics.validatedRequests;
 
     this.metrics.averageValidationTime = newAverage;
 
-    if (validationTime > this.config.performanceMonitoring.slowValidationThresholdMs) {
+    if (
+      validationTime >
+      this.config.performanceMonitoring.slowValidationThresholdMs
+    ) {
       this.metrics.slowValidations++;
     }
   }
 
   private loadMiddlewareConfiguration(): ValidationMiddlewareConfig {
     return {
-      enabled: process.env.PARLANT_MIDDLEWARE_ENABLED !== 'false',
-      defaultSecurityLevel: (process.env.PARLANT_DEFAULT_SECURITY_LEVEL as SecurityLevel) || 'INTERNAL',
-      defaultTimeoutMs: parseInt(process.env.PARLANT_DEFAULT_TIMEOUT_MS || '30000'),
+      enabled: process.env.PARLANT_MIDDLEWARE_ENABLED !== "false",
+      defaultSecurityLevel:
+        (process.env.PARLANT_DEFAULT_SECURITY_LEVEL as SecurityLevel) ||
+        "INTERNAL",
+      defaultTimeoutMs: parseInt(
+        process.env.PARLANT_DEFAULT_TIMEOUT_MS || "30000",
+      ),
       bypassPaths: [
-        '/health',
-        '/metrics',
-        '/favicon.ico',
-        '/static',
-        '/public'
+        "/health",
+        "/metrics",
+        "/favicon.ico",
+        "/static",
+        "/public",
       ],
-      bypassMethods: ['OPTIONS', 'HEAD'],
+      bypassMethods: ["OPTIONS", "HEAD"],
       performanceMonitoring: {
-        enabled: process.env.PARLANT_PERF_MONITORING_ENABLED !== 'false',
-        slowValidationThresholdMs: parseInt(process.env.PARLANT_SLOW_VALIDATION_THRESHOLD_MS || '1000'),
-        logSlowValidations: process.env.PARLANT_LOG_SLOW_VALIDATIONS !== 'false'
+        enabled: process.env.PARLANT_PERF_MONITORING_ENABLED !== "false",
+        slowValidationThresholdMs: parseInt(
+          process.env.PARLANT_SLOW_VALIDATION_THRESHOLD_MS || "1000",
+        ),
+        logSlowValidations:
+          process.env.PARLANT_LOG_SLOW_VALIDATIONS !== "false",
       },
       errorHandling: {
-        continueOnValidationFailure: process.env.PARLANT_CONTINUE_ON_FAILURE === 'true',
-        returnDetailedErrors: process.env.NODE_ENV === 'development',
-        logValidationErrors: true
+        continueOnValidationFailure:
+          process.env.PARLANT_CONTINUE_ON_FAILURE === "true",
+        returnDetailedErrors: process.env.NODE_ENV === "development",
+        logValidationErrors: true,
       },
       caching: {
-        enabled: process.env.PARLANT_CACHING_ENABLED !== 'false',
-        defaultTtlMs: parseInt(process.env.PARLANT_CACHE_TTL_MS || '300000'),
-        maxCacheSize: parseInt(process.env.PARLANT_MAX_CACHE_SIZE || '1000')
-      }
+        enabled: process.env.PARLANT_CACHING_ENABLED !== "false",
+        defaultTtlMs: parseInt(process.env.PARLANT_CACHE_TTL_MS || "300000"),
+        maxCacheSize: parseInt(process.env.PARLANT_MAX_CACHE_SIZE || "1000"),
+      },
     };
   }
 
@@ -920,27 +994,33 @@ export class PreExecutionValidationMiddleware implements NestMiddleware {
   getMetrics() {
     return {
       ...this.metrics,
-      validationRate: this.metrics.totalRequests > 0 ?
-        this.metrics.validatedRequests / this.metrics.totalRequests : 0,
-      bypassRate: this.metrics.totalRequests > 0 ?
-        this.metrics.bypassedRequests / this.metrics.totalRequests : 0,
-      errorRate: this.metrics.totalRequests > 0 ?
-        this.metrics.validationErrors / this.metrics.totalRequests : 0
+      validationRate:
+        this.metrics.totalRequests > 0
+          ? this.metrics.validatedRequests / this.metrics.totalRequests
+          : 0,
+      bypassRate:
+        this.metrics.totalRequests > 0
+          ? this.metrics.bypassedRequests / this.metrics.totalRequests
+          : 0,
+      errorRate:
+        this.metrics.totalRequests > 0
+          ? this.metrics.validationErrors / this.metrics.totalRequests
+          : 0,
     };
   }
 
   /**
    * Health check for middleware
    */
-  async healthCheck(): Promise<{status: string; metrics: any; config: any}> {
+  async healthCheck(): Promise<{ status: string; metrics: any; config: any }> {
     return {
-      status: 'healthy',
+      status: "healthy",
       metrics: this.getMetrics(),
       config: {
         enabled: this.config.enabled,
         defaultSecurityLevel: this.config.defaultSecurityLevel,
-        performanceMonitoring: this.config.performanceMonitoring.enabled
-      }
+        performanceMonitoring: this.config.performanceMonitoring.enabled,
+      },
     };
   }
 }
@@ -963,7 +1043,7 @@ export class ValidationFunctionWrapper {
   static wrapFunction<T extends (...args: any[]) => any>(
     originalFunction: T,
     config: PreExecutionValidationConfig,
-    validationService: PreExecutionValidationService
+    validationService: PreExecutionValidationService,
   ): T {
     const wrappedFunction = async (...args: any[]) => {
       if (!config.enabled) {
@@ -974,26 +1054,32 @@ export class ValidationFunctionWrapper {
         // Build validation request
         const validationRequest: PreExecutionValidationRequest = {
           id: `func-val-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-          functionName: originalFunction.name || 'anonymous',
+          functionName: originalFunction.name || "anonymous",
           parameters: ValidationFunctionWrapper.buildParametersFromArgs(args),
           userContext: ValidationFunctionWrapper.getDefaultUserContext(),
           conversationId: ValidationFunctionWrapper.getCurrentConversationId(),
           securityClassification: config.securityLevel,
-          naturalLanguageIntent: config.description || `Execute function ${originalFunction.name}`,
-          riskMetadata: ValidationFunctionWrapper.buildDefaultRiskMetadata(config),
+          naturalLanguageIntent:
+            config.description || `Execute function ${originalFunction.name}`,
+          riskMetadata:
+            ValidationFunctionWrapper.buildDefaultRiskMetadata(config),
           timestamp: new Date(),
-          timeoutMs: config.timeoutMs || 30000
+          timeoutMs: config.timeoutMs || 30000,
         };
 
         // Perform validation
-        const validationResult = await validationService.validateOperation(validationRequest);
+        const validationResult =
+          await validationService.validateOperation(validationRequest);
 
-        if (validationResult.result.decision === 'APPROVED') {
-          ValidationFunctionWrapper.logger.debug('Function execution approved', {
-            functionName: originalFunction.name,
-            validationId: validationResult.requestId,
-            riskScore: validationResult.riskAssessment.riskScore
-          });
+        if (validationResult.result.decision === "APPROVED") {
+          ValidationFunctionWrapper.logger.debug(
+            "Function execution approved",
+            {
+              functionName: originalFunction.name,
+              validationId: validationResult.requestId,
+              riskScore: validationResult.riskAssessment.riskScore,
+            },
+          );
 
           return originalFunction.apply(this, args);
         } else {
@@ -1002,18 +1088,20 @@ export class ValidationFunctionWrapper {
             {
               functionName: originalFunction.name,
               validationId: validationResult.requestId,
-              decision: validationResult.result.decision
-            }
+              decision: validationResult.result.decision,
+            },
           );
         }
       } catch (error) {
-        ValidationFunctionWrapper.logger.error('Function validation failed', {
+        ValidationFunctionWrapper.logger.error("Function validation failed", {
           functionName: originalFunction.name,
-          error: error.message
+          error: error.message,
         });
 
-        if (config.bypassInDev && process.env.NODE_ENV === 'development') {
-          ValidationFunctionWrapper.logger.warn('Bypassing validation in development mode');
+        if (config.bypassInDev && process.env.NODE_ENV === "development") {
+          ValidationFunctionWrapper.logger.warn(
+            "Bypassing validation in development mode",
+          );
           return originalFunction.apply(this, args);
         }
 
@@ -1022,9 +1110,9 @@ export class ValidationFunctionWrapper {
     };
 
     // Preserve original function properties
-    Object.defineProperty(wrappedFunction, 'name', {
+    Object.defineProperty(wrappedFunction, "name", {
       value: originalFunction.name,
-      configurable: true
+      configurable: true,
     });
 
     return wrappedFunction as T;
@@ -1042,24 +1130,24 @@ export class ValidationFunctionWrapper {
 
   private static getDefaultUserContext(): UserValidationContext {
     return {
-      userId: 'system',
-      roles: ['system'],
+      userId: "system",
+      roles: ["system"],
       sessionContext: {
-        sessionId: 'function-execution',
-        ipAddress: 'localhost',
-        userAgent: 'function-wrapper',
-        lastActivity: new Date()
+        sessionId: "function-execution",
+        ipAddress: "localhost",
+        userAgent: "function-wrapper",
+        lastActivity: new Date(),
       },
       conversationalPreferences: {
-        verbosityLevel: 'standard',
-        confirmationStyle: 'thorough',
-        riskTolerance: 'moderate'
+        verbosityLevel: "standard",
+        confirmationStyle: "thorough",
+        riskTolerance: "moderate",
       },
       validationHistory: {
         recentValidations: 0,
         successRate: 1.0,
-        averageResponseTime: 1000
-      }
+        averageResponseTime: 1000,
+      },
     };
   }
 
@@ -1067,32 +1155,39 @@ export class ValidationFunctionWrapper {
     return `func-conv-${Date.now()}`;
   }
 
-  private static buildDefaultRiskMetadata(config: PreExecutionValidationConfig): OperationRiskMetadata {
+  private static buildDefaultRiskMetadata(
+    config: PreExecutionValidationConfig,
+  ): OperationRiskMetadata {
     return {
-      dataSensitivity: config.securityLevel === 'RESTRICTED' ? 'restricted' :
-                      config.securityLevel === 'CONFIDENTIAL' ? 'confidential' :
-                      config.securityLevel === 'INTERNAL' ? 'internal' : 'public',
+      dataSensitivity:
+        config.securityLevel === "RESTRICTED"
+          ? "restricted"
+          : config.securityLevel === "CONFIDENTIAL"
+            ? "confidential"
+            : config.securityLevel === "INTERNAL"
+              ? "internal"
+              : "public",
       impactScope: {
         affectedRecords: 1,
-        dataVolume: 'small',
-        systemComponents: ['function-execution']
+        dataVolume: "small",
+        systemComponents: ["function-execution"],
       },
       reversibility: {
         isReversible: true,
-        rollbackComplexity: 'simple',
-        rollbackTimeEstimate: 60000
+        rollbackComplexity: "simple",
+        rollbackTimeEstimate: 60000,
       },
       dependencies: {
         externalServices: [],
-        affectedSystems: ['function-execution'],
-        potentialSideEffects: []
+        affectedSystems: ["function-execution"],
+        potentialSideEffects: [],
       },
       compliance: {
-        requiresApproval: config.securityLevel === 'RESTRICTED',
+        requiresApproval: config.securityLevel === "RESTRICTED",
         auditRequired: true,
-        complianceFrameworks: config.complianceFrameworks || []
+        complianceFrameworks: config.complianceFrameworks || [],
       },
-      ...config.riskMetadata
+      ...config.riskMetadata,
     };
   }
 }
@@ -1103,9 +1198,9 @@ export class ValidationFunctionWrapper {
 export class ValidationRejectionError extends Error {
   constructor(
     message: string,
-    public readonly context: Record<string, unknown>
+    public readonly context: Record<string, unknown>,
   ) {
     super(message);
-    this.name = 'ValidationRejectionError';
+    this.name = "ValidationRejectionError";
   }
 }

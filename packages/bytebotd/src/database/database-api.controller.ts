@@ -19,8 +19,8 @@
   Controller,
   Get,
   Post,
-  Put,
-  Delete,
+  Put as _Put,
+  Delete as _Delete,
   Param,
   Body,
   Query,
@@ -29,7 +29,7 @@
   Logger,
   HttpStatus,
   HttpException,
-  HttpCode,
+  HttpCode as _HttpCode,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -56,7 +56,7 @@ import {
 } from '@bytebot/shared/src/parlant/parlant-validation.decorator';
 import {
   ConversationContextParameter,
-  ConversationContext as ConversationContextType,
+  ConversationContext as _ConversationContextType,
   ConversationContext,
 } from '@bytebot/shared/src/types/conversation-context.types';
 
@@ -75,7 +75,7 @@ import {
 // Interceptors and Pipes;
 
 import { LoggingInterceptor } from '../common/interceptors/logging.interceptor';
-import { SecuritySanitizationPipes } from '../common/pipes/security-sanitization.pipe';
+import { SecuritySanitizationPipes as _SecuritySanitizationPipes } from '../common/pipes/security-sanitization.pipe';
 
 // ===== DATABASE OPERATION DTOS =====
 
@@ -197,6 +197,60 @@ export interface DatabaseAnalyticsDto {
   includeUsage?: boolean;
 }
 
+/**
+ * CI/CD Configuration interface for safe property access
+ */
+export interface CiCdConfiguration {
+  /** CI/CD runner configuration */
+  'runs-on'?: string;
+
+  /** Build strategy configuration */
+  strategy?: {
+    matrix?: Record<string, unknown[]>;
+    'fail-fast'?: boolean;
+  };
+
+  /** Build steps array */
+  steps?: Array<{
+    name?: string;
+    uses?: string;
+    run?: string;
+    with?: Record<string, unknown>;
+  }>;
+
+  /** Port mappings for services */
+  ports?: string[];
+
+  /** Environment variables */
+  environment?: Record<string, string>;
+
+  /** Health check configuration */
+  healthcheck?: {
+    test?: string[];
+    interval?: string;
+    timeout?: string;
+    retries?: number;
+  };
+}
+
+/**
+ * Security context interface for type-safe access
+ */
+export interface SecurityContextData {
+  accessLevel?: SecurityLevel;
+  userId?: string;
+  permissions?: string[];
+  auditRequired?: boolean;
+}
+
+/**
+ * Conversation context with typed security context
+ */
+export interface TypedConversationContext {
+  conversationId?: string;
+  securityContext?: SecurityContextData;
+}
+
 // ===== DATABASE API CONTROLLER =====
 
 @ApiTags('Database API - PARLANT Validated')
@@ -208,8 +262,7 @@ export interface DatabaseAnalyticsDto {
 export class DatabaseApiController {
   private readonly logger = new Logger(DatabaseApiController.name);
 
-  constructor() // Database services would be injected here
-  {
+  constructor() { // Database services would be injected here
     this.logger.log(
       'Database API Controller initialized with comprehensive PARLANT validation',
     );
@@ -282,12 +335,7 @@ export class DatabaseApiController {
       limit,
       offset,
       userId: user.id,
-      conversationId:
-        conversationContext &&
-        typeof conversationContext === 'object' &&
-        'conversationId' in conversationContext
-          ? (conversationContext as { conversationId: string }).conversationId
-          : undefined,
+      conversationId: this.extractConversationId(conversationContext),
       validationApproved: true,
     });
 
@@ -491,26 +539,9 @@ export class DatabaseApiController {
       operation: modificationDto.operation,
       justification: modificationDto.justification,
       userId: user.id,
-      conversationId:
-        conversationContext &&
-        typeof conversationContext === 'object' &&
-        'conversationId' in conversationContext
-          ? (conversationContext as { conversationId: string }).conversationId
-          : undefined,
+      conversationId: this.extractConversationId(conversationContext),
       validationApproved: true,
-      securityLevel:
-        conversationContext &&
-        typeof conversationContext === 'object' &&
-        'securityContext' in conversationContext &&
-        conversationContext.securityContext &&
-        typeof conversationContext.securityContext === 'object' &&
-        'accessLevel' in conversationContext.securityContext
-          ? (
-              conversationContext.securityContext as {
-                accessLevel: SecurityLevel;
-              }
-            ).accessLevel
-          : SecurityLevel.MEDIUM,
+      securityLevel: this.extractSecurityLevel(conversationContext),
     });
 
     try {
@@ -658,12 +689,7 @@ export class DatabaseApiController {
       description: schemaDto.description,
       reversible: schemaDto.reversible,
       userId: user.id,
-      conversationId:
-        conversationContext &&
-        typeof conversationContext === 'object' &&
-        'conversationId' in conversationContext
-          ? (conversationContext as { conversationId: string }).conversationId
-          : undefined,
+      conversationId: this.extractConversationId(conversationContext),
       validationApproved: true,
     });
 
@@ -748,12 +774,7 @@ export class DatabaseApiController {
       type: backupDto.type,
       encrypt: backupDto.encrypt,
       userId: user.id,
-      conversationId:
-        conversationContext &&
-        typeof conversationContext === 'object' &&
-        'conversationId' in conversationContext
-          ? (conversationContext as { conversationId: string }).conversationId
-          : undefined,
+      conversationId: this.extractConversationId(conversationContext),
     });
 
     // Mock backup implementation
@@ -806,12 +827,7 @@ export class DatabaseApiController {
       operationId,
       timeRange: analyticsDto.timeRange,
       userId: user.id,
-      conversationId:
-        conversationContext &&
-        typeof conversationContext === 'object' &&
-        'conversationId' in conversationContext
-          ? (conversationContext as { conversationId: string }).conversationId
-          : undefined,
+      conversationId: this.extractConversationId(conversationContext),
     });
 
     return {
@@ -865,14 +881,14 @@ export class DatabaseApiController {
     }
   }
 
-  private executeReadOnlyQuery(queryDto: DatabaseQueryDto): unknown[] {
+  private executeReadOnlyQuery(_queryDto: DatabaseQueryDto): unknown[] {
     // Mock implementation - would integrate with actual database
     return [];
   }
 
   private executeModificationOperation(
-    dto: DatabaseModificationDto,
-    operationId: string,
+    _dto: DatabaseModificationDto,
+    _operationId: string,
   ): { affectedRows: number } {
     // Mock implementation - would integrate with actual database
     return { affectedRows: 1 };
@@ -884,8 +900,8 @@ export class DatabaseApiController {
   }
 
   private createMigrationRecord(
-    dto: DatabaseSchemaDto,
-    userId: string,
+    _dto: DatabaseSchemaDto,
+    _userId: string,
   ): string {
     // Mock implementation - would create migration tracking record
     return `migration_${Date.now()}_${Math.random().toString(36).substring(7)}`;
@@ -903,5 +919,58 @@ export class DatabaseApiController {
 
   private generateOperationId(): string {
     return `db_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
+  }
+
+  /**
+   * Safely extract security level from conversation context
+   */
+  private extractSecurityLevel(
+    conversationContext?: ConversationContextParameter,
+  ): SecurityLevel {
+    if (
+      conversationContext &&
+      typeof conversationContext === 'object' &&
+      'securityContext' in conversationContext &&
+      conversationContext.securityContext &&
+      typeof conversationContext.securityContext === 'object'
+    ) {
+      const securityContext =
+        conversationContext.securityContext as SecurityContextData;
+      if (securityContext.accessLevel) {
+        return securityContext.accessLevel;
+      }
+    }
+    return SecurityLevel.MEDIUM;
+  }
+
+  /**
+   * Safely extract conversation ID from context
+   */
+  private extractConversationId(
+    conversationContext?: ConversationContextParameter,
+  ): string | undefined {
+    if (
+      conversationContext &&
+      typeof conversationContext === 'object' &&
+      'conversationId' in conversationContext &&
+      typeof conversationContext.conversationId === 'string'
+    ) {
+      return conversationContext.conversationId;
+    }
+    return undefined;
+  }
+
+  /**
+   * Safely access CI/CD configuration properties
+   */
+  private accessCiCdProperty<T>(
+    config: unknown,
+    property: keyof CiCdConfiguration,
+  ): T | undefined {
+    if (config && typeof config === 'object' && property in config) {
+      const typedConfig = config as CiCdConfiguration;
+      return typedConfig[property] as T;
+    }
+    return undefined;
   }
 }

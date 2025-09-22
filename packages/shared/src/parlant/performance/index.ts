@@ -20,24 +20,24 @@
  * @created 2025-09-21
  */
 
-import { Injectable, Logger, Module } from '@nestjs/common';
-import { EventEmitter } from 'events';
-import { performance } from 'perf_hooks';
+import { Injectable, Logger, Module } from "@nestjs/common";
+import { EventEmitter } from "events";
+import { performance } from "perf_hooks";
 
 // Import all performance components
 import {
   AdvancedMultiTierCacheService,
   CacheResult,
-  CacheMetrics
-} from './advanced-multi-tier-cache';
+  CacheMetrics,
+} from "./advanced-multi-tier-cache";
 
 import {
   IntelligentConnectionPoolService,
   ConnectionConfig,
   PoolMetrics,
   RoutedRequest,
-  PoolResponse
-} from './intelligent-connection-pool';
+  PoolResponse,
+} from "./intelligent-connection-pool";
 
 import {
   BatchProcessingEngine,
@@ -45,8 +45,8 @@ import {
   BatchItem,
   BatchResult,
   BatchMetrics,
-  BatchProcessor
-} from './batch-processing-engine';
+  BatchProcessor,
+} from "./batch-processing-engine";
 
 import {
   AsyncPipelineProcessor,
@@ -54,8 +54,8 @@ import {
   PipelineTask,
   PipelineResult,
   PipelineMetrics,
-  PipelineStageConfig
-} from './async-pipeline-processor';
+  PipelineStageConfig,
+} from "./async-pipeline-processor";
 
 import {
   CircuitBreakerSystem,
@@ -63,8 +63,8 @@ import {
   CircuitBreakerConfig,
   CircuitMetrics,
   ExecutionResult,
-  CircuitState
-} from './circuit-breaker-system';
+  CircuitState,
+} from "./circuit-breaker-system";
 
 import {
   ResourceOptimizationEngine,
@@ -73,8 +73,8 @@ import {
   CpuMetrics,
   V8Metrics,
   OptimizationResult,
-  ObjectPool
-} from './resource-optimization-engine';
+  ObjectPool,
+} from "./resource-optimization-engine";
 
 import {
   PerformanceMonitoringFramework,
@@ -82,16 +82,16 @@ import {
   PerformanceMetrics,
   BenchmarkResult,
   PerformanceAlert,
-  TimeSeriesDataPoint
-} from './performance-monitoring-framework';
+  TimeSeriesDataPoint,
+} from "./performance-monitoring-framework";
 
 import {
   PerformanceIntegrationTests,
   TestConfig,
   TestResult,
   PerformanceTargets,
-  TestMetrics
-} from './performance-integration-tests';
+  TestMetrics,
+} from "./performance-integration-tests";
 
 /**
  * Performance system configuration
@@ -113,27 +113,27 @@ interface PerformanceSystemConfig {
  */
 interface SystemPerformanceTargets {
   responseTime: {
-    p50: number;  // <200ms
-    p95: number;  // <1000ms
-    p99: number;  // <1500ms
+    p50: number; // <200ms
+    p95: number; // <1000ms
+    p99: number; // <1500ms
   };
   throughput: {
-    minimum: number;  // >5000 RPS
-    target: number;   // >10000 RPS
-    burst: number;    // >25000 RPS
+    minimum: number; // >5000 RPS
+    target: number; // >10000 RPS
+    burst: number; // >25000 RPS
   };
   efficiency: {
-    cacheHitRate: number;         // >90%
-    resourceImprovement: number;  // >40%
-    connectionReuse: number;      // >95%
-    batchEfficiency: number;      // >95%
-    workerUtilization: number;    // >95%
+    cacheHitRate: number; // >90%
+    resourceImprovement: number; // >40%
+    connectionReuse: number; // >95%
+    batchEfficiency: number; // >95%
+    workerUtilization: number; // >95%
   };
   reliability: {
-    errorRate: number;      // <0.1%
-    availability: number;   // >99.99%
-    failoverTime: number;   // <100ms
-    recoveryTime: number;   // <30 seconds
+    errorRate: number; // <0.1%
+    availability: number; // >99.99%
+    failoverTime: number; // <100ms
+    recoveryTime: number; // <30 seconds
   };
 }
 
@@ -223,7 +223,7 @@ export class IntegratedPerformanceSystem {
   private readonly optimizationHistory: SystemOptimizationResult[] = [];
 
   constructor(config: Partial<PerformanceSystemConfig> = {}) {
-    this.logger.log('Initializing Integrated Performance Optimization System');
+    this.logger.log("Initializing Integrated Performance Optimization System");
 
     // Default configuration
     this.config = {
@@ -236,67 +236,75 @@ export class IntegratedPerformanceSystem {
         processingTimeout: 30000,
         priorityLevels: 5,
         concurrentBatches: 4,
-        adaptiveSizing: true
+        adaptiveSizing: true,
       },
       asyncPipeline: {},
       circuitBreaker: {
         failureThreshold: 5,
         recoveryTimeout: 30000,
-        halfOpenMaxCalls: 3
+        halfOpenMaxCalls: 3,
       },
       resourceOptimization: {
         memoryOptimization: {
           enabled: true,
           heapOptimization: true,
           gcTuning: true,
-          memoryLeakDetection: true
+          memoryLeakDetection: true,
         },
         cpuOptimization: {
           enabled: true,
           workerOptimization: true,
-          loadBalancing: true
+          loadBalancing: true,
         },
         v8Tuning: {
           enabled: true,
           compilationCache: true,
-          turbofanOptimization: true
-        }
+          turbofanOptimization: true,
+        },
       },
       monitoring: {
         metrics: {
           enabled: true,
           collectionInterval: 1000,
-          realTimeUpdates: true
+          realTimeUpdates: true,
         },
         alerting: {
           enabled: true,
           responseTimeThresholds: { p50: 200, p95: 1000, p99: 1500 },
-          throughputThresholds: { minimum: 5000, target: 10000 }
-        }
+          throughputThresholds: { minimum: 5000, target: 10000 },
+        },
       },
       testing: {
-        testSuites: ['cache-performance', 'connection-pool', 'batch-processing', 'async-pipeline', 'circuit-breaker', 'resource-optimization', 'end-to-end'],
+        testSuites: [
+          "cache-performance",
+          "connection-pool",
+          "batch-processing",
+          "async-pipeline",
+          "circuit-breaker",
+          "resource-optimization",
+          "end-to-end",
+        ],
         iterations: 1000,
-        concurrentUsers: 100
+        concurrentUsers: 100,
       },
       systemTargets: {
         responseTime: { p50: 200, p95: 1000, p99: 1500 },
         throughput: { minimum: 5000, target: 10000, burst: 25000 },
         efficiency: {
-          cacheHitRate: 0.90,
-          resourceImprovement: 0.40,
+          cacheHitRate: 0.9,
+          resourceImprovement: 0.4,
           connectionReuse: 0.95,
           batchEfficiency: 0.95,
-          workerUtilization: 0.95
+          workerUtilization: 0.95,
         },
         reliability: {
           errorRate: 0.001,
           availability: 0.9999,
           failoverTime: 100,
-          recoveryTime: 30000
-        }
+          recoveryTime: 30000,
+        },
       },
-      ...config
+      ...config,
     };
 
     // Initialize components
@@ -304,13 +312,21 @@ export class IntegratedPerformanceSystem {
     this.connectionPoolService = new IntelligentConnectionPoolService();
     this.batchProcessor = new BatchProcessingEngine(
       this.config.batchProcessing,
-      async (items) => items.map(item => item.data)
+      async (items) => items.map((item) => item.data),
     );
-    this.pipelineProcessor = new AsyncPipelineProcessor(this.config.asyncPipeline);
+    this.pipelineProcessor = new AsyncPipelineProcessor(
+      this.config.asyncPipeline,
+    );
     this.circuitBreakerSystem = new CircuitBreakerSystem();
-    this.resourceOptimizer = new ResourceOptimizationEngine(this.config.resourceOptimization);
-    this.performanceMonitor = new PerformanceMonitoringFramework(this.config.monitoring);
-    this.integrationTests = new PerformanceIntegrationTests(this.config.testing);
+    this.resourceOptimizer = new ResourceOptimizationEngine(
+      this.config.resourceOptimization,
+    );
+    this.performanceMonitor = new PerformanceMonitoringFramework(
+      this.config.monitoring,
+    );
+    this.integrationTests = new PerformanceIntegrationTests(
+      this.config.testing,
+    );
 
     this.currentMetrics = this.initializeMetrics();
 
@@ -322,11 +338,11 @@ export class IntegratedPerformanceSystem {
    */
   async initialize(): Promise<void> {
     if (this.isInitialized) {
-      this.logger.warn('Performance system is already initialized');
+      this.logger.warn("Performance system is already initialized");
       return;
     }
 
-    this.logger.log('Initializing performance optimization system...');
+    this.logger.log("Initializing performance optimization system...");
 
     try {
       // Initialize all components
@@ -339,10 +355,11 @@ export class IntegratedPerformanceSystem {
       await this.performInitialOptimization();
 
       this.isInitialized = true;
-      this.logger.log('Performance optimization system initialized successfully');
+      this.logger.log(
+        "Performance optimization system initialized successfully",
+      );
 
-      this.eventEmitter.emit('system-initialized');
-
+      this.eventEmitter.emit("system-initialized");
     } catch (error) {
       this.logger.error(`Failed to initialize performance system: ${error}`);
       throw error;
@@ -358,11 +375,11 @@ export class IntegratedPerformanceSystem {
     }
 
     if (this.isRunning) {
-      this.logger.warn('Performance system is already running');
+      this.logger.warn("Performance system is already running");
       return;
     }
 
-    this.logger.log('Starting performance optimization system...');
+    this.logger.log("Starting performance optimization system...");
 
     try {
       // Start all components
@@ -375,10 +392,9 @@ export class IntegratedPerformanceSystem {
       this.startContinuousOptimization();
 
       this.isRunning = true;
-      this.logger.log('Performance optimization system started successfully');
+      this.logger.log("Performance optimization system started successfully");
 
-      this.eventEmitter.emit('system-started');
-
+      this.eventEmitter.emit("system-started");
     } catch (error) {
       this.logger.error(`Failed to start performance system: ${error}`);
       throw error;
@@ -390,11 +406,11 @@ export class IntegratedPerformanceSystem {
    */
   async stop(): Promise<void> {
     if (!this.isRunning) {
-      this.logger.warn('Performance system is not running');
+      this.logger.warn("Performance system is not running");
       return;
     }
 
-    this.logger.log('Stopping performance optimization system...');
+    this.logger.log("Stopping performance optimization system...");
 
     try {
       // Stop all components
@@ -404,10 +420,9 @@ export class IntegratedPerformanceSystem {
       this.resourceOptimizer.stop();
 
       this.isRunning = false;
-      this.logger.log('Performance optimization system stopped successfully');
+      this.logger.log("Performance optimization system stopped successfully");
 
-      this.eventEmitter.emit('system-stopped');
-
+      this.eventEmitter.emit("system-stopped");
     } catch (error) {
       this.logger.error(`Failed to stop performance system: ${error}`);
       throw error;
@@ -418,7 +433,7 @@ export class IntegratedPerformanceSystem {
    * Run comprehensive performance optimization
    */
   async optimize(): Promise<SystemOptimizationResult> {
-    this.logger.log('Running comprehensive performance optimization...');
+    this.logger.log("Running comprehensive performance optimization...");
 
     const optimizationId = `opt-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const beforeMetrics = await this.collectSystemMetrics();
@@ -430,7 +445,7 @@ export class IntegratedPerformanceSystem {
         this.performOptimalCacheWarming(),
         this.optimizeConnectionPools(),
         this.optimizeBatchProcessing(),
-        this.optimizeAsyncPipelines()
+        this.optimizeAsyncPipelines(),
       ];
 
       await Promise.all(optimizationPromises);
@@ -439,7 +454,10 @@ export class IntegratedPerformanceSystem {
       const afterMetrics = await this.collectSystemMetrics();
 
       // Calculate improvements
-      const improvements = this.calculateImprovements(beforeMetrics, afterMetrics);
+      const improvements = this.calculateImprovements(
+        beforeMetrics,
+        afterMetrics,
+      );
 
       // Validate targets
       const targetAchievement = this.validatePerformanceTargets(afterMetrics);
@@ -451,16 +469,20 @@ export class IntegratedPerformanceSystem {
         afterMetrics,
         improvements,
         targetAchievement,
-        recommendations: this.generateOptimizationRecommendations(afterMetrics, targetAchievement)
+        recommendations: this.generateOptimizationRecommendations(
+          afterMetrics,
+          targetAchievement,
+        ),
       };
 
       this.optimizationHistory.push(result);
-      this.logger.log(`Optimization completed - Overall improvement: ${improvements.overallImprovement.toFixed(2)}%`);
+      this.logger.log(
+        `Optimization completed - Overall improvement: ${improvements.overallImprovement.toFixed(2)}%`,
+      );
 
-      this.eventEmitter.emit('optimization-completed', result);
+      this.eventEmitter.emit("optimization-completed", result);
 
       return result;
-
     } catch (error) {
       this.logger.error(`Optimization failed: ${error}`);
       throw error;
@@ -471,7 +493,7 @@ export class IntegratedPerformanceSystem {
    * Run comprehensive performance tests
    */
   async runPerformanceTests(): Promise<TestResult[]> {
-    this.logger.log('Running comprehensive performance tests...');
+    this.logger.log("Running comprehensive performance tests...");
 
     try {
       const testResults = await this.integrationTests.runAllTests();
@@ -482,13 +504,15 @@ export class IntegratedPerformanceSystem {
         Passed: ${summary.passedTests}
         Failed: ${summary.failedTests}
         Success Rate: ${summary.successRate.toFixed(2)}%
-        Targets Met: ${summary.targetsMet ? 'YES' : 'NO'}
+        Targets Met: ${summary.targetsMet ? "YES" : "NO"}
       `);
 
-      this.eventEmitter.emit('tests-completed', { results: testResults, summary });
+      this.eventEmitter.emit("tests-completed", {
+        results: testResults,
+        summary,
+      });
 
       return testResults;
-
     } catch (error) {
       this.logger.error(`Performance tests failed: ${error}`);
       throw error;
@@ -535,30 +559,32 @@ export class IntegratedPerformanceSystem {
   // Private methods
 
   private async initializeComponents(): Promise<void> {
-    this.logger.log('Initializing performance components...');
+    this.logger.log("Initializing performance components...");
 
     // Component-specific initialization would go here
     // For now, components are initialized in constructor
   }
 
   private async validateConfiguration(): Promise<void> {
-    this.logger.log('Validating performance system configuration...');
+    this.logger.log("Validating performance system configuration...");
 
     // Validate that all required configurations are present and valid
     const validations = [
       this.config.systemTargets.responseTime.p95 > 0,
       this.config.systemTargets.throughput.minimum > 0,
-      this.config.systemTargets.efficiency.cacheHitRate > 0 && this.config.systemTargets.efficiency.cacheHitRate <= 1,
-      this.config.systemTargets.reliability.errorRate >= 0 && this.config.systemTargets.reliability.errorRate <= 1
+      this.config.systemTargets.efficiency.cacheHitRate > 0 &&
+        this.config.systemTargets.efficiency.cacheHitRate <= 1,
+      this.config.systemTargets.reliability.errorRate >= 0 &&
+        this.config.systemTargets.reliability.errorRate <= 1,
     ];
 
     if (!validations.every(Boolean)) {
-      throw new Error('Invalid performance system configuration detected');
+      throw new Error("Invalid performance system configuration detected");
     }
   }
 
   private async performInitialOptimization(): Promise<void> {
-    this.logger.log('Performing initial system optimization...');
+    this.logger.log("Performing initial system optimization...");
 
     // Run initial optimization to establish baseline performance
     await this.optimize();
@@ -566,13 +592,16 @@ export class IntegratedPerformanceSystem {
 
   private startContinuousOptimization(): void {
     // Start periodic optimization cycle
-    setInterval(async () => {
-      try {
-        await this.optimize();
-      } catch (error) {
-        this.logger.error(`Continuous optimization failed: ${error}`);
-      }
-    }, 5 * 60 * 1000); // Every 5 minutes
+    setInterval(
+      async () => {
+        try {
+          await this.optimize();
+        } catch (error) {
+          this.logger.error(`Continuous optimization failed: ${error}`);
+        }
+      },
+      5 * 60 * 1000,
+    ); // Every 5 minutes
   }
 
   private async collectSystemMetrics(): Promise<SystemPerformanceMetrics> {
@@ -586,7 +615,7 @@ export class IntegratedPerformanceSystem {
       pipelineMetrics,
       circuitMetrics,
       resourceMetrics,
-      monitoringMetrics
+      monitoringMetrics,
     ] = await Promise.all([
       Promise.resolve(this.cacheService.getMetrics()),
       Promise.resolve(this.connectionPoolService.getPoolMetrics()),
@@ -594,7 +623,7 @@ export class IntegratedPerformanceSystem {
       Promise.resolve(this.pipelineProcessor.getMetrics()),
       Promise.resolve(this.circuitBreakerSystem.getAllMetrics()),
       Promise.resolve(this.resourceOptimizer.getCurrentMetrics()),
-      Promise.resolve(this.performanceMonitor.getCurrentMetrics())
+      Promise.resolve(this.performanceMonitor.getCurrentMetrics()),
     ]);
 
     // Calculate overall metrics
@@ -603,16 +632,32 @@ export class IntegratedPerformanceSystem {
       totalThroughput: monitoringMetrics.throughput.requestsPerSecond,
       overallErrorRate: monitoringMetrics.error.errorRate,
       systemAvailability: 0.9999, // Calculate based on circuit breaker states
-      resourceUtilization: resourceMetrics.memory.heapUtilization
+      resourceUtilization: resourceMetrics.memory.heapUtilization,
     };
 
     // Validate performance targets
     const targetsAchieved = this.checkIfTargetsAchieved(overallMetrics);
     const componentValidation = new Map([
-      ['cache', cacheMetrics.overall.overallHitRate >= this.config.systemTargets.efficiency.cacheHitRate],
-      ['throughput', overallMetrics.totalThroughput >= this.config.systemTargets.throughput.minimum],
-      ['response-time', overallMetrics.averageResponseTime <= this.config.systemTargets.responseTime.p50],
-      ['error-rate', overallMetrics.overallErrorRate <= this.config.systemTargets.reliability.errorRate]
+      [
+        "cache",
+        cacheMetrics.overall.overallHitRate >=
+          this.config.systemTargets.efficiency.cacheHitRate,
+      ],
+      [
+        "throughput",
+        overallMetrics.totalThroughput >=
+          this.config.systemTargets.throughput.minimum,
+      ],
+      [
+        "response-time",
+        overallMetrics.averageResponseTime <=
+          this.config.systemTargets.responseTime.p50,
+      ],
+      [
+        "error-rate",
+        overallMetrics.overallErrorRate <=
+          this.config.systemTargets.reliability.errorRate,
+      ],
     ]);
 
     const metrics: SystemPerformanceMetrics = {
@@ -623,15 +668,19 @@ export class IntegratedPerformanceSystem {
         connectionPool: poolMetrics as PoolMetrics,
         batchProcessing: batchMetrics,
         asyncPipeline: pipelineMetrics,
-        circuitBreaker: Array.from(circuitMetrics.values())[0] || {} as CircuitMetrics,
+        circuitBreaker:
+          Array.from(circuitMetrics.values())[0] || ({} as CircuitMetrics),
         resourceOptimization: resourceMetrics,
-        monitoring: monitoringMetrics
+        monitoring: monitoringMetrics,
       },
       performanceValidation: {
         targetsAchieved,
         componentValidation,
-        recommendations: this.generateRecommendations(overallMetrics, targetsAchieved)
-      }
+        recommendations: this.generateRecommendations(
+          overallMetrics,
+          targetsAchieved,
+        ),
+      },
     };
 
     // Store in history
@@ -646,79 +695,151 @@ export class IntegratedPerformanceSystem {
 
   private checkIfTargetsAchieved(metrics: any): boolean {
     return (
-      metrics.averageResponseTime <= this.config.systemTargets.responseTime.p50 &&
+      metrics.averageResponseTime <=
+        this.config.systemTargets.responseTime.p50 &&
       metrics.totalThroughput >= this.config.systemTargets.throughput.minimum &&
-      metrics.overallErrorRate <= this.config.systemTargets.reliability.errorRate &&
-      metrics.systemAvailability >= this.config.systemTargets.reliability.availability
+      metrics.overallErrorRate <=
+        this.config.systemTargets.reliability.errorRate &&
+      metrics.systemAvailability >=
+        this.config.systemTargets.reliability.availability
     );
   }
 
-  private generateRecommendations(metrics: any, targetsAchieved: boolean): string[] {
+  private generateRecommendations(
+    metrics: any,
+    targetsAchieved: boolean,
+  ): string[] {
     const recommendations: string[] = [];
 
     if (!targetsAchieved) {
-      if (metrics.averageResponseTime > this.config.systemTargets.responseTime.p50) {
-        recommendations.push('Optimize response time through cache warming and query optimization');
+      if (
+        metrics.averageResponseTime > this.config.systemTargets.responseTime.p50
+      ) {
+        recommendations.push(
+          "Optimize response time through cache warming and query optimization",
+        );
       }
-      if (metrics.totalThroughput < this.config.systemTargets.throughput.minimum) {
-        recommendations.push('Increase throughput by scaling resources and optimizing concurrency');
+      if (
+        metrics.totalThroughput < this.config.systemTargets.throughput.minimum
+      ) {
+        recommendations.push(
+          "Increase throughput by scaling resources and optimizing concurrency",
+        );
       }
-      if (metrics.overallErrorRate > this.config.systemTargets.reliability.errorRate) {
-        recommendations.push('Reduce error rate through improved error handling and circuit breakers');
+      if (
+        metrics.overallErrorRate >
+        this.config.systemTargets.reliability.errorRate
+      ) {
+        recommendations.push(
+          "Reduce error rate through improved error handling and circuit breakers",
+        );
       }
     } else {
-      recommendations.push('All performance targets achieved - system operating optimally');
+      recommendations.push(
+        "All performance targets achieved - system operating optimally",
+      );
     }
 
     return recommendations;
   }
 
-  private calculateImprovements(before: SystemPerformanceMetrics, after: SystemPerformanceMetrics): any {
-    const responseTimeImprovement = ((before.overallMetrics.averageResponseTime - after.overallMetrics.averageResponseTime) / before.overallMetrics.averageResponseTime) * 100;
-    const throughputImprovement = ((after.overallMetrics.totalThroughput - before.overallMetrics.totalThroughput) / before.overallMetrics.totalThroughput) * 100;
-    const efficiencyImprovement = ((after.componentMetrics.cache.overall.overallHitRate - before.componentMetrics.cache.overall.overallHitRate) / before.componentMetrics.cache.overall.overallHitRate) * 100;
-    const resourceImprovement = ((before.overallMetrics.resourceUtilization - after.overallMetrics.resourceUtilization) / before.overallMetrics.resourceUtilization) * 100;
+  private calculateImprovements(
+    before: SystemPerformanceMetrics,
+    after: SystemPerformanceMetrics,
+  ): any {
+    const responseTimeImprovement =
+      ((before.overallMetrics.averageResponseTime -
+        after.overallMetrics.averageResponseTime) /
+        before.overallMetrics.averageResponseTime) *
+      100;
+    const throughputImprovement =
+      ((after.overallMetrics.totalThroughput -
+        before.overallMetrics.totalThroughput) /
+        before.overallMetrics.totalThroughput) *
+      100;
+    const efficiencyImprovement =
+      ((after.componentMetrics.cache.overall.overallHitRate -
+        before.componentMetrics.cache.overall.overallHitRate) /
+        before.componentMetrics.cache.overall.overallHitRate) *
+      100;
+    const resourceImprovement =
+      ((before.overallMetrics.resourceUtilization -
+        after.overallMetrics.resourceUtilization) /
+        before.overallMetrics.resourceUtilization) *
+      100;
 
     return {
       responseTimeImprovement: Math.max(0, responseTimeImprovement),
       throughputImprovement: Math.max(0, throughputImprovement),
       efficiencyImprovement: Math.max(0, efficiencyImprovement),
       resourceImprovement: Math.max(0, resourceImprovement),
-      overallImprovement: (responseTimeImprovement + throughputImprovement + efficiencyImprovement + resourceImprovement) / 4
+      overallImprovement:
+        (responseTimeImprovement +
+          throughputImprovement +
+          efficiencyImprovement +
+          resourceImprovement) /
+        4,
     };
   }
 
   private validatePerformanceTargets(metrics: SystemPerformanceMetrics): any {
     return {
-      responseTime: metrics.overallMetrics.averageResponseTime <= this.config.systemTargets.responseTime.p50,
-      throughput: metrics.overallMetrics.totalThroughput >= this.config.systemTargets.throughput.minimum,
-      efficiency: metrics.componentMetrics.cache.overall.overallHitRate >= this.config.systemTargets.efficiency.cacheHitRate,
-      reliability: metrics.overallMetrics.overallErrorRate <= this.config.systemTargets.reliability.errorRate,
-      allTargetsMet: false // Will be calculated based on above
+      responseTime:
+        metrics.overallMetrics.averageResponseTime <=
+        this.config.systemTargets.responseTime.p50,
+      throughput:
+        metrics.overallMetrics.totalThroughput >=
+        this.config.systemTargets.throughput.minimum,
+      efficiency:
+        metrics.componentMetrics.cache.overall.overallHitRate >=
+        this.config.systemTargets.efficiency.cacheHitRate,
+      reliability:
+        metrics.overallMetrics.overallErrorRate <=
+        this.config.systemTargets.reliability.errorRate,
+      allTargetsMet: false, // Will be calculated based on above
     };
   }
 
-  private generateOptimizationRecommendations(metrics: SystemPerformanceMetrics, targets: any): string[] {
+  private generateOptimizationRecommendations(
+    metrics: SystemPerformanceMetrics,
+    targets: any,
+  ): string[] {
     const recommendations: string[] = [];
 
     if (targets.allTargetsMet) {
-      recommendations.push('🎉 All performance targets achieved! System ready for production deployment.');
-      recommendations.push('💡 Consider running extended load tests for final validation.');
-      recommendations.push('📊 Monitor performance trends for continuous optimization.');
+      recommendations.push(
+        "🎉 All performance targets achieved! System ready for production deployment.",
+      );
+      recommendations.push(
+        "💡 Consider running extended load tests for final validation.",
+      );
+      recommendations.push(
+        "📊 Monitor performance trends for continuous optimization.",
+      );
     } else {
-      recommendations.push('⚠️ Some performance targets not met - optimization required:');
+      recommendations.push(
+        "⚠️ Some performance targets not met - optimization required:",
+      );
 
       if (!targets.responseTime) {
-        recommendations.push('🚀 Response Time: Optimize caching, query performance, and processing pipelines');
+        recommendations.push(
+          "🚀 Response Time: Optimize caching, query performance, and processing pipelines",
+        );
       }
       if (!targets.throughput) {
-        recommendations.push('📈 Throughput: Scale resources, optimize concurrency, and batch processing');
+        recommendations.push(
+          "📈 Throughput: Scale resources, optimize concurrency, and batch processing",
+        );
       }
       if (!targets.efficiency) {
-        recommendations.push('🎯 Efficiency: Improve cache hit rates and resource utilization');
+        recommendations.push(
+          "🎯 Efficiency: Improve cache hit rates and resource utilization",
+        );
       }
       if (!targets.reliability) {
-        recommendations.push('🛡️ Reliability: Enhance error handling and circuit breaker patterns');
+        recommendations.push(
+          "🛡️ Reliability: Enhance error handling and circuit breaker patterns",
+        );
       }
     }
 
@@ -727,35 +848,42 @@ export class IntegratedPerformanceSystem {
 
   private async performOptimalCacheWarming(): Promise<void> {
     // Implement cache warming strategy
-    this.logger.debug('Performing optimal cache warming...');
+    this.logger.debug("Performing optimal cache warming...");
   }
 
   private async optimizeConnectionPools(): Promise<void> {
     // Implement connection pool optimization
-    this.logger.debug('Optimizing connection pools...');
+    this.logger.debug("Optimizing connection pools...");
   }
 
   private async optimizeBatchProcessing(): Promise<void> {
     // Implement batch processing optimization
-    this.logger.debug('Optimizing batch processing...');
+    this.logger.debug("Optimizing batch processing...");
   }
 
   private async optimizeAsyncPipelines(): Promise<void> {
     // Implement async pipeline optimization
-    this.logger.debug('Optimizing async pipelines...');
+    this.logger.debug("Optimizing async pipelines...");
   }
 
   private setupEventListeners(): void {
-    this.eventEmitter.on('system-initialized', () => {
-      this.logger.log('Performance system initialization completed');
+    this.eventEmitter.on("system-initialized", () => {
+      this.logger.log("Performance system initialization completed");
     });
 
-    this.eventEmitter.on('optimization-completed', (result: SystemOptimizationResult) => {
-      this.logger.log(`Optimization completed with ${result.improvements.overallImprovement.toFixed(2)}% improvement`);
-    });
+    this.eventEmitter.on(
+      "optimization-completed",
+      (result: SystemOptimizationResult) => {
+        this.logger.log(
+          `Optimization completed with ${result.improvements.overallImprovement.toFixed(2)}% improvement`,
+        );
+      },
+    );
 
-    this.eventEmitter.on('tests-completed', (data: any) => {
-      this.logger.log(`Performance tests completed - ${data.summary.successRate.toFixed(2)}% success rate`);
+    this.eventEmitter.on("tests-completed", (data: any) => {
+      this.logger.log(
+        `Performance tests completed - ${data.summary.successRate.toFixed(2)}% success rate`,
+      );
     });
   }
 
@@ -767,7 +895,7 @@ export class IntegratedPerformanceSystem {
         totalThroughput: 0,
         overallErrorRate: 0,
         systemAvailability: 1.0,
-        resourceUtilization: 0
+        resourceUtilization: 0,
       },
       componentMetrics: {
         cache: {} as CacheMetrics,
@@ -778,15 +906,15 @@ export class IntegratedPerformanceSystem {
         resourceOptimization: {
           memory: {} as MemoryMetrics,
           cpu: {} as CpuMetrics,
-          v8: {} as V8Metrics
+          v8: {} as V8Metrics,
         },
-        monitoring: {} as PerformanceMetrics
+        monitoring: {} as PerformanceMetrics,
       },
       performanceValidation: {
         targetsAchieved: false,
         componentValidation: new Map(),
-        recommendations: []
-      }
+        recommendations: [],
+      },
     };
   }
 }
@@ -804,7 +932,7 @@ export class IntegratedPerformanceSystem {
     CircuitBreakerSystem,
     ResourceOptimizationEngine,
     PerformanceMonitoringFramework,
-    PerformanceIntegrationTests
+    PerformanceIntegrationTests,
   ],
   exports: [
     IntegratedPerformanceSystem,
@@ -815,8 +943,8 @@ export class IntegratedPerformanceSystem {
     CircuitBreakerSystem,
     ResourceOptimizationEngine,
     PerformanceMonitoringFramework,
-    PerformanceIntegrationTests
-  ]
+    PerformanceIntegrationTests,
+  ],
 })
 export class ParlantPerformanceModule {}
 
@@ -890,5 +1018,5 @@ export {
   TestConfig,
   TestResult,
   PerformanceTargets,
-  TestMetrics
+  TestMetrics,
 };

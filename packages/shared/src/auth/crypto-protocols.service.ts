@@ -25,11 +25,11 @@ import {
   Logger,
   OnModuleInit,
   OnModuleDestroy,
-} from '@nestjs/common';
-import * as crypto from 'crypto';
-import * as jwt from 'jsonwebtoken';
-import * as jose from 'jose';
-import { EventEmitter } from 'events';
+} from "@nestjs/common";
+import * as crypto from "crypto";
+import * as jwt from "jsonwebtoken";
+import * as jose from "jose";
+import { EventEmitter } from "events";
 
 /**
  * Cryptographic algorithm configuration
@@ -38,13 +38,13 @@ export interface CryptoAlgorithmConfig {
   /** Algorithm name */
   name: string;
   /** Algorithm type */
-  type: 'symmetric' | 'asymmetric' | 'quantum-resistant';
+  type: "symmetric" | "asymmetric" | "quantum-resistant";
   /** Key size in bits */
   keySize: number;
   /** Performance rating (1-10) */
   performanceRating: number;
   /** Security level */
-  securityLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'QUANTUM_SAFE';
+  securityLevel: "LOW" | "MEDIUM" | "HIGH" | "QUANTUM_SAFE";
   /** Compliance standards */
   compliance: string[];
 }
@@ -56,7 +56,7 @@ export interface CryptoKeyConfig {
   /** Key ID */
   keyId: string;
   /** Key type */
-  type: 'signing' | 'encryption' | 'verification';
+  type: "signing" | "encryption" | "verification";
   /** Algorithm used */
   algorithm: string;
   /** Key material (for symmetric keys) */
@@ -171,7 +171,7 @@ export interface CryptoOperationResult {
  */
 export interface HSMConfig {
   /** HSM provider */
-  provider: 'aws-cloudhsm' | 'azure-keyvault' | 'pkcs11' | 'software';
+  provider: "aws-cloudhsm" | "azure-keyvault" | "pkcs11" | "software";
   /** HSM endpoint */
   endpoint?: string;
   /** Authentication credentials */
@@ -245,7 +245,10 @@ export interface CryptoMetrics {
  * quantum-resistant algorithms for future-proof security.
  */
 @Injectable()
-export class CryptoProtocolsService extends EventEmitter implements OnModuleInit, OnModuleDestroy {
+export class CryptoProtocolsService
+  extends EventEmitter
+  implements OnModuleInit, OnModuleDestroy
+{
   private readonly logger = new Logger(CryptoProtocolsService.name);
 
   // Cryptographic configuration
@@ -284,7 +287,7 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
 
   constructor() {
     super();
-    this.logger.log('🔐 Initializing Cryptographic Protocols Service');
+    this.logger.log("🔐 Initializing Cryptographic Protocols Service");
   }
 
   /**
@@ -292,7 +295,7 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
    */
   async onModuleInit(): Promise<void> {
     const startTime = Date.now();
-    this.logger.log('🔄 Starting cryptographic protocols initialization...');
+    this.logger.log("🔄 Starting cryptographic protocols initialization...");
 
     try {
       await this.loadAlgorithmConfiguration();
@@ -302,9 +305,11 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
       await this.startKeyRotationScheduler();
 
       const initTime = Date.now() - startTime;
-      this.logger.log(`✅ Cryptographic protocols initialized successfully (${initTime}ms)`);
+      this.logger.log(
+        `✅ Cryptographic protocols initialized successfully (${initTime}ms)`,
+      );
 
-      this.emit('crypto:initialized', {
+      this.emit("crypto:initialized", {
         timestamp: new Date(),
         initializationTime: initTime,
         algorithmsLoaded: this.algorithms.size,
@@ -313,8 +318,13 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
         quantumResistantEnabled: this.quantumConfig.enabled,
       });
     } catch (error) {
-      this.logger.error('❌ Failed to initialize cryptographic protocols', error);
-      throw new Error(`Crypto initialization failed: ${error instanceof Error ? error.message : String(error)}`);
+      this.logger.error(
+        "❌ Failed to initialize cryptographic protocols",
+        error,
+      );
+      throw new Error(
+        `Crypto initialization failed: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 
@@ -322,12 +332,12 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
    * Clean up cryptographic resources
    */
   async onModuleDestroy(): Promise<void> {
-    this.logger.log('🔄 Shutting down cryptographic protocols...');
+    this.logger.log("🔄 Shutting down cryptographic protocols...");
 
     await this.stopKeyRotationScheduler();
     await this.securelyDestroyKeys();
 
-    this.logger.log('✅ Cryptographic protocols shutdown complete');
+    this.logger.log("✅ Cryptographic protocols shutdown complete");
   }
 
   /**
@@ -352,7 +362,7 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
       // Prepare JWT headers
       const headers: Record<string, unknown> = {
         alg: config.algorithm,
-        typ: 'JWT',
+        typ: "JWT",
         ...config.additionalHeaders,
       };
 
@@ -366,7 +376,9 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
         iss: config.issuer,
         aud: config.audience,
         iat: Math.floor(Date.now() / 1000),
-        exp: Math.floor((Date.now() + this.parseExpiration(config.expiresIn)) / 1000),
+        exp: Math.floor(
+          (Date.now() + this.parseExpiration(config.expiresIn)) / 1000,
+        ),
         jti: this.generateTokenId(),
         crypto_metadata: {
           algorithm: config.algorithm,
@@ -381,9 +393,19 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
 
       // Use appropriate signing method based on algorithm
       if (this.isAsymmetricAlgorithm(config.algorithm)) {
-        token = await this.signAsymmetricToken(enhancedPayload, key, config, headers);
+        token = await this.signAsymmetricToken(
+          enhancedPayload,
+          key,
+          config,
+          headers,
+        );
       } else {
-        token = await this.signSymmetricToken(enhancedPayload, key, config, headers);
+        token = await this.signSymmetricToken(
+          enhancedPayload,
+          key,
+          config,
+          headers,
+        );
       }
 
       const operationTime = Date.now() - startTime;
@@ -418,7 +440,7 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
           duration: operationTime,
           algorithm: config.algorithm,
           keyId: config.keyId,
-          securityLevel: 'UNKNOWN',
+          securityLevel: "UNKNOWN",
         },
       };
     }
@@ -436,12 +458,14 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
     this.metrics.totalOperations++;
 
     try {
-      this.logger.debug(`🔍 Validating token with algorithms: ${config.algorithms.join(', ')}`);
+      this.logger.debug(
+        `🔍 Validating token with algorithms: ${config.algorithms.join(", ")}`,
+      );
 
       // Decode token header to get algorithm and key ID
       const decoded = jwt.decode(token, { complete: true });
-      if (!decoded || typeof decoded === 'string') {
-        throw new Error('Invalid token format');
+      if (!decoded || typeof decoded === "string") {
+        throw new Error("Invalid token format");
       }
 
       const { alg: algorithm, kid: keyId } = decoded.header;
@@ -452,9 +476,11 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
       }
 
       // Get verification key
-      const key = keyId ? this.keys.get(keyId) : this.getDefaultVerificationKey(algorithm);
+      const key = keyId
+        ? this.keys.get(keyId)
+        : this.getDefaultVerificationKey(algorithm);
       if (!key) {
-        throw new Error(`Verification key not found: ${keyId || 'default'}`);
+        throw new Error(`Verification key not found: ${keyId || "default"}`);
       }
 
       let payload: any;
@@ -482,15 +508,18 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
           timestamp: new Date(),
           duration: operationTime,
           algorithm,
-          keyId: keyId || 'default',
+          keyId: keyId || "default",
           securityLevel: key.metadata.securityLevel as string,
         },
       };
     } catch (error) {
       const operationTime = Date.now() - startTime;
-      this.updateMetrics(operationTime, 'unknown', false);
+      this.updateMetrics(operationTime, "unknown", false);
 
-      this.logger.error(`❌ Token validation failed (${operationTime}ms)`, error);
+      this.logger.error(
+        `❌ Token validation failed (${operationTime}ms)`,
+        error,
+      );
 
       return {
         success: false,
@@ -499,8 +528,8 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
           operationId,
           timestamp: new Date(),
           duration: operationTime,
-          algorithm: 'unknown',
-          securityLevel: 'UNKNOWN',
+          algorithm: "unknown",
+          securityLevel: "UNKNOWN",
         },
       };
     }
@@ -520,29 +549,35 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
 
     try {
       const key = this.keys.get(keyId);
-      if (!key || key.type !== 'encryption') {
+      if (!key || key.type !== "encryption") {
         throw new Error(`Encryption key not found: ${keyId}`);
       }
 
       const encConfig: EncryptionConfig = {
-        algorithm: 'aes-256-gcm',
+        algorithm: "aes-256-gcm",
         ivSize: 12,
         tagSize: 16,
         saltSize: 32,
         ...config,
       };
 
-      const dataBuffer = Buffer.isBuffer(data) ? data : Buffer.from(data, 'utf8');
+      const dataBuffer = Buffer.isBuffer(data)
+        ? data
+        : Buffer.from(data, "utf8");
       const ivBuffer = crypto.randomBytes(encConfig.ivSize);
       const salt = crypto.randomBytes(encConfig.saltSize);
 
       // Derive key if needed
       const encryptionKey = key.keyMaterial
-        ? Buffer.from(key.keyMaterial, 'hex')
-        : crypto.pbkdf2Sync(key.keyMaterial || '', salt, 100000, 32, 'sha256');
+        ? Buffer.from(key.keyMaterial, "hex")
+        : crypto.pbkdf2Sync(key.keyMaterial || "", salt, 100000, 32, "sha256");
 
       // Encrypt data - use createCipheriv with proper IV
-      const cipher = crypto.createCipheriv(encConfig.algorithm, encryptionKey, ivBuffer) as crypto.CipherGCM;
+      const cipher = crypto.createCipheriv(
+        encConfig.algorithm,
+        encryptionKey,
+        ivBuffer,
+      ) as crypto.CipherGCM;
       if (encConfig.aad) {
         cipher.setAAD(encConfig.aad);
       }
@@ -555,19 +590,14 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
       const authTag = cipher.getAuthTag();
 
       // Combine all components
-      const result = Buffer.concat([
-        salt,
-        ivBuffer,
-        authTag,
-        encrypted,
-      ]);
+      const result = Buffer.concat([salt, ivBuffer, authTag, encrypted]);
 
       const operationTime = Date.now() - startTime;
       this.updateMetrics(operationTime, encConfig.algorithm, true);
 
       return {
         success: true,
-        data: result.toString('base64'),
+        data: result.toString("base64"),
         metadata: {
           operationId,
           timestamp: new Date(),
@@ -579,7 +609,7 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
       };
     } catch (error) {
       const operationTime = Date.now() - startTime;
-      this.updateMetrics(operationTime, 'encryption', false);
+      this.updateMetrics(operationTime, "encryption", false);
 
       return {
         success: false,
@@ -588,9 +618,9 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
           operationId,
           timestamp: new Date(),
           duration: operationTime,
-          algorithm: 'encryption',
+          algorithm: "encryption",
           keyId,
-          securityLevel: 'UNKNOWN',
+          securityLevel: "UNKNOWN",
         },
       };
     }
@@ -610,36 +640,45 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
 
     try {
       const key = this.keys.get(keyId);
-      if (!key || key.type !== 'encryption') {
+      if (!key || key.type !== "encryption") {
         throw new Error(`Decryption key not found: ${keyId}`);
       }
 
       const encConfig: EncryptionConfig = {
-        algorithm: 'aes-256-gcm',
+        algorithm: "aes-256-gcm",
         ivSize: 12,
         tagSize: 16,
         saltSize: 32,
         ...config,
       };
 
-      const encryptedBuffer: Buffer = Buffer.from(encryptedData, 'base64');
+      const encryptedBuffer: Buffer = Buffer.from(encryptedData, "base64");
 
       // Extract components
       const salt = encryptedBuffer.subarray(0, encConfig.saltSize);
-      const ivBuffer = encryptedBuffer.subarray(encConfig.saltSize, encConfig.saltSize + encConfig.ivSize);
+      const ivBuffer = encryptedBuffer.subarray(
+        encConfig.saltSize,
+        encConfig.saltSize + encConfig.ivSize,
+      );
       const authTag = encryptedBuffer.subarray(
         encConfig.saltSize + encConfig.ivSize,
         encConfig.saltSize + encConfig.ivSize + encConfig.tagSize,
       );
-      const encryptedPayload = encryptedBuffer.subarray(encConfig.saltSize + encConfig.ivSize + encConfig.tagSize);
+      const encryptedPayload = encryptedBuffer.subarray(
+        encConfig.saltSize + encConfig.ivSize + encConfig.tagSize,
+      );
 
       // Derive key
       const decryptionKey = key.keyMaterial
-        ? Buffer.from(key.keyMaterial, 'hex')
-        : crypto.pbkdf2Sync(key.keyMaterial || '', salt, 100000, 32, 'sha256');
+        ? Buffer.from(key.keyMaterial, "hex")
+        : crypto.pbkdf2Sync(key.keyMaterial || "", salt, 100000, 32, "sha256");
 
       // Decrypt data
-      const decipher = crypto.createDecipheriv(encConfig.algorithm, decryptionKey, ivBuffer) as crypto.DecipherGCM;
+      const decipher = crypto.createDecipheriv(
+        encConfig.algorithm,
+        decryptionKey,
+        ivBuffer,
+      ) as crypto.DecipherGCM;
       decipher.setAuthTag(authTag);
       if (encConfig.aad) {
         decipher.setAAD(encConfig.aad);
@@ -655,7 +694,7 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
 
       return {
         success: true,
-        data: decrypted.toString('utf8'),
+        data: decrypted.toString("utf8"),
         metadata: {
           operationId,
           timestamp: new Date(),
@@ -667,7 +706,7 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
       };
     } catch (error) {
       const operationTime = Date.now() - startTime;
-      this.updateMetrics(operationTime, 'decryption', false);
+      this.updateMetrics(operationTime, "decryption", false);
 
       return {
         success: false,
@@ -676,9 +715,9 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
           operationId,
           timestamp: new Date(),
           duration: operationTime,
-          algorithm: 'decryption',
+          algorithm: "decryption",
           keyId,
-          securityLevel: 'UNKNOWN',
+          securityLevel: "UNKNOWN",
         },
       };
     }
@@ -688,7 +727,7 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
    * Generate new cryptographic key
    */
   async generateKey(
-    type: 'signing' | 'encryption' | 'verification',
+    type: "signing" | "encryption" | "verification",
     algorithm: string,
     options?: Partial<CryptoKeyConfig>,
   ): Promise<CryptoOperationResult> {
@@ -701,9 +740,19 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
       let keyConfig: CryptoKeyConfig;
 
       if (this.isAsymmetricAlgorithm(algorithm)) {
-        keyConfig = await this.generateAsymmetricKey(keyId, type, algorithm, options);
+        keyConfig = await this.generateAsymmetricKey(
+          keyId,
+          type,
+          algorithm,
+          options,
+        );
       } else {
-        keyConfig = await this.generateSymmetricKey(keyId, type, algorithm, options);
+        keyConfig = await this.generateSymmetricKey(
+          keyId,
+          type,
+          algorithm,
+          options,
+        );
       }
 
       this.keys.set(keyId, keyConfig);
@@ -737,7 +786,7 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
           timestamp: new Date(),
           duration: operationTime,
           algorithm,
-          securityLevel: 'UNKNOWN',
+          securityLevel: "UNKNOWN",
         },
       };
     }
@@ -758,16 +807,20 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
       }
 
       // Generate new key with same configuration
-      const newKeyResult = await this.generateKey(oldKey.type, oldKey.algorithm, {
-        keyId: this.generateKeyId(),
-        usage: oldKey.usage,
-        rotationInterval: oldKey.rotationInterval,
-        metadata: {
-          ...oldKey.metadata,
-          rotatedFrom: keyId,
-          rotationTime: new Date(),
+      const newKeyResult = await this.generateKey(
+        oldKey.type,
+        oldKey.algorithm,
+        {
+          keyId: this.generateKeyId(),
+          usage: oldKey.usage,
+          rotationInterval: oldKey.rotationInterval,
+          metadata: {
+            ...oldKey.metadata,
+            rotatedFrom: keyId,
+            rotationTime: new Date(),
+          },
         },
-      });
+      );
 
       if (!newKeyResult.success) {
         throw new Error(`Failed to generate new key: ${newKeyResult.error}`);
@@ -782,7 +835,7 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
 
       this.logger.log(`🔄 Rotated key: ${keyId} -> ${newKeyResult.data.keyId}`);
 
-      this.emit('key:rotated', {
+      this.emit("key:rotated", {
         oldKeyId: keyId,
         newKeyId: newKeyResult.data.keyId,
         algorithm: oldKey.algorithm,
@@ -803,7 +856,7 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
       };
     } catch (error) {
       const operationTime = Date.now() - startTime;
-      this.updateMetrics(operationTime, 'rotation', false);
+      this.updateMetrics(operationTime, "rotation", false);
 
       return {
         success: false,
@@ -812,9 +865,9 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
           operationId,
           timestamp: new Date(),
           duration: operationTime,
-          algorithm: 'rotation',
+          algorithm: "rotation",
           keyId,
-          securityLevel: 'UNKNOWN',
+          securityLevel: "UNKNOWN",
         },
       };
     }
@@ -861,36 +914,36 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
   private async loadAlgorithmConfiguration(): Promise<void> {
     const algorithms: CryptoAlgorithmConfig[] = [
       {
-        name: 'HS256',
-        type: 'symmetric',
+        name: "HS256",
+        type: "symmetric",
         keySize: 256,
         performanceRating: 9,
-        securityLevel: 'HIGH',
-        compliance: ['FIPS-140-2', 'Common Criteria'],
+        securityLevel: "HIGH",
+        compliance: ["FIPS-140-2", "Common Criteria"],
       },
       {
-        name: 'RS256',
-        type: 'asymmetric',
+        name: "RS256",
+        type: "asymmetric",
         keySize: 2048,
         performanceRating: 6,
-        securityLevel: 'HIGH',
-        compliance: ['FIPS-140-2', 'Common Criteria', 'PKCS#1'],
+        securityLevel: "HIGH",
+        compliance: ["FIPS-140-2", "Common Criteria", "PKCS#1"],
       },
       {
-        name: 'ES256',
-        type: 'asymmetric',
+        name: "ES256",
+        type: "asymmetric",
         keySize: 256,
         performanceRating: 8,
-        securityLevel: 'HIGH',
-        compliance: ['FIPS-140-2', 'Common Criteria', 'RFC 7515'],
+        securityLevel: "HIGH",
+        compliance: ["FIPS-140-2", "Common Criteria", "RFC 7515"],
       },
       {
-        name: 'PS256',
-        type: 'asymmetric',
+        name: "PS256",
+        type: "asymmetric",
         keySize: 2048,
         performanceRating: 5,
-        securityLevel: 'HIGH',
-        compliance: ['FIPS-140-2', 'Common Criteria', 'PKCS#1 PSS'],
+        securityLevel: "HIGH",
+        compliance: ["FIPS-140-2", "Common Criteria", "PKCS#1 PSS"],
       },
     ];
 
@@ -903,49 +956,55 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
 
   private async initializeQuantumResistantAlgorithms(): Promise<void> {
     this.quantumConfig = {
-      enabled: process.env.QUANTUM_RESISTANT_ENABLED === 'true',
+      enabled: process.env.QUANTUM_RESISTANT_ENABLED === "true",
       dilithium: {
-        enabled: process.env.DILITHIUM_ENABLED === 'true',
-        securityLevel: parseInt(process.env.DILITHIUM_SECURITY_LEVEL || '3') as 2 | 3 | 5,
+        enabled: process.env.DILITHIUM_ENABLED === "true",
+        securityLevel: parseInt(process.env.DILITHIUM_SECURITY_LEVEL || "3") as
+          | 2
+          | 3
+          | 5,
       },
       kyber: {
-        enabled: process.env.KYBER_ENABLED === 'true',
-        securityLevel: parseInt(process.env.KYBER_SECURITY_LEVEL || '768') as 512 | 768 | 1024,
+        enabled: process.env.KYBER_ENABLED === "true",
+        securityLevel: parseInt(process.env.KYBER_SECURITY_LEVEL || "768") as
+          | 512
+          | 768
+          | 1024,
       },
-      hybridMode: process.env.QUANTUM_HYBRID_MODE === 'true',
+      hybridMode: process.env.QUANTUM_HYBRID_MODE === "true",
     };
 
     if (this.quantumConfig.enabled) {
-      this.logger.log('🛡️ Quantum-resistant algorithms enabled');
+      this.logger.log("🛡️ Quantum-resistant algorithms enabled");
     }
   }
 
   private async generateDefaultKeys(): Promise<void> {
     // Generate default signing key
-    await this.generateKey('signing', 'HS256', {
-      keyId: 'default-signing-key',
-      usage: ['sign', 'verify'],
+    await this.generateKey("signing", "HS256", {
+      keyId: "default-signing-key",
+      usage: ["sign", "verify"],
       rotationInterval: 86400000, // 24 hours
       metadata: {
-        securityLevel: 'HIGH',
+        securityLevel: "HIGH",
         default: true,
         autoGenerated: true,
       },
     });
 
     // Generate default encryption key
-    await this.generateKey('encryption', 'aes-256-gcm', {
-      keyId: 'default-encryption-key',
-      usage: ['encrypt', 'decrypt'],
+    await this.generateKey("encryption", "aes-256-gcm", {
+      keyId: "default-encryption-key",
+      usage: ["encrypt", "decrypt"],
       rotationInterval: 86400000, // 24 hours
       metadata: {
-        securityLevel: 'HIGH',
+        securityLevel: "HIGH",
         default: true,
         autoGenerated: true,
       },
     });
 
-    this.logger.log('🔑 Default cryptographic keys generated');
+    this.logger.log("🔑 Default cryptographic keys generated");
   }
 
   private async initializeHSM(): Promise<void> {
@@ -957,10 +1016,10 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
     this.hsmConfig = {
       provider: hsmProvider as any,
       endpoint: process.env.HSM_ENDPOINT,
-      timeout: parseInt(process.env.HSM_TIMEOUT || '5000'),
+      timeout: parseInt(process.env.HSM_TIMEOUT || "5000"),
       retry: {
-        maxAttempts: parseInt(process.env.HSM_RETRY_ATTEMPTS || '3'),
-        backoffMs: parseInt(process.env.HSM_RETRY_BACKOFF || '1000'),
+        maxAttempts: parseInt(process.env.HSM_RETRY_ATTEMPTS || "3"),
+        backoffMs: parseInt(process.env.HSM_RETRY_BACKOFF || "1000"),
       },
     };
 
@@ -970,13 +1029,15 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
   }
 
   private async startKeyRotationScheduler(): Promise<void> {
-    const rotationInterval = parseInt(process.env.KEY_ROTATION_INTERVAL || '3600000'); // 1 hour
+    const rotationInterval = parseInt(
+      process.env.KEY_ROTATION_INTERVAL || "3600000",
+    ); // 1 hour
 
     this.keyRotationTimer = setInterval(async () => {
       await this.performScheduledKeyRotation();
     }, rotationInterval);
 
-    this.logger.log('⏰ Key rotation scheduler started');
+    this.logger.log("⏰ Key rotation scheduler started");
   }
 
   private async stopKeyRotationScheduler(): Promise<void> {
@@ -991,7 +1052,10 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
 
     const keysArray = Array.from(this.keys.entries());
     for (const [keyId, key] of keysArray) {
-      if (key.rotationInterval && key.createdAt.getTime() + key.rotationInterval < now.getTime()) {
+      if (
+        key.rotationInterval &&
+        key.createdAt.getTime() + key.rotationInterval < now.getTime()
+      ) {
         this.logger.log(`🔄 Scheduled rotation for key: ${keyId}`);
         await this.rotateKey(keyId);
       }
@@ -1005,7 +1069,7 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
     headers: Record<string, unknown>,
   ): Promise<string> {
     if (!key.privateKey) {
-      throw new Error('Private key required for asymmetric signing');
+      throw new Error("Private key required for asymmetric signing");
     }
 
     const signingOptions: jwt.SignOptions = {
@@ -1023,7 +1087,7 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
     headers: Record<string, unknown>,
   ): Promise<string> {
     if (!key.keyMaterial) {
-      throw new Error('Key material required for symmetric signing');
+      throw new Error("Key material required for symmetric signing");
     }
 
     const signingOptions: jwt.SignOptions = {
@@ -1040,7 +1104,7 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
     config: TokenValidationConfig,
   ): Promise<any> {
     if (!key.publicKey) {
-      throw new Error('Public key required for asymmetric validation');
+      throw new Error("Public key required for asymmetric validation");
     }
 
     return jwt.verify(token, key.publicKey, {
@@ -1061,7 +1125,7 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
     config: TokenValidationConfig,
   ): Promise<any> {
     if (!key.keyMaterial) {
-      throw new Error('Key material required for symmetric validation');
+      throw new Error("Key material required for symmetric validation");
     }
 
     return jwt.verify(token, key.keyMaterial, {
@@ -1076,16 +1140,20 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
     });
   }
 
-  private async performSecurityValidations(payload: any, token: string): Promise<void> {
+  private async performSecurityValidations(
+    payload: any,
+    token: string,
+  ): Promise<void> {
     // Check for suspicious patterns
-    if (payload.crypto_metadata?.securityLevel === 'LOW') {
-      this.logger.warn('⚠️ Low security level token detected');
+    if (payload.crypto_metadata?.securityLevel === "LOW") {
+      this.logger.warn("⚠️ Low security level token detected");
     }
 
     // Check token age
     const tokenAge = Date.now() / 1000 - payload.iat;
-    if (tokenAge > 3600) { // 1 hour
-      this.logger.warn('⚠️ Old token detected', { tokenAge });
+    if (tokenAge > 3600) {
+      // 1 hour
+      this.logger.warn("⚠️ Old token detected", { tokenAge });
     }
   }
 
@@ -1098,19 +1166,19 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
     let keyPair: crypto.KeyPairSyncResult<string, string>;
 
     switch (algorithm) {
-      case 'RS256':
-      case 'PS256':
-        keyPair = crypto.generateKeyPairSync('rsa', {
+      case "RS256":
+      case "PS256":
+        keyPair = crypto.generateKeyPairSync("rsa", {
           modulusLength: 2048,
-          publicKeyEncoding: { type: 'spki', format: 'pem' },
-          privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
+          publicKeyEncoding: { type: "spki", format: "pem" },
+          privateKeyEncoding: { type: "pkcs8", format: "pem" },
         });
         break;
-      case 'ES256':
-        keyPair = crypto.generateKeyPairSync('ec', {
-          namedCurve: 'prime256v1',
-          publicKeyEncoding: { type: 'spki', format: 'pem' },
-          privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
+      case "ES256":
+        keyPair = crypto.generateKeyPairSync("ec", {
+          namedCurve: "prime256v1",
+          publicKeyEncoding: { type: "spki", format: "pem" },
+          privateKeyEncoding: { type: "pkcs8", format: "pem" },
         });
         break;
       default:
@@ -1124,10 +1192,10 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
       publicKey: keyPair.publicKey,
       privateKey: keyPair.privateKey,
       createdAt: new Date(),
-      usage: options?.usage || ['sign', 'verify'],
+      usage: options?.usage || ["sign", "verify"],
       metadata: {
-        securityLevel: 'HIGH',
-        keySize: algorithm.includes('256') ? 256 : 2048,
+        securityLevel: "HIGH",
+        keySize: algorithm.includes("256") ? 256 : 2048,
         ...options?.metadata,
       },
       ...options,
@@ -1140,8 +1208,8 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
     algorithm: string,
     options?: Partial<CryptoKeyConfig>,
   ): Promise<CryptoKeyConfig> {
-    const keySize = algorithm.includes('256') ? 32 : 16; // bytes
-    const keyMaterial = crypto.randomBytes(keySize).toString('hex');
+    const keySize = algorithm.includes("256") ? 32 : 16; // bytes
+    const keyMaterial = crypto.randomBytes(keySize).toString("hex");
 
     return {
       keyId,
@@ -1149,9 +1217,9 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
       algorithm,
       keyMaterial,
       createdAt: new Date(),
-      usage: options?.usage || ['sign', 'verify'],
+      usage: options?.usage || ["sign", "verify"],
       metadata: {
-        securityLevel: 'HIGH',
+        securityLevel: "HIGH",
         keySize: keySize * 8, // bits
         ...options?.metadata,
       },
@@ -1171,11 +1239,21 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
   }
 
   private isAsymmetricAlgorithm(algorithm: string): boolean {
-    return ['RS256', 'RS384', 'RS512', 'ES256', 'ES384', 'ES512', 'PS256', 'PS384', 'PS512'].includes(algorithm);
+    return [
+      "RS256",
+      "RS384",
+      "RS512",
+      "ES256",
+      "ES384",
+      "ES512",
+      "PS256",
+      "PS384",
+      "PS512",
+    ].includes(algorithm);
   }
 
   private isQuantumResistantAlgorithm(algorithm: string): boolean {
-    return algorithm.includes('Dilithium') || algorithm.includes('Kyber');
+    return algorithm.includes("Dilithium") || algorithm.includes("Kyber");
   }
 
   private parseExpiration(expiration: string): number {
@@ -1196,18 +1274,22 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
   }
 
   private generateOperationId(): string {
-    return `crypto_${Date.now()}_${crypto.randomBytes(8).toString('hex')}`;
+    return `crypto_${Date.now()}_${crypto.randomBytes(8).toString("hex")}`;
   }
 
   private generateKeyId(): string {
-    return `key_${Date.now()}_${crypto.randomBytes(8).toString('hex')}`;
+    return `key_${Date.now()}_${crypto.randomBytes(8).toString("hex")}`;
   }
 
   private generateTokenId(): string {
-    return `tok_${Date.now()}_${crypto.randomBytes(8).toString('hex')}`;
+    return `tok_${Date.now()}_${crypto.randomBytes(8).toString("hex")}`;
   }
 
-  private updateMetrics(operationTime: number, algorithm: string, success: boolean): void {
+  private updateMetrics(
+    operationTime: number,
+    algorithm: string,
+    success: boolean,
+  ): void {
     if (success) {
       this.metrics.successfulOperations++;
     } else {
@@ -1219,11 +1301,17 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
     }
 
     // Update running average
-    const totalTime = this.metrics.averageOperationTime * (this.metrics.successfulOperations - 1) + operationTime;
-    this.metrics.averageOperationTime = Math.round(totalTime / this.metrics.successfulOperations);
+    const totalTime =
+      this.metrics.averageOperationTime *
+        (this.metrics.successfulOperations - 1) +
+      operationTime;
+    this.metrics.averageOperationTime = Math.round(
+      totalTime / this.metrics.successfulOperations,
+    );
 
     // Update algorithm metrics
-    this.metrics.operationsByAlgorithm[algorithm] = (this.metrics.operationsByAlgorithm[algorithm] || 0) + 1;
+    this.metrics.operationsByAlgorithm[algorithm] =
+      (this.metrics.operationsByAlgorithm[algorithm] || 0) + 1;
 
     this.metrics.lastOperationTime = new Date();
   }
@@ -1234,14 +1322,14 @@ export class CryptoProtocolsService extends EventEmitter implements OnModuleInit
     for (const key of keysArray) {
       if (key.keyMaterial) {
         // In production, this would use secure memory clearing
-        key.keyMaterial = '';
+        key.keyMaterial = "";
       }
       if (key.privateKey) {
-        key.privateKey = '';
+        key.privateKey = "";
       }
     }
 
     this.keys.clear();
-    this.logger.log('🗑️ Cryptographic keys securely destroyed');
+    this.logger.log("🗑️ Cryptographic keys securely destroyed");
   }
 }

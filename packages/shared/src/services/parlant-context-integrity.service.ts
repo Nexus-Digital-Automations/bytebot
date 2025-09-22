@@ -78,7 +78,12 @@ export interface IntegrityError {
   /** Error severity */
   severity: "low" | "medium" | "high" | "critical";
   /** Error category */
-  category: "hash_mismatch" | "signature_invalid" | "tamper_detected" | "chain_broken" | "timestamp_invalid";
+  category:
+    | "hash_mismatch"
+    | "signature_invalid"
+    | "tamper_detected"
+    | "chain_broken"
+    | "timestamp_invalid";
   /** Additional error details */
   details: Record<string, unknown>;
 }
@@ -178,7 +183,12 @@ export interface TamperDetectionResult {
  */
 export interface TamperIndicator {
   /** Indicator type */
-  type: "hash_mismatch" | "signature_invalid" | "timestamp_anomaly" | "structure_modified" | "metadata_changed";
+  type:
+    | "hash_mismatch"
+    | "signature_invalid"
+    | "timestamp_anomaly"
+    | "structure_modified"
+    | "metadata_changed";
   /** Indicator severity */
   severity: "low" | "medium" | "high" | "critical";
   /** Indicator description */
@@ -196,7 +206,12 @@ export interface ForensicEvidence {
   /** Evidence ID */
   evidenceId: string;
   /** Evidence type */
-  type: "hash_comparison" | "signature_analysis" | "timestamp_analysis" | "metadata_diff" | "access_log";
+  type:
+    | "hash_comparison"
+    | "signature_analysis"
+    | "timestamp_analysis"
+    | "metadata_diff"
+    | "access_log";
   /** Evidence data */
   data: Record<string, unknown>;
   /** Evidence collection timestamp */
@@ -308,7 +323,11 @@ export interface IntegrityPolicyConfig {
  */
 export interface IntegrityVerificationRequirement {
   /** Requirement type */
-  type: "hash_verification" | "signature_verification" | "chain_verification" | "timestamp_verification";
+  type:
+    | "hash_verification"
+    | "signature_verification"
+    | "chain_verification"
+    | "timestamp_verification";
   /** Requirement level */
   level: "optional" | "recommended" | "mandatory";
   /** Configuration */
@@ -443,7 +462,10 @@ export class ParlantContextIntegrityService
   // Integrity records storage
   private readonly integrityRecords = new Map<string, ContextIntegrityRecord>();
   private readonly hashChains = new Map<string, HashChainVerification>();
-  private readonly signatureRegistry = new Map<string, CryptographicSignature[]>();
+  private readonly signatureRegistry = new Map<
+    string,
+    CryptographicSignature[]
+  >();
 
   // Cryptographic infrastructure
   private readonly masterSigningKey = this.generateMasterSigningKey();
@@ -490,7 +512,10 @@ export class ParlantContextIntegrityService
       this.logger.log("✅ Context Integrity Service initialized successfully");
       this.emit("integrity:service:initialized");
     } catch (error) {
-      this.logger.error("❌ Failed to initialize Context Integrity Service", error);
+      this.logger.error(
+        "❌ Failed to initialize Context Integrity Service",
+        error,
+      );
       throw new ParlantIntegrationError(
         "Context Integrity initialization failed",
         "INTEGRITY_INIT_ERROR",
@@ -525,19 +550,29 @@ export class ParlantContextIntegrityService
       const recordId = this.generateRecordId();
 
       // Perform verification
-      const verificationResult = await this.performIntegrityVerification(request);
+      const verificationResult =
+        await this.performIntegrityVerification(request);
 
       // Generate cryptographic signatures
-      const signatures = await this.generateCryptographicSignatures(request.contextData, request.requestingUser);
+      const signatures = await this.generateCryptographicSignatures(
+        request.contextData,
+        request.requestingUser,
+      );
 
       // Verify hash chain
-      const hashChain = await this.verifyHashChain(request.contextId, request.contextData);
+      const hashChain = await this.verifyHashChain(
+        request.contextId,
+        request.contextData,
+      );
 
       // Perform tamper detection
       const tamperDetection = await this.performTamperDetection(request);
 
       // Build validation chain
-      const validationChain = await this.buildValidationChain(request, verificationResult);
+      const validationChain = await this.buildValidationChain(
+        request,
+        verificationResult,
+      );
 
       // Create integrity record
       const integrityRecord: ContextIntegrityRecord = {
@@ -570,7 +605,10 @@ export class ParlantContextIntegrityService
       this.integrityRecords.set(recordId, integrityRecord);
 
       // Update performance statistics
-      this.updatePerformanceStats(integrityRecord, performance.now() - startTime);
+      this.updatePerformanceStats(
+        integrityRecord,
+        performance.now() - startTime,
+      );
 
       // Emit verification event
       this.emit("integrity:verified", {
@@ -593,7 +631,10 @@ export class ParlantContextIntegrityService
       throw new ParlantIntegrationError(
         "Context integrity verification failed",
         "INTEGRITY_VERIFY_ERROR",
-        { contextId: request.contextId, error: error instanceof Error ? error.message : String(error) },
+        {
+          contextId: request.contextId,
+          error: error instanceof Error ? error.message : String(error),
+        },
       );
     }
   }
@@ -613,14 +654,20 @@ export class ParlantContextIntegrityService
 
       for (const signature of signatures) {
         // Validate signature format
-        if (!signature.signature || !signature.algorithm || !signature.publicKeyFingerprint) {
+        if (
+          !signature.signature ||
+          !signature.algorithm ||
+          !signature.publicKeyFingerprint
+        ) {
           errors.push(`Invalid signature format: ${signature.signatureId}`);
           continue;
         }
 
         // Validate signature algorithm
         if (!this.isSupportedSignatureAlgorithm(signature.algorithm)) {
-          errors.push(`Unsupported signature algorithm: ${signature.algorithm}`);
+          errors.push(
+            `Unsupported signature algorithm: ${signature.algorithm}`,
+          );
           continue;
         }
 
@@ -632,19 +679,25 @@ export class ParlantContextIntegrityService
 
         // Check signature age
         const signatureAge = Date.now() - signature.timestamp.getTime();
-        if (signatureAge > 86400000) { // 24 hours
+        if (signatureAge > 86400000) {
+          // 24 hours
           warnings.push(`Old signature detected: ${signature.signatureId}`);
         }
 
         // Validate cryptographic signature
-        const signatureValid = await this.validateCryptographicSignature(signature);
+        const signatureValid =
+          await this.validateCryptographicSignature(signature);
         if (!signatureValid) {
-          errors.push(`Invalid cryptographic signature: ${signature.signatureId}`);
+          errors.push(
+            `Invalid cryptographic signature: ${signature.signatureId}`,
+          );
         }
 
         // Validate certificate chain if present
         if (signature.metadata.certificateChain) {
-          const chainValid = await this.validateCertificateChain(signature.metadata.certificateChain);
+          const chainValid = await this.validateCertificateChain(
+            signature.metadata.certificateChain,
+          );
           if (!chainValid) {
             errors.push(`Invalid certificate chain: ${signature.signatureId}`);
           }
@@ -678,7 +731,10 @@ export class ParlantContextIntegrityService
       throw new ParlantIntegrationError(
         "Signature chain validation failed",
         "SIGNATURE_VALIDATION_ERROR",
-        { contextId, error: error instanceof Error ? error.message : String(error) },
+        {
+          contextId,
+          error: error instanceof Error ? error.message : String(error),
+        },
       );
     }
   }
@@ -697,7 +753,10 @@ export class ParlantContextIntegrityService
       const forensicEvidence: ForensicEvidence[] = [];
 
       // Hash comparison analysis
-      const hashEvidence = await this.analyzeHashComparison(contextId, contextData);
+      const hashEvidence = await this.analyzeHashComparison(
+        contextId,
+        contextData,
+      );
       forensicEvidence.push(hashEvidence);
 
       // Signature analysis
@@ -705,11 +764,17 @@ export class ParlantContextIntegrityService
       forensicEvidence.push(signatureEvidence);
 
       // Timestamp analysis
-      const timestampEvidence = await this.analyzeTimestamps(contextId, contextData);
+      const timestampEvidence = await this.analyzeTimestamps(
+        contextId,
+        contextData,
+      );
       forensicEvidence.push(timestampEvidence);
 
       // Metadata difference analysis
-      const metadataEvidence = await this.analyzeMetadataDifferences(contextId, contextData);
+      const metadataEvidence = await this.analyzeMetadataDifferences(
+        contextId,
+        contextData,
+      );
       forensicEvidence.push(metadataEvidence);
 
       // Access log analysis
@@ -742,7 +807,10 @@ export class ParlantContextIntegrityService
       throw new ParlantIntegrationError(
         "Forensic analysis failed",
         "FORENSIC_ANALYSIS_ERROR",
-        { contextId, error: error instanceof Error ? error.message : String(error) },
+        {
+          contextId,
+          error: error instanceof Error ? error.message : String(error),
+        },
       );
     }
   }
@@ -750,7 +818,9 @@ export class ParlantContextIntegrityService
   /**
    * Get integrity record by context ID
    */
-  async getIntegrityRecord(contextId: string): Promise<ContextIntegrityRecord | null> {
+  async getIntegrityRecord(
+    contextId: string,
+  ): Promise<ContextIntegrityRecord | null> {
     try {
       // Find record by context ID
       for (const record of this.integrityRecords.values()) {
@@ -793,14 +863,20 @@ export class ParlantContextIntegrityService
     // Hash verification
     if (request.options.verifyHashChain) {
       verificationMethods.push("hash_verification");
-      const hashResult = await this.verifyContextHash(request.contextId, request.contextData);
+      const hashResult = await this.verifyContextHash(
+        request.contextId,
+        request.contextData,
+      );
       if (!hashResult.valid) {
         errors.push({
           code: "HASH_VERIFICATION_FAILED",
           message: hashResult.error || "Hash verification failed",
           severity: "high",
           category: "hash_mismatch",
-          details: { expected: hashResult.expectedHash, actual: hashResult.actualHash },
+          details: {
+            expected: hashResult.expectedHash,
+            actual: hashResult.actualHash,
+          },
         });
       }
     }
@@ -809,7 +885,10 @@ export class ParlantContextIntegrityService
     if (request.options.verifySignatureChain) {
       verificationMethods.push("signature_verification");
       const signatures = this.signatureRegistry.get(request.contextId) || [];
-      const signatureResult = await this.validateSignatureChain(request.contextId, signatures);
+      const signatureResult = await this.validateSignatureChain(
+        request.contextId,
+        signatures,
+      );
       if (!signatureResult.valid) {
         for (const error of signatureResult.errors) {
           errors.push({
@@ -839,7 +918,9 @@ export class ParlantContextIntegrityService
 
     // Structure verification
     verificationMethods.push("structure_verification");
-    const structureValid = await this.verifyContextStructure(request.contextData);
+    const structureValid = await this.verifyContextStructure(
+      request.contextData,
+    );
     if (!structureValid) {
       errors.push({
         code: "STRUCTURE_VERIFICATION_FAILED",
@@ -851,7 +932,11 @@ export class ParlantContextIntegrityService
     }
 
     // Calculate confidence score
-    const confidenceScore = this.calculateConfidenceScore(errors, warnings, verificationMethods);
+    const confidenceScore = this.calculateConfidenceScore(
+      errors,
+      warnings,
+      verificationMethods,
+    );
 
     return {
       verified: errors.length === 0,
@@ -906,11 +991,13 @@ export class ParlantContextIntegrityService
     const dataString = JSON.stringify(data);
 
     // Create signature using HMAC-SHA256 (simplified for demo)
-    const signature = crypto.createHmac("sha256", this.masterSigningKey)
+    const signature = crypto
+      .createHmac("sha256", this.masterSigningKey)
       .update(dataString)
       .digest("hex");
 
-    const publicKeyFingerprint = crypto.createHash("sha256")
+    const publicKeyFingerprint = crypto
+      .createHash("sha256")
       .update(this.masterSigningKey)
       .digest("hex")
       .substring(0, 16);
@@ -960,7 +1047,10 @@ export class ParlantContextIntegrityService
       this.hashChains.set(chainId, existingChain);
     } else {
       // Verify against existing chain
-      const expectedHash = await this.calculateChainHash(existingChain.currentHash, currentHash);
+      const expectedHash = await this.calculateChainHash(
+        existingChain.currentHash,
+        currentHash,
+      );
       existingChain = {
         ...existingChain,
         previousHash: existingChain.currentHash,
@@ -1002,7 +1092,10 @@ export class ParlantContextIntegrityService
 
     // Hash integrity detection
     detectionMethods.push("hash_integrity");
-    const hashTamper = await this.detectHashTampering(request.contextId, request.contextData);
+    const hashTamper = await this.detectHashTampering(
+      request.contextId,
+      request.contextData,
+    );
     if (hashTamper) {
       tamperIndicators.push({
         type: "hash_mismatch",
@@ -1015,7 +1108,9 @@ export class ParlantContextIntegrityService
 
     // Signature integrity detection
     detectionMethods.push("signature_integrity");
-    const signatureTamper = await this.detectSignatureTampering(request.contextId);
+    const signatureTamper = await this.detectSignatureTampering(
+      request.contextId,
+    );
     if (signatureTamper) {
       tamperIndicators.push({
         type: "signature_invalid",
@@ -1028,7 +1123,9 @@ export class ParlantContextIntegrityService
 
     // Timestamp anomaly detection
     detectionMethods.push("timestamp_anomaly");
-    const timestampAnomalies = await this.detectTimestampAnomalies(request.contextData);
+    const timestampAnomalies = await this.detectTimestampAnomalies(
+      request.contextData,
+    );
     for (const anomaly of timestampAnomalies) {
       tamperIndicators.push({
         type: "timestamp_anomaly",
@@ -1041,7 +1138,9 @@ export class ParlantContextIntegrityService
 
     // Structure modification detection
     detectionMethods.push("structure_analysis");
-    const structureModifications = await this.detectStructureModifications(request.contextData);
+    const structureModifications = await this.detectStructureModifications(
+      request.contextData,
+    );
     for (const modification of structureModifications) {
       tamperIndicators.push({
         type: "structure_modified",
@@ -1053,7 +1152,8 @@ export class ParlantContextIntegrityService
     }
 
     // Calculate detection confidence
-    const detectionConfidence = this.calculateDetectionConfidence(tamperIndicators);
+    const detectionConfidence =
+      this.calculateDetectionConfidence(tamperIndicators);
 
     // Collect forensic evidence if tampering detected
     let forensicEvidence: ForensicEvidence[] = [];
@@ -1061,7 +1161,7 @@ export class ParlantContextIntegrityService
       forensicEvidence = await this.performForensicAnalysis(
         request.contextId,
         request.contextData,
-        tamperIndicators.map(t => t.description),
+        tamperIndicators.map((t) => t.description),
       );
     }
 
@@ -1089,8 +1189,13 @@ export class ParlantContextIntegrityService
         method,
         result: verificationResult.verified ? "pass" : "fail",
         timestamp: new Date(),
-        duration: verificationResult.duration / verificationResult.verificationMethods.length,
-        details: { errors: verificationResult.errors, warnings: verificationResult.warnings },
+        duration:
+          verificationResult.duration /
+          verificationResult.verificationMethods.length,
+        details: {
+          errors: verificationResult.errors,
+          warnings: verificationResult.warnings,
+        },
         validator: "ParlantContextIntegrityService",
       });
     }
@@ -1115,7 +1220,12 @@ export class ParlantContextIntegrityService
   private async verifyContextHash(
     contextId: string,
     contextData: Record<string, unknown>,
-  ): Promise<{ valid: boolean; expectedHash?: string; actualHash?: string; error?: string }> {
+  ): Promise<{
+    valid: boolean;
+    expectedHash?: string;
+    actualHash?: string;
+    error?: string;
+  }> {
     try {
       const actualHash = await this.calculateContextHash(contextData);
 
@@ -1134,25 +1244,40 @@ export class ParlantContextIntegrityService
     }
   }
 
-  private async calculateContextHash(contextData: Record<string, unknown>): Promise<string> {
+  private async calculateContextHash(
+    contextData: Record<string, unknown>,
+  ): Promise<string> {
     const normalizedData = this.normalizeContextData(contextData);
     const dataString = JSON.stringify(normalizedData);
-    return crypto.createHash(this.hashAlgorithm.toLowerCase()).update(dataString).digest("hex");
+    return crypto
+      .createHash(this.hashAlgorithm.toLowerCase())
+      .update(dataString)
+      .digest("hex");
   }
 
-  private async calculateChainHash(previousHash: string, currentHash: string): Promise<string> {
+  private async calculateChainHash(
+    previousHash: string,
+    currentHash: string,
+  ): Promise<string> {
     const combinedData = previousHash + currentHash;
-    return crypto.createHash(this.hashAlgorithm.toLowerCase()).update(combinedData).digest("hex");
+    return crypto
+      .createHash(this.hashAlgorithm.toLowerCase())
+      .update(combinedData)
+      .digest("hex");
   }
 
-  private normalizeContextData(data: Record<string, unknown>): Record<string, unknown> {
+  private normalizeContextData(
+    data: Record<string, unknown>,
+  ): Record<string, unknown> {
     // Normalize data for consistent hashing
     const sortedKeys = Object.keys(data).sort();
     const normalized: Record<string, unknown> = {};
 
     for (const key of sortedKeys) {
       if (typeof data[key] === "object" && data[key] !== null) {
-        normalized[key] = this.normalizeContextData(data[key] as Record<string, unknown>);
+        normalized[key] = this.normalizeContextData(
+          data[key] as Record<string, unknown>,
+        );
       } else {
         normalized[key] = data[key];
       }
@@ -1161,16 +1286,23 @@ export class ParlantContextIntegrityService
     return normalized;
   }
 
-  private async validateCryptographicSignature(signature: CryptographicSignature): Promise<boolean> {
+  private async validateCryptographicSignature(
+    signature: CryptographicSignature,
+  ): Promise<boolean> {
     try {
       // Basic signature validation (simplified for demo)
-      return signature.signature.length > 0 && signature.publicKeyFingerprint.length > 0;
+      return (
+        signature.signature.length > 0 &&
+        signature.publicKeyFingerprint.length > 0
+      );
     } catch (error) {
       return false;
     }
   }
 
-  private async validateCertificateChain(certificateChain: string[]): Promise<boolean> {
+  private async validateCertificateChain(
+    certificateChain: string[],
+  ): Promise<boolean> {
     try {
       // Basic certificate chain validation (simplified for demo)
       return certificateChain.length > 0;
@@ -1179,13 +1311,20 @@ export class ParlantContextIntegrityService
     }
   }
 
-  private async verifyTimestamps(contextData: Record<string, unknown>): Promise<boolean> {
+  private async verifyTimestamps(
+    contextData: Record<string, unknown>,
+  ): Promise<boolean> {
     try {
       // Verify timestamp consistency and validity
       const now = new Date();
 
       // Check for timestamp fields
-      const timestampFields = ["createdAt", "lastModified", "lastAccessed", "timestamp"];
+      const timestampFields = [
+        "createdAt",
+        "lastModified",
+        "lastAccessed",
+        "timestamp",
+      ];
       for (const field of timestampFields) {
         if (contextData[field]) {
           const timestamp = new Date(contextData[field] as string);
@@ -1201,7 +1340,9 @@ export class ParlantContextIntegrityService
     }
   }
 
-  private async verifyContextStructure(contextData: Record<string, unknown>): Promise<boolean> {
+  private async verifyContextStructure(
+    contextData: Record<string, unknown>,
+  ): Promise<boolean> {
     try {
       // Basic structure validation
       const requiredFields = ["contextId"];
@@ -1224,18 +1365,26 @@ export class ParlantContextIntegrityService
     const baseScore = 100;
     const errorPenalty = errors.reduce((penalty, error) => {
       switch (error.severity) {
-        case "critical": return penalty + 30;
-        case "high": return penalty + 20;
-        case "medium": return penalty + 10;
-        case "low": return penalty + 5;
-        default: return penalty;
+        case "critical":
+          return penalty + 30;
+        case "high":
+          return penalty + 20;
+        case "medium":
+          return penalty + 10;
+        case "low":
+          return penalty + 5;
+        default:
+          return penalty;
       }
     }, 0);
 
     const warningPenalty = warnings.length * 2;
     const methodBonus = Math.min(verificationMethods.length * 5, 20);
 
-    return Math.max(0, Math.min(100, baseScore - errorPenalty - warningPenalty + methodBonus));
+    return Math.max(
+      0,
+      Math.min(100, baseScore - errorPenalty - warningPenalty + methodBonus),
+    );
   }
 
   private async detectHashTampering(
@@ -1254,14 +1403,19 @@ export class ParlantContextIntegrityService
     }
   }
 
-  private async detectSignatureTampering(contextId: string): Promise<Record<string, unknown> | null> {
+  private async detectSignatureTampering(
+    contextId: string,
+  ): Promise<Record<string, unknown> | null> {
     try {
       const signatures = this.signatureRegistry.get(contextId) || [];
 
       // Basic signature tampering detection
       for (const signature of signatures) {
         if (signature.metadata.validationStatus !== "valid") {
-          return { signatureId: signature.signatureId, status: signature.metadata.validationStatus };
+          return {
+            signatureId: signature.signatureId,
+            status: signature.metadata.validationStatus,
+          };
         }
       }
 
@@ -1271,13 +1425,19 @@ export class ParlantContextIntegrityService
     }
   }
 
-  private async detectTimestampAnomalies(contextData: Record<string, unknown>): Promise<Record<string, unknown>[]> {
+  private async detectTimestampAnomalies(
+    contextData: Record<string, unknown>,
+  ): Promise<Record<string, unknown>[]> {
     const anomalies: Record<string, unknown>[] = [];
 
     try {
       // Check for timestamp inconsistencies
-      const createdAt = contextData.createdAt ? new Date(contextData.createdAt as string) : null;
-      const lastModified = contextData.lastModified ? new Date(contextData.lastModified as string) : null;
+      const createdAt = contextData.createdAt
+        ? new Date(contextData.createdAt as string)
+        : null;
+      const lastModified = contextData.lastModified
+        ? new Date(contextData.lastModified as string)
+        : null;
 
       if (createdAt && lastModified && lastModified < createdAt) {
         anomalies.push({
@@ -1289,11 +1449,15 @@ export class ParlantContextIntegrityService
 
       return anomalies;
     } catch (error) {
-      return [{ error: error instanceof Error ? error.message : String(error) }];
+      return [
+        { error: error instanceof Error ? error.message : String(error) },
+      ];
     }
   }
 
-  private async detectStructureModifications(contextData: Record<string, unknown>): Promise<Record<string, unknown>[]> {
+  private async detectStructureModifications(
+    contextData: Record<string, unknown>,
+  ): Promise<Record<string, unknown>[]> {
     const modifications: Record<string, unknown>[] = [];
 
     try {
@@ -1310,18 +1474,24 @@ export class ParlantContextIntegrityService
 
       return modifications;
     } catch (error) {
-      return [{ error: error instanceof Error ? error.message : String(error) }];
+      return [
+        { error: error instanceof Error ? error.message : String(error) },
+      ];
     }
   }
 
-  private calculateDetectionConfidence(tamperIndicators: TamperIndicator[]): number {
+  private calculateDetectionConfidence(
+    tamperIndicators: TamperIndicator[],
+  ): number {
     if (tamperIndicators.length === 0) {
       return 0;
     }
 
     const severityWeights = { low: 1, medium: 2, high: 3, critical: 4 };
-    const totalWeight = tamperIndicators.reduce((sum, indicator) =>
-      sum + severityWeights[indicator.severity], 0);
+    const totalWeight = tamperIndicators.reduce(
+      (sum, indicator) => sum + severityWeights[indicator.severity],
+      0,
+    );
 
     return Math.min(100, (totalWeight / tamperIndicators.length) * 25);
   }
@@ -1343,12 +1513,17 @@ export class ParlantContextIntegrityService
         dataSize: Buffer.byteLength(JSON.stringify(contextData), "utf8"),
       },
       collectedAt: new Date(),
-      evidenceHash: crypto.createHash("sha256").update(currentHash).digest("hex"),
+      evidenceHash: crypto
+        .createHash("sha256")
+        .update(currentHash)
+        .digest("hex"),
       chainOfCustody: [],
     };
   }
 
-  private async analyzeSignatures(contextId: string): Promise<ForensicEvidence> {
+  private async analyzeSignatures(
+    contextId: string,
+  ): Promise<ForensicEvidence> {
     const evidenceId = this.generateEvidenceId();
     const signatures = this.signatureRegistry.get(contextId) || [];
 
@@ -1358,7 +1533,7 @@ export class ParlantContextIntegrityService
       data: {
         contextId,
         signaturesCount: signatures.length,
-        signatures: signatures.map(s => ({
+        signatures: signatures.map((s) => ({
           signatureId: s.signatureId,
           algorithm: s.algorithm,
           timestamp: s.timestamp,
@@ -1366,7 +1541,10 @@ export class ParlantContextIntegrityService
         })),
       },
       collectedAt: new Date(),
-      evidenceHash: crypto.createHash("sha256").update(JSON.stringify(signatures)).digest("hex"),
+      evidenceHash: crypto
+        .createHash("sha256")
+        .update(JSON.stringify(signatures))
+        .digest("hex"),
       chainOfCustody: [],
     };
   }
@@ -1380,7 +1558,10 @@ export class ParlantContextIntegrityService
     // Extract all timestamp fields
     const timestamps: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(contextData)) {
-      if (key.toLowerCase().includes("time") || key.toLowerCase().includes("date")) {
+      if (
+        key.toLowerCase().includes("time") ||
+        key.toLowerCase().includes("date")
+      ) {
         timestamps[key] = value;
       }
     }
@@ -1394,7 +1575,10 @@ export class ParlantContextIntegrityService
         analysisTimestamp: new Date(),
       },
       collectedAt: new Date(),
-      evidenceHash: crypto.createHash("sha256").update(JSON.stringify(timestamps)).digest("hex"),
+      evidenceHash: crypto
+        .createHash("sha256")
+        .update(JSON.stringify(timestamps))
+        .digest("hex"),
       chainOfCustody: [],
     };
   }
@@ -1418,12 +1602,17 @@ export class ParlantContextIntegrityService
         },
       },
       collectedAt: new Date(),
-      evidenceHash: crypto.createHash("sha256").update(JSON.stringify(contextData.metadata || {})).digest("hex"),
+      evidenceHash: crypto
+        .createHash("sha256")
+        .update(JSON.stringify(contextData.metadata || {}))
+        .digest("hex"),
       chainOfCustody: [],
     };
   }
 
-  private async analyzeAccessLogs(contextId: string): Promise<ForensicEvidence> {
+  private async analyzeAccessLogs(
+    contextId: string,
+  ): Promise<ForensicEvidence> {
     const evidenceId = this.generateEvidenceId();
 
     // In a real implementation, this would analyze actual access logs
@@ -1438,12 +1627,17 @@ export class ParlantContextIntegrityService
       type: "access_log",
       data: mockAccessLogs,
       collectedAt: new Date(),
-      evidenceHash: crypto.createHash("sha256").update(JSON.stringify(mockAccessLogs)).digest("hex"),
+      evidenceHash: crypto
+        .createHash("sha256")
+        .update(JSON.stringify(mockAccessLogs))
+        .digest("hex"),
       chainOfCustody: [],
     };
   }
 
-  private async establishChainOfCustody(evidence: ForensicEvidence): Promise<CustodyEntry[]> {
+  private async establishChainOfCustody(
+    evidence: ForensicEvidence,
+  ): Promise<CustodyEntry[]> {
     const custodyEntry: CustodyEntry = {
       entryId: this.generateCustodyId(),
       custodian: "ParlantContextIntegrityService",
@@ -1459,7 +1653,9 @@ export class ParlantContextIntegrityService
     return [custodyEntry];
   }
 
-  private determineSecurityLevel(request: ContextVerificationRequest): SecurityLevel {
+  private determineSecurityLevel(
+    request: ContextVerificationRequest,
+  ): SecurityLevel {
     // Determine security level based on request context
     if (request.verificationLevel === "forensic") {
       return SecurityLevel._CRITICAL;
@@ -1472,10 +1668,15 @@ export class ParlantContextIntegrityService
     }
   }
 
-  private getComplianceRequirements(request: ContextVerificationRequest): string[] {
+  private getComplianceRequirements(
+    request: ContextVerificationRequest,
+  ): string[] {
     const requirements = ["data_integrity", "audit_trail"];
 
-    if (request.verificationLevel === "forensic" || request.verificationLevel === "enhanced") {
+    if (
+      request.verificationLevel === "forensic" ||
+      request.verificationLevel === "enhanced"
+    ) {
       requirements.push("forensic_evidence", "chain_of_custody");
     }
 
@@ -1483,7 +1684,11 @@ export class ParlantContextIntegrityService
   }
 
   private getAuditRequirements(request: ContextVerificationRequest): string[] {
-    return ["verification_log", "tamper_detection_log", "signature_validation_log"];
+    return [
+      "verification_log",
+      "tamper_detection_log",
+      "signature_validation_log",
+    ];
   }
 
   private isSupportedSignatureAlgorithm(algorithm: string): boolean {
@@ -1492,7 +1697,10 @@ export class ParlantContextIntegrityService
   }
 
   private generateMasterSigningKey(): string {
-    return process.env.PARLANT_INTEGRITY_SIGNING_KEY || crypto.randomBytes(32).toString("hex");
+    return (
+      process.env.PARLANT_INTEGRITY_SIGNING_KEY ||
+      crypto.randomBytes(32).toString("hex")
+    );
   }
 
   private generateRecordId(): string {
@@ -1519,7 +1727,10 @@ export class ParlantContextIntegrityService
     return `custody_${Date.now()}_${crypto.randomBytes(8).toString("hex")}`;
   }
 
-  private updatePerformanceStats(record: ContextIntegrityRecord, duration: number): void {
+  private updatePerformanceStats(
+    record: ContextIntegrityRecord,
+    duration: number,
+  ): void {
     this.performanceStats.totalVerifications++;
     if (record.verificationResult.verified) {
       this.performanceStats.successfulVerifications++;
@@ -1534,15 +1745,17 @@ export class ParlantContextIntegrityService
     // Update average verification time
     const count = this.performanceStats.totalVerifications;
     this.performanceStats.averageVerificationTime =
-      (this.performanceStats.averageVerificationTime * (count - 1) + duration) / count;
+      (this.performanceStats.averageVerificationTime * (count - 1) + duration) /
+      count;
   }
 
   private calculateMemoryUsage(): number {
     return (
-      this.integrityRecords.size +
-      this.hashChains.size +
-      this.signatureRegistry.size
-    ) * 4096; // Rough estimate
+      (this.integrityRecords.size +
+        this.hashChains.size +
+        this.signatureRegistry.size) *
+      4096
+    ); // Rough estimate
   }
 
   private async initializeIntegrityPolicies(): Promise<void> {

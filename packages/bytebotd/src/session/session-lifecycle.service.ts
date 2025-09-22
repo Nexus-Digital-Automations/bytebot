@@ -1071,32 +1071,32 @@ export class SessionLifecycleService implements OnModuleInit, OnApplicationShutd
     };
   }
 
-  private async loadExistingSessions(): Promise<void> { }
-  private async loadHibernatedSessions(): Promise<void> { }
-  private async performGracefulShutdownCleanup(): Promise<void> { }
-  private async persistHibernatedSessions(): Promise<void> { }
-  private async collectSessionData(session: SessionMetadata): Promise<any> { return {}; }
+  private loadExistingSessions(): void { }
+  private loadHibernatedSessions(): void { }
+  private performGracefulShutdownCleanup(): void { }
+  private persistHibernatedSessions(): void { }
+  private collectSessionData(session: SessionMetadata): any { return {}; }
   private async createRestorationInstructions(session: SessionMetadata, sessionData: any): Promise<RestorationInstructions> {
     return { steps: [], dependencies: [], resourceRequirements: await this.getSessionResourceUsage(session.sessionId), estimatedRestorationTime: 1000, preconditions: [], rollbackPlan: [] };
   }
-  private async compressSessionData(data: any): Promise<any> { return data; }
-  private async encryptSessionData(data: any): Promise<any> { return data; }
-  private async decompressSessionData(data: any): Promise<any> { return data; }
-  private async decryptSessionData(data: any): Promise<any> { return data; }
+  private compressSessionData(data: any): any { return data; }
+  private encryptSessionData(data: any): any { return data; }
+  private decompressSessionData(data: any): any { return data; }
+  private decryptSessionData(data: any): any { return data; }
   private shouldEncryptHibernatedData(session: SessionMetadata): boolean { return false; }
-  private async calculateIntegrityHash(data: any): Promise<string> { return 'hash'; }private calculateCompressionRatio(original: any, compressed: any): number { return 0.8; }private async storeHibernationData(hibernationData: SessionHibernationData): Promise<void> { }
-  private async getHibernationData(hibernationId: string): Promise<SessionHibernationData | null> { return null; }
-  private async removeHibernationData(hibernationId: string): Promise<void> { }
-  private async updateSessionState(sessionId: string, state: SessionState): Promise<void> { }
-  private async releaseSessionResources(sessionId: string): Promise<void> { }
-  private async allocateSessionResources(sessionId: string, resourceSnapshot: SessionResourceUsage): Promise<void> { }
-  private async executeRestorationInstructions(instructions: RestorationInstructions, sessionData: any): Promise<SessionMetadata> {
+  private calculateIntegrityHash(data: any): string { return 'hash'; }private calculateCompressionRatio(original: any, compressed: any): number { return 0.8; }private storeHibernationData(hibernationData: SessionHibernationData): void { }
+  private getHibernationData(hibernationId: string): SessionHibernationData | null { return null; }
+  private removeHibernationData(hibernationId: string): void { }
+  private updateSessionState(sessionId: string, state: SessionState): void { }
+  private releaseSessionResources(sessionId: string): void { }
+  private allocateSessionResources(sessionId: string, resourceSnapshot: SessionResourceUsage): void { }
+  private executeRestorationInstructions(instructions: RestorationInstructions, sessionData: any): SessionMetadata {
     return {} as SessionMetadata;
   }
   private calculateResourceSavings(resources: SessionResourceUsage): number { return 100; }
   private calculateResourceAllocation(resources: SessionResourceUsage): number { return 100; }
-  private async terminateSession(sessionId: string, reason: SessionTransitionReason): Promise<void> { }
-  private async cleanupSession(sessionId: string): Promise<void> { }
+  private terminateSession(sessionId: string, reason: SessionTransitionReason): void { }
+  private cleanupSession(sessionId: string): void { }
   private calculateCleanupEfficiency(result: CleanupOperationResult): number { return 0.85; }
   private createEmptyCleanupResult(): CleanupOperationResult {
     return {

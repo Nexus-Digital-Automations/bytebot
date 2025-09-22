@@ -8,7 +8,7 @@
  * @since 2025-09-22
  */
 
-import { EventEmitter } from 'events';
+import { EventEmitter } from "events";
 
 // Core WebSocket Communication Interfaces
 export interface WebSocketConnection {
@@ -107,7 +107,7 @@ export interface ConversationalInterface {
 export interface ConversationMessage {
   id: string;
   timestamp: Date;
-  type: 'user' | 'system' | 'alert' | 'insight';
+  type: "user" | "system" | "alert" | "insight";
   content: string;
   metadata: ConversationMetadata;
   followUpActions?: FollowUpAction[];
@@ -252,21 +252,73 @@ export interface AccessControlPolicy {
 }
 
 // Type Definitions
-export type WebSocketStatus = 'connecting' | 'connected' | 'reconnecting' | 'disconnected' | 'error';
-export type WebSocketMessageType = 'operation_update' | 'performance_metric' | 'alert' | 'intervention_request' | 'conversation' | 'heartbeat';
-export type MessagePriority = 'critical' | 'high' | 'normal' | 'low';
-export type MonitoringLevel = 'basic' | 'enhanced' | 'comprehensive' | 'real_time';
-export type SessionStatus = 'active' | 'paused' | 'completed' | 'error' | 'terminated';
-export type QueryType = 'status' | 'metrics' | 'logs' | 'analysis' | 'prediction' | 'control';
-export type QueryStatus = 'processing' | 'completed' | 'failed' | 'partial' | 'cached';
-export type AggregationType = 'sum' | 'average' | 'min' | 'max' | 'count' | 'percentile';
-export type OutputFormat = 'text' | 'chart' | 'table' | 'json' | 'conversation';
-export type AlertSeverity = 'critical' | 'high' | 'medium' | 'low' | 'info';
-export type AlertCategory = 'performance' | 'security' | 'business' | 'system' | 'user';
-export type ActionType = 'automatic' | 'manual' | 'collaborative' | 'approval_required';
-export type RiskLevel = 'none' | 'low' | 'medium' | 'high' | 'critical';
-export type InterventionType = 'pause' | 'modify' | 'redirect' | 'scale' | 'fallback' | 'terminate';
-export type BottleneckPriority = 'immediate' | 'urgent' | 'normal' | 'deferred';
+export type WebSocketStatus =
+  | "connecting"
+  | "connected"
+  | "reconnecting"
+  | "disconnected"
+  | "error";
+export type WebSocketMessageType =
+  | "operation_update"
+  | "performance_metric"
+  | "alert"
+  | "intervention_request"
+  | "conversation"
+  | "heartbeat";
+export type MessagePriority = "critical" | "high" | "normal" | "low";
+export type MonitoringLevel =
+  | "basic"
+  | "enhanced"
+  | "comprehensive"
+  | "real_time";
+export type SessionStatus =
+  | "active"
+  | "paused"
+  | "completed"
+  | "error"
+  | "terminated";
+export type QueryType =
+  | "status"
+  | "metrics"
+  | "logs"
+  | "analysis"
+  | "prediction"
+  | "control";
+export type QueryStatus =
+  | "processing"
+  | "completed"
+  | "failed"
+  | "partial"
+  | "cached";
+export type AggregationType =
+  | "sum"
+  | "average"
+  | "min"
+  | "max"
+  | "count"
+  | "percentile";
+export type OutputFormat = "text" | "chart" | "table" | "json" | "conversation";
+export type AlertSeverity = "critical" | "high" | "medium" | "low" | "info";
+export type AlertCategory =
+  | "performance"
+  | "security"
+  | "business"
+  | "system"
+  | "user";
+export type ActionType =
+  | "automatic"
+  | "manual"
+  | "collaborative"
+  | "approval_required";
+export type RiskLevel = "none" | "low" | "medium" | "high" | "critical";
+export type InterventionType =
+  | "pause"
+  | "modify"
+  | "redirect"
+  | "scale"
+  | "fallback"
+  | "terminate";
+export type BottleneckPriority = "immediate" | "urgent" | "normal" | "deferred";
 
 // Supporting Interfaces
 export interface AlertThresholds {
@@ -278,10 +330,10 @@ export interface AlertThresholds {
 }
 
 export interface ConversationalPreferences {
-  technicalDetailLevel: 'basic' | 'intermediate' | 'advanced';
-  explanationStyle: 'concise' | 'detailed' | 'comprehensive';
+  technicalDetailLevel: "basic" | "intermediate" | "advanced";
+  explanationStyle: "concise" | "detailed" | "comprehensive";
   visualAidsEnabled: boolean;
-  notificationFrequency: 'immediate' | 'batched' | 'scheduled';
+  notificationFrequency: "immediate" | "batched" | "scheduled";
   languagePreference: string;
   timeZone: string;
 }
@@ -360,10 +412,21 @@ export interface StreamSubscription {
 }
 
 export interface ConversationalMonitoringEngine {
-  processNaturalLanguageQuery(query: string, context: QueryContext): Promise<QueryResult>;
-  generateConversationalResponse(data: unknown, context: ResponseContext): Promise<ConversationalResponse>;
-  explainPerformanceData(metrics: PerformanceMetrics, userLevel: string): Promise<PerformanceExplanation>;
-  suggestInterventions(situation: MonitoringSituation): Promise<InterventionSuggestion[]>;
+  processNaturalLanguageQuery(
+    query: string,
+    context: QueryContext,
+  ): Promise<QueryResult>;
+  generateConversationalResponse(
+    data: unknown,
+    context: ResponseContext,
+  ): Promise<ConversationalResponse>;
+  explainPerformanceData(
+    metrics: PerformanceMetrics,
+    userLevel: string,
+  ): Promise<PerformanceExplanation>;
+  suggestInterventions(
+    situation: MonitoringSituation,
+  ): Promise<InterventionSuggestion[]>;
   createLiveNarrative(operationId: string): Promise<LiveNarrative>;
 }
 
@@ -376,7 +439,13 @@ export interface TimeRange {
 
 export interface QueryFilter {
   field: string;
-  operator: 'equals' | 'contains' | 'greater_than' | 'less_than' | 'in' | 'range';
+  operator:
+    | "equals"
+    | "contains"
+    | "greater_than"
+    | "less_than"
+    | "in"
+    | "range";
   value: unknown;
 }
 
@@ -391,12 +460,18 @@ export interface ConversationMetadata {
 export interface FollowUpAction {
   actionId: string;
   description: string;
-  type: 'query' | 'intervention' | 'explanation' | 'drill_down';
+  type: "query" | "intervention" | "explanation" | "drill_down";
   parameters?: Record<string, unknown>;
 }
 
 export interface Bottleneck {
-  type: 'cpu' | 'memory' | 'network' | 'database' | 'external_service' | 'algorithm';
+  type:
+    | "cpu"
+    | "memory"
+    | "network"
+    | "database"
+    | "external_service"
+    | "algorithm";
   location: string;
   severity: number;
   impact: PerformanceImpact;
@@ -423,7 +498,7 @@ export interface ResolutionSuggestion {
   suggestionId: string;
   description: string;
   estimatedEffectiveness: number;
-  implementationComplexity: 'low' | 'medium' | 'high';
+  implementationComplexity: "low" | "medium" | "high";
   estimatedImplementationTime: number;
   riskAssessment: RiskAssessment;
 }
@@ -432,7 +507,7 @@ export interface HistoricalTrend {
   metric: string;
   timeRange: TimeRange;
   dataPoints: DataPoint[];
-  trend: 'increasing' | 'decreasing' | 'stable' | 'volatile';
+  trend: "increasing" | "decreasing" | "stable" | "volatile";
   seasonality?: SeasonalityPattern;
 }
 
@@ -446,7 +521,11 @@ export interface AnomalyDetection {
 
 export interface PredictiveInsight {
   insightId: string;
-  type: 'performance_degradation' | 'capacity_issue' | 'security_risk' | 'business_impact';
+  type:
+    | "performance_degradation"
+    | "capacity_issue"
+    | "security_risk"
+    | "business_impact";
   prediction: string;
   confidence: number;
   timeHorizon: number;
@@ -455,7 +534,7 @@ export interface PredictiveInsight {
 
 export interface OptimizationSuggestion {
   suggestionId: string;
-  category: 'performance' | 'cost' | 'reliability' | 'user_experience';
+  category: "performance" | "cost" | "reliability" | "user_experience";
   description: string;
   estimatedBenefit: OptimizationBenefit;
   implementationGuide: ImplementationGuide;
@@ -496,7 +575,7 @@ export interface RollbackProcedure {
 }
 
 export interface ImpactAssessment {
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
   businessImpact: number;
   technicalImpact: number;
   userImpact: number;
@@ -504,7 +583,7 @@ export interface ImpactAssessment {
 }
 
 export interface VisualAid {
-  type: 'chart' | 'diagram' | 'screenshot' | 'video';
+  type: "chart" | "diagram" | "screenshot" | "video";
   title: string;
   description: string;
   url?: string;
@@ -548,21 +627,21 @@ export interface AlertRule {
   conditions: AlertCondition[];
   severity: AlertSeverity;
   category: AlertCategory;
-  logicalOperator: 'AND' | 'OR';
+  logicalOperator: "AND" | "OR";
   enabled: boolean;
 }
 
 export interface AlertCondition {
   conditionId: string;
   metric: string;
-  operator: 'greater_than' | 'less_than' | 'equals' | 'not_equals';
+  operator: "greater_than" | "less_than" | "equals" | "not_equals";
   threshold: number;
   timeWindow: number;
 }
 
 export interface NotificationChannel {
   channelId: string;
-  type: 'email' | 'sms' | 'webhook' | 'in_app';
+  type: "email" | "sms" | "webhook" | "in_app";
   configuration: Record<string, unknown>;
   enabled: boolean;
 }
@@ -673,30 +752,60 @@ export interface PerformanceMetrics {
 
 export interface RealTimeAPIMonitorService {
   // Core monitoring operations
-  initiateMonitoring(operationId: string, config: MonitoringConfig): Promise<RealTimeMonitoringSession>;
+  initiateMonitoring(
+    operationId: string,
+    config: MonitoringConfig,
+  ): Promise<RealTimeMonitoringSession>;
   terminateMonitoring(sessionId: string): Promise<void>;
 
   // WebSocket management
-  establishWebSocketConnection(userId: string, authToken: string): Promise<WebSocketConnection>;
-  broadcastUpdate(message: WebSocketMessage, targetConnections?: string[]): Promise<void>;
+  establishWebSocketConnection(
+    userId: string,
+    authToken: string,
+  ): Promise<WebSocketConnection>;
+  broadcastUpdate(
+    message: WebSocketMessage,
+    targetConnections?: string[],
+  ): Promise<void>;
 
   // Conversational interface
-  processNaturalLanguageQuery(query: string, sessionId: string): Promise<ConversationalResponse>;
-  explainCurrentSituation(operationId: string, userLevel: string): Promise<ConversationalExplanation>;
+  processNaturalLanguageQuery(
+    query: string,
+    sessionId: string,
+  ): Promise<ConversationalResponse>;
+  explainCurrentSituation(
+    operationId: string,
+    userLevel: string,
+  ): Promise<ConversationalExplanation>;
 
   // Performance analytics
   collectRealTimeMetrics(operationId: string): Promise<RealTimeMetrics>;
-  analyzePerformanceBottlenecks(operationId: string): Promise<BottleneckAnalysis>;
+  analyzePerformanceBottlenecks(
+    operationId: string,
+  ): Promise<BottleneckAnalysis>;
 
   // Intelligent alerting
   evaluateAlertConditions(operationId: string): Promise<IntelligentAlert[]>;
-  generateConversationalAlerts(alert: IntelligentAlert, userPreferences: ConversationalPreferences): Promise<ConversationalAlert>;
+  generateConversationalAlerts(
+    alert: IntelligentAlert,
+    userPreferences: ConversationalPreferences,
+  ): Promise<ConversationalAlert>;
 
   // User intervention
-  enableUserIntervention(operationId: string, capabilities: InterventionCapability[]): Promise<UserInterventionFramework>;
-  processInterventionCommand(command: InterventionCommand, sessionId: string): Promise<InterventionResult>;
+  enableUserIntervention(
+    operationId: string,
+    capabilities: InterventionCapability[],
+  ): Promise<UserInterventionFramework>;
+  processInterventionCommand(
+    command: InterventionCommand,
+    sessionId: string,
+  ): Promise<InterventionResult>;
 
   // Security and access control
-  validateAccess(userId: string, operationId: string, action: string): Promise<AccessValidationResult>;
+  validateAccess(
+    userId: string,
+    operationId: string,
+    action: string,
+  ): Promise<AccessValidationResult>;
   auditMonitoringActivity(activity: MonitoringActivity): Promise<void>;
 }

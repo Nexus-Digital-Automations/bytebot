@@ -168,7 +168,12 @@ export interface EscalationRule {
  */
 export interface EscalationAction {
   /** Action type */
-  type: "notification" | "auto_scale" | "failover" | "maintenance_mode" | "custom";
+  type:
+    | "notification"
+    | "auto_scale"
+    | "failover"
+    | "maintenance_mode"
+    | "custom";
   /** Action parameters */
   parameters: Record<string, unknown>;
   /** Target recipients/systems */
@@ -437,7 +442,9 @@ export class SLAMonitor extends EventEmitter {
   registerCustomerSLA(customerSLA: CustomerSLA): void {
     this.customerSLAs.set(customerSLA.customerId, customerSLA);
     this.emit("sla.customer.registered", customerSLA);
-    this.logger.log(`Customer SLA registered: ${customerSLA.customerName} (${customerSLA.customerId})`);
+    this.logger.log(
+      `Customer SLA registered: ${customerSLA.customerName} (${customerSLA.customerId})`,
+    );
   }
 
   /**
@@ -457,7 +464,10 @@ export class SLAMonitor extends EventEmitter {
       const tier = this.tiers.get(customerSLA.tierId);
       if (!tier) continue;
 
-      const compliance = await this.evaluateCustomerCompliance(customerSLA, tier);
+      const compliance = await this.evaluateCustomerCompliance(
+        customerSLA,
+        tier,
+      );
       results.push(compliance);
 
       // Check for breaches
@@ -472,7 +482,7 @@ export class SLAMonitor extends EventEmitter {
    */
   async predictCompliance(
     customerId: string,
-    targetTime: Date
+    targetTime: Date,
   ): Promise<SLAPrediction | null> {
     const customerSLA = this.customerSLAs.get(customerId);
     if (!customerSLA) return null;
@@ -480,7 +490,11 @@ export class SLAMonitor extends EventEmitter {
     const tier = this.tiers.get(customerSLA.tierId);
     if (!tier) return null;
 
-    const prediction = await this.generateSLAPrediction(customerSLA, tier, targetTime);
+    const prediction = await this.generateSLAPrediction(
+      customerSLA,
+      tier,
+      targetTime,
+    );
     this.predictions.push(prediction);
 
     this.emit("sla.prediction.generated", prediction);
@@ -492,7 +506,7 @@ export class SLAMonitor extends EventEmitter {
    */
   getCurrentCompliance(customerId?: string): SLACompliance[] {
     return this.complianceHistory
-      .filter(c => !customerId || c.customerId === customerId)
+      .filter((c) => !customerId || c.customerId === customerId)
       .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
       .slice(0, 10);
   }
@@ -501,10 +515,14 @@ export class SLAMonitor extends EventEmitter {
    * Get breach history
    */
   getBreachHistory(customerId?: string, days: number = 30): SLABreach[] {
-    const cutoffTime = new Date(Date.now() - (days * 24 * 60 * 60 * 1000));
+    const cutoffTime = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 
     return this.breachHistory
-      .filter(b => b.timestamp >= cutoffTime && (!customerId || b.customerId === customerId))
+      .filter(
+        (b) =>
+          b.timestamp >= cutoffTime &&
+          (!customerId || b.customerId === customerId),
+      )
       .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
   }
 
@@ -512,7 +530,9 @@ export class SLAMonitor extends EventEmitter {
    * Generate SLA report
    */
   async generateReport(config: SLAReportConfig): Promise<string | Buffer> {
-    this.logger.log(`Generating SLA report: ${config.type} for period ${config.period.start} to ${config.period.end}`);
+    this.logger.log(
+      `Generating SLA report: ${config.type} for period ${config.period.start} to ${config.period.end}`,
+    );
 
     const reportData = await this.collectReportData(config);
 
@@ -534,12 +554,14 @@ export class SLAMonitor extends EventEmitter {
    * Escalate SLA breach
    */
   async escalateBreach(breachId: string): Promise<void> {
-    const breach = this.breachHistory.find(b => b.id === breachId);
+    const breach = this.breachHistory.find((b) => b.id === breachId);
     if (!breach) {
       throw new Error(`Breach not found: ${breachId}`);
     }
 
-    const customerSLA = breach.customerId ? this.customerSLAs.get(breach.customerId) : null;
+    const customerSLA = breach.customerId
+      ? this.customerSLAs.get(breach.customerId)
+      : null;
     const tier = this.tiers.get(breach.tierId);
 
     if (!tier) {
@@ -547,9 +569,10 @@ export class SLAMonitor extends EventEmitter {
     }
 
     // Find applicable escalation rules
-    const applicableRules = tier.escalationRules.filter(rule =>
-      rule.trigger.severities.includes(breach.breach.severity) &&
-      breach.breach.duration >= rule.trigger.duration
+    const applicableRules = tier.escalationRules.filter(
+      (rule) =>
+        rule.trigger.severities.includes(breach.breach.severity) &&
+        breach.breach.duration >= rule.trigger.duration,
     );
 
     for (const rule of applicableRules) {
@@ -572,18 +595,23 @@ export class SLAMonitor extends EventEmitter {
       overallCompliance: number;
       atRiskCustomers: number;
     };
-    byTier: Record<string, {
-      customers: number;
-      compliance: number;
-      breaches: number;
-    }>;
+    byTier: Record<
+      string,
+      {
+        customers: number;
+        compliance: number;
+        breaches: number;
+      }
+    >;
     recentBreaches: SLABreach[];
     complianceTrends: {
       period: string;
       compliance: number;
     }[];
   } {
-    const activeBreaches = this.breachHistory.filter(b => b.resolution.status !== "resolved");
+    const activeBreaches = this.breachHistory.filter(
+      (b) => b.resolution.status !== "resolved",
+    );
     const recentCompliance = this.complianceHistory.slice(-100);
 
     const overview = {
@@ -798,25 +826,31 @@ export class SLAMonitor extends EventEmitter {
   }
 
   private startReportingScheduler(): void {
-    this.reportingInterval = setInterval(() => {
-      this.generateAutomatedReports();
-    }, 24 * 60 * 60 * 1000); // Daily
+    this.reportingInterval = setInterval(
+      () => {
+        this.generateAutomatedReports();
+      },
+      24 * 60 * 60 * 1000,
+    ); // Daily
   }
 
   private startCleanupScheduler(): void {
-    this.cleanupInterval = setInterval(() => {
-      this.cleanupOldData();
-    }, 60 * 60 * 1000); // Hourly
+    this.cleanupInterval = setInterval(
+      () => {
+        this.cleanupOldData();
+      },
+      60 * 60 * 1000,
+    ); // Hourly
   }
 
   private async evaluateCustomerCompliance(
     customerSLA: CustomerSLA,
-    tier: SLATier
+    tier: SLATier,
   ): Promise<SLACompliance> {
     const now = new Date();
     const periodStart = new Date(now.getTime() - 60 * 60 * 1000); // Last hour
 
-    const objectives = tier.objectives.map(objective => {
+    const objectives = tier.objectives.map((objective) => {
       // Simulate metric evaluation
       const actual = this.simulateMetricValue(objective.metric);
       const target = objective.target;
@@ -827,12 +861,20 @@ export class SLAMonitor extends EventEmitter {
         target,
         actual,
         compliance,
-        status: compliance >= target ? "met" : compliance >= target * 0.9 ? "at_risk" : "breached" as const,
+        status:
+          compliance >= target
+            ? "met"
+            : compliance >= target * 0.9
+              ? "at_risk"
+              : ("breached" as const),
         trend: "stable" as const,
       };
     });
 
-    const overallCompliance = this.calculateWeightedCompliance(objectives, tier.objectives);
+    const overallCompliance = this.calculateWeightedCompliance(
+      objectives,
+      tier.objectives,
+    );
 
     const complianceResult: SLACompliance = {
       id: `compliance-${customerSLA.customerId}-${Date.now()}`,
@@ -847,13 +889,23 @@ export class SLAMonitor extends EventEmitter {
       objectives,
       overall: {
         compliance: overallCompliance,
-        status: overallCompliance >= 0.95 ? "met" : overallCompliance >= 0.9 ? "at_risk" : "breached",
+        status:
+          overallCompliance >= 0.95
+            ? "met"
+            : overallCompliance >= 0.9
+              ? "at_risk"
+              : "breached",
         score: overallCompliance * 100,
       },
       metrics: {
-        availability: objectives.find(o => o.objectiveId === "availability")?.actual || 0,
-        performance: objectives.find(o => o.objectiveId === "response_time")?.actual || 0,
-        reliability: 1 - (objectives.find(o => o.objectiveId === "error_rate")?.actual || 0),
+        availability:
+          objectives.find((o) => o.objectiveId === "availability")?.actual || 0,
+        performance:
+          objectives.find((o) => o.objectiveId === "response_time")?.actual ||
+          0,
+        reliability:
+          1 -
+          (objectives.find((o) => o.objectiveId === "error_rate")?.actual || 0),
         quality: overallCompliance,
       },
     };
@@ -867,17 +919,19 @@ export class SLAMonitor extends EventEmitter {
   private async checkForBreaches(
     compliance: SLACompliance,
     customerSLA: CustomerSLA,
-    tier: SLATier
+    tier: SLATier,
   ): Promise<void> {
     for (const objectiveCompliance of compliance.objectives) {
       if (objectiveCompliance.status === "breached") {
-        const objective = tier.objectives.find(o => o.id === objectiveCompliance.objectiveId);
+        const objective = tier.objectives.find(
+          (o) => o.id === objectiveCompliance.objectiveId,
+        );
         if (objective) {
           const breach = await this.createBreachEvent(
             compliance,
             customerSLA,
             objective,
-            objectiveCompliance
+            objectiveCompliance,
           );
           this.breachHistory.push(breach);
           this.emit("sla.breach.detected", breach);
@@ -895,7 +949,7 @@ export class SLAMonitor extends EventEmitter {
     compliance: SLACompliance,
     customerSLA: CustomerSLA,
     objective: SLAObjective,
-    objectiveCompliance: SLACompliance["objectives"][0]
+    objectiveCompliance: SLACompliance["objectives"][0],
   ): Promise<SLABreach> {
     const breach: SLABreach = {
       id: `breach-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -906,15 +960,23 @@ export class SLAMonitor extends EventEmitter {
       breach: {
         expected: objective.threshold,
         actual: objectiveCompliance.actual,
-        deviation: Math.abs((objectiveCompliance.actual - objective.threshold) / objective.threshold) * 100,
+        deviation:
+          Math.abs(
+            (objectiveCompliance.actual - objective.threshold) /
+              objective.threshold,
+          ) * 100,
         duration: 0, // Would be calculated based on continuous monitoring
         severity: this.calculateBreachSeverity(objective, objectiveCompliance),
       },
       impact: {
         affectedCustomers: 1,
-        businessImpact: this.calculateBusinessImpact(objective, objectiveCompliance),
+        businessImpact: this.calculateBusinessImpact(
+          objective,
+          objectiveCompliance,
+        ),
         revenueImpact: customerSLA.metadata.contractValue * 0.01, // 1% of contract value
-        reputationImpact: objective.criticality === "critical" ? "high" : "medium",
+        reputationImpact:
+          objective.criticality === "critical" ? "high" : "medium",
       },
       resolution: {
         status: "open",
@@ -933,7 +995,7 @@ export class SLAMonitor extends EventEmitter {
   private async generateSLAPrediction(
     customerSLA: CustomerSLA,
     tier: SLATier,
-    targetTime: Date
+    targetTime: Date,
   ): Promise<SLAPrediction> {
     const prediction: SLAPrediction = {
       id: `prediction-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -943,22 +1005,31 @@ export class SLAMonitor extends EventEmitter {
       tierId: tier.id,
       predictedCompliance: {
         overall: 0.95, // Simplified prediction
-        objectives: tier.objectives.reduce((acc, obj) => {
-          acc[obj.id] = 0.95;
-          return acc;
-        }, {} as Record<string, number>),
+        objectives: tier.objectives.reduce(
+          (acc, obj) => {
+            acc[obj.id] = 0.95;
+            return acc;
+          },
+          {} as Record<string, number>,
+        ),
       },
       riskAssessment: {
         overall: 0.15,
-        byObjective: tier.objectives.reduce((acc, obj) => {
-          acc[obj.id] = 0.1;
-          return acc;
-        }, {} as Record<string, number>),
+        byObjective: tier.objectives.reduce(
+          (acc, obj) => {
+            acc[obj.id] = 0.1;
+            return acc;
+          },
+          {} as Record<string, number>,
+        ),
         factors: ["Increasing load", "Historical patterns"],
         confidence: 0.8,
       },
       recommendations: {
-        preventive: ["Scale infrastructure proactively", "Implement caching optimizations"],
+        preventive: [
+          "Scale infrastructure proactively",
+          "Implement caching optimizations",
+        ],
         corrective: ["Monitor closely", "Prepare scaling plans"],
         priority: "medium",
       },
@@ -967,8 +1038,13 @@ export class SLAMonitor extends EventEmitter {
     return prediction;
   }
 
-  private async executeEscalationRule(breach: SLABreach, rule: EscalationRule): Promise<void> {
-    this.logger.log(`Executing escalation rule: ${rule.name} for breach: ${breach.id}`);
+  private async executeEscalationRule(
+    breach: SLABreach,
+    rule: EscalationRule,
+  ): Promise<void> {
+    this.logger.log(
+      `Executing escalation rule: ${rule.name} for breach: ${breach.id}`,
+    );
 
     for (const action of rule.actions) {
       try {
@@ -982,12 +1058,18 @@ export class SLAMonitor extends EventEmitter {
           recipient: action.targets.join(", "),
         });
       } catch (error) {
-        this.logger.error(`Failed to execute escalation action: ${action.type}`, error);
+        this.logger.error(
+          `Failed to execute escalation action: ${action.type}`,
+          error,
+        );
       }
     }
   }
 
-  private async executeEscalationAction(breach: SLABreach, action: EscalationAction): Promise<void> {
+  private async executeEscalationAction(
+    breach: SLABreach,
+    action: EscalationAction,
+  ): Promise<void> {
     switch (action.type) {
       case "notification":
         await this.sendNotification(breach, action);
@@ -1003,17 +1085,28 @@ export class SLAMonitor extends EventEmitter {
     }
   }
 
-  private async sendNotification(breach: SLABreach, action: EscalationAction): Promise<void> {
-    this.logger.log(`Sending notification for breach: ${breach.id} to targets: ${action.targets.join(", ")}`);
+  private async sendNotification(
+    breach: SLABreach,
+    action: EscalationAction,
+  ): Promise<void> {
+    this.logger.log(
+      `Sending notification for breach: ${breach.id} to targets: ${action.targets.join(", ")}`,
+    );
     // Implementation would integrate with actual notification systems
   }
 
-  private async triggerAutoScale(breach: SLABreach, action: EscalationAction): Promise<void> {
+  private async triggerAutoScale(
+    breach: SLABreach,
+    action: EscalationAction,
+  ): Promise<void> {
     this.logger.log(`Triggering auto-scale for breach: ${breach.id}`);
     // Implementation would integrate with infrastructure scaling systems
   }
 
-  private async triggerFailover(breach: SLABreach, action: EscalationAction): Promise<void> {
+  private async triggerFailover(
+    breach: SLABreach,
+    action: EscalationAction,
+  ): Promise<void> {
     this.logger.log(`Triggering failover for breach: ${breach.id}`);
     // Implementation would integrate with failover systems
   }
@@ -1032,7 +1125,10 @@ export class SLAMonitor extends EventEmitter {
     }
   }
 
-  private calculateObjectiveCompliance(actual: number, objective: SLAObjective): number {
+  private calculateObjectiveCompliance(
+    actual: number,
+    objective: SLAObjective,
+  ): number {
     switch (objective.operator) {
       case "ge":
         return Math.min(1, actual / objective.threshold);
@@ -1047,13 +1143,13 @@ export class SLAMonitor extends EventEmitter {
 
   private calculateWeightedCompliance(
     objectives: SLACompliance["objectives"],
-    tierObjectives: SLAObjective[]
+    tierObjectives: SLAObjective[],
   ): number {
     let weightedSum = 0;
     let totalWeight = 0;
 
-    objectives.forEach(obj => {
-      const tierObj = tierObjectives.find(t => t.id === obj.objectiveId);
+    objectives.forEach((obj) => {
+      const tierObj = tierObjectives.find((t) => t.id === obj.objectiveId);
       if (tierObj) {
         weightedSum += obj.compliance * tierObj.weight;
         totalWeight += tierObj.weight;
@@ -1065,11 +1161,14 @@ export class SLAMonitor extends EventEmitter {
 
   private calculateBreachSeverity(
     objective: SLAObjective,
-    objectiveCompliance: SLACompliance["objectives"][0]
+    objectiveCompliance: SLACompliance["objectives"][0],
   ): SLABreach["breach"]["severity"] {
-    const deviation = Math.abs(objectiveCompliance.actual - objective.threshold) / objective.threshold;
+    const deviation =
+      Math.abs(objectiveCompliance.actual - objective.threshold) /
+      objective.threshold;
 
-    if (objective.criticality === "critical" || deviation > 0.2) return "critical";
+    if (objective.criticality === "critical" || deviation > 0.2)
+      return "critical";
     if (objective.criticality === "high" || deviation > 0.1) return "high";
     if (deviation > 0.05) return "medium";
     return "low";
@@ -1077,33 +1176,55 @@ export class SLAMonitor extends EventEmitter {
 
   private calculateBusinessImpact(
     objective: SLAObjective,
-    objectiveCompliance: SLACompliance["objectives"][0]
+    objectiveCompliance: SLACompliance["objectives"][0],
   ): number {
     // Simplified business impact calculation
-    const deviation = Math.abs(objectiveCompliance.actual - objective.threshold) / objective.threshold;
+    const deviation =
+      Math.abs(objectiveCompliance.actual - objective.threshold) /
+      objective.threshold;
     const weight = objective.weight;
-    const criticalityMultiplier = { low: 1, medium: 2, high: 3, critical: 5 }[objective.criticality];
+    const criticalityMultiplier = { low: 1, medium: 2, high: 3, critical: 5 }[
+      objective.criticality
+    ];
 
     return deviation * weight * criticalityMultiplier * 100;
   }
 
   private calculateOverallCompliance(compliance: SLACompliance[]): number {
     if (compliance.length === 0) return 0;
-    return compliance.reduce((sum, c) => sum + c.overall.compliance, 0) / compliance.length;
+    return (
+      compliance.reduce((sum, c) => sum + c.overall.compliance, 0) /
+      compliance.length
+    );
   }
 
   private calculateAtRiskCustomers(): number {
-    const recentCompliance = this.complianceHistory.slice(-this.customerSLAs.size);
-    return recentCompliance.filter(c => c.overall.status === "at_risk").length;
+    const recentCompliance = this.complianceHistory.slice(
+      -this.customerSLAs.size,
+    );
+    return recentCompliance.filter((c) => c.overall.status === "at_risk")
+      .length;
   }
 
-  private calculateComplianceByTier(): Record<string, { customers: number; compliance: number; breaches: number }> {
-    const result: Record<string, { customers: number; compliance: number; breaches: number }> = {};
+  private calculateComplianceByTier(): Record<
+    string,
+    { customers: number; compliance: number; breaches: number }
+  > {
+    const result: Record<
+      string,
+      { customers: number; compliance: number; breaches: number }
+    > = {};
 
     this.tiers.forEach((tier, tierId) => {
-      const tierCustomers = Array.from(this.customerSLAs.values()).filter(c => c.tierId === tierId);
-      const tierCompliance = this.complianceHistory.filter(c => c.tierId === tierId);
-      const tierBreaches = this.breachHistory.filter(b => b.tierId === tierId && b.resolution.status !== "resolved");
+      const tierCustomers = Array.from(this.customerSLAs.values()).filter(
+        (c) => c.tierId === tierId,
+      );
+      const tierCompliance = this.complianceHistory.filter(
+        (c) => c.tierId === tierId,
+      );
+      const tierBreaches = this.breachHistory.filter(
+        (b) => b.tierId === tierId && b.resolution.status !== "resolved",
+      );
 
       result[tierId] = {
         customers: tierCustomers.length,
@@ -1115,16 +1236,20 @@ export class SLAMonitor extends EventEmitter {
     return result;
   }
 
-  private calculateComplianceTrends(): { period: string; compliance: number }[] {
+  private calculateComplianceTrends(): {
+    period: string;
+    compliance: number;
+  }[] {
     // Simplified trend calculation for last 7 days
     const trends = [];
     for (let i = 6; i >= 0; i--) {
       const date = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
-      const dayCompliance = this.complianceHistory
-        .filter(c => c.timestamp.toDateString() === date.toDateString());
+      const dayCompliance = this.complianceHistory.filter(
+        (c) => c.timestamp.toDateString() === date.toDateString(),
+      );
 
       trends.push({
-        period: date.toISOString().split('T')[0],
+        period: date.toISOString().split("T")[0],
         compliance: this.calculateOverallCompliance(dayCompliance),
       });
     }
@@ -1179,11 +1304,13 @@ export class SLAMonitor extends EventEmitter {
   private async collectReportData(config: SLAReportConfig): Promise<any> {
     // Collect data for report generation
     const compliance = this.complianceHistory.filter(
-      c => c.timestamp >= config.period.start && c.timestamp <= config.period.end
+      (c) =>
+        c.timestamp >= config.period.start && c.timestamp <= config.period.end,
     );
 
     const breaches = this.breachHistory.filter(
-      b => b.timestamp >= config.period.start && b.timestamp <= config.period.end
+      (b) =>
+        b.timestamp >= config.period.start && b.timestamp <= config.period.end,
     );
 
     return {
@@ -1194,7 +1321,9 @@ export class SLAMonitor extends EventEmitter {
         totalCustomers: this.customerSLAs.size,
         overallCompliance: this.calculateOverallCompliance(compliance),
         totalBreaches: breaches.length,
-        resolvedBreaches: breaches.filter(b => b.resolution.status === "resolved").length,
+        resolvedBreaches: breaches.filter(
+          (b) => b.resolution.status === "resolved",
+        ).length,
       },
     };
   }
@@ -1205,7 +1334,7 @@ export class SLAMonitor extends EventEmitter {
 
     data.compliance.forEach((c: SLACompliance) => {
       csvLines.push(
-        `${c.period.start.toISOString()},${c.customerId || "N/A"},${c.tierId},${(c.overall.compliance * 100).toFixed(2)}%,${data.breaches.filter((b: SLABreach) => b.customerId === c.customerId).length}`
+        `${c.period.start.toISOString()},${c.customerId || "N/A"},${c.tierId},${(c.overall.compliance * 100).toFixed(2)}%,${data.breaches.filter((b: SLABreach) => b.customerId === c.customerId).length}`,
       );
     });
 
@@ -1237,17 +1366,17 @@ export class SLAMonitor extends EventEmitter {
 
     // Clean up old compliance data
     this.complianceHistory = this.complianceHistory.filter(
-      c => c.timestamp >= cutoffTime
+      (c) => c.timestamp >= cutoffTime,
     );
 
     // Clean up old breach data (keep resolved breaches for audit)
     this.breachHistory = this.breachHistory.filter(
-      b => b.timestamp >= cutoffTime || b.resolution.status !== "resolved"
+      (b) => b.timestamp >= cutoffTime || b.resolution.status !== "resolved",
     );
 
     // Clean up old predictions
     this.predictions = this.predictions.filter(
-      p => p.timestamp >= cutoffTime
+      (p) => p.timestamp >= cutoffTime,
     );
   }
 }
@@ -1261,7 +1390,7 @@ export const slaMonitor = new SLAMonitor();
  * Start SLA monitoring with configuration
  */
 export async function startSLAMonitoring(
-  config?: Partial<SLAMonitorConfig>
+  config?: Partial<SLAMonitorConfig>,
 ): Promise<SLAMonitor> {
   const monitor = config ? new SLAMonitor(config) : slaMonitor;
   await monitor.initialize();

@@ -11,8 +11,8 @@
  * @created 2025-09-20
  */
 
-import { Logger } from '@nestjs/common';
-import { Injectable } from '@nestjs/common';
+import { Logger } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import {
   QualityGate,
   QualityGateContext,
@@ -27,9 +27,12 @@ import {
   ResourceUtilizationMetrics,
   ThresholdEvaluation,
   ValidationStep,
-  QualityGateLogEntry
-} from '../core/quality-gate-types';
-import { WrapperError, ErrorCategory } from '../../function-wrapper/interfaces/wrapper-types';
+  QualityGateLogEntry,
+} from "../core/quality-gate-types";
+import {
+  WrapperError,
+  ErrorCategory,
+} from "../../function-wrapper/interfaces/wrapper-types";
 
 /**
  * Performance Gate Configuration Interface
@@ -160,7 +163,7 @@ export class PerformanceQualityGate implements QualityGate {
     public readonly priority: QualityGatePriority,
     public readonly enabled: boolean,
     public readonly config: PerformanceGateConfig,
-    public readonly thresholds: QualityGateThresholds
+    public readonly thresholds: QualityGateThresholds,
   ) {}
 
   /**
@@ -189,12 +192,12 @@ export class PerformanceQualityGate implements QualityGate {
     try {
       // Step 1: Initialize performance monitoring
       const initStep: ValidationStep = {
-        stepId: 'init-monitoring',
-        stepName: 'Initialize Performance Monitoring',
-        status: 'passed',
+        stepId: "init-monitoring",
+        stepName: "Initialize Performance Monitoring",
+        status: "passed",
         executionTime: 0,
-        details: 'Performance monitoring initialized successfully',
-        output: {}
+        details: "Performance monitoring initialized successfully",
+        output: {},
       };
       validationSteps.push(initStep);
 
@@ -202,12 +205,12 @@ export class PerformanceQualityGate implements QualityGate {
       const measurement = await this.collectPerformanceMetrics(context);
 
       const measurementStep: ValidationStep = {
-        stepId: 'collect-metrics',
-        stepName: 'Collect Performance Metrics',
-        status: 'passed',
+        stepId: "collect-metrics",
+        stepName: "Collect Performance Metrics",
+        status: "passed",
         executionTime: Date.now() - startTime,
         details: `Collected metrics for ${measurement.sampleCount} samples over ${measurement.duration}ms`,
-        output: { measurement }
+        output: { measurement },
       };
       validationSteps.push(measurementStep);
 
@@ -215,50 +218,68 @@ export class PerformanceQualityGate implements QualityGate {
       const thresholdEvaluations = await this.evaluateThresholds(measurement);
 
       const thresholdStep: ValidationStep = {
-        stepId: 'evaluate-thresholds',
-        stepName: 'Evaluate Performance Thresholds',
-        status: thresholdEvaluations.every(e => e.passed) ? 'passed' : 'failed',
+        stepId: "evaluate-thresholds",
+        stepName: "Evaluate Performance Thresholds",
+        status: thresholdEvaluations.every((e) => e.passed)
+          ? "passed"
+          : "failed",
         executionTime: Date.now() - startTime,
         details: `Evaluated ${thresholdEvaluations.length} performance thresholds`,
-        output: { thresholdEvaluations }
+        output: { thresholdEvaluations },
       };
       validationSteps.push(thresholdStep);
 
       // Step 4: Compare with baseline (if available)
       let baselineComparison: BaselineComparison | undefined;
       if (this.config.baseline) {
-        baselineComparison = this.compareWithBaseline(measurement, this.config.baseline);
+        baselineComparison = this.compareWithBaseline(
+          measurement,
+          this.config.baseline,
+        );
 
         const baselineStep: ValidationStep = {
-          stepId: 'baseline-comparison',
-          stepName: 'Compare with Baseline',
-          status: baselineComparison.withinAcceptableRange ? 'passed' : 'failed',
+          stepId: "baseline-comparison",
+          stepName: "Compare with Baseline",
+          status: baselineComparison.withinAcceptableRange
+            ? "passed"
+            : "failed",
           executionTime: Date.now() - startTime,
           details: `Baseline comparison: ${baselineComparison.summary}`,
-          output: { baselineComparison }
+          output: { baselineComparison },
         };
         validationSteps.push(baselineStep);
       }
 
       // Step 5: Generate performance analysis
-      const analysis = this.analyzePerformance(measurement, thresholdEvaluations, baselineComparison);
+      const analysis = this.analyzePerformance(
+        measurement,
+        thresholdEvaluations,
+        baselineComparison,
+      );
 
       const analysisStep: ValidationStep = {
-        stepId: 'performance-analysis',
-        stepName: 'Performance Analysis',
-        status: 'passed',
+        stepId: "performance-analysis",
+        stepName: "Performance Analysis",
+        status: "passed",
         executionTime: Date.now() - startTime,
-        details: 'Performance analysis completed',
-        output: { analysis }
+        details: "Performance analysis completed",
+        output: { analysis },
       };
       validationSteps.push(analysisStep);
 
       // Determine overall gate status
-      const status = this.determineGateStatus(thresholdEvaluations, baselineComparison);
+      const status = this.determineGateStatus(
+        thresholdEvaluations,
+        baselineComparison,
+      );
       const score = this.calculateScore(measurement, thresholdEvaluations);
 
       // Generate recommendations
-      const recommendations = this.generateRecommendations(measurement, thresholdEvaluations, analysis);
+      const recommendations = this.generateRecommendations(
+        measurement,
+        thresholdEvaluations,
+        analysis,
+      );
 
       // Add warnings for concerning metrics
       this.addPerformanceWarnings(measurement, warnings);
@@ -266,7 +287,9 @@ export class PerformanceQualityGate implements QualityGate {
       // Add informational messages
       info.push(`Response time: ${measurement.responseTime}ms`);
       info.push(`Throughput: ${measurement.throughput} ops/sec`);
-      info.push(`Memory usage: ${(measurement.memoryUsage / 1024 / 1024).toFixed(2)} MB`);
+      info.push(
+        `Memory usage: ${(measurement.memoryUsage / 1024 / 1024).toFixed(2)} MB`,
+      );
       info.push(`CPU usage: ${measurement.cpuUsage.toFixed(2)}%`);
       info.push(`Error rate: ${measurement.errorRate.toFixed(2)}%`);
 
@@ -285,35 +308,36 @@ export class PerformanceQualityGate implements QualityGate {
           custom: {
             samplesCollected: measurement.sampleCount,
             measurementDuration: measurement.duration,
-            profilingEnabled: this.config.enableProfiling ? 1 : 0
-          }
+            profilingEnabled: this.config.enableProfiling ? 1 : 0,
+          },
         },
         details: {
           thresholdEvaluations,
           validationSteps,
           warnings,
           info,
-          logs
+          logs,
         },
         metadata: {
           executionId,
-          gateVersion: '1.0.0',
+          gateVersion: "1.0.0",
           environment: context.environment,
-          host: 'unknown',
+          host: "unknown",
           retryAttempt: 0,
           correlationId: context.sessionId,
           additionalMetadata: {
             performanceMeasurement: measurement,
             baselineComparison,
-            analysis
-          }
+            analysis,
+          },
         },
-        recommendations
+        recommendations,
       };
 
-      this.logger.log(`Performance gate completed: ${this.id}, Status: ${status}, Score: ${score}`);
+      this.logger.log(
+        `Performance gate completed: ${this.id}, Status: ${status}, Score: ${score}`,
+      );
       return result;
-
     } catch (error) {
       this.logger.error(`Performance gate execution failed: ${this.id}`, error);
 
@@ -326,33 +350,35 @@ export class PerformanceQualityGate implements QualityGate {
           performance: this.getEmptyPerformanceMetrics(),
           security: this.getEmptySecurityMetrics(),
           coverage: this.getEmptyCoverageMetrics(),
-          custom: {}
+          custom: {},
         },
         details: {
           thresholdEvaluations: [],
           validationSteps,
           warnings,
           info,
-          logs
+          logs,
         },
         metadata: {
           executionId,
-          gateVersion: '1.0.0',
+          gateVersion: "1.0.0",
           environment: context.environment,
-          host: 'unknown',
+          host: "unknown",
           retryAttempt: 0,
           correlationId: context.sessionId,
-          additionalMetadata: {}
+          additionalMetadata: {},
         },
         error: {
-          code: 'PERFORMANCE_GATE_ERROR',
+          code: "PERFORMANCE_GATE_ERROR",
           message: error instanceof Error ? error.message : String(error),
           originalError: error instanceof Error ? error : undefined,
           category: ErrorCategory.SYSTEM_ERROR,
           metadata: { gateId: this.id },
-          stackTrace: error instanceof Error ? error.stack : undefined
+          stackTrace: error instanceof Error ? error.stack : undefined,
         },
-        recommendations: ['Check system resources and performance monitoring configuration']
+        recommendations: [
+          "Check system resources and performance monitoring configuration",
+        ],
       };
 
       return errorResult;
@@ -370,88 +396,115 @@ export class PerformanceQualityGate implements QualityGate {
 
     // Validate response time threshold
     if (this.config.responseTimeThreshold <= 0) {
-      errors.push('Response time threshold must be greater than 0');
+      errors.push("Response time threshold must be greater than 0");
     }
 
     if (this.config.responseTimeThreshold > 10000) {
-      warnings.push('Response time threshold is very high (>10s), consider lowering for better user experience');
+      warnings.push(
+        "Response time threshold is very high (>10s), consider lowering for better user experience",
+      );
     }
 
     // Validate critical sub-1000ms requirement
-    if (this.priority === QualityGatePriority.CRITICAL && this.config.responseTimeThreshold > 1000) {
-      errors.push('Critical performance gates must have response time threshold ≤ 1000ms');
+    if (
+      this.priority === QualityGatePriority.CRITICAL &&
+      this.config.responseTimeThreshold > 1000
+    ) {
+      errors.push(
+        "Critical performance gates must have response time threshold ≤ 1000ms",
+      );
     }
 
     // Validate throughput threshold
     if (this.config.throughputThreshold < 0) {
-      errors.push('Throughput threshold cannot be negative');
+      errors.push("Throughput threshold cannot be negative");
     }
 
     // Validate memory threshold
     if (this.config.memoryThreshold <= 0) {
-      errors.push('Memory threshold must be greater than 0');
+      errors.push("Memory threshold must be greater than 0");
     }
 
     // Validate CPU threshold
     if (this.config.cpuThreshold < 0 || this.config.cpuThreshold > 100) {
-      errors.push('CPU threshold must be between 0 and 100');
+      errors.push("CPU threshold must be between 0 and 100");
     }
 
     // Validate error rate threshold
-    if (this.config.errorRateThreshold < 0 || this.config.errorRateThreshold > 100) {
-      errors.push('Error rate threshold must be between 0 and 100');
+    if (
+      this.config.errorRateThreshold < 0 ||
+      this.config.errorRateThreshold > 100
+    ) {
+      errors.push("Error rate threshold must be between 0 and 100");
     }
 
     // Validate profiling configuration
-    if (this.config.profilingSampleRate < 0 || this.config.profilingSampleRate > 1) {
-      errors.push('Profiling sample rate must be between 0 and 1');
+    if (
+      this.config.profilingSampleRate < 0 ||
+      this.config.profilingSampleRate > 1
+    ) {
+      errors.push("Profiling sample rate must be between 0 and 1");
     }
 
     // Validate monitoring window
     if (this.config.monitoringWindow <= 0) {
-      errors.push('Monitoring window must be greater than 0');
+      errors.push("Monitoring window must be greater than 0");
     }
 
     if (this.config.monitoringWindow < 1000) {
-      warnings.push('Monitoring window is very short (<1s), consider longer window for stable metrics');
+      warnings.push(
+        "Monitoring window is very short (<1s), consider longer window for stable metrics",
+      );
     }
 
     // Validate resource thresholds
     const resourceThresholds = this.config.resourceThresholds;
-    if (resourceThresholds.dbConnectionPoolThreshold < 0 || resourceThresholds.dbConnectionPoolThreshold > 100) {
-      errors.push('Database connection pool threshold must be between 0 and 100');
+    if (
+      resourceThresholds.dbConnectionPoolThreshold < 0 ||
+      resourceThresholds.dbConnectionPoolThreshold > 100
+    ) {
+      errors.push(
+        "Database connection pool threshold must be between 0 and 100",
+      );
     }
 
     if (resourceThresholds.networkBandwidthThreshold < 0) {
-      errors.push('Network bandwidth threshold cannot be negative');
+      errors.push("Network bandwidth threshold cannot be negative");
     }
 
     if (resourceThresholds.diskIoThreshold < 0) {
-      errors.push('Disk I/O threshold cannot be negative');
+      errors.push("Disk I/O threshold cannot be negative");
     }
 
-    if (resourceThresholds.cacheHitRateThreshold < 0 || resourceThresholds.cacheHitRateThreshold > 100) {
-      errors.push('Cache hit rate threshold must be between 0 and 100');
+    if (
+      resourceThresholds.cacheHitRateThreshold < 0 ||
+      resourceThresholds.cacheHitRateThreshold > 100
+    ) {
+      errors.push("Cache hit rate threshold must be between 0 and 100");
     }
 
     // Generate suggestions
     if (this.config.responseTimeThreshold > 2000) {
-      suggestions.push('Consider implementing caching or optimization to reduce response times');
+      suggestions.push(
+        "Consider implementing caching or optimization to reduce response times",
+      );
     }
 
     if (this.config.cpuThreshold > 80) {
-      suggestions.push('High CPU threshold may indicate need for horizontal scaling');
+      suggestions.push(
+        "High CPU threshold may indicate need for horizontal scaling",
+      );
     }
 
     if (!this.config.enableProfiling) {
-      suggestions.push('Enable profiling for detailed performance analysis');
+      suggestions.push("Enable profiling for detailed performance analysis");
     }
 
     return {
       valid: errors.length === 0,
       errors,
       warnings,
-      suggestions
+      suggestions,
     };
   }
 
@@ -460,13 +513,17 @@ export class PerformanceQualityGate implements QualityGate {
    * @param context - Execution context
    * @returns Performance measurement
    */
-  private async collectPerformanceMetrics(context: QualityGateContext): Promise<PerformanceMeasurement> {
+  private async collectPerformanceMetrics(
+    context: QualityGateContext,
+  ): Promise<PerformanceMeasurement> {
     const startTime = Date.now();
     const samples: PerformanceSample[] = [];
     const sampleInterval = Math.max(100, this.config.monitoringWindow / 10); // 10 samples minimum
     const endTime = startTime + this.config.monitoringWindow;
 
-    this.logger.debug(`Collecting performance metrics for ${this.config.monitoringWindow}ms`);
+    this.logger.debug(
+      `Collecting performance metrics for ${this.config.monitoringWindow}ms`,
+    );
 
     // Collect performance samples over the monitoring window
     while (Date.now() < endTime) {
@@ -486,7 +543,12 @@ export class PerformanceQualityGate implements QualityGate {
 
     // Aggregate samples into final measurement
     const duration = Date.now() - startTime;
-    const measurement = this.aggregateSamples(samples, new Date(startTime), duration, samples.length);
+    const measurement = this.aggregateSamples(
+      samples,
+      new Date(startTime),
+      duration,
+      samples.length,
+    );
 
     return measurement;
   }
@@ -496,7 +558,9 @@ export class PerformanceQualityGate implements QualityGate {
    * @param context - Execution context
    * @returns Performance sample
    */
-  private async collectSingleSample(context: QualityGateContext): Promise<PerformanceSample> {
+  private async collectSingleSample(
+    context: QualityGateContext,
+  ): Promise<PerformanceSample> {
     const sampleStartTime = Date.now();
 
     // Mock performance data collection
@@ -511,7 +575,7 @@ export class PerformanceQualityGate implements QualityGate {
       dbConnectionPool: Math.random() * 100,
       networkBandwidth: Math.random() * 1000000, // bytes/sec
       diskIo: Math.random() * 1000, // ops/sec
-      cacheHitRate: 80 + Math.random() * 20 // 80-100%
+      cacheHitRate: 80 + Math.random() * 20, // 80-100%
     };
 
     return {
@@ -522,7 +586,7 @@ export class PerformanceQualityGate implements QualityGate {
       cpuUsage,
       errorRate,
       resourceUtilization,
-      sampleDuration: Date.now() - sampleStartTime
+      sampleDuration: Date.now() - sampleStartTime,
     };
   }
 
@@ -531,20 +595,42 @@ export class PerformanceQualityGate implements QualityGate {
    * @param samples - Performance samples
    * @returns Aggregated measurement
    */
-  private aggregateSamples(samples: PerformanceSample[], timestamp: Date, duration: number, sampleCount: number): PerformanceMeasurement {
+  private aggregateSamples(
+    samples: PerformanceSample[],
+    timestamp: Date,
+    duration: number,
+    sampleCount: number,
+  ): PerformanceMeasurement {
     const count = samples.length;
 
-    const responseTime = samples.reduce((sum, s) => sum + s.responseTime, 0) / count;
-    const throughput = samples.reduce((sum, s) => sum + s.throughput, 0) / count;
-    const memoryUsage = samples.reduce((sum, s) => sum + s.memoryUsage, 0) / count;
+    const responseTime =
+      samples.reduce((sum, s) => sum + s.responseTime, 0) / count;
+    const throughput =
+      samples.reduce((sum, s) => sum + s.throughput, 0) / count;
+    const memoryUsage =
+      samples.reduce((sum, s) => sum + s.memoryUsage, 0) / count;
     const cpuUsage = samples.reduce((sum, s) => sum + s.cpuUsage, 0) / count;
     const errorRate = samples.reduce((sum, s) => sum + s.errorRate, 0) / count;
 
     const resourceUtilization: ResourceUtilizationMetrics = {
-      dbConnectionPool: samples.reduce((sum, s) => sum + s.resourceUtilization.dbConnectionPool, 0) / count,
-      networkBandwidth: samples.reduce((sum, s) => sum + s.resourceUtilization.networkBandwidth, 0) / count,
-      diskIo: samples.reduce((sum, s) => sum + s.resourceUtilization.diskIo, 0) / count,
-      cacheHitRate: samples.reduce((sum, s) => sum + s.resourceUtilization.cacheHitRate, 0) / count
+      dbConnectionPool:
+        samples.reduce(
+          (sum, s) => sum + s.resourceUtilization.dbConnectionPool,
+          0,
+        ) / count,
+      networkBandwidth:
+        samples.reduce(
+          (sum, s) => sum + s.resourceUtilization.networkBandwidth,
+          0,
+        ) / count,
+      diskIo:
+        samples.reduce((sum, s) => sum + s.resourceUtilization.diskIo, 0) /
+        count,
+      cacheHitRate:
+        samples.reduce(
+          (sum, s) => sum + s.resourceUtilization.cacheHitRate,
+          0,
+        ) / count,
     };
 
     return {
@@ -556,7 +642,7 @@ export class PerformanceQualityGate implements QualityGate {
       resourceUtilization,
       timestamp,
       duration,
-      sampleCount
+      sampleCount,
     };
   }
 
@@ -565,85 +651,91 @@ export class PerformanceQualityGate implements QualityGate {
    * @param measurement - Performance measurement
    * @returns Threshold evaluation results
    */
-  private async evaluateThresholds(measurement: PerformanceMeasurement): Promise<ThresholdEvaluation[]> {
+  private async evaluateThresholds(
+    measurement: PerformanceMeasurement,
+  ): Promise<ThresholdEvaluation[]> {
     const evaluations: ThresholdEvaluation[] = [];
 
     // Evaluate response time threshold
     evaluations.push({
-      thresholdId: 'response-time',
-      metric: 'responseTime',
+      thresholdId: "response-time",
+      metric: "responseTime",
       actualValue: measurement.responseTime,
       thresholdValue: this.config.responseTimeThreshold,
-      operator: 'lte' as any,
+      operator: "lte" as any,
       passed: measurement.responseTime <= this.config.responseTimeThreshold,
-      details: `Response time ${measurement.responseTime.toFixed(2)}ms vs threshold ${this.config.responseTimeThreshold}ms`
+      details: `Response time ${measurement.responseTime.toFixed(2)}ms vs threshold ${this.config.responseTimeThreshold}ms`,
     });
 
     // Evaluate throughput threshold
     evaluations.push({
-      thresholdId: 'throughput',
-      metric: 'throughput',
+      thresholdId: "throughput",
+      metric: "throughput",
       actualValue: measurement.throughput,
       thresholdValue: this.config.throughputThreshold,
-      operator: 'gte' as any,
+      operator: "gte" as any,
       passed: measurement.throughput >= this.config.throughputThreshold,
-      details: `Throughput ${measurement.throughput.toFixed(2)} ops/sec vs threshold ${this.config.throughputThreshold} ops/sec`
+      details: `Throughput ${measurement.throughput.toFixed(2)} ops/sec vs threshold ${this.config.throughputThreshold} ops/sec`,
     });
 
     // Evaluate memory threshold
     evaluations.push({
-      thresholdId: 'memory-usage',
-      metric: 'memoryUsage',
+      thresholdId: "memory-usage",
+      metric: "memoryUsage",
       actualValue: measurement.memoryUsage,
       thresholdValue: this.config.memoryThreshold,
-      operator: 'lte' as any,
+      operator: "lte" as any,
       passed: measurement.memoryUsage <= this.config.memoryThreshold,
-      details: `Memory usage ${(measurement.memoryUsage / 1024 / 1024).toFixed(2)}MB vs threshold ${(this.config.memoryThreshold / 1024 / 1024).toFixed(2)}MB`
+      details: `Memory usage ${(measurement.memoryUsage / 1024 / 1024).toFixed(2)}MB vs threshold ${(this.config.memoryThreshold / 1024 / 1024).toFixed(2)}MB`,
     });
 
     // Evaluate CPU threshold
     evaluations.push({
-      thresholdId: 'cpu-usage',
-      metric: 'cpuUsage',
+      thresholdId: "cpu-usage",
+      metric: "cpuUsage",
       actualValue: measurement.cpuUsage,
       thresholdValue: this.config.cpuThreshold,
-      operator: 'lte' as any,
+      operator: "lte" as any,
       passed: measurement.cpuUsage <= this.config.cpuThreshold,
-      details: `CPU usage ${measurement.cpuUsage.toFixed(2)}% vs threshold ${this.config.cpuThreshold}%`
+      details: `CPU usage ${measurement.cpuUsage.toFixed(2)}% vs threshold ${this.config.cpuThreshold}%`,
     });
 
     // Evaluate error rate threshold
     evaluations.push({
-      thresholdId: 'error-rate',
-      metric: 'errorRate',
+      thresholdId: "error-rate",
+      metric: "errorRate",
       actualValue: measurement.errorRate,
       thresholdValue: this.config.errorRateThreshold,
-      operator: 'lte' as any,
+      operator: "lte" as any,
       passed: measurement.errorRate <= this.config.errorRateThreshold,
-      details: `Error rate ${measurement.errorRate.toFixed(2)}% vs threshold ${this.config.errorRateThreshold}%`
+      details: `Error rate ${measurement.errorRate.toFixed(2)}% vs threshold ${this.config.errorRateThreshold}%`,
     });
 
     // Evaluate resource utilization thresholds
     const resourceThresholds = this.config.resourceThresholds;
 
     evaluations.push({
-      thresholdId: 'db-connection-pool',
-      metric: 'dbConnectionPool',
+      thresholdId: "db-connection-pool",
+      metric: "dbConnectionPool",
       actualValue: measurement.resourceUtilization.dbConnectionPool,
       thresholdValue: resourceThresholds.dbConnectionPoolThreshold,
-      operator: 'lte' as any,
-      passed: measurement.resourceUtilization.dbConnectionPool <= resourceThresholds.dbConnectionPoolThreshold,
-      details: `DB connection pool usage ${measurement.resourceUtilization.dbConnectionPool.toFixed(2)}% vs threshold ${resourceThresholds.dbConnectionPoolThreshold}%`
+      operator: "lte" as any,
+      passed:
+        measurement.resourceUtilization.dbConnectionPool <=
+        resourceThresholds.dbConnectionPoolThreshold,
+      details: `DB connection pool usage ${measurement.resourceUtilization.dbConnectionPool.toFixed(2)}% vs threshold ${resourceThresholds.dbConnectionPoolThreshold}%`,
     });
 
     evaluations.push({
-      thresholdId: 'cache-hit-rate',
-      metric: 'cacheHitRate',
+      thresholdId: "cache-hit-rate",
+      metric: "cacheHitRate",
       actualValue: measurement.resourceUtilization.cacheHitRate,
       thresholdValue: resourceThresholds.cacheHitRateThreshold,
-      operator: 'gte' as any,
-      passed: measurement.resourceUtilization.cacheHitRate >= resourceThresholds.cacheHitRateThreshold,
-      details: `Cache hit rate ${measurement.resourceUtilization.cacheHitRate.toFixed(2)}% vs threshold ${resourceThresholds.cacheHitRateThreshold}%`
+      operator: "gte" as any,
+      passed:
+        measurement.resourceUtilization.cacheHitRate >=
+        resourceThresholds.cacheHitRateThreshold,
+      details: `Cache hit rate ${measurement.resourceUtilization.cacheHitRate.toFixed(2)}% vs threshold ${resourceThresholds.cacheHitRateThreshold}%`,
     });
 
     return evaluations;
@@ -655,25 +747,40 @@ export class PerformanceQualityGate implements QualityGate {
    * @param baseline - Baseline metrics
    * @returns Baseline comparison result
    */
-  private compareWithBaseline(measurement: PerformanceMeasurement, baseline: BaselinePerformanceMetrics): BaselineComparison {
-    const responseTimeDelta = ((measurement.responseTime - baseline.responseTime) / baseline.responseTime) * 100;
-    const throughputDelta = ((measurement.throughput - baseline.throughput) / baseline.throughput) * 100;
-    const memoryDelta = ((measurement.memoryUsage - baseline.memoryUsage) / baseline.memoryUsage) * 100;
-    const cpuDelta = ((measurement.cpuUsage - baseline.cpuUsage) / baseline.cpuUsage) * 100;
-    const errorRateDelta = ((measurement.errorRate - baseline.errorRate) / baseline.errorRate) * 100;
+  private compareWithBaseline(
+    measurement: PerformanceMeasurement,
+    baseline: BaselinePerformanceMetrics,
+  ): BaselineComparison {
+    const responseTimeDelta =
+      ((measurement.responseTime - baseline.responseTime) /
+        baseline.responseTime) *
+      100;
+    const throughputDelta =
+      ((measurement.throughput - baseline.throughput) / baseline.throughput) *
+      100;
+    const memoryDelta =
+      ((measurement.memoryUsage - baseline.memoryUsage) /
+        baseline.memoryUsage) *
+      100;
+    const cpuDelta =
+      ((measurement.cpuUsage - baseline.cpuUsage) / baseline.cpuUsage) * 100;
+    const errorRateDelta =
+      ((measurement.errorRate - baseline.errorRate) / baseline.errorRate) * 100;
 
     // Consider acceptable range as ±20% for most metrics
     const acceptableRange = 20;
-    const withinAcceptableRange = Math.abs(responseTimeDelta) <= acceptableRange &&
-                                 Math.abs(throughputDelta) <= acceptableRange &&
-                                 Math.abs(memoryDelta) <= acceptableRange &&
-                                 Math.abs(cpuDelta) <= acceptableRange &&
-                                 Math.abs(errorRateDelta) <= acceptableRange;
+    const withinAcceptableRange =
+      Math.abs(responseTimeDelta) <= acceptableRange &&
+      Math.abs(throughputDelta) <= acceptableRange &&
+      Math.abs(memoryDelta) <= acceptableRange &&
+      Math.abs(cpuDelta) <= acceptableRange &&
+      Math.abs(errorRateDelta) <= acceptableRange;
 
-    const summary = `Response time: ${responseTimeDelta > 0 ? '+' : ''}${responseTimeDelta.toFixed(1)}%, ` +
-                   `Throughput: ${throughputDelta > 0 ? '+' : ''}${throughputDelta.toFixed(1)}%, ` +
-                   `Memory: ${memoryDelta > 0 ? '+' : ''}${memoryDelta.toFixed(1)}%, ` +
-                   `CPU: ${cpuDelta > 0 ? '+' : ''}${cpuDelta.toFixed(1)}%`;
+    const summary =
+      `Response time: ${responseTimeDelta > 0 ? "+" : ""}${responseTimeDelta.toFixed(1)}%, ` +
+      `Throughput: ${throughputDelta > 0 ? "+" : ""}${throughputDelta.toFixed(1)}%, ` +
+      `Memory: ${memoryDelta > 0 ? "+" : ""}${memoryDelta.toFixed(1)}%, ` +
+      `CPU: ${cpuDelta > 0 ? "+" : ""}${cpuDelta.toFixed(1)}%`;
 
     return {
       responseTimeDelta,
@@ -683,7 +790,7 @@ export class PerformanceQualityGate implements QualityGate {
       errorRateDelta,
       withinAcceptableRange,
       summary,
-      baselineTimestamp: baseline.timestamp
+      baselineTimestamp: baseline.timestamp,
     };
   }
 
@@ -697,39 +804,51 @@ export class PerformanceQualityGate implements QualityGate {
   private analyzePerformance(
     measurement: PerformanceMeasurement,
     thresholdEvaluations: ThresholdEvaluation[],
-    baselineComparison?: BaselineComparison
+    baselineComparison?: BaselineComparison,
   ): PerformanceAnalysis {
-    const failedThresholds = thresholdEvaluations.filter(e => !e.passed);
-    const criticalIssues = failedThresholds.filter(e => e.metric === 'responseTime' || e.metric === 'errorRate');
+    const failedThresholds = thresholdEvaluations.filter((e) => !e.passed);
+    const criticalIssues = failedThresholds.filter(
+      (e) => e.metric === "responseTime" || e.metric === "errorRate",
+    );
 
     let overallAssessment: string;
     if (criticalIssues.length > 0) {
-      overallAssessment = 'Critical performance issues detected';
+      overallAssessment = "Critical performance issues detected";
     } else if (failedThresholds.length > 0) {
-      overallAssessment = 'Performance issues detected';
-    } else if (baselineComparison && !baselineComparison.withinAcceptableRange) {
-      overallAssessment = 'Performance regression detected';
+      overallAssessment = "Performance issues detected";
+    } else if (
+      baselineComparison &&
+      !baselineComparison.withinAcceptableRange
+    ) {
+      overallAssessment = "Performance regression detected";
     } else {
-      overallAssessment = 'Performance within acceptable limits';
+      overallAssessment = "Performance within acceptable limits";
     }
 
     const bottlenecks: string[] = [];
     if (measurement.responseTime > this.config.responseTimeThreshold) {
-      bottlenecks.push('High response time indicates potential processing bottleneck');
+      bottlenecks.push(
+        "High response time indicates potential processing bottleneck",
+      );
     }
     if (measurement.cpuUsage > 80) {
-      bottlenecks.push('High CPU usage may indicate computational bottleneck');
+      bottlenecks.push("High CPU usage may indicate computational bottleneck");
     }
     if (measurement.resourceUtilization.cacheHitRate < 80) {
-      bottlenecks.push('Low cache hit rate may indicate caching inefficiency');
+      bottlenecks.push("Low cache hit rate may indicate caching inefficiency");
     }
 
     return {
       overallAssessment,
-      criticalIssues: criticalIssues.map(t => t.details),
+      criticalIssues: criticalIssues.map((t) => t.details),
       bottlenecks,
-      performanceTrend: baselineComparison ? this.determineTrend(baselineComparison) : 'stable',
-      recommendations: this.generatePerformanceRecommendations(measurement, failedThresholds)
+      performanceTrend: baselineComparison
+        ? this.determineTrend(baselineComparison)
+        : "stable",
+      recommendations: this.generatePerformanceRecommendations(
+        measurement,
+        failedThresholds,
+      ),
     };
   }
 
@@ -738,17 +857,19 @@ export class PerformanceQualityGate implements QualityGate {
    * @param comparison - Baseline comparison
    * @returns Trend direction
    */
-  private determineTrend(comparison: BaselineComparison): 'improving' | 'stable' | 'declining' {
+  private determineTrend(
+    comparison: BaselineComparison,
+  ): "improving" | "stable" | "declining" {
     const responseTimeChange = comparison.responseTimeDelta;
     const throughputChange = comparison.throughputDelta;
 
     // Consider trend based on response time and throughput
     if (responseTimeChange < -10 || throughputChange > 10) {
-      return 'improving';
+      return "improving";
     } else if (responseTimeChange > 10 || throughputChange < -10) {
-      return 'declining';
+      return "declining";
     } else {
-      return 'stable';
+      return "stable";
     }
   }
 
@@ -760,42 +881,60 @@ export class PerformanceQualityGate implements QualityGate {
    */
   private generatePerformanceRecommendations(
     measurement: PerformanceMeasurement,
-    failedThresholds: ThresholdEvaluation[]
+    failedThresholds: ThresholdEvaluation[],
   ): string[] {
     const recommendations: string[] = [];
 
     for (const threshold of failedThresholds) {
       switch (threshold.metric) {
-        case 'responseTime':
-          recommendations.push('Optimize query performance and consider implementing caching');
-          recommendations.push('Review database indexing and query optimization');
+        case "responseTime":
+          recommendations.push(
+            "Optimize query performance and consider implementing caching",
+          );
+          recommendations.push(
+            "Review database indexing and query optimization",
+          );
           break;
-        case 'throughput':
-          recommendations.push('Consider horizontal scaling or load balancing');
-          recommendations.push('Optimize processing algorithms and reduce bottlenecks');
+        case "throughput":
+          recommendations.push("Consider horizontal scaling or load balancing");
+          recommendations.push(
+            "Optimize processing algorithms and reduce bottlenecks",
+          );
           break;
-        case 'memoryUsage':
-          recommendations.push('Implement memory optimization and garbage collection tuning');
-          recommendations.push('Review object lifecycle management and caching strategies');
+        case "memoryUsage":
+          recommendations.push(
+            "Implement memory optimization and garbage collection tuning",
+          );
+          recommendations.push(
+            "Review object lifecycle management and caching strategies",
+          );
           break;
-        case 'cpuUsage':
-          recommendations.push('Optimize CPU-intensive operations and consider async processing');
-          recommendations.push('Review algorithm complexity and implementation efficiency');
+        case "cpuUsage":
+          recommendations.push(
+            "Optimize CPU-intensive operations and consider async processing",
+          );
+          recommendations.push(
+            "Review algorithm complexity and implementation efficiency",
+          );
           break;
-        case 'errorRate':
-          recommendations.push('Investigate root causes of errors and implement better error handling');
-          recommendations.push('Improve input validation and error recovery mechanisms');
+        case "errorRate":
+          recommendations.push(
+            "Investigate root causes of errors and implement better error handling",
+          );
+          recommendations.push(
+            "Improve input validation and error recovery mechanisms",
+          );
           break;
       }
     }
 
     // Add general recommendations
     if (measurement.resourceUtilization.cacheHitRate < 80) {
-      recommendations.push('Improve cache strategy and hit rates');
+      recommendations.push("Improve cache strategy and hit rates");
     }
 
     if (measurement.resourceUtilization.dbConnectionPool > 80) {
-      recommendations.push('Optimize database connection management');
+      recommendations.push("Optimize database connection management");
     }
 
     return recommendations;
@@ -809,11 +948,11 @@ export class PerformanceQualityGate implements QualityGate {
    */
   private determineGateStatus(
     thresholdEvaluations: ThresholdEvaluation[],
-    baselineComparison?: BaselineComparison
+    baselineComparison?: BaselineComparison,
   ): QualityGateStatus {
-    const failedThresholds = thresholdEvaluations.filter(e => !e.passed);
-    const criticalFailures = failedThresholds.filter(e =>
-      e.metric === 'responseTime' || e.metric === 'errorRate'
+    const failedThresholds = thresholdEvaluations.filter((e) => !e.passed);
+    const criticalFailures = failedThresholds.filter(
+      (e) => e.metric === "responseTime" || e.metric === "errorRate",
     );
 
     if (criticalFailures.length > 0) {
@@ -839,9 +978,11 @@ export class PerformanceQualityGate implements QualityGate {
    */
   private calculateScore(
     measurement: PerformanceMeasurement,
-    thresholdEvaluations: ThresholdEvaluation[]
+    thresholdEvaluations: ThresholdEvaluation[],
   ): number {
-    const passedThresholds = thresholdEvaluations.filter(e => e.passed).length;
+    const passedThresholds = thresholdEvaluations.filter(
+      (e) => e.passed,
+    ).length;
     const totalThresholds = thresholdEvaluations.length;
 
     const baseScore = (passedThresholds / totalThresholds) * 100;
@@ -872,21 +1013,24 @@ export class PerformanceQualityGate implements QualityGate {
    * @param measurement - Performance measurement
    * @param warnings - Warnings array to populate
    */
-  private addPerformanceWarnings(measurement: PerformanceMeasurement, warnings: string[]): void {
+  private addPerformanceWarnings(
+    measurement: PerformanceMeasurement,
+    warnings: string[],
+  ): void {
     if (measurement.responseTime > this.config.responseTimeThreshold * 0.8) {
-      warnings.push('Response time approaching threshold limit');
+      warnings.push("Response time approaching threshold limit");
     }
 
     if (measurement.cpuUsage > 85) {
-      warnings.push('High CPU usage detected');
+      warnings.push("High CPU usage detected");
     }
 
     if (measurement.resourceUtilization.cacheHitRate < 70) {
-      warnings.push('Low cache hit rate may impact performance');
+      warnings.push("Low cache hit rate may impact performance");
     }
 
     if (measurement.errorRate > 0.5) {
-      warnings.push('Elevated error rate detected');
+      warnings.push("Elevated error rate detected");
     }
   }
 
@@ -900,7 +1044,7 @@ export class PerformanceQualityGate implements QualityGate {
   private generateRecommendations(
     measurement: PerformanceMeasurement,
     thresholdEvaluations: ThresholdEvaluation[],
-    analysis: PerformanceAnalysis
+    analysis: PerformanceAnalysis,
   ): string[] {
     const recommendations: string[] = [];
 
@@ -908,16 +1052,20 @@ export class PerformanceQualityGate implements QualityGate {
     recommendations.push(...analysis.recommendations);
 
     // Add general performance recommendations
-    if (analysis.performanceTrend === 'declining') {
-      recommendations.push('Monitor performance trends and implement proactive optimizations');
+    if (analysis.performanceTrend === "declining") {
+      recommendations.push(
+        "Monitor performance trends and implement proactive optimizations",
+      );
     }
 
     if (analysis.criticalIssues.length > 0) {
-      recommendations.push('Address critical performance issues immediately');
+      recommendations.push("Address critical performance issues immediately");
     }
 
     if (analysis.bottlenecks.length > 0) {
-      recommendations.push('Investigate and resolve identified performance bottlenecks');
+      recommendations.push(
+        "Investigate and resolve identified performance bottlenecks",
+      );
     }
 
     return [...new Set(recommendations)]; // Remove duplicates
@@ -928,14 +1076,16 @@ export class PerformanceQualityGate implements QualityGate {
    * @param measurement - Performance measurement
    * @returns Framework performance metrics
    */
-  private convertToFrameworkMetrics(measurement: PerformanceMeasurement): PerformanceMetrics {
+  private convertToFrameworkMetrics(
+    measurement: PerformanceMeasurement,
+  ): PerformanceMetrics {
     return {
       responseTime: measurement.responseTime,
       throughput: measurement.throughput,
       memoryUsage: measurement.memoryUsage,
       cpuUsage: measurement.cpuUsage,
       errorRate: measurement.errorRate,
-      resourceUtilization: measurement.resourceUtilization
+      resourceUtilization: measurement.resourceUtilization,
     };
   }
 
@@ -954,8 +1104,8 @@ export class PerformanceQualityGate implements QualityGate {
         dbConnectionPool: 0,
         networkBandwidth: 0,
         diskIo: 0,
-        cacheHitRate: 0
-      }
+        cacheHitRate: 0,
+      },
     };
   }
 
@@ -969,7 +1119,7 @@ export class PerformanceQualityGate implements QualityGate {
       authSuccessRate: 0,
       authzViolations: 0,
       complianceScore: 0,
-      threatAlerts: 0
+      threatAlerts: 0,
     };
   }
 
@@ -983,7 +1133,7 @@ export class PerformanceQualityGate implements QualityGate {
       codeCoverage: 0,
       functionCoverage: 0,
       branchCoverage: 0,
-      integrationCoverage: 0
+      integrationCoverage: 0,
     };
   }
 
@@ -993,7 +1143,7 @@ export class PerformanceQualityGate implements QualityGate {
    * @returns Promise that resolves after delay
    */
   private sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
 
@@ -1035,6 +1185,6 @@ interface PerformanceAnalysis {
   readonly overallAssessment: string;
   readonly criticalIssues: readonly string[];
   readonly bottlenecks: readonly string[];
-  readonly performanceTrend: 'improving' | 'stable' | 'declining';
+  readonly performanceTrend: "improving" | "stable" | "declining";
   readonly recommendations: readonly string[];
 }

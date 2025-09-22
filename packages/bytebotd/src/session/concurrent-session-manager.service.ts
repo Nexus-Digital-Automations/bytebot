@@ -861,7 +861,7 @@ export class ConcurrentSessionManagerService implements OnModuleInit, OnApplicat
       session.sessionState = SessionState.TERMINATED;
       this.eventEmitter.emit('session.terminated', sessionId, reason);}}
 
-  private async suspendSession(sessionId: string, reason: string): Promise<void> {
+  private suspendSession(sessionId: string, reason: string): void {
     const session = this.sessionRegistry.get(sessionId);
     if (session) {
       session.sessionState = SessionState.SUSPENDED;

@@ -658,9 +658,7 @@ export class TestExecutionOptimizer extends EventEmitter {
     };
   }
 
-  private async planCacheStrategy(
-    testFiles: string[],
-  ): Promise<{
+  private async planCacheStrategy(testFiles: string[]): Promise<{
     enabled: boolean;
     cacheableTests: string[];
     invalidatedTests: string[];

@@ -16,7 +16,7 @@
  * @since Phase 1: Bytebot API Hardening - Local Deployment
  */
 
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   readFileSync,
@@ -197,7 +197,7 @@ export class SecretsService extends EventEmitter implements OnModuleInit {
         this.logger.debug(`[${operationId}] Secret retrieved from cache`, {
           secretName,
           cacheKey,
-          source: cachedSecret.metadata.source,
+          source: cachedSecret._metadata.source,
         });
         return encrypted
           ? this.decryptLocalSecret(cachedSecret.value)
@@ -246,7 +246,7 @@ export class SecretsService extends EventEmitter implements OnModuleInit {
 
       this.secretsCache.set(cacheKey, {
         value: secretValue,
-        metadata,
+        _metadata,
       });
 
       const loadTime = Date.now() - startTime;
@@ -342,7 +342,7 @@ export class SecretsService extends EventEmitter implements OnModuleInit {
 
       this.secretsCache.set(cacheKey, {
         value: encrypted ? encryptedData : value,
-        metadata,
+        _metadata,
       });
 
       const storeTime = Date.now() - startTime;
@@ -353,7 +353,7 @@ export class SecretsService extends EventEmitter implements OnModuleInit {
         filePath: secretFile,
       });
 
-      this.emit('localSecretUpdated', { secretName, key, metadata });
+      this.emit('localSecretUpdated', { secretName, key, _metadata });
       return true;
     } catch (error) {
       const storeTime = Date.now() - startTime;
@@ -460,7 +460,7 @@ export class SecretsService extends EventEmitter implements OnModuleInit {
    */
   getLocalSecretsMetadata(): LocalSecretMetadata[] {
     return Array.from(this.secretsCache.values()).map(
-      (secret) => secret.metadata,
+      (secret) => secret._metadata,
     );
   }
 
@@ -482,7 +482,7 @@ export class SecretsService extends EventEmitter implements OnModuleInit {
   } {
     const now = Date.now();
     const details = Array.from(this.secretsCache.values()).map((secret) => {
-      const age = now - secret.metadata.lastUpdated.getTime();
+      const age = now - secret._metadata.lastUpdated.getTime();
       const status: 'healthy' | 'expiring' | 'expired' =
         age > this.rotationConfig.maxAge
           ? 'expired'
@@ -493,11 +493,11 @@ export class SecretsService extends EventEmitter implements OnModuleInit {
             : 'healthy';
 
       return {
-        name: secret.metadata.name,
-        key: secret.metadata.key,
+        name: secret._metadata.name,
+        key: secret._metadata.key,
         status,
         age,
-        source: secret.metadata.source,
+        source: secret._metadata.source,
       };
     });
 

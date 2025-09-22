@@ -197,10 +197,10 @@ export class CircuitBreakerAuthGuard implements CanActivate {
       }
 
       // Check circuit breaker state
-      const canProceed = await this.checkCircuitState();
+      const canProceed = this.checkCircuitState();
       if (!canProceed) {
         if (this.config.fallbackEnabled) {
-          return await this.handleFallbackAuthentication(request, context);
+          return this.handleFallbackAuthentication(request, context);
         } else {
           throw new ServiceUnavailableException(
             'Authentication service temporarily unavailable',
@@ -249,7 +249,7 @@ export class CircuitBreakerAuthGuard implements CanActivate {
   /**
    * Check if circuit breaker allows requests to proceed
    */
-  private async checkCircuitState(): Promise<boolean> {
+  private checkCircuitState(): boolean {
     const now = Date.now();
 
     switch (this.metrics.state) {
@@ -315,10 +315,10 @@ export class CircuitBreakerAuthGuard implements CanActivate {
   /**
    * Handle fallback authentication when circuit is open
    */
-  private async handleFallbackAuthentication(
+  private handleFallbackAuthentication(
     request: CircuitBreakerRequest,
     context: ExecutionContext,
-  ): Promise<boolean> {
+  ): boolean {
     try {
       this.logger.warn(
         `Circuit breaker OPEN - attempting fallback authentication for ${request.url}`,
@@ -377,7 +377,7 @@ export class CircuitBreakerAuthGuard implements CanActivate {
   /**
    * Validate JWT token with comprehensive verification
    */
-  private async validateJwtToken(token: string): Promise<JWTPayload> {
+  private validateJwtToken(token: string): JWTPayload {
     try {
       const secret = this.configService.get<string>(
         'JWT_SECRET_HS256',
@@ -441,7 +441,7 @@ export class CircuitBreakerAuthGuard implements CanActivate {
   /**
    * Record authentication attempt result and update circuit state
    */
-  private async recordAttemptResult(result: AuthAttemptResult): Promise<void> {
+  private recordAttemptResult(result: AuthAttemptResult): void {
     this.metrics.totalAttempts++;
 
     // Update response time average

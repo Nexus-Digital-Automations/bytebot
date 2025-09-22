@@ -32,7 +32,11 @@ import {
 import { Request, Response, NextFunction } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { ApiSecurityService } from '../security/api-security.service';
-import { ParlantIntegrationService, ParlantConversationContext, RiskLevel } from '../parlant/parlant-integration.service';
+import {
+  ParlantIntegrationService,
+  ParlantConversationContext,
+  RiskLevel,
+} from '../parlant/parlant-integration.service';
 
 /** Security configuration interface
  */
@@ -71,12 +75,15 @@ interface SecurityValidationResult {
   passed: boolean;
   riskScore: number;
   violations: SecurityViolation[];
-  recommendedAction: 'allow' | 'block' | 'monitor' | 'warn';}/**
+  recommendedAction: 'allow' | 'block' | 'monitor' | 'warn';
+} /**
  * Security violation details
  */
 interface SecurityViolation {
   type: SecurityViolationType;
-  severity: 'low' | 'medium' | 'high' | 'critical';description: string;evidence: Record<string, unknown>;
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  description: string;
+  evidence: Record<string, unknown>;
   recommendedAction: string;
 }
 
@@ -84,7 +91,17 @@ interface SecurityViolation {
  * Security violation types
  */
 enum SecurityViolationType {
-  XSS_ATTEMPT = 'xss_attempt',SQL_INJECTION = 'sql_injection',COMMAND_INJECTION = 'command_injection',PATH_TRAVERSAL = 'path_traversal',RATE_LIMIT_EXCEEDED = 'rate_limit_exceeded',SUSPICIOUS_USER_AGENT = 'suspicious_user_agent',BLOCKED_IP = 'blocked_ip',EXCESSIVE_PAYLOAD = 'excessive_payload',MALFORMED_REQUEST = 'malformed_request',UNAUTHORIZED_ACCESS = 'unauthorized_access',}/**
+  XSS_ATTEMPT = 'xss_attempt',
+  SQL_INJECTION = 'sql_injection',
+  COMMAND_INJECTION = 'command_injection',
+  PATH_TRAVERSAL = 'path_traversal',
+  RATE_LIMIT_EXCEEDED = 'rate_limit_exceeded',
+  SUSPICIOUS_USER_AGENT = 'suspicious_user_agent',
+  BLOCKED_IP = 'blocked_ip',
+  EXCESSIVE_PAYLOAD = 'excessive_payload',
+  MALFORMED_REQUEST = 'malformed_request',
+  UNAUTHORIZED_ACCESS = 'unauthorized_access',
+} /**
  * Rate limiting tracker
  */
 interface RateLimitTracker {
@@ -113,7 +130,9 @@ export class BrowserSecurityMiddleware implements NestMiddleware {
     // Initialize rate limit cleanup
     setInterval(() => this.cleanupRateLimitTrackers(), 60000); // Every minute
 
-    this.logger.log('Browser Security Middleware initialized', {maxRequestSize: this.securityConfig.maxRequestSize,rateLimitWindow: this.securityConfig.rateLimitWindow,
+    this.logger.log('Browser Security Middleware initialized', {
+      maxRequestSize: this.securityConfig.maxRequestSize,
+      rateLimitWindow: this.securityConfig.rateLimitWindow,
       rateLimitMax: this.securityConfig.rateLimitMax,
       trustedIpRanges: this.securityConfig.trustedIpRanges.length,
     });
@@ -127,18 +146,22 @@ export class BrowserSecurityMiddleware implements NestMiddleware {
     const startTime = Date.now();
 
     // Add request ID to headers for tracking
-    req.headers['x-request-id'] = requestId;res.setHeader('X-Request-ID', requestId);
+    req.headers['x-request-id'] = requestId;
+    res.setHeader('X-Request-ID', requestId);
 
     const securityContext = this.buildSecurityContext(req, requestId);
 
-    this.logger.debug(`[${requestId}] Browser automation security check started`, {
-      requestId,
-      method: securityContext.method,
-      endpoint: securityContext.endpoint,
-      ipAddress: securityContext.ipAddress,
-      userAgent: securityContext.userAgent?.substring(0, 100),
-      payloadSize: securityContext.payloadSize,
-    });
+    this.logger.debug(
+      `[${requestId}] Browser automation security check started`,
+      {
+        requestId,
+        method: securityContext.method,
+        endpoint: securityContext.endpoint,
+        ipAddress: securityContext.ipAddress,
+        userAgent: securityContext.userAgent?.substring(0, 100),
+        payloadSize: securityContext.payloadSize,
+      },
+    );
 
     try {
       // 1. Pre-validation security checks
@@ -154,7 +177,10 @@ export class BrowserSecurityMiddleware implements NestMiddleware {
       await this.validateRequestPayload(req, securityContext);
 
       // 5. Security threat detection
-      const validationResult = await this.performSecurityValidation(req, securityContext);
+      const validationResult = await this.performSecurityValidation(
+        req,
+        securityContext,
+      );
 
       // 6. Apply security response based on validation result
       await this.applySecurityResponse(validationResult, securityContext, res);
@@ -170,7 +196,6 @@ export class BrowserSecurityMiddleware implements NestMiddleware {
 
       // Security validation passed - continue to next middleware
       next();
-
     } catch (error) {
       const duration = Date.now() - startTime;
 
@@ -188,26 +213,38 @@ export class BrowserSecurityMiddleware implements NestMiddleware {
       });
 
       // Log security failure event
-      this.logSecurityEvent('security_validation_failed', securityContext, {error: error instanceof Error ? error.message : String(error),duration,
+      this.logSecurityEvent('security_validation_failed', securityContext, {
+        error: error instanceof Error ? error.message : String(error),
+        duration,
       });
 
       // Handle specific security exceptions
-      if (error instanceof HttpException && error.getStatus() === HttpStatus.TOO_MANY_REQUESTS ||
-          error instanceof BadRequestException ||
-          error instanceof ForbiddenException ||
-          error instanceof UnauthorizedException) {
+      if (
+        (error instanceof HttpException &&
+          error.getStatus() === HttpStatus.TOO_MANY_REQUESTS) ||
+        error instanceof BadRequestException ||
+        error instanceof ForbiddenException ||
+        error instanceof UnauthorizedException
+      ) {
         throw error;
       }
 
       // Generic security validation failure
-      throw new ForbiddenException('Security validation failed');}}
+      throw new ForbiddenException('Security validation failed');
+    }
+  }
 
   /**
    * Build security context from request
    */
-  private buildSecurityContext(req: Request, requestId: string): RequestSecurityContext {
+  private buildSecurityContext(
+    req: Request,
+    requestId: string,
+  ): RequestSecurityContext {
     const ipAddress = this.extractClientIp(req);
-    const userAgent = req.headers['user-agent'] || '';const endpoint = req.route?.path || req.path;const method = req.method;
+    const userAgent = req.headers['user-agent'] || '';
+    const endpoint = req.route?.path || req.path;
+    const method = req.method;
     const payloadSize = this.calculatePayloadSize(req);
 
     // Extract user information if available
@@ -216,7 +253,12 @@ export class BrowserSecurityMiddleware implements NestMiddleware {
     const sessionId = user?.sessionId;
 
     // Calculate initial risk score
-    const riskScore = this.calculateInitialRiskScore(req, ipAddress, userAgent, endpoint);
+    const riskScore = this.calculateInitialRiskScore(
+      req,
+      ipAddress,
+      userAgent,
+      endpoint,
+    );
 
     return {
       ipAddress,
@@ -235,7 +277,9 @@ export class BrowserSecurityMiddleware implements NestMiddleware {
   /**
    * Perform pre-validation security checks
    */
-  private async performPreValidationChecks(context: RequestSecurityContext): Promise<void> {
+  private async performPreValidationChecks(
+    context: RequestSecurityContext,
+  ): Promise<void> {
     // Check request size limits
     if (context.payloadSize > this.securityConfig.maxRequestSize) {
       throw new BadRequestException({
@@ -247,12 +291,15 @@ export class BrowserSecurityMiddleware implements NestMiddleware {
 
     // Check for suspicious user agents
     if (this.isSuspiciousUserAgent(context.userAgent)) {
-      this.logger.warn(`[${context.requestId}] Suspicious user agent detected`, {
-        requestId: context.requestId,
-        userAgent: context.userAgent,
-        ipAddress: context.ipAddress,
-        endpoint: context.endpoint,
-      });
+      this.logger.warn(
+        `[${context.requestId}] Suspicious user agent detected`,
+        {
+          requestId: context.requestId,
+          userAgent: context.userAgent,
+          ipAddress: context.ipAddress,
+          endpoint: context.endpoint,
+        },
+      );
 
       // Don't block immediately, but increase risk score
       context.riskScore += 25;
@@ -265,8 +312,12 @@ export class BrowserSecurityMiddleware implements NestMiddleware {
   /**
    * Validate rate limiting
    */
-  private async validateRateLimit(context: RequestSecurityContext): Promise<void> {
-    const key = `${context.ipAddress}:${context.endpoint}`;const now = Date.now();const windowStart = now - this.securityConfig.rateLimitWindow;
+  private async validateRateLimit(
+    context: RequestSecurityContext,
+  ): Promise<void> {
+    const key = `${context.ipAddress}:${context.endpoint}`;
+    const now = Date.now();
+    const windowStart = now - this.securityConfig.rateLimitWindow;
 
     let tracker = this.rateLimitTracker.get(key);
 
@@ -305,19 +356,24 @@ export class BrowserSecurityMiddleware implements NestMiddleware {
         windowMs: this.securityConfig.rateLimitWindow,
       });
 
-      throw new HttpException({
-        message: 'Rate limit exceeded',
-        retryAfter: Math.ceil(this.securityConfig.rateLimitWindow / 1000),
-        limit: this.securityConfig.rateLimitMax,
-        windowMs: this.securityConfig.rateLimitWindow,
-      }, HttpStatus.TOO_MANY_REQUESTS);
+      throw new HttpException(
+        {
+          message: 'Rate limit exceeded',
+          retryAfter: Math.ceil(this.securityConfig.rateLimitWindow / 1000),
+          limit: this.securityConfig.rateLimitMax,
+          windowMs: this.securityConfig.rateLimitWindow,
+        },
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
     }
   }
 
   /**
    * Validate IP-based access control
    */
-  private async validateIpAccess(context: RequestSecurityContext): Promise<void> {
+  private async validateIpAccess(
+    context: RequestSecurityContext,
+  ): Promise<void> {
     // Check if IP is in blocked ranges
     if (this.isIpBlocked(context.ipAddress)) {
       this.logger.warn(`[${context.requestId}] Blocked IP attempted access`, {
@@ -328,7 +384,9 @@ export class BrowserSecurityMiddleware implements NestMiddleware {
       });
 
       throw new ForbiddenException({
-        message: 'Access denied from this IP address',ipAddress: context.ipAddress,});
+        message: 'Access denied from this IP address',
+        ipAddress: context.ipAddress,
+      });
     }
 
     // Check if IP is in trusted ranges (lower risk score)
@@ -340,7 +398,10 @@ export class BrowserSecurityMiddleware implements NestMiddleware {
   /**
    * Validate request payload for security threats
    */
-  private async validateRequestPayload(req: Request, context: RequestSecurityContext): Promise<void> {
+  private async validateRequestPayload(
+    req: Request,
+    context: RequestSecurityContext,
+  ): Promise<void> {
     if (!this.securityConfig.enablePayloadValidation) {
       return;
     }
@@ -354,44 +415,64 @@ export class BrowserSecurityMiddleware implements NestMiddleware {
     const payloadString = JSON.stringify(payload);
 
     // Check for XSS patterns
-    if (this.securityConfig.enableXssProtection && this.containsXssPatterns(payloadString)) {
-      this.logger.warn(`[${context.requestId}] XSS attempt detected in payload`, {
-        requestId: context.requestId,
-        ipAddress: context.ipAddress,
-        endpoint: context.endpoint,
-        payloadSample: payloadString.substring(0, 200),
-      });
+    if (
+      this.securityConfig.enableXssProtection &&
+      this.containsXssPatterns(payloadString)
+    ) {
+      this.logger.warn(
+        `[${context.requestId}] XSS attempt detected in payload`,
+        {
+          requestId: context.requestId,
+          ipAddress: context.ipAddress,
+          endpoint: context.endpoint,
+          payloadSample: payloadString.substring(0, 200),
+        },
+      );
 
       throw new BadRequestException({
-        message: 'Invalid request: potential XSS detected',type: 'xss_validation_failed',
+        message: 'Invalid request: potential XSS detected',
+        type: 'xss_validation_failed',
       });
     }
 
     // Check for SQL injection patterns
-    if (this.securityConfig.enableSqlInjectionProtection && this.containsSqlInjectionPatterns(payloadString)) {
-      this.logger.warn(`[${context.requestId}] SQL injection attempt detected`, {
-        requestId: context.requestId,
-        ipAddress: context.ipAddress,
-        endpoint: context.endpoint,
-        payloadSample: payloadString.substring(0, 200),
-      });
+    if (
+      this.securityConfig.enableSqlInjectionProtection &&
+      this.containsSqlInjectionPatterns(payloadString)
+    ) {
+      this.logger.warn(
+        `[${context.requestId}] SQL injection attempt detected`,
+        {
+          requestId: context.requestId,
+          ipAddress: context.ipAddress,
+          endpoint: context.endpoint,
+          payloadSample: payloadString.substring(0, 200),
+        },
+      );
 
       throw new BadRequestException({
-        message: 'Invalid request: potential SQL injection detected',type: 'sql_injection_validation_failed',
+        message: 'Invalid request: potential SQL injection detected',
+        type: 'sql_injection_validation_failed',
       });
     }
 
     // Check for command injection patterns
     if (this.containsCommandInjectionPatterns(payloadString)) {
-      this.logger.warn(`[${context.requestId}] Command injection attempt detected`, {
-        requestId: context.requestId,
-        ipAddress: context.ipAddress,
-        endpoint: context.endpoint,
-        payloadSample: payloadString.substring(0, 200),
-      });
+      this.logger.warn(
+        `[${context.requestId}] Command injection attempt detected`,
+        {
+          requestId: context.requestId,
+          ipAddress: context.ipAddress,
+          endpoint: context.endpoint,
+          payloadSample: payloadString.substring(0, 200),
+        },
+      );
 
       throw new BadRequestException({
-        message: 'Invalid request: potential command injection detected',type: 'command_injection_validation_failed',});}
+        message: 'Invalid request: potential command injection detected',
+        type: 'command_injection_validation_failed',
+      });
+    }
 
     // Validate browser automation specific payloads
     await this.validateBrowserAutomationPayload(payload, context);
@@ -400,27 +481,51 @@ export class BrowserSecurityMiddleware implements NestMiddleware {
   /**
    * Perform comprehensive security validation
    */
-  private async performSecurityValidation(req: Request, context: RequestSecurityContext): Promise<SecurityValidationResult> {
+  private async performSecurityValidation(
+    req: Request,
+    context: RequestSecurityContext,
+  ): Promise<SecurityValidationResult> {
     const violations: SecurityViolation[] = [];
     let riskScore = context.riskScore;
 
     // Validate browser automation specific security concerns
-    const browserViolations = await this.validateBrowserAutomationSecurity(req, context);
+    const browserViolations = await this.validateBrowserAutomationSecurity(
+      req,
+      context,
+    );
     violations.push(...browserViolations);
 
     // Calculate total risk score
-    violations.forEach(violation => {
+    violations.forEach((violation) => {
       switch (violation.severity) {
-        case 'critical':riskScore += 50;break;
-        case 'high':riskScore += 25;break;
-        case 'medium':riskScore += 10;break;
-        case 'low':riskScore += 5;break;
+        case 'critical':
+          riskScore += 50;
+          break;
+        case 'high':
+          riskScore += 25;
+          break;
+        case 'medium':
+          riskScore += 10;
+          break;
+        case 'low':
+          riskScore += 5;
+          break;
       }
     });
 
     // Determine recommended action based on risk score
-    let recommendedAction: 'allow' | 'block' | 'monitor' | 'warn' = 'allow';if (riskScore >= 80) {recommendedAction = 'block';} else if (riskScore >= 60) {recommendedAction = 'warn';} else if (riskScore >= 40) {recommendedAction = 'monitor';}return {
-      passed: recommendedAction !== 'block',riskScore,violations,
+    let recommendedAction: 'allow' | 'block' | 'monitor' | 'warn' = 'allow';
+    if (riskScore >= 80) {
+      recommendedAction = 'block';
+    } else if (riskScore >= 60) {
+      recommendedAction = 'warn';
+    } else if (riskScore >= 40) {
+      recommendedAction = 'monitor';
+    }
+    return {
+      passed: recommendedAction !== 'block',
+      riskScore,
+      violations,
       recommendedAction,
     };
   }
@@ -437,7 +542,10 @@ export class BrowserSecurityMiddleware implements NestMiddleware {
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('X-Frame-Options', 'DENY');
     res.setHeader('X-XSS-Protection', '1; mode=block');
-    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+    res.setHeader(
+      'Strict-Transport-Security',
+      'max-age=31536000; includeSubDomains',
+    );
     res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
 
     // Add risk score header for monitoring
@@ -449,24 +557,35 @@ export class BrowserSecurityMiddleware implements NestMiddleware {
         throw new ForbiddenException({
           message: 'Request blocked due to security policy violation',
           riskScore: result.riskScore,
-          violations: result.violations.map(v => v.type),
+          violations: result.violations.map((v) => v.type),
         });
 
       case 'warn':
-        this.logger.warn(`[${context.requestId}] High-risk request allowed with warning`, {
-          requestId: context.requestId,
-          riskScore: result.riskScore,
-          violations: result.violations.length,
-          ipAddress: context.ipAddress,
-          endpoint: context.endpoint,
-        });
-        res.setHeader('X-Security-Warning', 'high-risk-request');break;case 'monitor':
-        this.logger.log(`[${context.requestId}] Medium-risk request under monitoring`, {
-          requestId: context.requestId,
-          riskScore: result.riskScore,
-          violations: result.violations.length,
-        });
-        res.setHeader('X-Security-Monitor', 'medium-risk-request');break;case 'allow':default:// Low risk - proceed normally
+        this.logger.warn(
+          `[${context.requestId}] High-risk request allowed with warning`,
+          {
+            requestId: context.requestId,
+            riskScore: result.riskScore,
+            violations: result.violations.length,
+            ipAddress: context.ipAddress,
+            endpoint: context.endpoint,
+          },
+        );
+        res.setHeader('X-Security-Warning', 'high-risk-request');
+        break;
+      case 'monitor':
+        this.logger.log(
+          `[${context.requestId}] Medium-risk request under monitoring`,
+          {
+            requestId: context.requestId,
+            riskScore: result.riskScore,
+            violations: result.violations.length,
+          },
+        );
+        res.setHeader('X-Security-Monitor', 'medium-risk-request');
+        break;
+      case 'allow':
+      default: // Low risk - proceed normally
         break;
     }
   }
@@ -474,7 +593,10 @@ export class BrowserSecurityMiddleware implements NestMiddleware {
   /**
    * Validate browser automation specific security concerns
    */
-  private async validateBrowserAutomationSecurity(req: Request, context: RequestSecurityContext): Promise<SecurityViolation[]> {
+  private async validateBrowserAutomationSecurity(
+    req: Request,
+    context: RequestSecurityContext,
+  ): Promise<SecurityViolation[]> {
     const violations: SecurityViolation[] = [];
 
     // Check for potentially dangerous browser automation patterns
@@ -487,7 +609,8 @@ export class BrowserSecurityMiddleware implements NestMiddleware {
           severity: 'high',
           description: 'Potentially dangerous CSS selector or XPath detected',
           evidence: { payload: JSON.stringify(payload).substring(0, 200) },
-          recommendedAction: 'Sanitize selectors and validate against whitelist',
+          recommendedAction:
+            'Sanitize selectors and validate against whitelist',
         });
       }
 
@@ -520,7 +643,10 @@ export class BrowserSecurityMiddleware implements NestMiddleware {
   /**
    * Validate browser automation payload for specific threats
    */
-  private async validateBrowserAutomationPayload(payload: any, context: RequestSecurityContext): Promise<void> {
+  private async validateBrowserAutomationPayload(
+    payload: any,
+    context: RequestSecurityContext,
+  ): Promise<void> {
     // Validate browser session configurations
     if (payload.sessionConfig) {
       this.validateSessionConfig(payload.sessionConfig, context);
@@ -547,7 +673,10 @@ export class BrowserSecurityMiddleware implements NestMiddleware {
    */
   private extractClientIp(req: Request): string {
     return (
-      (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||(req.headers['x-real-ip'] as string) ||req.connection?.remoteAddress ||req.socket?.remoteAddress ||
+      (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
+      (req.headers['x-real-ip'] as string) ||
+      req.connection?.remoteAddress ||
+      req.socket?.remoteAddress ||
       'unknown'
     );
   }
@@ -560,20 +689,36 @@ export class BrowserSecurityMiddleware implements NestMiddleware {
     return JSON.stringify(req.body || {}).length;
   }
 
-  private calculateInitialRiskScore(req: Request, ipAddress: string, userAgent: string, endpoint: string): number {
+  private calculateInitialRiskScore(
+    req: Request,
+    ipAddress: string,
+    userAgent: string,
+    endpoint: string,
+  ): number {
     let score = 0;
 
     // Base score for browser automation endpoints
-    if (endpoint.includes('/browser-use/')) {score += 10;}
+    if (endpoint.includes('/browser-use/')) {
+      score += 10;
+    }
 
     // Higher score for administrative endpoints
-    if (endpoint.includes('/admin/') || endpoint.includes('/config/')) {score += 20;}
+    if (endpoint.includes('/admin/') || endpoint.includes('/config/')) {
+      score += 20;
+    }
 
     // Score based on method
     switch (req.method) {
-      case 'DELETE':score += 15;break;
-      case 'PUT':case 'PATCH':score += 10;break;
-      case 'POST':score += 5;break;
+      case 'DELETE':
+        score += 15;
+        break;
+      case 'PUT':
+      case 'PATCH':
+        score += 10;
+        break;
+      case 'POST':
+        score += 5;
+        break;
     }
 
     return score;
@@ -589,21 +734,23 @@ export class BrowserSecurityMiddleware implements NestMiddleware {
       /sqlmap|burp|zap|nikto/gi,
     ];
 
-    return suspiciousPatterns.some(pattern => {
-      if (typeof pattern === 'string') {return userAgent.toLowerCase().includes(pattern.toLowerCase());}
+    return suspiciousPatterns.some((pattern) => {
+      if (typeof pattern === 'string') {
+        return userAgent.toLowerCase().includes(pattern.toLowerCase());
+      }
       return pattern.test(userAgent);
     });
   }
 
   private isIpBlocked(ipAddress: string): boolean {
-    return this.securityConfig.blockedIpRanges.some(range => {
+    return this.securityConfig.blockedIpRanges.some((range) => {
       // Simple IP matching - in production, use proper CIDR matching
       return ipAddress.startsWith(range);
     });
   }
 
   private isIpTrusted(ipAddress: string): boolean {
-    return this.securityConfig.trustedIpRanges.some(range => {
+    return this.securityConfig.trustedIpRanges.some((range) => {
       // Simple IP matching - in production, use proper CIDR matching
       return ipAddress.startsWith(range);
     });
@@ -621,7 +768,7 @@ export class BrowserSecurityMiddleware implements NestMiddleware {
       /vbscript:/gi,
     ];
 
-    return xssPatterns.some(pattern => pattern.test(payload));
+    return xssPatterns.some((pattern) => pattern.test(payload));
   }
 
   private containsSqlInjectionPatterns(payload: string): boolean {
@@ -633,7 +780,7 @@ export class BrowserSecurityMiddleware implements NestMiddleware {
       /(\b(or|and)\b).*(\=|<|>|\!)/gi,
     ];
 
-    return sqlPatterns.some(pattern => pattern.test(payload));
+    return sqlPatterns.some((pattern) => pattern.test(payload));
   }
 
   private containsCommandInjectionPatterns(payload: string): boolean {
@@ -645,7 +792,7 @@ export class BrowserSecurityMiddleware implements NestMiddleware {
       /\.\.(\/|\\)/gi,
     ];
 
-    return commandPatterns.some(pattern => pattern.test(payload));
+    return commandPatterns.some((pattern) => pattern.test(payload));
   }
 
   private containsDangerousSelectors(payload: any): boolean {
@@ -657,16 +804,27 @@ export class BrowserSecurityMiddleware implements NestMiddleware {
         /<script/gi,
         /on\w+=/gi,
       ];
-      return dangerousPatterns.some(pattern => pattern.test(selector));
+      return dangerousPatterns.some((pattern) => pattern.test(selector));
     };
 
-    if (payload.selector && typeof payload.selector === 'string') {return checkSelector(payload.selector);}
+    if (payload.selector && typeof payload.selector === 'string') {
+      return checkSelector(payload.selector);
+    }
 
-    if (payload.selectors && typeof payload.selectors === 'object') {return Object.values(payload.selectors).some(selector =>typeof selector === 'string' && checkSelector(selector));}
+    if (payload.selectors && typeof payload.selectors === 'object') {
+      return Object.values(payload.selectors).some(
+        (selector) => typeof selector === 'string' && checkSelector(selector),
+      );
+    }
 
     if (payload.actions && Array.isArray(payload.actions)) {
-      return payload.actions.some(action =>
-        action.selector && typeof action.selector === 'string' && checkSelector(action.selector));}
+      return payload.actions.some(
+        (action) =>
+          action.selector &&
+          typeof action.selector === 'string' &&
+          checkSelector(action.selector),
+      );
+    }
 
     return false;
   }
@@ -684,15 +842,24 @@ export class BrowserSecurityMiddleware implements NestMiddleware {
         /10\./gi,
         /172\.(1[6-9]|2[0-9]|3[0-1])\./gi,
       ];
-      return dangerousPatterns.some(pattern => pattern.test(url));
+      return dangerousPatterns.some((pattern) => pattern.test(url));
     };
 
-    if (payload.url && typeof payload.url === 'string') {return checkUrl(payload.url);}
+    if (payload.url && typeof payload.url === 'string') {
+      return checkUrl(payload.url);
+    }
 
     if (payload.urls && Array.isArray(payload.urls)) {
-      return payload.urls.some(url => typeof url === 'string' && checkUrl(url));}if (payload.actions && Array.isArray(payload.actions)) {
-      return payload.actions.some(action =>
-        action.url && typeof action.url === 'string' && checkUrl(action.url));}
+      return payload.urls.some(
+        (url) => typeof url === 'string' && checkUrl(url),
+      );
+    }
+    if (payload.actions && Array.isArray(payload.actions)) {
+      return payload.actions.some(
+        (action) =>
+          action.url && typeof action.url === 'string' && checkUrl(action.url),
+      );
+    }
 
     return false;
   }
@@ -705,51 +872,114 @@ export class BrowserSecurityMiddleware implements NestMiddleware {
       /\.ssh|\.aws|\.config|passwd|shadow|hosts|\.env/gi,
     ];
 
-    return fileSystemPatterns.some(pattern => pattern.test(payloadString));
+    return fileSystemPatterns.some((pattern) => pattern.test(payloadString));
   }
 
   private validateRequestHeaders(context: RequestSecurityContext): void {
     const headers = context.headers;
 
     // Check for suspicious headers
-    const suspiciousHeaders = ['x-forwarded-host', 'x-original-url', 'x-rewrite-url'];
-    suspiciousHeaders.forEach(header => {
+    const suspiciousHeaders = [
+      'x-forwarded-host',
+      'x-original-url',
+      'x-rewrite-url',
+    ];
+    suspiciousHeaders.forEach((header) => {
       if (headers[header]) {
-        this.logger.warn(`[${context.requestId}] Suspicious header detected: ${header}`, {
-          requestId: context.requestId,
-          header,
-          value: headers[header],
-          ipAddress: context.ipAddress,
-        });
+        this.logger.warn(
+          `[${context.requestId}] Suspicious header detected: ${header}`,
+          {
+            requestId: context.requestId,
+            header,
+            value: headers[header],
+            ipAddress: context.ipAddress,
+          },
+        );
         context.riskScore += 15;
       }
     });
 
     // Validate content-type for POST/PUT requests
-    if (['POST', 'PUT', 'PATCH'].includes(context.method) && headers['content-type']) {const contentType = headers['content-type'];if (!contentType.includes('application/json') && !contentType.includes('application/x-www-form-urlencoded')) {context.riskScore += 10;}
+    if (
+      ['POST', 'PUT', 'PATCH'].includes(context.method) &&
+      headers['content-type']
+    ) {
+      const contentType = headers['content-type'];
+      if (
+        !contentType.includes('application/json') &&
+        !contentType.includes('application/x-www-form-urlencoded')
+      ) {
+        context.riskScore += 10;
+      }
     }
   }
 
-  private validateSessionConfig(sessionConfig: any, context: RequestSecurityContext): void {
+  private validateSessionConfig(
+    sessionConfig: any,
+    context: RequestSecurityContext,
+  ): void {
     // Validate viewport settings
-    if (sessionConfig.viewportWidth && (sessionConfig.viewportWidth < 320 || sessionConfig.viewportWidth > 3840)) {
-      throw new BadRequestException('Invalid viewport width');}if (sessionConfig.viewportHeight && (sessionConfig.viewportHeight < 240 || sessionConfig.viewportHeight > 2160)) {
-      throw new BadRequestException('Invalid viewport height');}// Validate additional args for dangerous parameters
-    if (sessionConfig.additionalArgs && Array.isArray(sessionConfig.additionalArgs)) {
-      const dangerousArgs = ['--disable-web-security', '--user-data-dir', '--allow-running-insecure-content'];const hasDangerousArgs = sessionConfig.additionalArgs.some(arg =>dangerousArgs.some(dangerous => arg.includes(dangerous))
+    if (
+      sessionConfig.viewportWidth &&
+      (sessionConfig.viewportWidth < 320 || sessionConfig.viewportWidth > 3840)
+    ) {
+      throw new BadRequestException('Invalid viewport width');
+    }
+    if (
+      sessionConfig.viewportHeight &&
+      (sessionConfig.viewportHeight < 240 ||
+        sessionConfig.viewportHeight > 2160)
+    ) {
+      throw new BadRequestException('Invalid viewport height');
+    } // Validate additional args for dangerous parameters
+    if (
+      sessionConfig.additionalArgs &&
+      Array.isArray(sessionConfig.additionalArgs)
+    ) {
+      const dangerousArgs = [
+        '--disable-web-security',
+        '--user-data-dir',
+        '--allow-running-insecure-content',
+      ];
+      const hasDangerousArgs = sessionConfig.additionalArgs.some((arg) =>
+        dangerousArgs.some((dangerous) => arg.includes(dangerous)),
       );
 
       if (hasDangerousArgs) {
-        throw new BadRequestException('Dangerous browser arguments detected');}}
+        throw new BadRequestException('Dangerous browser arguments detected');
+      }
+    }
   }
 
-  private validateBrowserActions(actions: any[], context: RequestSecurityContext): void {
+  private validateBrowserActions(
+    actions: any[],
+    context: RequestSecurityContext,
+  ): void {
     actions.forEach((action, index) => {
       // Validate action types
-      const allowedActions = ['navigate', 'click', 'type', 'scroll', 'screenshot', 'extract_text', 'extract_data', 'fill_form', 'submit_form', 'wait_for_element', 'wait_for_url', 'custom'];
+      const allowedActions = [
+        'navigate',
+        'click',
+        'type',
+        'scroll',
+        'screenshot',
+        'extract_text',
+        'extract_data',
+        'fill_form',
+        'submit_form',
+        'wait_for_element',
+        'wait_for_url',
+        'custom',
+      ];
       if (!allowedActions.includes(action.type)) {
-        throw new BadRequestException(`Invalid action type at index ${index}: ${action.type}`);}// Validate timeouts
-      if (action.waitTimeoutMs && (action.waitTimeoutMs < 100 || action.waitTimeoutMs > 60000)) {
+        throw new BadRequestException(
+          `Invalid action type at index ${index}: ${action.type}`,
+        );
+      } // Validate timeouts
+      if (
+        action.waitTimeoutMs &&
+        (action.waitTimeoutMs < 100 || action.waitTimeoutMs > 60000)
+      ) {
         throw new BadRequestException(`Invalid wait timeout at index ${index}`);
       }
     });
@@ -761,26 +991,35 @@ export class BrowserSecurityMiddleware implements NestMiddleware {
     if (payload.url) urls.push(payload.url);
     if (payload.urls) urls.push(...payload.urls);
     if (payload.actions) {
-      payload.actions.forEach(action => {
+      payload.actions.forEach((action) => {
         if (action.url) urls.push(action.url);
       });
     }
 
-    urls.forEach(url => {
+    urls.forEach((url) => {
       try {
         const parsedUrl = new URL(url);
 
         // Only allow http and https protocols
         if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
-          throw new BadRequestException(`Invalid URL protocol: ${parsedUrl.protocol}`);
+          throw new BadRequestException(
+            `Invalid URL protocol: ${parsedUrl.protocol}`,
+          );
         }
 
         // Block internal/localhost URLs
-        if (parsedUrl.hostname === 'localhost' ||parsedUrl.hostname === '127.0.0.1' ||
-            parsedUrl.hostname.match(/^192\.168\./) ||
-            parsedUrl.hostname.match(/^10\./) ||
-            parsedUrl.hostname.match(/^172\.(1[6-9]|2[0-9]|3[0-1])\./)) {
-          throw new BadRequestException(`Internal URL access not allowed: ${url}`);}} catch (error) {
+        if (
+          parsedUrl.hostname === 'localhost' ||
+          parsedUrl.hostname === '127.0.0.1' ||
+          parsedUrl.hostname.match(/^192\.168\./) ||
+          parsedUrl.hostname.match(/^10\./) ||
+          parsedUrl.hostname.match(/^172\.(1[6-9]|2[0-9]|3[0-1])\./)
+        ) {
+          throw new BadRequestException(
+            `Internal URL access not allowed: ${url}`,
+          );
+        }
+      } catch (error) {
         if (error instanceof BadRequestException) {
           throw error;
         }
@@ -789,20 +1028,25 @@ export class BrowserSecurityMiddleware implements NestMiddleware {
     });
   }
 
-  private validateSelectors(payload: any, context: RequestSecurityContext): void {
+  private validateSelectors(
+    payload: any,
+    context: RequestSecurityContext,
+  ): void {
     const selectors = [];
 
     if (payload.selector) selectors.push(payload.selector);
     if (payload.selectors) {
-      if (typeof payload.selectors === 'object') {selectors.push(...Object.values(payload.selectors));}
+      if (typeof payload.selectors === 'object') {
+        selectors.push(...Object.values(payload.selectors));
+      }
     }
     if (payload.actions) {
-      payload.actions.forEach(action => {
+      payload.actions.forEach((action) => {
         if (action.selector) selectors.push(action.selector);
       });
     }
 
-    selectors.forEach(selector => {
+    selectors.forEach((selector) => {
       if (typeof selector !== 'string') return;
 
       // Check selector length
@@ -812,14 +1056,16 @@ export class BrowserSecurityMiddleware implements NestMiddleware {
 
       // Check for dangerous patterns in selectors
       if (this.containsXssPatterns(selector)) {
-        throw new BadRequestException('Invalid selector contains dangerous patterns');
+        throw new BadRequestException(
+          'Invalid selector contains dangerous patterns',
+        );
       }
     });
   }
 
   private cleanupRateLimitTrackers(): void {
     const now = Date.now();
-    const expiredThreshold = now - (this.securityConfig.rateLimitWindow * 2);
+    const expiredThreshold = now - this.securityConfig.rateLimitWindow * 2;
 
     for (const [key, tracker] of Array.from(this.rateLimitTracker.entries())) {
       if (tracker.windowStart < expiredThreshold) {
@@ -828,7 +1074,11 @@ export class BrowserSecurityMiddleware implements NestMiddleware {
     }
   }
 
-  private logSecurityEvent(eventType: string, context: RequestSecurityContext, metadata: Record<string, unknown>): void {
+  private logSecurityEvent(
+    eventType: string,
+    context: RequestSecurityContext,
+    metadata: Record<string, unknown>,
+  ): void {
     this.logger.log(`Security Event: ${eventType}`, {
       eventType,
       requestId: context.requestId,
@@ -848,15 +1098,42 @@ export class BrowserSecurityMiddleware implements NestMiddleware {
 
   private loadSecurityConfig(): SecurityConfig {
     return {
-      maxRequestSize: this.configService.get<number>('BROWSER_SECURITY_MAX_REQUEST_SIZE', 1048576), // 1MB
-      rateLimitWindow: this.configService.get<number>('BROWSER_SECURITY_RATE_LIMIT_WINDOW', 60000), // 1 minute
-      rateLimitMax: this.configService.get<number>('BROWSER_SECURITY_RATE_LIMIT_MAX', 100),
-      enableXssProtection: this.configService.get<boolean>('BROWSER_SECURITY_XSS_PROTECTION', true),
-      enableSqlInjectionProtection: this.configService.get<boolean>('BROWSER_SECURITY_SQL_INJECTION_PROTECTION', true),
-      enablePayloadValidation: this.configService.get<boolean>('BROWSER_SECURITY_PAYLOAD_VALIDATION', true),
-      trustedIpRanges: this.configService.get<string>('BROWSER_SECURITY_TRUSTED_IPS', '').split(',').filter(Boolean),
-      blockedIpRanges: this.configService.get<string>('BROWSER_SECURITY_BLOCKED_IPS', '').split(',').filter(Boolean),
-      suspiciousUserAgentPatterns: this.configService.get<string>('BROWSER_SECURITY_SUSPICIOUS_USER_AGENTS', '').split(',').filter(Boolean),
+      maxRequestSize: this.configService.get<number>(
+        'BROWSER_SECURITY_MAX_REQUEST_SIZE',
+        1048576,
+      ), // 1MB
+      rateLimitWindow: this.configService.get<number>(
+        'BROWSER_SECURITY_RATE_LIMIT_WINDOW',
+        60000,
+      ), // 1 minute
+      rateLimitMax: this.configService.get<number>(
+        'BROWSER_SECURITY_RATE_LIMIT_MAX',
+        100,
+      ),
+      enableXssProtection: this.configService.get<boolean>(
+        'BROWSER_SECURITY_XSS_PROTECTION',
+        true,
+      ),
+      enableSqlInjectionProtection: this.configService.get<boolean>(
+        'BROWSER_SECURITY_SQL_INJECTION_PROTECTION',
+        true,
+      ),
+      enablePayloadValidation: this.configService.get<boolean>(
+        'BROWSER_SECURITY_PAYLOAD_VALIDATION',
+        true,
+      ),
+      trustedIpRanges: this.configService
+        .get<string>('BROWSER_SECURITY_TRUSTED_IPS', '')
+        .split(',')
+        .filter(Boolean),
+      blockedIpRanges: this.configService
+        .get<string>('BROWSER_SECURITY_BLOCKED_IPS', '')
+        .split(',')
+        .filter(Boolean),
+      suspiciousUserAgentPatterns: this.configService
+        .get<string>('BROWSER_SECURITY_SUSPICIOUS_USER_AGENTS', '')
+        .split(',')
+        .filter(Boolean),
     };
   }
 }

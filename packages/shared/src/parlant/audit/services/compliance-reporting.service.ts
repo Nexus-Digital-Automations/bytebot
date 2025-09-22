@@ -20,16 +20,16 @@
  * @author Claude Code - Audit Trail System Agent
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Injectable, Logger } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { EventEmitter2 } from "@nestjs/event-emitter";
 import {
   AuditEvent,
   AuditEventId,
   ComplianceAuditId,
   AuditEventSeverity,
   ComplianceMetadata,
-} from '../types/audit-core.types';
+} from "../types/audit-core.types";
 import {
   ComplianceFramework,
   ComplianceStatus,
@@ -49,9 +49,9 @@ import {
   ReportAppendix,
   ReportSignature,
   ComplianceCertification,
-} from '../types/compliance-forensic.types';
-import { createHash, randomBytes } from 'crypto';
-import { performance } from 'perf_hooks';
+} from "../types/compliance-forensic.types";
+import { createHash, randomBytes } from "crypto";
+import { performance } from "perf_hooks";
 
 // ===========================
 // COMPLIANCE REPORTING INTERFACES
@@ -125,27 +125,27 @@ export interface ReportPeriod {
  * Report period types
  */
 export enum ReportPeriodType {
-  ANNUAL = 'annual',
-  QUARTERLY = 'quarterly',
-  MONTHLY = 'monthly',
-  WEEKLY = 'weekly',
-  AD_HOC = 'ad_hoc',
-  INCIDENT_DRIVEN = 'incident_driven',
-  AUDIT_DRIVEN = 'audit_driven',
+  ANNUAL = "annual",
+  QUARTERLY = "quarterly",
+  MONTHLY = "monthly",
+  WEEKLY = "weekly",
+  AD_HOC = "ad_hoc",
+  INCIDENT_DRIVEN = "incident_driven",
+  AUDIT_DRIVEN = "audit_driven",
 }
 
 /**
  * Reporting frequencies
  */
 export enum ReportingFrequency {
-  REAL_TIME = 'real_time',
-  DAILY = 'daily',
-  WEEKLY = 'weekly',
-  MONTHLY = 'monthly',
-  QUARTERLY = 'quarterly',
-  SEMI_ANNUALLY = 'semi_annually',
-  ANNUALLY = 'annually',
-  AS_NEEDED = 'as_needed',
+  REAL_TIME = "real_time",
+  DAILY = "daily",
+  WEEKLY = "weekly",
+  MONTHLY = "monthly",
+  QUARTERLY = "quarterly",
+  SEMI_ANNUALLY = "semi_annually",
+  ANNUALLY = "annually",
+  AS_NEEDED = "as_needed",
 }
 
 /**
@@ -279,13 +279,13 @@ export interface ReportReviewer {
  * Reviewer roles
  */
 export enum ReviewerRole {
-  TECHNICAL_REVIEWER = 'technical_reviewer',
-  LEGAL_REVIEWER = 'legal_reviewer',
-  COMPLIANCE_OFFICER = 'compliance_officer',
-  SECURITY_OFFICER = 'security_officer',
-  PRIVACY_OFFICER = 'privacy_officer',
-  SUBJECT_MATTER_EXPERT = 'subject_matter_expert',
-  EXTERNAL_AUDITOR = 'external_auditor',
+  TECHNICAL_REVIEWER = "technical_reviewer",
+  LEGAL_REVIEWER = "legal_reviewer",
+  COMPLIANCE_OFFICER = "compliance_officer",
+  SECURITY_OFFICER = "security_officer",
+  PRIVACY_OFFICER = "privacy_officer",
+  SUBJECT_MATTER_EXPERT = "subject_matter_expert",
+  EXTERNAL_AUDITOR = "external_auditor",
 }
 
 /**
@@ -321,48 +321,48 @@ export interface ReviewComment {
  * Review comment types
  */
 export enum ReviewCommentType {
-  CLARIFICATION_REQUEST = 'clarification_request',
-  FACTUAL_CORRECTION = 'factual_correction',
-  METHODOLOGY_CONCERN = 'methodology_concern',
-  COMPLIANCE_CONCERN = 'compliance_concern',
-  RECOMMENDATION = 'recommendation',
-  APPROVAL_CONDITION = 'approval_condition',
-  EDITORIAL_SUGGESTION = 'editorial_suggestion',
+  CLARIFICATION_REQUEST = "clarification_request",
+  FACTUAL_CORRECTION = "factual_correction",
+  METHODOLOGY_CONCERN = "methodology_concern",
+  COMPLIANCE_CONCERN = "compliance_concern",
+  RECOMMENDATION = "recommendation",
+  APPROVAL_CONDITION = "approval_condition",
+  EDITORIAL_SUGGESTION = "editorial_suggestion",
 }
 
 /**
  * Comment severity levels
  */
 export enum CommentSeverity {
-  INFORMATIONAL = 'informational',
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  CRITICAL = 'critical',
-  BLOCKING = 'blocking',
+  INFORMATIONAL = "informational",
+  LOW = "low",
+  MEDIUM = "medium",
+  HIGH = "high",
+  CRITICAL = "critical",
+  BLOCKING = "blocking",
 }
 
 /**
  * Resolution status
  */
 export enum ResolutionStatus {
-  OPEN = 'open',
-  IN_PROGRESS = 'in_progress',
-  RESOLVED = 'resolved',
-  ACCEPTED = 'accepted',
-  REJECTED = 'rejected',
-  DEFERRED = 'deferred',
+  OPEN = "open",
+  IN_PROGRESS = "in_progress",
+  RESOLVED = "resolved",
+  ACCEPTED = "accepted",
+  REJECTED = "rejected",
+  DEFERRED = "deferred",
 }
 
 /**
  * Review approval status
  */
 export enum ReviewApprovalStatus {
-  PENDING = 'pending',
-  APPROVED = 'approved',
-  APPROVED_WITH_CONDITIONS = 'approved_with_conditions',
-  REJECTED = 'rejected',
-  REQUIRES_REVISION = 'requires_revision',
+  PENDING = "pending",
+  APPROVED = "approved",
+  APPROVED_WITH_CONDITIONS = "approved_with_conditions",
+  REJECTED = "rejected",
+  REQUIRES_REVISION = "requires_revision",
 }
 
 /**
@@ -418,12 +418,12 @@ export interface ApprovalAuthority {
  * Authority levels
  */
 export enum AuthorityLevel {
-  OPERATIONAL = 'operational',
-  MANAGEMENT = 'management',
-  EXECUTIVE = 'executive',
-  BOARD_LEVEL = 'board_level',
-  REGULATORY = 'regulatory',
-  EXTERNAL_AUDITOR = 'external_auditor',
+  OPERATIONAL = "operational",
+  MANAGEMENT = "management",
+  EXECUTIVE = "executive",
+  BOARD_LEVEL = "board_level",
+  REGULATORY = "regulatory",
+  EXTERNAL_AUDITOR = "external_auditor",
 }
 
 /**
@@ -447,11 +447,11 @@ export interface AuthorityVerification {
  * Verification methods
  */
 export enum VerificationMethod {
-  ORGANIZATIONAL_CHART = 'organizational_chart',
-  BOARD_RESOLUTION = 'board_resolution',
-  REGULATORY_APPOINTMENT = 'regulatory_appointment',
-  PROFESSIONAL_LICENSE = 'professional_license',
-  DELEGATION_DOCUMENT = 'delegation_document',
+  ORGANIZATIONAL_CHART = "organizational_chart",
+  BOARD_RESOLUTION = "board_resolution",
+  REGULATORY_APPOINTMENT = "regulatory_appointment",
+  PROFESSIONAL_LICENSE = "professional_license",
+  DELEGATION_DOCUMENT = "delegation_document",
 }
 
 /**
@@ -478,11 +478,11 @@ export interface SealOfApproval {
  * Seal types
  */
 export enum SealType {
-  DIGITAL_SEAL = 'digital_seal',
-  ELECTRONIC_SIGNATURE = 'electronic_signature',
-  NOTARIZED_SEAL = 'notarized_seal',
-  CORPORATE_SEAL = 'corporate_seal',
-  REGULATORY_SEAL = 'regulatory_seal',
+  DIGITAL_SEAL = "digital_seal",
+  ELECTRONIC_SIGNATURE = "electronic_signature",
+  NOTARIZED_SEAL = "notarized_seal",
+  CORPORATE_SEAL = "corporate_seal",
+  REGULATORY_SEAL = "regulatory_seal",
 }
 
 /**
@@ -509,12 +509,12 @@ export interface ReportClassification {
  * Classification levels
  */
 export enum ClassificationLevel {
-  PUBLIC = 'public',
-  INTERNAL = 'internal',
-  CONFIDENTIAL = 'confidential',
-  RESTRICTED = 'restricted',
-  SECRET = 'secret',
-  TOP_SECRET = 'top_secret',
+  PUBLIC = "public",
+  INTERNAL = "internal",
+  CONFIDENTIAL = "confidential",
+  RESTRICTED = "restricted",
+  SECRET = "secret",
+  TOP_SECRET = "top_secret",
 }
 
 /**
@@ -541,12 +541,12 @@ export interface AccessRestriction {
  * Access restriction types
  */
 export enum AccessRestrictionType {
-  ROLE_BASED = 'role_based',
-  CLEARANCE_BASED = 'clearance_based',
-  NEED_TO_KNOW = 'need_to_know',
-  TIME_LIMITED = 'time_limited',
-  LOCATION_LIMITED = 'location_limited',
-  PURPOSE_LIMITED = 'purpose_limited',
+  ROLE_BASED = "role_based",
+  CLEARANCE_BASED = "clearance_based",
+  NEED_TO_KNOW = "need_to_know",
+  TIME_LIMITED = "time_limited",
+  LOCATION_LIMITED = "location_limited",
+  PURPOSE_LIMITED = "purpose_limited",
 }
 
 /**
@@ -573,39 +573,39 @@ export interface DistributionRestriction {
  * Distribution scopes
  */
 export enum DistributionScope {
-  INTERNAL_ONLY = 'internal_only',
-  AUTHORIZED_PARTNERS = 'authorized_partners',
-  REGULATORY_BODIES = 'regulatory_bodies',
-  PUBLIC_DISCLOSURE = 'public_disclosure',
-  COURT_ORDERED = 'court_ordered',
-  LAW_ENFORCEMENT = 'law_enforcement',
+  INTERNAL_ONLY = "internal_only",
+  AUTHORIZED_PARTNERS = "authorized_partners",
+  REGULATORY_BODIES = "regulatory_bodies",
+  PUBLIC_DISCLOSURE = "public_disclosure",
+  COURT_ORDERED = "court_ordered",
+  LAW_ENFORCEMENT = "law_enforcement",
 }
 
 /**
  * Recipient categories
  */
 export enum RecipientCategory {
-  EXECUTIVES = 'executives',
-  COMPLIANCE_TEAM = 'compliance_team',
-  AUDIT_COMMITTEE = 'audit_committee',
-  BOARD_OF_DIRECTORS = 'board_of_directors',
-  EXTERNAL_AUDITORS = 'external_auditors',
-  REGULATORY_AUTHORITIES = 'regulatory_authorities',
-  LAW_ENFORCEMENT = 'law_enforcement',
-  LEGAL_COUNSEL = 'legal_counsel',
+  EXECUTIVES = "executives",
+  COMPLIANCE_TEAM = "compliance_team",
+  AUDIT_COMMITTEE = "audit_committee",
+  BOARD_OF_DIRECTORS = "board_of_directors",
+  EXTERNAL_AUDITORS = "external_auditors",
+  REGULATORY_AUTHORITIES = "regulatory_authorities",
+  LAW_ENFORCEMENT = "law_enforcement",
+  LEGAL_COUNSEL = "legal_counsel",
 }
 
 /**
  * Distribution methods
  */
 export enum DistributionMethod {
-  SECURE_EMAIL = 'secure_email',
-  ENCRYPTED_FILE_TRANSFER = 'encrypted_file_transfer',
-  SECURE_PORTAL = 'secure_portal',
-  PHYSICAL_DELIVERY = 'physical_delivery',
-  REGISTERED_MAIL = 'registered_mail',
-  COURIER_SERVICE = 'courier_service',
-  IN_PERSON_HANDOFF = 'in_person_handoff',
+  SECURE_EMAIL = "secure_email",
+  ENCRYPTED_FILE_TRANSFER = "encrypted_file_transfer",
+  SECURE_PORTAL = "secure_portal",
+  PHYSICAL_DELIVERY = "physical_delivery",
+  REGISTERED_MAIL = "registered_mail",
+  COURIER_SERVICE = "courier_service",
+  IN_PERSON_HANDOFF = "in_person_handoff",
 }
 
 /**
@@ -649,24 +649,24 @@ export interface CopyDestructionRequirement {
  * Destruction triggers
  */
 export enum DestructionTrigger {
-  TIME_BASED = 'time_based',
-  EVENT_BASED = 'event_based',
-  PURPOSE_COMPLETION = 'purpose_completion',
-  SUPERSEDED = 'superseded',
-  CLASSIFICATION_CHANGE = 'classification_change',
-  REQUEST_BASED = 'request_based',
+  TIME_BASED = "time_based",
+  EVENT_BASED = "event_based",
+  PURPOSE_COMPLETION = "purpose_completion",
+  SUPERSEDED = "superseded",
+  CLASSIFICATION_CHANGE = "classification_change",
+  REQUEST_BASED = "request_based",
 }
 
 /**
  * Destruction methods
  */
 export enum DestructionMethod {
-  SECURE_DELETION = 'secure_deletion',
-  PHYSICAL_SHREDDING = 'physical_shredding',
-  INCINERATION = 'incineration',
-  PULPING = 'pulping',
-  DEGAUSSING = 'degaussing',
-  CRYPTOGRAPHIC_ERASURE = 'cryptographic_erasure',
+  SECURE_DELETION = "secure_deletion",
+  PHYSICAL_SHREDDING = "physical_shredding",
+  INCINERATION = "incineration",
+  PULPING = "pulping",
+  DEGAUSSING = "degaussing",
+  CRYPTOGRAPHIC_ERASURE = "cryptographic_erasure",
 }
 
 /**
@@ -727,21 +727,21 @@ export interface RetentionPeriod {
  * Retention time units
  */
 export enum RetentionTimeUnit {
-  DAYS = 'days',
-  MONTHS = 'months',
-  YEARS = 'years',
-  INDEFINITE = 'indefinite',
+  DAYS = "days",
+  MONTHS = "months",
+  YEARS = "years",
+  INDEFINITE = "indefinite",
 }
 
 /**
  * Retention start triggers
  */
 export enum RetentionStartTrigger {
-  CREATION_DATE = 'creation_date',
-  APPROVAL_DATE = 'approval_date',
-  DISTRIBUTION_DATE = 'distribution_date',
-  SUPERSEDED_DATE = 'superseded_date',
-  PROJECT_COMPLETION = 'project_completion',
+  CREATION_DATE = "creation_date",
+  APPROVAL_DATE = "approval_date",
+  DISTRIBUTION_DATE = "distribution_date",
+  SUPERSEDED_DATE = "superseded_date",
+  PROJECT_COMPLETION = "project_completion",
 }
 
 /**
@@ -765,11 +765,11 @@ export interface RetentionExtensionCondition {
  * Extension condition types
  */
 export enum ExtensionConditionType {
-  LEGAL_HOLD = 'legal_hold',
-  ONGOING_INVESTIGATION = 'ongoing_investigation',
-  REGULATORY_REQUEST = 'regulatory_request',
-  LITIGATION = 'litigation',
-  BUSINESS_CONTINUITY = 'business_continuity',
+  LEGAL_HOLD = "legal_hold",
+  ONGOING_INVESTIGATION = "ongoing_investigation",
+  REGULATORY_REQUEST = "regulatory_request",
+  LITIGATION = "litigation",
+  BUSINESS_CONTINUITY = "business_continuity",
 }
 
 /**
@@ -796,12 +796,12 @@ export interface LegalHoldConsideration {
  * Legal hold types
  */
 export enum LegalHoldType {
-  LITIGATION_HOLD = 'litigation_hold',
-  INVESTIGATION_HOLD = 'investigation_hold',
-  REGULATORY_HOLD = 'regulatory_hold',
-  DISCOVERY_HOLD = 'discovery_hold',
-  PRESERVATION_ORDER = 'preservation_order',
-  COMPLIANCE_HOLD = 'compliance_hold',
+  LITIGATION_HOLD = "litigation_hold",
+  INVESTIGATION_HOLD = "investigation_hold",
+  REGULATORY_HOLD = "regulatory_hold",
+  DISCOVERY_HOLD = "discovery_hold",
+  PRESERVATION_ORDER = "preservation_order",
+  COMPLIANCE_HOLD = "compliance_hold",
 }
 
 /**
@@ -825,12 +825,12 @@ export interface HoldReleaseCondition {
  * Release condition types
  */
 export enum ReleaseConditionType {
-  CASE_CLOSURE = 'case_closure',
-  SETTLEMENT = 'settlement',
-  COURT_ORDER = 'court_order',
-  REGULATORY_CLEARANCE = 'regulatory_clearance',
-  INVESTIGATION_COMPLETION = 'investigation_completion',
-  TIME_EXPIRATION = 'time_expiration',
+  CASE_CLOSURE = "case_closure",
+  SETTLEMENT = "settlement",
+  COURT_ORDER = "court_order",
+  REGULATORY_CLEARANCE = "regulatory_clearance",
+  INVESTIGATION_COMPLETION = "investigation_completion",
+  TIME_EXPIRATION = "time_expiration",
 }
 
 /**
@@ -874,12 +874,12 @@ export interface DisposalVerificationRequirement {
  * Disposal verification types
  */
 export enum DisposalVerificationType {
-  WITNESS_VERIFICATION = 'witness_verification',
-  PHOTOGRAPHIC_EVIDENCE = 'photographic_evidence',
-  VIDEO_DOCUMENTATION = 'video_documentation',
-  CERTIFICATE_OF_DESTRUCTION = 'certificate_of_destruction',
-  CHAIN_OF_CUSTODY = 'chain_of_custody',
-  FORENSIC_VERIFICATION = 'forensic_verification',
+  WITNESS_VERIFICATION = "witness_verification",
+  PHOTOGRAPHIC_EVIDENCE = "photographic_evidence",
+  VIDEO_DOCUMENTATION = "video_documentation",
+  CERTIFICATE_OF_DESTRUCTION = "certificate_of_destruction",
+  CHAIN_OF_CUSTODY = "chain_of_custody",
+  FORENSIC_VERIFICATION = "forensic_verification",
 }
 
 /**
@@ -906,25 +906,25 @@ export interface ArchiveRequirement {
  * Archive locations
  */
 export enum ArchiveLocation {
-  ON_SITE_ARCHIVE = 'on_site_archive',
-  OFF_SITE_ARCHIVE = 'off_site_archive',
-  CLOUD_ARCHIVE = 'cloud_archive',
-  HYBRID_ARCHIVE = 'hybrid_archive',
-  THIRD_PARTY_ARCHIVE = 'third_party_archive',
-  REGULATORY_ARCHIVE = 'regulatory_archive',
+  ON_SITE_ARCHIVE = "on_site_archive",
+  OFF_SITE_ARCHIVE = "off_site_archive",
+  CLOUD_ARCHIVE = "cloud_archive",
+  HYBRID_ARCHIVE = "hybrid_archive",
+  THIRD_PARTY_ARCHIVE = "third_party_archive",
+  REGULATORY_ARCHIVE = "regulatory_archive",
 }
 
 /**
  * Archive formats
  */
 export enum ArchiveFormat {
-  DIGITAL_ORIGINAL = 'digital_original',
-  PDF_A = 'pdf_a',
-  MICROFILM = 'microfilm',
-  MICROFICHE = 'microfiche',
-  OPTICAL_DISC = 'optical_disc',
-  MAGNETIC_TAPE = 'magnetic_tape',
-  PAPER_COPY = 'paper_copy',
+  DIGITAL_ORIGINAL = "digital_original",
+  PDF_A = "pdf_a",
+  MICROFILM = "microfilm",
+  MICROFICHE = "microfiche",
+  OPTICAL_DISC = "optical_disc",
+  MAGNETIC_TAPE = "magnetic_tape",
+  PAPER_COPY = "paper_copy",
 }
 
 /**
@@ -948,12 +948,12 @@ export interface ArchiveAccessRestriction {
  * Archive restriction types
  */
 export enum ArchiveRestrictionType {
-  ROLE_BASED_ACCESS = 'role_based_access',
-  TIME_RESTRICTED_ACCESS = 'time_restricted_access',
-  PURPOSE_LIMITED_ACCESS = 'purpose_limited_access',
-  SUPERVISED_ACCESS_ONLY = 'supervised_access_only',
-  READ_ONLY_ACCESS = 'read_only_access',
-  NO_REPRODUCTION = 'no_reproduction',
+  ROLE_BASED_ACCESS = "role_based_access",
+  TIME_RESTRICTED_ACCESS = "time_restricted_access",
+  PURPOSE_LIMITED_ACCESS = "purpose_limited_access",
+  SUPERVISED_ACCESS_ONLY = "supervised_access_only",
+  READ_ONLY_ACCESS = "read_only_access",
+  NO_REPRODUCTION = "no_reproduction",
 }
 
 /**
@@ -1000,12 +1000,12 @@ export interface MigrationRequirement {
  * Migration triggers
  */
 export enum MigrationTrigger {
-  FORMAT_OBSOLESCENCE = 'format_obsolescence',
-  TECHNOLOGY_REFRESH = 'technology_refresh',
-  STANDARD_UPDATE = 'standard_update',
-  STORAGE_MIGRATION = 'storage_migration',
-  COMPLIANCE_REQUIREMENT = 'compliance_requirement',
-  ACCESSIBILITY_IMPROVEMENT = 'accessibility_improvement',
+  FORMAT_OBSOLESCENCE = "format_obsolescence",
+  TECHNOLOGY_REFRESH = "technology_refresh",
+  STANDARD_UPDATE = "standard_update",
+  STORAGE_MIGRATION = "storage_migration",
+  COMPLIANCE_REQUIREMENT = "compliance_requirement",
+  ACCESSIBILITY_IMPROVEMENT = "accessibility_improvement",
 }
 
 /**
@@ -1069,12 +1069,12 @@ export interface DeclassificationSchedule {
  * Declassification triggers
  */
 export enum DeclassificationTrigger {
-  TIME_BASED = 'time_based',
-  EVENT_BASED = 'event_based',
-  REQUEST_BASED = 'request_based',
-  AUTOMATIC = 'automatic',
-  MANUAL_REVIEW = 'manual_review',
-  REGULATORY_CHANGE = 'regulatory_change',
+  TIME_BASED = "time_based",
+  EVENT_BASED = "event_based",
+  REQUEST_BASED = "request_based",
+  AUTOMATIC = "automatic",
+  MANUAL_REVIEW = "manual_review",
+  REGULATORY_CHANGE = "regulatory_change",
 }
 
 /**
@@ -1127,12 +1127,12 @@ export interface ReceiptConfirmation {
  * Confirmation methods
  */
 export enum ConfirmationMethod {
-  EMAIL_CONFIRMATION = 'email_confirmation',
-  DIGITAL_SIGNATURE = 'digital_signature',
-  DELIVERY_RECEIPT = 'delivery_receipt',
-  READ_RECEIPT = 'read_receipt',
-  PORTAL_ACCESS_LOG = 'portal_access_log',
-  PHYSICAL_SIGNATURE = 'physical_signature',
+  EMAIL_CONFIRMATION = "email_confirmation",
+  DIGITAL_SIGNATURE = "digital_signature",
+  DELIVERY_RECEIPT = "delivery_receipt",
+  READ_RECEIPT = "read_receipt",
+  PORTAL_ACCESS_LOG = "portal_access_log",
+  PHYSICAL_SIGNATURE = "physical_signature",
 }
 
 /**
@@ -1182,12 +1182,12 @@ export interface OrganizationalScope {
  * Organizational levels
  */
 export enum OrganizationalLevel {
-  CORPORATE = 'corporate',
-  DIVISION = 'division',
-  BUSINESS_UNIT = 'business_unit',
-  DEPARTMENT = 'department',
-  TEAM = 'team',
-  INDIVIDUAL = 'individual',
+  CORPORATE = "corporate",
+  DIVISION = "division",
+  BUSINESS_UNIT = "business_unit",
+  DEPARTMENT = "department",
+  TEAM = "team",
+  INDIVIDUAL = "individual",
 }
 
 /**
@@ -1234,12 +1234,12 @@ export interface CrossBorderActivity {
  * Cross-border activity types
  */
 export enum CrossBorderActivityType {
-  DATA_TRANSFER = 'data_transfer',
-  SERVICE_DELIVERY = 'service_delivery',
-  STAFF_ASSIGNMENT = 'staff_assignment',
-  VENDOR_SERVICES = 'vendor_services',
-  CLOUD_SERVICES = 'cloud_services',
-  BACKUP_REPLICATION = 'backup_replication',
+  DATA_TRANSFER = "data_transfer",
+  SERVICE_DELIVERY = "service_delivery",
+  STAFF_ASSIGNMENT = "staff_assignment",
+  VENDOR_SERVICES = "vendor_services",
+  CLOUD_SERVICES = "cloud_services",
+  BACKUP_REPLICATION = "backup_replication",
 }
 
 /**
@@ -1306,25 +1306,25 @@ export interface DataVolumeEstimate {
  * Volume units
  */
 export enum VolumeUnit {
-  RECORDS = 'records',
-  BYTES = 'bytes',
-  KILOBYTES = 'kilobytes',
-  MEGABYTES = 'megabytes',
-  GIGABYTES = 'gigabytes',
-  TERABYTES = 'terabytes',
-  PETABYTES = 'petabytes',
+  RECORDS = "records",
+  BYTES = "bytes",
+  KILOBYTES = "kilobytes",
+  MEGABYTES = "megabytes",
+  GIGABYTES = "gigabytes",
+  TERABYTES = "terabytes",
+  PETABYTES = "petabytes",
 }
 
 /**
  * Estimation methods
  */
 export enum EstimationMethod {
-  ACTUAL_COUNT = 'actual_count',
-  STATISTICAL_SAMPLING = 'statistical_sampling',
-  EXPERT_ESTIMATION = 'expert_estimation',
-  SYSTEM_METRICS = 'system_metrics',
-  HISTORICAL_ANALYSIS = 'historical_analysis',
-  VENDOR_ESTIMATES = 'vendor_estimates',
+  ACTUAL_COUNT = "actual_count",
+  STATISTICAL_SAMPLING = "statistical_sampling",
+  EXPERT_ESTIMATION = "expert_estimation",
+  SYSTEM_METRICS = "system_metrics",
+  HISTORICAL_ANALYSIS = "historical_analysis",
+  VENDOR_ESTIMATES = "vendor_estimates",
 }
 
 /**
@@ -1377,23 +1377,23 @@ export interface CloudPlatform {
  * Cloud service types
  */
 export enum CloudServiceType {
-  IAAS = 'iaas',
-  PAAS = 'paas',
-  SAAS = 'saas',
-  FAAS = 'faas',
-  CAAS = 'caas',
-  DBAAS = 'dbaas',
+  IAAS = "iaas",
+  PAAS = "paas",
+  SAAS = "saas",
+  FAAS = "faas",
+  CAAS = "caas",
+  DBAAS = "dbaas",
 }
 
 /**
  * Cloud deployment models
  */
 export enum CloudDeploymentModel {
-  PUBLIC = 'public',
-  PRIVATE = 'private',
-  HYBRID = 'hybrid',
-  MULTI_CLOUD = 'multi_cloud',
-  COMMUNITY = 'community',
+  PUBLIC = "public",
+  PRIVATE = "private",
+  HYBRID = "hybrid",
+  MULTI_CLOUD = "multi_cloud",
+  COMMUNITY = "community",
 }
 
 /**
@@ -1423,36 +1423,36 @@ export interface ThirdPartySystem {
  * Third-party service categories
  */
 export enum ThirdPartyServiceCategory {
-  PAYMENT_PROCESSING = 'payment_processing',
-  CUSTOMER_SUPPORT = 'customer_support',
-  MARKETING_AUTOMATION = 'marketing_automation',
-  ANALYTICS = 'analytics',
-  BACKUP_SERVICES = 'backup_services',
-  SECURITY_SERVICES = 'security_services',
-  COMMUNICATION_SERVICES = 'communication_services',
+  PAYMENT_PROCESSING = "payment_processing",
+  CUSTOMER_SUPPORT = "customer_support",
+  MARKETING_AUTOMATION = "marketing_automation",
+  ANALYTICS = "analytics",
+  BACKUP_SERVICES = "backup_services",
+  SECURITY_SERVICES = "security_services",
+  COMMUNICATION_SERVICES = "communication_services",
 }
 
 /**
  * Data access levels
  */
 export enum DataAccessLevel {
-  NO_ACCESS = 'no_access',
-  METADATA_ONLY = 'metadata_only',
-  LIMITED_ACCESS = 'limited_access',
-  FULL_ACCESS = 'full_access',
-  ADMINISTRATIVE_ACCESS = 'administrative_access',
+  NO_ACCESS = "no_access",
+  METADATA_ONLY = "metadata_only",
+  LIMITED_ACCESS = "limited_access",
+  FULL_ACCESS = "full_access",
+  ADMINISTRATIVE_ACCESS = "administrative_access",
 }
 
 /**
  * Third-party compliance status
  */
 export enum ThirdPartyComplianceStatus {
-  COMPLIANT = 'compliant',
-  NON_COMPLIANT = 'non_compliant',
-  PARTIALLY_COMPLIANT = 'partially_compliant',
-  UNDER_REVIEW = 'under_review',
-  NOT_ASSESSED = 'not_assessed',
-  EXEMPTED = 'exempted',
+  COMPLIANT = "compliant",
+  NON_COMPLIANT = "non_compliant",
+  PARTIALLY_COMPLIANT = "partially_compliant",
+  UNDER_REVIEW = "under_review",
+  NOT_ASSESSED = "not_assessed",
+  EXEMPTED = "exempted",
 }
 
 /**
@@ -1479,12 +1479,12 @@ export interface ScopeExclusion {
  * Exclusion types
  */
 export enum ExclusionType {
-  ORGANIZATIONAL_EXCLUSION = 'organizational_exclusion',
-  GEOGRAPHICAL_EXCLUSION = 'geographical_exclusion',
-  FUNCTIONAL_EXCLUSION = 'functional_exclusion',
-  DATA_EXCLUSION = 'data_exclusion',
-  SYSTEM_EXCLUSION = 'system_exclusion',
-  TEMPORAL_EXCLUSION = 'temporal_exclusion',
+  ORGANIZATIONAL_EXCLUSION = "organizational_exclusion",
+  GEOGRAPHICAL_EXCLUSION = "geographical_exclusion",
+  FUNCTIONAL_EXCLUSION = "functional_exclusion",
+  DATA_EXCLUSION = "data_exclusion",
+  SYSTEM_EXCLUSION = "system_exclusion",
+  TEMPORAL_EXCLUSION = "temporal_exclusion",
 }
 
 /**
@@ -1514,12 +1514,12 @@ export interface ReportMethodology {
  * Assessment approaches
  */
 export enum AssessmentApproach {
-  RISK_BASED = 'risk_based',
-  CONTROLS_BASED = 'controls_based',
-  PROCESS_BASED = 'process_based',
-  OUTCOME_BASED = 'outcome_based',
-  HYBRID = 'hybrid',
-  COMPREHENSIVE = 'comprehensive',
+  RISK_BASED = "risk_based",
+  CONTROLS_BASED = "controls_based",
+  PROCESS_BASED = "process_based",
+  OUTCOME_BASED = "outcome_based",
+  HYBRID = "hybrid",
+  COMPREHENSIVE = "comprehensive",
 }
 
 /**
@@ -1549,24 +1549,24 @@ export interface EvidenceCollectionMethod {
  * Evidence method types
  */
 export enum EvidenceMethodType {
-  DOCUMENTARY_REVIEW = 'documentary_review',
-  INTERVIEWS = 'interviews',
-  OBSERVATIONS = 'observations',
-  TESTING = 'testing',
-  ANALYTICAL_PROCEDURES = 'analytical_procedures',
-  SYSTEM_INTERROGATION = 'system_interrogation',
+  DOCUMENTARY_REVIEW = "documentary_review",
+  INTERVIEWS = "interviews",
+  OBSERVATIONS = "observations",
+  TESTING = "testing",
+  ANALYTICAL_PROCEDURES = "analytical_procedures",
+  SYSTEM_INTERROGATION = "system_interrogation",
 }
 
 /**
  * Sampling approaches
  */
 export enum SamplingApproach {
-  RANDOM_SAMPLING = 'random_sampling',
-  SYSTEMATIC_SAMPLING = 'systematic_sampling',
-  STRATIFIED_SAMPLING = 'stratified_sampling',
-  CLUSTER_SAMPLING = 'cluster_sampling',
-  JUDGMENTAL_SAMPLING = 'judgmental_sampling',
-  CENSUS = 'census',
+  RANDOM_SAMPLING = "random_sampling",
+  SYSTEMATIC_SAMPLING = "systematic_sampling",
+  STRATIFIED_SAMPLING = "stratified_sampling",
+  CLUSTER_SAMPLING = "cluster_sampling",
+  JUDGMENTAL_SAMPLING = "judgmental_sampling",
+  CENSUS = "census",
 }
 
 /**
@@ -1596,36 +1596,36 @@ export interface DataSource {
  * Data source types
  */
 export enum DataSourceType {
-  SYSTEM_LOGS = 'system_logs',
-  DATABASE_RECORDS = 'database_records',
-  CONFIGURATION_FILES = 'configuration_files',
-  DOCUMENTATION = 'documentation',
-  INTERVIEW_NOTES = 'interview_notes',
-  EXTERNAL_REPORTS = 'external_reports',
-  THIRD_PARTY_ASSESSMENTS = 'third_party_assessments',
+  SYSTEM_LOGS = "system_logs",
+  DATABASE_RECORDS = "database_records",
+  CONFIGURATION_FILES = "configuration_files",
+  DOCUMENTATION = "documentation",
+  INTERVIEW_NOTES = "interview_notes",
+  EXTERNAL_REPORTS = "external_reports",
+  THIRD_PARTY_ASSESSMENTS = "third_party_assessments",
 }
 
 /**
  * Source reliability ratings
  */
 export enum SourceReliabilityRating {
-  HIGHLY_RELIABLE = 'highly_reliable',
-  RELIABLE = 'reliable',
-  MODERATELY_RELIABLE = 'moderately_reliable',
-  QUESTIONABLE = 'questionable',
-  UNRELIABLE = 'unreliable',
+  HIGHLY_RELIABLE = "highly_reliable",
+  RELIABLE = "reliable",
+  MODERATELY_RELIABLE = "moderately_reliable",
+  QUESTIONABLE = "questionable",
+  UNRELIABLE = "unreliable",
 }
 
 /**
  * Source access methods
  */
 export enum SourceAccessMethod {
-  DIRECT_ACCESS = 'direct_access',
-  SYSTEM_EXPORT = 'system_export',
-  API_EXTRACTION = 'api_extraction',
-  MANUAL_COLLECTION = 'manual_collection',
-  THIRD_PARTY_PROVISION = 'third_party_provision',
-  AUTOMATED_COLLECTION = 'automated_collection',
+  DIRECT_ACCESS = "direct_access",
+  SYSTEM_EXPORT = "system_export",
+  API_EXTRACTION = "api_extraction",
+  MANUAL_COLLECTION = "manual_collection",
+  THIRD_PARTY_PROVISION = "third_party_provision",
+  AUTOMATED_COLLECTION = "automated_collection",
 }
 
 /**
@@ -1655,12 +1655,12 @@ export interface AnalyticalTechnique {
  * Analytical technique types
  */
 export enum AnalyticalTechniqueType {
-  DESCRIPTIVE_ANALYTICS = 'descriptive_analytics',
-  DIAGNOSTIC_ANALYTICS = 'diagnostic_analytics',
-  PREDICTIVE_ANALYTICS = 'predictive_analytics',
-  PRESCRIPTIVE_ANALYTICS = 'prescriptive_analytics',
-  COMPARATIVE_ANALYSIS = 'comparative_analysis',
-  TREND_ANALYSIS = 'trend_analysis',
+  DESCRIPTIVE_ANALYTICS = "descriptive_analytics",
+  DIAGNOSTIC_ANALYTICS = "diagnostic_analytics",
+  PREDICTIVE_ANALYTICS = "predictive_analytics",
+  PRESCRIPTIVE_ANALYTICS = "prescriptive_analytics",
+  COMPARATIVE_ANALYSIS = "comparative_analysis",
+  TREND_ANALYSIS = "trend_analysis",
 }
 
 /**
@@ -1687,12 +1687,12 @@ export interface StatisticalMethod {
  * Statistical method categories
  */
 export enum StatisticalMethodCategory {
-  DESCRIPTIVE_STATISTICS = 'descriptive_statistics',
-  INFERENTIAL_STATISTICS = 'inferential_statistics',
-  REGRESSION_ANALYSIS = 'regression_analysis',
-  TIME_SERIES_ANALYSIS = 'time_series_analysis',
-  MULTIVARIATE_ANALYSIS = 'multivariate_analysis',
-  HYPOTHESIS_TESTING = 'hypothesis_testing',
+  DESCRIPTIVE_STATISTICS = "descriptive_statistics",
+  INFERENTIAL_STATISTICS = "inferential_statistics",
+  REGRESSION_ANALYSIS = "regression_analysis",
+  TIME_SERIES_ANALYSIS = "time_series_analysis",
+  MULTIVARIATE_ANALYSIS = "multivariate_analysis",
+  HYPOTHESIS_TESTING = "hypothesis_testing",
 }
 
 /**
@@ -1739,12 +1739,12 @@ export interface AnalyticalTool {
  * Tool capabilities
  */
 export enum ToolCapability {
-  DATA_EXTRACTION = 'data_extraction',
-  DATA_TRANSFORMATION = 'data_transformation',
-  STATISTICAL_ANALYSIS = 'statistical_analysis',
-  VISUALIZATION = 'visualization',
-  REPORTING = 'reporting',
-  AUTOMATION = 'automation',
+  DATA_EXTRACTION = "data_extraction",
+  DATA_TRANSFORMATION = "data_transformation",
+  STATISTICAL_ANALYSIS = "statistical_analysis",
+  VISUALIZATION = "visualization",
+  REPORTING = "reporting",
+  AUTOMATION = "automation",
 }
 
 /**
@@ -1771,12 +1771,12 @@ export interface AccuracyMeasure {
  * Accuracy measure types
  */
 export enum AccuracyMeasureType {
-  PRECISION = 'precision',
-  RECALL = 'recall',
-  F1_SCORE = 'f1_score',
-  ACCURACY_RATE = 'accuracy_rate',
-  ERROR_RATE = 'error_rate',
-  CONFIDENCE_INTERVAL = 'confidence_interval',
+  PRECISION = "precision",
+  RECALL = "recall",
+  F1_SCORE = "f1_score",
+  ACCURACY_RATE = "accuracy_rate",
+  ERROR_RATE = "error_rate",
+  CONFIDENCE_INTERVAL = "confidence_interval",
 }
 
 /**
@@ -1809,12 +1809,12 @@ export interface TestingProcedure {
  * Testing procedure types
  */
 export enum TestingProcedureType {
-  COMPLIANCE_TESTING = 'compliance_testing',
-  CONTROLS_TESTING = 'controls_testing',
-  SECURITY_TESTING = 'security_testing',
-  PERFORMANCE_TESTING = 'performance_testing',
-  INTEGRATION_TESTING = 'integration_testing',
-  BUSINESS_PROCESS_TESTING = 'business_process_testing',
+  COMPLIANCE_TESTING = "compliance_testing",
+  CONTROLS_TESTING = "controls_testing",
+  SECURITY_TESTING = "security_testing",
+  PERFORMANCE_TESTING = "performance_testing",
+  INTEGRATION_TESTING = "integration_testing",
+  BUSINESS_PROCESS_TESTING = "business_process_testing",
 }
 
 /**
@@ -1881,24 +1881,24 @@ export interface TestMethod {
  * Test method types
  */
 export enum TestMethodType {
-  MANUAL_TESTING = 'manual_testing',
-  AUTOMATED_TESTING = 'automated_testing',
-  WALKTHROUGH = 'walkthrough',
-  INSPECTION = 'inspection',
-  SIMULATION = 'simulation',
-  PENETRATION_TESTING = 'penetration_testing',
+  MANUAL_TESTING = "manual_testing",
+  AUTOMATED_TESTING = "automated_testing",
+  WALKTHROUGH = "walkthrough",
+  INSPECTION = "inspection",
+  SIMULATION = "simulation",
+  PENETRATION_TESTING = "penetration_testing",
 }
 
 /**
  * Test execution approaches
  */
 export enum TestExecutionApproach {
-  BLACK_BOX = 'black_box',
-  WHITE_BOX = 'white_box',
-  GRAY_BOX = 'gray_box',
-  RISK_BASED = 'risk_based',
-  SCENARIO_BASED = 'scenario_based',
-  EXPLORATORY = 'exploratory',
+  BLACK_BOX = "black_box",
+  WHITE_BOX = "white_box",
+  GRAY_BOX = "gray_box",
+  RISK_BASED = "risk_based",
+  SCENARIO_BASED = "scenario_based",
+  EXPLORATORY = "exploratory",
 }
 
 /**
@@ -1928,12 +1928,12 @@ export interface ValidationMethod {
  * Validation method types
  */
 export enum ValidationMethodType {
-  DATA_VALIDATION = 'data_validation',
-  PROCESS_VALIDATION = 'process_validation',
-  SYSTEM_VALIDATION = 'system_validation',
-  DOCUMENT_VALIDATION = 'document_validation',
-  RESULT_VALIDATION = 'result_validation',
-  CROSS_VALIDATION = 'cross_validation',
+  DATA_VALIDATION = "data_validation",
+  PROCESS_VALIDATION = "process_validation",
+  SYSTEM_VALIDATION = "system_validation",
+  DOCUMENT_VALIDATION = "document_validation",
+  RESULT_VALIDATION = "result_validation",
+  CROSS_VALIDATION = "cross_validation",
 }
 
 /**
@@ -1960,23 +1960,23 @@ export interface QualityCheck {
  * Quality check types
  */
 export enum QualityCheckType {
-  COMPLETENESS_CHECK = 'completeness_check',
-  ACCURACY_CHECK = 'accuracy_check',
-  CONSISTENCY_CHECK = 'consistency_check',
-  VALIDITY_CHECK = 'validity_check',
-  RELIABILITY_CHECK = 'reliability_check',
-  TIMELINESS_CHECK = 'timeliness_check',
+  COMPLETENESS_CHECK = "completeness_check",
+  ACCURACY_CHECK = "accuracy_check",
+  CONSISTENCY_CHECK = "consistency_check",
+  VALIDITY_CHECK = "validity_check",
+  RELIABILITY_CHECK = "reliability_check",
+  TIMELINESS_CHECK = "timeliness_check",
 }
 
 /**
  * Quality check results
  */
 export enum QualityCheckResult {
-  PASSED = 'passed',
-  FAILED = 'failed',
-  WARNING = 'warning',
-  NOT_APPLICABLE = 'not_applicable',
-  INSUFFICIENT_DATA = 'insufficient_data',
+  PASSED = "passed",
+  FAILED = "failed",
+  WARNING = "warning",
+  NOT_APPLICABLE = "not_applicable",
+  INSUFFICIENT_DATA = "insufficient_data",
 }
 
 /**
@@ -2003,11 +2003,11 @@ export interface ValidationResult {
  * Validation result status
  */
 export enum ValidationResultStatus {
-  VALIDATED = 'validated',
-  PARTIALLY_VALIDATED = 'partially_validated',
-  NOT_VALIDATED = 'not_validated',
-  VALIDATION_FAILED = 'validation_failed',
-  INSUFFICIENT_EVIDENCE = 'insufficient_evidence',
+  VALIDATED = "validated",
+  PARTIALLY_VALIDATED = "partially_validated",
+  NOT_VALIDATED = "not_validated",
+  VALIDATION_FAILED = "validation_failed",
+  INSUFFICIENT_EVIDENCE = "insufficient_evidence",
 }
 
 /**
@@ -2034,12 +2034,12 @@ export interface MethodologyLimitation {
  * Limitation types
  */
 export enum LimitationType {
-  DATA_LIMITATION = 'data_limitation',
-  SCOPE_LIMITATION = 'scope_limitation',
-  TIME_LIMITATION = 'time_limitation',
-  RESOURCE_LIMITATION = 'resource_limitation',
-  ACCESS_LIMITATION = 'access_limitation',
-  TECHNICAL_LIMITATION = 'technical_limitation',
+  DATA_LIMITATION = "data_limitation",
+  SCOPE_LIMITATION = "scope_limitation",
+  TIME_LIMITATION = "time_limitation",
+  RESOURCE_LIMITATION = "resource_limitation",
+  ACCESS_LIMITATION = "access_limitation",
+  TECHNICAL_LIMITATION = "technical_limitation",
 }
 
 /**
@@ -2063,33 +2063,33 @@ export interface ImpactAssessment {
  * Impact levels
  */
 export enum ImpactLevel {
-  NEGLIGIBLE = 'negligible',
-  LOW = 'low',
-  MODERATE = 'moderate',
-  HIGH = 'high',
-  SEVERE = 'severe',
+  NEGLIGIBLE = "negligible",
+  LOW = "low",
+  MODERATE = "moderate",
+  HIGH = "high",
+  SEVERE = "severe",
 }
 
 /**
  * Confidence impact levels
  */
 export enum ConfidenceImpactLevel {
-  NO_IMPACT = 'no_impact',
-  MINOR_REDUCTION = 'minor_reduction',
-  MODERATE_REDUCTION = 'moderate_reduction',
-  SIGNIFICANT_REDUCTION = 'significant_reduction',
-  MAJOR_REDUCTION = 'major_reduction',
+  NO_IMPACT = "no_impact",
+  MINOR_REDUCTION = "minor_reduction",
+  MODERATE_REDUCTION = "moderate_reduction",
+  SIGNIFICANT_REDUCTION = "significant_reduction",
+  MAJOR_REDUCTION = "major_reduction",
 }
 
 /**
  * Conclusion impact levels
  */
 export enum ConclusionImpactLevel {
-  NO_IMPACT = 'no_impact',
-  QUALIFICATION_REQUIRED = 'qualification_required',
-  SCOPE_LIMITATION = 'scope_limitation',
-  OPINION_MODIFICATION = 'opinion_modification',
-  DISCLAIMER_REQUIRED = 'disclaimer_required',
+  NO_IMPACT = "no_impact",
+  QUALIFICATION_REQUIRED = "qualification_required",
+  SCOPE_LIMITATION = "scope_limitation",
+  OPINION_MODIFICATION = "opinion_modification",
+  DISCLAIMER_REQUIRED = "disclaimer_required",
 }
 
 /**
@@ -2116,36 +2116,36 @@ export interface ResidualRiskAssessment {
  * Risk levels
  */
 export enum RiskLevel {
-  VERY_LOW = 'very_low',
-  LOW = 'low',
-  MODERATE = 'moderate',
-  HIGH = 'high',
-  VERY_HIGH = 'very_high',
-  CRITICAL = 'critical',
+  VERY_LOW = "very_low",
+  LOW = "low",
+  MODERATE = "moderate",
+  HIGH = "high",
+  VERY_HIGH = "very_high",
+  CRITICAL = "critical",
 }
 
 /**
  * Risk probability
  */
 export enum RiskProbability {
-  VERY_UNLIKELY = 'very_unlikely',
-  UNLIKELY = 'unlikely',
-  POSSIBLE = 'possible',
-  LIKELY = 'likely',
-  VERY_LIKELY = 'very_likely',
-  CERTAIN = 'certain',
+  VERY_UNLIKELY = "very_unlikely",
+  UNLIKELY = "unlikely",
+  POSSIBLE = "possible",
+  LIKELY = "likely",
+  VERY_LIKELY = "very_likely",
+  CERTAIN = "certain",
 }
 
 /**
  * Risk impact
  */
 export enum RiskImpact {
-  NEGLIGIBLE = 'negligible',
-  MINOR = 'minor',
-  MODERATE = 'moderate',
-  MAJOR = 'major',
-  SEVERE = 'severe',
-  CATASTROPHIC = 'catastrophic',
+  NEGLIGIBLE = "negligible",
+  MINOR = "minor",
+  MODERATE = "moderate",
+  MAJOR = "major",
+  SEVERE = "severe",
+  CATASTROPHIC = "catastrophic",
 }
 
 /**
@@ -2189,23 +2189,23 @@ export interface QualityAssuranceProcedure {
  * Quality assurance procedure types
  */
 export enum QualityAssuranceProcedureType {
-  PEER_REVIEW = 'peer_review',
-  INDEPENDENT_REVIEW = 'independent_review',
-  TECHNICAL_REVIEW = 'technical_review',
-  EDITORIAL_REVIEW = 'editorial_review',
-  COMPLIANCE_REVIEW = 'compliance_review',
-  QUALITY_CONTROL = 'quality_control',
+  PEER_REVIEW = "peer_review",
+  INDEPENDENT_REVIEW = "independent_review",
+  TECHNICAL_REVIEW = "technical_review",
+  EDITORIAL_REVIEW = "editorial_review",
+  COMPLIANCE_REVIEW = "compliance_review",
+  QUALITY_CONTROL = "quality_control",
 }
 
 /**
  * Implementation levels
  */
 export enum ImplementationLevel {
-  BASIC = 'basic',
-  STANDARD = 'standard',
-  ENHANCED = 'enhanced',
-  COMPREHENSIVE = 'comprehensive',
-  ENTERPRISE = 'enterprise',
+  BASIC = "basic",
+  STANDARD = "standard",
+  ENHANCED = "enhanced",
+  COMPREHENSIVE = "comprehensive",
+  ENTERPRISE = "enterprise",
 }
 
 /**
@@ -2232,11 +2232,11 @@ export interface ReviewLevel {
  * Review completeness
  */
 export enum ReviewCompleteness {
-  COMPLETE = 'complete',
-  SUBSTANTIALLY_COMPLETE = 'substantially_complete',
-  PARTIALLY_COMPLETE = 'partially_complete',
-  INCOMPLETE = 'incomplete',
-  NOT_STARTED = 'not_started',
+  COMPLETE = "complete",
+  SUBSTANTIALLY_COMPLETE = "substantially_complete",
+  PARTIALLY_COMPLETE = "partially_complete",
+  INCOMPLETE = "incomplete",
+  NOT_STARTED = "not_started",
 }
 
 /**
@@ -2266,23 +2266,23 @@ export interface QualityMetric {
  * Quality metric categories
  */
 export enum QualityMetricCategory {
-  ACCURACY = 'accuracy',
-  COMPLETENESS = 'completeness',
-  CONSISTENCY = 'consistency',
-  TIMELINESS = 'timeliness',
-  RELEVANCE = 'relevance',
-  RELIABILITY = 'reliability',
+  ACCURACY = "accuracy",
+  COMPLETENESS = "completeness",
+  CONSISTENCY = "consistency",
+  TIMELINESS = "timeliness",
+  RELEVANCE = "relevance",
+  RELIABILITY = "reliability",
 }
 
 /**
  * Performance assessments
  */
 export enum PerformanceAssessment {
-  EXCEEDS_TARGET = 'exceeds_target',
-  MEETS_TARGET = 'meets_target',
-  APPROACHES_TARGET = 'approaches_target',
-  BELOW_TARGET = 'below_target',
-  SIGNIFICANTLY_BELOW_TARGET = 'significantly_below_target',
+  EXCEEDS_TARGET = "exceeds_target",
+  MEETS_TARGET = "meets_target",
+  APPROACHES_TARGET = "approaches_target",
+  BELOW_TARGET = "below_target",
+  SIGNIFICANTLY_BELOW_TARGET = "significantly_below_target",
 }
 
 /**
@@ -2312,11 +2312,11 @@ export interface QualityAssuranceCertification {
  * Certification levels
  */
 export enum CertificationLevel {
-  BASIC = 'basic',
-  INTERMEDIATE = 'intermediate',
-  ADVANCED = 'advanced',
-  EXPERT = 'expert',
-  MASTER = 'master',
+  BASIC = "basic",
+  INTERMEDIATE = "intermediate",
+  ADVANCED = "advanced",
+  EXPERT = "expert",
+  MASTER = "master",
 }
 
 /**
@@ -2341,4 +2341,4 @@ export interface CertificationValidity {
 
 // Continue with remaining interfaces in next part...
 
-export * from './compliance-reporting.service';
+export * from "./compliance-reporting.service";

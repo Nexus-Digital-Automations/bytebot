@@ -38,35 +38,35 @@ export interface CoverageDataSource {
  * Coverage tool types
  */
 export enum CoverageToolType {
-  JEST = 'JEST',
-  NYC = 'NYC',
-  ISTANBUL = 'ISTANBUL',
-  C8 = 'C8',
-  LCOV = 'LCOV',
-  JACOCO = 'JACOCO',
-  CUSTOM = 'CUSTOM'
+  JEST = "JEST",
+  NYC = "NYC",
+  ISTANBUL = "ISTANBUL",
+  C8 = "C8",
+  LCOV = "LCOV",
+  JACOCO = "JACOCO",
+  CUSTOM = "CUSTOM",
 }
 
 /**
  * Coverage data formats
  */
 export enum CoverageDataFormat {
-  JSON = 'JSON',
-  LCOV = 'LCOV',
-  XML = 'XML',
-  HTML = 'HTML',
-  TEXT = 'TEXT'
+  JSON = "JSON",
+  LCOV = "LCOV",
+  XML = "XML",
+  HTML = "HTML",
+  TEXT = "TEXT",
 }
 
 /**
  * Coverage thresholds
  */
 export interface CoverageThreshold {
-  readonly overall: number;        // percentage
-  readonly functions: number;      // percentage
-  readonly branches: number;       // percentage
-  readonly lines: number;          // percentage
-  readonly statements: number;     // percentage
+  readonly overall: number; // percentage
+  readonly functions: number; // percentage
+  readonly branches: number; // percentage
+  readonly lines: number; // percentage
+  readonly statements: number; // percentage
   readonly perFile?: CoverageThreshold;
   readonly perFunction?: CoverageThreshold;
 }
@@ -75,13 +75,13 @@ export interface CoverageThreshold {
  * Coverage report formats
  */
 export enum CoverageReportFormat {
-  HTML = 'HTML',
-  JSON = 'JSON',
-  LCOV = 'LCOV',
-  XML = 'XML',
-  CONSOLE = 'CONSOLE',
-  PDF = 'PDF',
-  EXCEL = 'EXCEL'
+  HTML = "HTML",
+  JSON = "JSON",
+  LCOV = "LCOV",
+  XML = "XML",
+  CONSOLE = "CONSOLE",
+  PDF = "PDF",
+  EXCEL = "EXCEL",
 }
 
 /**
@@ -100,7 +100,7 @@ export interface HistoricalAnalysisConfig {
  */
 export interface RealTimeTrackingConfig {
   readonly enabled: boolean;
-  readonly updateInterval: number;    // milliseconds
+  readonly updateInterval: number; // milliseconds
   readonly alertThresholds: AlertThreshold[];
   readonly dashboardEnabled: boolean;
 }
@@ -120,42 +120,42 @@ export interface AlertThreshold {
  * Coverage metric types
  */
 export enum CoverageMetricType {
-  OVERALL_PERCENTAGE = 'OVERALL_PERCENTAGE',
-  FUNCTION_PERCENTAGE = 'FUNCTION_PERCENTAGE',
-  BRANCH_PERCENTAGE = 'BRANCH_PERCENTAGE',
-  LINE_PERCENTAGE = 'LINE_PERCENTAGE',
-  UNCOVERED_LINES = 'UNCOVERED_LINES',
-  UNCOVERED_FUNCTIONS = 'UNCOVERED_FUNCTIONS'
+  OVERALL_PERCENTAGE = "OVERALL_PERCENTAGE",
+  FUNCTION_PERCENTAGE = "FUNCTION_PERCENTAGE",
+  BRANCH_PERCENTAGE = "BRANCH_PERCENTAGE",
+  LINE_PERCENTAGE = "LINE_PERCENTAGE",
+  UNCOVERED_LINES = "UNCOVERED_LINES",
+  UNCOVERED_FUNCTIONS = "UNCOVERED_FUNCTIONS",
 }
 
 /**
  * Threshold directions
  */
 export enum ThresholdDirection {
-  ABOVE = 'ABOVE',
-  BELOW = 'BELOW',
-  EQUALS = 'EQUALS'
+  ABOVE = "ABOVE",
+  BELOW = "BELOW",
+  EQUALS = "EQUALS",
 }
 
 /**
  * Alert severity levels
  */
 export enum AlertSeverity {
-  INFO = 'INFO',
-  WARNING = 'WARNING',
-  ERROR = 'ERROR',
-  CRITICAL = 'CRITICAL'
+  INFO = "INFO",
+  WARNING = "WARNING",
+  ERROR = "ERROR",
+  CRITICAL = "CRITICAL",
 }
 
 /**
  * Alert actions
  */
 export enum AlertAction {
-  LOG = 'LOG',
-  EMAIL = 'EMAIL',
-  SLACK = 'SLACK',
-  WEBHOOK = 'WEBHOOK',
-  STOP_BUILD = 'STOP_BUILD'
+  LOG = "LOG",
+  EMAIL = "EMAIL",
+  SLACK = "SLACK",
+  WEBHOOK = "WEBHOOK",
+  STOP_BUILD = "STOP_BUILD",
 }
 
 /**
@@ -258,14 +258,14 @@ export interface UncoveredBranch {
  * Branch types
  */
 export enum BranchType {
-  IF = 'IF',
-  ELSE = 'ELSE',
-  SWITCH = 'SWITCH',
-  TERNARY = 'TERNARY',
-  LOGICAL_AND = 'LOGICAL_AND',
-  LOGICAL_OR = 'LOGICAL_OR',
-  WHILE = 'WHILE',
-  FOR = 'FOR'
+  IF = "IF",
+  ELSE = "ELSE",
+  SWITCH = "SWITCH",
+  TERNARY = "TERNARY",
+  LOGICAL_AND = "LOGICAL_AND",
+  LOGICAL_OR = "LOGICAL_OR",
+  WHILE = "WHILE",
+  FOR = "FOR",
 }
 
 /**
@@ -285,20 +285,20 @@ export interface UncoveredElement {
  * Uncovered element types
  */
 export enum UncoveredElementType {
-  LINE = 'LINE',
-  FUNCTION = 'FUNCTION',
-  BRANCH = 'BRANCH',
-  STATEMENT = 'STATEMENT'
+  LINE = "LINE",
+  FUNCTION = "FUNCTION",
+  BRANCH = "BRANCH",
+  STATEMENT = "STATEMENT",
 }
 
 /**
  * Priority levels for uncovered elements
  */
 export enum UncoveredPriority {
-  LOW = 'LOW',
-  MEDIUM = 'MEDIUM',
-  HIGH = 'HIGH',
-  CRITICAL = 'CRITICAL'
+  LOW = "LOW",
+  MEDIUM = "MEDIUM",
+  HIGH = "HIGH",
+  CRITICAL = "CRITICAL",
 }
 
 /**
@@ -357,41 +357,41 @@ export interface CoverageInsight {
  * Coverage insight types
  */
 export enum CoverageInsightType {
-  THRESHOLD_NOT_MET = 'THRESHOLD_NOT_MET',
-  LOW_FUNCTION_COVERAGE = 'LOW_FUNCTION_COVERAGE',
-  LOW_BRANCH_COVERAGE = 'LOW_BRANCH_COVERAGE',
-  HIGH_COMPLEXITY_UNCOVERED = 'HIGH_COMPLEXITY_UNCOVERED',
-  REGRESSION_DETECTED = 'REGRESSION_DETECTED',
-  IMPROVEMENT_OPPORTUNITY = 'IMPROVEMENT_OPPORTUNITY'
+  THRESHOLD_NOT_MET = "THRESHOLD_NOT_MET",
+  LOW_FUNCTION_COVERAGE = "LOW_FUNCTION_COVERAGE",
+  LOW_BRANCH_COVERAGE = "LOW_BRANCH_COVERAGE",
+  HIGH_COMPLEXITY_UNCOVERED = "HIGH_COMPLEXITY_UNCOVERED",
+  REGRESSION_DETECTED = "REGRESSION_DETECTED",
+  IMPROVEMENT_OPPORTUNITY = "IMPROVEMENT_OPPORTUNITY",
 }
 
 /**
  * Insight severity levels
  */
 export enum InsightSeverity {
-  INFO = 'INFO',
-  LOW = 'LOW',
-  MEDIUM = 'MEDIUM',
-  HIGH = 'HIGH',
-  CRITICAL = 'CRITICAL'
+  INFO = "INFO",
+  LOW = "LOW",
+  MEDIUM = "MEDIUM",
+  HIGH = "HIGH",
+  CRITICAL = "CRITICAL",
 }
 
 /**
  * Insight impact levels
  */
 export enum InsightImpact {
-  LOW = 'LOW',
-  MEDIUM = 'MEDIUM',
-  HIGH = 'HIGH'
+  LOW = "LOW",
+  MEDIUM = "MEDIUM",
+  HIGH = "HIGH",
 }
 
 /**
  * Insight effort levels
  */
 export enum InsightEffort {
-  LOW = 'LOW',
-  MEDIUM = 'MEDIUM',
-  HIGH = 'HIGH'
+  LOW = "LOW",
+  MEDIUM = "MEDIUM",
+  HIGH = "HIGH",
 }
 
 /**
@@ -411,43 +411,43 @@ export interface CoverageRecommendation {
  * Recommendation priorities
  */
 export enum RecommendationPriority {
-  LOW = 'LOW',
-  MEDIUM = 'MEDIUM',
-  HIGH = 'HIGH',
-  CRITICAL = 'CRITICAL'
+  LOW = "LOW",
+  MEDIUM = "MEDIUM",
+  HIGH = "HIGH",
+  CRITICAL = "CRITICAL",
 }
 
 /**
  * Recommendation categories
  */
 export enum RecommendationCategory {
-  FUNCTION_COVERAGE = 'FUNCTION_COVERAGE',
-  BRANCH_COVERAGE = 'BRANCH_COVERAGE',
-  LINE_COVERAGE = 'LINE_COVERAGE',
-  FILE_COVERAGE = 'FILE_COVERAGE',
-  INTEGRATION_TESTING = 'INTEGRATION_TESTING',
-  EDGE_CASE_TESTING = 'EDGE_CASE_TESTING'
+  FUNCTION_COVERAGE = "FUNCTION_COVERAGE",
+  BRANCH_COVERAGE = "BRANCH_COVERAGE",
+  LINE_COVERAGE = "LINE_COVERAGE",
+  FILE_COVERAGE = "FILE_COVERAGE",
+  INTEGRATION_TESTING = "INTEGRATION_TESTING",
+  EDGE_CASE_TESTING = "EDGE_CASE_TESTING",
 }
 
 /**
  * Effort levels
  */
 export enum EffortLevel {
-  MINIMAL = 'MINIMAL',      // < 1 hour
-  LOW = 'LOW',              // 1-4 hours
-  MEDIUM = 'MEDIUM',        // 1-2 days
-  HIGH = 'HIGH',            // 3-5 days
-  VERY_HIGH = 'VERY_HIGH'   // > 1 week
+  MINIMAL = "MINIMAL", // < 1 hour
+  LOW = "LOW", // 1-4 hours
+  MEDIUM = "MEDIUM", // 1-2 days
+  HIGH = "HIGH", // 3-5 days
+  VERY_HIGH = "VERY_HIGH", // > 1 week
 }
 
 /**
  * Impact levels
  */
 export enum ImpactLevel {
-  LOW = 'LOW',              // < 5% improvement
-  MEDIUM = 'MEDIUM',        // 5-15% improvement
-  HIGH = 'HIGH',            // 15-30% improvement
-  VERY_HIGH = 'VERY_HIGH'   // > 30% improvement
+  LOW = "LOW", // < 5% improvement
+  MEDIUM = "MEDIUM", // 5-15% improvement
+  HIGH = "HIGH", // 15-30% improvement
+  VERY_HIGH = "VERY_HIGH", // > 30% improvement
 }
 
 /**
@@ -503,13 +503,13 @@ export interface CoverageWidget {
  * Widget types for coverage dashboard
  */
 export enum WidgetType {
-  COVERAGE_GAUGE = 'COVERAGE_GAUGE',
-  TREND_CHART = 'TREND_CHART',
-  FILE_LIST = 'FILE_LIST',
-  FUNCTION_LIST = 'FUNCTION_LIST',
-  UNCOVERED_ELEMENTS = 'UNCOVERED_ELEMENTS',
-  THRESHOLD_STATUS = 'THRESHOLD_STATUS',
-  HEATMAP = 'HEATMAP'
+  COVERAGE_GAUGE = "COVERAGE_GAUGE",
+  TREND_CHART = "TREND_CHART",
+  FILE_LIST = "FILE_LIST",
+  FUNCTION_LIST = "FUNCTION_LIST",
+  UNCOVERED_ELEMENTS = "UNCOVERED_ELEMENTS",
+  THRESHOLD_STATUS = "THRESHOLD_STATUS",
+  HEATMAP = "HEATMAP",
 }
 
 /**
@@ -547,10 +547,10 @@ export interface TimeRange {
  * Time granularity options
  */
 export enum TimeGranularity {
-  HOUR = 'HOUR',
-  DAY = 'DAY',
-  WEEK = 'WEEK',
-  MONTH = 'MONTH'
+  HOUR = "HOUR",
+  DAY = "DAY",
+  WEEK = "WEEK",
+  MONTH = "MONTH",
 }
 
 /**
@@ -567,25 +567,25 @@ export interface CoverageFilter {
  * Filter types
  */
 export enum FilterType {
-  DROPDOWN = 'DROPDOWN',
-  MULTI_SELECT = 'MULTI_SELECT',
-  DATE_RANGE = 'DATE_RANGE',
-  SEARCH = 'SEARCH',
-  THRESHOLD = 'THRESHOLD'
+  DROPDOWN = "DROPDOWN",
+  MULTI_SELECT = "MULTI_SELECT",
+  DATE_RANGE = "DATE_RANGE",
+  SEARCH = "SEARCH",
+  THRESHOLD = "THRESHOLD",
 }
 
 /**
  * Coverage format types for export
  */
 export enum CoverageFormat {
-  JSON = 'JSON',
-  XML = 'XML',
-  LCOV = 'LCOV',
-  HTML = 'HTML',
-  CSV = 'CSV',
-  COBERTURA = 'COBERTURA',
-  CLOVER = 'CLOVER',
-  JUNIT = 'JUNIT'
+  JSON = "JSON",
+  XML = "XML",
+  LCOV = "LCOV",
+  HTML = "HTML",
+  CSV = "CSV",
+  COBERTURA = "COBERTURA",
+  CLOVER = "CLOVER",
+  JUNIT = "JUNIT",
 }
 
 /**
@@ -610,7 +610,7 @@ export interface CoverageExportResult {
   readonly formats: any[];
   readonly artifacts: CoverageArtifact[];
   readonly integrations: ExternalIntegration[];
-  status: 'IN_PROGRESS' | 'COMPLETED' | 'COMPLETED_WITH_ERRORS' | 'FAILED';
+  status: "IN_PROGRESS" | "COMPLETED" | "COMPLETED_WITH_ERRORS" | "FAILED";
   duration: number;
   readonly errors: Array<{
     readonly type: string;
@@ -624,7 +624,7 @@ export interface CoverageExportResult {
  */
 export interface ExternalIntegration {
   readonly tool: string;
-  readonly status: 'SUCCESS' | 'FAILURE';
+  readonly status: "SUCCESS" | "FAILURE";
   readonly uploadId: string;
   readonly url?: string;
   readonly duration: number;
@@ -637,7 +637,12 @@ export interface ExternalIntegration {
  */
 export interface CIIntegrationConfig {
   readonly enabled: boolean;
-  readonly type: 'GITHUB_ACTIONS' | 'GITLAB_CI' | 'JENKINS' | 'AZURE_DEVOPS' | 'CUSTOM';
+  readonly type:
+    | "GITHUB_ACTIONS"
+    | "GITLAB_CI"
+    | "JENKINS"
+    | "AZURE_DEVOPS"
+    | "CUSTOM";
   readonly config: Record<string, any>;
   readonly artifactPublishing: {
     readonly enabled: boolean;
@@ -662,7 +667,12 @@ export interface CoverageExportConfig {
   readonly compression: boolean;
   readonly encryption?: EncryptionConfig;
   readonly externalIntegrations?: Array<{
-    readonly tool: 'SONARQUBE' | 'CODECOV' | 'COVERALLS' | 'CODECLIMATE' | 'CUSTOM';
+    readonly tool:
+      | "SONARQUBE"
+      | "CODECOV"
+      | "COVERALLS"
+      | "CODECLIMATE"
+      | "CUSTOM";
     readonly config: {
       readonly apiUrl?: string;
       readonly apiKey?: string;
@@ -700,8 +710,8 @@ export interface CoverageTrendAnalysis {
   readonly functionName?: string;
   readonly dataPoints: CoverageDataPoint[];
   readonly trend: TrendDirection;
-  readonly correlation: number;           // -1 to 1
-  readonly volatility: number;            // standard deviation
+  readonly correlation: number; // -1 to 1
+  readonly volatility: number; // standard deviation
   readonly prediction: CoveragePrediction;
   readonly anomalies: CoverageAnomaly[];
 }
@@ -723,12 +733,12 @@ export interface CoverageDataPoint {
  * Trend directions
  */
 export enum TrendDirection {
-  STRONGLY_IMPROVING = 'STRONGLY_IMPROVING',
-  IMPROVING = 'IMPROVING',
-  STABLE = 'STABLE',
-  DECLINING = 'DECLINING',
-  STRONGLY_DECLINING = 'STRONGLY_DECLINING',
-  VOLATILE = 'VOLATILE'
+  STRONGLY_IMPROVING = "STRONGLY_IMPROVING",
+  IMPROVING = "IMPROVING",
+  STABLE = "STABLE",
+  DECLINING = "DECLINING",
+  STRONGLY_DECLINING = "STRONGLY_DECLINING",
+  VOLATILE = "VOLATILE",
 }
 
 /**
@@ -736,8 +746,8 @@ export enum TrendDirection {
  */
 export interface CoveragePrediction {
   readonly predictedCoverage: number;
-  readonly confidence: number;            // 0-1
-  readonly timeHorizon: number;          // days
+  readonly confidence: number; // 0-1
+  readonly timeHorizon: number; // days
   readonly methodology: string;
   readonly assumptions: string[];
 }
@@ -759,21 +769,21 @@ export interface CoverageAnomaly {
  * Anomaly types
  */
 export enum AnomalyType {
-  SUDDEN_DROP = 'SUDDEN_DROP',
-  SUDDEN_SPIKE = 'SUDDEN_SPIKE',
-  GRADUAL_DECLINE = 'GRADUAL_DECLINE',
-  UNUSUAL_VOLATILITY = 'UNUSUAL_VOLATILITY',
-  BASELINE_SHIFT = 'BASELINE_SHIFT'
+  SUDDEN_DROP = "SUDDEN_DROP",
+  SUDDEN_SPIKE = "SUDDEN_SPIKE",
+  GRADUAL_DECLINE = "GRADUAL_DECLINE",
+  UNUSUAL_VOLATILITY = "UNUSUAL_VOLATILITY",
+  BASELINE_SHIFT = "BASELINE_SHIFT",
 }
 
 /**
  * Anomaly severity levels
  */
 export enum AnomalySeverity {
-  MINOR = 'MINOR',
-  MODERATE = 'MODERATE',
-  MAJOR = 'MAJOR',
-  CRITICAL = 'CRITICAL'
+  MINOR = "MINOR",
+  MODERATE = "MODERATE",
+  MAJOR = "MAJOR",
+  CRITICAL = "CRITICAL",
 }
 
 /**
@@ -830,20 +840,20 @@ export interface ChangeMetric {
  * Change directions
  */
 export enum ChangeDirection {
-  INCREASED = 'INCREASED',
-  DECREASED = 'DECREASED',
-  UNCHANGED = 'UNCHANGED'
+  INCREASED = "INCREASED",
+  DECREASED = "DECREASED",
+  UNCHANGED = "UNCHANGED",
 }
 
 /**
  * Change significance levels
  */
 export enum ChangeSignificance {
-  NEGLIGIBLE = 'NEGLIGIBLE',    // < 1%
-  MINOR = 'MINOR',              // 1-5%
-  MODERATE = 'MODERATE',        // 5-15%
-  MAJOR = 'MAJOR',              // 15-30%
-  CRITICAL = 'CRITICAL'         // > 30%
+  NEGLIGIBLE = "NEGLIGIBLE", // < 1%
+  MINOR = "MINOR", // 1-5%
+  MODERATE = "MODERATE", // 5-15%
+  MAJOR = "MAJOR", // 15-30%
+  CRITICAL = "CRITICAL", // > 30%
 }
 
 /**
@@ -873,10 +883,10 @@ export interface ComparisonAnalysis {
  * Risk levels
  */
 export enum RiskLevel {
-  LOW = 'LOW',
-  MEDIUM = 'MEDIUM',
-  HIGH = 'HIGH',
-  CRITICAL = 'CRITICAL'
+  LOW = "LOW",
+  MEDIUM = "MEDIUM",
+  HIGH = "HIGH",
+  CRITICAL = "CRITICAL",
 }
 
 /**
@@ -893,11 +903,11 @@ export interface QualityImpact {
  * Comparison verdict
  */
 export enum ComparisonVerdict {
-  SIGNIFICANTLY_BETTER = 'SIGNIFICANTLY_BETTER',
-  BETTER = 'BETTER',
-  SIMILAR = 'SIMILAR',
-  WORSE = 'WORSE',
-  SIGNIFICANTLY_WORSE = 'SIGNIFICANTLY_WORSE'
+  SIGNIFICANTLY_BETTER = "SIGNIFICANTLY_BETTER",
+  BETTER = "BETTER",
+  SIMILAR = "SIMILAR",
+  WORSE = "WORSE",
+  SIGNIFICANTLY_WORSE = "SIGNIFICANTLY_WORSE",
 }
 
 /**
@@ -922,11 +932,11 @@ export interface CoverageAlert {
  * Coverage alert types
  */
 export enum CoverageAlertType {
-  THRESHOLD_VIOLATION = 'THRESHOLD_VIOLATION',
-  REGRESSION_DETECTED = 'REGRESSION_DETECTED',
-  ANOMALY_DETECTED = 'ANOMALY_DETECTED',
-  SIGNIFICANT_DECLINE = 'SIGNIFICANT_DECLINE',
-  NEW_UNCOVERED_CODE = 'NEW_UNCOVERED_CODE'
+  THRESHOLD_VIOLATION = "THRESHOLD_VIOLATION",
+  REGRESSION_DETECTED = "REGRESSION_DETECTED",
+  ANOMALY_DETECTED = "ANOMALY_DETECTED",
+  SIGNIFICANT_DECLINE = "SIGNIFICANT_DECLINE",
+  NEW_UNCOVERED_CODE = "NEW_UNCOVERED_CODE",
 }
 
 /**
@@ -938,7 +948,7 @@ export interface CoverageOptimization {
   readonly target: OptimizationTarget;
   readonly description: string;
   readonly implementation: string;
-  readonly expectedImprovement: number;   // percentage points
+  readonly expectedImprovement: number; // percentage points
   readonly effort: EffortLevel;
   readonly priority: RecommendationPriority;
   readonly dependencies: string[];
@@ -949,31 +959,31 @@ export interface CoverageOptimization {
  * Optimization types
  */
 export enum OptimizationType {
-  TEST_ADDITION = 'TEST_ADDITION',
-  TEST_IMPROVEMENT = 'TEST_IMPROVEMENT',
-  CODE_REFACTORING = 'CODE_REFACTORING',
-  DEAD_CODE_REMOVAL = 'DEAD_CODE_REMOVAL',
-  EDGE_CASE_TESTING = 'EDGE_CASE_TESTING',
-  INTEGRATION_TESTING = 'INTEGRATION_TESTING'
+  TEST_ADDITION = "TEST_ADDITION",
+  TEST_IMPROVEMENT = "TEST_IMPROVEMENT",
+  CODE_REFACTORING = "CODE_REFACTORING",
+  DEAD_CODE_REMOVAL = "DEAD_CODE_REMOVAL",
+  EDGE_CASE_TESTING = "EDGE_CASE_TESTING",
+  INTEGRATION_TESTING = "INTEGRATION_TESTING",
 }
 
 /**
  * Optimization targets
  */
 export enum OptimizationTarget {
-  OVERALL_COVERAGE = 'OVERALL_COVERAGE',
-  FUNCTION_COVERAGE = 'FUNCTION_COVERAGE',
-  BRANCH_COVERAGE = 'BRANCH_COVERAGE',
-  LINE_COVERAGE = 'LINE_COVERAGE',
-  SPECIFIC_FILE = 'SPECIFIC_FILE',
-  SPECIFIC_FUNCTION = 'SPECIFIC_FUNCTION'
+  OVERALL_COVERAGE = "OVERALL_COVERAGE",
+  FUNCTION_COVERAGE = "FUNCTION_COVERAGE",
+  BRANCH_COVERAGE = "BRANCH_COVERAGE",
+  LINE_COVERAGE = "LINE_COVERAGE",
+  SPECIFIC_FILE = "SPECIFIC_FILE",
+  SPECIFIC_FUNCTION = "SPECIFIC_FUNCTION",
 }
 
 /**
  * Coverage health score
  */
 export interface CoverageHealthScore {
-  readonly score: number;              // 0-100
+  readonly score: number; // 0-100
   readonly grade: HealthGrade;
   readonly factors: HealthFactor[];
   readonly trend: TrendDirection;
@@ -984,11 +994,11 @@ export interface CoverageHealthScore {
  * Health grades
  */
 export enum HealthGrade {
-  EXCELLENT = 'EXCELLENT',    // 90-100
-  GOOD = 'GOOD',              // 80-89
-  FAIR = 'FAIR',              // 70-79
-  POOR = 'POOR',              // 50-69
-  CRITICAL = 'CRITICAL'       // 0-49
+  EXCELLENT = "EXCELLENT", // 90-100
+  GOOD = "GOOD", // 80-89
+  FAIR = "FAIR", // 70-79
+  POOR = "POOR", // 50-69
+  CRITICAL = "CRITICAL", // 0-49
 }
 
 /**
@@ -996,8 +1006,8 @@ export enum HealthGrade {
  */
 export interface HealthFactor {
   readonly name: string;
-  readonly weight: number;        // 0-1
-  readonly score: number;         // 0-100
+  readonly weight: number; // 0-1
+  readonly score: number; // 0-100
   readonly description: string;
 }
 
@@ -1018,9 +1028,9 @@ export interface CoverageDashboardData {
   trends: CoverageTrendData[];
   comparisons: CoverageComparisonResult[];
   systemStatus: {
-    status: 'HEALTHY' | 'WARNING' | 'CRITICAL';
+    status: "HEALTHY" | "WARNING" | "CRITICAL";
     lastUpdate: Date;
-    dataFreshness: 'CURRENT' | 'STALE' | 'OUTDATED';
+    dataFreshness: "CURRENT" | "STALE" | "OUTDATED";
     alertCount: number;
   };
 }
@@ -1043,7 +1053,7 @@ export interface CoverageTrendData {
  */
 export interface CoverageVisualization {
   id: string;
-  type: 'LINE_CHART' | 'BAR_CHART' | 'PIE_CHART' | 'HEATMAP' | 'TREEMAP';
+  type: "LINE_CHART" | "BAR_CHART" | "PIE_CHART" | "HEATMAP" | "TREEMAP";
   title: string;
   data: any;
   config: Record<string, any>;
@@ -1056,8 +1066,8 @@ export interface CoverageVisualization {
  */
 export interface DashboardCoverageAlert {
   id: string;
-  type: 'COVERAGE_THRESHOLD' | 'COVERAGE_TREND' | 'PERFORMANCE';
-  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  type: "COVERAGE_THRESHOLD" | "COVERAGE_TREND" | "PERFORMANCE";
+  severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
   title: string;
   message: string;
   timestamp: Date;

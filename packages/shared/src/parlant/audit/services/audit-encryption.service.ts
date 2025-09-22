@@ -19,9 +19,9 @@
  * @author Claude Code - Audit Trail System Agent
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Injectable, Logger } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { EventEmitter2 } from "@nestjs/event-emitter";
 import {
   AuditEvent,
   AuditEventId,
@@ -31,9 +31,17 @@ import {
   EncryptionComplianceSettings,
   HsmConfig,
   QuantumResistantSettings,
-} from '../types/audit-core.types';
-import { createCipheriv, createDecipheriv, randomBytes, createHash, createHmac, createSign, createVerify } from 'crypto';
-import { performance } from 'perf_hooks';
+} from "../types/audit-core.types";
+import {
+  createCipheriv,
+  createDecipheriv,
+  randomBytes,
+  createHash,
+  createHmac,
+  createSign,
+  createVerify,
+} from "crypto";
+import { performance } from "perf_hooks";
 
 // ===========================
 // ENCRYPTION SERVICE INTERFACES
@@ -69,13 +77,13 @@ export interface EncryptionConfig {
  * Encryption algorithms
  */
 export enum EncryptionAlgorithm {
-  AES_256_GCM = 'aes-256-gcm',
-  AES_256_CBC = 'aes-256-cbc',
-  CHACHA20_POLY1305 = 'chacha20-poly1305',
-  XCHACHA20_POLY1305 = 'xchacha20-poly1305',
-  AES_256_SIV = 'aes-256-siv',
-  KYBER_1024 = 'kyber-1024',           // Post-quantum
-  DILITHIUM_5 = 'dilithium-5',         // Post-quantum signature
+  AES_256_GCM = "aes-256-gcm",
+  AES_256_CBC = "aes-256-cbc",
+  CHACHA20_POLY1305 = "chacha20-poly1305",
+  XCHACHA20_POLY1305 = "xchacha20-poly1305",
+  AES_256_SIV = "aes-256-siv",
+  KYBER_1024 = "kyber-1024", // Post-quantum
+  DILITHIUM_5 = "dilithium-5", // Post-quantum signature
 }
 
 /**
@@ -105,24 +113,24 @@ export interface KeyManagementConfig {
  * Key generation algorithms
  */
 export enum KeyGenerationAlgorithm {
-  PBKDF2 = 'pbkdf2',
-  SCRYPT = 'scrypt',
-  ARGON2ID = 'argon2id',
-  HKDF = 'hkdf',
-  RANDOM_BYTES = 'random_bytes',
-  HSM_GENERATED = 'hsm_generated',
+  PBKDF2 = "pbkdf2",
+  SCRYPT = "scrypt",
+  ARGON2ID = "argon2id",
+  HKDF = "hkdf",
+  RANDOM_BYTES = "random_bytes",
+  HSM_GENERATED = "hsm_generated",
 }
 
 /**
  * Key storage methods
  */
 export enum KeyStorageMethod {
-  MEMORY = 'memory',
-  ENCRYPTED_FILE = 'encrypted_file',
-  ENVIRONMENT_VARIABLE = 'environment_variable',
-  HSM = 'hsm',
-  KEY_VAULT = 'key_vault',
-  DATABASE_ENCRYPTED = 'database_encrypted',
+  MEMORY = "memory",
+  ENCRYPTED_FILE = "encrypted_file",
+  ENVIRONMENT_VARIABLE = "environment_variable",
+  HSM = "hsm",
+  KEY_VAULT = "key_vault",
+  DATABASE_ENCRYPTED = "database_encrypted",
 }
 
 /**
@@ -152,12 +160,12 @@ export interface KeyRotationPolicy {
  * Key rotation triggers
  */
 export enum KeyRotationTrigger {
-  TIME_BASED = 'time_based',
-  USAGE_BASED = 'usage_based',
-  COMPROMISE_SUSPECTED = 'compromise_suspected',
-  COMPLIANCE_REQUIREMENT = 'compliance_requirement',
-  SECURITY_INCIDENT = 'security_incident',
-  ADMINISTRATIVE_REQUEST = 'administrative_request',
+  TIME_BASED = "time_based",
+  USAGE_BASED = "usage_based",
+  COMPROMISE_SUSPECTED = "compromise_suspected",
+  COMPLIANCE_REQUIREMENT = "compliance_requirement",
+  SECURITY_INCIDENT = "security_incident",
+  ADMINISTRATIVE_REQUEST = "administrative_request",
 }
 
 /**
@@ -181,12 +189,12 @@ export interface KeyRotationNotification {
  * Notification methods
  */
 export enum NotificationMethod {
-  EMAIL = 'email',
-  SMS = 'sms',
-  SLACK = 'slack',
-  TEAMS = 'teams',
-  WEBHOOK = 'webhook',
-  SYSTEM_LOG = 'system_log',
+  EMAIL = "email",
+  SMS = "sms",
+  SLACK = "slack",
+  TEAMS = "teams",
+  WEBHOOK = "webhook",
+  SYSTEM_LOG = "system_log",
 }
 
 /**
@@ -247,11 +255,11 @@ export interface MasterKeyProtection {
  * Master key protection methods
  */
 export enum MasterKeyProtectionMethod {
-  PASSWORD_PROTECTED = 'password_protected',
-  CERTIFICATE_PROTECTED = 'certificate_protected',
-  HSM_PROTECTED = 'hsm_protected',
-  THRESHOLD_SCHEME = 'threshold_scheme',
-  MULTI_FACTOR = 'multi_factor',
+  PASSWORD_PROTECTED = "password_protected",
+  CERTIFICATE_PROTECTED = "certificate_protected",
+  HSM_PROTECTED = "hsm_protected",
+  THRESHOLD_SCHEME = "threshold_scheme",
+  MULTI_FACTOR = "multi_factor",
 }
 
 /**
@@ -295,22 +303,22 @@ export interface ShareHolder {
  * Authentication methods
  */
 export enum AuthenticationMethod {
-  PASSWORD = 'password',
-  CERTIFICATE = 'certificate',
-  BIOMETRIC = 'biometric',
-  SMART_CARD = 'smart_card',
-  HARDWARE_TOKEN = 'hardware_token',
-  MULTI_FACTOR = 'multi_factor',
+  PASSWORD = "password",
+  CERTIFICATE = "certificate",
+  BIOMETRIC = "biometric",
+  SMART_CARD = "smart_card",
+  HARDWARE_TOKEN = "hardware_token",
+  MULTI_FACTOR = "multi_factor",
 }
 
 /**
  * Reconstruction algorithms
  */
 export enum ReconstructionAlgorithm {
-  SHAMIRS_SECRET_SHARING = 'shamirs_secret_sharing',
-  FELDMAN_VSS = 'feldman_vss',
-  PEDERSEN_VSS = 'pedersen_vss',
-  ADDITIVE_SECRET_SHARING = 'additive_secret_sharing',
+  SHAMIRS_SECRET_SHARING = "shamirs_secret_sharing",
+  FELDMAN_VSS = "feldman_vss",
+  PEDERSEN_VSS = "pedersen_vss",
+  ADDITIVE_SECRET_SHARING = "additive_secret_sharing",
 }
 
 /**
@@ -351,11 +359,11 @@ export interface AccessRequirement {
  * Access requirement types
  */
 export enum AccessRequirementType {
-  DUAL_CONTROL = 'dual_control',
-  COMMITTEE_APPROVAL = 'committee_approval',
-  MANAGEMENT_APPROVAL = 'management_approval',
-  EMERGENCY_OVERRIDE = 'emergency_override',
-  SCHEDULED_ACCESS = 'scheduled_access',
+  DUAL_CONTROL = "dual_control",
+  COMMITTEE_APPROVAL = "committee_approval",
+  MANAGEMENT_APPROVAL = "management_approval",
+  EMERGENCY_OVERRIDE = "emergency_override",
+  SCHEDULED_ACCESS = "scheduled_access",
 }
 
 /**
@@ -382,14 +390,14 @@ export interface AuthorizationLevel {
  * Key operations
  */
 export enum KeyOperation {
-  GENERATE_KEY = 'generate_key',
-  ROTATE_KEY = 'rotate_key',
-  BACKUP_KEY = 'backup_key',
-  RESTORE_KEY = 'restore_key',
-  DELETE_KEY = 'delete_key',
-  EXPORT_KEY = 'export_key',
-  IMPORT_KEY = 'import_key',
-  VIEW_KEY_METADATA = 'view_key_metadata',
+  GENERATE_KEY = "generate_key",
+  ROTATE_KEY = "rotate_key",
+  BACKUP_KEY = "backup_key",
+  RESTORE_KEY = "restore_key",
+  DELETE_KEY = "delete_key",
+  EXPORT_KEY = "export_key",
+  IMPORT_KEY = "import_key",
+  VIEW_KEY_METADATA = "view_key_metadata",
 }
 
 /**
@@ -430,11 +438,11 @@ export interface TimeBasedRestriction {
  * Time restriction types
  */
 export enum TimeRestrictionType {
-  BUSINESS_HOURS = 'business_hours',
-  MAINTENANCE_WINDOW = 'maintenance_window',
-  EMERGENCY_ONLY = 'emergency_only',
-  SCHEDULED_ACCESS = 'scheduled_access',
-  BLACKOUT_PERIOD = 'blackout_period',
+  BUSINESS_HOURS = "business_hours",
+  MAINTENANCE_WINDOW = "maintenance_window",
+  EMERGENCY_ONLY = "emergency_only",
+  SCHEDULED_ACCESS = "scheduled_access",
+  BLACKOUT_PERIOD = "blackout_period",
 }
 
 /**
@@ -458,13 +466,13 @@ export interface TimeWindow {
  * Days of week
  */
 export enum DayOfWeek {
-  MONDAY = 'monday',
-  TUESDAY = 'tuesday',
-  WEDNESDAY = 'wednesday',
-  THURSDAY = 'thursday',
-  FRIDAY = 'friday',
-  SATURDAY = 'saturday',
-  SUNDAY = 'sunday',
+  MONDAY = "monday",
+  TUESDAY = "tuesday",
+  WEDNESDAY = "wednesday",
+  THURSDAY = "thursday",
+  FRIDAY = "friday",
+  SATURDAY = "saturday",
+  SUNDAY = "sunday",
 }
 
 /**
@@ -485,11 +493,11 @@ export interface TimeWindowExclusion {
  * Exclusion types
  */
 export enum ExclusionType {
-  HOLIDAY = 'holiday',
-  MAINTENANCE = 'maintenance',
-  EMERGENCY = 'emergency',
-  PLANNED_OUTAGE = 'planned_outage',
-  SECURITY_INCIDENT = 'security_incident',
+  HOLIDAY = "holiday",
+  MAINTENANCE = "maintenance",
+  EMERGENCY = "emergency",
+  PLANNED_OUTAGE = "planned_outage",
+  SECURITY_INCIDENT = "security_incident",
 }
 
 /**
@@ -513,12 +521,12 @@ export interface RecurringExclusion {
  * Recurrence patterns
  */
 export enum RecurrencePattern {
-  DAILY = 'daily',
-  WEEKLY = 'weekly',
-  MONTHLY = 'monthly',
-  QUARTERLY = 'quarterly',
-  ANNUALLY = 'annually',
-  CUSTOM = 'custom',
+  DAILY = "daily",
+  WEEKLY = "weekly",
+  MONTHLY = "monthly",
+  QUARTERLY = "quarterly",
+  ANNUALLY = "annually",
+  CUSTOM = "custom",
 }
 
 /**
@@ -548,11 +556,11 @@ export interface AccessLogging {
  * Access log levels
  */
 export enum AccessLogLevel {
-  MINIMAL = 'minimal',
-  STANDARD = 'standard',
-  DETAILED = 'detailed',
-  COMPREHENSIVE = 'comprehensive',
-  FORENSIC = 'forensic',
+  MINIMAL = "minimal",
+  STANDARD = "standard",
+  DETAILED = "detailed",
+  COMPREHENSIVE = "comprehensive",
+  FORENSIC = "forensic",
 }
 
 /**
@@ -579,23 +587,23 @@ export interface AccessAlertThreshold {
  * Access threshold types
  */
 export enum AccessThresholdType {
-  FAILED_ATTEMPTS = 'failed_attempts',
-  SUCCESSFUL_ACCESSES = 'successful_accesses',
-  CONCURRENT_SESSIONS = 'concurrent_sessions',
-  UNUSUAL_TIME_ACCESS = 'unusual_time_access',
-  BULK_OPERATIONS = 'bulk_operations',
+  FAILED_ATTEMPTS = "failed_attempts",
+  SUCCESSFUL_ACCESSES = "successful_accesses",
+  CONCURRENT_SESSIONS = "concurrent_sessions",
+  UNUSUAL_TIME_ACCESS = "unusual_time_access",
+  BULK_OPERATIONS = "bulk_operations",
 }
 
 /**
  * Alert response actions
  */
 export enum AlertResponseAction {
-  LOG_INCIDENT = 'log_incident',
-  SEND_NOTIFICATION = 'send_notification',
-  LOCK_ACCOUNT = 'lock_account',
-  REQUIRE_ADDITIONAL_AUTH = 'require_additional_auth',
-  ESCALATE_TO_SECURITY = 'escalate_to_security',
-  INITIATE_INVESTIGATION = 'initiate_investigation',
+  LOG_INCIDENT = "log_incident",
+  SEND_NOTIFICATION = "send_notification",
+  LOCK_ACCOUNT = "lock_account",
+  REQUIRE_ADDITIONAL_AUTH = "require_additional_auth",
+  ESCALATE_TO_SECURITY = "escalate_to_security",
+  INITIATE_INVESTIGATION = "initiate_investigation",
 }
 
 /**
@@ -676,11 +684,11 @@ export interface BreakGlassRequirement {
  * Break-glass requirement types
  */
 export enum BreakGlassRequirementType {
-  EXECUTIVE_APPROVAL = 'executive_approval',
-  SECURITY_OFFICER_APPROVAL = 'security_officer_approval',
-  COMMITTEE_APPROVAL = 'committee_approval',
-  DOCUMENTED_EMERGENCY = 'documented_emergency',
-  COMPLIANCE_OFFICER_APPROVAL = 'compliance_officer_approval',
+  EXECUTIVE_APPROVAL = "executive_approval",
+  SECURITY_OFFICER_APPROVAL = "security_officer_approval",
+  COMMITTEE_APPROVAL = "committee_approval",
+  DOCUMENTED_EMERGENCY = "documented_emergency",
+  COMPLIANCE_OFFICER_APPROVAL = "compliance_officer_approval",
 }
 
 /**
@@ -764,11 +772,11 @@ export interface BackupRedundancy {
  * Redundancy levels
  */
 export enum RedundancyLevel {
-  SINGLE_COPY = 'single_copy',
-  DUAL_COPY = 'dual_copy',
-  TRIPLE_COPY = 'triple_copy',
-  MULTIPLE_COPY = 'multiple_copy',
-  ERASURE_CODED = 'erasure_coded',
+  SINGLE_COPY = "single_copy",
+  DUAL_COPY = "dual_copy",
+  TRIPLE_COPY = "triple_copy",
+  MULTIPLE_COPY = "multiple_copy",
+  ERASURE_CODED = "erasure_coded",
 }
 
 /**
@@ -826,23 +834,23 @@ export interface GeographicCoordinates {
  * Backup site types
  */
 export enum BackupSiteType {
-  PRIMARY_DATA_CENTER = 'primary_data_center',
-  SECONDARY_DATA_CENTER = 'secondary_data_center',
-  CLOUD_STORAGE = 'cloud_storage',
-  OFFLINE_STORAGE = 'offline_storage',
-  SECURE_VAULT = 'secure_vault',
-  THIRD_PARTY_FACILITY = 'third_party_facility',
+  PRIMARY_DATA_CENTER = "primary_data_center",
+  SECONDARY_DATA_CENTER = "secondary_data_center",
+  CLOUD_STORAGE = "cloud_storage",
+  OFFLINE_STORAGE = "offline_storage",
+  SECURE_VAULT = "secure_vault",
+  THIRD_PARTY_FACILITY = "third_party_facility",
 }
 
 /**
  * Site security levels
  */
 export enum SiteSecurityLevel {
-  BASIC = 'basic',
-  STANDARD = 'standard',
-  HIGH = 'high',
-  MAXIMUM = 'maximum',
-  CLASSIFIED = 'classified',
+  BASIC = "basic",
+  STANDARD = "standard",
+  HIGH = "high",
+  MAXIMUM = "maximum",
+  CLASSIFIED = "classified",
 }
 
 /**
@@ -866,12 +874,12 @@ export interface StorageMediaDiversity {
  * Storage media types
  */
 export enum StorageMediaType {
-  MAGNETIC_DISK = 'magnetic_disk',
-  SOLID_STATE_DISK = 'solid_state_disk',
-  MAGNETIC_TAPE = 'magnetic_tape',
-  OPTICAL_DISC = 'optical_disc',
-  CLOUD_STORAGE = 'cloud_storage',
-  FLASH_MEMORY = 'flash_memory',
+  MAGNETIC_DISK = "magnetic_disk",
+  SOLID_STATE_DISK = "solid_state_disk",
+  MAGNETIC_TAPE = "magnetic_tape",
+  OPTICAL_DISC = "optical_disc",
+  CLOUD_STORAGE = "cloud_storage",
+  FLASH_MEMORY = "flash_memory",
 }
 
 /**
@@ -895,11 +903,11 @@ export interface BackupCrossValidation {
  * Backup validation methods
  */
 export enum BackupValidationMethod {
-  HASH_COMPARISON = 'hash_comparison',
-  BYTE_COMPARISON = 'byte_comparison',
-  RESTORE_TEST = 'restore_test',
-  INTEGRITY_CHECK = 'integrity_check',
-  CRYPTOGRAPHIC_VERIFICATION = 'cryptographic_verification',
+  HASH_COMPARISON = "hash_comparison",
+  BYTE_COMPARISON = "byte_comparison",
+  RESTORE_TEST = "restore_test",
+  INTEGRITY_CHECK = "integrity_check",
+  CRYPTOGRAPHIC_VERIFICATION = "cryptographic_verification",
 }
 
 /**
@@ -923,22 +931,22 @@ export interface DiscrepancyHandling {
  * Discrepancy resolution strategies
  */
 export enum DiscrepancyResolutionStrategy {
-  USE_NEWEST = 'use_newest',
-  USE_MAJORITY = 'use_majority',
-  USE_PRIMARY = 'use_primary',
-  MANUAL_REVIEW = 'manual_review',
-  RECREATE_BACKUP = 'recreate_backup',
+  USE_NEWEST = "use_newest",
+  USE_MAJORITY = "use_majority",
+  USE_PRIMARY = "use_primary",
+  MANUAL_REVIEW = "manual_review",
+  RECREATE_BACKUP = "recreate_backup",
 }
 
 /**
  * Discrepancy triggers
  */
 export enum DiscrepancyTrigger {
-  HASH_MISMATCH = 'hash_mismatch',
-  SIZE_MISMATCH = 'size_mismatch',
-  TIMESTAMP_MISMATCH = 'timestamp_mismatch',
-  CONTENT_DIFFERENCE = 'content_difference',
-  CORRUPTION_DETECTED = 'corruption_detected',
+  HASH_MISMATCH = "hash_mismatch",
+  SIZE_MISMATCH = "size_mismatch",
+  TIMESTAMP_MISMATCH = "timestamp_mismatch",
+  CONTENT_DIFFERENCE = "content_difference",
+  CORRUPTION_DETECTED = "corruption_detected",
 }
 
 /**
@@ -1045,11 +1053,11 @@ export interface EscrowAgent {
  * Escrow agent types
  */
 export enum EscrowAgentType {
-  INTERNAL_AGENT = 'internal_agent',
-  THIRD_PARTY_AGENT = 'third_party_agent',
-  REGULATORY_AGENT = 'regulatory_agent',
-  LEGAL_AGENT = 'legal_agent',
-  TECHNOLOGY_VENDOR = 'technology_vendor',
+  INTERNAL_AGENT = "internal_agent",
+  THIRD_PARTY_AGENT = "third_party_agent",
+  REGULATORY_AGENT = "regulatory_agent",
+  LEGAL_AGENT = "legal_agent",
+  TECHNOLOGY_VENDOR = "technology_vendor",
 }
 
 /**
@@ -1107,11 +1115,11 @@ export interface CoverageLimit {
  * Coverage types
  */
 export enum CoverageType {
-  GENERAL_LIABILITY = 'general_liability',
-  PROFESSIONAL_LIABILITY = 'professional_liability',
-  TECHNOLOGY_ERRORS = 'technology_errors',
-  DATA_BREACH = 'data_breach',
-  CYBER_LIABILITY = 'cyber_liability',
+  GENERAL_LIABILITY = "general_liability",
+  PROFESSIONAL_LIABILITY = "professional_liability",
+  TECHNOLOGY_ERRORS = "technology_errors",
+  DATA_BREACH = "data_breach",
+  CYBER_LIABILITY = "cyber_liability",
 }
 
 /**
@@ -1135,24 +1143,24 @@ export interface EscrowCondition {
  * Escrow condition types
  */
 export enum EscrowConditionType {
-  BUSINESS_CLOSURE = 'business_closure',
-  BANKRUPTCY = 'bankruptcy',
-  REGULATORY_ORDER = 'regulatory_order',
-  COURT_ORDER = 'court_order',
-  CONTRACT_TERMINATION = 'contract_termination',
-  TECHNICAL_FAILURE = 'technical_failure',
+  BUSINESS_CLOSURE = "business_closure",
+  BANKRUPTCY = "bankruptcy",
+  REGULATORY_ORDER = "regulatory_order",
+  COURT_ORDER = "court_order",
+  CONTRACT_TERMINATION = "contract_termination",
+  TECHNICAL_FAILURE = "technical_failure",
 }
 
 /**
  * Escrow trigger events
  */
 export enum EscrowTriggerEvent {
-  CESSATION_OF_BUSINESS = 'cessation_of_business',
-  CHANGE_OF_CONTROL = 'change_of_control',
-  MATERIAL_BREACH = 'material_breach',
-  INSOLVENCY = 'insolvency',
-  REGULATORY_VIOLATION = 'regulatory_violation',
-  SECURITY_INCIDENT = 'security_incident',
+  CESSATION_OF_BUSINESS = "cessation_of_business",
+  CHANGE_OF_CONTROL = "change_of_control",
+  MATERIAL_BREACH = "material_breach",
+  INSOLVENCY = "insolvency",
+  REGULATORY_VIOLATION = "regulatory_violation",
+  SECURITY_INCIDENT = "security_incident",
 }
 
 /**
@@ -1213,11 +1221,11 @@ export interface EscrowAuditRequirement {
  * Escrow audit frequencies
  */
 export enum EscrowAuditFrequency {
-  QUARTERLY = 'quarterly',
-  SEMI_ANNUALLY = 'semi_annually',
-  ANNUALLY = 'annually',
-  BIENNIALLY = 'biennially',
-  EVENT_DRIVEN = 'event_driven',
+  QUARTERLY = "quarterly",
+  SEMI_ANNUALLY = "semi_annually",
+  ANNUALLY = "annually",
+  BIENNIALLY = "biennially",
+  EVENT_DRIVEN = "event_driven",
 }
 
 /**
@@ -1241,11 +1249,11 @@ export interface EscrowAuditReporting {
  * Audit report formats
  */
 export enum AuditReportFormat {
-  DETAILED_REPORT = 'detailed_report',
-  SUMMARY_REPORT = 'summary_report',
-  COMPLIANCE_CERTIFICATE = 'compliance_certificate',
-  DASHBOARD = 'dashboard',
-  CUSTOM_FORMAT = 'custom_format',
+  DETAILED_REPORT = "detailed_report",
+  SUMMARY_REPORT = "summary_report",
+  COMPLIANCE_CERTIFICATE = "compliance_certificate",
+  DASHBOARD = "dashboard",
+  CUSTOM_FORMAT = "custom_format",
 }
 
 /**
@@ -1272,14 +1280,14 @@ export interface KeyDerivationSettings {
  * Key derivation functions
  */
 export enum KeyDerivationFunction {
-  PBKDF2_SHA256 = 'pbkdf2-sha256',
-  PBKDF2_SHA512 = 'pbkdf2-sha512',
-  SCRYPT = 'scrypt',
-  ARGON2I = 'argon2i',
-  ARGON2D = 'argon2d',
-  ARGON2ID = 'argon2id',
-  HKDF_SHA256 = 'hkdf-sha256',
-  HKDF_SHA512 = 'hkdf-sha512',
+  PBKDF2_SHA256 = "pbkdf2-sha256",
+  PBKDF2_SHA512 = "pbkdf2-sha512",
+  SCRYPT = "scrypt",
+  ARGON2I = "argon2i",
+  ARGON2D = "argon2d",
+  ARGON2ID = "argon2id",
+  HKDF_SHA256 = "hkdf-sha256",
+  HKDF_SHA512 = "hkdf-sha512",
 }
 
 /**
@@ -1303,32 +1311,32 @@ export interface SaltGeneration {
  * Salt sources
  */
 export enum SaltSource {
-  RANDOM_BYTES = 'random_bytes',
-  SYSTEM_ENTROPY = 'system_entropy',
-  HSM_GENERATED = 'hsm_generated',
-  HARDWARE_RNG = 'hardware_rng',
-  COMBINED_SOURCES = 'combined_sources',
+  RANDOM_BYTES = "random_bytes",
+  SYSTEM_ENTROPY = "system_entropy",
+  HSM_GENERATED = "hsm_generated",
+  HARDWARE_RNG = "hardware_rng",
+  COMBINED_SOURCES = "combined_sources",
 }
 
 /**
  * Salt uniqueness levels
  */
 export enum SaltUniqueness {
-  PER_KEY = 'per_key',
-  PER_OPERATION = 'per_operation',
-  PER_SESSION = 'per_session',
-  PER_USER = 'per_user',
-  GLOBAL = 'global',
+  PER_KEY = "per_key",
+  PER_OPERATION = "per_operation",
+  PER_SESSION = "per_session",
+  PER_USER = "per_user",
+  GLOBAL = "global",
 }
 
 /**
  * Salt storage methods
  */
 export enum SaltStorage {
-  WITH_KEY = 'with_key',
-  SEPARATE_STORAGE = 'separate_storage',
-  DERIVED_FROM_CONTEXT = 'derived_from_context',
-  NOT_STORED = 'not_stored',
+  WITH_KEY = "with_key",
+  SEPARATE_STORAGE = "separate_storage",
+  DERIVED_FROM_CONTEXT = "derived_from_context",
+  NOT_STORED = "not_stored",
 }
 
 /**
@@ -1375,11 +1383,11 @@ export interface SearchableEncryption {
  * Searchable encryption algorithms
  */
 export enum SearchableEncryptionAlgorithm {
-  DETERMINISTIC_ENCRYPTION = 'deterministic_encryption',
-  ORDER_PRESERVING_ENCRYPTION = 'order_preserving_encryption',
-  PROPERTY_PRESERVING_ENCRYPTION = 'property_preserving_encryption',
-  FULLY_HOMOMORPHIC_ENCRYPTION = 'fully_homomorphic_encryption',
-  SOMEWHAT_HOMOMORPHIC_ENCRYPTION = 'somewhat_homomorphic_encryption',
+  DETERMINISTIC_ENCRYPTION = "deterministic_encryption",
+  ORDER_PRESERVING_ENCRYPTION = "order_preserving_encryption",
+  PROPERTY_PRESERVING_ENCRYPTION = "property_preserving_encryption",
+  FULLY_HOMOMORPHIC_ENCRYPTION = "fully_homomorphic_encryption",
+  SOMEWHAT_HOMOMORPHIC_ENCRYPTION = "somewhat_homomorphic_encryption",
 }
 
 /**
@@ -1406,33 +1414,33 @@ export interface SearchIndexConfiguration {
  * Search index types
  */
 export enum SearchIndexType {
-  INVERTED_INDEX = 'inverted_index',
-  BLOOM_FILTER = 'bloom_filter',
-  ENCRYPTED_BITMAP = 'encrypted_bitmap',
-  HOMOMORPHIC_INDEX = 'homomorphic_index',
-  OBLIVIOUS_INDEX = 'oblivious_index',
+  INVERTED_INDEX = "inverted_index",
+  BLOOM_FILTER = "bloom_filter",
+  ENCRYPTED_BITMAP = "encrypted_bitmap",
+  HOMOMORPHIC_INDEX = "homomorphic_index",
+  OBLIVIOUS_INDEX = "oblivious_index",
 }
 
 /**
  * Index granularity levels
  */
 export enum IndexGranularity {
-  EXACT_MATCH = 'exact_match',
-  PREFIX_MATCH = 'prefix_match',
-  SUBSTRING_MATCH = 'substring_match',
-  FUZZY_MATCH = 'fuzzy_match',
-  SEMANTIC_MATCH = 'semantic_match',
+  EXACT_MATCH = "exact_match",
+  PREFIX_MATCH = "prefix_match",
+  SUBSTRING_MATCH = "substring_match",
+  FUZZY_MATCH = "fuzzy_match",
+  SEMANTIC_MATCH = "semantic_match",
 }
 
 /**
  * Index update frequencies
  */
 export enum IndexUpdateFrequency {
-  REAL_TIME = 'real_time',
-  BATCH_HOURLY = 'batch_hourly',
-  BATCH_DAILY = 'batch_daily',
-  BATCH_WEEKLY = 'batch_weekly',
-  ON_DEMAND = 'on_demand',
+  REAL_TIME = "real_time",
+  BATCH_HOURLY = "batch_hourly",
+  BATCH_DAILY = "batch_daily",
+  BATCH_WEEKLY = "batch_weekly",
+  ON_DEMAND = "on_demand",
 }
 
 /**
@@ -1470,11 +1478,11 @@ export interface IndexAccessRestriction {
  * Index restriction types
  */
 export enum IndexRestrictionType {
-  USER_BASED = 'user_based',
-  ROLE_BASED = 'role_based',
-  TIME_BASED = 'time_based',
-  QUERY_TYPE_BASED = 'query_type_based',
-  DATA_SENSITIVITY_BASED = 'data_sensitivity_based',
+  USER_BASED = "user_based",
+  ROLE_BASED = "role_based",
+  TIME_BASED = "time_based",
+  QUERY_TYPE_BASED = "query_type_based",
+  DATA_SENSITIVITY_BASED = "data_sensitivity_based",
 }
 
 /**
@@ -1501,22 +1509,22 @@ export interface QueryRateLimiting {
  * Rate limiting strategies
  */
 export enum RateLimitingStrategy {
-  TOKEN_BUCKET = 'token_bucket',
-  LEAKY_BUCKET = 'leaky_bucket',
-  FIXED_WINDOW = 'fixed_window',
-  SLIDING_WINDOW = 'sliding_window',
-  ADAPTIVE = 'adaptive',
+  TOKEN_BUCKET = "token_bucket",
+  LEAKY_BUCKET = "leaky_bucket",
+  FIXED_WINDOW = "fixed_window",
+  SLIDING_WINDOW = "sliding_window",
+  ADAPTIVE = "adaptive",
 }
 
 /**
  * Rate limit penalties
  */
 export enum RateLimitPenalty {
-  TEMPORARY_BLOCK = 'temporary_block',
-  QUERY_DELAY = 'query_delay',
-  REDUCED_PRIORITY = 'reduced_priority',
-  NOTIFICATION_ONLY = 'notification_only',
-  ESCALATION = 'escalation',
+  TEMPORARY_BLOCK = "temporary_block",
+  QUERY_DELAY = "query_delay",
+  REDUCED_PRIORITY = "reduced_priority",
+  NOTIFICATION_ONLY = "notification_only",
+  ESCALATION = "escalation",
 }
 
 /**
@@ -1540,38 +1548,38 @@ export interface IndexAuditRequirement {
  * Index audit types
  */
 export enum IndexAuditType {
-  ACCESS_AUDIT = 'access_audit',
-  QUERY_AUDIT = 'query_audit',
-  UPDATE_AUDIT = 'update_audit',
-  PERFORMANCE_AUDIT = 'performance_audit',
-  SECURITY_AUDIT = 'security_audit',
+  ACCESS_AUDIT = "access_audit",
+  QUERY_AUDIT = "query_audit",
+  UPDATE_AUDIT = "update_audit",
+  PERFORMANCE_AUDIT = "performance_audit",
+  SECURITY_AUDIT = "security_audit",
 }
 
 /**
  * Index audit frequencies
  */
 export enum IndexAuditFrequency {
-  REAL_TIME = 'real_time',
-  HOURLY = 'hourly',
-  DAILY = 'daily',
-  WEEKLY = 'weekly',
-  MONTHLY = 'monthly',
+  REAL_TIME = "real_time",
+  HOURLY = "hourly",
+  DAILY = "daily",
+  WEEKLY = "weekly",
+  MONTHLY = "monthly",
 }
 
 /**
  * Query capabilities
  */
 export enum QueryCapability {
-  EXACT_MATCH = 'exact_match',
-  RANGE_QUERY = 'range_query',
-  PREFIX_SEARCH = 'prefix_search',
-  WILDCARD_SEARCH = 'wildcard_search',
-  REGEX_SEARCH = 'regex_search',
-  AGGREGATE_FUNCTIONS = 'aggregate_functions',
-  JOIN_OPERATIONS = 'join_operations',
-  STATISTICAL_QUERIES = 'statistical_queries',
+  EXACT_MATCH = "exact_match",
+  RANGE_QUERY = "range_query",
+  PREFIX_SEARCH = "prefix_search",
+  WILDCARD_SEARCH = "wildcard_search",
+  REGEX_SEARCH = "regex_search",
+  AGGREGATE_FUNCTIONS = "aggregate_functions",
+  JOIN_OPERATIONS = "join_operations",
+  STATISTICAL_QUERIES = "statistical_queries",
 }
 
 // Continue with remaining interfaces in next part...
 
-export * from './audit-encryption.service';
+export * from "./audit-encryption.service";

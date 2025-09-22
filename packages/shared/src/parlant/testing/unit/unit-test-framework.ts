@@ -31,15 +31,24 @@
  * @classification Enterprise Testing Infrastructure
  */
 
-import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { testingFrameworkConfig } from '../config/testing-framework.config';
-import { MockManager } from '../mocks/mock-manager';
-import { TestDataGenerator } from '../utils/test-data-generator';
-import { CoverageAnalyzer } from '../utils/coverage-analyzer';
-import { PerformanceProfiler } from '../utils/performance-profiler';
+import {
+  jest,
+  describe,
+  it,
+  expect,
+  beforeEach,
+  afterEach,
+  beforeAll,
+  afterAll,
+} from "@jest/globals";
+import { testingFrameworkConfig } from "../config/testing-framework.config";
+import { MockManager } from "../mocks/mock-manager";
+import { TestDataGenerator } from "../utils/test-data-generator";
+import { CoverageAnalyzer } from "../utils/coverage-analyzer";
+import { PerformanceProfiler } from "../utils/performance-profiler";
 
 export interface UnitTestOptions {
-  mockLevel?: 'none' | 'partial' | 'full';
+  mockLevel?: "none" | "partial" | "full";
   coverageThreshold?: number;
   performanceBenchmark?: boolean;
   snapshotTesting?: boolean;
@@ -85,7 +94,7 @@ export class UnitTestFramework {
    */
   public createTestSuite(
     componentPath: string,
-    options: UnitTestOptions = {}
+    options: UnitTestOptions = {},
   ): void {
     const component = require(componentPath);
     const componentName = this.extractComponentName(componentPath);
@@ -144,24 +153,31 @@ export class UnitTestFramework {
   /**
    * Generate automated tests for functions
    */
-  private generateFunctionTests(component: any, options: UnitTestOptions): void {
+  private generateFunctionTests(
+    component: any,
+    options: UnitTestOptions,
+  ): void {
     const functions = this.extractFunctions(component);
 
-    functions.forEach(func => {
+    functions.forEach((func) => {
       describe(`Function: ${func.name}`, () => {
         // Test with valid inputs
-        it('should handle valid inputs correctly', async () => {
+        it("should handle valid inputs correctly", async () => {
           const testData = this.testDataGenerator.generateValidInputs(func);
 
           for (const data of testData) {
-            const result = await this.executeWithErrorHandling(func.method, data.input);
+            const result = await this.executeWithErrorHandling(
+              func.method,
+              data.input,
+            );
             expect(result).toMatchObject(data.expected);
           }
         });
 
         // Test with invalid inputs
-        it('should handle invalid inputs gracefully', async () => {
-          const invalidInputs = this.testDataGenerator.generateInvalidInputs(func);
+        it("should handle invalid inputs gracefully", async () => {
+          const invalidInputs =
+            this.testDataGenerator.generateInvalidInputs(func);
 
           for (const input of invalidInputs) {
             await expect(func.method(input)).rejects.toThrow();
@@ -169,29 +185,37 @@ export class UnitTestFramework {
         });
 
         // Test edge cases
-        it('should handle edge cases correctly', async () => {
+        it("should handle edge cases correctly", async () => {
           const edgeCases = this.testDataGenerator.generateEdgeCases(func);
 
           for (const edgeCase of edgeCases) {
-            const result = await this.executeWithErrorHandling(func.method, edgeCase.input);
+            const result = await this.executeWithErrorHandling(
+              func.method,
+              edgeCase.input,
+            );
             expect(result).toBeDefined();
           }
         });
 
         // Test with boundary values
-        it('should handle boundary values correctly', async () => {
-          const boundaryValues = this.testDataGenerator.generateBoundaryValues(func);
+        it("should handle boundary values correctly", async () => {
+          const boundaryValues =
+            this.testDataGenerator.generateBoundaryValues(func);
 
           for (const value of boundaryValues) {
-            const result = await this.executeWithErrorHandling(func.method, value);
+            const result = await this.executeWithErrorHandling(
+              func.method,
+              value,
+            );
             expect(result).toBeDefined();
           }
         });
 
         // Test asynchronous behavior
         if (this.isAsyncFunction(func.method)) {
-          it('should handle asynchronous operations correctly', async () => {
-            const asyncTestData = this.testDataGenerator.generateAsyncTestData(func);
+          it("should handle asynchronous operations correctly", async () => {
+            const asyncTestData =
+              this.testDataGenerator.generateAsyncTestData(func);
 
             for (const data of asyncTestData) {
               const promise = func.method(data.input);
@@ -212,31 +236,33 @@ export class UnitTestFramework {
   private generateClassTests(component: any, options: UnitTestOptions): void {
     const classes = this.extractClasses(component);
 
-    classes.forEach(cls => {
+    classes.forEach((cls) => {
       describe(`Class: ${cls.name}`, () => {
         let instance: any;
 
         beforeEach(() => {
-          const constructorArgs = this.testDataGenerator.generateConstructorArgs(cls);
+          const constructorArgs =
+            this.testDataGenerator.generateConstructorArgs(cls);
           instance = new cls.constructor(...constructorArgs);
         });
 
         // Test constructor
-        it('should initialize correctly', () => {
+        it("should initialize correctly", () => {
           expect(instance).toBeInstanceOf(cls.constructor);
           expect(instance).toBeDefined();
         });
 
         // Test public methods
         const publicMethods = this.extractPublicMethods(cls);
-        publicMethods.forEach(method => {
+        publicMethods.forEach((method) => {
           it(`should execute ${method.name} correctly`, async () => {
-            const testData = this.testDataGenerator.generateMethodTestData(method);
+            const testData =
+              this.testDataGenerator.generateMethodTestData(method);
 
             for (const data of testData) {
               const result = await this.executeWithErrorHandling(
                 instance[method.name].bind(instance),
-                data.input
+                data.input,
               );
               expect(result).toMatchObject(data.expected);
             }
@@ -244,8 +270,9 @@ export class UnitTestFramework {
         });
 
         // Test state management
-        it('should manage state correctly', async () => {
-          const stateTestCases = this.testDataGenerator.generateStateTestCases(cls);
+        it("should manage state correctly", async () => {
+          const stateTestCases =
+            this.testDataGenerator.generateStateTestCases(cls);
 
           for (const testCase of stateTestCases) {
             await this.executeStateTest(instance, testCase);
@@ -253,12 +280,13 @@ export class UnitTestFramework {
         });
 
         // Test error handling
-        it('should handle errors gracefully', async () => {
-          const errorTestCases = this.testDataGenerator.generateErrorTestCases(cls);
+        it("should handle errors gracefully", async () => {
+          const errorTestCases =
+            this.testDataGenerator.generateErrorTestCases(cls);
 
           for (const testCase of errorTestCases) {
             await expect(
-              instance[testCase.method](...testCase.args)
+              instance[testCase.method](...testCase.args),
             ).rejects.toThrow(testCase.expectedError);
           }
         });
@@ -270,21 +298,21 @@ export class UnitTestFramework {
    * Generate module-level integration tests
    */
   private generateModuleTests(component: any, options: UnitTestOptions): void {
-    describe('Module Integration', () => {
-      it('should export all required components', () => {
+    describe("Module Integration", () => {
+      it("should export all required components", () => {
         const expectedExports = this.getExpectedExports(component);
 
-        expectedExports.forEach(exportName => {
+        expectedExports.forEach((exportName) => {
           expect(component[exportName]).toBeDefined();
         });
       });
 
-      it('should have consistent module interface', () => {
+      it("should have consistent module interface", () => {
         const moduleInterface = this.analyzeModuleInterface(component);
         expect(moduleInterface.isConsistent).toBe(true);
       });
 
-      it('should handle module dependencies correctly', async () => {
+      it("should handle module dependencies correctly", async () => {
         const dependencies = this.analyzeDependencies(component);
 
         for (const dependency of dependencies) {
@@ -297,20 +325,27 @@ export class UnitTestFramework {
   /**
    * Generate mock integration tests
    */
-  private generateMockIntegrationTests(component: any, options: UnitTestOptions): void {
-    if (options.mockLevel === 'none') return;
+  private generateMockIntegrationTests(
+    component: any,
+    options: UnitTestOptions,
+  ): void {
+    if (options.mockLevel === "none") return;
 
-    describe('Mock Integration Tests', () => {
+    describe("Mock Integration Tests", () => {
       beforeEach(async () => {
-        await this.mockManager.setupComponentMocks(component, options.mockLevel);
+        await this.mockManager.setupComponentMocks(
+          component,
+          options.mockLevel,
+        );
       });
 
       afterEach(async () => {
         await this.mockManager.clearComponentMocks(component);
       });
 
-      it('should work correctly with mocked dependencies', async () => {
-        const mockTestCases = this.testDataGenerator.generateMockTestCases(component);
+      it("should work correctly with mocked dependencies", async () => {
+        const mockTestCases =
+          this.testDataGenerator.generateMockTestCases(component);
 
         for (const testCase of mockTestCases) {
           const result = await this.executeMockTest(testCase);
@@ -318,8 +353,9 @@ export class UnitTestFramework {
         }
       });
 
-      it('should handle mock failures gracefully', async () => {
-        const failureScenarios = this.testDataGenerator.generateMockFailureScenarios(component);
+      it("should handle mock failures gracefully", async () => {
+        const failureScenarios =
+          this.testDataGenerator.generateMockFailureScenarios(component);
 
         for (const scenario of failureScenarios) {
           await this.executeMockFailureTest(scenario);
@@ -331,10 +367,14 @@ export class UnitTestFramework {
   /**
    * Generate performance benchmark tests
    */
-  private generatePerformanceTests(component: any, options: UnitTestOptions): void {
-    describe('Performance Benchmarks', () => {
-      it('should meet performance benchmarks', async () => {
-        const performanceTests = this.testDataGenerator.generatePerformanceTests(component);
+  private generatePerformanceTests(
+    component: any,
+    options: UnitTestOptions,
+  ): void {
+    describe("Performance Benchmarks", () => {
+      it("should meet performance benchmarks", async () => {
+        const performanceTests =
+          this.testDataGenerator.generatePerformanceTests(component);
 
         for (const test of performanceTests) {
           const startTime = performance.now();
@@ -346,12 +386,14 @@ export class UnitTestFramework {
         }
       });
 
-      it('should handle load efficiently', async () => {
+      it("should handle load efficiently", async () => {
         const loadTests = this.testDataGenerator.generateLoadTests(component);
 
         for (const loadTest of loadTests) {
           const results = await this.executeLoadTest(loadTest);
-          expect(results.averageResponseTime).toBeLessThan(loadTest.maxResponseTime);
+          expect(results.averageResponseTime).toBeLessThan(
+            loadTest.maxResponseTime,
+          );
         }
       });
     });
@@ -360,13 +402,19 @@ export class UnitTestFramework {
   /**
    * Generate property-based tests
    */
-  private generatePropertyBasedTests(component: any, options: UnitTestOptions): void {
-    describe('Property-Based Tests', () => {
-      it('should maintain invariants', async () => {
+  private generatePropertyBasedTests(
+    component: any,
+    options: UnitTestOptions,
+  ): void {
+    describe("Property-Based Tests", () => {
+      it("should maintain invariants", async () => {
         const properties = this.testDataGenerator.generateProperties(component);
 
         for (const property of properties) {
-          const testInputs = this.testDataGenerator.generateRandomInputs(property, 100);
+          const testInputs = this.testDataGenerator.generateRandomInputs(
+            property,
+            100,
+          );
 
           for (const input of testInputs) {
             const result = await property.test(input);
@@ -380,10 +428,14 @@ export class UnitTestFramework {
   /**
    * Generate snapshot tests
    */
-  private generateSnapshotTests(component: any, options: UnitTestOptions): void {
-    describe('Snapshot Tests', () => {
-      it('should match snapshots', async () => {
-        const snapshotTests = this.testDataGenerator.generateSnapshotTests(component);
+  private generateSnapshotTests(
+    component: any,
+    options: UnitTestOptions,
+  ): void {
+    describe("Snapshot Tests", () => {
+      it("should match snapshots", async () => {
+        const snapshotTests =
+          this.testDataGenerator.generateSnapshotTests(component);
 
         for (const test of snapshotTests) {
           const result = await test.execute();
@@ -396,18 +448,31 @@ export class UnitTestFramework {
   /**
    * Helper methods
    */
-  private async setupTestEnvironment(componentName: string, options: UnitTestOptions): Promise<void> {
+  private async setupTestEnvironment(
+    componentName: string,
+    options: UnitTestOptions,
+  ): Promise<void> {
     await this.coverageAnalyzer.startTracking(componentName);
     await this.performanceProfiler.startProfiling(componentName);
   }
 
-  private async teardownTestEnvironment(componentName: string, options: UnitTestOptions): Promise<void> {
+  private async teardownTestEnvironment(
+    componentName: string,
+    options: UnitTestOptions,
+  ): Promise<void> {
     const coverage = await this.coverageAnalyzer.stopTracking(componentName);
-    const performance = await this.performanceProfiler.stopProfiling(componentName);
+    const performance =
+      await this.performanceProfiler.stopProfiling(componentName);
 
     // Validate coverage threshold
-    if (coverage.percentage < (options.coverageThreshold || testingFrameworkConfig.unit.coverageThreshold)) {
-      throw new Error(`Coverage ${coverage.percentage}% below threshold ${options.coverageThreshold || testingFrameworkConfig.unit.coverageThreshold}%`);
+    if (
+      coverage.percentage <
+      (options.coverageThreshold ||
+        testingFrameworkConfig.unit.coverageThreshold)
+    ) {
+      throw new Error(
+        `Coverage ${coverage.percentage}% below threshold ${options.coverageThreshold || testingFrameworkConfig.unit.coverageThreshold}%`,
+      );
     }
 
     this.testResults.set(componentName, { coverage, performance });
@@ -417,13 +482,21 @@ export class UnitTestFramework {
     jest.clearAllMocks();
   }
 
-  private async teardownTestCase(componentName: string, duration: number): Promise<void> {
+  private async teardownTestCase(
+    componentName: string,
+    duration: number,
+  ): Promise<void> {
     // Record test case metrics
     this.performanceProfiler.recordTestCaseDuration(componentName, duration);
   }
 
   private extractComponentName(componentPath: string): string {
-    return componentPath.split('/').pop()?.replace(/\.[^/.]+$/, '') || 'Unknown';
+    return (
+      componentPath
+        .split("/")
+        .pop()
+        ?.replace(/\.[^/.]+$/, "") || "Unknown"
+    );
   }
 
   private extractFunctions(component: any): any[] {
@@ -442,15 +515,18 @@ export class UnitTestFramework {
   }
 
   private isAsyncFunction(func: Function): boolean {
-    return func.constructor.name === 'AsyncFunction';
+    return func.constructor.name === "AsyncFunction";
   }
 
-  private async executeWithErrorHandling(method: Function, input: any): Promise<any> {
+  private async executeWithErrorHandling(
+    method: Function,
+    input: any,
+  ): Promise<any> {
     try {
       return await method(input);
     } catch (error) {
       // Log error for analysis but don't throw unless expected
-      console.warn('Test execution error:', error);
+      console.warn("Test execution error:", error);
       throw error;
     }
   }
@@ -493,20 +569,30 @@ export class UnitTestFramework {
 export const unitTestFramework = new UnitTestFramework();
 
 // Convenience methods for test creation
-export const createUnitTest = (componentPath: string, options?: UnitTestOptions): void => {
+export const createUnitTest = (
+  componentPath: string,
+  options?: UnitTestOptions,
+): void => {
   unitTestFramework.createTestSuite(componentPath, options);
 };
 
-export const createFunctionTest = (func: Function, testCases: TestCase[]): void => {
-  testCases.forEach(testCase => {
-    it(testCase.name, async () => {
-      if (testCase.setup) await testCase.setup();
+export const createFunctionTest = (
+  func: Function,
+  testCases: TestCase[],
+): void => {
+  testCases.forEach((testCase) => {
+    it(
+      testCase.name,
+      async () => {
+        if (testCase.setup) await testCase.setup();
 
-      const result = await func(testCase.input);
-      expect(result).toEqual(testCase.expected);
+        const result = await func(testCase.input);
+        expect(result).toEqual(testCase.expected);
 
-      if (testCase.teardown) await testCase.teardown();
-    }, testCase.timeout);
+        if (testCase.teardown) await testCase.teardown();
+      },
+      testCase.timeout,
+    );
   });
 };
 
@@ -522,15 +608,19 @@ export const createClassTest = (cls: any, testSuite: TestSuite): void => {
     });
     afterEach(testSuite.afterEach);
 
-    testSuite.testCases.forEach(testCase => {
-      it(testCase.name, async () => {
-        if (testCase.setup) await testCase.setup();
+    testSuite.testCases.forEach((testCase) => {
+      it(
+        testCase.name,
+        async () => {
+          if (testCase.setup) await testCase.setup();
 
-        const result = await instance[testCase.name](testCase.input);
-        expect(result).toEqual(testCase.expected);
+          const result = await instance[testCase.name](testCase.input);
+          expect(result).toEqual(testCase.expected);
 
-        if (testCase.teardown) await testCase.teardown();
-      }, testCase.timeout);
+          if (testCase.teardown) await testCase.teardown();
+        },
+        testCase.timeout,
+      );
     });
   });
 };

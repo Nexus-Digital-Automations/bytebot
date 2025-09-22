@@ -1,0 +1,577 @@
+# Docker Compose Local Deployment Guide
+
+## Overview
+
+This guide provides complete Docker Compose configurations for deploying Bytebot APIs locally with full orchestration, networking, and service management. All services run locally with no cloud dependencies.
+
+## Prerequisites
+
+### System Requirements
+- **Docker Engine**: 20.10+ with Docker Compose v2
+- **System Memory**: Minimum 4GB RAM, recommended 8GB+
+- **Storage**: 10GB+ available disk space
+- **Network**: Local network access for inter-service communication
+
+### Installation Verification
+```bash
+# Verify Docker installation
+docker --version
+docker compose version
+
+# Check system resources
+docker system info
+df -h  # Check available disk space
+free -h  # Check available memory
+```
+
+## Complete Docker Compose Configuration
+
+### Primary docker-compose.yml
+```yaml
+version: '3.8'
+
+services:
+  # Bytebot Core API Service
+  bytebot-api:
+    build:
+      context: .
+      dockerfile: docker/bytebot-api/Dockerfile
+    container_name: bytebot-api
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DATABASE_URL=postgresql://bytebot:${DB_PASSWORD}@postgres:5432/bytebot
+      - JWT_SECRET_FILE=/run/secrets/jwt_secret
+      - AI_API_KEY_FILE=/run/secrets/ai_api_key
+      - LOG_LEVEL=info
+    volumes:
+      - ./data/logs:/app/logs
+      - ./data/uploads:/app/uploads
+      - ./config:/app/config:ro
+    secrets:
+      - jwt_secret
+      - ai_api_key
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - bytebot-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Agent Services
+  bytebot-agents:
+    build:
+      context: .
+      dockerfile: docker/bytebot-agents/Dockerfile
+    container_name: bytebot-agents
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - API_BASE_URL=http://bytebot-api:3000
+      - AGENT_POOL_SIZE=5
+      - MAX_CONCURRENT_TASKS=10
+    volumes:
+      - ./data/agent-logs:/app/logs
+      - ./data/agent-workspace:/app/workspace
+      - ./config/agents:/app/config:ro
+    depends_on:
+      bytebot-api:
+        condition: service_healthy
+    networks:
+      - bytebot-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: bytebot-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=bytebot
+      - POSTGRES_USER=bytebot
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_INITDB_ARGS=--encoding=UTF-8 --lc-collate=en_US.UTF-8 --lc-ctype=en_US.UTF-8
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
+      - ./data/postgres-logs:/var/log/postgresql
+    networks:
+      - bytebot-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bytebot -d bytebot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis for Caching and Sessions
+  redis:
+    image: redis:7-alpine
+    container_name: bytebot-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis_data:/data
+      - ./config/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    networks:
+      - bytebot-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # Local File Server for Static Assets
+  file-server:
+    image: nginx:alpine
+    container_name: bytebot-files
+    ports:
+      - "3003:80"
+    volumes:
+      - ./data/static:/usr/share/nginx/html:ro
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./data/nginx-logs:/var/log/nginx
+    networks:
+      - bytebot-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Local Monitoring Stack (Prometheus)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: bytebot-prometheus
+    ports:
+      - "9090:9090"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    volumes:
+      - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    networks:
+      - bytebot-network
+    restart: unless-stopped
+
+  # Local Monitoring Dashboard (Grafana)
+  grafana:
+    image: grafana/grafana:latest
+    container_name: bytebot-grafana
+    ports:
+      - "3002:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./config/grafana/provisioning:/etc/grafana/provisioning:ro
+    networks:
+      - bytebot-network
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+
+  # Local Log Aggregation
+  loki:
+    image: grafana/loki:latest
+    container_name: bytebot-loki
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - ./config/loki/loki-config.yml:/etc/loki/local-config.yaml:ro
+      - loki_data:/loki
+    networks:
+      - bytebot-network
+    restart: unless-stopped
+
+# Persistent Volumes
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+  loki_data:
+    driver: local
+
+# Local Network
+networks:
+  bytebot-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+# Secrets Management
+secrets:
+  jwt_secret:
+    file: ./secrets/jwt-secret.txt
+  ai_api_key:
+    file: ./secrets/ai-api-key.txt
+```
+
+## Environment Configuration
+
+### .env File
+```bash
+# Database Configuration
+DB_PASSWORD=your_secure_postgres_password
+REDIS_PASSWORD=your_secure_redis_password
+
+# Monitoring Configuration
+GRAFANA_PASSWORD=your_secure_grafana_password
+
+# Application Configuration
+NODE_ENV=production
+LOG_LEVEL=info
+
+# AI Service Configuration (store actual keys in secrets files)
+AI_SERVICE_PROVIDER=openai
+
+# Local Network Configuration
+SUBNET_RANGE=172.20.0.0/16
+```
+
+### Secrets Setup
+```bash
+# Create secrets directory
+mkdir -p secrets
+
+# Create JWT secret
+openssl rand -base64 32 > secrets/jwt-secret.txt
+
+# Add AI API key (replace with actual key)
+echo "your-openai-api-key" > secrets/ai-api-key.txt
+
+# Secure secrets directory
+chmod 600 secrets/*
+chmod 700 secrets
+```
+
+## Service-Specific Configurations
+
+### Nginx Configuration (docker/nginx/nginx.conf)
+```nginx
+events {
+    worker_connections 1024;
+}
+
+http {
+    include       /etc/nginx/mime.types;
+    default_type  application/octet-stream;
+
+    # Logging
+    access_log /var/log/nginx/access.log;
+    error_log /var/log/nginx/error.log;
+
+    # Security headers
+    add_header X-Frame-Options DENY;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block";
+
+    server {
+        listen 80;
+        server_name localhost;
+
+        # Static file serving
+        location / {
+            root /usr/share/nginx/html;
+            index index.html;
+            try_files $uri $uri/ =404;
+        }
+
+        # File upload handling
+        location /uploads {
+            alias /usr/share/nginx/html/uploads;
+            expires 1y;
+            add_header Cache-Control "public, immutable";
+        }
+
+        # Health check
+        location /health {
+            access_log off;
+            return 200 "healthy\n";
+            add_header Content-Type text/plain;
+        }
+    }
+}
+```
+
+### Prometheus Configuration (config/prometheus/prometheus.yml)
+```yaml
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'bytebot-api'
+    static_configs:
+      - targets: ['bytebot-api:3000']
+    metrics_path: '/metrics'
+    scrape_interval: 5s
+
+  - job_name: 'bytebot-agents'
+    static_configs:
+      - targets: ['bytebot-agents:3001']
+    metrics_path: '/metrics'
+    scrape_interval: 5s
+
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres:5432']
+
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis:6379']
+```
+
+## Deployment Procedures
+
+### Initial Setup
+```bash
+# 1. Clone repository and navigate to project
+git clone <repository-url>
+cd bytebot
+
+# 2. Create required directories
+mkdir -p data/{logs,uploads,static,postgres-logs,agent-logs,agent-workspace,nginx-logs}
+mkdir -p config/{agents,prometheus,grafana,loki}
+mkdir -p secrets
+
+# 3. Set up environment
+cp .env.example .env
+# Edit .env with your configuration
+
+# 4. Generate secrets
+./scripts/setup-secrets.sh
+
+# 5. Build and start services
+docker compose up -d --build
+```
+
+### Service Management
+```bash
+# Start all services
+docker compose up -d
+
+# Stop all services
+docker compose down
+
+# Restart specific service
+docker compose restart bytebot-api
+
+# View logs
+docker compose logs -f bytebot-api
+
+# Check service status
+docker compose ps
+
+# Scale agent services
+docker compose up -d --scale bytebot-agents=3
+```
+
+### Health Monitoring
+```bash
+# Check all service health
+docker compose ps --format "table {{.Name}}\t{{.Status}}\t{{.Ports}}"
+
+# Individual service health checks
+curl http://localhost:3000/health  # API health
+curl http://localhost:3001/health  # Agents health
+curl http://localhost:3003/health  # File server health
+
+# Database connection test
+docker compose exec postgres pg_isready -U bytebot -d bytebot
+
+# Redis connection test
+docker compose exec redis redis-cli ping
+```
+
+## Backup and Recovery
+
+### Automated Backup Script
+```bash
+#!/bin/bash
+# backup.sh - Local backup script
+
+BACKUP_DIR="./backups/$(date +%Y-%m-%d_%H-%M-%S)"
+mkdir -p "$BACKUP_DIR"
+
+# Database backup
+docker compose exec postgres pg_dump -U bytebot bytebot > "$BACKUP_DIR/postgres.sql"
+
+# Redis backup
+docker compose exec redis redis-cli SAVE
+docker cp bytebot-redis:/data/dump.rdb "$BACKUP_DIR/redis.rdb"
+
+# Application data backup
+tar -czf "$BACKUP_DIR/app-data.tar.gz" data/
+
+# Configuration backup
+tar -czf "$BACKUP_DIR/config.tar.gz" config/
+
+echo "Backup completed: $BACKUP_DIR"
+```
+
+### Recovery Procedures
+```bash
+# 1. Stop services
+docker compose down
+
+# 2. Restore database
+docker compose up -d postgres
+docker compose exec -i postgres psql -U bytebot -d bytebot < backups/latest/postgres.sql
+
+# 3. Restore Redis
+docker cp backups/latest/redis.rdb bytebot-redis:/data/dump.rdb
+docker compose restart redis
+
+# 4. Restore application data
+tar -xzf backups/latest/app-data.tar.gz
+
+# 5. Start all services
+docker compose up -d
+```
+
+## Troubleshooting
+
+### Common Issues
+
+#### Port Conflicts
+```bash
+# Check port usage
+netstat -tlnp | grep :3000
+
+# Change ports in docker-compose.yml if needed
+ports:
+  - "3010:3000"  # Use different host port
+```
+
+#### Permission Issues
+```bash
+# Fix volume permissions
+sudo chown -R $USER:$USER data/
+chmod -R 755 data/
+```
+
+#### Service Startup Failures
+```bash
+# Check service logs
+docker compose logs service-name
+
+# Check resource usage
+docker stats
+
+# Restart specific service
+docker compose restart service-name
+```
+
+#### Database Connection Issues
+```bash
+# Check database logs
+docker compose logs postgres
+
+# Test connection
+docker compose exec postgres psql -U bytebot -d bytebot -c "SELECT version();"
+
+# Reset database if needed
+docker compose down
+docker volume rm bytebot_postgres_data
+docker compose up -d postgres
+```
+
+## Performance Optimization
+
+### Resource Limits
+```yaml
+# Add to each service in docker-compose.yml
+deploy:
+  resources:
+    limits:
+      cpus: '1.0'
+      memory: 1G
+    reservations:
+      cpus: '0.5'
+      memory: 512M
+```
+
+### Local Caching
+```yaml
+# Add cache volumes for faster rebuilds
+volumes:
+  - ~/.npm:/root/.npm:delegated
+  - ~/.cache:/root/.cache:delegated
+```
+
+### Network Optimization
+```yaml
+networks:
+  bytebot-network:
+    driver: bridge
+    driver_opts:
+      com.docker.network.driver.mtu: 1450
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+```
+
+## Security Best Practices
+
+### Container Security
+- Use non-root users in containers
+- Scan images for vulnerabilities
+- Keep base images updated
+- Use minimal base images (alpine)
+
+### Network Security
+- Isolate services in custom network
+- Expose only necessary ports
+- Use internal service names for communication
+- Implement SSL/TLS for external access
+
+### Data Security
+- Use Docker secrets for sensitive data
+- Encrypt data volumes
+- Regular security updates
+- Monitor access logs
+
+This Docker Compose setup provides a complete local deployment environment for Bytebot APIs with full observability, backup capabilities, and production-ready configuration while maintaining 100% local operation.

@@ -20,17 +20,17 @@
  * @author PARLANT Phase 1 Performance Team
  */
 
-import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter } from 'events';
-import { performance } from 'perf_hooks';
-import { Worker, isMainThread, parentPort, workerData } from 'worker_threads';
+import { Injectable, Logger, OnApplicationShutdown } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { EventEmitter } from "events";
+import { performance } from "perf_hooks";
+import { Worker, isMainThread, parentPort, workerData } from "worker_threads";
 import {
   PreExecutionValidationRequest,
   PreExecutionValidationResponse,
-  RiskAssessmentResult
-} from './pre-execution-validation.service';
-import { SecurityLevel } from '../../validation/types/validation-layer.types';
+  RiskAssessmentResult,
+} from "./pre-execution-validation.service";
+import { SecurityLevel } from "../../validation/types/validation-layer.types";
 
 // ===== PERFORMANCE OPTIMIZATION TYPES =====
 
@@ -58,7 +58,7 @@ export interface PerformanceOptimizerConfig {
     maxWorkers: number;
     workerPoolSize: number;
     taskTimeout: number;
-    loadBalancing: 'round-robin' | 'least-loaded' | 'response-time';
+    loadBalancing: "round-robin" | "least-loaded" | "response-time";
   };
 
   /** Resource optimization */
@@ -100,7 +100,7 @@ export interface L1CacheConfig {
   defaultTtlMs: number;
 
   /** Cache strategy */
-  strategy: 'LRU' | 'LFU' | 'FIFO' | 'ADAPTIVE';
+  strategy: "LRU" | "LFU" | "FIFO" | "ADAPTIVE";
 
   /** Preload frequently accessed items */
   preloadEnabled: boolean;
@@ -193,7 +193,7 @@ export interface MemoryManagementConfig {
 
   /** Garbage collection tuning */
   gcTuning: {
-    strategy: 'aggressive' | 'balanced' | 'conservative';
+    strategy: "aggressive" | "balanced" | "conservative";
     maxPauseMs: number;
     parallelThreads: number;
   };
@@ -263,7 +263,7 @@ export interface NetworkOptimizationConfig {
   /** Compression settings */
   compression: {
     enabled: boolean;
-    algorithm: 'gzip' | 'brotli' | 'deflate';
+    algorithm: "gzip" | "brotli" | "deflate";
     level: number;
   };
 }
@@ -389,10 +389,10 @@ export interface PredictiveCacheRecommendation {
   confidence: number;
 
   /** Prediction source */
-  source: 'ml-model' | 'pattern-analysis' | 'user-behavior';
+  source: "ml-model" | "pattern-analysis" | "user-behavior";
 
   /** Recommended cache level */
-  recommendedLevel: 'L1' | 'L2' | 'L3';
+  recommendedLevel: "L1" | "L2" | "L3";
 
   /** Predicted access time */
   predictedAccessTime: Date;
@@ -416,7 +416,7 @@ export interface PerformanceOptimizationResult {
     l1Used: boolean;
     l2Used: boolean;
     l3Used: boolean;
-    hitLevel: 'L1' | 'L2' | 'L3' | 'MISS';
+    hitLevel: "L1" | "L2" | "L3" | "MISS";
   };
 
   /** Optimizations applied */
@@ -466,32 +466,32 @@ export class PerformanceOptimizerService implements OnApplicationShutdown {
     l2Misses: 0,
     l3Hits: 0,
     l3Misses: 0,
-    totalRequests: 0
+    totalRequests: 0,
   };
 
   constructor(private readonly configService: ConfigService) {
     this.config = this.loadPerformanceConfiguration();
     this.initializePerformanceOptimizer();
 
-    this.logger.log('PerformanceOptimizerService initialized', {
-      version: '1.0.0',
+    this.logger.log("PerformanceOptimizerService initialized", {
+      version: "1.0.0",
       features: [
-        'sub_500ms_response_times',
-        'multi_level_caching',
-        'parallel_processing',
-        'predictive_loading',
-        'resource_optimization',
-        'real_time_monitoring',
-        'adaptive_scaling',
-        'cache_invalidation'
+        "sub_500ms_response_times",
+        "multi_level_caching",
+        "parallel_processing",
+        "predictive_loading",
+        "resource_optimization",
+        "real_time_monitoring",
+        "adaptive_scaling",
+        "cache_invalidation",
       ],
       config: {
         enabled: this.config.enabled,
         targetResponseTime: this.config.targetResponseTimeMs,
         cachingEnabled: this.config.caching.l1Cache.enabled,
         parallelProcessing: this.config.parallelProcessing.enabled,
-        workerPoolSize: this.config.parallelProcessing.workerPoolSize
-      }
+        workerPoolSize: this.config.parallelProcessing.workerPoolSize,
+      },
     });
   }
 
@@ -504,7 +504,9 @@ export class PerformanceOptimizerService implements OnApplicationShutdown {
    */
   async optimizeValidation(
     request: PreExecutionValidationRequest,
-    validationFunction: (req: PreExecutionValidationRequest) => Promise<PreExecutionValidationResponse>
+    validationFunction: (
+      req: PreExecutionValidationRequest,
+    ) => Promise<PreExecutionValidationResponse>,
   ): Promise<{
     result: PreExecutionValidationResponse;
     optimization: PerformanceOptimizationResult;
@@ -521,28 +523,33 @@ export class PerformanceOptimizerService implements OnApplicationShutdown {
             originalResponseTime: performance.now() - startTime,
             optimizedResponseTime: performance.now() - startTime,
             improvementFactor: 1.0,
-            cacheUtilization: { l1Used: false, l2Used: false, l3Used: false, hitLevel: 'MISS' },
+            cacheUtilization: {
+              l1Used: false,
+              l2Used: false,
+              l3Used: false,
+              hitLevel: "MISS",
+            },
             optimizationsApplied: [],
-            resourceSavings: { cpuSaved: 0, memorySaved: 0, networkSaved: 0 }
-          }
+            resourceSavings: { cpuSaved: 0, memorySaved: 0, networkSaved: 0 },
+          },
         };
       }
 
-      this.logger.debug('Starting performance optimization', {
+      this.logger.debug("Starting performance optimization", {
         requestId: request.id,
-        targetTime: this.config.targetResponseTimeMs
+        targetTime: this.config.targetResponseTimeMs,
       });
 
       // Step 1: Check cache hierarchy for existing result
       const cacheResult = await this.checkCacheHierarchy(request);
       if (cacheResult.hit) {
-        optimizationsApplied.push('cache-hit');
+        optimizationsApplied.push("cache-hit");
         const responseTime = performance.now() - startTime;
 
-        this.logger.debug('Cache hit achieved sub-500ms response', {
+        this.logger.debug("Cache hit achieved sub-500ms response", {
           requestId: request.id,
           responseTime,
-          cacheLevel: cacheResult.level
+          cacheLevel: cacheResult.level,
         });
 
         return {
@@ -552,63 +559,76 @@ export class PerformanceOptimizerService implements OnApplicationShutdown {
             optimizedResponseTime: responseTime,
             improvementFactor: 5.0, // Typical cache improvement
             cacheUtilization: {
-              l1Used: cacheResult.level === 'L1',
-              l2Used: cacheResult.level === 'L2',
-              l3Used: cacheResult.level === 'L3',
-              hitLevel: cacheResult.level
+              l1Used: cacheResult.level === "L1",
+              l2Used: cacheResult.level === "L2",
+              l3Used: cacheResult.level === "L3",
+              hitLevel: cacheResult.level,
             },
             optimizationsApplied,
-            resourceSavings: { cpuSaved: 80, memorySaved: 60, networkSaved: 90 }
-          }
+            resourceSavings: {
+              cpuSaved: 80,
+              memorySaved: 60,
+              networkSaved: 90,
+            },
+          },
         };
       }
 
       // Step 2: Predictive optimization
       await this.applyPredictiveOptimizations(request);
-      optimizationsApplied.push('predictive-optimization');
+      optimizationsApplied.push("predictive-optimization");
 
       // Step 3: Parallel processing optimization
       let result: PreExecutionValidationResponse;
-      if (this.config.parallelProcessing.enabled && this.shouldUseParallelProcessing(request)) {
-        result = await this.executeParallelValidation(request, validationFunction);
-        optimizationsApplied.push('parallel-processing');
+      if (
+        this.config.parallelProcessing.enabled &&
+        this.shouldUseParallelProcessing(request)
+      ) {
+        result = await this.executeParallelValidation(
+          request,
+          validationFunction,
+        );
+        optimizationsApplied.push("parallel-processing");
       } else {
-        result = await this.executeOptimizedValidation(request, validationFunction);
-        optimizationsApplied.push('optimized-execution');
+        result = await this.executeOptimizedValidation(
+          request,
+          validationFunction,
+        );
+        optimizationsApplied.push("optimized-execution");
       }
 
       // Step 4: Cache the result for future use
       await this.cacheValidationResult(request, result);
-      optimizationsApplied.push('result-caching');
+      optimizationsApplied.push("result-caching");
 
       // Step 5: Resource optimization
       await this.optimizeResources();
-      optimizationsApplied.push('resource-optimization');
+      optimizationsApplied.push("resource-optimization");
 
       const responseTime = performance.now() - startTime;
       this.updatePerformanceMetrics(responseTime, optimizationsApplied);
 
       // Guarantee sub-500ms response time
       if (responseTime > this.config.targetResponseTimeMs) {
-        this.logger.warn('Response time exceeded target', {
+        this.logger.warn("Response time exceeded target", {
           requestId: request.id,
           responseTime,
-          target: this.config.targetResponseTimeMs
+          target: this.config.targetResponseTimeMs,
         });
 
         // Emit performance alert
-        this.eventEmitter.emit('performance-target-exceeded', {
+        this.eventEmitter.emit("performance-target-exceeded", {
           requestId: request.id,
           responseTime,
-          target: this.config.targetResponseTimeMs
+          target: this.config.targetResponseTimeMs,
         });
       }
 
-      this.logger.debug('Performance optimization completed', {
+      this.logger.debug("Performance optimization completed", {
         requestId: request.id,
         responseTime,
         optimizationsApplied,
-        targetMet: responseTime <= this.config.targetResponseTimeMs
+        targetMet: responseTime <= this.config.targetResponseTimeMs,
       });
 
       return {
@@ -616,18 +636,25 @@ export class PerformanceOptimizerService implements OnApplicationShutdown {
         optimization: {
           originalResponseTime: this.estimateOriginalResponseTime(request),
           optimizedResponseTime: responseTime,
-          improvementFactor: this.calculateImprovementFactor(request, responseTime),
-          cacheUtilization: { l1Used: false, l2Used: false, l3Used: false, hitLevel: 'MISS' },
+          improvementFactor: this.calculateImprovementFactor(
+            request,
+            responseTime,
+          ),
+          cacheUtilization: {
+            l1Used: false,
+            l2Used: false,
+            l3Used: false,
+            hitLevel: "MISS",
+          },
           optimizationsApplied,
-          resourceSavings: this.calculateResourceSavings(optimizationsApplied)
-        }
+          resourceSavings: this.calculateResourceSavings(optimizationsApplied),
+        },
       };
-
     } catch (error) {
-      this.logger.error('Performance optimization failed', {
+      this.logger.error("Performance optimization failed", {
         requestId: request.id,
         error: error.message,
-        stack: error.stack
+        stack: error.stack,
       });
 
       // Fallback to direct execution
@@ -640,10 +667,15 @@ export class PerformanceOptimizerService implements OnApplicationShutdown {
           originalResponseTime: responseTime,
           optimizedResponseTime: responseTime,
           improvementFactor: 1.0,
-          cacheUtilization: { l1Used: false, l2Used: false, l3Used: false, hitLevel: 'MISS' },
-          optimizationsApplied: ['fallback-execution'],
-          resourceSavings: { cpuSaved: 0, memorySaved: 0, networkSaved: 0 }
-        }
+          cacheUtilization: {
+            l1Used: false,
+            l2Used: false,
+            l3Used: false,
+            hitLevel: "MISS",
+          },
+          optimizationsApplied: ["fallback-execution"],
+          resourceSavings: { cpuSaved: 0, memorySaved: 0, networkSaved: 0 },
+        },
       };
     }
   }
@@ -652,8 +684,12 @@ export class PerformanceOptimizerService implements OnApplicationShutdown {
    * Check cache hierarchy for existing validation result
    */
   private async checkCacheHierarchy(
-    request: PreExecutionValidationRequest
-  ): Promise<{ hit: boolean; level?: 'L1' | 'L2' | 'L3'; data?: PreExecutionValidationResponse }> {
+    request: PreExecutionValidationRequest,
+  ): Promise<{
+    hit: boolean;
+    level?: "L1" | "L2" | "L3";
+    data?: PreExecutionValidationResponse;
+  }> {
     const cacheKey = this.generateCacheKey(request);
 
     // Check L1 cache (fastest)
@@ -662,7 +698,7 @@ export class PerformanceOptimizerService implements OnApplicationShutdown {
       if (l1Result && this.isCacheEntryValid(l1Result)) {
         this.cacheStats.l1Hits++;
         this.updateCacheEntryAccess(l1Result);
-        return { hit: true, level: 'L1', data: l1Result.data };
+        return { hit: true, level: "L1", data: l1Result.data };
       } else {
         this.cacheStats.l1Misses++;
       }
@@ -675,7 +711,7 @@ export class PerformanceOptimizerService implements OnApplicationShutdown {
         this.cacheStats.l2Hits++;
         // Promote to L1 cache
         await this.promoteToL1Cache(cacheKey, l2Result);
-        return { hit: true, level: 'L2', data: l2Result };
+        return { hit: true, level: "L2", data: l2Result };
       } else {
         this.cacheStats.l2Misses++;
       }
@@ -689,7 +725,7 @@ export class PerformanceOptimizerService implements OnApplicationShutdown {
         // Promote to L1 and L2 caches
         await this.promoteToL2Cache(cacheKey, l3Result);
         await this.promoteToL1Cache(cacheKey, l3Result);
-        return { hit: true, level: 'L3', data: l3Result };
+        return { hit: true, level: "L3", data: l3Result };
       } else {
         this.cacheStats.l3Misses++;
       }
@@ -701,7 +737,9 @@ export class PerformanceOptimizerService implements OnApplicationShutdown {
   /**
    * Apply predictive optimizations
    */
-  private async applyPredictiveOptimizations(request: PreExecutionValidationRequest): Promise<void> {
+  private async applyPredictiveOptimizations(
+    request: PreExecutionValidationRequest,
+  ): Promise<void> {
     if (!this.config.caching.predictiveCache.enabled) {
       return;
     }
@@ -711,7 +749,10 @@ export class PerformanceOptimizerService implements OnApplicationShutdown {
 
     // Preload recommended cache entries
     for (const recommendation of recommendations) {
-      if (recommendation.confidence > this.config.caching.predictiveCache.mlModel.confidenceThreshold) {
+      if (
+        recommendation.confidence >
+        this.config.caching.predictiveCache.mlModel.confidenceThreshold
+      ) {
         await this.preloadCacheEntry(recommendation);
       }
     }
@@ -722,7 +763,9 @@ export class PerformanceOptimizerService implements OnApplicationShutdown {
    */
   private async executeParallelValidation(
     request: PreExecutionValidationRequest,
-    validationFunction: (req: PreExecutionValidationRequest) => Promise<PreExecutionValidationResponse>
+    validationFunction: (
+      req: PreExecutionValidationRequest,
+    ) => Promise<PreExecutionValidationResponse>,
   ): Promise<PreExecutionValidationResponse> {
     if (this.workerPool.length === 0) {
       // Fallback to regular execution if no workers available
@@ -733,25 +776,25 @@ export class PerformanceOptimizerService implements OnApplicationShutdown {
       const worker = this.getNextWorker();
       const timeout = setTimeout(() => {
         worker.terminate();
-        reject(new Error('Worker timeout'));
+        reject(new Error("Worker timeout"));
       }, this.config.parallelProcessing.taskTimeout);
 
       worker.postMessage({
-        type: 'validation-request',
+        type: "validation-request",
         request,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
 
-      worker.once('message', (message) => {
+      worker.once("message", (message) => {
         clearTimeout(timeout);
-        if (message.type === 'validation-response') {
+        if (message.type === "validation-response") {
           resolve(message.result);
-        } else if (message.type === 'validation-error') {
+        } else if (message.type === "validation-error") {
           reject(new Error(message.error));
         }
       });
 
-      worker.once('error', (error) => {
+      worker.once("error", (error) => {
         clearTimeout(timeout);
         reject(error);
       });
@@ -763,7 +806,9 @@ export class PerformanceOptimizerService implements OnApplicationShutdown {
    */
   private async executeOptimizedValidation(
     request: PreExecutionValidationRequest,
-    validationFunction: (req: PreExecutionValidationRequest) => Promise<PreExecutionValidationResponse>
+    validationFunction: (
+      req: PreExecutionValidationRequest,
+    ) => Promise<PreExecutionValidationResponse>,
   ): Promise<PreExecutionValidationResponse> {
     // Apply CPU optimizations
     if (this.config.resourceOptimization.cpuOptimization.enabled) {
@@ -784,10 +829,13 @@ export class PerformanceOptimizerService implements OnApplicationShutdown {
    */
   private async cacheValidationResult(
     request: PreExecutionValidationRequest,
-    result: PreExecutionValidationResponse
+    result: PreExecutionValidationResponse,
   ): Promise<void> {
     const cacheKey = this.generateCacheKey(request);
-    const cacheEntry = this.createCacheEntry(result, this.calculateCachePriority(request));
+    const cacheEntry = this.createCacheEntry(
+      result,
+      this.calculateCachePriority(request),
+    );
 
     // Store in L1 cache
     if (this.config.caching.l1Cache.enabled) {
@@ -812,14 +860,14 @@ export class PerformanceOptimizerService implements OnApplicationShutdown {
       functionName: request.functionName,
       parameters: JSON.stringify(request.parameters),
       securityLevel: request.securityClassification,
-      userRoles: request.userContext.roles.sort().join(','),
+      userRoles: request.userContext.roles.sort().join(","),
       riskMetadata: {
         dataSensitivity: request.riskMetadata.dataSensitivity,
-        reversible: request.riskMetadata.reversibility.isReversible
-      }
+        reversible: request.riskMetadata.reversibility.isReversible,
+      },
     };
 
-    return `validation:${Buffer.from(JSON.stringify(keyData)).toString('base64')}`;
+    return `validation:${Buffer.from(JSON.stringify(keyData)).toString("base64")}`;
   }
 
   private isCacheEntryValid(entry: CacheEntry<any>): boolean {
@@ -841,11 +889,13 @@ export class PerformanceOptimizerService implements OnApplicationShutdown {
       lastAccess: new Date(),
       priority,
       tags: [],
-      size: JSON.stringify(data).length
+      size: JSON.stringify(data).length,
     };
   }
 
-  private calculateCachePriority(request: PreExecutionValidationRequest): number {
+  private calculateCachePriority(
+    request: PreExecutionValidationRequest,
+  ): number {
     let priority = 50; // Base priority
 
     // Higher priority for frequently used functions
@@ -854,20 +904,25 @@ export class PerformanceOptimizerService implements OnApplicationShutdown {
     }
 
     // Higher priority for admin users
-    if (request.userContext.roles.includes('admin')) {
+    if (request.userContext.roles.includes("admin")) {
       priority += 15;
     }
 
     // Higher priority for low-risk operations (more likely to be cached)
-    if (request.securityClassification === SecurityLevel._LOW ||
-        request.securityClassification === SecurityLevel._MINIMAL) {
+    if (
+      request.securityClassification === SecurityLevel._LOW ||
+      request.securityClassification === SecurityLevel._MINIMAL
+    ) {
       priority += 10;
     }
 
     return Math.min(100, priority);
   }
 
-  private async storeInL1Cache(cacheKey: string, entry: CacheEntry<any>): Promise<void> {
+  private async storeInL1Cache(
+    cacheKey: string,
+    entry: CacheEntry<any>,
+  ): Promise<void> {
     // Implement LRU eviction if cache is full
     if (this.l1Cache.size >= this.config.caching.l1Cache.maxSize) {
       await this.evictFromL1Cache();
@@ -880,7 +935,7 @@ export class PerformanceOptimizerService implements OnApplicationShutdown {
     if (this.l1Cache.size === 0) return;
 
     // Find least recently used entry
-    let oldestKey = '';
+    let oldestKey = "";
     let oldestTime = Date.now();
 
     for (const [key, entry] of this.l1Cache.entries()) {
@@ -905,7 +960,10 @@ export class PerformanceOptimizerService implements OnApplicationShutdown {
     return null;
   }
 
-  private async storeInL2Cache(cacheKey: string, entry: CacheEntry<any>): Promise<void> {
+  private async storeInL2Cache(
+    cacheKey: string,
+    entry: CacheEntry<any>,
+  ): Promise<void> {
     // Simulate L2 cache storage (would use Redis in production)
   }
 
@@ -922,26 +980,31 @@ export class PerformanceOptimizerService implements OnApplicationShutdown {
     return null;
   }
 
-  private async storeInL3Cache(cacheKey: string, entry: CacheEntry<any>): Promise<void> {
+  private async storeInL3Cache(
+    cacheKey: string,
+    entry: CacheEntry<any>,
+  ): Promise<void> {
     this.l3CacheStore.set(cacheKey, entry);
   }
 
   // ===== PREDICTIVE OPTIMIZATION METHODS =====
 
   private async getPredictiveRecommendations(
-    request: PreExecutionValidationRequest
+    request: PreExecutionValidationRequest,
   ): Promise<PredictiveCacheRecommendation[]> {
     const recommendations: PredictiveCacheRecommendation[] = [];
 
     // Pattern-based prediction
     if (this.config.caching.predictiveCache.patternPrediction.enabled) {
-      const patternRecommendations = await this.getPatternBasedRecommendations(request);
+      const patternRecommendations =
+        await this.getPatternBasedRecommendations(request);
       recommendations.push(...patternRecommendations);
     }
 
     // User behavior prediction
     if (this.config.caching.predictiveCache.userBehaviorPrediction.enabled) {
-      const behaviorRecommendations = await this.getUserBehaviorRecommendations(request);
+      const behaviorRecommendations =
+        await this.getUserBehaviorRecommendations(request);
       recommendations.push(...behaviorRecommendations);
     }
 
@@ -949,7 +1012,7 @@ export class PerformanceOptimizerService implements OnApplicationShutdown {
   }
 
   private async getPatternBasedRecommendations(
-    request: PreExecutionValidationRequest
+    request: PreExecutionValidationRequest,
   ): Promise<PredictiveCacheRecommendation[]> {
     // Analyze historical patterns to predict likely next requests
     const recommendations: PredictiveCacheRecommendation[] = [];
@@ -961,9 +1024,9 @@ export class PerformanceOptimizerService implements OnApplicationShutdown {
         cacheKey: `prediction:${relatedFunction}:${request.userContext.userId}`,
         predictedData: null, // Would be generated based on patterns
         confidence: 0.7,
-        source: 'pattern-analysis',
-        recommendedLevel: 'L1',
-        predictedAccessTime: new Date(Date.now() + 60000) // 1 minute
+        source: "pattern-analysis",
+        recommendedLevel: "L1",
+        predictedAccessTime: new Date(Date.now() + 60000), // 1 minute
       });
     }
 
@@ -971,7 +1034,7 @@ export class PerformanceOptimizerService implements OnApplicationShutdown {
   }
 
   private async getUserBehaviorRecommendations(
-    request: PreExecutionValidationRequest
+    request: PreExecutionValidationRequest,
   ): Promise<PredictiveCacheRecommendation[]> {
     // Analyze user behavior to predict likely operations
     const recommendations: PredictiveCacheRecommendation[] = [];
@@ -983,34 +1046,40 @@ export class PerformanceOptimizerService implements OnApplicationShutdown {
         cacheKey: `user-behavior:${pattern.functionName}:${request.userContext.userId}`,
         predictedData: null,
         confidence: pattern.confidence,
-        source: 'user-behavior',
-        recommendedLevel: 'L2',
-        predictedAccessTime: pattern.predictedTime
+        source: "user-behavior",
+        recommendedLevel: "L2",
+        predictedAccessTime: pattern.predictedTime,
       });
     }
 
     return recommendations;
   }
 
-  private async preloadCacheEntry(recommendation: PredictiveCacheRecommendation): Promise<void> {
+  private async preloadCacheEntry(
+    recommendation: PredictiveCacheRecommendation,
+  ): Promise<void> {
     // Preload cache entry based on prediction
     // In production, this would trigger background validation to populate cache
-    this.logger.debug('Preloading cache entry', {
+    this.logger.debug("Preloading cache entry", {
       cacheKey: recommendation.cacheKey,
       confidence: recommendation.confidence,
-      source: recommendation.source
+      source: recommendation.source,
     });
   }
 
   // ===== PARALLEL PROCESSING METHODS =====
 
-  private shouldUseParallelProcessing(request: PreExecutionValidationRequest): boolean {
+  private shouldUseParallelProcessing(
+    request: PreExecutionValidationRequest,
+  ): boolean {
     // Determine if request would benefit from parallel processing
     const complexity = this.calculateRequestComplexity(request);
     return complexity > 50 && this.workerPool.length > 0;
   }
 
-  private calculateRequestComplexity(request: PreExecutionValidationRequest): number {
+  private calculateRequestComplexity(
+    request: PreExecutionValidationRequest,
+  ): number {
     let complexity = 0;
 
     // Parameter complexity
@@ -1022,12 +1091,15 @@ export class PerformanceOptimizerService implements OnApplicationShutdown {
       [SecurityLevel._LOW]: 10,
       [SecurityLevel._MEDIUM]: 20,
       [SecurityLevel._HIGH]: 30,
-      [SecurityLevel._CRITICAL]: 40
+      [SecurityLevel._CRITICAL]: 40,
     };
     complexity += securityComplexity[request.securityClassification] || 0;
 
     // Function complexity
-    if (request.functionName.includes('admin') || request.functionName.includes('system')) {
+    if (
+      request.functionName.includes("admin") ||
+      request.functionName.includes("system")
+    ) {
       complexity += 20;
     }
 
@@ -1036,11 +1108,12 @@ export class PerformanceOptimizerService implements OnApplicationShutdown {
 
   private getNextWorker(): Worker {
     if (this.workerPool.length === 0) {
-      throw new Error('No workers available');
+      throw new Error("No workers available");
     }
 
     const worker = this.workerPool[this.workerRoundRobin];
-    this.workerRoundRobin = (this.workerRoundRobin + 1) % this.workerPool.length;
+    this.workerRoundRobin =
+      (this.workerRoundRobin + 1) % this.workerPool.length;
     return worker;
   }
 
@@ -1058,9 +1131,12 @@ export class PerformanceOptimizerService implements OnApplicationShutdown {
 
   private async applyCpuOptimizations(): Promise<void> {
     // Apply CPU-specific optimizations
-    if (this.config.resourceOptimization.cpuOptimization.taskScheduling.adaptiveScheduling) {
+    if (
+      this.config.resourceOptimization.cpuOptimization.taskScheduling
+        .adaptiveScheduling
+    ) {
       // Yield to allow other tasks to run
-      await new Promise(resolve => setImmediate(resolve));
+      await new Promise((resolve) => setImmediate(resolve));
     }
   }
 
@@ -1076,10 +1152,14 @@ export class PerformanceOptimizerService implements OnApplicationShutdown {
     const memoryUsage = process.memoryUsage();
     const heapUsedMB = memoryUsage.heapUsed / 1024 / 1024;
 
-    if (heapUsedMB > this.config.resourceOptimization.memoryManagement.maxHeapSizeMb * 0.8) {
-      this.logger.debug('High memory usage detected, performing optimization', {
+    if (
+      heapUsedMB >
+      this.config.resourceOptimization.memoryManagement.maxHeapSizeMb * 0.8
+    ) {
+      this.logger.debug("High memory usage detected, performing optimization", {
         heapUsedMB,
-        maxHeapSizeMB: this.config.resourceOptimization.memoryManagement.maxHeapSizeMb
+        maxHeapSizeMB:
+          this.config.resourceOptimization.memoryManagement.maxHeapSizeMb,
       });
 
       // Clean up old cache entries
@@ -1101,7 +1181,10 @@ export class PerformanceOptimizerService implements OnApplicationShutdown {
   private shouldTriggerGC(): boolean {
     const memoryUsage = process.memoryUsage();
     const heapUsedMB = memoryUsage.heapUsed / 1024 / 1024;
-    return heapUsedMB > this.config.resourceOptimization.memoryManagement.maxHeapSizeMb * 0.7;
+    return (
+      heapUsedMB >
+      this.config.resourceOptimization.memoryManagement.maxHeapSizeMb * 0.7
+    );
   }
 
   private async cleanupCaches(): Promise<void> {
@@ -1126,17 +1209,19 @@ export class PerformanceOptimizerService implements OnApplicationShutdown {
 
   private isFrequentlyUsedFunction(functionName: string): boolean {
     // Analyze function usage patterns
-    const frequentFunctions = ['read', 'get', 'list', 'search', 'view'];
-    return frequentFunctions.some(pattern => functionName.toLowerCase().includes(pattern));
+    const frequentFunctions = ["read", "get", "list", "search", "view"];
+    return frequentFunctions.some((pattern) =>
+      functionName.toLowerCase().includes(pattern),
+    );
   }
 
   private getRelatedFunctions(functionName: string): string[] {
     // Return functions that are commonly used together
     const relationshipMap: Record<string, string[]> = {
-      'create': ['read', 'update'],
-      'read': ['update', 'delete'],
-      'update': ['read', 'validate'],
-      'delete': ['read', 'backup']
+      create: ["read", "update"],
+      read: ["update", "delete"],
+      update: ["read", "validate"],
+      delete: ["read", "backup"],
     };
 
     for (const [pattern, related] of Object.entries(relationshipMap)) {
@@ -1148,29 +1233,36 @@ export class PerformanceOptimizerService implements OnApplicationShutdown {
     return [];
   }
 
-  private async getUserPatterns(userId: string): Promise<Array<{
-    functionName: string;
-    confidence: number;
-    predictedTime: Date;
-  }>> {
+  private async getUserPatterns(userId: string): Promise<
+    Array<{
+      functionName: string;
+      confidence: number;
+      predictedTime: Date;
+    }>
+  > {
     // Simulate user pattern analysis
     return [
       {
-        functionName: 'read_user_data',
+        functionName: "read_user_data",
         confidence: 0.8,
-        predictedTime: new Date(Date.now() + 30000)
-      }
+        predictedTime: new Date(Date.now() + 30000),
+      },
     ];
   }
 
-  private estimateOriginalResponseTime(request: PreExecutionValidationRequest): number {
+  private estimateOriginalResponseTime(
+    request: PreExecutionValidationRequest,
+  ): number {
     // Estimate what response time would be without optimization
     const baseTime = 200; // Base processing time
     const complexity = this.calculateRequestComplexity(request);
-    return baseTime + (complexity * 5); // Rough estimation
+    return baseTime + complexity * 5; // Rough estimation
   }
 
-  private calculateImprovementFactor(request: PreExecutionValidationRequest, optimizedTime: number): number {
+  private calculateImprovementFactor(
+    request: PreExecutionValidationRequest,
+    optimizedTime: number,
+  ): number {
     const estimatedOriginal = this.estimateOriginalResponseTime(request);
     return Math.max(1.0, estimatedOriginal / optimizedTime);
   }
@@ -1186,15 +1278,15 @@ export class PerformanceOptimizerService implements OnApplicationShutdown {
 
     for (const optimization of optimizationsApplied) {
       switch (optimization) {
-        case 'cache-hit':
+        case "cache-hit":
           cpuSaved += 80;
           memorySaved += 60;
           networkSaved += 90;
           break;
-        case 'parallel-processing':
+        case "parallel-processing":
           cpuSaved += 30;
           break;
-        case 'resource-optimization':
+        case "resource-optimization":
           memorySaved += 20;
           cpuSaved += 10;
           break;
@@ -1204,7 +1296,10 @@ export class PerformanceOptimizerService implements OnApplicationShutdown {
     return { cpuSaved, memorySaved, networkSaved };
   }
 
-  private updatePerformanceMetrics(responseTime: number, optimizationsApplied: string[]): void {
+  private updatePerformanceMetrics(
+    responseTime: number,
+    optimizationsApplied: string[],
+  ): void {
     this.responseTimes.push(responseTime);
     this.cacheStats.totalRequests++;
 
@@ -1218,10 +1313,10 @@ export class PerformanceOptimizerService implements OnApplicationShutdown {
 
     // Emit performance events
     if (responseTime > this.config.targetResponseTimeMs) {
-      this.eventEmitter.emit('performance-degradation', {
+      this.eventEmitter.emit("performance-degradation", {
         responseTime,
         target: this.config.targetResponseTimeMs,
-        optimizationsApplied
+        optimizationsApplied,
       });
     }
   }
@@ -1231,45 +1326,58 @@ export class PerformanceOptimizerService implements OnApplicationShutdown {
     const p95Index = Math.floor(sortedTimes.length * 0.95);
     const p99Index = Math.floor(sortedTimes.length * 0.99);
 
-    const totalCacheRequests = this.cacheStats.l1Hits + this.cacheStats.l1Misses +
-                              this.cacheStats.l2Hits + this.cacheStats.l2Misses +
-                              this.cacheStats.l3Hits + this.cacheStats.l3Misses;
+    const totalCacheRequests =
+      this.cacheStats.l1Hits +
+      this.cacheStats.l1Misses +
+      this.cacheStats.l2Hits +
+      this.cacheStats.l2Misses +
+      this.cacheStats.l3Hits +
+      this.cacheStats.l3Misses;
 
-    const totalCacheHits = this.cacheStats.l1Hits + this.cacheStats.l2Hits + this.cacheStats.l3Hits;
+    const totalCacheHits =
+      this.cacheStats.l1Hits + this.cacheStats.l2Hits + this.cacheStats.l3Hits;
 
     return {
       timestamp: new Date(),
       responseTime: {
-        average: this.responseTimes.reduce((sum, time) => sum + time, 0) / this.responseTimes.length,
+        average:
+          this.responseTimes.reduce((sum, time) => sum + time, 0) /
+          this.responseTimes.length,
         median: sortedTimes[Math.floor(sortedTimes.length / 2)] || 0,
         p95: sortedTimes[p95Index] || 0,
         p99: sortedTimes[p99Index] || 0,
         min: sortedTimes[0] || 0,
-        max: sortedTimes[sortedTimes.length - 1] || 0
+        max: sortedTimes[sortedTimes.length - 1] || 0,
       },
       cache: {
-        l1HitRate: this.cacheStats.l1Hits / Math.max(1, this.cacheStats.l1Hits + this.cacheStats.l1Misses),
-        l2HitRate: this.cacheStats.l2Hits / Math.max(1, this.cacheStats.l2Hits + this.cacheStats.l2Misses),
-        l3HitRate: this.cacheStats.l3Hits / Math.max(1, this.cacheStats.l3Hits + this.cacheStats.l3Misses),
+        l1HitRate:
+          this.cacheStats.l1Hits /
+          Math.max(1, this.cacheStats.l1Hits + this.cacheStats.l1Misses),
+        l2HitRate:
+          this.cacheStats.l2Hits /
+          Math.max(1, this.cacheStats.l2Hits + this.cacheStats.l2Misses),
+        l3HitRate:
+          this.cacheStats.l3Hits /
+          Math.max(1, this.cacheStats.l3Hits + this.cacheStats.l3Misses),
         overallHitRate: totalCacheHits / Math.max(1, totalCacheRequests),
-        evictionRate: 0 // Would be calculated from eviction events
+        evictionRate: 0, // Would be calculated from eviction events
       },
       resources: {
         cpuUtilization: this.getCurrentCpuUtilization(),
         memoryUtilization: this.getCurrentMemoryUtilization(),
         networkUtilization: 0,
-        diskUtilization: 0
+        diskUtilization: 0,
       },
       throughput: {
         requestsPerSecond: this.calculateRequestsPerSecond(),
         validationsPerSecond: this.calculateValidationsPerSecond(),
-        cacheOperationsPerSecond: this.calculateCacheOperationsPerSecond()
+        cacheOperationsPerSecond: this.calculateCacheOperationsPerSecond(),
       },
       errors: {
         timeoutRate: 0,
         cacheErrorRate: 0,
-        systemErrorRate: 0
-      }
+        systemErrorRate: 0,
+      },
     };
   }
 
@@ -1303,151 +1411,253 @@ export class PerformanceOptimizerService implements OnApplicationShutdown {
 
   private loadPerformanceConfiguration(): PerformanceOptimizerConfig {
     return {
-      enabled: this.configService.get<boolean>('PARLANT_PERFORMANCE_OPTIMIZATION_ENABLED', true),
-      targetResponseTimeMs: this.configService.get<number>('PARLANT_TARGET_RESPONSE_TIME_MS', 500),
+      enabled: this.configService.get<boolean>(
+        "PARLANT_PERFORMANCE_OPTIMIZATION_ENABLED",
+        true,
+      ),
+      targetResponseTimeMs: this.configService.get<number>(
+        "PARLANT_TARGET_RESPONSE_TIME_MS",
+        500,
+      ),
       caching: {
         l1Cache: {
-          enabled: this.configService.get<boolean>('PARLANT_L1_CACHE_ENABLED', true),
-          maxSize: this.configService.get<number>('PARLANT_L1_CACHE_MAX_SIZE', 1000),
-          defaultTtlMs: this.configService.get<number>('PARLANT_L1_CACHE_TTL_MS', 300000),
-          strategy: 'LRU',
-          preloadEnabled: this.configService.get<boolean>('PARLANT_L1_PRELOAD_ENABLED', true)
+          enabled: this.configService.get<boolean>(
+            "PARLANT_L1_CACHE_ENABLED",
+            true,
+          ),
+          maxSize: this.configService.get<number>(
+            "PARLANT_L1_CACHE_MAX_SIZE",
+            1000,
+          ),
+          defaultTtlMs: this.configService.get<number>(
+            "PARLANT_L1_CACHE_TTL_MS",
+            300000,
+          ),
+          strategy: "LRU",
+          preloadEnabled: this.configService.get<boolean>(
+            "PARLANT_L1_PRELOAD_ENABLED",
+            true,
+          ),
         },
         l2Cache: {
-          enabled: this.configService.get<boolean>('PARLANT_L2_CACHE_ENABLED', true),
+          enabled: this.configService.get<boolean>(
+            "PARLANT_L2_CACHE_ENABLED",
+            true,
+          ),
           connection: {
-            host: this.configService.get<string>('PARLANT_REDIS_HOST', 'localhost'),
-            port: this.configService.get<number>('PARLANT_REDIS_PORT', 6379),
-            database: this.configService.get<number>('PARLANT_REDIS_DB', 0),
-            keyPrefix: 'parlant:validation:'
+            host: this.configService.get<string>(
+              "PARLANT_REDIS_HOST",
+              "localhost",
+            ),
+            port: this.configService.get<number>("PARLANT_REDIS_PORT", 6379),
+            database: this.configService.get<number>("PARLANT_REDIS_DB", 0),
+            keyPrefix: "parlant:validation:",
           },
-          defaultTtlMs: this.configService.get<number>('PARLANT_L2_CACHE_TTL_MS', 900000),
+          defaultTtlMs: this.configService.get<number>(
+            "PARLANT_L2_CACHE_TTL_MS",
+            900000,
+          ),
           compressionEnabled: true,
-          batchOperationsEnabled: true
+          batchOperationsEnabled: true,
         },
         l3Cache: {
-          enabled: this.configService.get<boolean>('PARLANT_L3_CACHE_ENABLED', true),
-          storagePath: this.configService.get<string>('PARLANT_L3_CACHE_PATH', './cache'),
-          defaultTtlMs: this.configService.get<number>('PARLANT_L3_CACHE_TTL_MS', 3600000),
-          cleanupIntervalMs: this.configService.get<number>('PARLANT_L3_CLEANUP_INTERVAL_MS', 1800000),
-          maxStorageMb: this.configService.get<number>('PARLANT_L3_MAX_STORAGE_MB', 1024)
+          enabled: this.configService.get<boolean>(
+            "PARLANT_L3_CACHE_ENABLED",
+            true,
+          ),
+          storagePath: this.configService.get<string>(
+            "PARLANT_L3_CACHE_PATH",
+            "./cache",
+          ),
+          defaultTtlMs: this.configService.get<number>(
+            "PARLANT_L3_CACHE_TTL_MS",
+            3600000,
+          ),
+          cleanupIntervalMs: this.configService.get<number>(
+            "PARLANT_L3_CLEANUP_INTERVAL_MS",
+            1800000,
+          ),
+          maxStorageMb: this.configService.get<number>(
+            "PARLANT_L3_MAX_STORAGE_MB",
+            1024,
+          ),
         },
         predictiveCache: {
-          enabled: this.configService.get<boolean>('PARLANT_PREDICTIVE_CACHE_ENABLED', true),
+          enabled: this.configService.get<boolean>(
+            "PARLANT_PREDICTIVE_CACHE_ENABLED",
+            true,
+          ),
           mlModel: {
             enabled: false, // Disabled for initial implementation
-            modelPath: '',
+            modelPath: "",
             confidenceThreshold: 0.8,
-            retrainingIntervalHours: 24
+            retrainingIntervalHours: 24,
           },
           patternPrediction: {
             enabled: true,
             lookbackPeriodHours: 24,
-            minPatternConfidence: 0.6
+            minPatternConfidence: 0.6,
           },
           userBehaviorPrediction: {
             enabled: true,
             userHistoryDepth: 100,
-            behaviorPatterns: ['sequential', 'periodic', 'contextual']
-          }
-        }
+            behaviorPatterns: ["sequential", "periodic", "contextual"],
+          },
+        },
       },
       parallelProcessing: {
-        enabled: this.configService.get<boolean>('PARLANT_PARALLEL_PROCESSING_ENABLED', false), // Disabled initially
-        maxWorkers: this.configService.get<number>('PARLANT_MAX_WORKERS', 4),
-        workerPoolSize: this.configService.get<number>('PARLANT_WORKER_POOL_SIZE', 2),
-        taskTimeout: this.configService.get<number>('PARLANT_TASK_TIMEOUT_MS', 30000),
-        loadBalancing: 'round-robin'
+        enabled: this.configService.get<boolean>(
+          "PARLANT_PARALLEL_PROCESSING_ENABLED",
+          false,
+        ), // Disabled initially
+        maxWorkers: this.configService.get<number>("PARLANT_MAX_WORKERS", 4),
+        workerPoolSize: this.configService.get<number>(
+          "PARLANT_WORKER_POOL_SIZE",
+          2,
+        ),
+        taskTimeout: this.configService.get<number>(
+          "PARLANT_TASK_TIMEOUT_MS",
+          30000,
+        ),
+        loadBalancing: "round-robin",
       },
       resourceOptimization: {
         memoryManagement: {
-          enabled: this.configService.get<boolean>('PARLANT_MEMORY_OPTIMIZATION_ENABLED', true),
-          maxHeapSizeMb: this.configService.get<number>('PARLANT_MAX_HEAP_SIZE_MB', 1024),
+          enabled: this.configService.get<boolean>(
+            "PARLANT_MEMORY_OPTIMIZATION_ENABLED",
+            true,
+          ),
+          maxHeapSizeMb: this.configService.get<number>(
+            "PARLANT_MAX_HEAP_SIZE_MB",
+            1024,
+          ),
           gcTuning: {
-            strategy: 'balanced',
+            strategy: "balanced",
             maxPauseMs: 50,
-            parallelThreads: 2
+            parallelThreads: 2,
           },
           memoryPools: {
             enabled: false,
-            poolSizes: {}
+            poolSizes: {},
           },
           leakDetection: {
             enabled: true,
             checkIntervalMs: 300000,
-            thresholdMb: 100
-          }
+            thresholdMb: 100,
+          },
         },
         cpuOptimization: {
-          enabled: this.configService.get<boolean>('PARLANT_CPU_OPTIMIZATION_ENABLED', true),
+          enabled: this.configService.get<boolean>(
+            "PARLANT_CPU_OPTIMIZATION_ENABLED",
+            true,
+          ),
           cpuAffinity: {
             enabled: false,
-            dedicatedCores: []
+            dedicatedCores: [],
           },
           taskScheduling: {
             priorityQueues: true,
             adaptiveScheduling: true,
-            yieldFrequency: 1000
+            yieldFrequency: 1000,
           },
           algorithmOptimizations: {
-            enabledOptimizations: ['caching', 'batching', 'parallel'],
-            customOptimizations: {}
-          }
+            enabledOptimizations: ["caching", "batching", "parallel"],
+            customOptimizations: {},
+          },
         },
         networkOptimization: {
-          enabled: this.configService.get<boolean>('PARLANT_NETWORK_OPTIMIZATION_ENABLED', true),
+          enabled: this.configService.get<boolean>(
+            "PARLANT_NETWORK_OPTIMIZATION_ENABLED",
+            true,
+          ),
           connectionPooling: {
             enabled: true,
             maxConnections: 100,
-            keepAliveTimeout: 60000
+            keepAliveTimeout: 60000,
           },
           requestBatching: {
             enabled: true,
             batchSize: 10,
-            batchTimeoutMs: 100
+            batchTimeoutMs: 100,
           },
           compression: {
             enabled: true,
-            algorithm: 'gzip',
-            level: 6
-          }
-        }
+            algorithm: "gzip",
+            level: 6,
+          },
+        },
       },
       monitoring: {
-        enabled: this.configService.get<boolean>('PARLANT_PERFORMANCE_MONITORING_ENABLED', true),
-        samplingRate: this.configService.get<number>('PARLANT_MONITORING_SAMPLING_RATE', 1.0),
+        enabled: this.configService.get<boolean>(
+          "PARLANT_PERFORMANCE_MONITORING_ENABLED",
+          true,
+        ),
+        samplingRate: this.configService.get<number>(
+          "PARLANT_MONITORING_SAMPLING_RATE",
+          1.0,
+        ),
         alertThresholds: {
           responseTime: {
-            warning: this.configService.get<number>('PARLANT_RESPONSE_TIME_WARNING_MS', 400),
-            critical: this.configService.get<number>('PARLANT_RESPONSE_TIME_CRITICAL_MS', 600)
+            warning: this.configService.get<number>(
+              "PARLANT_RESPONSE_TIME_WARNING_MS",
+              400,
+            ),
+            critical: this.configService.get<number>(
+              "PARLANT_RESPONSE_TIME_CRITICAL_MS",
+              600,
+            ),
           },
           cacheHitRate: {
-            warning: this.configService.get<number>('PARLANT_CACHE_HIT_RATE_WARNING', 0.7),
-            critical: this.configService.get<number>('PARLANT_CACHE_HIT_RATE_CRITICAL', 0.5)
+            warning: this.configService.get<number>(
+              "PARLANT_CACHE_HIT_RATE_WARNING",
+              0.7,
+            ),
+            critical: this.configService.get<number>(
+              "PARLANT_CACHE_HIT_RATE_CRITICAL",
+              0.5,
+            ),
           },
           cpuUtilization: {
-            warning: this.configService.get<number>('PARLANT_CPU_UTILIZATION_WARNING', 70),
-            critical: this.configService.get<number>('PARLANT_CPU_UTILIZATION_CRITICAL', 90)
+            warning: this.configService.get<number>(
+              "PARLANT_CPU_UTILIZATION_WARNING",
+              70,
+            ),
+            critical: this.configService.get<number>(
+              "PARLANT_CPU_UTILIZATION_CRITICAL",
+              90,
+            ),
           },
           memoryUtilization: {
-            warning: this.configService.get<number>('PARLANT_MEMORY_UTILIZATION_WARNING', 80),
-            critical: this.configService.get<number>('PARLANT_MEMORY_UTILIZATION_CRITICAL', 95)
-          }
+            warning: this.configService.get<number>(
+              "PARLANT_MEMORY_UTILIZATION_WARNING",
+              80,
+            ),
+            critical: this.configService.get<number>(
+              "PARLANT_MEMORY_UTILIZATION_CRITICAL",
+              95,
+            ),
+          },
         },
-        metricsRetentionHours: this.configService.get<number>('PARLANT_METRICS_RETENTION_HOURS', 24)
+        metricsRetentionHours: this.configService.get<number>(
+          "PARLANT_METRICS_RETENTION_HOURS",
+          24,
+        ),
       },
       adaptiveScaling: {
-        enabled: this.configService.get<boolean>('PARLANT_ADAPTIVE_SCALING_ENABLED', false), // Disabled initially
+        enabled: this.configService.get<boolean>(
+          "PARLANT_ADAPTIVE_SCALING_ENABLED",
+          false,
+        ), // Disabled initially
         scaleUpThreshold: 0.8,
         scaleDownThreshold: 0.3,
         maxInstances: 10,
-        cooldownPeriodMs: 300000
-      }
+        cooldownPeriodMs: 300000,
+      },
     };
   }
 
   private initializePerformanceOptimizer(): void {
-    this.logger.log('Initializing performance optimization framework');
+    this.logger.log("Initializing performance optimization framework");
 
     // Initialize current metrics
     this.currentMetrics = this.calculateCurrentMetrics();
@@ -1462,7 +1672,7 @@ export class PerformanceOptimizerService implements OnApplicationShutdown {
       this.initializeWorkerPool();
     }
 
-    this.logger.log('Performance optimization framework initialized');
+    this.logger.log("Performance optimization framework initialized");
   }
 
   private startPerformanceMonitoring(): void {
@@ -1472,8 +1682,15 @@ export class PerformanceOptimizerService implements OnApplicationShutdown {
       this.performanceHistory.push(this.currentMetrics);
 
       // Keep only recent history
-      if (this.performanceHistory.length > this.config.monitoring.metricsRetentionHours) {
-        this.performanceHistory.splice(0, this.performanceHistory.length - this.config.monitoring.metricsRetentionHours);
+      if (
+        this.performanceHistory.length >
+        this.config.monitoring.metricsRetentionHours
+      ) {
+        this.performanceHistory.splice(
+          0,
+          this.performanceHistory.length -
+            this.config.monitoring.metricsRetentionHours,
+        );
       }
 
       // Check thresholds and emit alerts
@@ -1485,32 +1702,40 @@ export class PerformanceOptimizerService implements OnApplicationShutdown {
     const thresholds = this.config.monitoring.alertThresholds;
 
     // Check response time
-    if (this.currentMetrics.responseTime.p95 > thresholds.responseTime.critical) {
-      this.eventEmitter.emit('performance-alert', {
-        type: 'response-time',
-        severity: 'critical',
+    if (
+      this.currentMetrics.responseTime.p95 > thresholds.responseTime.critical
+    ) {
+      this.eventEmitter.emit("performance-alert", {
+        type: "response-time",
+        severity: "critical",
         value: this.currentMetrics.responseTime.p95,
-        threshold: thresholds.responseTime.critical
+        threshold: thresholds.responseTime.critical,
       });
     }
 
     // Check cache hit rate
-    if (this.currentMetrics.cache.overallHitRate < thresholds.cacheHitRate.critical) {
-      this.eventEmitter.emit('performance-alert', {
-        type: 'cache-hit-rate',
-        severity: 'critical',
+    if (
+      this.currentMetrics.cache.overallHitRate <
+      thresholds.cacheHitRate.critical
+    ) {
+      this.eventEmitter.emit("performance-alert", {
+        type: "cache-hit-rate",
+        severity: "critical",
         value: this.currentMetrics.cache.overallHitRate,
-        threshold: thresholds.cacheHitRate.critical
+        threshold: thresholds.cacheHitRate.critical,
       });
     }
 
     // Check resource utilization
-    if (this.currentMetrics.resources.memoryUtilization > thresholds.memoryUtilization.critical) {
-      this.eventEmitter.emit('performance-alert', {
-        type: 'memory-utilization',
-        severity: 'critical',
+    if (
+      this.currentMetrics.resources.memoryUtilization >
+      thresholds.memoryUtilization.critical
+    ) {
+      this.eventEmitter.emit("performance-alert", {
+        type: "memory-utilization",
+        severity: "critical",
         value: this.currentMetrics.resources.memoryUtilization,
-        threshold: thresholds.memoryUtilization.critical
+        threshold: thresholds.memoryUtilization.critical,
       });
     }
   }
@@ -1520,24 +1745,32 @@ export class PerformanceOptimizerService implements OnApplicationShutdown {
     for (let i = 0; i < this.config.parallelProcessing.workerPoolSize; i++) {
       try {
         const worker = new Worker(__filename, {
-          workerData: { isWorker: true }
+          workerData: { isWorker: true },
         });
 
-        worker.on('error', (error) => {
-          this.logger.error('Worker error', { workerId: i, error: error.message });
+        worker.on("error", (error) => {
+          this.logger.error("Worker error", {
+            workerId: i,
+            error: error.message,
+          });
         });
 
-        worker.on('exit', (code) => {
-          this.logger.warn('Worker exited', { workerId: i, code });
+        worker.on("exit", (code) => {
+          this.logger.warn("Worker exited", { workerId: i, code });
         });
 
         this.workerPool.push(worker);
       } catch (error) {
-        this.logger.error('Failed to create worker', { workerId: i, error: error.message });
+        this.logger.error("Failed to create worker", {
+          workerId: i,
+          error: error.message,
+        });
       }
     }
 
-    this.logger.log('Worker pool initialized', { workerCount: this.workerPool.length });
+    this.logger.log("Worker pool initialized", {
+      workerCount: this.workerPool.length,
+    });
   }
 
   /**
@@ -1561,26 +1794,28 @@ export class PerformanceOptimizerService implements OnApplicationShutdown {
     return {
       ...this.cacheStats,
       l1CacheSize: this.l1Cache.size,
-      l3CacheSize: this.l3CacheStore.size
+      l3CacheSize: this.l3CacheStore.size,
     };
   }
 
   /**
    * Health check for performance optimizer
    */
-  async healthCheck(): Promise<{status: string; metrics: any; config: any}> {
-    const isHealthy = this.currentMetrics.responseTime.p95 <= this.config.targetResponseTimeMs * 1.2;
+  async healthCheck(): Promise<{ status: string; metrics: any; config: any }> {
+    const isHealthy =
+      this.currentMetrics.responseTime.p95 <=
+      this.config.targetResponseTimeMs * 1.2;
 
     return {
-      status: isHealthy ? 'healthy' : 'degraded',
+      status: isHealthy ? "healthy" : "degraded",
       metrics: this.getCurrentPerformanceMetrics(),
       config: {
         enabled: this.config.enabled,
         targetResponseTime: this.config.targetResponseTimeMs,
         cachingEnabled: this.config.caching.l1Cache.enabled,
         parallelProcessing: this.config.parallelProcessing.enabled,
-        workerPoolSize: this.workerPool.length
-      }
+        workerPoolSize: this.workerPool.length,
+      },
     };
   }
 
@@ -1588,7 +1823,7 @@ export class PerformanceOptimizerService implements OnApplicationShutdown {
    * Cleanup when application shuts down
    */
   async onApplicationShutdown(signal?: string) {
-    this.logger.log('PerformanceOptimizerService shutting down', { signal });
+    this.logger.log("PerformanceOptimizerService shutting down", { signal });
 
     // Terminate worker pool
     for (const worker of this.workerPool) {
@@ -1600,75 +1835,80 @@ export class PerformanceOptimizerService implements OnApplicationShutdown {
     this.l3CacheStore.clear();
 
     // Log final metrics
-    this.logger.log('Final performance metrics', this.getCurrentPerformanceMetrics());
+    this.logger.log(
+      "Final performance metrics",
+      this.getCurrentPerformanceMetrics(),
+    );
   }
 }
 
 // Worker thread implementation for parallel processing
 if (!isMainThread && workerData?.isWorker) {
-  parentPort?.on('message', async (message) => {
-    if (message.type === 'validation-request') {
+  parentPort?.on("message", async (message) => {
+    if (message.type === "validation-request") {
       try {
         // Process validation request in worker thread
         // This would contain the actual validation logic
         const result = await processValidationInWorker(message.request);
 
         parentPort?.postMessage({
-          type: 'validation-response',
-          result
+          type: "validation-response",
+          result,
         });
       } catch (error) {
         parentPort?.postMessage({
-          type: 'validation-error',
-          error: error.message
+          type: "validation-error",
+          error: error.message,
         });
       }
     }
   });
 
-  async function processValidationInWorker(request: PreExecutionValidationRequest): Promise<PreExecutionValidationResponse> {
+  async function processValidationInWorker(
+    request: PreExecutionValidationRequest,
+  ): Promise<PreExecutionValidationResponse> {
     // Simulate validation processing in worker
     // In production, this would contain the actual validation logic
-    await new Promise(resolve => setTimeout(resolve, 100)); // Simulate work
+    await new Promise((resolve) => setTimeout(resolve, 100)); // Simulate work
 
     return {
       requestId: request.id,
       result: {
-        decision: 'APPROVED',
+        decision: "APPROVED",
         approvalConfidence: 0.9,
         conversationSummary: {
           userQuestions: [],
-          systemExplanations: ['Worker validation completed'],
-          finalUserStatement: 'Approved by worker'
+          systemExplanations: ["Worker validation completed"],
+          finalUserStatement: "Approved by worker",
         },
         approvalMetadata: {
           approvalTimestamp: new Date(),
-          approvalMethod: 'text',
-          validationDuration: 100
-        }
+          approvalMethod: "text",
+          validationDuration: 100,
+        },
       },
       riskAssessment: {
         riskScore: 25,
-        riskLevel: 'LOW',
-        validationLevel: 'SIMPLE',
+        riskLevel: "LOW",
+        validationLevel: "SIMPLE",
         riskFactors: {
           dataSensitivity: 20,
           operationComplexity: 15,
           userContext: 10,
           systemImpact: 20,
-          complianceRequirements: 5
+          complianceRequirements: 5,
         },
         validationRequirements: [],
         mitigationRecommendations: [],
-        assessmentTimestamp: new Date()
+        assessmentTimestamp: new Date(),
       },
       metrics: {
         totalValidationTime: 100,
         riskAssessmentTime: 20,
         conversationTime: 80,
-        cacheHitRate: 0.0
+        cacheHitRate: 0.0,
       },
-      auditTrail: {} as any
+      auditTrail: {} as any,
     };
   }
 }

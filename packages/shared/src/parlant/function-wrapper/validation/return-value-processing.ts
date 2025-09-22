@@ -11,7 +11,7 @@
  * @created 2025-09-19
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from "@nestjs/common";
 import {
   WrapperResult,
   ExecutionMetadata,
@@ -23,8 +23,8 @@ import {
   WrapperError,
   BusinessImpact,
   SecurityRiskLevel,
-  PerformanceMetrics
-} from '../interfaces/wrapper-types';
+  PerformanceMetrics,
+} from "../interfaces/wrapper-types";
 
 /**
  * Advanced Return Value Processing Service
@@ -56,7 +56,7 @@ export class ReturnValueProcessingService {
     userContext: UserContext,
     validationLevel: ValidationLevel,
     validationResult: ValidationResult,
-    executionMetadata: Partial<ExecutionMetadata>
+    executionMetadata: Partial<ExecutionMetadata>,
   ): Promise<ReturnValueProcessingResult<T>> {
     const startTime = Date.now();
     const processingId = this.generateProcessingId();
@@ -64,7 +64,7 @@ export class ReturnValueProcessingService {
     this.logger.debug(`Starting return value processing for ${functionName}`, {
       processingId,
       validationLevel,
-      hasReturnValue: returnValue !== null && returnValue !== undefined
+      hasReturnValue: returnValue !== null && returnValue !== undefined,
     });
 
     try {
@@ -72,80 +72,90 @@ export class ReturnValueProcessingService {
       const resultAnalysis = await this.resultAnalyzer.analyzeReturnValue(
         returnValue,
         functionName,
-        processingId
+        processingId,
       );
 
       // Step 2: Security validation and sanitization
-      const securityValidation = await this.securityProcessor.validateReturnValueSecurity(
-        returnValue,
-        resultAnalysis,
-        userContext,
-        validationLevel
-      );
+      const securityValidation =
+        await this.securityProcessor.validateReturnValueSecurity(
+          returnValue,
+          resultAnalysis,
+          userContext,
+          validationLevel,
+        );
 
       if (!securityValidation.passed) {
-        const error = new Error(`Return value security validation failed: ${securityValidation.violations.join(', ')}`);
-        (error as any).code = 'RETURN_VALUE_SECURITY_VIOLATION';
+        const error = new Error(
+          `Return value security validation failed: ${securityValidation.violations.join(", ")}`,
+        );
+        (error as any).code = "RETURN_VALUE_SECURITY_VIOLATION";
         (error as any).category = ErrorCategory.VALIDATION_ERROR;
         (error as any).metadata = {
           processingId,
           functionName,
-          violations: securityValidation.violations
+          violations: securityValidation.violations,
         };
         throw error;
       }
 
       // Step 3: Transform and sanitize return value
-      const transformedValue = await this.transformationEngine.transformReturnValue(
-        returnValue,
-        resultAnalysis,
-        securityValidation,
-        userContext
-      );
+      const transformedValue =
+        await this.transformationEngine.transformReturnValue(
+          returnValue,
+          resultAnalysis,
+          securityValidation,
+          userContext,
+        );
 
       // Step 4: Performance analysis
-      const performanceAnalysis = await this.performanceAnalyzer.analyzeReturnValuePerformance(
-        returnValue,
-        resultAnalysis,
-        executionMetadata
-      );
+      const performanceAnalysis =
+        await this.performanceAnalyzer.analyzeReturnValuePerformance(
+          returnValue,
+          resultAnalysis,
+          executionMetadata,
+        );
 
       // Step 5: Business impact assessment
       const businessImpact = await this.assessBusinessImpactOfReturnValue(
         returnValue,
         resultAnalysis,
         functionName,
-        userContext
+        userContext,
       );
 
       // Step 6: Generate audit trail for return value
-      const auditTrail = await this.auditProcessor.generateReturnValueAuditTrail(
-        functionName,
-        returnValue,
-        transformedValue,
-        resultAnalysis,
-        securityValidation,
-        userContext,
-        processingId
-      );
+      const auditTrail =
+        await this.auditProcessor.generateReturnValueAuditTrail(
+          functionName,
+          returnValue,
+          transformedValue,
+          resultAnalysis,
+          securityValidation,
+          userContext,
+          processingId,
+        );
 
       // Step 7: Create PARLANT conversation summary
-      const conversationSummary = await this.createReturnValueConversationSummary(
-        functionName,
-        resultAnalysis,
-        securityValidation,
-        businessImpact,
-        userContext
-      );
+      const conversationSummary =
+        await this.createReturnValueConversationSummary(
+          functionName,
+          resultAnalysis,
+          securityValidation,
+          businessImpact,
+          userContext,
+        );
 
       const processingTime = Date.now() - startTime;
 
-      this.logger.debug(`Return value processing completed for ${functionName}`, {
-        processingId,
-        processingTime,
-        securityPassed: securityValidation.passed,
-        transformationApplied: transformedValue !== returnValue
-      });
+      this.logger.debug(
+        `Return value processing completed for ${functionName}`,
+        {
+          processingId,
+          processingTime,
+          securityPassed: securityValidation.passed,
+          transformationApplied: transformedValue !== returnValue,
+        },
+      );
 
       return {
         processingId,
@@ -163,17 +173,16 @@ export class ReturnValueProcessingService {
         metadata: {
           validationLevel,
           userPermissions: userContext.permissions,
-          originalValidationId: validationResult.validationId
-        }
+          originalValidationId: validationResult.validationId,
+        },
       };
-
     } catch (error) {
       const processingTime = Date.now() - startTime;
 
       this.logger.error(`Return value processing failed for ${functionName}`, {
         processingId,
         error: error instanceof Error ? error.message : String(error),
-        processingTime
+        processingTime,
       });
 
       return {
@@ -182,26 +191,35 @@ export class ReturnValueProcessingService {
         originalValue: returnValue,
         transformedValue: returnValue,
         resultAnalysis: {
-          resultType: 'error',
+          resultType: "error",
           dataClassification: DataClassification.INTERNAL,
           securityRisk: SecurityRiskLevel.LOW,
           size: 0,
           complexity: 0,
           structure: { isCollection: false, elementCount: 0, nestedLevels: 0 },
-          contentAnalysis: { containsPII: false, containsCredentials: false, containsSensitiveData: false, dataPatterns: [] }
+          contentAnalysis: {
+            containsPII: false,
+            containsCredentials: false,
+            containsSensitiveData: false,
+            dataPatterns: [],
+          },
         },
-        securityValidation: { passed: false, violations: [error instanceof Error ? error.message : String(error)], sanitizationApplied: false },
+        securityValidation: {
+          passed: false,
+          violations: [error instanceof Error ? error.message : String(error)],
+          sanitizationApplied: false,
+        },
         performanceAnalysis: {
           serializationTime: 0,
           memoryFootprint: 0,
           transferSize: 0,
-          optimizationOpportunities: []
+          optimizationOpportunities: [],
         },
         businessImpact: {
-          impactLevel: 'low',
+          impactLevel: "low",
           affectedSystems: [],
           dataValue: DataValueLevel.LOW,
-          complianceImplications: []
+          complianceImplications: [],
         },
         auditTrail: null,
         conversationSummary: null,
@@ -211,8 +229,8 @@ export class ReturnValueProcessingService {
         metadata: {
           validationLevel,
           userPermissions: userContext.permissions,
-          originalValidationId: validationResult.validationId
-        }
+          originalValidationId: validationResult.validationId,
+        },
       };
     }
   }
@@ -228,7 +246,7 @@ export class ReturnValueProcessingService {
   public async validateReturnValueSchema<T>(
     returnValue: T,
     expectedSchema: ReturnValueSchema,
-    functionName: string
+    functionName: string,
   ): Promise<SchemaValidationResult> {
     const validationErrors: string[] = [];
     const warnings: string[] = [];
@@ -237,53 +255,61 @@ export class ReturnValueProcessingService {
       // Type validation
       if (expectedSchema.type && typeof returnValue !== expectedSchema.type) {
         validationErrors.push(
-          `Expected type '${expectedSchema.type}' but got '${typeof returnValue}'`
+          `Expected type '${expectedSchema.type}' but got '${typeof returnValue}'`,
         );
       }
 
       // Null/undefined validation
       if (returnValue === null || returnValue === undefined) {
         if (!expectedSchema.nullable) {
-          validationErrors.push('Return value is null/undefined but schema requires non-null value');
+          validationErrors.push(
+            "Return value is null/undefined but schema requires non-null value",
+          );
         }
       } else {
         // Structure validation for objects
-        if (expectedSchema.type === 'object' && expectedSchema.properties) {
+        if (expectedSchema.type === "object" && expectedSchema.properties) {
           const structureValidation = this.validateObjectStructure(
             returnValue as any,
-            expectedSchema.properties
+            expectedSchema.properties,
           );
           validationErrors.push(...structureValidation.errors);
           warnings.push(...structureValidation.warnings);
         }
 
         // Array validation
-        if (expectedSchema.type === 'array' && Array.isArray(returnValue)) {
+        if (expectedSchema.type === "array" && Array.isArray(returnValue)) {
           const arrayValidation = this.validateArrayStructure(
             returnValue,
-            expectedSchema.items
+            expectedSchema.items,
           );
           validationErrors.push(...arrayValidation.errors);
           warnings.push(...arrayValidation.warnings);
         }
 
         // Range validation for numbers
-        if (expectedSchema.type === 'number' && typeof returnValue === 'number') {
+        if (
+          expectedSchema.type === "number" &&
+          typeof returnValue === "number"
+        ) {
           const rangeValidation = this.validateNumberRange(
             returnValue,
             expectedSchema.minimum,
-            expectedSchema.maximum
+            expectedSchema.maximum,
           );
           validationErrors.push(...rangeValidation);
         }
 
         // String validation
-        if (expectedSchema.type === 'string' && typeof returnValue === 'string') {
+        if (
+          expectedSchema.type === "string" &&
+          typeof returnValue === "string"
+        ) {
           const stringValidation = this.validateStringConstraints(
             returnValue,
             expectedSchema.minLength,
             expectedSchema.maxLength,
-            expectedSchema.pattern
+            expectedSchema.pattern,
           );
           validationErrors.push(...stringValidation);
         }
@@ -295,17 +321,18 @@ export class ReturnValueProcessingService {
         warnings,
         schema: expectedSchema,
         actualType: typeof returnValue,
-        compliance: this.calculateSchemaCompliance(validationErrors, warnings)
+        compliance: this.calculateSchemaCompliance(validationErrors, warnings),
       };
-
     } catch (error) {
       return {
         valid: false,
-        errors: [`Schema validation failed: ${error instanceof Error ? error.message : String(error)}`],
+        errors: [
+          `Schema validation failed: ${error instanceof Error ? error.message : String(error)}`,
+        ],
         warnings: [],
         schema: expectedSchema,
         actualType: typeof returnValue,
-        compliance: 0
+        compliance: 0,
       };
     }
   }
@@ -319,7 +346,7 @@ export class ReturnValueProcessingService {
    */
   public async transformReturnValueForTransmission<T>(
     returnValue: T,
-    transformationOptions: TransformationOptions
+    transformationOptions: TransformationOptions,
   ): Promise<TransformedReturnValue<T>> {
     const transformationId = this.generateProcessingId();
 
@@ -329,28 +356,32 @@ export class ReturnValueProcessingService {
 
       // Sanitization transformations
       if (transformationOptions.sanitizePII) {
-        transformedValue = await this.transformationEngine.sanitizePII(transformedValue);
-        appliedTransformations.push('pii_sanitization');
+        transformedValue =
+          await this.transformationEngine.sanitizePII(transformedValue);
+        appliedTransformations.push("pii_sanitization");
       }
 
       if (transformationOptions.redactCredentials) {
-        transformedValue = await this.transformationEngine.redactCredentials(transformedValue);
-        appliedTransformations.push('credential_redaction');
+        transformedValue =
+          await this.transformationEngine.redactCredentials(transformedValue);
+        appliedTransformations.push("credential_redaction");
       }
 
       // Size optimization transformations
       if (transformationOptions.compressLargeData) {
-        const compressionResult = await this.transformationEngine.compressIfLarge(transformedValue);
+        const compressionResult =
+          await this.transformationEngine.compressIfLarge(transformedValue);
         transformedValue = compressionResult.value;
         if (compressionResult.compressed) {
-          appliedTransformations.push('data_compression');
+          appliedTransformations.push("data_compression");
         }
       }
 
       // Format transformations
       if (transformationOptions.normalizeFormat) {
-        transformedValue = await this.transformationEngine.normalizeFormat(transformedValue);
-        appliedTransformations.push('format_normalization');
+        transformedValue =
+          await this.transformationEngine.normalizeFormat(transformedValue);
+        appliedTransformations.push("format_normalization");
       }
 
       return {
@@ -363,14 +394,13 @@ export class ReturnValueProcessingService {
         sizeAfter: this.calculateValueSize(transformedValue),
         transformationMetadata: {
           timestamp: new Date(),
-          options: transformationOptions
-        }
+          options: transformationOptions,
+        },
       };
-
     } catch (error) {
       this.logger.error(`Return value transformation failed`, {
         transformationId,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
 
       return {
@@ -384,8 +414,8 @@ export class ReturnValueProcessingService {
         error: error instanceof Error ? error.message : String(error),
         transformationMetadata: {
           timestamp: new Date(),
-          options: transformationOptions
-        }
+          options: transformationOptions,
+        },
       };
     }
   }
@@ -401,38 +431,41 @@ export class ReturnValueProcessingService {
   public async generateReturnValueConversationSummary<T>(
     functionName: string,
     returnValue: T,
-    userContext: UserContext
+    userContext: UserContext,
   ): Promise<ReturnValueConversationSummary> {
     const analysis = await this.resultAnalyzer.analyzeReturnValue(
       returnValue,
       functionName,
-      this.generateProcessingId()
+      this.generateProcessingId(),
     );
 
     return {
       functionName,
       executionSuccessful: returnValue !== null && returnValue !== undefined,
-      resultDescription: this.generateHumanReadableResultDescription(returnValue, analysis),
+      resultDescription: this.generateHumanReadableResultDescription(
+        returnValue,
+        analysis,
+      ),
       dataClassification: analysis.dataClassification,
       securityRelevant: analysis.securityRisk !== SecurityRiskLevel.LOW,
       businessImpact: await this.assessBusinessImpactOfReturnValue(
         returnValue,
         analysis,
         functionName,
-        userContext
+        userContext,
       ),
       conversationPrompts: this.generateReturnValueConversationPrompts(
         returnValue,
         analysis,
-        functionName
+        functionName,
       ),
       recommendedActions: this.generateReturnValueRecommendedActions(
         returnValue,
         analysis,
         functionName,
-        userContext
+        userContext,
       ),
-      nextSteps: this.generateNextSteps(returnValue, analysis, functionName)
+      nextSteps: this.generateNextSteps(returnValue, analysis, functionName),
     };
   }
 
@@ -460,39 +493,47 @@ export class ReturnValueProcessingService {
     returnValue: T,
     analysis: ReturnValueAnalysis,
     functionName: string,
-    userContext: UserContext
+    userContext: UserContext,
   ): Promise<ReturnValueBusinessImpact> {
     // Determine impact level based on multiple factors
-    let impactLevel: 'low' | 'medium' | 'high' | 'critical' = 'low';
+    let impactLevel: "low" | "medium" | "high" | "critical" = "low";
 
     // Function type impact
-    if (functionName.toLowerCase().includes('create') ||
-        functionName.toLowerCase().includes('update') ||
-        functionName.toLowerCase().includes('delete')) {
-      impactLevel = 'high';
+    if (
+      functionName.toLowerCase().includes("create") ||
+      functionName.toLowerCase().includes("update") ||
+      functionName.toLowerCase().includes("delete")
+    ) {
+      impactLevel = "high";
     }
 
     // Data classification impact
     if (analysis.dataClassification === DataClassification.RESTRICTED) {
-      impactLevel = 'critical';
-    } else if (analysis.dataClassification === DataClassification.CONFIDENTIAL) {
-      impactLevel = 'high';
+      impactLevel = "critical";
+    } else if (
+      analysis.dataClassification === DataClassification.CONFIDENTIAL
+    ) {
+      impactLevel = "high";
     }
 
     // Security risk impact
     if (analysis.securityRisk === SecurityRiskLevel.CRITICAL) {
-      impactLevel = 'critical';
+      impactLevel = "critical";
     } else if (analysis.securityRisk === SecurityRiskLevel.HIGH) {
-      impactLevel = 'high';
+      impactLevel = "high";
     }
 
     // Size impact
-    if (analysis.size > 10000000) { // > 10MB
-      if (impactLevel === 'low') impactLevel = 'medium';
+    if (analysis.size > 10000000) {
+      // > 10MB
+      if (impactLevel === "low") impactLevel = "medium";
     }
 
     // Determine affected systems
-    const affectedSystems = this.identifyAffectedSystems(functionName, analysis);
+    const affectedSystems = this.identifyAffectedSystems(
+      functionName,
+      analysis,
+    );
 
     // Assess data value
     const dataValue = this.assessDataValue(returnValue, analysis);
@@ -501,14 +542,14 @@ export class ReturnValueProcessingService {
     const complianceImplications = this.identifyComplianceImplications(
       analysis,
       functionName,
-      userContext
+      userContext,
     );
 
     return {
       impactLevel,
       affectedSystems,
       dataValue,
-      complianceImplications
+      complianceImplications,
     };
   }
 
@@ -521,28 +562,28 @@ export class ReturnValueProcessingService {
    */
   private identifyAffectedSystems(
     functionName: string,
-    analysis: ReturnValueAnalysis
+    analysis: ReturnValueAnalysis,
   ): string[] {
     const systems: string[] = [];
 
     // Extract system from function name
-    const functionParts = functionName.split('.');
+    const functionParts = functionName.split(".");
     if (functionParts.length > 1) {
       systems.push(functionParts[0]);
     }
 
     // Add systems based on data classification
     if (analysis.dataClassification === DataClassification.RESTRICTED) {
-      systems.push('security-system', 'audit-system');
+      systems.push("security-system", "audit-system");
     }
 
     // Add systems based on content
     if (analysis.contentAnalysis.containsPII) {
-      systems.push('privacy-compliance-system');
+      systems.push("privacy-compliance-system");
     }
 
     if (analysis.contentAnalysis.containsCredentials) {
-      systems.push('credential-management-system');
+      systems.push("credential-management-system");
     }
 
     return [...new Set(systems)]; // Remove duplicates
@@ -557,7 +598,7 @@ export class ReturnValueProcessingService {
    */
   private assessDataValue<T>(
     returnValue: T,
-    analysis: ReturnValueAnalysis
+    analysis: ReturnValueAnalysis,
   ): DataValueLevel {
     // High value indicators
     if (analysis.contentAnalysis.containsCredentials) {
@@ -581,7 +622,10 @@ export class ReturnValueProcessingService {
       return DataValueLevel.MEDIUM;
     }
 
-    if (analysis.structure.isCollection && analysis.structure.elementCount > 1000) {
+    if (
+      analysis.structure.isCollection &&
+      analysis.structure.elementCount > 1000
+    ) {
       return DataValueLevel.MEDIUM;
     }
 
@@ -599,31 +643,39 @@ export class ReturnValueProcessingService {
   private identifyComplianceImplications(
     analysis: ReturnValueAnalysis,
     functionName: string,
-    userContext: UserContext
+    userContext: UserContext,
   ): string[] {
     const implications: string[] = [];
 
     // GDPR implications
     if (analysis.contentAnalysis.containsPII) {
-      implications.push('GDPR - Personal data processing');
+      implications.push("GDPR - Personal data processing");
     }
 
     // SOX implications
-    if (functionName.toLowerCase().includes('financial') ||
-        functionName.toLowerCase().includes('audit')) {
-      implications.push('SOX - Financial data controls');
+    if (
+      functionName.toLowerCase().includes("financial") ||
+      functionName.toLowerCase().includes("audit")
+    ) {
+      implications.push("SOX - Financial data controls");
     }
 
     // HIPAA implications
-    if (analysis.contentAnalysis.dataPatterns.some(pattern =>
-        pattern.includes('medical') || pattern.includes('health'))) {
-      implications.push('HIPAA - Healthcare data protection');
+    if (
+      analysis.contentAnalysis.dataPatterns.some(
+        (pattern) => pattern.includes("medical") || pattern.includes("health"),
+      )
+    ) {
+      implications.push("HIPAA - Healthcare data protection");
     }
 
     // PCI-DSS implications
-    if (analysis.contentAnalysis.dataPatterns.some(pattern =>
-        pattern.includes('credit') || pattern.includes('payment'))) {
-      implications.push('PCI-DSS - Payment data security');
+    if (
+      analysis.contentAnalysis.dataPatterns.some(
+        (pattern) => pattern.includes("credit") || pattern.includes("payment"),
+      )
+    ) {
+      implications.push("PCI-DSS - Payment data security");
     }
 
     return implications;
@@ -644,7 +696,7 @@ export class ReturnValueProcessingService {
     analysis: ReturnValueAnalysis,
     securityValidation: ReturnValueSecurityValidation,
     businessImpact: ReturnValueBusinessImpact,
-    userContext: UserContext
+    userContext: UserContext,
   ): Promise<ReturnValueConversationSummary> {
     return {
       functionName,
@@ -653,9 +705,16 @@ export class ReturnValueProcessingService {
       dataClassification: analysis.dataClassification,
       securityRelevant: analysis.securityRisk !== SecurityRiskLevel.LOW,
       businessImpact,
-      conversationPrompts: this.generateConversationPrompts(analysis, businessImpact),
-      recommendedActions: this.generateRecommendations(analysis, businessImpact, userContext),
-      nextSteps: this.generateNextSteps(null, analysis, functionName)
+      conversationPrompts: this.generateConversationPrompts(
+        analysis,
+        businessImpact,
+      ),
+      recommendedActions: this.generateRecommendations(
+        analysis,
+        businessImpact,
+        userContext,
+      ),
+      nextSteps: this.generateNextSteps(null, analysis, functionName),
     };
   }
 
@@ -681,14 +740,14 @@ export class ReturnValueProcessingService {
     }
 
     if (complexity > 50) {
-      description += ` with ${complexity > 80 ? 'high' : 'moderate'} complexity`;
+      description += ` with ${complexity > 80 ? "high" : "moderate"} complexity`;
     }
 
     if (analysis.contentAnalysis.containsSensitiveData) {
-      description += ' containing sensitive data';
+      description += " containing sensitive data";
     }
 
-    return description + '.';
+    return description + ".";
   }
 
   /**
@@ -700,7 +759,8 @@ export class ReturnValueProcessingService {
   private formatSize(bytes: number): string {
     if (bytes < 1024) return `${bytes} bytes`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    if (bytes < 1024 * 1024 * 1024) return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+    if (bytes < 1024 * 1024 * 1024)
+      return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
     return `${(bytes / 1024 / 1024 / 1024).toFixed(1)} GB`;
   }
 
@@ -713,45 +773,49 @@ export class ReturnValueProcessingService {
    */
   private generateConversationPrompts(
     analysis: ReturnValueAnalysis,
-    businessImpact: ReturnValueBusinessImpact
+    businessImpact: ReturnValueBusinessImpact,
   ): ConversationPrompt[] {
     const prompts: ConversationPrompt[] = [];
 
     // Success confirmation
     prompts.push({
-      type: 'information',
-      message: 'Function executed successfully and returned data.',
+      type: "information",
+      message: "Function executed successfully and returned data.",
       priority: 1,
-      requiresResponse: false
+      requiresResponse: false,
     });
 
     // Security prompts
     if (analysis.contentAnalysis.containsSensitiveData) {
       prompts.push({
-        type: 'security_warning',
-        message: 'The returned data contains sensitive information. Handle with appropriate care.',
+        type: "security_warning",
+        message:
+          "The returned data contains sensitive information. Handle with appropriate care.",
         priority: 8,
-        requiresResponse: false
+        requiresResponse: false,
       });
     }
 
     // Business impact prompts
-    if (businessImpact.impactLevel === 'critical' || businessImpact.impactLevel === 'high') {
+    if (
+      businessImpact.impactLevel === "critical" ||
+      businessImpact.impactLevel === "high"
+    ) {
       prompts.push({
-        type: 'confirmation',
+        type: "confirmation",
         message: `This operation has ${businessImpact.impactLevel} business impact. Please review the results carefully.`,
         priority: 7,
-        requiresResponse: true
+        requiresResponse: true,
       });
     }
 
     // Compliance prompts
     if (businessImpact.complianceImplications.length > 0) {
       prompts.push({
-        type: 'information',
-        message: `Compliance considerations: ${businessImpact.complianceImplications.join(', ')}`,
+        type: "information",
+        message: `Compliance considerations: ${businessImpact.complianceImplications.join(", ")}`,
         priority: 6,
-        requiresResponse: false
+        requiresResponse: false,
       });
     }
 
@@ -769,51 +833,52 @@ export class ReturnValueProcessingService {
   private generateRecommendations(
     analysis: ReturnValueAnalysis,
     businessImpact: ReturnValueBusinessImpact,
-    userContext: UserContext
+    userContext: UserContext,
   ): RecommendedAction[] {
     const actions: RecommendedAction[] = [];
 
     // Security actions
     if (analysis.contentAnalysis.containsSensitiveData) {
       actions.push({
-        type: 'security',
-        action: 'secure_data_handling',
-        description: 'Ensure secure handling and storage of sensitive data',
+        type: "security",
+        action: "secure_data_handling",
+        description: "Ensure secure handling and storage of sensitive data",
         priority: 9,
-        required: true
+        required: true,
       });
     }
 
     // Performance actions
-    if (analysis.size > 10000000) { // > 10MB
+    if (analysis.size > 10000000) {
+      // > 10MB
       actions.push({
-        type: 'performance',
-        action: 'optimize_large_data',
-        description: 'Consider data compression or streaming for large results',
+        type: "performance",
+        action: "optimize_large_data",
+        description: "Consider data compression or streaming for large results",
         priority: 5,
-        required: false
+        required: false,
       });
     }
 
     // Compliance actions
     if (businessImpact.complianceImplications.length > 0) {
       actions.push({
-        type: 'validation',
-        action: 'compliance_review',
-        description: 'Review result for compliance requirements',
+        type: "validation",
+        action: "compliance_review",
+        description: "Review result for compliance requirements",
         priority: 7,
-        required: true
+        required: true,
       });
     }
 
     // Business actions
-    if (businessImpact.impactLevel === 'critical') {
+    if (businessImpact.impactLevel === "critical") {
       actions.push({
-        type: 'validation',
-        action: 'management_review',
-        description: 'Obtain management review for critical business impact',
+        type: "validation",
+        action: "management_review",
+        description: "Obtain management review for critical business impact",
         priority: 10,
-        required: true
+        required: true,
       });
     }
 
@@ -829,14 +894,14 @@ export class ReturnValueProcessingService {
    */
   private generateHumanReadableResultDescription<T>(
     returnValue: T,
-    analysis: ReturnValueAnalysis
+    analysis: ReturnValueAnalysis,
   ): string {
     if (returnValue === null) {
-      return 'Function completed but returned no data (null).';
+      return "Function completed but returned no data (null).";
     }
 
     if (returnValue === undefined) {
-      return 'Function completed but returned no data (undefined).';
+      return "Function completed but returned no data (undefined).";
     }
 
     const type = analysis.resultType;
@@ -848,12 +913,12 @@ export class ReturnValueProcessingService {
       return `Function returned an array of ${count} ${type} items (${size}).`;
     }
 
-    if (type === 'object') {
+    if (type === "object") {
       return `Function returned an object with ${count} properties (${size}).`;
     }
 
-    if (type === 'string') {
-      const length = typeof returnValue === 'string' ? returnValue.length : 0;
+    if (type === "string") {
+      const length = typeof returnValue === "string" ? returnValue.length : 0;
       return `Function returned a string of ${length} characters (${size}).`;
     }
 
@@ -871,35 +936,37 @@ export class ReturnValueProcessingService {
   private generateReturnValueConversationPrompts<T>(
     returnValue: T,
     analysis: ReturnValueAnalysis,
-    functionName: string
+    functionName: string,
   ): ConversationPrompt[] {
     const prompts: ConversationPrompt[] = [];
 
     // Success prompt
     prompts.push({
-      type: 'information',
+      type: "information",
       message: `${functionName} completed successfully.`,
       priority: 1,
-      requiresResponse: false
+      requiresResponse: false,
     });
 
     // Data size warning
-    if (analysis.size > 1000000) { // > 1MB
+    if (analysis.size > 1000000) {
+      // > 1MB
       prompts.push({
-        type: 'performance_warning',
+        type: "performance_warning",
         message: `The result is quite large (${this.formatSize(analysis.size)}). Consider if all data is needed.`,
         priority: 4,
-        requiresResponse: false
+        requiresResponse: false,
       });
     }
 
     // Security warning
     if (analysis.contentAnalysis.containsSensitiveData) {
       prompts.push({
-        type: 'security_warning',
-        message: 'The result contains sensitive data. Please handle appropriately.',
+        type: "security_warning",
+        message:
+          "The result contains sensitive data. Please handle appropriately.",
         priority: 8,
-        requiresResponse: false
+        requiresResponse: false,
       });
     }
 
@@ -919,40 +986,42 @@ export class ReturnValueProcessingService {
     returnValue: T,
     analysis: ReturnValueAnalysis,
     functionName: string,
-    userContext: UserContext
+    userContext: UserContext,
   ): RecommendedAction[] {
     const actions: RecommendedAction[] = [];
 
     // Save/store action
     if (analysis.size > 0) {
       actions.push({
-        type: 'validation',
-        action: 'review_result',
-        description: 'Review the returned data for accuracy',
+        type: "validation",
+        action: "review_result",
+        description: "Review the returned data for accuracy",
         priority: 5,
-        required: false
+        required: false,
       });
     }
 
     // Security action
     if (analysis.contentAnalysis.containsSensitiveData) {
       actions.push({
-        type: 'security',
-        action: 'secure_storage',
-        description: 'Store sensitive data securely if persisting',
+        type: "security",
+        action: "secure_storage",
+        description: "Store sensitive data securely if persisting",
         priority: 9,
-        required: true
+        required: true,
       });
     }
 
     // Performance action
-    if (analysis.size > 5000000) { // > 5MB
+    if (analysis.size > 5000000) {
+      // > 5MB
       actions.push({
-        type: 'performance',
-        action: 'consider_compression',
-        description: 'Consider compressing large data for storage or transmission',
+        type: "performance",
+        action: "consider_compression",
+        description:
+          "Consider compressing large data for storage or transmission",
         priority: 6,
-        required: false
+        required: false,
       });
     }
 
@@ -970,37 +1039,37 @@ export class ReturnValueProcessingService {
   private generateNextSteps<T>(
     returnValue: T,
     analysis: ReturnValueAnalysis,
-    functionName: string
+    functionName: string,
   ): string[] {
     const steps: string[] = [];
 
     // Basic next steps
     if (analysis.size > 0) {
-      steps.push('Review the returned data');
+      steps.push("Review the returned data");
     }
 
     // Security steps
     if (analysis.contentAnalysis.containsSensitiveData) {
-      steps.push('Apply appropriate data protection measures');
+      steps.push("Apply appropriate data protection measures");
     }
 
     // Performance steps
     if (analysis.size > 1000000) {
-      steps.push('Consider data optimization if storing or transmitting');
+      steps.push("Consider data optimization if storing or transmitting");
     }
 
     // Function-specific steps
-    if (functionName.toLowerCase().includes('create')) {
-      steps.push('Verify the created resource is accessible');
-    } else if (functionName.toLowerCase().includes('update')) {
-      steps.push('Confirm the update was applied correctly');
-    } else if (functionName.toLowerCase().includes('delete')) {
-      steps.push('Verify the resource was properly removed');
+    if (functionName.toLowerCase().includes("create")) {
+      steps.push("Verify the created resource is accessible");
+    } else if (functionName.toLowerCase().includes("update")) {
+      steps.push("Confirm the update was applied correctly");
+    } else if (functionName.toLowerCase().includes("delete")) {
+      steps.push("Verify the resource was properly removed");
     }
 
     // Default step if no specific steps
     if (steps.length === 0) {
-      steps.push('Process completed successfully');
+      steps.push("Process completed successfully");
     }
 
     return steps;
@@ -1015,7 +1084,7 @@ export class ReturnValueProcessingService {
    */
   private validateObjectStructure(
     obj: any,
-    properties: Record<string, PropertySchema>
+    properties: Record<string, PropertySchema>,
   ): { errors: string[]; warnings: string[] } {
     const errors: string[] = [];
     const warnings: string[] = [];
@@ -1029,13 +1098,15 @@ export class ReturnValueProcessingService {
       if (propName in obj) {
         const propValue = obj[propName];
         if (propSchema.type && typeof propValue !== propSchema.type) {
-          errors.push(`Property ${propName}: expected ${propSchema.type}, got ${typeof propValue}`);
+          errors.push(
+            `Property ${propName}: expected ${propSchema.type}, got ${typeof propValue}`,
+          );
         }
       }
     });
 
     // Check for unexpected properties
-    Object.keys(obj).forEach(propName => {
+    Object.keys(obj).forEach((propName) => {
       if (!(propName in properties)) {
         warnings.push(`Unexpected property: ${propName}`);
       }
@@ -1053,7 +1124,7 @@ export class ReturnValueProcessingService {
    */
   private validateArrayStructure(
     array: any[],
-    itemSchema?: ItemSchema
+    itemSchema?: ItemSchema,
   ): { errors: string[]; warnings: string[] } {
     const errors: string[] = [];
     const warnings: string[] = [];
@@ -1061,7 +1132,9 @@ export class ReturnValueProcessingService {
     if (itemSchema) {
       array.forEach((item, index) => {
         if (itemSchema.type && typeof item !== itemSchema.type) {
-          errors.push(`Array item ${index}: expected ${itemSchema.type}, got ${typeof item}`);
+          errors.push(
+            `Array item ${index}: expected ${itemSchema.type}, got ${typeof item}`,
+          );
         }
       });
     }
@@ -1080,7 +1153,7 @@ export class ReturnValueProcessingService {
   private validateNumberRange(
     value: number,
     minimum?: number,
-    maximum?: number
+    maximum?: number,
   ): string[] {
     const errors: string[] = [];
 
@@ -1108,16 +1181,20 @@ export class ReturnValueProcessingService {
     value: string,
     minLength?: number,
     maxLength?: number,
-    pattern?: string
+    pattern?: string,
   ): string[] {
     const errors: string[] = [];
 
     if (minLength !== undefined && value.length < minLength) {
-      errors.push(`String length ${value.length} is below minimum ${minLength}`);
+      errors.push(
+        `String length ${value.length} is below minimum ${minLength}`,
+      );
     }
 
     if (maxLength !== undefined && value.length > maxLength) {
-      errors.push(`String length ${value.length} is above maximum ${maxLength}`);
+      errors.push(
+        `String length ${value.length} is above maximum ${maxLength}`,
+      );
     }
 
     if (pattern) {
@@ -1127,7 +1204,9 @@ export class ReturnValueProcessingService {
           errors.push(`String does not match required pattern`);
         }
       } catch (error) {
-        errors.push(`Invalid pattern: ${error instanceof Error ? error.message : String(error)}`);
+        errors.push(
+          `Invalid pattern: ${error instanceof Error ? error.message : String(error)}`,
+        );
       }
     }
 
@@ -1141,8 +1220,11 @@ export class ReturnValueProcessingService {
    * @param warnings - Validation warnings
    * @returns Compliance percentage (0-100)
    */
-  private calculateSchemaCompliance(errors: string[], warnings: string[]): number {
-    const totalIssues = errors.length + (warnings.length * 0.5);
+  private calculateSchemaCompliance(
+    errors: string[],
+    warnings: string[],
+  ): number {
+    const totalIssues = errors.length + warnings.length * 0.5;
     if (totalIssues === 0) return 100;
 
     // Simple compliance calculation
@@ -1163,7 +1245,7 @@ export class ReturnValueProcessingService {
       if (value === null || value === undefined) return 0;
 
       const serialized = JSON.stringify(value);
-      return Buffer.byteLength(serialized, 'utf8');
+      return Buffer.byteLength(serialized, "utf8");
     } catch (error) {
       return 0;
     }
@@ -1188,7 +1270,7 @@ export class ResultAnalyzer {
   public async analyzeReturnValue<T>(
     returnValue: T,
     functionName: string,
-    processingId: string
+    processingId: string,
   ): Promise<ReturnValueAnalysis> {
     const resultType = this.determineResultType(returnValue);
     const size = this.calculateValueSize(returnValue);
@@ -1205,7 +1287,7 @@ export class ResultAnalyzer {
       size,
       complexity,
       structure,
-      contentAnalysis
+      contentAnalysis,
     };
   }
 
@@ -1216,12 +1298,12 @@ export class ResultAnalyzer {
    * @returns Result type string
    */
   private determineResultType(value: any): string {
-    if (value === null) return 'null';
-    if (value === undefined) return 'undefined';
-    if (Array.isArray(value)) return 'array';
-    if (value instanceof Date) return 'date';
-    if (value instanceof Error) return 'error';
-    if (Buffer.isBuffer(value)) return 'buffer';
+    if (value === null) return "null";
+    if (value === undefined) return "undefined";
+    if (Array.isArray(value)) return "array";
+    if (value instanceof Date) return "date";
+    if (value instanceof Error) return "error";
+    if (Buffer.isBuffer(value)) return "buffer";
 
     return typeof value;
   }
@@ -1237,7 +1319,7 @@ export class ResultAnalyzer {
       if (value === null || value === undefined) return 0;
 
       const serialized = JSON.stringify(value);
-      return Buffer.byteLength(serialized, 'utf8');
+      return Buffer.byteLength(serialized, "utf8");
     } catch (error) {
       return 0;
     }
@@ -1251,19 +1333,31 @@ export class ResultAnalyzer {
    */
   private calculateComplexity(value: any): number {
     if (value === null || value === undefined) return 0;
-    if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') return 10;
+    if (
+      typeof value === "string" ||
+      typeof value === "number" ||
+      typeof value === "boolean"
+    )
+      return 10;
 
     if (Array.isArray(value)) {
       const baseComplexity = 20;
       const lengthComplexity = Math.min(value.length * 2, 30);
-      const nestedComplexity = Math.max(...value.map(item => this.calculateComplexity(item))) * 0.5;
-      return Math.min(baseComplexity + lengthComplexity + nestedComplexity, 100);
+      const nestedComplexity =
+        Math.max(...value.map((item) => this.calculateComplexity(item))) * 0.5;
+      return Math.min(
+        baseComplexity + lengthComplexity + nestedComplexity,
+        100,
+      );
     }
 
-    if (typeof value === 'object') {
+    if (typeof value === "object") {
       const baseComplexity = 30;
       const keyComplexity = Math.min(Object.keys(value).length * 3, 40);
-      const nestedComplexity = Math.max(...Object.values(value).map(val => this.calculateComplexity(val))) * 0.5;
+      const nestedComplexity =
+        Math.max(
+          ...Object.values(value).map((val) => this.calculateComplexity(val)),
+        ) * 0.5;
       return Math.min(baseComplexity + keyComplexity + nestedComplexity, 100);
     }
 
@@ -1277,14 +1371,15 @@ export class ResultAnalyzer {
    * @returns Structure analysis
    */
   private analyzeStructure(value: any): ReturnValueStructure {
-    const isCollection = Array.isArray(value) || (typeof value === 'object' && value !== null);
+    const isCollection =
+      Array.isArray(value) || (typeof value === "object" && value !== null);
     let elementCount = 0;
     let nestedLevels = 0;
 
     if (Array.isArray(value)) {
       elementCount = value.length;
       nestedLevels = this.calculateNestingDepth(value);
-    } else if (typeof value === 'object' && value !== null) {
+    } else if (typeof value === "object" && value !== null) {
       elementCount = Object.keys(value).length;
       nestedLevels = this.calculateNestingDepth(value);
     }
@@ -1292,7 +1387,7 @@ export class ResultAnalyzer {
     return {
       isCollection,
       elementCount,
-      nestedLevels
+      nestedLevels,
     };
   }
 
@@ -1303,17 +1398,21 @@ export class ResultAnalyzer {
    * @returns Maximum nesting depth
    */
   private calculateNestingDepth(value: any): number {
-    if (value === null || typeof value !== 'object') return 0;
+    if (value === null || typeof value !== "object") return 0;
 
     if (Array.isArray(value)) {
       if (value.length === 0) return 1;
-      return 1 + Math.max(...value.map(item => this.calculateNestingDepth(item)));
+      return (
+        1 + Math.max(...value.map((item) => this.calculateNestingDepth(item)))
+      );
     }
 
     const keys = Object.keys(value);
     if (keys.length === 0) return 1;
 
-    return 1 + Math.max(...keys.map(key => this.calculateNestingDepth(value[key])));
+    return (
+      1 + Math.max(...keys.map((key) => this.calculateNestingDepth(value[key])))
+    );
   }
 
   /**
@@ -1322,7 +1421,9 @@ export class ResultAnalyzer {
    * @param value - Value to analyze
    * @returns Content analysis
    */
-  private async analyzeContent(value: any): Promise<ReturnValueContentAnalysis> {
+  private async analyzeContent(
+    value: any,
+  ): Promise<ReturnValueContentAnalysis> {
     const serialized = this.serializeValue(value);
 
     const containsPII = await this.detectPII(serialized);
@@ -1334,7 +1435,7 @@ export class ResultAnalyzer {
       containsPII,
       containsCredentials,
       containsSensitiveData,
-      dataPatterns
+      dataPatterns,
     };
   }
 
@@ -1366,7 +1467,7 @@ export class ResultAnalyzer {
       /\b\d{3}-\d{3}-\d{4}\b/, // Phone number
     ];
 
-    return piiPatterns.some(pattern => pattern.test(serialized));
+    return piiPatterns.some((pattern) => pattern.test(serialized));
   }
 
   /**
@@ -1384,10 +1485,10 @@ export class ResultAnalyzer {
       /bearer/i,
       /api[_-]?key/i,
       /access[_-]?token/i,
-      /private[_-]?key/i
+      /private[_-]?key/i,
     ];
 
-    return credentialPatterns.some(pattern => pattern.test(serialized));
+    return credentialPatterns.some((pattern) => pattern.test(serialized));
   }
 
   /**
@@ -1400,12 +1501,15 @@ export class ResultAnalyzer {
     const patterns: string[] = [];
 
     // Check for common data patterns
-    if (/\b\d{4}-\d{2}-\d{2}\b/.test(serialized)) patterns.push('date');
-    if (/\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/.test(serialized)) patterns.push('ip-address');
-    if (/\bhttps?:\/\//.test(serialized)) patterns.push('url');
-    if (/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/.test(serialized)) patterns.push('email');
-    if (/\$\d+(\.\d{2})?/.test(serialized)) patterns.push('currency');
-    if (/\b\d{1,5}\s\w+\s(St|Street|Ave|Avenue|Rd|Road)\b/i.test(serialized)) patterns.push('address');
+    if (/\b\d{4}-\d{2}-\d{2}\b/.test(serialized)) patterns.push("date");
+    if (/\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/.test(serialized))
+      patterns.push("ip-address");
+    if (/\bhttps?:\/\//.test(serialized)) patterns.push("url");
+    if (/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/.test(serialized))
+      patterns.push("email");
+    if (/\$\d+(\.\d{2})?/.test(serialized)) patterns.push("currency");
+    if (/\b\d{1,5}\s\w+\s(St|Street|Ave|Avenue|Rd|Road)\b/i.test(serialized))
+      patterns.push("address");
 
     return patterns;
   }
@@ -1417,12 +1521,17 @@ export class ResultAnalyzer {
    * @param contentAnalysis - Content analysis result
    * @returns Data classification level
    */
-  private classifyData(value: any, contentAnalysis: ReturnValueContentAnalysis): DataClassification {
-    if (contentAnalysis.containsCredentials) return DataClassification.RESTRICTED;
+  private classifyData(
+    value: any,
+    contentAnalysis: ReturnValueContentAnalysis,
+  ): DataClassification {
+    if (contentAnalysis.containsCredentials)
+      return DataClassification.RESTRICTED;
     if (contentAnalysis.containsPII) return DataClassification.CONFIDENTIAL;
 
     const serialized = this.serializeValue(value);
-    if (/\b(id|uuid|guid)\b/i.test(serialized)) return DataClassification.INTERNAL;
+    if (/\b(id|uuid|guid)\b/i.test(serialized))
+      return DataClassification.INTERNAL;
 
     return DataClassification.PUBLIC;
   }
@@ -1434,7 +1543,10 @@ export class ResultAnalyzer {
    * @param contentAnalysis - Content analysis result
    * @returns Security risk level
    */
-  private assessSecurityRisk(value: any, contentAnalysis: ReturnValueContentAnalysis): SecurityRiskLevel {
+  private assessSecurityRisk(
+    value: any,
+    contentAnalysis: ReturnValueContentAnalysis,
+  ): SecurityRiskLevel {
     if (contentAnalysis.containsCredentials) return SecurityRiskLevel.CRITICAL;
     if (contentAnalysis.containsPII) return SecurityRiskLevel.HIGH;
 
@@ -1467,40 +1579,43 @@ export class ReturnValueSecurityProcessor {
     returnValue: T,
     analysis: ReturnValueAnalysis,
     userContext: UserContext,
-    validationLevel: ValidationLevel
+    validationLevel: ValidationLevel,
   ): Promise<ReturnValueSecurityValidation> {
     const violations: string[] = [];
     let sanitizationApplied = false;
 
     // Check permissions for sensitive data
     if (analysis.contentAnalysis.containsPII) {
-      if (!userContext.permissions.includes('access-pii')) {
-        violations.push('User lacks permission to access PII data');
+      if (!userContext.permissions.includes("access-pii")) {
+        violations.push("User lacks permission to access PII data");
       }
     }
 
     if (analysis.contentAnalysis.containsCredentials) {
-      if (!userContext.permissions.includes('access-credentials')) {
-        violations.push('User lacks permission to access credential data');
+      if (!userContext.permissions.includes("access-credentials")) {
+        violations.push("User lacks permission to access credential data");
       }
     }
 
     // Check validation level requirements
     if (analysis.securityRisk === SecurityRiskLevel.CRITICAL) {
       if (validationLevel !== ValidationLevel.CRITICAL) {
-        violations.push('Critical security risk requires critical validation level');
+        violations.push(
+          "Critical security risk requires critical validation level",
+        );
       }
     }
 
     // Check data size limits
-    if (analysis.size > 100000000) { // 100MB
-      violations.push('Return value exceeds maximum allowed size');
+    if (analysis.size > 100000000) {
+      // 100MB
+      violations.push("Return value exceeds maximum allowed size");
     }
 
     return {
       passed: violations.length === 0,
       violations,
-      sanitizationApplied
+      sanitizationApplied,
     };
   }
 }
@@ -1525,7 +1640,7 @@ export class ResultTransformationEngine {
     returnValue: T,
     analysis: ReturnValueAnalysis,
     securityValidation: ReturnValueSecurityValidation,
-    userContext: UserContext
+    userContext: UserContext,
   ): Promise<T> {
     let transformedValue = returnValue;
 
@@ -1539,7 +1654,8 @@ export class ResultTransformationEngine {
     }
 
     // Apply size limits
-    if (analysis.size > 50000000) { // > 50MB
+    if (analysis.size > 50000000) {
+      // > 50MB
       const compressionResult = await this.compressIfLarge(transformedValue);
       transformedValue = compressionResult.value;
     }
@@ -1554,14 +1670,17 @@ export class ResultTransformationEngine {
    * @returns Sanitized value
    */
   public async sanitizePII<T>(value: T): Promise<T> {
-    if (typeof value === 'string') {
+    if (typeof value === "string") {
       let sanitized: string = value;
-      sanitized = sanitized.replace(/\b\d{3}-\d{2}-\d{4}\b/g, 'XXX-XX-XXXX'); // SSN
-      sanitized = sanitized.replace(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g, '[EMAIL_REDACTED]'); // Email
+      sanitized = sanitized.replace(/\b\d{3}-\d{2}-\d{4}\b/g, "XXX-XX-XXXX"); // SSN
+      sanitized = sanitized.replace(
+        /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g,
+        "[EMAIL_REDACTED]",
+      ); // Email
       return sanitized as unknown as T;
     }
 
-    if (typeof value === 'object' && value !== null) {
+    if (typeof value === "object" && value !== null) {
       const serialized = JSON.stringify(value);
       const sanitized = await this.sanitizePII(serialized);
       try {
@@ -1581,12 +1700,21 @@ export class ResultTransformationEngine {
    * @returns Redacted value
    */
   public async redactCredentials<T>(value: T): Promise<T> {
-    if (typeof value === 'string') {
+    if (typeof value === "string") {
       // Replace credential-like patterns
       let redacted: string = value;
-      redacted = redacted.replace(/password["\s]*[:=]["\s]*[^"\s,}]+/gi, 'password: "[REDACTED]"');
-      redacted = redacted.replace(/token["\s]*[:=]["\s]*[^"\s,}]+/gi, 'token: "[REDACTED]"');
-      redacted = redacted.replace(/key["\s]*[:=]["\s]*[^"\s,}]+/gi, 'key: "[REDACTED]"');
+      redacted = redacted.replace(
+        /password["\s]*[:=]["\s]*[^"\s,}]+/gi,
+        'password: "[REDACTED]"',
+      );
+      redacted = redacted.replace(
+        /token["\s]*[:=]["\s]*[^"\s,}]+/gi,
+        'token: "[REDACTED]"',
+      );
+      redacted = redacted.replace(
+        /key["\s]*[:=]["\s]*[^"\s,}]+/gi,
+        'key: "[REDACTED]"',
+      );
       return redacted as unknown as T;
     }
 
@@ -1599,14 +1727,17 @@ export class ResultTransformationEngine {
    * @param value - Value to compress
    * @returns Compression result
    */
-  public async compressIfLarge<T>(value: T): Promise<{ value: T; compressed: boolean }> {
+  public async compressIfLarge<T>(
+    value: T,
+  ): Promise<{ value: T; compressed: boolean }> {
     // Simple compression simulation - in real implementation would use actual compression
     const size = this.calculateSize(value);
 
-    if (size > 1000000) { // > 1MB
+    if (size > 1000000) {
+      // > 1MB
       // Simulate compression by truncating strings
-      if (typeof value === 'string' && value.length > 10000) {
-        const compressed = value.substring(0, 10000) + '...[COMPRESSED]';
+      if (typeof value === "string" && value.length > 10000) {
+        const compressed = value.substring(0, 10000) + "...[COMPRESSED]";
         return { value: compressed as T, compressed: true };
       }
     }
@@ -1622,7 +1753,7 @@ export class ResultTransformationEngine {
    */
   public async normalizeFormat<T>(value: T): Promise<T> {
     // Basic format normalization
-    if (typeof value === 'object' && value !== null) {
+    if (typeof value === "object" && value !== null) {
       // Sort object keys for consistent output
       const sorted = this.sortObjectKeys(value);
       return sorted as T;
@@ -1639,14 +1770,16 @@ export class ResultTransformationEngine {
    */
   private sortObjectKeys(obj: any): any {
     if (Array.isArray(obj)) {
-      return obj.map(item => this.sortObjectKeys(item));
+      return obj.map((item) => this.sortObjectKeys(item));
     }
 
-    if (typeof obj === 'object' && obj !== null) {
+    if (typeof obj === "object" && obj !== null) {
       const sorted: any = {};
-      Object.keys(obj).sort().forEach(key => {
-        sorted[key] = this.sortObjectKeys(obj[key]);
-      });
+      Object.keys(obj)
+        .sort()
+        .forEach((key) => {
+          sorted[key] = this.sortObjectKeys(obj[key]);
+        });
       return sorted;
     }
 
@@ -1662,7 +1795,7 @@ export class ResultTransformationEngine {
   private calculateSize(value: any): number {
     try {
       const serialized = JSON.stringify(value);
-      return Buffer.byteLength(serialized, 'utf8');
+      return Buffer.byteLength(serialized, "utf8");
     } catch {
       return 0;
     }
@@ -1695,7 +1828,7 @@ export class ReturnValueAuditProcessor {
     analysis: ReturnValueAnalysis,
     securityValidation: ReturnValueSecurityValidation,
     userContext: UserContext,
-    processingId: string
+    processingId: string,
   ): Promise<ReturnValueAuditTrail> {
     return {
       processingId,
@@ -1704,25 +1837,26 @@ export class ReturnValueAuditProcessor {
       userContext: {
         userId: userContext.userId,
         permissions: [...userContext.permissions],
-        sessionId: userContext.sessionMetadata.sessionId
+        sessionId: userContext.sessionMetadata.sessionId,
       },
       resultSummary: {
         resultType: analysis.resultType,
         dataClassification: analysis.dataClassification,
         securityRisk: analysis.securityRisk,
         size: analysis.size,
-        transformationApplied: originalValue !== transformedValue
+        transformationApplied: originalValue !== transformedValue,
       },
       securityValidation: {
         passed: securityValidation.passed,
         violations: [...securityValidation.violations],
-        sanitizationApplied: securityValidation.sanitizationApplied
+        sanitizationApplied: securityValidation.sanitizationApplied,
       },
       compliance: {
-        dataProtectionCompliant: !analysis.contentAnalysis.containsPII || securityValidation.passed,
+        dataProtectionCompliant:
+          !analysis.contentAnalysis.containsPII || securityValidation.passed,
         accessControlCompliant: securityValidation.passed,
-        auditTrailComplete: true
-      }
+        auditTrailComplete: true,
+      },
     };
   }
 }
@@ -1745,18 +1879,19 @@ export class ReturnValuePerformanceAnalyzer {
   public async analyzeReturnValuePerformance<T>(
     returnValue: T,
     analysis: ReturnValueAnalysis,
-    executionMetadata: Partial<ExecutionMetadata>
+    executionMetadata: Partial<ExecutionMetadata>,
   ): Promise<ReturnValuePerformanceAnalysis> {
     const serializationTime = await this.measureSerializationTime(returnValue);
     const memoryFootprint = this.estimateMemoryFootprint(analysis);
     const transferSize = analysis.size;
-    const optimizationOpportunities = this.identifyOptimizationOpportunities(analysis);
+    const optimizationOpportunities =
+      this.identifyOptimizationOpportunities(analysis);
 
     return {
       serializationTime,
       memoryFootprint,
       transferSize,
-      optimizationOpportunities
+      optimizationOpportunities,
     };
   }
 
@@ -1785,7 +1920,8 @@ export class ReturnValuePerformanceAnalyzer {
   private estimateMemoryFootprint(analysis: ReturnValueAnalysis): number {
     // Estimate based on size and complexity
     const baseFootprint = analysis.size;
-    const complexityOverhead = (analysis.complexity / 100) * analysis.size * 0.5;
+    const complexityOverhead =
+      (analysis.complexity / 100) * analysis.size * 0.5;
     const structureOverhead = analysis.structure.nestedLevels * 1024;
 
     return Math.round(baseFootprint + complexityOverhead + structureOverhead);
@@ -1797,23 +1933,28 @@ export class ReturnValuePerformanceAnalyzer {
    * @param analysis - Result analysis
    * @returns Optimization recommendations
    */
-  private identifyOptimizationOpportunities(analysis: ReturnValueAnalysis): string[] {
+  private identifyOptimizationOpportunities(
+    analysis: ReturnValueAnalysis,
+  ): string[] {
     const opportunities: string[] = [];
 
     if (analysis.size > 1000000) {
-      opportunities.push('Consider data compression for large results');
+      opportunities.push("Consider data compression for large results");
     }
 
     if (analysis.complexity > 80) {
-      opportunities.push('Simplify complex data structures if possible');
+      opportunities.push("Simplify complex data structures if possible");
     }
 
     if (analysis.structure.nestedLevels > 5) {
-      opportunities.push('Reduce nesting levels for better performance');
+      opportunities.push("Reduce nesting levels for better performance");
     }
 
-    if (analysis.structure.isCollection && analysis.structure.elementCount > 1000) {
-      opportunities.push('Consider pagination for large collections');
+    if (
+      analysis.structure.isCollection &&
+      analysis.structure.elementCount > 1000
+    ) {
+      opportunities.push("Consider pagination for large collections");
     }
 
     return opportunities;
@@ -1826,10 +1967,10 @@ export class ReturnValuePerformanceAnalyzer {
  * Data value level enumeration
  */
 export enum DataValueLevel {
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  CRITICAL = 'critical'
+  LOW = "low",
+  MEDIUM = "medium",
+  HIGH = "high",
+  CRITICAL = "critical",
 }
 
 /**
@@ -1907,7 +2048,7 @@ export interface ReturnValuePerformanceAnalysis {
  * Return value business impact
  */
 export interface ReturnValueBusinessImpact {
-  readonly impactLevel: 'low' | 'medium' | 'high' | 'critical';
+  readonly impactLevel: "low" | "medium" | "high" | "critical";
   readonly affectedSystems: readonly string[];
   readonly dataValue: DataValueLevel;
   readonly complianceImplications: readonly string[];
@@ -2041,7 +2182,11 @@ export interface TransformedReturnValue<T> {
  * Conversation prompt
  */
 export interface ConversationPrompt {
-  readonly type: 'confirmation' | 'security_warning' | 'performance_warning' | 'information';
+  readonly type:
+    | "confirmation"
+    | "security_warning"
+    | "performance_warning"
+    | "information";
   readonly message: string;
   readonly priority: number;
   readonly requiresResponse: boolean;
@@ -2051,7 +2196,7 @@ export interface ConversationPrompt {
  * Recommended action
  */
 export interface RecommendedAction {
-  readonly type: 'security' | 'performance' | 'validation' | 'optimization';
+  readonly type: "security" | "performance" | "validation" | "optimization";
   readonly action: string;
   readonly description: string;
   readonly priority: number;

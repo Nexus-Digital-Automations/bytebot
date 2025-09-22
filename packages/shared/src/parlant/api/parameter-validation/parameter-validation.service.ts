@@ -17,17 +17,17 @@
  * @author AIgent PARLANT Integration Team
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from "@nestjs/common";
 import {
   ValidationRequest,
   ValidationResponse,
   ConversationContext,
   ValidationDecision,
   SecurityLevel,
-  RiskLevel
-} from '../../validation/types/validation-layer.types';
-import { ParlantValidationBridge } from '../../validation/parlant-validation-bridge.service';
-import { ConversationContextBuilder } from '../../validation/context/conversation-context-builder.service';
+  RiskLevel,
+} from "../../validation/types/validation-layer.types";
+import { ParlantValidationBridge } from "../../validation/parlant-validation-bridge.service";
+import { ConversationContextBuilder } from "../../validation/context/conversation-context-builder.service";
 
 // ===== PARAMETER VALIDATION INTERFACES =====
 
@@ -106,17 +106,17 @@ export interface ParameterDefinition {
 }
 
 export enum ParameterType {
-  STRING = 'string',
-  NUMBER = 'number',
-  BOOLEAN = 'boolean',
-  ARRAY = 'array',
-  OBJECT = 'object',
-  DATE = 'date',
-  EMAIL = 'email',
-  URL = 'url',
-  FILE_PATH = 'file_path',
-  JSON = 'json',
-  ENUM = 'enum'
+  STRING = "string",
+  NUMBER = "number",
+  BOOLEAN = "boolean",
+  ARRAY = "array",
+  OBJECT = "object",
+  DATE = "date",
+  EMAIL = "email",
+  URL = "url",
+  FILE_PATH = "file_path",
+  JSON = "json",
+  ENUM = "enum",
 }
 
 export interface ValidationRule {
@@ -134,14 +134,14 @@ export interface ValidationRule {
 }
 
 export enum ValidationRuleType {
-  MIN_LENGTH = 'min_length',
-  MAX_LENGTH = 'max_length',
-  REGEX_PATTERN = 'regex_pattern',
-  RANGE = 'range',
-  ENUM_VALUES = 'enum_values',
-  CUSTOM_FUNCTION = 'custom_function',
-  DEPENDENCY = 'dependency',
-  CONDITIONAL = 'conditional'
+  MIN_LENGTH = "min_length",
+  MAX_LENGTH = "max_length",
+  REGEX_PATTERN = "regex_pattern",
+  RANGE = "range",
+  ENUM_VALUES = "enum_values",
+  CUSTOM_FUNCTION = "custom_function",
+  DEPENDENCY = "dependency",
+  CONDITIONAL = "conditional",
 }
 
 export interface SanitizationRule {
@@ -159,14 +159,14 @@ export interface SanitizationRule {
 }
 
 export enum SanitizationType {
-  TRIM_WHITESPACE = 'trim_whitespace',
-  ESCAPE_HTML = 'escape_html',
-  REMOVE_SCRIPT_TAGS = 'remove_script_tags',
-  SQL_INJECTION_PREVENTION = 'sql_injection_prevention',
-  XSS_PREVENTION = 'xss_prevention',
-  PATH_TRAVERSAL_PREVENTION = 'path_traversal_prevention',
-  NORMALIZE_UNICODE = 'normalize_unicode',
-  VALIDATE_ENCODING = 'validate_encoding'
+  TRIM_WHITESPACE = "trim_whitespace",
+  ESCAPE_HTML = "escape_html",
+  REMOVE_SCRIPT_TAGS = "remove_script_tags",
+  SQL_INJECTION_PREVENTION = "sql_injection_prevention",
+  XSS_PREVENTION = "xss_prevention",
+  PATH_TRAVERSAL_PREVENTION = "path_traversal_prevention",
+  NORMALIZE_UNICODE = "normalize_unicode",
+  VALIDATE_ENCODING = "validate_encoding",
 }
 
 export interface BusinessRule {
@@ -187,10 +187,10 @@ export interface BusinessRule {
 }
 
 export enum RuleSeverity {
-  INFO = 'info',
-  WARNING = 'warning',
-  ERROR = 'error',
-  CRITICAL = 'critical'
+  INFO = "info",
+  WARNING = "warning",
+  ERROR = "error",
+  CRITICAL = "critical",
 }
 
 export interface SecurityConstraint {
@@ -208,11 +208,11 @@ export interface SecurityConstraint {
 }
 
 export enum SecurityConstraintType {
-  INJECTION_PREVENTION = 'injection_prevention',
-  ACCESS_CONTROL = 'access_control',
-  DATA_CLASSIFICATION = 'data_classification',
-  AUDIT_REQUIREMENT = 'audit_requirement',
-  ENCRYPTION_REQUIREMENT = 'encryption_requirement'
+  INJECTION_PREVENTION = "injection_prevention",
+  ACCESS_CONTROL = "access_control",
+  DATA_CLASSIFICATION = "data_classification",
+  AUDIT_REQUIREMENT = "audit_requirement",
+  ENCRYPTION_REQUIREMENT = "encryption_requirement",
 }
 
 export interface ParameterValidationDetails {
@@ -253,11 +253,11 @@ export interface ParameterResult {
 }
 
 export enum ParameterValidationStatus {
-  VALID = 'valid',
-  INVALID = 'invalid',
-  SANITIZED = 'sanitized',
-  TYPE_CONVERTED = 'type_converted',
-  DEFAULT_APPLIED = 'default_applied'
+  VALID = "valid",
+  INVALID = "invalid",
+  SANITIZED = "sanitized",
+  TYPE_CONVERTED = "type_converted",
+  DEFAULT_APPLIED = "default_applied",
 }
 
 export interface TypeConversion {
@@ -312,14 +312,14 @@ export interface ThreatIndicator {
 }
 
 export enum ThreatType {
-  SQL_INJECTION = 'sql_injection',
-  XSS_ATTACK = 'xss_attack',
-  PATH_TRAVERSAL = 'path_traversal',
-  COMMAND_INJECTION = 'command_injection',
-  LDAP_INJECTION = 'ldap_injection',
-  XML_INJECTION = 'xml_injection',
-  SCRIPT_INJECTION = 'script_injection',
-  DATA_EXFILTRATION = 'data_exfiltration'
+  SQL_INJECTION = "sql_injection",
+  XSS_ATTACK = "xss_attack",
+  PATH_TRAVERSAL = "path_traversal",
+  COMMAND_INJECTION = "command_injection",
+  LDAP_INJECTION = "ldap_injection",
+  XML_INJECTION = "xml_injection",
+  SCRIPT_INJECTION = "script_injection",
+  DATA_EXFILTRATION = "data_exfiltration",
 }
 
 export interface AuditRequirement {
@@ -404,7 +404,7 @@ export interface UserContext {
 
 export interface UserPreferences {
   /** Preferred validation style */
-  validationStyle: 'strict' | 'lenient' | 'guided';
+  validationStyle: "strict" | "lenient" | "guided";
 
   /** Confirmation preferences */
   confirmationPreferences: ConfirmationPreferences;
@@ -529,11 +529,11 @@ export interface SecurityViolation {
 }
 
 export enum SecurityViolationType {
-  INJECTION_ATTEMPT = 'injection_attempt',
-  UNAUTHORIZED_ACCESS = 'unauthorized_access',
-  DATA_EXFILTRATION_ATTEMPT = 'data_exfiltration_attempt',
-  PRIVILEGE_ESCALATION = 'privilege_escalation',
-  SUSPICIOUS_PATTERN = 'suspicious_pattern'
+  INJECTION_ATTEMPT = "injection_attempt",
+  UNAUTHORIZED_ACCESS = "unauthorized_access",
+  DATA_EXFILTRATION_ATTEMPT = "data_exfiltration_attempt",
+  PRIVILEGE_ESCALATION = "privilege_escalation",
+  SUSPICIOUS_PATTERN = "suspicious_pattern",
 }
 
 export interface SanitizationAction {
@@ -567,18 +567,18 @@ export interface ValidationWarning {
   affectedParameters: string[];
 
   /** Severity level */
-  severity: 'low' | 'medium' | 'high';
+  severity: "low" | "medium" | "high";
 
   /** Suggested action */
   suggestedAction: string;
 }
 
 export enum ValidationWarningType {
-  TYPE_MISMATCH = 'type_mismatch',
-  DEPRECATED_PARAMETER = 'deprecated_parameter',
-  PERFORMANCE_CONCERN = 'performance_concern',
-  SECURITY_CONCERN = 'security_concern',
-  COMPATIBILITY_ISSUE = 'compatibility_issue'
+  TYPE_MISMATCH = "type_mismatch",
+  DEPRECATED_PARAMETER = "deprecated_parameter",
+  PERFORMANCE_CONCERN = "performance_concern",
+  SECURITY_CONCERN = "security_concern",
+  COMPATIBILITY_ISSUE = "compatibility_issue",
 }
 
 // ===== MAIN SERVICE IMPLEMENTATION =====
@@ -589,27 +589,35 @@ export class ParameterValidationService {
 
   constructor(
     private readonly parlantValidationBridge: ParlantValidationBridge,
-    private readonly contextBuilder: ConversationContextBuilder
+    private readonly contextBuilder: ConversationContextBuilder,
   ) {}
 
   /**
    * Validate and sanitize parameters through conversational AI interface
    */
   async validateParameters(
-    request: ParameterValidationRequest
+    request: ParameterValidationRequest,
   ): Promise<ParameterValidationResponse> {
     const startTime = Date.now();
-    this.logger.log(`Starting parameter validation for function: ${request.functionName}`);
+    this.logger.log(
+      `Starting parameter validation for function: ${request.functionName}`,
+    );
 
     try {
       // 1. Parse and pre-process parameters
       const parsingStart = Date.now();
-      const parsedParameters = await this.parseParameters(request.rawParameters, request.expectedSchema);
+      const parsedParameters = await this.parseParameters(
+        request.rawParameters,
+        request.expectedSchema,
+      );
       const parsingTime = Date.now() - parsingStart;
 
       // 2. Perform syntax and type validation
       const validationStart = Date.now();
-      const syntaxValidation = await this.performSyntaxValidation(parsedParameters, request.expectedSchema);
+      const syntaxValidation = await this.performSyntaxValidation(
+        parsedParameters,
+        request.expectedSchema,
+      );
       const validationTime = Date.now() - validationStart;
 
       // 3. Apply sanitization rules
@@ -618,7 +626,7 @@ export class ParameterValidationService {
         syntaxValidation.parameters,
         request.expectedSchema,
         request.options,
-        request.userContext
+        request.userContext,
       );
       const sanitizationTime = Date.now() - sanitizationStart;
 
@@ -626,14 +634,14 @@ export class ParameterValidationService {
       const businessValidation = await this.validateBusinessRules(
         sanitizationResult.sanitizedParameters,
         request.expectedSchema.businessRules,
-        request.userContext
+        request.userContext,
       );
 
       // 5. Perform security assessment
       const securityAssessment = await this.performSecurityAssessment(
         sanitizationResult.sanitizedParameters,
         request.expectedSchema.securityConstraints,
-        request.userContext
+        request.userContext,
       );
 
       // 6. Conversational validation if enabled
@@ -646,7 +654,7 @@ export class ParameterValidationService {
           request,
           sanitizationResult.sanitizedParameters,
           businessValidation,
-          securityAssessment
+          securityAssessment,
         );
         conversationalTime = Date.now() - conversationalStart;
       }
@@ -655,28 +663,38 @@ export class ParameterValidationService {
       const finalParameters = this.compileFinalParameters(
         sanitizationResult.sanitizedParameters,
         conversationalResult,
-        request.expectedSchema
+        request.expectedSchema,
       );
 
       const totalTime = Date.now() - startTime;
 
       const response: ParameterValidationResponse = {
-        isValid: this.determineOverallValidity(syntaxValidation, businessValidation, securityAssessment, conversationalResult),
+        isValid: this.determineOverallValidity(
+          syntaxValidation,
+          businessValidation,
+          securityAssessment,
+          conversationalResult,
+        ),
         validatedParameters: finalParameters,
-        conversationalResult: conversationalResult || this.createDefaultValidationResponse(request),
+        conversationalResult:
+          conversationalResult || this.createDefaultValidationResponse(request),
         validationDetails: {
           parameterResults: syntaxValidation.parameterResults,
           businessRuleViolations: businessValidation.violations,
           securityViolations: securityAssessment.violations,
           sanitizationActions: sanitizationResult.actions,
-          warnings: this.compileWarnings(syntaxValidation, businessValidation, securityAssessment)
+          warnings: this.compileWarnings(
+            syntaxValidation,
+            businessValidation,
+            securityAssessment,
+          ),
         },
         securityAssessment: {
           overallSecurityLevel: securityAssessment.overallSecurityLevel,
           threatIndicators: securityAssessment.threatIndicators,
           riskScore: securityAssessment.riskScore,
           recommendedActions: securityAssessment.recommendedActions,
-          auditRequirements: securityAssessment.auditRequirements
+          auditRequirements: securityAssessment.auditRequirements,
         },
         performanceMetrics: {
           totalValidationTime: totalTime,
@@ -685,15 +703,19 @@ export class ParameterValidationService {
           sanitizationTime,
           conversationalValidationTime: conversationalTime,
           memoryUsage: process.memoryUsage().heapUsed,
-          parametersProcessed: Object.keys(request.rawParameters).length
-        }
+          parametersProcessed: Object.keys(request.rawParameters).length,
+        },
       };
 
-      this.logger.log(`Parameter validation completed in ${totalTime}ms for ${request.functionName}`);
+      this.logger.log(
+        `Parameter validation completed in ${totalTime}ms for ${request.functionName}`,
+      );
       return response;
-
     } catch (error) {
-      this.logger.error(`Parameter validation failed for ${request.functionName}:`, error);
+      this.logger.error(
+        `Parameter validation failed for ${request.functionName}:`,
+        error,
+      );
       throw new Error(`Parameter validation failed: ${error.message}`);
     }
   }
@@ -703,7 +725,7 @@ export class ParameterValidationService {
    */
   private async parseParameters(
     rawParameters: Record<string, any>,
-    schema: ParameterSchema
+    schema: ParameterSchema,
   ): Promise<Record<string, any>> {
     const parsedParameters: Record<string, any> = {};
 
@@ -734,7 +756,10 @@ export class ParameterValidationService {
   /**
    * Parse individual parameter value based on definition
    */
-  private async parseParameterValue(value: any, definition: ParameterDefinition): Promise<any> {
+  private async parseParameterValue(
+    value: any,
+    definition: ParameterDefinition,
+  ): Promise<any> {
     // Handle null/undefined values
     if (value === null || value === undefined) {
       return definition.defaultValue;
@@ -750,10 +775,10 @@ export class ParameterValidationService {
         return isNaN(num) ? value : num;
 
       case ParameterType.BOOLEAN:
-        if (typeof value === 'boolean') return value;
-        if (typeof value === 'string') {
+        if (typeof value === "boolean") return value;
+        if (typeof value === "string") {
           const lower = value.toLowerCase();
-          return lower === 'true' || lower === 'yes' || lower === '1';
+          return lower === "true" || lower === "yes" || lower === "1";
         }
         return Boolean(value);
 
@@ -763,7 +788,7 @@ export class ParameterValidationService {
         return isNaN(date.getTime()) ? value : date;
 
       case ParameterType.JSON:
-        if (typeof value === 'object') return value;
+        if (typeof value === "object") return value;
         try {
           return JSON.parse(value);
         } catch {
@@ -783,8 +808,11 @@ export class ParameterValidationService {
    */
   private async performSyntaxValidation(
     parameters: Record<string, any>,
-    schema: ParameterSchema
-  ): Promise<{ parameters: Record<string, any>, parameterResults: Record<string, ParameterResult> }> {
+    schema: ParameterSchema,
+  ): Promise<{
+    parameters: Record<string, any>;
+    parameterResults: Record<string, ParameterResult>;
+  }> {
     const parameterResults: Record<string, ParameterResult> = {};
     const validatedParameters: Record<string, any> = {};
 
@@ -805,14 +833,14 @@ export class ParameterValidationService {
   private async validateParameter(
     name: string,
     value: any,
-    definition?: ParameterDefinition
+    definition?: ParameterDefinition,
   ): Promise<ParameterResult> {
     const result: ParameterResult = {
       name,
       originalValue: value,
       sanitizedValue: value,
       status: ParameterValidationStatus.VALID,
-      messages: []
+      messages: [],
     };
 
     if (!definition) {
@@ -838,15 +866,17 @@ export class ParameterValidationService {
    */
   private async applyValidationRule(
     value: any,
-    rule: ValidationRule
-  ): Promise<{ isValid: boolean, message: string }> {
+    rule: ValidationRule,
+  ): Promise<{ isValid: boolean; message: string }> {
     switch (rule.type) {
       case ValidationRuleType.MIN_LENGTH:
         const minLen = rule.config.minLength as number;
         const isValidMin = String(value).length >= minLen;
         return {
           isValid: isValidMin,
-          message: isValidMin ? '' : rule.errorMessage.replace('{minLength}', minLen.toString())
+          message: isValidMin
+            ? ""
+            : rule.errorMessage.replace("{minLength}", minLen.toString()),
         };
 
       case ValidationRuleType.MAX_LENGTH:
@@ -854,7 +884,9 @@ export class ParameterValidationService {
         const isValidMax = String(value).length <= maxLen;
         return {
           isValid: isValidMax,
-          message: isValidMax ? '' : rule.errorMessage.replace('{maxLength}', maxLen.toString())
+          message: isValidMax
+            ? ""
+            : rule.errorMessage.replace("{maxLength}", maxLen.toString()),
         };
 
       case ValidationRuleType.REGEX_PATTERN:
@@ -862,7 +894,7 @@ export class ParameterValidationService {
         const isValidRegex = pattern.test(String(value));
         return {
           isValid: isValidRegex,
-          message: isValidRegex ? '' : rule.errorMessage
+          message: isValidRegex ? "" : rule.errorMessage,
         };
 
       case ValidationRuleType.RANGE:
@@ -872,7 +904,11 @@ export class ParameterValidationService {
         const isValidRange = !isNaN(num) && num >= min && num <= max;
         return {
           isValid: isValidRange,
-          message: isValidRange ? '' : rule.errorMessage.replace('{min}', min.toString()).replace('{max}', max.toString())
+          message: isValidRange
+            ? ""
+            : rule.errorMessage
+                .replace("{min}", min.toString())
+                .replace("{max}", max.toString()),
         };
 
       case ValidationRuleType.ENUM_VALUES:
@@ -880,11 +916,16 @@ export class ParameterValidationService {
         const isValidEnum = allowedValues.includes(value);
         return {
           isValid: isValidEnum,
-          message: isValidEnum ? '' : rule.errorMessage.replace('{allowedValues}', allowedValues.join(', '))
+          message: isValidEnum
+            ? ""
+            : rule.errorMessage.replace(
+                "{allowedValues}",
+                allowedValues.join(", "),
+              ),
         };
 
       default:
-        return { isValid: true, message: '' };
+        return { isValid: true, message: "" };
     }
   }
 
@@ -895,8 +936,11 @@ export class ParameterValidationService {
     parameters: Record<string, any>,
     schema: ParameterSchema,
     options: ValidationOptions,
-    userContext: UserContext
-  ): Promise<{ sanitizedParameters: Record<string, any>, actions: SanitizationAction[] }> {
+    userContext: UserContext,
+  ): Promise<{
+    sanitizedParameters: Record<string, any>;
+    actions: SanitizationAction[];
+  }> {
     const sanitizedParameters: Record<string, any> = { ...parameters };
     const actions: SanitizationAction[] = [];
 
@@ -916,8 +960,16 @@ export class ParameterValidationService {
               sanitizationType: rule.type,
               originalValue: value,
               sanitizedValue: sanitizedValue,
-              userConfirmationReceived: !rule.requireConfirmation || await this.requestSanitizationConfirmation(key, rule, value, sanitizedValue, userContext),
-              timestamp: new Date()
+              userConfirmationReceived:
+                !rule.requireConfirmation ||
+                (await this.requestSanitizationConfirmation(
+                  key,
+                  rule,
+                  value,
+                  sanitizedValue,
+                  userContext,
+                )),
+              timestamp: new Date(),
             };
 
             if (action.userConfirmationReceived) {
@@ -935,7 +987,10 @@ export class ParameterValidationService {
   /**
    * Apply individual sanitization rule
    */
-  private async applySanitizationRule(value: any, rule: SanitizationRule): Promise<any> {
+  private async applySanitizationRule(
+    value: any,
+    rule: SanitizationRule,
+  ): Promise<any> {
     const stringValue = String(value);
 
     switch (rule.type) {
@@ -944,35 +999,35 @@ export class ParameterValidationService {
 
       case SanitizationType.ESCAPE_HTML:
         return stringValue
-          .replace(/&/g, '&amp;')
-          .replace(/</g, '&lt;')
-          .replace(/>/g, '&gt;')
-          .replace(/"/g, '&quot;')
-          .replace(/'/g, '&#x27;');
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#x27;");
 
       case SanitizationType.REMOVE_SCRIPT_TAGS:
-        return stringValue.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '');
+        return stringValue.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "");
 
       case SanitizationType.SQL_INJECTION_PREVENTION:
-        return stringValue.replace(/['"\\]/g, '\\$&');
+        return stringValue.replace(/['"\\]/g, "\\$&");
 
       case SanitizationType.XSS_PREVENTION:
         return stringValue.replace(/[<>'"&]/g, (match) => {
           const entities: Record<string, string> = {
-            '<': '&lt;',
-            '>': '&gt;',
-            '"': '&quot;',
-            "'": '&#x27;',
-            '&': '&amp;'
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#x27;",
+            "&": "&amp;",
           };
           return entities[match] || match;
         });
 
       case SanitizationType.PATH_TRAVERSAL_PREVENTION:
-        return stringValue.replace(/\.\./g, '').replace(/[\/\\]/g, '');
+        return stringValue.replace(/\.\./g, "").replace(/[\/\\]/g, "");
 
       case SanitizationType.NORMALIZE_UNICODE:
-        return stringValue.normalize('NFC');
+        return stringValue.normalize("NFC");
 
       default:
         return value;
@@ -987,11 +1042,13 @@ export class ParameterValidationService {
     rule: SanitizationRule,
     originalValue: any,
     sanitizedValue: any,
-    userContext: UserContext
+    userContext: UserContext,
   ): Promise<boolean> {
     // For now, return true for auto-approval
     // TODO: Implement actual conversational confirmation through PARLANT
-    this.logger.log(`Sanitization confirmation requested for parameter '${parameterName}': ${rule.explanation}`);
+    this.logger.log(
+      `Sanitization confirmation requested for parameter '${parameterName}': ${rule.explanation}`,
+    );
     return true;
   }
 
@@ -1001,12 +1058,16 @@ export class ParameterValidationService {
   private async validateBusinessRules(
     parameters: Record<string, any>,
     businessRules: BusinessRule[],
-    userContext: UserContext
+    userContext: UserContext,
   ): Promise<{ violations: BusinessRuleViolation[] }> {
     const violations: BusinessRuleViolation[] = [];
 
     for (const rule of businessRules) {
-      const isViolated = await this.evaluateBusinessRule(rule, parameters, userContext);
+      const isViolated = await this.evaluateBusinessRule(
+        rule,
+        parameters,
+        userContext,
+      );
 
       if (isViolated) {
         violations.push({
@@ -1014,7 +1075,7 @@ export class ParameterValidationService {
           description: rule.description,
           affectedParameters: this.getAffectedParameters(rule, parameters),
           severity: rule.severity,
-          suggestedResolution: `Please review and adjust parameters according to business rule: ${rule.description}`
+          suggestedResolution: `Please review and adjust parameters according to business rule: ${rule.description}`,
         });
       }
     }
@@ -1028,7 +1089,7 @@ export class ParameterValidationService {
   private async evaluateBusinessRule(
     rule: BusinessRule,
     parameters: Record<string, any>,
-    userContext: UserContext
+    userContext: UserContext,
   ): Promise<boolean> {
     // TODO: Implement sophisticated business rule evaluation engine
     // For now, return false (no violations)
@@ -1038,7 +1099,10 @@ export class ParameterValidationService {
   /**
    * Get parameters affected by a business rule
    */
-  private getAffectedParameters(rule: BusinessRule, parameters: Record<string, any>): string[] {
+  private getAffectedParameters(
+    rule: BusinessRule,
+    parameters: Record<string, any>,
+  ): string[] {
     // TODO: Parse rule condition to identify affected parameters
     return Object.keys(parameters);
   }
@@ -1049,14 +1113,14 @@ export class ParameterValidationService {
   private async performSecurityAssessment(
     parameters: Record<string, any>,
     securityConstraints: SecurityConstraint[],
-    userContext: UserContext
+    userContext: UserContext,
   ): Promise<{
-    overallSecurityLevel: SecurityLevel,
-    threatIndicators: ThreatIndicator[],
-    riskScore: number,
-    recommendedActions: string[],
-    auditRequirements: AuditRequirement[],
-    violations: SecurityViolation[]
+    overallSecurityLevel: SecurityLevel;
+    threatIndicators: ThreatIndicator[];
+    riskScore: number;
+    recommendedActions: string[];
+    auditRequirements: AuditRequirement[];
+    violations: SecurityViolation[];
   }> {
     const threatIndicators: ThreatIndicator[] = [];
     const violations: SecurityViolation[] = [];
@@ -1071,7 +1135,11 @@ export class ParameterValidationService {
 
     // Evaluate security constraints
     for (const constraint of securityConstraints) {
-      const constraintResult = await this.evaluateSecurityConstraint(constraint, parameters, userContext);
+      const constraintResult = await this.evaluateSecurityConstraint(
+        constraint,
+        parameters,
+        userContext,
+      );
 
       if (constraintResult.violated) {
         violations.push(constraintResult.violation);
@@ -1082,10 +1150,17 @@ export class ParameterValidationService {
     }
 
     // Calculate overall risk score
-    const riskScore = this.calculateRiskScore(threatIndicators, violations, userContext);
+    const riskScore = this.calculateRiskScore(
+      threatIndicators,
+      violations,
+      userContext,
+    );
 
     // Determine overall security level
-    const overallSecurityLevel = this.determineSecurityLevel(riskScore, userContext.securityContext.securityClearance);
+    const overallSecurityLevel = this.determineSecurityLevel(
+      riskScore,
+      userContext.securityContext.securityClearance,
+    );
 
     return {
       overallSecurityLevel,
@@ -1093,20 +1168,23 @@ export class ParameterValidationService {
       riskScore,
       recommendedActions,
       auditRequirements,
-      violations
+      violations,
     };
   }
 
   /**
    * Detect security threats in parameter values
    */
-  private async detectSecurityThreats(parameterName: string, value: any): Promise<ThreatIndicator[]> {
+  private async detectSecurityThreats(
+    parameterName: string,
+    value: any,
+  ): Promise<ThreatIndicator[]> {
     const threats: ThreatIndicator[] = [];
     const stringValue = String(value);
 
     // SQL Injection detection
     const sqlPatterns = [
-      /('|(\\')|(;)|(\-\-)|(\|)|(\*)|(%)|(<)|(>)|(\\)|(\/\*)|(\*\/)|(\bUNION\b)|(\bSELECT\b)|(\bINSERT\b)|(\bDELETE\b)|(\bUPDATE\b)|(\bDROP\b)/i
+      /('|(\\')|(;)|(\-\-)|(\|)|(\*)|(%)|(<)|(>)|(\\)|(\/\*)|(\*\/)|(\bUNION\b)|(\bSELECT\b)|(\bINSERT\b)|(\bDELETE\b)|(\bUPDATE\b)|(\bDROP\b)/i,
     ];
 
     for (const pattern of sqlPatterns) {
@@ -1116,7 +1194,7 @@ export class ParameterValidationService {
           description: `Potential SQL injection pattern detected in parameter '${parameterName}'`,
           severity: RiskLevel.HIGH,
           affectedParameters: [parameterName],
-          mitigationApplied: false
+          mitigationApplied: false,
         });
         break;
       }
@@ -1127,7 +1205,7 @@ export class ParameterValidationService {
       /<script[^>]*>.*?<\/script>/gi,
       /javascript:/gi,
       /on\w+\s*=/gi,
-      /<iframe[^>]*>.*?<\/iframe>/gi
+      /<iframe[^>]*>.*?<\/iframe>/gi,
     ];
 
     for (const pattern of xssPatterns) {
@@ -1137,7 +1215,7 @@ export class ParameterValidationService {
           description: `Potential XSS attack pattern detected in parameter '${parameterName}'`,
           severity: RiskLevel.HIGH,
           affectedParameters: [parameterName],
-          mitigationApplied: false
+          mitigationApplied: false,
         });
         break;
       }
@@ -1148,7 +1226,7 @@ export class ParameterValidationService {
       /\.\.\//g,
       /\.\.\\\\/g,
       /%2e%2e%2f/gi,
-      /%2e%2e%5c/gi
+      /%2e%2e%5c/gi,
     ];
 
     for (const pattern of pathTraversalPatterns) {
@@ -1158,7 +1236,7 @@ export class ParameterValidationService {
           description: `Potential path traversal attack detected in parameter '${parameterName}'`,
           severity: RiskLevel.MEDIUM,
           affectedParameters: [parameterName],
-          mitigationApplied: false
+          mitigationApplied: false,
         });
         break;
       }
@@ -1173,18 +1251,18 @@ export class ParameterValidationService {
   private async evaluateSecurityConstraint(
     constraint: SecurityConstraint,
     parameters: Record<string, any>,
-    userContext: UserContext
+    userContext: UserContext,
   ): Promise<{
-    violated: boolean,
-    violation?: SecurityViolation,
-    recommendedActions: string[],
-    auditRequirements: AuditRequirement[]
+    violated: boolean;
+    violation?: SecurityViolation;
+    recommendedActions: string[];
+    auditRequirements: AuditRequirement[];
   }> {
     // TODO: Implement comprehensive security constraint evaluation
     return {
       violated: false,
       recommendedActions: [],
-      auditRequirements: []
+      auditRequirements: [],
     };
   }
 
@@ -1194,7 +1272,7 @@ export class ParameterValidationService {
   private calculateRiskScore(
     threatIndicators: ThreatIndicator[],
     violations: SecurityViolation[],
-    userContext: UserContext
+    userContext: UserContext,
   ): number {
     let riskScore = 0;
 
@@ -1220,7 +1298,8 @@ export class ParameterValidationService {
     riskScore += violations.length * 10;
 
     // User context risk factors
-    riskScore += (100 - userContext.securityContext.riskAssessment.trustScore) * 0.2;
+    riskScore +=
+      (100 - userContext.securityContext.riskAssessment.trustScore) * 0.2;
 
     return Math.min(riskScore, 100);
   }
@@ -1228,7 +1307,10 @@ export class ParameterValidationService {
   /**
    * Determine security level based on risk score
    */
-  private determineSecurityLevel(riskScore: number, userClearance: SecurityLevel): SecurityLevel {
+  private determineSecurityLevel(
+    riskScore: number,
+    userClearance: SecurityLevel,
+  ): SecurityLevel {
     if (riskScore >= 80) return SecurityLevel.CLASSIFIED;
     if (riskScore >= 60) return SecurityLevel.RESTRICTED;
     if (riskScore >= 40) return SecurityLevel.CONFIDENTIAL;
@@ -1243,26 +1325,32 @@ export class ParameterValidationService {
     request: ParameterValidationRequest,
     parameters: Record<string, any>,
     businessValidation: { violations: BusinessRuleViolation[] },
-    securityAssessment: any
+    securityAssessment: any,
   ): Promise<ValidationResponse> {
     // Build conversation context
     const conversationContext = await this.buildConversationContext(
       request,
       parameters,
       businessValidation,
-      securityAssessment
+      securityAssessment,
     );
 
     // Create validation request for PARLANT
     const parlantRequest: ValidationRequest = {
       id: `param-validation-${Date.now()}`,
       functionName: request.functionName,
-      packageName: 'parameter-validation',
-      operationType: request.expectedSchema.parameters ?
-        (Object.keys(request.expectedSchema.parameters).some(key =>
-          request.expectedSchema.parameters[key].type === ParameterType.OBJECT ||
-          request.expectedSchema.parameters[key].type === ParameterType.ARRAY
-        ) ? DatabaseOperationType.BULK_OPERATION : DatabaseOperationType.READ) : DatabaseOperationType.READ,
+      packageName: "parameter-validation",
+      operationType: request.expectedSchema.parameters
+        ? Object.keys(request.expectedSchema.parameters).some(
+            (key) =>
+              request.expectedSchema.parameters[key].type ===
+                ParameterType.OBJECT ||
+              request.expectedSchema.parameters[key].type ===
+                ParameterType.ARRAY,
+          )
+          ? DatabaseOperationType.BULK_OPERATION
+          : DatabaseOperationType.READ
+        : DatabaseOperationType.READ,
       parameters: parameters,
       userContext: {
         userId: request.userContext.userId,
@@ -1270,30 +1358,37 @@ export class ParameterValidationService {
         sessionId: request.userContext.sessionId,
         ipAddress: request.userContext.securityContext.ipAddress,
         userAgent: request.userContext.securityContext.deviceInfo.browserInfo,
-        metadata: request.userContext.preferences
+        metadata: request.userContext.preferences,
       },
       securityLevel: securityAssessment.overallSecurityLevel,
       timestamp: new Date(),
       timeoutMs: request.options.targetPerformanceMs || 5000,
       conversationMeta: {
-        priority: this.determineConversationPriority(securityAssessment.riskScore),
-        responseTypes: ['DETAILED', 'INTERACTIVE'],
-        language: request.userContext.preferences.language || 'en',
+        priority: this.determineConversationPriority(
+          securityAssessment.riskScore,
+        ),
+        responseTypes: ["DETAILED", "INTERACTIVE"],
+        language: request.userContext.preferences.language || "en",
         interfacePreferences: {
-          preferredMode: 'text',
+          preferredMode: "text",
           accessibility: {
-            screenReader: request.userContext.preferences.accessibility.screenReader,
-            highContrast: request.userContext.preferences.accessibility.highContrast,
+            screenReader:
+              request.userContext.preferences.accessibility.screenReader,
+            highContrast:
+              request.userContext.preferences.accessibility.highContrast,
             largeText: request.userContext.preferences.accessibility.largeText,
-            keyboardOnly: false
+            keyboardOnly: false,
           },
-          responseFormat: 'natural_language'
-        }
-      }
+          responseFormat: "natural_language",
+        },
+      },
     };
 
     // Send to PARLANT for validation
-    return await this.parlantValidationBridge.validateRequest(parlantRequest, conversationContext);
+    return await this.parlantValidationBridge.validateRequest(
+      parlantRequest,
+      conversationContext,
+    );
   }
 
   /**
@@ -1303,11 +1398,20 @@ export class ParameterValidationService {
     request: ParameterValidationRequest,
     parameters: Record<string, any>,
     businessValidation: { violations: BusinessRuleViolation[] },
-    securityAssessment: any
+    securityAssessment: any,
   ): Promise<ConversationContext> {
-    const operationDescription = this.generateOperationDescription(request.functionName, parameters);
-    const parameterSummary = this.generateParameterSummary(parameters, request.expectedSchema);
-    const riskContext = this.buildRiskContext(securityAssessment, businessValidation);
+    const operationDescription = this.generateOperationDescription(
+      request.functionName,
+      parameters,
+    );
+    const parameterSummary = this.generateParameterSummary(
+      parameters,
+      request.expectedSchema,
+    );
+    const riskContext = this.buildRiskContext(
+      securityAssessment,
+      businessValidation,
+    );
 
     return {
       operationDescription,
@@ -1315,36 +1419,48 @@ export class ParameterValidationService {
       riskContext,
       userIntent: `Validate parameters for ${request.functionName} function`,
       businessImpact: {
-        severity: businessValidation.violations.length > 0 ? ImpactSeverity.MODERATE : ImpactSeverity.MINOR,
-        affectedAreas: ['Parameter Validation', 'Function Execution'],
+        severity:
+          businessValidation.violations.length > 0
+            ? ImpactSeverity.MODERATE
+            : ImpactSeverity.MINOR,
+        affectedAreas: ["Parameter Validation", "Function Execution"],
         estimatedDurationMs: request.options.targetPerformanceMs || 1000,
-        recoveryRequirements: ['Review parameters', 'Correct validation errors']
-      }
+        recoveryRequirements: [
+          "Review parameters",
+          "Correct validation errors",
+        ],
+      },
     };
   }
 
   /**
    * Generate natural language operation description
    */
-  private generateOperationDescription(functionName: string, parameters: Record<string, any>): string {
+  private generateOperationDescription(
+    functionName: string,
+    parameters: Record<string, any>,
+  ): string {
     const paramCount = Object.keys(parameters).length;
-    return `Execute function '${functionName}' with ${paramCount} parameter${paramCount !== 1 ? 's' : ''}`;
+    return `Execute function '${functionName}' with ${paramCount} parameter${paramCount !== 1 ? "s" : ""}`;
   }
 
   /**
    * Generate parameter summary for conversation
    */
-  private generateParameterSummary(parameters: Record<string, any>, schema: ParameterSchema): string {
+  private generateParameterSummary(
+    parameters: Record<string, any>,
+    schema: ParameterSchema,
+  ): string {
     const summaryParts: string[] = [];
 
     for (const [key, value] of Object.entries(parameters)) {
       const paramDef = schema.parameters[key];
-      const description = paramDef?.description || 'No description available';
+      const description = paramDef?.description || "No description available";
       const valueStr = this.formatValueForSummary(value);
       summaryParts.push(`${key}: ${valueStr} (${description})`);
     }
 
-    return summaryParts.join(', ');
+    return summaryParts.join(", ");
   }
 
   /**
@@ -1352,15 +1468,17 @@ export class ParameterValidationService {
    */
   private formatValueForSummary(value: any): string {
     if (value === null || value === undefined) {
-      return 'null';
+      return "null";
     }
 
-    if (typeof value === 'string') {
-      return value.length > 50 ? `"${value.substring(0, 50)}..."` : `"${value}"`;
+    if (typeof value === "string") {
+      return value.length > 50
+        ? `"${value.substring(0, 50)}..."`
+        : `"${value}"`;
     }
 
-    if (typeof value === 'object') {
-      return Array.isArray(value) ? `Array(${value.length})` : 'Object';
+    if (typeof value === "object") {
+      return Array.isArray(value) ? `Array(${value.length})` : "Object";
     }
 
     return String(value);
@@ -1369,7 +1487,10 @@ export class ParameterValidationService {
   /**
    * Build risk context for conversation
    */
-  private buildRiskContext(securityAssessment: any, businessValidation: { violations: BusinessRuleViolation[] }): any {
+  private buildRiskContext(
+    securityAssessment: any,
+    businessValidation: { violations: BusinessRuleViolation[] },
+  ): any {
     const riskFactors: string[] = [];
 
     // Add security risk factors
@@ -1386,7 +1507,7 @@ export class ParameterValidationService {
       riskLevel: this.translateRiskLevel(securityAssessment.riskScore),
       riskFactors,
       mitigationStrategies: securityAssessment.recommendedActions,
-      riskScore: securityAssessment.riskScore
+      riskScore: securityAssessment.riskScore,
     };
   }
 
@@ -1405,11 +1526,11 @@ export class ParameterValidationService {
    * Determine conversation priority based on risk score
    */
   private determineConversationPriority(riskScore: number): any {
-    if (riskScore >= 80) return 'EMERGENCY';
-    if (riskScore >= 60) return 'URGENT';
-    if (riskScore >= 40) return 'HIGH';
-    if (riskScore >= 20) return 'NORMAL';
-    return 'LOW';
+    if (riskScore >= 80) return "EMERGENCY";
+    if (riskScore >= 60) return "URGENT";
+    if (riskScore >= 40) return "HIGH";
+    if (riskScore >= 20) return "NORMAL";
+    return "LOW";
   }
 
   /**
@@ -1418,7 +1539,7 @@ export class ParameterValidationService {
   private compileFinalParameters(
     sanitizedParameters: Record<string, any>,
     conversationalResult: ValidationResponse | null,
-    schema: ParameterSchema
+    schema: ParameterSchema,
   ): Record<string, any> {
     // If conversational validation denied, return empty object
     if (conversationalResult?.decision === ValidationDecision.DENY) {
@@ -1428,7 +1549,10 @@ export class ParameterValidationService {
     // Apply any modifications from conversational validation
     let finalParameters = { ...sanitizedParameters };
 
-    if (conversationalResult?.decision === ValidationDecision.MODIFY && conversationalResult.executionContext) {
+    if (
+      conversationalResult?.decision === ValidationDecision.MODIFY &&
+      conversationalResult.executionContext
+    ) {
       // TODO: Apply modifications based on execution context
     }
 
@@ -1442,11 +1566,13 @@ export class ParameterValidationService {
     syntaxValidation: any,
     businessValidation: { violations: BusinessRuleViolation[] },
     securityAssessment: any,
-    conversationalResult: ValidationResponse | null
+    conversationalResult: ValidationResponse | null,
   ): boolean {
     // Check for critical syntax errors
-    const hasCriticalSyntaxErrors = Object.values(syntaxValidation.parameterResults).some(
-      (result: any) => result.status === ParameterValidationStatus.INVALID
+    const hasCriticalSyntaxErrors = Object.values(
+      syntaxValidation.parameterResults,
+    ).some(
+      (result: any) => result.status === ParameterValidationStatus.INVALID,
     );
 
     if (hasCriticalSyntaxErrors) {
@@ -1455,7 +1581,7 @@ export class ParameterValidationService {
 
     // Check for critical business rule violations
     const hasCriticalBusinessViolations = businessValidation.violations.some(
-      violation => violation.severity === RuleSeverity.CRITICAL
+      (violation) => violation.severity === RuleSeverity.CRITICAL,
     );
 
     if (hasCriticalBusinessViolations) {
@@ -1464,7 +1590,8 @@ export class ParameterValidationService {
 
     // Check for critical security violations
     const hasCriticalSecurityViolations = securityAssessment.violations.some(
-      (violation: SecurityViolation) => violation.riskLevel === RiskLevel.CRITICAL
+      (violation: SecurityViolation) =>
+        violation.riskLevel === RiskLevel.CRITICAL,
     );
 
     if (hasCriticalSecurityViolations) {
@@ -1485,20 +1612,23 @@ export class ParameterValidationService {
   private compileWarnings(
     syntaxValidation: any,
     businessValidation: { violations: BusinessRuleViolation[] },
-    securityAssessment: any
+    securityAssessment: any,
   ): ValidationWarning[] {
     const warnings: ValidationWarning[] = [];
 
     // Add syntax warnings
-    for (const [paramName, result] of Object.entries(syntaxValidation.parameterResults)) {
+    for (const [paramName, result] of Object.entries(
+      syntaxValidation.parameterResults,
+    )) {
       const paramResult = result as ParameterResult;
       if (paramResult.status === ParameterValidationStatus.TYPE_CONVERTED) {
         warnings.push({
           type: ValidationWarningType.TYPE_MISMATCH,
           message: `Parameter '${paramName}' was automatically converted to expected type`,
           affectedParameters: [paramName],
-          severity: 'low',
-          suggestedAction: 'Review parameter type and provide correct type in future'
+          severity: "low",
+          suggestedAction:
+            "Review parameter type and provide correct type in future",
         });
       }
     }
@@ -1510,8 +1640,8 @@ export class ParameterValidationService {
           type: ValidationWarningType.COMPATIBILITY_ISSUE,
           message: violation.description,
           affectedParameters: violation.affectedParameters,
-          severity: 'medium',
-          suggestedAction: violation.suggestedResolution
+          severity: "medium",
+          suggestedAction: violation.suggestedResolution,
         });
       }
     }
@@ -1523,8 +1653,9 @@ export class ParameterValidationService {
           type: ValidationWarningType.SECURITY_CONCERN,
           message: indicator.description,
           affectedParameters: indicator.affectedParameters,
-          severity: 'medium',
-          suggestedAction: 'Review parameter content for potential security risks'
+          severity: "medium",
+          suggestedAction:
+            "Review parameter content for potential security risks",
         });
       }
     }
@@ -1535,23 +1666,25 @@ export class ParameterValidationService {
   /**
    * Create default validation response when conversational validation is disabled
    */
-  private createDefaultValidationResponse(request: ParameterValidationRequest): ValidationResponse {
+  private createDefaultValidationResponse(
+    request: ParameterValidationRequest,
+  ): ValidationResponse {
     return {
       requestId: `default-${Date.now()}`,
       decision: ValidationDecision.APPROVE,
-      conversationId: '',
-      reasoning: 'Automated validation without conversational review',
+      conversationId: "",
+      reasoning: "Automated validation without conversational review",
       confidence: 0.8,
       timestamp: new Date(),
       processingTimeMs: 0,
       cacheInfo: {
-        status: 'MISS',
-        strategy: 'DISABLED',
-        tier: 'L1_MEMORY',
-        ttlRemainingMs: 0
+        status: "MISS",
+        strategy: "DISABLED",
+        tier: "L1_MEMORY",
+        ttlRemainingMs: 0,
       },
       metadata: {
-        source: 'FALLBACK',
+        source: "FALLBACK",
         pipelineStages: [],
         performanceMetrics: {
           responseTime: 0,
@@ -1561,11 +1694,11 @@ export class ParameterValidationService {
             cpu: 0,
             memory: 0,
             network: 0,
-            storage: 0
-          }
+            storage: 0,
+          },
         },
-        qualityIndicators: []
-      }
+        qualityIndicators: [],
+      },
     };
   }
 }

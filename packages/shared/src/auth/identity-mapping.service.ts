@@ -27,22 +27,27 @@ import {
   OnModuleInit,
   OnModuleDestroy,
   Inject,
-} from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter } from 'events';
-import * as crypto from 'crypto';
-import axios, { AxiosInstance } from 'axios';
+} from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { EventEmitter } from "events";
+import * as crypto from "crypto";
+import axios, { AxiosInstance } from "axios";
 
 /**
  * Identity mapping configuration
  */
 export interface IdentityMappingConfig {
   /** Synchronization strategy */
-  syncStrategy: 'realtime' | 'periodic' | 'on-demand' | 'hybrid';
+  syncStrategy: "realtime" | "periodic" | "on-demand" | "hybrid";
   /** Sync interval for periodic strategy */
   syncInterval: number;
   /** Conflict resolution strategy */
-  conflictResolution: 'aigent-wins' | 'parlant-wins' | 'merge' | 'manual' | 'latest-wins';
+  conflictResolution:
+    | "aigent-wins"
+    | "parlant-wins"
+    | "merge"
+    | "manual"
+    | "latest-wins";
   /** Enable automatic role mapping */
   autoRoleMapping: boolean;
   /** Enable automatic permission mapping */
@@ -104,7 +109,7 @@ export interface CrossSystemUserIdentity {
     mappedPermissions: string[];
     securityLevel: string;
     lastSync: Date;
-    syncStatus: 'synced' | 'pending' | 'conflict' | 'error';
+    syncStatus: "synced" | "pending" | "conflict" | "error";
   };
   /** Mapping metadata */
   metadata: {
@@ -125,15 +130,15 @@ export interface RoleMapping {
   /** Mapping ID */
   mappingId: string;
   /** Source system */
-  sourceSystem: 'aigent' | 'parlant';
+  sourceSystem: "aigent" | "parlant";
   /** Source role */
   sourceRole: string;
   /** Target system */
-  targetSystem: 'aigent' | 'parlant';
+  targetSystem: "aigent" | "parlant";
   /** Target role */
   targetRole: string;
   /** Mapping type */
-  mappingType: 'direct' | 'hierarchical' | 'computed' | 'conditional';
+  mappingType: "direct" | "hierarchical" | "computed" | "conditional";
   /** Mapping conditions */
   conditions?: Record<string, unknown>;
   /** Mapping priority */
@@ -156,15 +161,15 @@ export interface PermissionMapping {
   /** Mapping ID */
   mappingId: string;
   /** Source system */
-  sourceSystem: 'aigent' | 'parlant';
+  sourceSystem: "aigent" | "parlant";
   /** Source permission */
   sourcePermission: string;
   /** Target system */
-  targetSystem: 'aigent' | 'parlant';
+  targetSystem: "aigent" | "parlant";
   /** Target permission */
   targetPermission: string;
   /** Mapping type */
-  mappingType: 'direct' | 'scoped' | 'computed' | 'conditional';
+  mappingType: "direct" | "scoped" | "computed" | "conditional";
   /** Permission scope */
   scope?: string;
   /** Mapping conditions */
@@ -187,11 +192,11 @@ export interface SyncHistoryEntry {
   /** Sync timestamp */
   timestamp: Date;
   /** Sync type */
-  type: 'full' | 'incremental' | 'conflict-resolution' | 'manual';
+  type: "full" | "incremental" | "conflict-resolution" | "manual";
   /** Source system */
-  sourceSystem: 'aigent' | 'parlant' | 'both';
+  sourceSystem: "aigent" | "parlant" | "both";
   /** Sync result */
-  result: 'success' | 'partial' | 'failed';
+  result: "success" | "partial" | "failed";
   /** Changes made */
   changes: {
     field: string;
@@ -216,7 +221,7 @@ export interface ConflictEntry {
   /** Conflict timestamp */
   timestamp: Date;
   /** Conflict type */
-  type: 'role' | 'permission' | 'profile' | 'status' | 'other';
+  type: "role" | "permission" | "profile" | "status" | "other";
   /** Field in conflict */
   field: string;
   /** AIgent value */
@@ -248,7 +253,7 @@ export interface FederationInfo {
   /** Last federation sync */
   lastSync: Date;
   /** Federation status */
-  status: 'active' | 'inactive' | 'error';
+  status: "active" | "inactive" | "error";
 }
 
 /**
@@ -338,7 +343,10 @@ export interface IdentityMappingAnalytics {
  * and comprehensive audit capabilities.
  */
 @Injectable()
-export class IdentityMappingService extends EventEmitter implements OnModuleInit, OnModuleDestroy {
+export class IdentityMappingService
+  extends EventEmitter
+  implements OnModuleInit, OnModuleDestroy
+{
   private readonly logger = new Logger(IdentityMappingService.name);
 
   // Configuration
@@ -397,10 +405,11 @@ export class IdentityMappingService extends EventEmitter implements OnModuleInit
 
   constructor(
     private readonly configService: ConfigService,
-    @Inject('IDENTITY_MAPPING_CONFIG') private readonly mappingConfig: Partial<IdentityMappingConfig>,
+    @Inject("IDENTITY_MAPPING_CONFIG")
+    private readonly mappingConfig: Partial<IdentityMappingConfig>,
   ) {
     super();
-    this.logger.log('👥 Initializing Identity Mapping Service');
+    this.logger.log("👥 Initializing Identity Mapping Service");
   }
 
   /**
@@ -408,7 +417,7 @@ export class IdentityMappingService extends EventEmitter implements OnModuleInit
    */
   async onModuleInit(): Promise<void> {
     const startTime = Date.now();
-    this.logger.log('🔄 Starting identity mapping initialization...');
+    this.logger.log("🔄 Starting identity mapping initialization...");
 
     try {
       await this.loadConfiguration();
@@ -418,16 +427,20 @@ export class IdentityMappingService extends EventEmitter implements OnModuleInit
       await this.performInitialSync();
 
       const initTime = Date.now() - startTime;
-      this.logger.log(`✅ Identity mapping initialized successfully (${initTime}ms)`);
+      this.logger.log(
+        `✅ Identity mapping initialized successfully (${initTime}ms)`,
+      );
 
-      this.emit('identity:initialized', {
+      this.emit("identity:initialized", {
         timestamp: new Date(),
         initializationTime: initTime,
         configuration: this.sanitizeConfig(),
       });
     } catch (error) {
-      this.logger.error('❌ Failed to initialize identity mapping', error);
-      throw new Error(`Identity mapping initialization failed: ${error instanceof Error ? error.message : String(error)}`);
+      this.logger.error("❌ Failed to initialize identity mapping", error);
+      throw new Error(
+        `Identity mapping initialization failed: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 
@@ -435,12 +448,12 @@ export class IdentityMappingService extends EventEmitter implements OnModuleInit
    * Clean up resources on module destruction
    */
   async onModuleDestroy(): Promise<void> {
-    this.logger.log('🔄 Shutting down identity mapping...');
+    this.logger.log("🔄 Shutting down identity mapping...");
 
     await this.stopPeriodicTasks();
     await this.flushSyncQueue();
 
-    this.logger.log('✅ Identity mapping shutdown complete');
+    this.logger.log("✅ Identity mapping shutdown complete");
   }
 
   /**
@@ -478,34 +491,59 @@ export class IdentityMappingService extends EventEmitter implements OnModuleInit
       // Determine primary email for lookup
       const primaryEmail = aigentUser?.email || parlantUser?.email;
       if (!primaryEmail) {
-        throw new Error('Primary email required for identity mapping');
+        throw new Error("Primary email required for identity mapping");
       }
 
       // Find existing mapping
-      let existingMappingId = options?.mappingId || this.emailToMappingId.get(primaryEmail);
-      let existingMapping = existingMappingId ? this.identityMappings.get(existingMappingId) : null;
+      let existingMappingId =
+        options?.mappingId || this.emailToMappingId.get(primaryEmail);
+      let existingMapping = existingMappingId
+        ? this.identityMappings.get(existingMappingId)
+        : null;
 
       // Create new mapping if none exists
       if (!existingMapping) {
         existingMappingId = this.generateMappingId();
-        existingMapping = await this.createNewIdentityMapping(existingMappingId, primaryEmail);
+        existingMapping = await this.createNewIdentityMapping(
+          existingMappingId,
+          primaryEmail,
+        );
       }
 
-      const changes: Array<{ field: string; oldValue: unknown; newValue: unknown; source: string }> = [];
+      const changes: Array<{
+        field: string;
+        oldValue: unknown;
+        newValue: unknown;
+        source: string;
+      }> = [];
       const conflicts: ConflictEntry[] = [];
 
       // Update AIgent user information
       if (aigentUser) {
-        await this.updateAigentUserInfo(existingMapping, aigentUser, changes, conflicts);
+        await this.updateAigentUserInfo(
+          existingMapping,
+          aigentUser,
+          changes,
+          conflicts,
+        );
       }
 
       // Update Parlant user information
       if (parlantUser) {
-        await this.updateParlantUserInfo(existingMapping, parlantUser, changes, conflicts);
+        await this.updateParlantUserInfo(
+          existingMapping,
+          parlantUser,
+          changes,
+          conflicts,
+        );
       }
 
       // Resolve conflicts
-      await this.resolveConflicts(existingMapping, conflicts, options?.conflictResolution);
+      await this.resolveConflicts(
+        existingMapping,
+        conflicts,
+        options?.conflictResolution,
+      );
 
       // Update common attributes
       await this.updateCommonAttributes(existingMapping);
@@ -517,12 +555,20 @@ export class IdentityMappingService extends EventEmitter implements OnModuleInit
       // Add to sync history
       existingMapping.metadata.syncHistory.push({
         timestamp: new Date(),
-        type: existingMapping.metadata.syncHistory.length === 0 ? 'full' : 'incremental',
-        sourceSystem: aigentUser && parlantUser ? 'both' : (aigentUser ? 'aigent' : 'parlant'),
-        result: conflicts.length > 0 ? 'partial' : 'success',
+        type:
+          existingMapping.metadata.syncHistory.length === 0
+            ? "full"
+            : "incremental",
+        sourceSystem:
+          aigentUser && parlantUser
+            ? "both"
+            : aigentUser
+              ? "aigent"
+              : "parlant",
+        result: conflicts.length > 0 ? "partial" : "success",
         changes,
         duration: Date.now() - startTime,
-        triggeredBy: options?.triggeredBy || 'api',
+        triggeredBy: options?.triggeredBy || "api",
       });
 
       // Update analytics
@@ -537,16 +583,23 @@ export class IdentityMappingService extends EventEmitter implements OnModuleInit
           syncId,
           timestamp: new Date(),
           duration: Date.now() - startTime,
-          syncType: 'manual',
-          sourceSystem: aigentUser && parlantUser ? 'both' : (aigentUser ? 'aigent' : 'parlant'),
-          triggeredBy: options?.triggeredBy || 'api',
+          syncType: "manual",
+          sourceSystem:
+            aigentUser && parlantUser
+              ? "both"
+              : aigentUser
+                ? "aigent"
+                : "parlant",
+          triggeredBy: options?.triggeredBy || "api",
         },
       };
 
-      this.logger.log(`✅ Identity mapping updated: ${existingMappingId} (${Date.now() - startTime}ms)`);
+      this.logger.log(
+        `✅ Identity mapping updated: ${existingMappingId} (${Date.now() - startTime}ms)`,
+      );
 
       // Emit event
-      this.emit('identity:updated', {
+      this.emit("identity:updated", {
         mappingId: existingMappingId,
         changes,
         conflicts,
@@ -567,12 +620,12 @@ export class IdentityMappingService extends EventEmitter implements OnModuleInit
           syncId,
           timestamp: new Date(),
           duration: Date.now() - startTime,
-          syncType: 'manual',
-          sourceSystem: 'unknown',
-          triggeredBy: options?.triggeredBy || 'api',
+          syncType: "manual",
+          sourceSystem: "unknown",
+          triggeredBy: options?.triggeredBy || "api",
         },
         error: {
-          code: 'MAPPING_FAILED',
+          code: "MAPPING_FAILED",
           message: error instanceof Error ? error.message : String(error),
         },
       };
@@ -584,7 +637,7 @@ export class IdentityMappingService extends EventEmitter implements OnModuleInit
    */
   async synchronizeIdentity(
     email: string,
-    sourceSystem: 'aigent' | 'parlant',
+    sourceSystem: "aigent" | "parlant",
     options?: {
       forceSync?: boolean;
       conflictResolution?: string;
@@ -594,11 +647,13 @@ export class IdentityMappingService extends EventEmitter implements OnModuleInit
     const startTime = Date.now();
 
     try {
-      this.logger.debug(`🔄 Synchronizing identity: ${email} from ${sourceSystem}`);
+      this.logger.debug(
+        `🔄 Synchronizing identity: ${email} from ${sourceSystem}`,
+      );
 
       // Fetch user data from source system
       let userData: any;
-      if (sourceSystem === 'aigent') {
+      if (sourceSystem === "aigent") {
         userData = await this.fetchAigentUser(email);
       } else {
         userData = await this.fetchParlantUser(email);
@@ -609,15 +664,15 @@ export class IdentityMappingService extends EventEmitter implements OnModuleInit
       }
 
       // Create or update mapping
-      if (sourceSystem === 'aigent') {
+      if (sourceSystem === "aigent") {
         return await this.createOrUpdateIdentityMapping(userData, undefined, {
           conflictResolution: options?.conflictResolution,
-          triggeredBy: 'sync',
+          triggeredBy: "sync",
         });
       } else {
         return await this.createOrUpdateIdentityMapping(undefined, userData, {
           conflictResolution: options?.conflictResolution,
-          triggeredBy: 'sync',
+          triggeredBy: "sync",
         });
       }
     } catch (error) {
@@ -631,12 +686,12 @@ export class IdentityMappingService extends EventEmitter implements OnModuleInit
           syncId,
           timestamp: new Date(),
           duration: Date.now() - startTime,
-          syncType: 'sync',
+          syncType: "sync",
           sourceSystem,
-          triggeredBy: 'sync',
+          triggeredBy: "sync",
         },
         error: {
-          code: 'SYNC_FAILED',
+          code: "SYNC_FAILED",
           message: error instanceof Error ? error.message : String(error),
         },
       };
@@ -654,12 +709,15 @@ export class IdentityMappingService extends EventEmitter implements OnModuleInit
   /**
    * Get identity mapping by user ID
    */
-  getIdentityByUserId(userId: string, system: 'aigent' | 'parlant'): CrossSystemUserIdentity | null {
+  getIdentityByUserId(
+    userId: string,
+    system: "aigent" | "parlant",
+  ): CrossSystemUserIdentity | null {
     for (const identity of this.identityMappings.values()) {
-      if (system === 'aigent' && identity.aigent.userId === userId) {
+      if (system === "aigent" && identity.aigent.userId === userId) {
         return identity;
       }
-      if (system === 'parlant' && identity.parlant.userId === userId) {
+      if (system === "parlant" && identity.parlant.userId === userId) {
         return identity;
       }
     }
@@ -669,7 +727,11 @@ export class IdentityMappingService extends EventEmitter implements OnModuleInit
   /**
    * Map roles from source to target system
    */
-  mapRoles(roles: string[], sourceSystem: 'aigent' | 'parlant', targetSystem: 'aigent' | 'parlant'): string[] {
+  mapRoles(
+    roles: string[],
+    sourceSystem: "aigent" | "parlant",
+    targetSystem: "aigent" | "parlant",
+  ): string[] {
     const mappedRoles: string[] = [];
 
     for (const role of roles) {
@@ -689,12 +751,20 @@ export class IdentityMappingService extends EventEmitter implements OnModuleInit
   /**
    * Map permissions from source to target system
    */
-  mapPermissions(permissions: string[], sourceSystem: 'aigent' | 'parlant', targetSystem: 'aigent' | 'parlant'): string[] {
+  mapPermissions(
+    permissions: string[],
+    sourceSystem: "aigent" | "parlant",
+    targetSystem: "aigent" | "parlant",
+  ): string[] {
     const mappedPermissions: string[] = [];
 
     for (const permission of permissions) {
       // Find direct permission mapping
-      const mapping = this.findPermissionMapping(permission, sourceSystem, targetSystem);
+      const mapping = this.findPermissionMapping(
+        permission,
+        sourceSystem,
+        targetSystem,
+      );
       if (mapping) {
         mappedPermissions.push(mapping.targetPermission);
       } else {
@@ -716,11 +786,19 @@ export class IdentityMappingService extends EventEmitter implements OnModuleInit
   /**
    * Get all pending conflicts
    */
-  getPendingConflicts(): Array<{ mappingId: string; conflicts: ConflictEntry[] }> {
-    const pendingConflicts: Array<{ mappingId: string; conflicts: ConflictEntry[] }> = [];
+  getPendingConflicts(): Array<{
+    mappingId: string;
+    conflicts: ConflictEntry[];
+  }> {
+    const pendingConflicts: Array<{
+      mappingId: string;
+      conflicts: ConflictEntry[];
+    }> = [];
 
     for (const [mappingId, identity] of this.identityMappings.entries()) {
-      const conflicts = identity.metadata.conflicts.filter(c => c.requiresManualResolution && !c.resolvedAt);
+      const conflicts = identity.metadata.conflicts.filter(
+        (c) => c.requiresManualResolution && !c.resolvedAt,
+      );
       if (conflicts.length > 0) {
         pendingConflicts.push({ mappingId, conflicts });
       }
@@ -743,7 +821,9 @@ export class IdentityMappingService extends EventEmitter implements OnModuleInit
       return false;
     }
 
-    const conflict = identity.metadata.conflicts.find(c => c.conflictId === conflictId);
+    const conflict = identity.metadata.conflicts.find(
+      (c) => c.conflictId === conflictId,
+    );
     if (!conflict) {
       return false;
     }
@@ -757,10 +837,12 @@ export class IdentityMappingService extends EventEmitter implements OnModuleInit
     // Update the actual field value
     await this.applyConflictResolution(identity, conflict);
 
-    this.logger.log(`✅ Conflict resolved manually: ${conflictId} in mapping ${mappingId}`);
+    this.logger.log(
+      `✅ Conflict resolved manually: ${conflictId} in mapping ${mappingId}`,
+    );
 
     // Emit event
-    this.emit('conflict:resolved', {
+    this.emit("conflict:resolved", {
       mappingId,
       conflictId,
       resolution,
@@ -777,9 +859,9 @@ export class IdentityMappingService extends EventEmitter implements OnModuleInit
 
   private async loadConfiguration(): Promise<void> {
     this.config = {
-      syncStrategy: 'hybrid',
+      syncStrategy: "hybrid",
       syncInterval: 600000, // 10 minutes
-      conflictResolution: 'merge',
+      conflictResolution: "merge",
       autoRoleMapping: true,
       autoPermissionMapping: true,
       cache: {
@@ -790,75 +872,81 @@ export class IdentityMappingService extends EventEmitter implements OnModuleInit
       federation: {
         enabled: false,
         providers: [],
-        defaultProvider: '',
+        defaultProvider: "",
       },
       audit: {
         enabled: true,
         includeData: false,
         retentionDays: 90,
       },
-      ...(this.configService.get('identityMapping') || {}),
+      ...(this.configService.get("identityMapping") || {}),
       ...this.mappingConfig,
     };
 
-    this.logger.log('⚙️ Identity mapping configuration loaded');
+    this.logger.log("⚙️ Identity mapping configuration loaded");
   }
 
   private async initializeClients(): Promise<void> {
     // Initialize AIgent client
     this.aigentClient = axios.create({
-      baseURL: this.configService.get('AIGENT_API_URL', 'http://localhost:3000'),
+      baseURL: this.configService.get(
+        "AIGENT_API_URL",
+        "http://localhost:3000",
+      ),
       timeout: 5000,
       headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${this.configService.get('AIGENT_API_KEY', '')}`,
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${this.configService.get("AIGENT_API_KEY", "")}`,
       },
     });
 
     // Initialize Parlant client
     this.parlantClient = axios.create({
-      baseURL: this.configService.get('PARLANT_API_URL', 'http://localhost:8000'),
+      baseURL: this.configService.get(
+        "PARLANT_API_URL",
+        "http://localhost:8000",
+      ),
       timeout: 5000,
       headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${this.configService.get('PARLANT_API_KEY', '')}`,
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${this.configService.get("PARLANT_API_KEY", "")}`,
       },
     });
 
-    this.logger.log('🔗 API clients initialized');
+    this.logger.log("🔗 API clients initialized");
   }
 
   private async loadDefaultMappings(): Promise<void> {
     // Load default role mappings
     const defaultRoleMappings: RoleMapping[] = [
       {
-        mappingId: 'role_admin_mapping',
-        sourceSystem: 'aigent',
-        sourceRole: 'admin',
-        targetSystem: 'parlant',
-        targetRole: 'administrator',
-        mappingType: 'direct',
+        mappingId: "role_admin_mapping",
+        sourceSystem: "aigent",
+        sourceRole: "admin",
+        targetSystem: "parlant",
+        targetRole: "administrator",
+        mappingType: "direct",
         priority: 1,
         active: true,
         metadata: {
           createdAt: new Date(),
-          createdBy: 'system',
-          description: 'Map admin role to administrator',
+          createdBy: "system",
+          description: "Map admin role to administrator",
         },
       },
       {
-        mappingId: 'role_user_mapping',
-        sourceSystem: 'aigent',
-        sourceRole: 'user',
-        targetSystem: 'parlant',
-        targetRole: 'user',
-        mappingType: 'direct',
+        mappingId: "role_user_mapping",
+        sourceSystem: "aigent",
+        sourceRole: "user",
+        targetSystem: "parlant",
+        targetRole: "user",
+        mappingType: "direct",
         priority: 2,
         active: true,
         metadata: {
           createdAt: new Date(),
-          createdBy: 'system',
-          description: 'Map user role to user',
+          createdBy: "system",
+          description: "Map user role to user",
         },
       },
     ];
@@ -870,31 +958,31 @@ export class IdentityMappingService extends EventEmitter implements OnModuleInit
     // Load default permission mappings
     const defaultPermissionMappings: PermissionMapping[] = [
       {
-        mappingId: 'perm_read_mapping',
-        sourceSystem: 'aigent',
-        sourcePermission: 'read',
-        targetSystem: 'parlant',
-        targetPermission: 'view',
-        mappingType: 'direct',
+        mappingId: "perm_read_mapping",
+        sourceSystem: "aigent",
+        sourcePermission: "read",
+        targetSystem: "parlant",
+        targetPermission: "view",
+        mappingType: "direct",
         active: true,
         metadata: {
           createdAt: new Date(),
-          createdBy: 'system',
-          description: 'Map read permission to view',
+          createdBy: "system",
+          description: "Map read permission to view",
         },
       },
       {
-        mappingId: 'perm_write_mapping',
-        sourceSystem: 'aigent',
-        sourcePermission: 'write',
-        targetSystem: 'parlant',
-        targetPermission: 'edit',
-        mappingType: 'direct',
+        mappingId: "perm_write_mapping",
+        sourceSystem: "aigent",
+        sourcePermission: "write",
+        targetSystem: "parlant",
+        targetPermission: "edit",
+        mappingType: "direct",
         active: true,
         metadata: {
           createdAt: new Date(),
-          createdBy: 'system',
-          description: 'Map write permission to edit',
+          createdBy: "system",
+          description: "Map write permission to edit",
         },
       },
     ];
@@ -903,17 +991,22 @@ export class IdentityMappingService extends EventEmitter implements OnModuleInit
       this.permissionMappings.set(mapping.mappingId, mapping);
     }
 
-    this.logger.log(`📚 Loaded ${defaultRoleMappings.length} role mappings and ${defaultPermissionMappings.length} permission mappings`);
+    this.logger.log(
+      `📚 Loaded ${defaultRoleMappings.length} role mappings and ${defaultPermissionMappings.length} permission mappings`,
+    );
   }
 
-  private async createNewIdentityMapping(mappingId: string, primaryEmail: string): Promise<CrossSystemUserIdentity> {
+  private async createNewIdentityMapping(
+    mappingId: string,
+    primaryEmail: string,
+  ): Promise<CrossSystemUserIdentity> {
     const now = new Date();
 
     return {
       mappingId,
       aigent: {
-        userId: '',
-        username: '',
+        userId: "",
+        username: "",
         email: primaryEmail,
         roles: [],
         permissions: [],
@@ -922,8 +1015,8 @@ export class IdentityMappingService extends EventEmitter implements OnModuleInit
         active: false,
       },
       parlant: {
-        userId: '',
-        username: '',
+        userId: "",
+        username: "",
         email: primaryEmail,
         roles: [],
         permissions: [],
@@ -933,19 +1026,19 @@ export class IdentityMappingService extends EventEmitter implements OnModuleInit
       },
       common: {
         primaryEmail,
-        displayName: '',
-        preferredUsername: '',
+        displayName: "",
+        preferredUsername: "",
         mappedRoles: [],
         mappedPermissions: [],
-        securityLevel: 'MEDIUM',
+        securityLevel: "MEDIUM",
         lastSync: now,
-        syncStatus: 'pending',
+        syncStatus: "pending",
       },
       metadata: {
         createdAt: now,
-        createdBy: 'system',
+        createdBy: "system",
         lastModifiedAt: now,
-        lastModifiedBy: 'system',
+        lastModifiedBy: "system",
         syncHistory: [],
         conflicts: [],
       },
@@ -955,7 +1048,12 @@ export class IdentityMappingService extends EventEmitter implements OnModuleInit
   private async updateAigentUserInfo(
     identity: CrossSystemUserIdentity,
     aigentUser: any,
-    changes: Array<{ field: string; oldValue: unknown; newValue: unknown; source: string }>,
+    changes: Array<{
+      field: string;
+      oldValue: unknown;
+      newValue: unknown;
+      source: string;
+    }>,
     conflicts: ConflictEntry[],
   ): Promise<void> {
     const now = new Date();
@@ -963,24 +1061,33 @@ export class IdentityMappingService extends EventEmitter implements OnModuleInit
     // Track changes
     if (identity.aigent.userId !== aigentUser.userId) {
       changes.push({
-        field: 'aigent.userId',
+        field: "aigent.userId",
         oldValue: identity.aigent.userId,
         newValue: aigentUser.userId,
-        source: 'aigent',
+        source: "aigent",
       });
     }
 
     if (identity.aigent.username !== aigentUser.username) {
       // Check for conflict with parlant username
-      if (identity.parlant.username && identity.parlant.username !== aigentUser.username) {
-        conflicts.push(this.createConflict('username', identity.parlant.username, aigentUser.username));
+      if (
+        identity.parlant.username &&
+        identity.parlant.username !== aigentUser.username
+      ) {
+        conflicts.push(
+          this.createConflict(
+            "username",
+            identity.parlant.username,
+            aigentUser.username,
+          ),
+        );
       }
 
       changes.push({
-        field: 'aigent.username',
+        field: "aigent.username",
         oldValue: identity.aigent.username,
         newValue: aigentUser.username,
-        source: 'aigent',
+        source: "aigent",
       });
     }
 
@@ -1001,7 +1108,12 @@ export class IdentityMappingService extends EventEmitter implements OnModuleInit
   private async updateParlantUserInfo(
     identity: CrossSystemUserIdentity,
     parlantUser: any,
-    changes: Array<{ field: string; oldValue: unknown; newValue: unknown; source: string }>,
+    changes: Array<{
+      field: string;
+      oldValue: unknown;
+      newValue: unknown;
+      source: string;
+    }>,
     conflicts: ConflictEntry[],
   ): Promise<void> {
     const now = new Date();
@@ -1009,24 +1121,33 @@ export class IdentityMappingService extends EventEmitter implements OnModuleInit
     // Track changes
     if (identity.parlant.userId !== parlantUser.userId) {
       changes.push({
-        field: 'parlant.userId',
+        field: "parlant.userId",
         oldValue: identity.parlant.userId,
         newValue: parlantUser.userId,
-        source: 'parlant',
+        source: "parlant",
       });
     }
 
     if (identity.parlant.username !== parlantUser.username) {
       // Check for conflict with aigent username
-      if (identity.aigent.username && identity.aigent.username !== parlantUser.username) {
-        conflicts.push(this.createConflict('username', identity.aigent.username, parlantUser.username));
+      if (
+        identity.aigent.username &&
+        identity.aigent.username !== parlantUser.username
+      ) {
+        conflicts.push(
+          this.createConflict(
+            "username",
+            identity.aigent.username,
+            parlantUser.username,
+          ),
+        );
       }
 
       changes.push({
-        field: 'parlant.username',
+        field: "parlant.username",
         oldValue: identity.parlant.username,
         newValue: parlantUser.username,
-        source: 'parlant',
+        source: "parlant",
       });
     }
 
@@ -1044,41 +1165,73 @@ export class IdentityMappingService extends EventEmitter implements OnModuleInit
     };
   }
 
-  private async updateCommonAttributes(identity: CrossSystemUserIdentity): Promise<void> {
+  private async updateCommonAttributes(
+    identity: CrossSystemUserIdentity,
+  ): Promise<void> {
     // Update display name
-    identity.common.displayName = identity.aigent.profile?.displayName as string ||
-                                   identity.parlant.profile?.displayName as string ||
-                                   identity.aigent.username ||
-                                   identity.parlant.username;
+    identity.common.displayName =
+      (identity.aigent.profile?.displayName as string) ||
+      (identity.parlant.profile?.displayName as string) ||
+      identity.aigent.username ||
+      identity.parlant.username;
 
     // Update preferred username
-    identity.common.preferredUsername = identity.aigent.username || identity.parlant.username;
+    identity.common.preferredUsername =
+      identity.aigent.username || identity.parlant.username;
 
     // Map roles
-    const aigentRoles = this.mapRoles(identity.aigent.roles, 'aigent', 'parlant');
-    const parlantRoles = this.mapRoles(identity.parlant.roles, 'parlant', 'aigent');
-    identity.common.mappedRoles = [...new Set([...aigentRoles, ...parlantRoles])];
+    const aigentRoles = this.mapRoles(
+      identity.aigent.roles,
+      "aigent",
+      "parlant",
+    );
+    const parlantRoles = this.mapRoles(
+      identity.parlant.roles,
+      "parlant",
+      "aigent",
+    );
+    identity.common.mappedRoles = [
+      ...new Set([...aigentRoles, ...parlantRoles]),
+    ];
 
     // Map permissions
-    const aigentPermissions = this.mapPermissions(identity.aigent.permissions, 'aigent', 'parlant');
-    const parlantPermissions = this.mapPermissions(identity.parlant.permissions, 'parlant', 'aigent');
-    identity.common.mappedPermissions = [...new Set([...aigentPermissions, ...parlantPermissions])];
+    const aigentPermissions = this.mapPermissions(
+      identity.aigent.permissions,
+      "aigent",
+      "parlant",
+    );
+    const parlantPermissions = this.mapPermissions(
+      identity.parlant.permissions,
+      "parlant",
+      "aigent",
+    );
+    identity.common.mappedPermissions = [
+      ...new Set([...aigentPermissions, ...parlantPermissions]),
+    ];
 
     // Update sync status
-    identity.common.syncStatus = identity.metadata.conflicts.some(c => c.requiresManualResolution) ? 'conflict' : 'synced';
+    identity.common.syncStatus = identity.metadata.conflicts.some(
+      (c) => c.requiresManualResolution,
+    )
+      ? "conflict"
+      : "synced";
     identity.common.lastSync = new Date();
   }
 
-  private createConflict(field: string, aigentValue: unknown, parlantValue: unknown): ConflictEntry {
+  private createConflict(
+    field: string,
+    aigentValue: unknown,
+    parlantValue: unknown,
+  ): ConflictEntry {
     return {
       conflictId: this.generateConflictId(),
       timestamp: new Date(),
-      type: 'other',
+      type: "other",
       field,
       aigentValue,
       parlantValue,
       resolutionStrategy: this.config.conflictResolution,
-      requiresManualResolution: this.config.conflictResolution === 'manual',
+      requiresManualResolution: this.config.conflictResolution === "manual",
     };
   }
 
@@ -1093,21 +1246,25 @@ export class IdentityMappingService extends EventEmitter implements OnModuleInit
       conflict.resolutionStrategy = resolutionStrategy;
 
       switch (resolutionStrategy) {
-        case 'aigent-wins':
+        case "aigent-wins":
           conflict.resolvedValue = conflict.aigentValue;
           break;
-        case 'parlant-wins':
+        case "parlant-wins":
           conflict.resolvedValue = conflict.parlantValue;
           break;
-        case 'latest-wins':
-          conflict.resolvedValue = identity.aigent.lastUpdated > identity.parlant.lastUpdated
-            ? conflict.aigentValue
-            : conflict.parlantValue;
+        case "latest-wins":
+          conflict.resolvedValue =
+            identity.aigent.lastUpdated > identity.parlant.lastUpdated
+              ? conflict.aigentValue
+              : conflict.parlantValue;
           break;
-        case 'merge':
-          conflict.resolvedValue = this.mergeValues(conflict.aigentValue, conflict.parlantValue);
+        case "merge":
+          conflict.resolvedValue = this.mergeValues(
+            conflict.aigentValue,
+            conflict.parlantValue,
+          );
           break;
-        case 'manual':
+        case "manual":
           conflict.requiresManualResolution = true;
           continue;
       }
@@ -1115,18 +1272,21 @@ export class IdentityMappingService extends EventEmitter implements OnModuleInit
       if (!conflict.requiresManualResolution) {
         await this.applyConflictResolution(identity, conflict);
         conflict.resolvedAt = new Date();
-        conflict.resolvedBy = 'system';
+        conflict.resolvedBy = "system";
       }
 
       identity.metadata.conflicts.push(conflict);
     }
   }
 
-  private async applyConflictResolution(identity: CrossSystemUserIdentity, conflict: ConflictEntry): Promise<void> {
+  private async applyConflictResolution(
+    identity: CrossSystemUserIdentity,
+    conflict: ConflictEntry,
+  ): Promise<void> {
     // Apply resolved value to the appropriate field
     const value = conflict.resolvedValue;
 
-    if (conflict.field === 'username') {
+    if (conflict.field === "username") {
       identity.common.preferredUsername = value as string;
     }
     // Add more field resolutions as needed
@@ -1138,7 +1298,12 @@ export class IdentityMappingService extends EventEmitter implements OnModuleInit
       return [...new Set([...value1, ...value2])];
     }
 
-    if (typeof value1 === 'object' && typeof value2 === 'object' && value1 && value2) {
+    if (
+      typeof value1 === "object" &&
+      typeof value2 === "object" &&
+      value1 &&
+      value2
+    ) {
       return { ...value1, ...value2 };
     }
 
@@ -1146,24 +1311,36 @@ export class IdentityMappingService extends EventEmitter implements OnModuleInit
     return value2 || value1;
   }
 
-  private findRoleMapping(role: string, sourceSystem: 'aigent' | 'parlant', targetSystem: 'aigent' | 'parlant'): RoleMapping | null {
+  private findRoleMapping(
+    role: string,
+    sourceSystem: "aigent" | "parlant",
+    targetSystem: "aigent" | "parlant",
+  ): RoleMapping | null {
     for (const mapping of this.roleMappings.values()) {
-      if (mapping.sourceSystem === sourceSystem &&
-          mapping.targetSystem === targetSystem &&
-          mapping.sourceRole === role &&
-          mapping.active) {
+      if (
+        mapping.sourceSystem === sourceSystem &&
+        mapping.targetSystem === targetSystem &&
+        mapping.sourceRole === role &&
+        mapping.active
+      ) {
         return mapping;
       }
     }
     return null;
   }
 
-  private findPermissionMapping(permission: string, sourceSystem: 'aigent' | 'parlant', targetSystem: 'aigent' | 'parlant'): PermissionMapping | null {
+  private findPermissionMapping(
+    permission: string,
+    sourceSystem: "aigent" | "parlant",
+    targetSystem: "aigent" | "parlant",
+  ): PermissionMapping | null {
     for (const mapping of this.permissionMappings.values()) {
-      if (mapping.sourceSystem === sourceSystem &&
-          mapping.targetSystem === targetSystem &&
-          mapping.sourcePermission === permission &&
-          mapping.active) {
+      if (
+        mapping.sourceSystem === sourceSystem &&
+        mapping.targetSystem === targetSystem &&
+        mapping.sourcePermission === permission &&
+        mapping.active
+      ) {
         return mapping;
       }
     }
@@ -1200,15 +1377,22 @@ export class IdentityMappingService extends EventEmitter implements OnModuleInit
     }
 
     // Update average sync time
-    const totalTime = this.analytics.syncStats.averageSyncTime * (this.analytics.syncStats.totalSyncs - 1) + duration;
-    this.analytics.syncStats.averageSyncTime = totalTime / this.analytics.syncStats.totalSyncs;
+    const totalTime =
+      this.analytics.syncStats.averageSyncTime *
+        (this.analytics.syncStats.totalSyncs - 1) +
+      duration;
+    this.analytics.syncStats.averageSyncTime =
+      totalTime / this.analytics.syncStats.totalSyncs;
 
     this.analytics.syncStats.lastSyncTime = new Date();
     this.analytics.lastUpdated = new Date();
   }
 
   private async startPeriodicTasks(): Promise<void> {
-    if (this.config.syncStrategy === 'periodic' || this.config.syncStrategy === 'hybrid') {
+    if (
+      this.config.syncStrategy === "periodic" ||
+      this.config.syncStrategy === "hybrid"
+    ) {
       this.syncTimer = setInterval(() => {
         this.performPeriodicSync();
       }, this.config.syncInterval);
@@ -1224,7 +1408,7 @@ export class IdentityMappingService extends EventEmitter implements OnModuleInit
       this.performCleanup();
     }, 3600000);
 
-    this.logger.log('⏰ Periodic tasks started');
+    this.logger.log("⏰ Periodic tasks started");
   }
 
   private async stopPeriodicTasks(): Promise<void> {
@@ -1245,19 +1429,22 @@ export class IdentityMappingService extends EventEmitter implements OnModuleInit
   }
 
   private async performInitialSync(): Promise<void> {
-    this.logger.log('🔄 Performing initial identity sync...');
+    this.logger.log("🔄 Performing initial identity sync...");
     // Implementation would sync initial user data
   }
 
   private async performPeriodicSync(): Promise<void> {
-    this.logger.debug('🔄 Performing periodic identity sync...');
+    this.logger.debug("🔄 Performing periodic identity sync...");
     // Implementation would sync updated user data
   }
 
   private updateAnalytics(): void {
     this.analytics.totalMappedIdentities = this.identityMappings.size;
-    this.analytics.activeMappings = Array.from(this.identityMappings.values())
-      .filter(identity => identity.aigent.active || identity.parlant.active).length;
+    this.analytics.activeMappings = Array.from(
+      this.identityMappings.values(),
+    ).filter(
+      (identity) => identity.aigent.active || identity.parlant.active,
+    ).length;
 
     // Update conflict statistics
     let totalConflicts = 0;
@@ -1267,9 +1454,15 @@ export class IdentityMappingService extends EventEmitter implements OnModuleInit
 
     for (const identity of this.identityMappings.values()) {
       totalConflicts += identity.metadata.conflicts.length;
-      resolvedConflicts += identity.metadata.conflicts.filter(c => c.resolvedAt).length;
-      pendingConflicts += identity.metadata.conflicts.filter(c => !c.resolvedAt).length;
-      manualResolutionRequired += identity.metadata.conflicts.filter(c => c.requiresManualResolution && !c.resolvedAt).length;
+      resolvedConflicts += identity.metadata.conflicts.filter(
+        (c) => c.resolvedAt,
+      ).length;
+      pendingConflicts += identity.metadata.conflicts.filter(
+        (c) => !c.resolvedAt,
+      ).length;
+      manualResolutionRequired += identity.metadata.conflicts.filter(
+        (c) => c.requiresManualResolution && !c.resolvedAt,
+      ).length;
     }
 
     this.analytics.conflictStats = {
@@ -1284,24 +1477,24 @@ export class IdentityMappingService extends EventEmitter implements OnModuleInit
 
   private async performCleanup(): Promise<void> {
     // Clean up old sync history entries, resolved conflicts, etc.
-    this.logger.debug('🧹 Performing identity mapping cleanup...');
+    this.logger.debug("🧹 Performing identity mapping cleanup...");
   }
 
   private async flushSyncQueue(): Promise<void> {
     // Complete any pending sync operations
-    this.logger.debug('💾 Flushing sync queue...');
+    this.logger.debug("💾 Flushing sync queue...");
   }
 
   private generateSyncId(): string {
-    return `sync_${Date.now()}_${crypto.randomBytes(8).toString('hex')}`;
+    return `sync_${Date.now()}_${crypto.randomBytes(8).toString("hex")}`;
   }
 
   private generateMappingId(): string {
-    return `mapping_${Date.now()}_${crypto.randomBytes(8).toString('hex')}`;
+    return `mapping_${Date.now()}_${crypto.randomBytes(8).toString("hex")}`;
   }
 
   private generateConflictId(): string {
-    return `conflict_${Date.now()}_${crypto.randomBytes(8).toString('hex')}`;
+    return `conflict_${Date.now()}_${crypto.randomBytes(8).toString("hex")}`;
   }
 
   private sanitizeConfig(): Record<string, unknown> {

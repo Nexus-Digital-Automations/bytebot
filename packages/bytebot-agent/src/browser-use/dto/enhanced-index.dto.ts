@@ -130,24 +130,15 @@ export const DTOCategories = {
     'BrowserTaskResultDto',
     'ErrorResponseDto',
   ],
-  ENHANCED_NAVIGATION: [
-    'NavigationDto',
-    'NavigationResponseDto',
-  ],
+  ENHANCED_NAVIGATION: ['NavigationDto', 'NavigationResponseDto'],
   ENHANCED_INTERACTION: [
     'ClickInteractionDto',
     'TypeInteractionDto',
     'ScrollInteractionDto',
     'InteractionResponseDto',
   ],
-  ENHANCED_SCREENSHOT: [
-    'CaptureScreenshotDto',
-    'ScreenshotResponseDto',
-  ],
-  ENHANCED_SESSION: [
-    'SessionConfigDto',
-    'SessionStatusDto',
-  ],
+  ENHANCED_SCREENSHOT: ['CaptureScreenshotDto', 'ScreenshotResponseDto'],
+  ENHANCED_SESSION: ['SessionConfigDto', 'SessionStatusDto'],
   ENHANCED_RESPONSE: [
     'BaseEnhancedResponseDto',
     'EnhancedListResponseDto',
@@ -163,13 +154,8 @@ export const DTOCategories = {
     'BrowserTaskResponseDto',
     'BrowserTaskStatusDto',
   ],
-  LEGACY_SESSION: [
-    'CreateBrowserSessionDto',
-    'BrowserSessionResponseDto',
-  ],
-  LEGACY_SCREENSHOT: [
-    'BrowserScreenshotDto',
-  ],
+  LEGACY_SESSION: ['CreateBrowserSessionDto', 'BrowserSessionResponseDto'],
+  LEGACY_SCREENSHOT: ['BrowserScreenshotDto'],
   LEGACY_INTERACTION: [
     'BrowserNavigateDto',
     'BrowserClickDto',
@@ -206,7 +192,8 @@ export const ValidationPatterns = {
   XPATH: /^(\/\/?[\w\-_\[\]@='":\(\)\s\.]*)+$/,
 
   // Identifier patterns
-  UUID_V4: /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+  UUID_V4:
+    /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
   SLUG: /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
 
   // Content patterns
@@ -216,7 +203,8 @@ export const ValidationPatterns = {
 
   // Security patterns
   NO_SCRIPT_TAGS: /^(?!.*<script).*$/i,
-  NO_SQL_INJECTION: /^(?!.*(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|UNION)).*$/i,
+  NO_SQL_INJECTION:
+    /^(?!.*(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|UNION)).*$/i,
 } as const;
 
 /**
@@ -295,7 +283,11 @@ export const DTOUtils = {
    * Check if a DTO is an enhanced type
    */
   isEnhancedDTO: (dto: any): boolean => {
-    return dto && typeof dto === 'object' && dto.constructor.name.includes('Enhanced');
+    return (
+      dto &&
+      typeof dto === 'object' &&
+      dto.constructor.name.includes('Enhanced')
+    );
   },
 
   /**
@@ -308,14 +300,19 @@ export const DTOUtils = {
   /**
    * Validate a pattern against predefined regex
    */
-  validatePattern: (value: string, patternName: keyof typeof ValidationPatterns): boolean => {
+  validatePattern: (
+    value: string,
+    patternName: keyof typeof ValidationPatterns,
+  ): boolean => {
     return ValidationPatterns[patternName].test(value);
   },
 
   /**
    * Get DTOs by category
    */
-  getDTOsByCategory: (category: keyof typeof DTOCategories): readonly string[] => {
+  getDTOsByCategory: (
+    category: keyof typeof DTOCategories,
+  ): readonly string[] => {
     return DTOCategories[category];
   },
 } as const;

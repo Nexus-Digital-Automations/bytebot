@@ -9,9 +9,9 @@
  * @compliance GDPR, SOX, HIPAA, SOC2, ISO27001
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { createHash, createHmac } from 'crypto';
-import { v4 as uuidv4 } from 'uuid';
+import { Injectable, Logger } from "@nestjs/common";
+import { createHash, createHmac } from "crypto";
+import { v4 as uuidv4 } from "uuid";
 import {
   EmergencyBypassToken,
   BypassOperationResult,
@@ -20,8 +20,8 @@ import {
   BypassOperationType,
   ApprovalWorkflow,
   SecurityViolation,
-  ViolationSeverity
-} from '../types/bypass-core.types';
+  ViolationSeverity,
+} from "../types/bypass-core.types";
 
 /**
  * Audit entry for bypass operations
@@ -71,17 +71,17 @@ export interface BypassAuditEntry {
  * Audit entry types
  */
 export enum AuditEntryType {
-  TOKEN_CREATION = 'token_creation',
-  TOKEN_APPROVAL = 'token_approval',
-  TOKEN_REVOCATION = 'token_revocation',
-  BYPASS_OPERATION = 'bypass_operation',
-  AUTHORIZATION_DECISION = 'authorization_decision',
-  SECURITY_VIOLATION = 'security_violation',
-  ABUSE_DETECTION = 'abuse_detection',
-  SYSTEM_TRIGGER = 'system_trigger',
-  CONFIGURATION_CHANGE = 'configuration_change',
-  DATA_ACCESS = 'data_access',
-  EXPORT_REQUEST = 'export_request'
+  TOKEN_CREATION = "token_creation",
+  TOKEN_APPROVAL = "token_approval",
+  TOKEN_REVOCATION = "token_revocation",
+  BYPASS_OPERATION = "bypass_operation",
+  AUTHORIZATION_DECISION = "authorization_decision",
+  SECURITY_VIOLATION = "security_violation",
+  ABUSE_DETECTION = "abuse_detection",
+  SYSTEM_TRIGGER = "system_trigger",
+  CONFIGURATION_CHANGE = "configuration_change",
+  DATA_ACCESS = "data_access",
+  EXPORT_REQUEST = "export_request",
 }
 
 /**
@@ -117,11 +117,11 @@ export interface AuditActor {
  * Actor types
  */
 export enum ActorType {
-  HUMAN_USER = 'human_user',
-  SYSTEM_SERVICE = 'system_service',
-  API_CLIENT = 'api_client',
-  AUTOMATION = 'automation',
-  EXTERNAL_SYSTEM = 'external_system'
+  HUMAN_USER = "human_user",
+  SYSTEM_SERVICE = "system_service",
+  API_CLIENT = "api_client",
+  AUTOMATION = "automation",
+  EXTERNAL_SYSTEM = "external_system",
 }
 
 /**
@@ -154,14 +154,14 @@ export interface AuditAction {
  * Action categories
  */
 export enum ActionCategory {
-  AUTHENTICATION = 'authentication',
-  AUTHORIZATION = 'authorization',
-  DATA_ACCESS = 'data_access',
-  DATA_MODIFICATION = 'data_modification',
-  CONFIGURATION = 'configuration',
-  SECURITY = 'security',
-  MONITORING = 'monitoring',
-  ADMINISTRATION = 'administration'
+  AUTHENTICATION = "authentication",
+  AUTHORIZATION = "authorization",
+  DATA_ACCESS = "data_access",
+  DATA_MODIFICATION = "data_modification",
+  CONFIGURATION = "configuration",
+  SECURITY = "security",
+  MONITORING = "monitoring",
+  ADMINISTRATION = "administration",
 }
 
 /**
@@ -191,25 +191,25 @@ export interface AuditResource {
  * Resource types
  */
 export enum ResourceType {
-  DATABASE_TABLE = 'database_table',
-  DATABASE_RECORD = 'database_record',
-  CONFIG_FILE = 'config_file',
-  API_ENDPOINT = 'api_endpoint',
-  SYSTEM_FUNCTION = 'system_function',
-  USER_ACCOUNT = 'user_account',
-  SECURITY_TOKEN = 'security_token',
-  AUDIT_LOG = 'audit_log'
+  DATABASE_TABLE = "database_table",
+  DATABASE_RECORD = "database_record",
+  CONFIG_FILE = "config_file",
+  API_ENDPOINT = "api_endpoint",
+  SYSTEM_FUNCTION = "system_function",
+  USER_ACCOUNT = "user_account",
+  SECURITY_TOKEN = "security_token",
+  AUDIT_LOG = "audit_log",
 }
 
 /**
  * Data sensitivity levels
  */
 export enum DataSensitivityLevel {
-  PUBLIC = 'public',
-  INTERNAL = 'internal',
-  CONFIDENTIAL = 'confidential',
-  RESTRICTED = 'restricted',
-  TOP_SECRET = 'top_secret'
+  PUBLIC = "public",
+  INTERNAL = "internal",
+  CONFIDENTIAL = "confidential",
+  RESTRICTED = "restricted",
+  TOP_SECRET = "top_secret",
 }
 
 /**
@@ -239,11 +239,11 @@ export interface AuditOutcome {
  * Security impact levels
  */
 export enum SecurityImpactLevel {
-  NONE = 'none',
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  CRITICAL = 'critical'
+  NONE = "none",
+  LOW = "low",
+  MEDIUM = "medium",
+  HIGH = "high",
+  CRITICAL = "critical",
 }
 
 /**
@@ -405,25 +405,25 @@ export interface TechnicalContext {
  * Security classification
  */
 export enum SecurityClassification {
-  UNCLASSIFIED = 'unclassified',
-  INTERNAL = 'internal',
-  CONFIDENTIAL = 'confidential',
-  SECRET = 'secret',
-  TOP_SECRET = 'top_secret'
+  UNCLASSIFIED = "unclassified",
+  INTERNAL = "internal",
+  CONFIDENTIAL = "confidential",
+  SECRET = "secret",
+  TOP_SECRET = "top_secret",
 }
 
 /**
  * Compliance tags
  */
 export enum ComplianceTag {
-  GDPR = 'gdpr',
-  SOX = 'sox',
-  HIPAA = 'hipaa',
-  SOC2 = 'soc2',
-  ISO27001 = 'iso27001',
-  PCI_DSS = 'pci_dss',
-  CCPA = 'ccpa',
-  NIST = 'nist'
+  GDPR = "gdpr",
+  SOX = "sox",
+  HIPAA = "hipaa",
+  SOC2 = "soc2",
+  ISO27001 = "iso27001",
+  PCI_DSS = "pci_dss",
+  CCPA = "ccpa",
+  NIST = "nist",
 }
 
 /**
@@ -474,24 +474,24 @@ export interface ForensicInvestigation {
  * Investigation types
  */
 export enum InvestigationType {
-  SECURITY_INCIDENT = 'security_incident',
-  COMPLIANCE_AUDIT = 'compliance_audit',
-  FRAUD_INVESTIGATION = 'fraud_investigation',
-  DATA_BREACH = 'data_breach',
-  UNAUTHORIZED_ACCESS = 'unauthorized_access',
-  SYSTEM_COMPROMISE = 'system_compromise',
-  INSIDER_THREAT = 'insider_threat'
+  SECURITY_INCIDENT = "security_incident",
+  COMPLIANCE_AUDIT = "compliance_audit",
+  FRAUD_INVESTIGATION = "fraud_investigation",
+  DATA_BREACH = "data_breach",
+  UNAUTHORIZED_ACCESS = "unauthorized_access",
+  SYSTEM_COMPROMISE = "system_compromise",
+  INSIDER_THREAT = "insider_threat",
 }
 
 /**
  * Investigation status
  */
 export enum InvestigationStatus {
-  INITIATED = 'initiated',
-  IN_PROGRESS = 'in_progress',
-  SUSPENDED = 'suspended',
-  COMPLETED = 'completed',
-  CLOSED = 'closed'
+  INITIATED = "initiated",
+  IN_PROGRESS = "in_progress",
+  SUSPENDED = "suspended",
+  COMPLETED = "completed",
+  CLOSED = "closed",
 }
 
 /**
@@ -575,14 +575,14 @@ export interface ForensicEvidence {
  * Evidence types
  */
 export enum EvidenceType {
-  AUDIT_LOG = 'audit_log',
-  SYSTEM_LOG = 'system_log',
-  DATABASE_RECORD = 'database_record',
-  NETWORK_TRAFFIC = 'network_traffic',
-  FILE_SYSTEM = 'file_system',
-  MEMORY_DUMP = 'memory_dump',
-  SCREENSHOT = 'screenshot',
-  CONFIGURATION = 'configuration'
+  AUDIT_LOG = "audit_log",
+  SYSTEM_LOG = "system_log",
+  DATABASE_RECORD = "database_record",
+  NETWORK_TRAFFIC = "network_traffic",
+  FILE_SYSTEM = "file_system",
+  MEMORY_DUMP = "memory_dump",
+  SCREENSHOT = "screenshot",
+  CONFIGURATION = "configuration",
 }
 
 /**
@@ -609,11 +609,11 @@ export interface CustodyRecord {
  * Custody actions
  */
 export enum CustodyAction {
-  COLLECTED = 'collected',
-  TRANSFERRED = 'transferred',
-  ANALYZED = 'analyzed',
-  STORED = 'stored',
-  DESTROYED = 'destroyed'
+  COLLECTED = "collected",
+  TRANSFERRED = "transferred",
+  ANALYZED = "analyzed",
+  STORED = "stored",
+  DESTROYED = "destroyed",
 }
 
 /**
@@ -646,12 +646,12 @@ export interface InvestigationFinding {
  * Finding types
  */
 export enum FindingType {
-  POLICY_VIOLATION = 'policy_violation',
-  UNAUTHORIZED_ACCESS = 'unauthorized_access',
-  DATA_EXFILTRATION = 'data_exfiltration',
-  PRIVILEGE_ABUSE = 'privilege_abuse',
-  SYSTEM_COMPROMISE = 'system_compromise',
-  COMPLIANCE_VIOLATION = 'compliance_violation'
+  POLICY_VIOLATION = "policy_violation",
+  UNAUTHORIZED_ACCESS = "unauthorized_access",
+  DATA_EXFILTRATION = "data_exfiltration",
+  PRIVILEGE_ABUSE = "privilege_abuse",
+  SYSTEM_COMPROMISE = "system_compromise",
+  COMPLIANCE_VIOLATION = "compliance_violation",
 }
 
 /**
@@ -704,10 +704,10 @@ export interface TimelineEvent {
  * Confidence levels
  */
 export enum ConfidenceLevel {
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  CERTAIN = 'certain'
+  LOW = "low",
+  MEDIUM = "medium",
+  HIGH = "high",
+  CERTAIN = "certain",
 }
 
 /**
@@ -783,7 +783,7 @@ export class BypassAuditForensicsService {
   async logBypassOperation(
     operation: BypassOperationResult,
     actor: AuditActor,
-    token?: EmergencyBypassToken
+    token?: EmergencyBypassToken,
   ): Promise<string> {
     const auditEntry: BypassAuditEntry = {
       auditId: uuidv4(),
@@ -791,13 +791,13 @@ export class BypassAuditForensicsService {
       entryType: AuditEntryType.BYPASS_OPERATION,
       actor,
       action: {
-        name: 'bypass_operation_executed',
+        name: "bypass_operation_executed",
         category: ActionCategory.AUTHORIZATION,
         function: operation.functionName,
         parameters: {}, // Sanitized parameters
         duration: operation.performanceMetrics.duration,
         success: operation.success,
-        error: operation.error?.message
+        error: operation.error?.message,
       },
       resource: {
         id: operation.operationId,
@@ -805,30 +805,34 @@ export class BypassAuditForensicsService {
         name: operation.functionName,
         attributes: {
           tokenId: operation.tokenId,
-          operationType: this.extractOperationType(operation.functionName)
+          operationType: this.extractOperationType(operation.functionName),
         },
-        sensitivityLevel: this.determineSensitivityLevel(operation.functionName)
+        sensitivityLevel: this.determineSensitivityLevel(
+          operation.functionName,
+        ),
       },
       outcome: {
         success: operation.success,
-        resultCode: operation.success ? 'SUCCESS' : 'FAILURE',
-        message: operation.success ? 'Operation completed successfully' : operation.error?.message || 'Operation failed',
+        resultCode: operation.success ? "SUCCESS" : "FAILURE",
+        message: operation.success
+          ? "Operation completed successfully"
+          : operation.error?.message || "Operation failed",
         dataReturned: !!operation.result,
         recordsAffected: 1,
-        securityImpact: this.assessSecurityImpact(operation)
+        securityImpact: this.assessSecurityImpact(operation),
       },
       details: {
         requestContext: {
           requestId: operation.operationId,
           headers: {},
           size: 0,
-          timestamp: operation.executedAt
+          timestamp: operation.executedAt,
         },
         responseContext: {
           statusCode: operation.success ? 200 : 500,
           headers: {},
           size: 0,
-          responseTime: operation.performanceMetrics.duration
+          responseTime: operation.performanceMetrics.duration,
         },
         performanceMetrics: {
           executionTime: operation.performanceMetrics.duration,
@@ -836,37 +840,41 @@ export class BypassAuditForensicsService {
           networkTime: operation.performanceMetrics.networkLatency,
           cpuUsage: 0,
           memoryUsage: 0,
-          ioOperations: 1
+          ioOperations: 1,
         },
         securityContext: {
-          authorizationLevel: token?.authorizationLevel || BypassAuthorizationLevel.SYSTEM_CRITICAL,
+          authorizationLevel:
+            token?.authorizationLevel ||
+            BypassAuthorizationLevel.SYSTEM_CRITICAL,
           tokenId: operation.tokenId,
           riskScore: operation.securityValidation.riskScore,
-          securityFlags: operation.securityValidation.violations.map(v => v.type),
+          securityFlags: operation.securityValidation.violations.map(
+            (v) => v.type,
+          ),
           threatIndicators: [],
-          complianceViolations: []
+          complianceViolations: [],
         },
         businessContext: {
-          businessProcess: 'emergency_bypass',
-          businessImpact: 'operational_continuity'
+          businessProcess: "emergency_bypass",
+          businessImpact: "operational_continuity",
         },
         technicalContext: {
-          systemVersion: '1.0.0',
-          environment: process.env.NODE_ENV || 'development',
-          region: 'us-east-1',
-          serviceInstance: 'bypass-service-1',
-          technologyStack: ['nodejs', 'typescript', 'nestjs'],
-          dependencies: ['parlant-service', 'database']
-        }
+          systemVersion: "1.0.0",
+          environment: process.env.NODE_ENV || "development",
+          region: "us-east-1",
+          serviceInstance: "bypass-service-1",
+          technologyStack: ["nodejs", "typescript", "nestjs"],
+          dependencies: ["parlant-service", "database"],
+        },
       },
       classification: SecurityClassification.CONFIDENTIAL,
       complianceTags: [
         ComplianceTag.SOX,
         ComplianceTag.SOC2,
-        ComplianceTag.ISO27001
+        ComplianceTag.ISO27001,
       ],
-      signature: '',
-      entryHash: ''
+      signature: "",
+      entryHash: "",
     };
 
     // Generate signature and hash
@@ -878,7 +886,9 @@ export class BypassAuditForensicsService {
     this.auditEntries.set(auditEntry.auditId, auditEntry);
     this.updateChainHash(auditEntry.entryHash);
 
-    this.logger.log(`Audit entry created: ${auditEntry.auditId} for operation ${operation.operationId}`);
+    this.logger.log(
+      `Audit entry created: ${auditEntry.auditId} for operation ${operation.operationId}`,
+    );
 
     return auditEntry.auditId;
   }
@@ -888,7 +898,7 @@ export class BypassAuditForensicsService {
    */
   async logTokenCreation(
     token: EmergencyBypassToken,
-    actor: AuditActor
+    actor: AuditActor,
   ): Promise<string> {
     const auditEntry: BypassAuditEntry = {
       auditId: uuidv4(),
@@ -896,35 +906,37 @@ export class BypassAuditForensicsService {
       entryType: AuditEntryType.TOKEN_CREATION,
       actor,
       action: {
-        name: 'emergency_token_created',
+        name: "emergency_token_created",
         category: ActionCategory.AUTHENTICATION,
-        function: 'createEmergencyToken',
+        function: "createEmergencyToken",
         parameters: {
           authorizationLevel: token.authorizationLevel,
           allowedOperations: token.allowedOperations,
           maxOperations: token.maxOperations,
-          durationMinutes: Math.round((token.expiresAt.getTime() - token.createdAt.getTime()) / 60000)
+          durationMinutes: Math.round(
+            (token.expiresAt.getTime() - token.createdAt.getTime()) / 60000,
+          ),
         },
         duration: 0,
-        success: true
+        success: true,
       },
       resource: {
         id: token.tokenId,
         type: ResourceType.SECURITY_TOKEN,
-        name: 'emergency_bypass_token',
+        name: "emergency_bypass_token",
         attributes: {
           authorizationLevel: token.authorizationLevel,
-          allowedOperations: token.allowedOperations
+          allowedOperations: token.allowedOperations,
         },
-        sensitivityLevel: DataSensitivityLevel.RESTRICTED
+        sensitivityLevel: DataSensitivityLevel.RESTRICTED,
       },
       outcome: {
         success: true,
-        resultCode: 'TOKEN_CREATED',
-        message: 'Emergency bypass token created successfully',
+        resultCode: "TOKEN_CREATED",
+        message: "Emergency bypass token created successfully",
         dataReturned: true,
         recordsAffected: 1,
-        securityImpact: SecurityImpactLevel.HIGH
+        securityImpact: SecurityImpactLevel.HIGH,
       },
       details: this.createBasicDetails(token.tokenId),
       classification: SecurityClassification.SECRET,
@@ -932,10 +944,10 @@ export class BypassAuditForensicsService {
         ComplianceTag.SOX,
         ComplianceTag.SOC2,
         ComplianceTag.ISO27001,
-        ComplianceTag.GDPR
+        ComplianceTag.GDPR,
       ],
-      signature: '',
-      entryHash: ''
+      signature: "",
+      entryHash: "",
     };
 
     // Generate signature and hash
@@ -947,7 +959,9 @@ export class BypassAuditForensicsService {
     this.auditEntries.set(auditEntry.auditId, auditEntry);
     this.updateChainHash(auditEntry.entryHash);
 
-    this.logger.warn(`Token creation audit entry: ${auditEntry.auditId} for token ${token.tokenId}`);
+    this.logger.warn(
+      `Token creation audit entry: ${auditEntry.auditId} for token ${token.tokenId}`,
+    );
 
     return auditEntry.auditId;
   }
@@ -958,7 +972,7 @@ export class BypassAuditForensicsService {
   async logSecurityViolation(
     violation: SecurityViolation,
     actor: AuditActor,
-    context: any
+    context: any,
   ): Promise<string> {
     const auditEntry: BypassAuditEntry = {
       auditId: uuidv4(),
@@ -966,52 +980,52 @@ export class BypassAuditForensicsService {
       entryType: AuditEntryType.SECURITY_VIOLATION,
       actor,
       action: {
-        name: 'security_violation_detected',
+        name: "security_violation_detected",
         category: ActionCategory.SECURITY,
-        function: 'detectSecurityViolation',
+        function: "detectSecurityViolation",
         parameters: {
           violationType: violation.type,
-          severity: violation.severity
+          severity: violation.severity,
         },
         duration: 0,
-        success: true
+        success: true,
       },
       resource: {
         id: uuidv4(),
         type: ResourceType.SYSTEM_FUNCTION,
-        name: 'security_monitoring',
+        name: "security_monitoring",
         attributes: {
           violationType: violation.type,
-          severity: violation.severity
+          severity: violation.severity,
         },
-        sensitivityLevel: DataSensitivityLevel.RESTRICTED
+        sensitivityLevel: DataSensitivityLevel.RESTRICTED,
       },
       outcome: {
         success: true,
-        resultCode: 'VIOLATION_DETECTED',
+        resultCode: "VIOLATION_DETECTED",
         message: violation.description,
         dataReturned: false,
         recordsAffected: 0,
-        securityImpact: this.mapSeverityToImpact(violation.severity)
+        securityImpact: this.mapSeverityToImpact(violation.severity),
       },
       details: {
-        ...this.createBasicDetails('security_violation'),
+        ...this.createBasicDetails("security_violation"),
         securityContext: {
           authorizationLevel: BypassAuthorizationLevel.SYSTEM_CRITICAL,
           riskScore: 100,
           securityFlags: [violation.type],
           threatIndicators: [violation.type],
-          complianceViolations: [violation.type]
-        }
+          complianceViolations: [violation.type],
+        },
       },
       classification: SecurityClassification.SECRET,
       complianceTags: [
         ComplianceTag.SOX,
         ComplianceTag.SOC2,
-        ComplianceTag.ISO27001
+        ComplianceTag.ISO27001,
       ],
-      signature: '',
-      entryHash: ''
+      signature: "",
+      entryHash: "",
     };
 
     // Generate signature and hash
@@ -1023,7 +1037,9 @@ export class BypassAuditForensicsService {
     this.auditEntries.set(auditEntry.auditId, auditEntry);
     this.updateChainHash(auditEntry.entryHash);
 
-    this.logger.error(`Security violation audit entry: ${auditEntry.auditId} - ${violation.type}`);
+    this.logger.error(
+      `Security violation audit entry: ${auditEntry.auditId} - ${violation.type}`,
+    );
 
     return auditEntry.auditId;
   }
@@ -1035,7 +1051,7 @@ export class BypassAuditForensicsService {
     title: string,
     type: InvestigationType,
     investigator: string,
-    scope: InvestigationScope
+    scope: InvestigationScope,
   ): Promise<string> {
     const investigationId = uuidv4();
 
@@ -1050,12 +1066,14 @@ export class BypassAuditForensicsService {
       evidence: [],
       findings: [],
       timeline: [],
-      recommendations: []
+      recommendations: [],
     };
 
     this.investigations.set(investigationId, investigation);
 
-    this.logger.warn(`Forensic investigation started: ${investigationId} - ${title}`);
+    this.logger.warn(
+      `Forensic investigation started: ${investigationId} - ${title}`,
+    );
 
     return investigationId;
   }
@@ -1067,11 +1085,11 @@ export class BypassAuditForensicsService {
     investigationId: string,
     evidenceType: EvidenceType,
     source: string,
-    data: any
+    data: any,
   ): Promise<string> {
     const investigation = this.investigations.get(investigationId);
     if (!investigation) {
-      throw new Error('Investigation not found');
+      throw new Error("Investigation not found");
     }
 
     const evidenceId = uuidv4();
@@ -1081,21 +1099,25 @@ export class BypassAuditForensicsService {
       source,
       collectedAt: new Date(),
       data,
-      chainOfCustody: [{
-        custodian: investigation.investigator,
-        timestamp: new Date(),
-        action: CustodyAction.COLLECTED,
-        reason: 'Evidence collection for investigation',
-        signature: this.generateEvidenceSignature(evidenceId, data)
-      }],
+      chainOfCustody: [
+        {
+          custodian: investigation.investigator,
+          timestamp: new Date(),
+          action: CustodyAction.COLLECTED,
+          reason: "Evidence collection for investigation",
+          signature: this.generateEvidenceSignature(evidenceId, data),
+        },
+      ],
       integrityHash: this.generateIntegrityHash(data),
-      classification: SecurityClassification.CONFIDENTIAL
+      classification: SecurityClassification.CONFIDENTIAL,
     };
 
     investigation.evidence.push(evidence);
     this.investigations.set(investigationId, investigation);
 
-    this.logger.log(`Evidence collected: ${evidenceId} for investigation ${investigationId}`);
+    this.logger.log(
+      `Evidence collected: ${evidenceId} for investigation ${investigationId}`,
+    );
 
     return evidenceId;
   }
@@ -1103,32 +1125,40 @@ export class BypassAuditForensicsService {
   /**
    * Query audit entries
    */
-  async queryAuditEntries(criteria: AuditQueryCriteria): Promise<BypassAuditEntry[]> {
+  async queryAuditEntries(
+    criteria: AuditQueryCriteria,
+  ): Promise<BypassAuditEntry[]> {
     let entries = Array.from(this.auditEntries.values());
 
     // Apply filters
     if (criteria.startTime) {
-      entries = entries.filter(e => e.timestamp >= criteria.startTime!);
+      entries = entries.filter((e) => e.timestamp >= criteria.startTime!);
     }
 
     if (criteria.endTime) {
-      entries = entries.filter(e => e.timestamp <= criteria.endTime!);
+      entries = entries.filter((e) => e.timestamp <= criteria.endTime!);
     }
 
     if (criteria.entryTypes?.length) {
-      entries = entries.filter(e => criteria.entryTypes!.includes(e.entryType));
+      entries = entries.filter((e) =>
+        criteria.entryTypes!.includes(e.entryType),
+      );
     }
 
     if (criteria.actors?.length) {
-      entries = entries.filter(e => criteria.actors!.includes(e.actor.id));
+      entries = entries.filter((e) => criteria.actors!.includes(e.actor.id));
     }
 
     if (criteria.functions?.length) {
-      entries = entries.filter(e => criteria.functions!.includes(e.action.function));
+      entries = entries.filter((e) =>
+        criteria.functions!.includes(e.action.function),
+      );
     }
 
     if (criteria.successOnly !== undefined) {
-      entries = entries.filter(e => e.outcome.success === criteria.successOnly);
+      entries = entries.filter(
+        (e) => e.outcome.success === criteria.successOnly,
+      );
     }
 
     // Sort by timestamp
@@ -1146,8 +1176,9 @@ export class BypassAuditForensicsService {
    * Verify audit trail integrity
    */
   async verifyAuditIntegrity(): Promise<IntegrityVerificationResult> {
-    const entries = Array.from(this.auditEntries.values())
-      .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+    const entries = Array.from(this.auditEntries.values()).sort(
+      (a, b) => a.timestamp.getTime() - b.timestamp.getTime(),
+    );
 
     const results: IntegrityCheck[] = [];
     let previousHash: string | undefined;
@@ -1158,14 +1189,16 @@ export class BypassAuditForensicsService {
         signatureValid: this.verifySignature(entry),
         hashValid: this.verifyEntryHash(entry),
         chainValid: this.verifyChainHash(entry, previousHash),
-        timestamp: entry.timestamp
+        timestamp: entry.timestamp,
       };
 
       results.push(check);
       previousHash = entry.entryHash;
     }
 
-    const invalidChecks = results.filter(r => !r.signatureValid || !r.hashValid || !r.chainValid);
+    const invalidChecks = results.filter(
+      (r) => !r.signatureValid || !r.hashValid || !r.chainValid,
+    );
 
     return {
       totalEntries: results.length,
@@ -1173,7 +1206,7 @@ export class BypassAuditForensicsService {
       invalidEntries: invalidChecks.length,
       integrityScore: (results.length - invalidChecks.length) / results.length,
       checks: results,
-      tamperedEntries: invalidChecks.map(c => c.auditId)
+      tamperedEntries: invalidChecks.map((c) => c.auditId),
     };
   }
 
@@ -1182,15 +1215,15 @@ export class BypassAuditForensicsService {
    */
   async generateComplianceReport(
     complianceFramework: ComplianceTag,
-    timeRange: TimeRange
+    timeRange: TimeRange,
   ): Promise<ComplianceReport> {
     const entries = await this.queryAuditEntries({
       startTime: timeRange.startTime,
-      endTime: timeRange.endTime
+      endTime: timeRange.endTime,
     });
 
-    const relevantEntries = entries.filter(e =>
-      e.complianceTags.includes(complianceFramework)
+    const relevantEntries = entries.filter((e) =>
+      e.complianceTags.includes(complianceFramework),
     );
 
     return {
@@ -1200,9 +1233,14 @@ export class BypassAuditForensicsService {
       generatedAt: new Date(),
       totalEntries: relevantEntries.length,
       entriesByType: this.groupEntriesByType(relevantEntries),
-      securityViolations: relevantEntries.filter(e => e.entryType === AuditEntryType.SECURITY_VIOLATION).length,
+      securityViolations: relevantEntries.filter(
+        (e) => e.entryType === AuditEntryType.SECURITY_VIOLATION,
+      ).length,
       integrityVerification: await this.verifyAuditIntegrity(),
-      recommendations: this.generateComplianceRecommendations(complianceFramework, relevantEntries)
+      recommendations: this.generateComplianceRecommendations(
+        complianceFramework,
+        relevantEntries,
+      ),
     };
   }
 
@@ -1211,12 +1249,12 @@ export class BypassAuditForensicsService {
   // =============================================================================
 
   private initializeAuditSystem(): void {
-    this.logger.warn('Audit and forensics system initialized');
+    this.logger.warn("Audit and forensics system initialized");
   }
 
   private generateSecretKey(): string {
     // In production, this should be loaded from secure configuration
-    return 'default-audit-secret-key-change-in-production';
+    return "default-audit-secret-key-change-in-production";
   }
 
   private generateSignature(entry: BypassAuditEntry): string {
@@ -1225,29 +1263,32 @@ export class BypassAuditForensicsService {
       timestamp: entry.timestamp,
       actor: entry.actor.id,
       action: entry.action.name,
-      resource: entry.resource.id
+      resource: entry.resource.id,
     });
 
-    return createHmac('sha256', this.secretKey).update(data).digest('hex');
+    return createHmac("sha256", this.secretKey).update(data).digest("hex");
   }
 
   private generateEntryHash(entry: BypassAuditEntry): string {
     const data = JSON.stringify(entry, null, 0);
-    return createHash('sha256').update(data).digest('hex');
+    return createHash("sha256").update(data).digest("hex");
   }
 
   private generateEvidenceSignature(evidenceId: string, data: any): string {
     const signatureData = `${evidenceId}:${JSON.stringify(data)}`;
-    return createHmac('sha256', this.secretKey).update(signatureData).digest('hex');
+    return createHmac("sha256", this.secretKey)
+      .update(signatureData)
+      .digest("hex");
   }
 
   private generateIntegrityHash(data: any): string {
-    return createHash('sha256').update(JSON.stringify(data)).digest('hex');
+    return createHash("sha256").update(JSON.stringify(data)).digest("hex");
   }
 
   private getLastChainHash(): string | undefined {
-    const entries = Array.from(this.auditEntries.values())
-      .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+    const entries = Array.from(this.auditEntries.values()).sort(
+      (a, b) => b.timestamp.getTime() - a.timestamp.getTime(),
+    );
 
     return entries.length > 0 ? entries[0].entryHash : undefined;
   }
@@ -1264,11 +1305,16 @@ export class BypassAuditForensicsService {
   private verifyEntryHash(entry: BypassAuditEntry): boolean {
     // Use destructuring to exclude entryHash instead of delete operator
     const { entryHash: _, ...entryWithoutHash } = entry;
-    const expectedHash = createHash('sha256').update(JSON.stringify(entryWithoutHash)).digest('hex');
+    const expectedHash = createHash("sha256")
+      .update(JSON.stringify(entryWithoutHash))
+      .digest("hex");
     return entry.entryHash === expectedHash;
   }
 
-  private verifyChainHash(entry: BypassAuditEntry, expectedPreviousHash?: string): boolean {
+  private verifyChainHash(
+    entry: BypassAuditEntry,
+    expectedPreviousHash?: string,
+  ): boolean {
     if (!expectedPreviousHash && !entry.previousHash) {
       return true; // First entry
     }
@@ -1277,30 +1323,37 @@ export class BypassAuditForensicsService {
   }
 
   private extractOperationType(functionName: string): BypassOperationType {
-    if (functionName.includes('database') || functionName.includes('db')) {
+    if (functionName.includes("database") || functionName.includes("db")) {
       return BypassOperationType.DATABASE_CRITICAL;
-    } else if (functionName.includes('auth')) {
+    } else if (functionName.includes("auth")) {
       return BypassOperationType.AUTH_CRITICAL;
-    } else if (functionName.includes('config')) {
+    } else if (functionName.includes("config")) {
       return BypassOperationType.CONFIG_CRITICAL;
     } else {
       return BypassOperationType.MAINTENANCE;
     }
   }
 
-  private determineSensitivityLevel(functionName: string): DataSensitivityLevel {
-    if (functionName.includes('secret') || functionName.includes('private')) {
+  private determineSensitivityLevel(
+    functionName: string,
+  ): DataSensitivityLevel {
+    if (functionName.includes("secret") || functionName.includes("private")) {
       return DataSensitivityLevel.TOP_SECRET;
-    } else if (functionName.includes('auth') || functionName.includes('security')) {
+    } else if (
+      functionName.includes("auth") ||
+      functionName.includes("security")
+    ) {
       return DataSensitivityLevel.RESTRICTED;
-    } else if (functionName.includes('config')) {
+    } else if (functionName.includes("config")) {
       return DataSensitivityLevel.CONFIDENTIAL;
     } else {
       return DataSensitivityLevel.INTERNAL;
     }
   }
 
-  private assessSecurityImpact(operation: BypassOperationResult): SecurityImpactLevel {
+  private assessSecurityImpact(
+    operation: BypassOperationResult,
+  ): SecurityImpactLevel {
     if (operation.securityValidation.riskScore > 90) {
       return SecurityImpactLevel.CRITICAL;
     } else if (operation.securityValidation.riskScore > 70) {
@@ -1314,7 +1367,9 @@ export class BypassAuditForensicsService {
     }
   }
 
-  private mapSeverityToImpact(severity: ViolationSeverity): SecurityImpactLevel {
+  private mapSeverityToImpact(
+    severity: ViolationSeverity,
+  ): SecurityImpactLevel {
     switch (severity) {
       case ViolationSeverity.CRITICAL:
         return SecurityImpactLevel.CRITICAL;
@@ -1335,13 +1390,13 @@ export class BypassAuditForensicsService {
         requestId: uuidv4(),
         headers: {},
         size: 0,
-        timestamp: new Date()
+        timestamp: new Date(),
       },
       responseContext: {
         statusCode: 200,
         headers: {},
         size: 0,
-        responseTime: 0
+        responseTime: 0,
       },
       performanceMetrics: {
         executionTime: 0,
@@ -1349,32 +1404,37 @@ export class BypassAuditForensicsService {
         networkTime: 0,
         cpuUsage: 0,
         memoryUsage: 0,
-        ioOperations: 0
+        ioOperations: 0,
       },
       securityContext: {
         authorizationLevel: BypassAuthorizationLevel.SYSTEM_CRITICAL,
         riskScore: 50,
         securityFlags: [],
         threatIndicators: [],
-        complianceViolations: []
+        complianceViolations: [],
       },
       businessContext: {
-        businessProcess: 'emergency_bypass',
-        businessImpact: 'operational_continuity'
+        businessProcess: "emergency_bypass",
+        businessImpact: "operational_continuity",
       },
       technicalContext: {
-        systemVersion: '1.0.0',
-        environment: process.env.NODE_ENV || 'development',
-        region: 'us-east-1',
-        serviceInstance: 'bypass-service-1',
-        technologyStack: ['nodejs', 'typescript', 'nestjs'],
-        dependencies: ['parlant-service', 'database']
-      }
+        systemVersion: "1.0.0",
+        environment: process.env.NODE_ENV || "development",
+        region: "us-east-1",
+        serviceInstance: "bypass-service-1",
+        technologyStack: ["nodejs", "typescript", "nestjs"],
+        dependencies: ["parlant-service", "database"],
+      },
     };
   }
 
-  private groupEntriesByType(entries: BypassAuditEntry[]): Record<AuditEntryType, number> {
-    const groups: Record<AuditEntryType, number> = {} as Record<AuditEntryType, number>;
+  private groupEntriesByType(
+    entries: BypassAuditEntry[],
+  ): Record<AuditEntryType, number> {
+    const groups: Record<AuditEntryType, number> = {} as Record<
+      AuditEntryType,
+      number
+    >;
 
     for (const entry of entries) {
       groups[entry.entryType] = (groups[entry.entryType] || 0) + 1;
@@ -1385,27 +1445,31 @@ export class BypassAuditForensicsService {
 
   private generateComplianceRecommendations(
     framework: ComplianceTag,
-    entries: BypassAuditEntry[]
+    entries: BypassAuditEntry[],
   ): string[] {
     const recommendations: string[] = [];
 
     // Generic recommendations based on framework
     switch (framework) {
       case ComplianceTag.SOX:
-        recommendations.push('Ensure all financial data access is properly documented');
-        recommendations.push('Implement quarterly access reviews');
+        recommendations.push(
+          "Ensure all financial data access is properly documented",
+        );
+        recommendations.push("Implement quarterly access reviews");
         break;
       case ComplianceTag.GDPR:
-        recommendations.push('Verify data subject consent for all personal data processing');
-        recommendations.push('Implement data retention policies');
+        recommendations.push(
+          "Verify data subject consent for all personal data processing",
+        );
+        recommendations.push("Implement data retention policies");
         break;
       case ComplianceTag.HIPAA:
-        recommendations.push('Ensure PHI access is properly authorized');
-        recommendations.push('Implement minimum necessary access controls');
+        recommendations.push("Ensure PHI access is properly authorized");
+        recommendations.push("Implement minimum necessary access controls");
         break;
       default:
-        recommendations.push('Review access patterns for anomalies');
-        recommendations.push('Implement regular audit reviews');
+        recommendations.push("Review access patterns for anomalies");
+        recommendations.push("Implement regular audit reviews");
     }
 
     return recommendations;

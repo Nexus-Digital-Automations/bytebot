@@ -17,13 +17,19 @@
  * @created 2025-09-21
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { EventEmitter } from 'events';
-import { performance } from 'perf_hooks';
-import { Worker, isMainThread, parentPort, workerData, MessageChannel } from 'worker_threads';
-import { cpus } from 'os';
-import { promisify } from 'util';
-import * as path from 'path';
+import { Injectable, Logger } from "@nestjs/common";
+import { EventEmitter } from "events";
+import { performance } from "perf_hooks";
+import {
+  Worker,
+  isMainThread,
+  parentPort,
+  workerData,
+  MessageChannel,
+} from "worker_threads";
+import { cpus } from "os";
+import { promisify } from "util";
+import * as path from "path";
 
 // Type guards
 function isError(error: unknown): error is Error {
@@ -32,8 +38,8 @@ function isError(error: unknown): error is Error {
 
 function getErrorMessage(error: unknown): string {
   if (isError(error)) return error.message;
-  if (typeof error === 'string') return error;
-  return 'An unknown error occurred';
+  if (typeof error === "string") return error;
+  return "An unknown error occurred";
 }
 
 /**
@@ -211,7 +217,7 @@ class PipelineWorker {
   constructor(
     private readonly workerId: string,
     private readonly workerScript: string,
-    private readonly eventEmitter: EventEmitter
+    private readonly eventEmitter: EventEmitter,
   ) {
     this.metrics = {
       workerId,
@@ -222,28 +228,32 @@ class PipelineWorker {
       isActive: false,
       lastActivity: new Date(),
       errors: 0,
-      successRate: 1.0
+      successRate: 1.0,
     };
   }
 
   async initialize(): Promise<void> {
     try {
       this.worker = new Worker(this.workerScript, {
-        workerData: { workerId: this.workerId }
+        workerData: { workerId: this.workerId },
       });
 
       this.setupWorkerEventListeners();
       this.logger.debug(`Worker ${this.workerId} initialized`);
-
     } catch (error) {
-      this.logger.error(`Failed to initialize worker ${this.workerId}: ${getErrorMessage(error)}`);
+      this.logger.error(
+        `Failed to initialize worker ${this.workerId}: ${getErrorMessage(error)}`,
+      );
       throw error;
     }
   }
 
-  async executeTask<T, R>(task: PipelineTask<T>, stageName: string): Promise<StageResult<R>> {
+  async executeTask<T, R>(
+    task: PipelineTask<T>,
+    stageName: string,
+  ): Promise<StageResult<R>> {
     if (!this.worker) {
-      throw new Error('Worker not initialized');
+      throw new Error("Worker not initialized");
     }
 
     const startTime = performance.now();
@@ -253,7 +263,7 @@ class PipelineWorker {
     return new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {
         this.logger.error(`Task timeout for ${task.id} in stage ${stageName}`);
-        reject(new Error('Task execution timeout'));
+        reject(new Error("Task execution timeout"));
       }, task.timeout);
 
       const messageHandler = (result: any) => {
@@ -276,22 +286,22 @@ class PipelineWorker {
             metadata: {
               memoryUsed: result.memoryUsed || 0,
               cpuTime: processingTime,
-              queueTime: startTime - task.timestamp.getTime()
-            }
+              queueTime: startTime - task.timestamp.getTime(),
+            },
           });
         }
       };
 
-      this.worker!.once('message', messageHandler);
+      this.worker!.once("message", messageHandler);
 
       this.worker!.postMessage({
-        type: 'execute',
+        type: "execute",
         task: {
           id: task.id,
           data: task.data,
           stageName,
-          metadata: task.metadata
-        }
+          metadata: task.metadata,
+        },
       });
     });
   }
@@ -319,19 +329,22 @@ class PipelineWorker {
   private setupWorkerEventListeners(): void {
     if (!this.worker) return;
 
-    this.worker.on('error', (error) => {
+    this.worker.on("error", (error) => {
       this.logger.error(`Worker ${this.workerId} error: ${error.message}`);
-      this.eventEmitter.emit('worker-error', { workerId: this.workerId, error });
+      this.eventEmitter.emit("worker-error", {
+        workerId: this.workerId,
+        error,
+      });
       this.metrics.errors++;
     });
 
-    this.worker.on('exit', (code) => {
+    this.worker.on("exit", (code) => {
       this.logger.warn(`Worker ${this.workerId} exited with code ${code}`);
-      this.eventEmitter.emit('worker-exit', { workerId: this.workerId, code });
+      this.eventEmitter.emit("worker-exit", { workerId: this.workerId, code });
     });
 
-    this.worker.on('message', (message) => {
-      if (message.type === 'metrics') {
+    this.worker.on("message", (message) => {
+      if (message.type === "metrics") {
         this.metrics.memoryUsage = message.memoryUsage;
         this.metrics.cpuUsage = message.cpuUsage;
       }
@@ -348,7 +361,8 @@ class PipelineWorker {
     }
 
     this.metrics.successRate =
-      (this.metrics.tasksProcessed - this.metrics.errors) / this.metrics.tasksProcessed;
+      (this.metrics.tasksProcessed - this.metrics.errors) /
+      this.metrics.tasksProcessed;
     this.metrics.lastActivity = new Date();
   }
 }
@@ -364,7 +378,7 @@ class PipelineStage {
   constructor(
     private readonly config: PipelineStageConfig,
     private readonly workerScript: string,
-    private readonly eventEmitter: EventEmitter
+    private readonly eventEmitter: EventEmitter,
   ) {
     this.metrics = {
       stageName: config.name,
@@ -372,7 +386,7 @@ class PipelineStage {
       averageProcessingTime: 0,
       errorRate: 0,
       throughput: 0,
-      parallelism: config.parallelism
+      parallelism: config.parallelism,
     };
   }
 
@@ -380,19 +394,25 @@ class PipelineStage {
     // Create workers for this stage
     for (let i = 0; i < this.config.parallelism; i++) {
       const workerId = `${this.config.name}-worker-${i}`;
-      const worker = new PipelineWorker(workerId, this.workerScript, this.eventEmitter);
+      const worker = new PipelineWorker(
+        workerId,
+        this.workerScript,
+        this.eventEmitter,
+      );
       await worker.initialize();
       this.workers.push(worker);
     }
 
-    this.logger.log(`Stage ${this.config.name} initialized with ${this.config.parallelism} workers`);
+    this.logger.log(
+      `Stage ${this.config.name} initialized with ${this.config.parallelism} workers`,
+    );
   }
 
   async processTask<T, R>(task: PipelineTask<T>): Promise<StageResult<R>> {
     const startTime = performance.now();
 
     // Find available worker
-    const worker = this.workers.find(w => w.isAvailable());
+    const worker = this.workers.find((w) => w.isAvailable());
     if (!worker) {
       throw new Error(`No available workers for stage ${this.config.name}`);
     }
@@ -404,7 +424,6 @@ class PipelineStage {
       this.updateMetrics(result.processingTime, true);
 
       return result;
-
     } catch (error) {
       const processingTime = performance.now() - startTime;
       this.updateMetrics(processingTime, false);
@@ -420,7 +439,7 @@ class PipelineStage {
   }
 
   getAvailableWorkerCount(): number {
-    return this.workers.filter(w => w.isAvailable()).length;
+    return this.workers.filter((w) => w.isAvailable()).length;
   }
 
   getMetrics(): StageMetrics {
@@ -434,10 +453,12 @@ class PipelineStage {
 
     if (!success) {
       this.metrics.errorRate =
-        (this.metrics.errorRate * (this.metrics.tasksProcessed - 1) + 1) / this.metrics.tasksProcessed;
+        (this.metrics.errorRate * (this.metrics.tasksProcessed - 1) + 1) /
+        this.metrics.tasksProcessed;
     } else {
       this.metrics.errorRate =
-        (this.metrics.errorRate * (this.metrics.tasksProcessed - 1)) / this.metrics.tasksProcessed;
+        (this.metrics.errorRate * (this.metrics.tasksProcessed - 1)) /
+        this.metrics.tasksProcessed;
     }
 
     // Calculate throughput (tasks per second)
@@ -474,7 +495,7 @@ export class AsyncPipelineProcessor {
   private readonly workerManager: WorkerManager;
 
   constructor(config: Partial<PipelineConfig> = {}) {
-    this.logger.log('Initializing Asynchronous Pipeline Processor');
+    this.logger.log("Initializing Asynchronous Pipeline Processor");
 
     this.config = {
       maxWorkers: cpus().length * 2,
@@ -486,29 +507,29 @@ export class AsyncPipelineProcessor {
         maxRetries: 3,
         retryDelay: 1000,
         exponentialBackoff: true,
-        retryableErrors: ['TIMEOUT', 'WORKER_ERROR', 'PROCESSING_ERROR'],
+        retryableErrors: ["TIMEOUT", "WORKER_ERROR", "PROCESSING_ERROR"],
         circuitBreaker: {
           enabled: true,
           failureThreshold: 5,
           recoveryTimeout: 30000,
-          halfOpenMaxCalls: 3
-        }
+          halfOpenMaxCalls: 3,
+        },
       },
       scalingPolicy: {
         autoScaling: true,
         scaleUpThreshold: 0.8,
         scaleDownThreshold: 0.3,
         scaleUpCooldown: 60000,
-        scaleDownCooldown: 120000
+        scaleDownCooldown: 120000,
       },
       monitoring: {
         metricsInterval: 10000,
         performanceAlerts: true,
         resourceTracking: true,
-        detailedLogging: false
+        detailedLogging: false,
       },
       stages: [],
-      ...config
+      ...config,
     };
 
     this.metrics = this.initializeMetrics();
@@ -526,7 +547,11 @@ export class AsyncPipelineProcessor {
     }
 
     const workerScript = this.createWorkerScript(stageConfig);
-    const stage = new PipelineStage(stageConfig, workerScript, this.eventEmitter);
+    const stage = new PipelineStage(
+      stageConfig,
+      workerScript,
+      this.eventEmitter,
+    );
 
     await stage.initialize();
 
@@ -547,7 +572,7 @@ export class AsyncPipelineProcessor {
       timeout?: number;
       metadata?: Record<string, any>;
       callback?: (result: PipelineResult<R>, error?: Error) => void;
-    } = {}
+    } = {},
   ): Promise<PipelineResult<R>> {
     const task: PipelineTask<T> = {
       id: `task-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -557,7 +582,7 @@ export class AsyncPipelineProcessor {
       timeout: options.timeout || this.config.taskTimeout,
       retries: 0,
       stage: this.stageOrder[0],
-      metadata: options.metadata || {}
+      metadata: options.metadata || {},
     };
 
     const startTime = performance.now();
@@ -577,9 +602,10 @@ export class AsyncPipelineProcessor {
           // Transform data for next stage
           task.data = stageResult.result as T;
           task.stage = stageName;
-
         } catch (stageError) {
-          error = isError(stageError) ? stageError : new Error(getErrorMessage(stageError));
+          error = isError(stageError)
+            ? stageError
+            : new Error(getErrorMessage(stageError));
           successful = false;
 
           if (this.shouldRetryTask(task)) {
@@ -599,10 +625,10 @@ export class AsyncPipelineProcessor {
         successful,
         error,
         stages: {
-          completed: results.map(r => r.stageName),
+          completed: results.map((r) => r.stageName),
           failed: error ? [task.stage] : [],
-          skipped: successful ? [] : this.stageOrder.slice(results.length + 1)
-        }
+          skipped: successful ? [] : this.stageOrder.slice(results.length + 1),
+        },
       };
 
       // Call callback if provided
@@ -614,19 +640,20 @@ export class AsyncPipelineProcessor {
       this.updateTaskMetrics(result);
 
       return result;
-
     } catch (pipelineError) {
       const result: PipelineResult<R> = {
         taskId: task.id,
         results,
         totalProcessingTime: performance.now() - startTime,
         successful: false,
-        error: isError(pipelineError) ? pipelineError : new Error(getErrorMessage(pipelineError)),
+        error: isError(pipelineError)
+          ? pipelineError
+          : new Error(getErrorMessage(pipelineError)),
         stages: {
-          completed: results.map(r => r.stageName),
+          completed: results.map((r) => r.stageName),
           failed: [task.stage],
-          skipped: this.stageOrder.slice(results.length + 1)
-        }
+          skipped: this.stageOrder.slice(results.length + 1),
+        },
       };
 
       if (options.callback) {
@@ -643,17 +670,17 @@ export class AsyncPipelineProcessor {
    */
   start(): void {
     if (this.isRunning) {
-      this.logger.warn('Pipeline processor is already running');
+      this.logger.warn("Pipeline processor is already running");
       return;
     }
 
     this.isRunning = true;
-    this.logger.log('Starting asynchronous pipeline processor');
+    this.logger.log("Starting asynchronous pipeline processor");
 
     this.startMetricsCollection();
     this.workerManager.start();
 
-    this.eventEmitter.emit('pipeline-started');
+    this.eventEmitter.emit("pipeline-started");
   }
 
   /**
@@ -661,12 +688,12 @@ export class AsyncPipelineProcessor {
    */
   async stop(): Promise<void> {
     if (!this.isRunning) {
-      this.logger.warn('Pipeline processor is not running');
+      this.logger.warn("Pipeline processor is not running");
       return;
     }
 
     this.isRunning = false;
-    this.logger.log('Stopping asynchronous pipeline processor');
+    this.logger.log("Stopping asynchronous pipeline processor");
 
     if (this.processingInterval) {
       clearInterval(this.processingInterval);
@@ -679,7 +706,7 @@ export class AsyncPipelineProcessor {
 
     await this.workerManager.stop();
 
-    this.eventEmitter.emit('pipeline-stopped');
+    this.eventEmitter.emit("pipeline-stopped");
   }
 
   /**
@@ -709,7 +736,7 @@ export class AsyncPipelineProcessor {
       workerUtilization: this.metrics.workerUtilization >= 0.95, // >95%
       responseTime: this.metrics.averageProcessingTime <= 200, // <200ms P50
       parallelEfficiency: true, // Implement parallel efficiency calculation
-      memoryOverhead: true // Implement memory overhead calculation
+      memoryOverhead: true, // Implement memory overhead calculation
     };
   }
 
@@ -720,13 +747,13 @@ export class AsyncPipelineProcessor {
 
   private async retryTask<T, R>(
     task: PipelineTask<T>,
-    options: any
+    options: any,
   ): Promise<PipelineResult<R>> {
     const delay = this.config.retryPolicy.exponentialBackoff
       ? this.config.retryPolicy.retryDelay * Math.pow(2, task.retries - 1)
       : this.config.retryPolicy.retryDelay;
 
-    await new Promise(resolve => setTimeout(resolve, delay));
+    await new Promise((resolve) => setTimeout(resolve, delay));
     return this.executeTask(task.data, options);
   }
 
@@ -754,7 +781,7 @@ export class AsyncPipelineProcessor {
 
     // Write to temporary file and return path
     // Implementation depends on specific requirements
-    return path.join(__dirname, 'workers', `${stageConfig.name}-worker.js`);
+    return path.join(__dirname, "workers", `${stageConfig.name}-worker.js`);
   }
 
   private updateTaskMetrics(result: PipelineResult): void {
@@ -791,16 +818,18 @@ export class AsyncPipelineProcessor {
       queueDepth: 0,
       errorRate: 0,
       stageMetrics: new Map(),
-      workerMetrics: new Map()
+      workerMetrics: new Map(),
     };
   }
 
   private setupEventListeners(): void {
-    this.eventEmitter.on('worker-error', (data) => {
-      this.logger.error(`Worker error: ${data.workerId} - ${data.error.message}`);
+    this.eventEmitter.on("worker-error", (data) => {
+      this.logger.error(
+        `Worker error: ${data.workerId} - ${data.error.message}`,
+      );
     });
 
-    this.eventEmitter.on('stage-completed', (data) => {
+    this.eventEmitter.on("stage-completed", (data) => {
       this.logger.debug(`Stage completed: ${data.stageName} - ${data.taskId}`);
     });
   }
@@ -808,7 +837,7 @@ export class AsyncPipelineProcessor {
   private startMetricsCollection(): void {
     this.processingInterval = setInterval(() => {
       const targets = this.validatePerformanceTargets();
-      this.logger.log('Pipeline Performance Status:', targets);
+      this.logger.log("Pipeline Performance Status:", targets);
     }, this.config.monitoring.metricsInterval);
   }
 }
@@ -822,7 +851,7 @@ class WorkerManager {
 
   constructor(
     private readonly config: PipelineConfig,
-    private readonly eventEmitter: EventEmitter
+    private readonly eventEmitter: EventEmitter,
   ) {}
 
   start(): void {
@@ -853,5 +882,5 @@ export {
   PipelineTask,
   PipelineResult,
   PipelineMetrics,
-  PipelineStageConfig
+  PipelineStageConfig,
 };

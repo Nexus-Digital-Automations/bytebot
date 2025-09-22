@@ -22,17 +22,17 @@ import {
   Controller,
   Get,
   Post,
-  Put,
-  Delete,
+  Put as _Put,
+  Delete as _Delete,
   Param,
   Body,
   Query,
-  UseGuards,
-  UseInterceptors,
+  UseGuards as _UseGuards,
+  UseInterceptors as _UseInterceptors,
   Logger,
   HttpStatus,
   HttpException,
-  HttpCode,
+  HttpCode as _HttpCode,
   Request,
 } from '@nestjs/common';
 
@@ -66,15 +66,15 @@ import {
   DataClassification,
   ComplianceFramework,
   DatabaseOperationContext,
-  TransactionContext,
-  PerformanceConstraints,
+  TransactionContext as _TransactionContext,
+  PerformanceConstraints as _PerformanceConstraints,
   QueryPriority,
   CachePolicy,
   TransactionIsolationLevel,
 } from '../../../bytebot-agent/src/database/parlant-database-validation-comprehensive.service';
 
 import {
-  SecurityLevel,
+  SecurityLevel as _SecurityLevel,
   ConversationalValidationError,
 } from '../../../shared/src/parlant/monitoring/parlant-integration.service';
 
@@ -328,13 +328,17 @@ export class ParlantComprehensiveDatabaseApiController {
       this.logger.error(`Query execution failed: ${operationId}`, error);
 
       if (error instanceof ConversationalValidationError) {
+        const validationData =
+          typeof error.toJSON === 'function'
+            ? error.toJSON()
+            : { message: error.message };
         throw new HttpException(
           {
             statusCode: HttpStatus.FORBIDDEN,
             message: error.message,
             operationId,
             timestamp: new Date(),
-            validationError: error.toJSON(),
+            validationError: validationData,
           },
           HttpStatus.FORBIDDEN,
         );
@@ -974,7 +978,7 @@ export class ParlantComprehensiveDatabaseApiController {
     status: 200,
     description: 'Health check completed successfully',
   })
-  getDatabaseHealth(@Request() req: AuthenticatedRequest): {
+  getDatabaseHealth(@Request() _req: AuthenticatedRequest): {
     database: 'healthy' | 'degraded' | 'unhealthy';
     parlantValidation: 'healthy' | 'degraded' | 'unhealthy';
     timestamp: Date;
@@ -1063,10 +1067,15 @@ export class ParlantComprehensiveDatabaseApiController {
   private assessInitialRiskLevel(
     operation: DatabaseOperationContext,
   ): RiskLevel {
-    if (operation.isDestructive) return RiskLevel._HIGH;
-    if (operation.securityClassification === DataClassification.RESTRICTED)
+    if (operation.isDestructive) {
       return RiskLevel._HIGH;
-    if (operation.estimatedRows > 50000) return RiskLevel._MODERATE;
+    }
+    if (operation.securityClassification === DataClassification.RESTRICTED) {
+      return RiskLevel._HIGH;
+    }
+    if (operation.estimatedRows > 50000) {
+      return RiskLevel._MODERATE;
+    }
     return RiskLevel._LOW;
   }
 
@@ -1151,15 +1160,13 @@ export class ParlantComprehensiveDatabaseApiController {
 
   private executeValidatedQuery(
     query: string,
-    validationResult: ParlantDatabaseValidationResponse,
+    _validationResult: ParlantDatabaseValidationResponse,
   ): {
     rows: Record<string, unknown>[];
     rowCount: number;
   } {
     // Mock query execution - in production, this would use actual database connection
-    this.logger.debug(
-      `Executing validated query with optimization: ${validationResult.optimizedQuery || query}`,
-    );
+    this.logger.debug(`Executing validated query with optimization: ${query}`);
 
     return {
       rows: [{ id: 1, name: 'Sample Data', timestamp: new Date() }],
@@ -1169,7 +1176,7 @@ export class ParlantComprehensiveDatabaseApiController {
 
   private executeValidatedModification(
     request: DataModificationRequest,
-    validationResult: ParlantDatabaseValidationResponse,
+    _validationResult: ParlantDatabaseValidationResponse,
   ): { rowsAffected: number } {
     // Mock modification execution - in production, this would use actual database connection
     this.logger.debug(
@@ -1183,7 +1190,7 @@ export class ParlantComprehensiveDatabaseApiController {
 
   private executeValidatedBulkOperations(
     request: BulkOperationRequest,
-    validationResults: ParlantDatabaseValidationResponse[],
+    _validationResults: ParlantDatabaseValidationResponse[],
   ): { totalRowsAffected: number } {
     // Mock bulk execution - in production, this would use actual database transaction
     this.logger.debug(
@@ -1200,7 +1207,7 @@ export class ParlantComprehensiveDatabaseApiController {
 
   private executeValidatedAdminOperation(
     request: DatabaseAdminRequest,
-    validationResult: ParlantDatabaseValidationResponse,
+    _validationResult: ParlantDatabaseValidationResponse,
   ): Record<string, unknown> {
     // Mock admin operation execution - in production, this would execute actual admin commands
     this.logger.debug(
@@ -1222,7 +1229,7 @@ export class ParlantComprehensiveDatabaseApiController {
       includeConstraints?: boolean;
       includeStatistics?: boolean;
     },
-    validationResult: ParlantDatabaseValidationResponse,
+    _validationResult: ParlantDatabaseValidationResponse,
   ): Record<string, unknown> {
     // Mock schema retrieval - in production, this would query information schema
     this.logger.debug(`Retrieving validated table schema: ${tableName}`);
@@ -1354,13 +1361,17 @@ export class ParlantComprehensiveDatabaseApiController {
     operationId: string,
   ): HttpException {
     if (error instanceof ConversationalValidationError) {
+      const validationData =
+        typeof error.toJSON === 'function'
+          ? error.toJSON()
+          : { message: error.message };
       return new HttpException(
         {
           statusCode: HttpStatus.FORBIDDEN,
           message: error.message,
           operationId,
           timestamp: new Date(),
-          validationError: error.toJSON(),
+          validationError: validationData,
         },
         HttpStatus.FORBIDDEN,
       );

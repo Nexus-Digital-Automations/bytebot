@@ -40,11 +40,11 @@ export type ParlantOperationId = `parlant-${string}-${string}-${string}`;
  * Enhanced security levels with hierarchical typing
  */
 export enum SecurityLevel {
-  _MINIMAL = 'MINIMAL',
-  _LOW = 'LOW',
-  _MEDIUM = 'MEDIUM',
-  _HIGH = 'HIGH',
-  _CRITICAL = 'CRITICAL',
+  _MINIMAL = "MINIMAL",
+  _LOW = "LOW",
+  _MEDIUM = "MEDIUM",
+  _HIGH = "HIGH",
+  _CRITICAL = "CRITICAL",
 }
 
 /**
@@ -67,33 +67,33 @@ export type IsValidSecurityLevel<T> = T extends SecurityLevel ? true : false;
  * Enhanced validation modes with strict typing
  */
 export enum ValidationMode {
-  _AUTOMATED = 'AUTOMATED',
-  _INTERACTIVE = 'INTERACTIVE',
-  _SYNCHRONOUS = 'SYNCHRONOUS',
-  _ASYNCHRONOUS = 'ASYNCHRONOUS',
-  _BATCH = 'BATCH',
+  _AUTOMATED = "AUTOMATED",
+  _INTERACTIVE = "INTERACTIVE",
+  _SYNCHRONOUS = "SYNCHRONOUS",
+  _ASYNCHRONOUS = "ASYNCHRONOUS",
+  _BATCH = "BATCH",
 }
 
 /**
  * Enhanced approval levels
  */
 export enum ApprovalLevel {
-  _AUTOMATIC = 'AUTOMATIC',
-  _SINGLE_APPROVAL = 'SINGLE_APPROVAL',
-  _DUAL_APPROVAL = 'DUAL_APPROVAL',
-  _COMMITTEE_APPROVAL = 'COMMITTEE_APPROVAL',
-  _ESCALATED_APPROVAL = 'ESCALATED_APPROVAL',
+  _AUTOMATIC = "AUTOMATIC",
+  _SINGLE_APPROVAL = "SINGLE_APPROVAL",
+  _DUAL_APPROVAL = "DUAL_APPROVAL",
+  _COMMITTEE_APPROVAL = "COMMITTEE_APPROVAL",
+  _ESCALATED_APPROVAL = "ESCALATED_APPROVAL",
 }
 
 /**
  * Enhanced risk levels with numerical mapping
  */
 export enum RiskLevel {
-  _MINIMAL = 'MINIMAL',
-  _LOW = 'LOW',
-  _MODERATE = 'MODERATE',
-  _HIGH = 'HIGH',
-  _CRITICAL = 'CRITICAL',
+  _MINIMAL = "MINIMAL",
+  _LOW = "LOW",
+  _MODERATE = "MODERATE",
+  _HIGH = "HIGH",
+  _CRITICAL = "CRITICAL",
 }
 
 /**
@@ -112,7 +112,11 @@ export type RiskLevelScore = {
 /**
  * Enhanced PARLANT request with strict typing
  */
-export interface EnhancedParlantRequest<TBody = unknown, TQuery = Record<string, string>, TParams = Record<string, string>> {
+export interface EnhancedParlantRequest<
+  TBody = unknown,
+  TQuery = Record<string, string>,
+  TParams = Record<string, string>,
+> {
   readonly requestId: ParlantOperationId;
   readonly method: HTTPMethod;
   readonly url: string;
@@ -136,7 +140,14 @@ export interface EnhancedParlantRequest<TBody = unknown, TQuery = Record<string,
 /**
  * Strict HTTP method typing
  */
-export type HTTPMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'OPTIONS' | 'HEAD';
+export type HTTPMethod =
+  | "GET"
+  | "POST"
+  | "PUT"
+  | "DELETE"
+  | "PATCH"
+  | "OPTIONS"
+  | "HEAD";
 
 /**
  * Type-safe request metadata
@@ -165,46 +176,46 @@ export interface SecurityContext {
  * Authentication status enumeration
  */
 export enum AuthenticationStatus {
-  AUTHENTICATED = 'AUTHENTICATED',
-  UNAUTHENTICATED = 'UNAUTHENTICATED',
-  EXPIRED = 'EXPIRED',
-  INVALID = 'INVALID',
-  PENDING = 'PENDING',
+  AUTHENTICATED = "AUTHENTICATED",
+  UNAUTHENTICATED = "UNAUTHENTICATED",
+  EXPIRED = "EXPIRED",
+  INVALID = "INVALID",
+  PENDING = "PENDING",
 }
 
 /**
  * Authorization level enumeration
  */
 export enum AuthorizationLevel {
-  NONE = 'NONE',
-  BASIC = 'BASIC',
-  STANDARD = 'STANDARD',
-  ELEVATED = 'ELEVATED',
-  ADMINISTRATIVE = 'ADMINISTRATIVE',
+  NONE = "NONE",
+  BASIC = "BASIC",
+  STANDARD = "STANDARD",
+  ELEVATED = "ELEVATED",
+  ADMINISTRATIVE = "ADMINISTRATIVE",
 }
 
 /**
  * Security flags for threat detection
  */
 export type SecurityFlag =
-  | 'SQL_INJECTION_DETECTED'
-  | 'XSS_DETECTED'
-  | 'CSRF_DETECTED'
-  | 'SENSITIVE_DATA_DETECTED'
-  | 'MALICIOUS_PAYLOAD_DETECTED'
-  | 'RATE_LIMIT_EXCEEDED'
-  | 'SUSPICIOUS_BEHAVIOR'
-  | 'UNAUTHORIZED_ACCESS_ATTEMPT';
+  | "SQL_INJECTION_DETECTED"
+  | "XSS_DETECTED"
+  | "CSRF_DETECTED"
+  | "SENSITIVE_DATA_DETECTED"
+  | "MALICIOUS_PAYLOAD_DETECTED"
+  | "RATE_LIMIT_EXCEEDED"
+  | "SUSPICIOUS_BEHAVIOR"
+  | "UNAUTHORIZED_ACCESS_ATTEMPT";
 
 /**
  * Compliance status enumeration
  */
 export enum ComplianceStatus {
-  COMPLIANT = 'COMPLIANT',
-  NON_COMPLIANT = 'NON_COMPLIANT',
-  PENDING_REVIEW = 'PENDING_REVIEW',
-  EXEMPT = 'EXEMPT',
-  UNKNOWN = 'UNKNOWN',
+  COMPLIANT = "COMPLIANT",
+  NON_COMPLIANT = "NON_COMPLIANT",
+  PENDING_REVIEW = "PENDING_REVIEW",
+  EXEMPT = "EXEMPT",
+  UNKNOWN = "UNKNOWN",
 }
 
 // ===== ENHANCED USER CONTEXT TYPES =====
@@ -256,12 +267,24 @@ export interface Permission {
 /**
  * Permission actions
  */
-export type PermissionAction = 'READ' | 'WRITE' | 'CREATE' | 'DELETE' | 'UPDATE' | 'EXECUTE' | 'ADMIN';
+export type PermissionAction =
+  | "READ"
+  | "WRITE"
+  | "CREATE"
+  | "DELETE"
+  | "UPDATE"
+  | "EXECUTE"
+  | "ADMIN";
 
 /**
  * Permission scopes
  */
-export type PermissionScope = 'GLOBAL' | 'ORGANIZATION' | 'DEPARTMENT' | 'TEAM' | 'PERSONAL';
+export type PermissionScope =
+  | "GLOBAL"
+  | "ORGANIZATION"
+  | "DEPARTMENT"
+  | "TEAM"
+  | "PERSONAL";
 
 /**
  * Permission conditions for contextual access
@@ -277,17 +300,23 @@ export interface PermissionCondition {
  * Condition types for permissions
  */
 export type ConditionType =
-  | 'TIME_RANGE'
-  | 'IP_ADDRESS'
-  | 'GEOGRAPHIC_LOCATION'
-  | 'DEVICE_TYPE'
-  | 'SECURITY_LEVEL'
-  | 'CUSTOM';
+  | "TIME_RANGE"
+  | "IP_ADDRESS"
+  | "GEOGRAPHIC_LOCATION"
+  | "DEVICE_TYPE"
+  | "SECURITY_LEVEL"
+  | "CUSTOM";
 
 /**
  * Comparison operators
  */
-export type ComparisonOperator = 'EQUALS' | 'NOT_EQUALS' | 'GREATER_THAN' | 'LESS_THAN' | 'CONTAINS' | 'MATCHES';
+export type ComparisonOperator =
+  | "EQUALS"
+  | "NOT_EQUALS"
+  | "GREATER_THAN"
+  | "LESS_THAN"
+  | "CONTAINS"
+  | "MATCHES";
 
 /**
  * Role restrictions
@@ -303,24 +332,24 @@ export interface RoleRestriction {
  * Restriction types
  */
 export type RestrictionType =
-  | 'TIME_BASED'
-  | 'LOCATION_BASED'
-  | 'IP_BASED'
-  | 'DEVICE_BASED'
-  | 'USAGE_QUOTA'
-  | 'CUSTOM';
+  | "TIME_BASED"
+  | "LOCATION_BASED"
+  | "IP_BASED"
+  | "DEVICE_BASED"
+  | "USAGE_QUOTA"
+  | "CUSTOM";
 
 /**
  * Authentication methods
  */
 export type AuthenticationMethod =
-  | 'PASSWORD'
-  | 'MFA'
-  | 'SSO'
-  | 'API_KEY'
-  | 'CERTIFICATE'
-  | 'BIOMETRIC'
-  | 'TOKEN';
+  | "PASSWORD"
+  | "MFA"
+  | "SSO"
+  | "API_KEY"
+  | "CERTIFICATE"
+  | "BIOMETRIC"
+  | "TOKEN";
 
 /**
  * Session metadata
@@ -344,7 +373,7 @@ export interface GeolocationData {
   readonly city: string;
   readonly coordinates?: readonly [number, number]; // [latitude, longitude]
   readonly accuracy: number;
-  readonly source: 'IP' | 'GPS' | 'USER_PROVIDED';
+  readonly source: "IP" | "GPS" | "USER_PROVIDED";
 }
 
 /**
@@ -364,19 +393,19 @@ export interface SecurityEvent {
  * Security event types
  */
 export type SecurityEventType =
-  | 'LOGIN_ATTEMPT'
-  | 'LOGIN_SUCCESS'
-  | 'LOGIN_FAILURE'
-  | 'LOGOUT'
-  | 'PASSWORD_CHANGE'
-  | 'PERMISSION_ESCALATION'
-  | 'SUSPICIOUS_ACTIVITY'
-  | 'SECURITY_VIOLATION';
+  | "LOGIN_ATTEMPT"
+  | "LOGIN_SUCCESS"
+  | "LOGIN_FAILURE"
+  | "LOGOUT"
+  | "PASSWORD_CHANGE"
+  | "PERMISSION_ESCALATION"
+  | "SUSPICIOUS_ACTIVITY"
+  | "SECURITY_VIOLATION";
 
 /**
  * Security event severity
  */
-export type SecurityEventSeverity = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+export type SecurityEventSeverity = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
 
 // ===== PERFORMANCE AND MONITORING TYPES =====
 
@@ -539,19 +568,19 @@ export interface ThreatPattern {
  * Threat types
  */
 export type ThreatType =
-  | 'SQL_INJECTION'
-  | 'XSS'
-  | 'CSRF'
-  | 'COMMAND_INJECTION'
-  | 'PATH_TRAVERSAL'
-  | 'SENSITIVE_DATA_EXPOSURE'
-  | 'MALICIOUS_PAYLOAD'
-  | 'CUSTOM';
+  | "SQL_INJECTION"
+  | "XSS"
+  | "CSRF"
+  | "COMMAND_INJECTION"
+  | "PATH_TRAVERSAL"
+  | "SENSITIVE_DATA_EXPOSURE"
+  | "MALICIOUS_PAYLOAD"
+  | "CUSTOM";
 
 /**
  * Threat severity levels
  */
-export type ThreatSeverity = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+export type ThreatSeverity = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
 
 /**
  * Threat response actions
@@ -568,13 +597,13 @@ export interface ThreatResponseAction {
  * Response action types
  */
 export type ResponseActionType =
-  | 'BLOCK'
-  | 'QUARANTINE'
-  | 'SANITIZE'
-  | 'LOG_ONLY'
-  | 'NOTIFY'
-  | 'ESCALATE'
-  | 'RATE_LIMIT';
+  | "BLOCK"
+  | "QUARANTINE"
+  | "SANITIZE"
+  | "LOG_ONLY"
+  | "NOTIFY"
+  | "ESCALATE"
+  | "RATE_LIMIT";
 
 // ===== AUDIT AND COMPLIANCE TYPES =====
 
@@ -601,24 +630,34 @@ export interface AuditEvent {
  * Audit event types
  */
 export type AuditEventType =
-  | 'AUTHENTICATION'
-  | 'AUTHORIZATION'
-  | 'DATA_ACCESS'
-  | 'DATA_MODIFICATION'
-  | 'CONFIGURATION_CHANGE'
-  | 'SECURITY_EVENT'
-  | 'SYSTEM_EVENT'
-  | 'COMPLIANCE_EVENT';
+  | "AUTHENTICATION"
+  | "AUTHORIZATION"
+  | "DATA_ACCESS"
+  | "DATA_MODIFICATION"
+  | "CONFIGURATION_CHANGE"
+  | "SECURITY_EVENT"
+  | "SYSTEM_EVENT"
+  | "COMPLIANCE_EVENT";
 
 /**
  * Audit event severity
  */
-export type AuditEventSeverity = 'INFORMATIONAL' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+export type AuditEventSeverity =
+  | "INFORMATIONAL"
+  | "LOW"
+  | "MEDIUM"
+  | "HIGH"
+  | "CRITICAL";
 
 /**
  * Audit outcome
  */
-export type AuditOutcome = 'SUCCESS' | 'FAILURE' | 'PARTIAL_SUCCESS' | 'DENIED' | 'ERROR';
+export type AuditOutcome =
+  | "SUCCESS"
+  | "FAILURE"
+  | "PARTIAL_SUCCESS"
+  | "DENIED"
+  | "ERROR";
 
 /**
  * Audit metadata
@@ -647,13 +686,13 @@ export interface RetentionPolicy {
  * Compliance flags
  */
 export type ComplianceFlag =
-  | 'GDPR_APPLICABLE'
-  | 'HIPAA_APPLICABLE'
-  | 'SOX_APPLICABLE'
-  | 'PCI_DSS_APPLICABLE'
-  | 'FERPA_APPLICABLE'
-  | 'CCPA_APPLICABLE'
-  | 'CUSTOM_COMPLIANCE';
+  | "GDPR_APPLICABLE"
+  | "HIPAA_APPLICABLE"
+  | "SOX_APPLICABLE"
+  | "PCI_DSS_APPLICABLE"
+  | "FERPA_APPLICABLE"
+  | "CCPA_APPLICABLE"
+  | "CUSTOM_COMPLIANCE";
 
 // ===== UTILITY TYPES =====
 
@@ -661,9 +700,7 @@ export type ComplianceFlag =
  * Type-safe configuration builder
  */
 export type ConfigBuilder<T> = {
-  [K in keyof T]: T[K] extends object
-    ? ConfigBuilder<T[K]>
-    : T[K];
+  [K in keyof T]: T[K] extends object ? ConfigBuilder<T[K]> : T[K];
 };
 
 /**
@@ -692,13 +729,13 @@ export interface TypedEventEmitter<T extends Record<string, any[]>> {
  * Middleware events
  */
 export interface MiddlewareEvents {
-  'request:start': [EnhancedParlantRequest];
-  'request:validated': [EnhancedParlantRequest, ValidationResult];
-  'request:error': [EnhancedParlantRequest, Error];
-  'request:complete': [EnhancedParlantRequest, any];
-  'performance:warning': [ParlantOperationId, PerformanceMetrics];
-  'security:threat': [ParlantOperationId, ThreatDetectionResult];
-  'audit:event': [AuditEvent];
+  "request:start": [EnhancedParlantRequest];
+  "request:validated": [EnhancedParlantRequest, ValidationResult];
+  "request:error": [EnhancedParlantRequest, Error];
+  "request:complete": [EnhancedParlantRequest, any];
+  "performance:warning": [ParlantOperationId, PerformanceMetrics];
+  "security:threat": [ParlantOperationId, ThreatDetectionResult];
+  "audit:event": [AuditEvent];
 }
 
 /**
@@ -724,21 +761,21 @@ export interface ValidationResult {
  * Validation status enumeration
  */
 export enum ValidationStatus {
-  APPROVED = 'APPROVED',
-  DENIED = 'DENIED',
-  PENDING = 'PENDING',
-  CONDITIONAL = 'CONDITIONAL',
-  ERROR = 'ERROR',
+  APPROVED = "APPROVED",
+  DENIED = "DENIED",
+  PENDING = "PENDING",
+  CONDITIONAL = "CONDITIONAL",
+  ERROR = "ERROR",
 }
 
 /**
  * Validation level enumeration
  */
 export enum ValidationLevel {
-  BASIC = 'BASIC',
-  STANDARD = 'STANDARD',
-  COMPREHENSIVE = 'COMPREHENSIVE',
-  EXHAUSTIVE = 'EXHAUSTIVE',
+  BASIC = "BASIC",
+  STANDARD = "STANDARD",
+  COMPREHENSIVE = "COMPREHENSIVE",
+  EXHAUSTIVE = "EXHAUSTIVE",
 }
 
 /**
@@ -747,7 +784,7 @@ export enum ValidationLevel {
 export interface ValidationWarning {
   readonly code: string;
   readonly message: string;
-  readonly severity: 'LOW' | 'MEDIUM' | 'HIGH';
+  readonly severity: "LOW" | "MEDIUM" | "HIGH";
   readonly category: WarningCategory;
   readonly metadata?: Record<string, unknown>;
 }
@@ -756,11 +793,11 @@ export interface ValidationWarning {
  * Warning categories
  */
 export type WarningCategory =
-  | 'PERFORMANCE'
-  | 'SECURITY'
-  | 'COMPLIANCE'
-  | 'BEST_PRACTICE'
-  | 'DEPRECATION';
+  | "PERFORMANCE"
+  | "SECURITY"
+  | "COMPLIANCE"
+  | "BEST_PRACTICE"
+  | "DEPRECATION";
 
 /**
  * Validation recommendations
@@ -778,17 +815,17 @@ export interface ValidationRecommendation {
 /**
  * Recommendation priority
  */
-export type RecommendationPriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
+export type RecommendationPriority = "LOW" | "MEDIUM" | "HIGH" | "URGENT";
 
 /**
  * Recommendation categories
  */
 export type RecommendationCategory =
-  | 'SECURITY_IMPROVEMENT'
-  | 'PERFORMANCE_OPTIMIZATION'
-  | 'COMPLIANCE_ENHANCEMENT'
-  | 'RELIABILITY_IMPROVEMENT'
-  | 'USABILITY_ENHANCEMENT';
+  | "SECURITY_IMPROVEMENT"
+  | "PERFORMANCE_OPTIMIZATION"
+  | "COMPLIANCE_ENHANCEMENT"
+  | "RELIABILITY_IMPROVEMENT"
+  | "USABILITY_ENHANCEMENT";
 
 /**
  * Threat detection result
@@ -798,7 +835,7 @@ export interface ThreatDetectionResult {
   readonly type: ThreatType;
   readonly severity: ThreatSeverity;
   readonly confidence: number;
-  readonly location: 'headers' | 'query' | 'body' | 'url' | 'metadata';
+  readonly location: "headers" | "query" | "body" | "url" | "metadata";
   readonly pattern: string;
   readonly value: string;
   readonly mitigationApplied: boolean;
@@ -812,29 +849,48 @@ export interface ThreatDetectionResult {
  * Type guard for security level validation
  */
 export const isSecurityLevel = (value: unknown): value is SecurityLevel => {
-  return typeof value === 'string' && Object.values(SecurityLevel).includes(value as SecurityLevel);
+  return (
+    typeof value === "string" &&
+    Object.values(SecurityLevel).includes(value as SecurityLevel)
+  );
 };
 
 /**
  * Type guard for validation mode
  */
 export const isValidationMode = (value: unknown): value is ValidationMode => {
-  return typeof value === 'string' && Object.values(ValidationMode).includes(value as ValidationMode);
+  return (
+    typeof value === "string" &&
+    Object.values(ValidationMode).includes(value as ValidationMode)
+  );
 };
 
 /**
  * Type guard for HTTP method
  */
 export const isHTTPMethod = (value: unknown): value is HTTPMethod => {
-  const methods: HTTPMethod[] = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'];
-  return typeof value === 'string' && methods.includes(value as HTTPMethod);
+  const methods: HTTPMethod[] = [
+    "GET",
+    "POST",
+    "PUT",
+    "DELETE",
+    "PATCH",
+    "OPTIONS",
+    "HEAD",
+  ];
+  return typeof value === "string" && methods.includes(value as HTTPMethod);
 };
 
 /**
  * Type guard for PARLANT operation ID
  */
-export const isParlantOperationId = (value: unknown): value is ParlantOperationId => {
-  return typeof value === 'string' && /^parlant-[a-z0-9]+-[a-z0-9]+-[a-z0-9]+$/.test(value);
+export const isParlantOperationId = (
+  value: unknown,
+): value is ParlantOperationId => {
+  return (
+    typeof value === "string" &&
+    /^parlant-[a-z0-9]+-[a-z0-9]+-[a-z0-9]+$/.test(value)
+  );
 };
 
 // ===== BRANDED TYPES FOR ADDITIONAL SAFETY =====
@@ -842,21 +898,24 @@ export const isParlantOperationId = (value: unknown): value is ParlantOperationI
 /**
  * Branded string types for type safety
  */
-export type UserId = string & { readonly __brand: 'UserId' };
-export type SessionId = string & { readonly __brand: 'SessionId' };
-export type OrganizationId = string & { readonly __brand: 'OrganizationId' };
-export type DepartmentId = string & { readonly __brand: 'DepartmentId' };
-export type PermissionId = string & { readonly __brand: 'PermissionId' };
-export type RoleId = string & { readonly __brand: 'RoleId' };
+export type UserId = string & { readonly __brand: "UserId" };
+export type SessionId = string & { readonly __brand: "SessionId" };
+export type OrganizationId = string & { readonly __brand: "OrganizationId" };
+export type DepartmentId = string & { readonly __brand: "DepartmentId" };
+export type PermissionId = string & { readonly __brand: "PermissionId" };
+export type RoleId = string & { readonly __brand: "RoleId" };
 
 /**
  * Branded utility functions
  */
 export const createUserId = (id: string): UserId => id as UserId;
 export const createSessionId = (id: string): SessionId => id as SessionId;
-export const createOrganizationId = (id: string): OrganizationId => id as OrganizationId;
-export const createDepartmentId = (id: string): DepartmentId => id as DepartmentId;
-export const createPermissionId = (id: string): PermissionId => id as PermissionId;
+export const createOrganizationId = (id: string): OrganizationId =>
+  id as OrganizationId;
+export const createDepartmentId = (id: string): DepartmentId =>
+  id as DepartmentId;
+export const createPermissionId = (id: string): PermissionId =>
+  id as PermissionId;
 export const createRoleId = (id: string): RoleId => id as RoleId;
 
 // ===== CONFIGURATION DEFAULTS =====

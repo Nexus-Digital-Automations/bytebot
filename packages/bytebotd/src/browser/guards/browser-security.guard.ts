@@ -90,14 +90,20 @@ class SafeBrowserJwtAccess {
   }
 
   static getEmail(payload: unknown): string | null {
-    if (isValidBrowserJwtPayload(payload) && typeof payload.email === 'string') {
+    if (
+      isValidBrowserJwtPayload(payload) &&
+      typeof payload.email === 'string'
+    ) {
       return payload.email;
     }
     return null;
   }
 
   static getUsername(payload: unknown): string | null {
-    if (isValidBrowserJwtPayload(payload) && typeof payload.username === 'string') {
+    if (
+      isValidBrowserJwtPayload(payload) &&
+      typeof payload.username === 'string'
+    ) {
       return payload.username;
     }
     return null;
@@ -111,7 +117,10 @@ class SafeBrowserJwtAccess {
   }
 
   static getPermissions(payload: unknown): string[] {
-    if (isValidBrowserJwtPayload(payload) && Array.isArray(payload.permissions)) {
+    if (
+      isValidBrowserJwtPayload(payload) &&
+      Array.isArray(payload.permissions)
+    ) {
       return payload.permissions;
     }
     return [];
@@ -125,7 +134,10 @@ class SafeBrowserJwtAccess {
   }
 
   static getSessionId(payload: unknown): string | null {
-    if (isValidBrowserJwtPayload(payload) && typeof payload.sessionId === 'string') {
+    if (
+      isValidBrowserJwtPayload(payload) &&
+      typeof payload.sessionId === 'string'
+    ) {
       return payload.sessionId;
     }
     return null;
@@ -446,12 +458,14 @@ export class BrowserSecurityGuard implements CanActivate {
       // Extract user information with safe access
       const user: BrowserUser = {
         id: SafeBrowserJwtAccess.getId(payload) || 'unknown',
-        email: SafeBrowserJwtAccess.getEmail(payload) || 'unknown@unknown.local',
+        email:
+          SafeBrowserJwtAccess.getEmail(payload) || 'unknown@unknown.local',
         username: SafeBrowserJwtAccess.getUsername(payload) || 'unknown',
         role: SafeBrowserJwtAccess.getRole(payload) || UserRole._VIEWER,
         permissions: SafeBrowserJwtAccess.getPermissions(payload),
         isActive: SafeBrowserJwtAccess.getIsActive(payload),
-        sessionId: SafeBrowserJwtAccess.getSessionId(payload) || 'unknown-session',
+        sessionId:
+          SafeBrowserJwtAccess.getSessionId(payload) || 'unknown-session',
       };
 
       // Validate user is active

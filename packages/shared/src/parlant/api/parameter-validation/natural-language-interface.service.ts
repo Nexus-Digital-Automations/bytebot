@@ -18,15 +18,15 @@
  * @author AIgent PARLANT Integration Team
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from "@nestjs/common";
 import {
   ParameterSchema,
   ParameterDefinition,
   ParameterType,
   UserContext,
-  ValidationOptions
-} from './parameter-validation.service';
-import { ParlantValidationBridge } from '../../validation/parlant-validation-bridge.service';
+  ValidationOptions,
+} from "./parameter-validation.service";
+import { ParlantValidationBridge } from "../../validation/parlant-validation-bridge.service";
 
 // ===== NATURAL LANGUAGE INTERFACE TYPES =====
 
@@ -94,10 +94,10 @@ export interface ParameterCollectionOptions {
 }
 
 export enum InteractionStyle {
-  MINIMAL = 'minimal',
-  GUIDED = 'guided',
-  DETAILED = 'detailed',
-  EXPERT = 'expert'
+  MINIMAL = "minimal",
+  GUIDED = "guided",
+  DETAILED = "detailed",
+  EXPERT = "expert",
 }
 
 export interface ConversationSummary {
@@ -129,11 +129,11 @@ export interface SatisfactionIndicator {
 }
 
 export enum SatisfactionType {
-  RESPONSE_TIME = 'response_time',
-  CLARITY = 'clarity',
-  HELPFULNESS = 'helpfulness',
-  EFFICIENCY = 'efficiency',
-  COMPLETION = 'completion'
+  RESPONSE_TIME = "response_time",
+  CLARITY = "clarity",
+  HELPFULNESS = "helpfulness",
+  EFFICIENCY = "efficiency",
+  COMPLETION = "completion",
 }
 
 export interface ConversationMoment {
@@ -154,20 +154,20 @@ export interface ConversationMoment {
 }
 
 export enum MomentType {
-  PARAMETER_DISCOVERED = 'parameter_discovered',
-  CONFLICT_IDENTIFIED = 'conflict_identified',
-  GUIDANCE_PROVIDED = 'guidance_provided',
-  SUGGESTION_ACCEPTED = 'suggestion_accepted',
-  CLARIFICATION_REQUESTED = 'clarification_requested',
-  COMPLETION_ACHIEVED = 'completion_achieved'
+  PARAMETER_DISCOVERED = "parameter_discovered",
+  CONFLICT_IDENTIFIED = "conflict_identified",
+  GUIDANCE_PROVIDED = "guidance_provided",
+  SUGGESTION_ACCEPTED = "suggestion_accepted",
+  CLARIFICATION_REQUESTED = "clarification_requested",
+  COMPLETION_ACHIEVED = "completion_achieved",
 }
 
 export enum UserReaction {
-  POSITIVE = 'positive',
-  NEUTRAL = 'neutral',
-  NEGATIVE = 'negative',
-  CONFUSED = 'confused',
-  SATISFIED = 'satisfied'
+  POSITIVE = "positive",
+  NEUTRAL = "neutral",
+  NEGATIVE = "negative",
+  CONFUSED = "confused",
+  SATISFIED = "satisfied",
 }
 
 export interface ParameterGuidance {
@@ -194,19 +194,19 @@ export interface ParameterGuidance {
 }
 
 export enum GuidanceType {
-  EXPLANATION = 'explanation',
-  EXAMPLES = 'examples',
-  VALIDATION_HELP = 'validation_help',
-  FORMAT_GUIDANCE = 'format_guidance',
-  BUSINESS_CONTEXT = 'business_context',
-  SECURITY_GUIDANCE = 'security_guidance'
+  EXPLANATION = "explanation",
+  EXAMPLES = "examples",
+  VALIDATION_HELP = "validation_help",
+  FORMAT_GUIDANCE = "format_guidance",
+  BUSINESS_CONTEXT = "business_context",
+  SECURITY_GUIDANCE = "security_guidance",
 }
 
 export enum DifficultyLevel {
-  BEGINNER = 'beginner',
-  INTERMEDIATE = 'intermediate',
-  ADVANCED = 'advanced',
-  EXPERT = 'expert'
+  BEGINNER = "beginner",
+  INTERMEDIATE = "intermediate",
+  ADVANCED = "advanced",
+  EXPERT = "expert",
 }
 
 export interface ParameterConflict {
@@ -230,20 +230,20 @@ export interface ParameterConflict {
 }
 
 export enum ConflictType {
-  TYPE_MISMATCH = 'type_mismatch',
-  VALUE_CONTRADICTION = 'value_contradiction',
-  DEPENDENCY_VIOLATION = 'dependency_violation',
-  SECURITY_CONSTRAINT = 'security_constraint',
-  BUSINESS_RULE_VIOLATION = 'business_rule_violation',
-  MUTUAL_EXCLUSION = 'mutual_exclusion'
+  TYPE_MISMATCH = "type_mismatch",
+  VALUE_CONTRADICTION = "value_contradiction",
+  DEPENDENCY_VIOLATION = "dependency_violation",
+  SECURITY_CONSTRAINT = "security_constraint",
+  BUSINESS_RULE_VIOLATION = "business_rule_violation",
+  MUTUAL_EXCLUSION = "mutual_exclusion",
 }
 
 export enum ResolutionStrategy {
-  USER_CHOICE = 'user_choice',
-  AUTOMATIC_CORRECTION = 'automatic_correction',
-  PRIORITY_BASED = 'priority_based',
-  EXPERT_RECOMMENDATION = 'expert_recommendation',
-  CONTEXT_BASED = 'context_based'
+  USER_CHOICE = "user_choice",
+  AUTOMATIC_CORRECTION = "automatic_correction",
+  PRIORITY_BASED = "priority_based",
+  EXPERT_RECOMMENDATION = "expert_recommendation",
+  CONTEXT_BASED = "context_based",
 }
 
 export interface ConflictResolution {
@@ -303,21 +303,21 @@ export interface ParameterPrompt {
 }
 
 export enum PromptType {
-  INITIAL_REQUEST = 'initial_request',
-  CLARIFICATION = 'clarification',
-  VALIDATION_ERROR = 'validation_error',
-  SUGGESTION = 'suggestion',
-  CONFIRMATION = 'confirmation',
-  COMPLETION = 'completion'
+  INITIAL_REQUEST = "initial_request",
+  CLARIFICATION = "clarification",
+  VALIDATION_ERROR = "validation_error",
+  SUGGESTION = "suggestion",
+  CONFIRMATION = "confirmation",
+  COMPLETION = "completion",
 }
 
 export enum ResponseFormat {
-  TEXT = 'text',
-  NUMBER = 'number',
-  BOOLEAN = 'boolean',
-  JSON = 'json',
-  LIST = 'list',
-  CHOICE = 'choice'
+  TEXT = "text",
+  NUMBER = "number",
+  BOOLEAN = "boolean",
+  JSON = "json",
+  LIST = "list",
+  CHOICE = "choice",
 }
 
 export interface PromptExample {
@@ -402,10 +402,10 @@ export interface ParseOptions {
 }
 
 export enum CorrectionLevel {
-  NONE = 'none',
-  MINIMAL = 'minimal',
-  MODERATE = 'moderate',
-  AGGRESSIVE = 'aggressive'
+  NONE = "none",
+  MINIMAL = "minimal",
+  MODERATE = "moderate",
+  AGGRESSIVE = "aggressive",
 }
 
 export interface ParseAlternative {
@@ -429,17 +429,19 @@ export class NaturalLanguageParameterInterface {
   private readonly logger = new Logger(NaturalLanguageParameterInterface.name);
 
   constructor(
-    private readonly parlantValidationBridge: ParlantValidationBridge
+    private readonly parlantValidationBridge: ParlantValidationBridge,
   ) {}
 
   /**
    * Collect parameters through conversational interface
    */
   async collectParameters(
-    request: ParameterCollectionRequest
+    request: ParameterCollectionRequest,
   ): Promise<ParameterCollectionResponse> {
     const startTime = Date.now();
-    this.logger.log(`Starting parameter collection for function: ${request.functionName}`);
+    this.logger.log(
+      `Starting parameter collection for function: ${request.functionName}`,
+    );
 
     try {
       const conversationRounds: ConversationRound[] = [];
@@ -455,11 +457,11 @@ export class NaturalLanguageParameterInterface {
         // Identify missing parameters
         const missingParameters = this.identifyMissingParameters(
           collectedParameters,
-          request.schema
+          request.schema,
         );
 
         if (missingParameters.length === 0) {
-          this.logger.log('All parameters collected successfully');
+          this.logger.log("All parameters collected successfully");
           break;
         }
 
@@ -469,7 +471,7 @@ export class NaturalLanguageParameterInterface {
           request.schema,
           collectedParameters,
           request.userContext,
-          request.options
+          request.options,
         );
 
         // Collect responses through conversation
@@ -478,7 +480,7 @@ export class NaturalLanguageParameterInterface {
           request.schema,
           collectedParameters,
           request.userContext,
-          request.options
+          request.options,
         );
 
         conversationRounds.push(roundResult);
@@ -493,7 +495,7 @@ export class NaturalLanguageParameterInterface {
         const conflicts = await this.detectAndResolveConflicts(
           collectedParameters,
           request.schema,
-          request.userContext
+          request.userContext,
         );
 
         conflictsResolved.push(...conflicts);
@@ -512,30 +514,37 @@ export class NaturalLanguageParameterInterface {
       const conversationSummary = this.generateConversationSummary(
         conversationRounds,
         guidanceProvided,
-        conflictsResolved
+        conflictsResolved,
       );
 
       // Calculate performance metrics
       const performanceMetrics = this.calculateCollectionPerformanceMetrics(
         conversationRounds,
         totalTime,
-        collectedParameters
+        collectedParameters,
       );
 
       const response: ParameterCollectionResponse = {
-        success: this.hasAllRequiredParameters(collectedParameters, request.schema),
+        success: this.hasAllRequiredParameters(
+          collectedParameters,
+          request.schema,
+        ),
         collectedParameters,
         conversationSummary,
         guidanceProvided,
         conflictsResolved,
-        performanceMetrics
+        performanceMetrics,
       };
 
-      this.logger.log(`Parameter collection completed in ${totalTime}ms for ${request.functionName}`);
+      this.logger.log(
+        `Parameter collection completed in ${totalTime}ms for ${request.functionName}`,
+      );
       return response;
-
     } catch (error) {
-      this.logger.error(`Parameter collection failed for ${request.functionName}:`, error);
+      this.logger.error(
+        `Parameter collection failed for ${request.functionName}:`,
+        error,
+      );
       throw new Error(`Parameter collection failed: ${error.message}`);
     }
   }
@@ -544,9 +553,11 @@ export class NaturalLanguageParameterInterface {
    * Parse natural language input into structured parameters
    */
   async parseNaturalLanguageInput(
-    request: NaturalLanguageParseRequest
+    request: NaturalLanguageParseRequest,
   ): Promise<NaturalLanguageParseResponse> {
-    this.logger.log(`Parsing natural language input for parameter: ${request.context.parameterName}`);
+    this.logger.log(
+      `Parsing natural language input for parameter: ${request.context.parameterName}`,
+    );
 
     try {
       // Preprocess input
@@ -557,22 +568,28 @@ export class NaturalLanguageParameterInterface {
         preprocessedInput,
         request.expectedType,
         request.context,
-        request.options
+        request.options,
       );
 
       // Generate alternatives if needed
-      const alternatives = request.options.maxAlternatives > 0 ?
-        await this.generateParseAlternatives(
-          preprocessedInput,
-          request.expectedType,
-          request.context,
-          request.options.maxAlternatives
-        ) : [];
+      const alternatives =
+        request.options.maxAlternatives > 0
+          ? await this.generateParseAlternatives(
+              preprocessedInput,
+              request.expectedType,
+              request.context,
+              request.options.maxAlternatives,
+            )
+          : [];
 
       // Apply auto-correction if enabled
-      const correctedResult = request.options.autoCorrectionLevel !== CorrectionLevel.NONE ?
-        await this.applyCorrectionIfNeeded(parseResult, request.options.autoCorrectionLevel) :
-        parseResult;
+      const correctedResult =
+        request.options.autoCorrectionLevel !== CorrectionLevel.NONE
+          ? await this.applyCorrectionIfNeeded(
+              parseResult,
+              request.options.autoCorrectionLevel,
+            )
+          : parseResult;
 
       const response: NaturalLanguageParseResponse = {
         success: correctedResult.success,
@@ -580,13 +597,15 @@ export class NaturalLanguageParameterInterface {
         confidence: correctedResult.confidence,
         explanation: correctedResult.explanation,
         alternatives,
-        warnings: correctedResult.warnings || []
+        warnings: correctedResult.warnings || [],
       };
 
       return response;
-
     } catch (error) {
-      this.logger.error(`Natural language parsing failed for ${request.context.parameterName}:`, error);
+      this.logger.error(
+        `Natural language parsing failed for ${request.context.parameterName}:`,
+        error,
+      );
 
       return {
         success: false,
@@ -594,7 +613,7 @@ export class NaturalLanguageParameterInterface {
         confidence: 0,
         explanation: `Failed to parse input: ${error.message}`,
         alternatives: [],
-        warnings: [error.message]
+        warnings: [error.message],
       };
     }
   }
@@ -607,7 +626,7 @@ export class NaturalLanguageParameterInterface {
     schema: ParameterSchema,
     existingParameters: Record<string, any>,
     userContext: UserContext,
-    options: ParameterCollectionOptions
+    options: ParameterCollectionOptions,
   ): Promise<Record<string, ParameterPrompt>> {
     const prompts: Record<string, ParameterPrompt> = {};
 
@@ -620,7 +639,7 @@ export class NaturalLanguageParameterInterface {
         paramDef,
         existingParameters,
         userContext,
-        options
+        options,
       );
 
       prompts[paramName] = prompt;
@@ -636,44 +655,63 @@ export class NaturalLanguageParameterInterface {
     parameterName: string,
     definition: ParameterDefinition,
     userContext: UserContext,
-    guidanceType: GuidanceType
+    guidanceType: GuidanceType,
   ): Promise<ParameterGuidance> {
     const userLevel = this.determineUserExpertiseLevel(userContext);
 
     const guidance: ParameterGuidance = {
       parameterName,
       type: guidanceType,
-      content: '',
+      content: "",
       examples: [],
       commonMistakes: [],
       relatedParameters: [],
-      difficultyLevel: this.assessParameterDifficulty(definition)
+      difficultyLevel: this.assessParameterDifficulty(definition),
     };
 
     switch (guidanceType) {
       case GuidanceType.EXPLANATION:
-        guidance.content = await this.generateParameterExplanation(definition, userLevel);
+        guidance.content = await this.generateParameterExplanation(
+          definition,
+          userLevel,
+        );
         break;
 
       case GuidanceType.EXAMPLES:
-        guidance.examples = await this.generateParameterExamples(definition, userLevel);
+        guidance.examples = await this.generateParameterExamples(
+          definition,
+          userLevel,
+        );
         break;
 
       case GuidanceType.VALIDATION_HELP:
-        guidance.content = await this.generateValidationHelp(definition, userLevel);
+        guidance.content = await this.generateValidationHelp(
+          definition,
+          userLevel,
+        );
         break;
 
       case GuidanceType.FORMAT_GUIDANCE:
-        guidance.content = await this.generateFormatGuidance(definition, userLevel);
+        guidance.content = await this.generateFormatGuidance(
+          definition,
+          userLevel,
+        );
         break;
 
       case GuidanceType.BUSINESS_CONTEXT:
-        guidance.content = await this.generateBusinessContext(definition, userLevel);
+        guidance.content = await this.generateBusinessContext(
+          definition,
+          userLevel,
+        );
         break;
 
       case GuidanceType.SECURITY_GUIDANCE:
-        guidance.content = await this.generateSecurityGuidance(definition, userLevel);
-        guidance.commonMistakes = await this.generateSecurityMistakes(definition);
+        guidance.content = await this.generateSecurityGuidance(
+          definition,
+          userLevel,
+        );
+        guidance.commonMistakes =
+          await this.generateSecurityMistakes(definition);
         break;
     }
 
@@ -687,15 +725,17 @@ export class NaturalLanguageParameterInterface {
    */
   private identifyMissingParameters(
     providedParameters: Record<string, any>,
-    schema: ParameterSchema
+    schema: ParameterSchema,
   ): string[] {
     const missing: string[] = [];
 
     for (const requiredParam of schema.required) {
-      if (!(requiredParam in providedParameters) ||
-          providedParameters[requiredParam] === undefined ||
-          providedParameters[requiredParam] === null ||
-          providedParameters[requiredParam] === '') {
+      if (
+        !(requiredParam in providedParameters) ||
+        providedParameters[requiredParam] === undefined ||
+        providedParameters[requiredParam] === null ||
+        providedParameters[requiredParam] === ""
+      ) {
         missing.push(requiredParam);
       }
     }
@@ -711,12 +751,12 @@ export class NaturalLanguageParameterInterface {
     definition: ParameterDefinition,
     existingParameters: Record<string, any>,
     userContext: UserContext,
-    options: ParameterCollectionOptions
+    options: ParameterCollectionOptions,
   ): Promise<ParameterPrompt> {
     const userLevel = this.determineUserExpertiseLevel(userContext);
     const interactionStyle = options.interactionStyle;
 
-    let content = '';
+    let content = "";
     let examples: PromptExample[] = [];
     let validationHints: string[] = [];
 
@@ -732,15 +772,25 @@ export class NaturalLanguageParameterInterface {
         break;
 
       case InteractionStyle.DETAILED:
-        content = await this.generateDetailedPrompt(paramName, definition, existingParameters);
+        content = await this.generateDetailedPrompt(
+          paramName,
+          definition,
+          existingParameters,
+        );
         examples = await this.generateDetailedExamples(definition, 3);
         validationHints = await this.generateValidationHints(definition);
         break;
 
       case InteractionStyle.EXPERT:
-        content = await this.generateExpertPrompt(paramName, definition, existingParameters, userContext);
+        content = await this.generateExpertPrompt(
+          paramName,
+          definition,
+          existingParameters,
+          userContext,
+        );
         examples = await this.generateExpertExamples(definition, 5);
-        validationHints = await this.generateAdvancedValidationHints(definition);
+        validationHints =
+          await this.generateAdvancedValidationHints(definition);
         break;
     }
 
@@ -750,7 +800,7 @@ export class NaturalLanguageParameterInterface {
       expectedFormat: this.determineExpectedFormat(definition.type),
       validationHints,
       examples,
-      followUpPrompts: await this.generateFollowUpPrompts(definition)
+      followUpPrompts: await this.generateFollowUpPrompts(definition),
     };
   }
 
@@ -762,7 +812,7 @@ export class NaturalLanguageParameterInterface {
     schema: ParameterSchema,
     existingParameters: Record<string, any>,
     userContext: UserContext,
-    options: ParameterCollectionOptions
+    options: ParameterCollectionOptions,
   ): Promise<ConversationRound> {
     // This would integrate with the actual conversational interface
     // For now, we'll simulate the round result
@@ -780,7 +830,7 @@ export class NaturalLanguageParameterInterface {
         mockUserResponse,
         paramDef.type,
         paramName,
-        userContext
+        userContext,
       );
 
       if (parseResult.success) {
@@ -793,7 +843,7 @@ export class NaturalLanguageParameterInterface {
           paramName,
           paramDef,
           userContext,
-          GuidanceType.EXPLANATION
+          GuidanceType.EXPLANATION,
         );
         guidanceProvided.push(guidance);
       }
@@ -803,10 +853,11 @@ export class NaturalLanguageParameterInterface {
       roundNumber: 1,
       collectedParameters,
       guidanceProvided,
-      completed: Object.keys(collectedParameters).length === Object.keys(prompts).length,
+      completed:
+        Object.keys(collectedParameters).length === Object.keys(prompts).length,
       userRequestedStop: false,
       errors: [],
-      userSatisfaction: 0.8
+      userSatisfaction: 0.8,
     };
   }
 
@@ -816,7 +867,7 @@ export class NaturalLanguageParameterInterface {
   private async detectAndResolveConflicts(
     parameters: Record<string, any>,
     schema: ParameterSchema,
-    userContext: UserContext
+    userContext: UserContext,
   ): Promise<ParameterConflict[]> {
     const conflicts: ParameterConflict[] = [];
 
@@ -831,11 +882,13 @@ export class NaturalLanguageParameterInterface {
           resolutionStrategy: ResolutionStrategy.AUTOMATIC_CORRECTION,
           resolutionResult: {
             success: true,
-            finalValues: { [paramName]: this.convertValueToType(value, paramDef.type) },
+            finalValues: {
+              [paramName]: this.convertValueToType(value, paramDef.type),
+            },
             explanation: `Automatically converted value to ${paramDef.type}`,
-            userSatisfaction: 0.7
+            userSatisfaction: 0.7,
           },
-          userConfirmationReceived: true
+          userConfirmationReceived: true,
         };
 
         conflicts.push(conflict);
@@ -857,7 +910,7 @@ export class NaturalLanguageParameterInterface {
   private generateConversationSummary(
     rounds: ConversationRound[],
     guidance: ParameterGuidance[],
-    conflicts: ParameterConflict[]
+    conflicts: ParameterConflict[],
   ): ConversationSummary {
     const totalRounds = rounds.length;
     const parametersPerRound: Record<number, string[]> = {};
@@ -866,14 +919,22 @@ export class NaturalLanguageParameterInterface {
       parametersPerRound[index + 1] = Object.keys(round.collectedParameters);
     });
 
-    const effectivenessScore = this.calculateEffectivenessScore(rounds, guidance, conflicts);
+    const effectivenessScore = this.calculateEffectivenessScore(
+      rounds,
+      guidance,
+      conflicts,
+    );
 
     return {
       totalRounds,
       parametersPerRound,
       userSatisfactionIndicators: this.generateSatisfactionIndicators(rounds),
       effectivenessScore,
-      keyMoments: this.identifyKeyConversationMoments(rounds, guidance, conflicts)
+      keyMoments: this.identifyKeyConversationMoments(
+        rounds,
+        guidance,
+        conflicts,
+      ),
     };
   }
 
@@ -883,13 +944,13 @@ export class NaturalLanguageParameterInterface {
   private calculateCollectionPerformanceMetrics(
     rounds: ConversationRound[],
     totalTime: number,
-    collectedParameters: Record<string, any>
+    collectedParameters: Record<string, any>,
   ): CollectionPerformanceMetrics {
     const parameterCount = Object.keys(collectedParameters).length;
     const timePerParameter: Record<string, number> = {};
 
     // Estimate time per parameter
-    Object.keys(collectedParameters).forEach(param => {
+    Object.keys(collectedParameters).forEach((param) => {
       timePerParameter[param] = totalTime / parameterCount;
     });
 
@@ -897,9 +958,16 @@ export class NaturalLanguageParameterInterface {
       totalCollectionTime: totalTime,
       timePerParameter,
       conversationRounds: rounds.length,
-      userInteractions: rounds.reduce((sum, round) => sum + (round.userInteractions || 1), 0),
-      successRate: rounds.filter(round => round.completed).length / rounds.length,
-      errorRecoveryAttempts: rounds.reduce((sum, round) => sum + round.errors.length, 0)
+      userInteractions: rounds.reduce(
+        (sum, round) => sum + (round.userInteractions || 1),
+        0,
+      ),
+      successRate:
+        rounds.filter((round) => round.completed).length / rounds.length,
+      errorRecoveryAttempts: rounds.reduce(
+        (sum, round) => sum + round.errors.length,
+        0,
+      ),
     };
   }
 
@@ -908,12 +976,13 @@ export class NaturalLanguageParameterInterface {
    */
   private hasAllRequiredParameters(
     parameters: Record<string, any>,
-    schema: ParameterSchema
+    schema: ParameterSchema,
   ): boolean {
-    return schema.required.every(param =>
-      param in parameters &&
-      parameters[param] !== undefined &&
-      parameters[param] !== null
+    return schema.required.every(
+      (param) =>
+        param in parameters &&
+        parameters[param] !== undefined &&
+        parameters[param] !== null,
     );
   }
 
@@ -931,15 +1000,21 @@ export class NaturalLanguageParameterInterface {
     input: string,
     expectedType: ParameterType,
     context: ParseContext,
-    options: ParseOptions
-  ): Promise<{ success: boolean; value: any; confidence: number; explanation: string; warnings?: string[] }> {
+    options: ParseOptions,
+  ): Promise<{
+    success: boolean;
+    value: any;
+    confidence: number;
+    explanation: string;
+    warnings?: string[];
+  }> {
     switch (expectedType) {
       case ParameterType.STRING:
         return {
           success: true,
           value: input,
           confidence: 1.0,
-          explanation: 'Direct string input'
+          explanation: "Direct string input",
         };
 
       case ParameterType.NUMBER:
@@ -949,14 +1024,14 @@ export class NaturalLanguageParameterInterface {
             success: false,
             value: null,
             confidence: 0,
-            explanation: 'Input is not a valid number'
+            explanation: "Input is not a valid number",
           };
         }
         return {
           success: true,
           value: num,
           confidence: 0.9,
-          explanation: `Parsed as number: ${num}`
+          explanation: `Parsed as number: ${num}`,
         };
 
       case ParameterType.BOOLEAN:
@@ -965,9 +1040,10 @@ export class NaturalLanguageParameterInterface {
           success: booleanValue !== null,
           value: booleanValue,
           confidence: booleanValue !== null ? 0.85 : 0,
-          explanation: booleanValue !== null ?
-            `Interpreted as boolean: ${booleanValue}` :
-            'Could not interpret as boolean'
+          explanation:
+            booleanValue !== null
+              ? `Interpreted as boolean: ${booleanValue}`
+              : "Could not interpret as boolean",
         };
 
       case ParameterType.DATE:
@@ -977,14 +1053,14 @@ export class NaturalLanguageParameterInterface {
             success: false,
             value: null,
             confidence: 0,
-            explanation: 'Input is not a valid date'
+            explanation: "Input is not a valid date",
           };
         }
         return {
           success: true,
           value: date,
           confidence: 0.8,
-          explanation: `Parsed as date: ${date.toISOString()}`
+          explanation: `Parsed as date: ${date.toISOString()}`,
         };
 
       case ParameterType.JSON:
@@ -994,14 +1070,14 @@ export class NaturalLanguageParameterInterface {
             success: true,
             value: jsonValue,
             confidence: 0.9,
-            explanation: 'Successfully parsed as JSON'
+            explanation: "Successfully parsed as JSON",
           };
         } catch {
           return {
             success: false,
             value: null,
             confidence: 0,
-            explanation: 'Input is not valid JSON'
+            explanation: "Input is not valid JSON",
           };
         }
 
@@ -1010,7 +1086,7 @@ export class NaturalLanguageParameterInterface {
           success: true,
           value: input,
           confidence: 0.5,
-          explanation: 'Fallback to string interpretation'
+          explanation: "Fallback to string interpretation",
         };
     }
   }
@@ -1019,8 +1095,8 @@ export class NaturalLanguageParameterInterface {
    * Parse boolean from natural language
    */
   private parseBoolean(input: string): boolean | null {
-    const trueValues = ['true', 'yes', 'y', '1', 'on', 'enable', 'enabled'];
-    const falseValues = ['false', 'no', 'n', '0', 'off', 'disable', 'disabled'];
+    const trueValues = ["true", "yes", "y", "1", "on", "enable", "enabled"];
+    const falseValues = ["false", "no", "n", "0", "off", "disable", "disabled"];
 
     const normalized = input.toLowerCase().trim();
 
@@ -1042,7 +1118,7 @@ export class NaturalLanguageParameterInterface {
     input: string,
     expectedType: ParameterType,
     context: ParseContext,
-    maxAlternatives: number
+    maxAlternatives: number,
   ): Promise<ParseAlternative[]> {
     const alternatives: ParseAlternative[] = [];
 
@@ -1055,14 +1131,14 @@ export class NaturalLanguageParameterInterface {
         alternatives.push({
           value: true,
           confidence: 0.3,
-          explanation: 'Interpret as true',
-          reasoning: 'Default to positive interpretation'
+          explanation: "Interpret as true",
+          reasoning: "Default to positive interpretation",
         });
         alternatives.push({
           value: false,
           confidence: 0.3,
-          explanation: 'Interpret as false',
-          reasoning: 'Default to negative interpretation'
+          explanation: "Interpret as false",
+          reasoning: "Default to negative interpretation",
         });
       }
     }
@@ -1075,7 +1151,7 @@ export class NaturalLanguageParameterInterface {
    */
   private async applyCorrectionIfNeeded(
     parseResult: any,
-    correctionLevel: CorrectionLevel
+    correctionLevel: CorrectionLevel,
   ): Promise<any> {
     // For now, return the original result
     // TODO: Implement intelligent correction based on level
@@ -1085,15 +1161,23 @@ export class NaturalLanguageParameterInterface {
   /**
    * Determine user expertise level
    */
-  private determineUserExpertiseLevel(userContext: UserContext): DifficultyLevel {
+  private determineUserExpertiseLevel(
+    userContext: UserContext,
+  ): DifficultyLevel {
     // Simple heuristic based on roles
-    if (userContext.roles.includes('admin') || userContext.roles.includes('expert')) {
+    if (
+      userContext.roles.includes("admin") ||
+      userContext.roles.includes("expert")
+    ) {
       return DifficultyLevel.EXPERT;
     }
-    if (userContext.roles.includes('developer') || userContext.roles.includes('power-user')) {
+    if (
+      userContext.roles.includes("developer") ||
+      userContext.roles.includes("power-user")
+    ) {
       return DifficultyLevel.ADVANCED;
     }
-    if (userContext.roles.includes('user')) {
+    if (userContext.roles.includes("user")) {
       return DifficultyLevel.INTERMEDIATE;
     }
     return DifficultyLevel.BEGINNER;
@@ -1102,9 +1186,14 @@ export class NaturalLanguageParameterInterface {
   /**
    * Assess parameter difficulty
    */
-  private assessParameterDifficulty(definition: ParameterDefinition): DifficultyLevel {
+  private assessParameterDifficulty(
+    definition: ParameterDefinition,
+  ): DifficultyLevel {
     // Simple assessment based on type and validation rules
-    if (definition.type === ParameterType.JSON || definition.type === ParameterType.OBJECT) {
+    if (
+      definition.type === ParameterType.JSON ||
+      definition.type === ParameterType.OBJECT
+    ) {
       return DifficultyLevel.ADVANCED;
     }
     if (definition.validationRules.length > 2) {
@@ -1118,7 +1207,7 @@ export class NaturalLanguageParameterInterface {
    */
   private async generateParameterExplanation(
     definition: ParameterDefinition,
-    userLevel: DifficultyLevel
+    userLevel: DifficultyLevel,
   ): Promise<string> {
     let explanation = definition.description;
 
@@ -1131,7 +1220,7 @@ export class NaturalLanguageParameterInterface {
         break;
       case DifficultyLevel.ADVANCED:
       case DifficultyLevel.EXPERT:
-        explanation += ` Type: ${definition.type}, Security Level: ${definition.securityLevel}, Rules: ${definition.validationRules.map(r => r.type).join(', ')}.`;
+        explanation += ` Type: ${definition.type}, Security Level: ${definition.securityLevel}, Rules: ${definition.validationRules.map((r) => r.type).join(", ")}.`;
         break;
     }
 
@@ -1143,7 +1232,7 @@ export class NaturalLanguageParameterInterface {
    */
   private async generateParameterExamples(
     definition: ParameterDefinition,
-    userLevel: DifficultyLevel
+    userLevel: DifficultyLevel,
   ): Promise<string[]> {
     if (definition.examples.length > 0) {
       return definition.examples;
@@ -1152,15 +1241,15 @@ export class NaturalLanguageParameterInterface {
     // Generate examples based on type
     switch (definition.type) {
       case ParameterType.STRING:
-        return ['example_string', 'another_example'];
+        return ["example_string", "another_example"];
       case ParameterType.NUMBER:
-        return ['42', '3.14'];
+        return ["42", "3.14"];
       case ParameterType.BOOLEAN:
-        return ['true', 'false'];
+        return ["true", "false"];
       case ParameterType.DATE:
-        return ['2024-01-01', '2024-12-31T23:59:59Z'];
+        return ["2024-01-01", "2024-12-31T23:59:59Z"];
       default:
-        return ['example_value'];
+        return ["example_value"];
     }
   }
 
@@ -1169,15 +1258,15 @@ export class NaturalLanguageParameterInterface {
   private generateMockUserResponse(definition: ParameterDefinition): string {
     switch (definition.type) {
       case ParameterType.STRING:
-        return 'test_value';
+        return "test_value";
       case ParameterType.NUMBER:
-        return '42';
+        return "42";
       case ParameterType.BOOLEAN:
-        return 'true';
+        return "true";
       case ParameterType.DATE:
-        return '2024-01-01';
+        return "2024-01-01";
       default:
-        return 'mock_value';
+        return "mock_value";
     }
   }
 
@@ -1185,47 +1274,49 @@ export class NaturalLanguageParameterInterface {
     response: string,
     expectedType: ParameterType,
     paramName: string,
-    userContext: UserContext
+    userContext: UserContext,
   ): Promise<{ success: boolean; parsedValue: any }> {
     const parseRequest: NaturalLanguageParseRequest = {
       userInput: response,
       expectedType,
       context: {
-        functionName: 'mock_function',
+        functionName: "mock_function",
         parameterName: paramName,
         relatedParameters: {},
         userContext,
-        conversationHistory: []
+        conversationHistory: [],
       },
       options: {
         enableFuzzyMatching: true,
         autoCorrectionLevel: CorrectionLevel.MODERATE,
         requireConfirmationForAmbiguous: false,
-        maxAlternatives: 3
-      }
+        maxAlternatives: 3,
+      },
     };
 
     const parseResult = await this.parseNaturalLanguageInput(parseRequest);
     return {
       success: parseResult.success,
-      parsedValue: parseResult.parsedValue
+      parsedValue: parseResult.parsedValue,
     };
   }
 
   private isValueCompatibleWithType(value: any, type: ParameterType): boolean {
     switch (type) {
       case ParameterType.STRING:
-        return typeof value === 'string';
+        return typeof value === "string";
       case ParameterType.NUMBER:
-        return typeof value === 'number' && !isNaN(value);
+        return typeof value === "number" && !isNaN(value);
       case ParameterType.BOOLEAN:
-        return typeof value === 'boolean';
+        return typeof value === "boolean";
       case ParameterType.DATE:
         return value instanceof Date && !isNaN(value.getTime());
       case ParameterType.ARRAY:
         return Array.isArray(value);
       case ParameterType.OBJECT:
-        return typeof value === 'object' && value !== null && !Array.isArray(value);
+        return (
+          typeof value === "object" && value !== null && !Array.isArray(value)
+        );
       default:
         return true;
     }
@@ -1251,7 +1342,7 @@ export class NaturalLanguageParameterInterface {
   private calculateEffectivenessScore(
     rounds: ConversationRound[],
     guidance: ParameterGuidance[],
-    conflicts: ParameterConflict[]
+    conflicts: ParameterConflict[],
   ): number {
     // Simple effectiveness calculation
     let score = 0.8; // Base score
@@ -1265,31 +1356,35 @@ export class NaturalLanguageParameterInterface {
     score += guidance.length * 0.05;
 
     // Reduce score for unresolved conflicts
-    const unresolvedConflicts = conflicts.filter(c => !c.resolutionResult.success).length;
+    const unresolvedConflicts = conflicts.filter(
+      (c) => !c.resolutionResult.success,
+    ).length;
     score -= unresolvedConflicts * 0.15;
 
     return Math.max(0, Math.min(1, score));
   }
 
-  private generateSatisfactionIndicators(rounds: ConversationRound[]): SatisfactionIndicator[] {
+  private generateSatisfactionIndicators(
+    rounds: ConversationRound[],
+  ): SatisfactionIndicator[] {
     return [
       {
         type: SatisfactionType.EFFICIENCY,
         value: rounds.length <= 2 ? 0.9 : 0.6,
-        context: 'Based on number of conversation rounds'
+        context: "Based on number of conversation rounds",
       },
       {
         type: SatisfactionType.COMPLETION,
-        value: rounds.some(r => r.completed) ? 1.0 : 0.3,
-        context: 'Based on successful completion'
-      }
+        value: rounds.some((r) => r.completed) ? 1.0 : 0.3,
+        context: "Based on successful completion",
+      },
     ];
   }
 
   private identifyKeyConversationMoments(
     rounds: ConversationRound[],
     guidance: ParameterGuidance[],
-    conflicts: ParameterConflict[]
+    conflicts: ParameterConflict[],
   ): ConversationMoment[] {
     const moments: ConversationMoment[] = [];
 
@@ -1300,7 +1395,7 @@ export class NaturalLanguageParameterInterface {
           type: MomentType.PARAMETER_DISCOVERED,
           description: `Collected ${Object.keys(round.collectedParameters).length} parameters`,
           parametersInvolved: Object.keys(round.collectedParameters),
-          userReaction: UserReaction.POSITIVE
+          userReaction: UserReaction.POSITIVE,
         });
       }
     });
@@ -1325,60 +1420,100 @@ export class NaturalLanguageParameterInterface {
   }
 
   // Add more helper methods as needed...
-  private async generateDetailedPrompt(paramName: string, definition: ParameterDefinition, existingParameters: Record<string, any>): Promise<string> {
+  private async generateDetailedPrompt(
+    paramName: string,
+    definition: ParameterDefinition,
+    existingParameters: Record<string, any>,
+  ): Promise<string> {
     return `Please provide a value for ${paramName}. ${definition.description}. Type: ${definition.type}.`;
   }
 
-  private async generateExpertPrompt(paramName: string, definition: ParameterDefinition, existingParameters: Record<string, any>, userContext: UserContext): Promise<string> {
+  private async generateExpertPrompt(
+    paramName: string,
+    definition: ParameterDefinition,
+    existingParameters: Record<string, any>,
+    userContext: UserContext,
+  ): Promise<string> {
     return `${paramName} (${definition.type}): ${definition.description}. Security: ${definition.securityLevel}.`;
   }
 
-  private async generateSimpleExamples(definition: ParameterDefinition, count: number): Promise<PromptExample[]> {
-    return definition.examples.slice(0, count).map(example => ({
+  private async generateSimpleExamples(
+    definition: ParameterDefinition,
+    count: number,
+  ): Promise<PromptExample[]> {
+    return definition.examples.slice(0, count).map((example) => ({
       input: example,
       explanation: `Example value: ${example}`,
-      isGoodExample: true
+      isGoodExample: true,
     }));
   }
 
-  private async generateDetailedExamples(definition: ParameterDefinition, count: number): Promise<PromptExample[]> {
+  private async generateDetailedExamples(
+    definition: ParameterDefinition,
+    count: number,
+  ): Promise<PromptExample[]> {
     return this.generateSimpleExamples(definition, count);
   }
 
-  private async generateExpertExamples(definition: ParameterDefinition, count: number): Promise<PromptExample[]> {
+  private async generateExpertExamples(
+    definition: ParameterDefinition,
+    count: number,
+  ): Promise<PromptExample[]> {
     return this.generateSimpleExamples(definition, count);
   }
 
-  private async generateValidationHints(definition: ParameterDefinition): Promise<string[]> {
-    return definition.validationRules.map(rule => rule.conversationalExplanation);
+  private async generateValidationHints(
+    definition: ParameterDefinition,
+  ): Promise<string[]> {
+    return definition.validationRules.map(
+      (rule) => rule.conversationalExplanation,
+    );
   }
 
-  private async generateAdvancedValidationHints(definition: ParameterDefinition): Promise<string[]> {
+  private async generateAdvancedValidationHints(
+    definition: ParameterDefinition,
+  ): Promise<string[]> {
     return this.generateValidationHints(definition);
   }
 
-  private async generateFollowUpPrompts(definition: ParameterDefinition): Promise<string[]> {
+  private async generateFollowUpPrompts(
+    definition: ParameterDefinition,
+  ): Promise<string[]> {
     return [`Would you like to see examples for ${definition.type} values?`];
   }
 
-  private async generateValidationHelp(definition: ParameterDefinition, userLevel: DifficultyLevel): Promise<string> {
-    return `Validation rules: ${definition.validationRules.map(r => r.type).join(', ')}`;
+  private async generateValidationHelp(
+    definition: ParameterDefinition,
+    userLevel: DifficultyLevel,
+  ): Promise<string> {
+    return `Validation rules: ${definition.validationRules.map((r) => r.type).join(", ")}`;
   }
 
-  private async generateFormatGuidance(definition: ParameterDefinition, userLevel: DifficultyLevel): Promise<string> {
+  private async generateFormatGuidance(
+    definition: ParameterDefinition,
+    userLevel: DifficultyLevel,
+  ): Promise<string> {
     return `Expected format: ${definition.type}`;
   }
 
-  private async generateBusinessContext(definition: ParameterDefinition, userLevel: DifficultyLevel): Promise<string> {
+  private async generateBusinessContext(
+    definition: ParameterDefinition,
+    userLevel: DifficultyLevel,
+  ): Promise<string> {
     return `Business context: ${definition.description}`;
   }
 
-  private async generateSecurityGuidance(definition: ParameterDefinition, userLevel: DifficultyLevel): Promise<string> {
+  private async generateSecurityGuidance(
+    definition: ParameterDefinition,
+    userLevel: DifficultyLevel,
+  ): Promise<string> {
     return `Security level: ${definition.securityLevel}`;
   }
 
-  private async generateSecurityMistakes(definition: ParameterDefinition): Promise<string[]> {
-    return ['Avoid special characters', 'Do not include sensitive data'];
+  private async generateSecurityMistakes(
+    definition: ParameterDefinition,
+  ): Promise<string[]> {
+    return ["Avoid special characters", "Do not include sensitive data"];
   }
 }
 

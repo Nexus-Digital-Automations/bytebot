@@ -74,35 +74,46 @@ describe("EnhancedJwtParlantBridgeService Integration Tests", () => {
         {
           provide: ConfigService,
           useValue: {
-            get: jest.fn((key: string, defaultValue?: string | number | boolean | Record<string, unknown>) => {
-              switch (key) {
-                case "JWT_SECRET":
-                  return testConfig.JWT_SECRET;
-                case "JWT_REFRESH_SECRET":
-                  return testConfig.JWT_REFRESH_SECRET;
-                case "redis":
-                  return {
-                    host: testConfig.REDIS_HOST,
-                    port: testConfig.REDIS_PORT,
-                    password: undefined,
-                    db: 0,
-                  };
-                case "parlant.apiUrl":
-                  return testConfig.PARLANT_API_URL;
-                case "parlant.apiKey":
-                  return testConfig.PARLANT_API_KEY;
-                case "parlant.failoverUrls":
-                  return "http://localhost:8001,http://localhost:8002";
-                default:
-                  return defaultValue;
-              }
-            }),
+            get: jest.fn(
+              (
+                key: string,
+                defaultValue?:
+                  | string
+                  | number
+                  | boolean
+                  | Record<string, unknown>,
+              ) => {
+                switch (key) {
+                  case "JWT_SECRET":
+                    return testConfig.JWT_SECRET;
+                  case "JWT_REFRESH_SECRET":
+                    return testConfig.JWT_REFRESH_SECRET;
+                  case "redis":
+                    return {
+                      host: testConfig.REDIS_HOST,
+                      port: testConfig.REDIS_PORT,
+                      password: undefined,
+                      db: 0,
+                    };
+                  case "parlant.apiUrl":
+                    return testConfig.PARLANT_API_URL;
+                  case "parlant.apiKey":
+                    return testConfig.PARLANT_API_KEY;
+                  case "parlant.failoverUrls":
+                    return "http://localhost:8001,http://localhost:8002";
+                  default:
+                    return defaultValue;
+                }
+              },
+            ),
           },
         },
       ],
     }).compile();
 
-    service = module.get<EnhancedJwtParlantBridgeService>(EnhancedJwtParlantBridgeService);
+    service = module.get<EnhancedJwtParlantBridgeService>(
+      EnhancedJwtParlantBridgeService,
+    );
 
     // Initialize the service
     await service.onModuleInit();
@@ -142,7 +153,7 @@ describe("EnhancedJwtParlantBridgeService Integration Tests", () => {
           mfaVerified: true,
         },
         testConfig.JWT_SECRET,
-        { expiresIn: "1h" }
+        { expiresIn: "1h" },
       );
 
       // Mock successful PARLANT session creation
@@ -154,13 +165,13 @@ describe("EnhancedJwtParlantBridgeService Integration Tests", () => {
         mockToken,
         "refresh-token",
         "127.0.0.1",
-        "test-agent"
+        "test-agent",
       );
 
       expect(mockRedisInstance.setex).toHaveBeenCalledWith(
         "session:session-123",
         3600,
-        expect.any(String)
+        expect.any(String),
       );
       expect(validationContext.sessionId).toBe("parlant-session-123");
     });
@@ -196,9 +207,13 @@ describe("EnhancedJwtParlantBridgeService Integration Tests", () => {
     });
 
     it("should handle Redis connection failures gracefully", async () => {
-      mockRedisInstance.connect.mockRejectedValue(new Error("Redis connection failed"));
+      mockRedisInstance.connect.mockRejectedValue(
+        new Error("Redis connection failed"),
+      );
 
-      await expect(service.onModuleInit()).rejects.toThrow("Redis connection failed");
+      await expect(service.onModuleInit()).rejects.toThrow(
+        "Redis connection failed",
+      );
     });
 
     it("should cleanup expired sessions from Redis", async () => {
@@ -211,7 +226,10 @@ describe("EnhancedJwtParlantBridgeService Integration Tests", () => {
       mockRedisInstance.keys.mockResolvedValue(expiredSessionKeys);
 
       // Mock the cleanup process
-      const cleanupExpiredSessionsSpy = jest.spyOn(service as any, "cleanupExpiredSessions");
+      const cleanupExpiredSessionsSpy = jest.spyOn(
+        service as any,
+        "cleanupExpiredSessions",
+      );
 
       // Trigger cleanup (normally done by timer)
       (service as any).cleanupExpiredSessions();
@@ -235,7 +253,7 @@ describe("EnhancedJwtParlantBridgeService Integration Tests", () => {
           mfaVerified: true,
         },
         testConfig.JWT_SECRET,
-        { expiresIn: "1h" }
+        { expiresIn: "1h" },
       );
 
       const expectedSessionResponse = {
@@ -252,7 +270,7 @@ describe("EnhancedJwtParlantBridgeService Integration Tests", () => {
         mockToken,
         "refresh-token",
         "192.168.1.100",
-        "Mozilla/5.0 Integration Test"
+        "Mozilla/5.0 Integration Test",
       );
 
       expect(mockedAxios.post).toHaveBeenCalledWith("/sessions", {
@@ -301,7 +319,9 @@ describe("EnhancedJwtParlantBridgeService Integration Tests", () => {
 
       const result = await service.validateSession("session-validate");
 
-      expect(mockedAxios.get).toHaveBeenCalledWith(`/sessions/${parlantSessionId}/validate`);
+      expect(mockedAxios.get).toHaveBeenCalledWith(
+        `/sessions/${parlantSessionId}/validate`,
+      );
       expect(result).toBeDefined();
     });
 
@@ -319,7 +339,7 @@ describe("EnhancedJwtParlantBridgeService Integration Tests", () => {
           mfaVerified: false,
         },
         testConfig.JWT_SECRET,
-        { expiresIn: "1h" }
+        { expiresIn: "1h" },
       );
 
       // Mock PARLANT API failure
@@ -329,7 +349,7 @@ describe("EnhancedJwtParlantBridgeService Integration Tests", () => {
         mockToken,
         "refresh-token",
         "127.0.0.1",
-        "test-agent"
+        "test-agent",
       );
 
       // Should still create session with fallback PARLANT session ID
@@ -360,13 +380,20 @@ describe("EnhancedJwtParlantBridgeService Integration Tests", () => {
       };
 
       // Set up the session bridge in service
-      (service as any).sessionBridges.set("session-invalidate", mockSessionData);
+      (service as any).sessionBridges.set(
+        "session-invalidate",
+        mockSessionData,
+      );
 
       // Call the private invalidation method
       await (service as any).invalidateSession("session-invalidate");
 
-      expect(mockedAxios.delete).toHaveBeenCalledWith(`/sessions/${parlantSessionId}`);
-      expect(mockRedisInstance.del).toHaveBeenCalledWith("session:session-invalidate");
+      expect(mockedAxios.delete).toHaveBeenCalledWith(
+        `/sessions/${parlantSessionId}`,
+      );
+      expect(mockRedisInstance.del).toHaveBeenCalledWith(
+        "session:session-invalidate",
+      );
     });
 
     it("should handle PARLANT health check", async () => {
@@ -401,7 +428,7 @@ describe("EnhancedJwtParlantBridgeService Integration Tests", () => {
           expiresIn: "1h",
           issuer: "bytebot-auth-service",
           audience: "bytebot-api",
-        }
+        },
       );
 
       const exchangeRequest: TokenExchangeRequest = {
@@ -427,7 +454,9 @@ describe("EnhancedJwtParlantBridgeService Integration Tests", () => {
       expect(result.translatedToken).toBeDefined();
       expect(result.identityMapping.success).toBe(true);
       expect(result.identityMapping.aigentUserId).toBe(mockUserId);
-      expect(result.identityMapping.parlantUserId).toBe(`parlant_${mockUserId}`);
+      expect(result.identityMapping.parlantUserId).toBe(
+        `parlant_${mockUserId}`,
+      );
       expect(result.securityValidation.passed).toBe(true);
       expect(result.securityValidation.riskScore).toBeLessThan(100);
     });
@@ -446,7 +475,7 @@ describe("EnhancedJwtParlantBridgeService Integration Tests", () => {
           mfaVerified: false, // MFA not verified for critical security level
         },
         testConfig.JWT_SECRET,
-        { expiresIn: "1h" }
+        { expiresIn: "1h" },
       );
 
       const exchangeRequest: TokenExchangeRequest = {
@@ -465,18 +494,24 @@ describe("EnhancedJwtParlantBridgeService Integration Tests", () => {
 
       // Should still attempt exchange but with high risk score
       expect(result.securityValidation.riskScore).toBeGreaterThan(50);
-      expect(result.securityValidation.threatIndicators).toContain("exchange_failure");
+      expect(result.securityValidation.threatIndicators).toContain(
+        "exchange_failure",
+      );
     });
 
     it("should perform PARLANT to AIgent token exchange", async () => {
       // Create a mock PARLANT token (simplified format)
-      const parlantToken = "parlant_token_" + Buffer.from(JSON.stringify({
-        user_id: mockUserId,
-        agent_id: "agent-456",
-        conversation_id: "conv-789",
-        permissions: ["chat", "analysis"],
-        expires_at: Date.now() + 3600000,
-      })).toString("base64");
+      const parlantToken =
+        "parlant_token_" +
+        Buffer.from(
+          JSON.stringify({
+            user_id: mockUserId,
+            agent_id: "agent-456",
+            conversation_id: "conv-789",
+            permissions: ["chat", "analysis"],
+            expires_at: Date.now() + 3600000,
+          }),
+        ).toString("base64");
 
       const exchangeRequest: TokenExchangeRequest = {
         sourceToken: parlantToken,
@@ -494,7 +529,9 @@ describe("EnhancedJwtParlantBridgeService Integration Tests", () => {
 
       expect(result.success).toBe(true);
       expect(result.translatedToken).toBeDefined();
-      expect(result.identityMapping.parlantUserId).toBe(`parlant_${mockUserId}`);
+      expect(result.identityMapping.parlantUserId).toBe(
+        `parlant_${mockUserId}`,
+      );
     });
   });
 
@@ -515,7 +552,7 @@ describe("EnhancedJwtParlantBridgeService Integration Tests", () => {
           mfaVerified: true,
         },
         testConfig.JWT_SECRET,
-        { expiresIn: "1h" }
+        { expiresIn: "1h" },
       );
 
       const exchangeRequest: TokenExchangeRequest = {
@@ -555,14 +592,14 @@ describe("EnhancedJwtParlantBridgeService Integration Tests", () => {
           mfaVerified: true,
         },
         testConfig.JWT_SECRET,
-        { expiresIn: "1h" }
+        { expiresIn: "1h" },
       );
 
       await service.createBridgeSession(
         aigentToken,
         "refresh-token",
         "127.0.0.1",
-        "test-agent"
+        "test-agent",
       );
 
       expect(eventListener).toHaveBeenCalledWith(
@@ -570,7 +607,7 @@ describe("EnhancedJwtParlantBridgeService Integration Tests", () => {
           type: "authentication",
           action: "bridge_session_created",
           outcome: "success",
-        })
+        }),
       );
     });
 
@@ -593,7 +630,7 @@ describe("EnhancedJwtParlantBridgeService Integration Tests", () => {
             mfaVerified: true,
           },
           testConfig.JWT_SECRET,
-          { expiresIn: "1h" }
+          { expiresIn: "1h" },
         );
 
         const exchangeRequest: TokenExchangeRequest = {
@@ -632,7 +669,10 @@ describe("EnhancedJwtParlantBridgeService Integration Tests", () => {
         data: { session_id: "parlant-failover-session" },
       });
 
-      const result = await service.performFailover("primary-system-1", "timeout");
+      const result = await service.performFailover(
+        "primary-system-1",
+        "timeout",
+      );
 
       expect(result.success).toBe(true);
       expect(result.failoverSystemId).toBeDefined();
@@ -644,7 +684,10 @@ describe("EnhancedJwtParlantBridgeService Integration Tests", () => {
       mockedAxios.post.mockRejectedValue(new Error("All systems down"));
       mockedAxios.get.mockRejectedValue(new Error("All systems down"));
 
-      const result = await service.performFailover("primary-system-1", "manual_failover");
+      const result = await service.performFailover(
+        "primary-system-1",
+        "manual_failover",
+      );
 
       expect(result.success).toBe(false);
       expect(result.affectedSessions).toBe(0);
@@ -667,11 +710,16 @@ describe("EnhancedJwtParlantBridgeService Integration Tests", () => {
           mfaVerified: true,
         },
         testConfig.JWT_SECRET,
-        { expiresIn: "1h" }
+        { expiresIn: "1h" },
       );
 
       // Perform several operations to generate audit trail
-      await service.createBridgeSession(aigentToken, "refresh-token", "127.0.0.1", "compliance-test");
+      await service.createBridgeSession(
+        aigentToken,
+        "refresh-token",
+        "127.0.0.1",
+        "compliance-test",
+      );
 
       const exchangeRequest: TokenExchangeRequest = {
         sourceToken: aigentToken,
@@ -691,7 +739,11 @@ describe("EnhancedJwtParlantBridgeService Integration Tests", () => {
       const startDate = new Date(Date.now() - 86400000); // 24 hours ago
       const endDate = new Date();
 
-      const report = await service.generateComplianceReport(startDate, endDate, "comprehensive");
+      const report = await service.generateComplianceReport(
+        startDate,
+        endDate,
+        "comprehensive",
+      );
 
       expect(report.reportType).toBe("comprehensive");
       expect(report.complianceScore).toBeGreaterThan(0);

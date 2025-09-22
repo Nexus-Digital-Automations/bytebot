@@ -15,51 +15,51 @@
  * Test execution status enumeration
  */
 export enum TestStatus {
-  PENDING = 'PENDING',
-  RUNNING = 'RUNNING',
-  PASSED = 'PASSED',
-  FAILED = 'FAILED',
-  SKIPPED = 'SKIPPED',
-  CANCELLED = 'CANCELLED',
-  TIMEOUT = 'TIMEOUT'
+  PENDING = "PENDING",
+  RUNNING = "RUNNING",
+  PASSED = "PASSED",
+  FAILED = "FAILED",
+  SKIPPED = "SKIPPED",
+  CANCELLED = "CANCELLED",
+  TIMEOUT = "TIMEOUT",
 }
 
 /**
  * Test category enumeration
  */
 export enum TestCategory {
-  UNIT = 'UNIT',
-  INTEGRATION = 'INTEGRATION',
-  PERFORMANCE = 'PERFORMANCE',
-  SECURITY = 'SECURITY',
-  REGRESSION = 'REGRESSION',
-  LOAD = 'LOAD',
-  STRESS = 'STRESS',
-  SMOKE = 'SMOKE'
+  UNIT = "UNIT",
+  INTEGRATION = "INTEGRATION",
+  PERFORMANCE = "PERFORMANCE",
+  SECURITY = "SECURITY",
+  REGRESSION = "REGRESSION",
+  LOAD = "LOAD",
+  STRESS = "STRESS",
+  SMOKE = "SMOKE",
 }
 
 /**
  * Test priority levels
  */
 export enum TestPriority {
-  CRITICAL = 'CRITICAL',
-  HIGH = 'HIGH',
-  MEDIUM = 'MEDIUM',
-  LOW = 'LOW'
+  CRITICAL = "CRITICAL",
+  HIGH = "HIGH",
+  MEDIUM = "MEDIUM",
+  LOW = "LOW",
 }
 
 /**
  * Database function categories for testing
  */
 export enum DatabaseFunctionCategory {
-  QUERY = 'QUERY',
-  TRANSACTION = 'TRANSACTION',
-  HEALTH = 'HEALTH',
-  METRICS = 'METRICS',
-  BACKUP = 'BACKUP',
-  AUTHENTICATION = 'AUTHENTICATION',
-  AUTHORIZATION = 'AUTHORIZATION',
-  VALIDATION = 'VALIDATION'
+  QUERY = "QUERY",
+  TRANSACTION = "TRANSACTION",
+  HEALTH = "HEALTH",
+  METRICS = "METRICS",
+  BACKUP = "BACKUP",
+  AUTHENTICATION = "AUTHENTICATION",
+  AUTHORIZATION = "AUTHORIZATION",
+  VALIDATION = "VALIDATION",
 }
 
 /**
@@ -71,7 +71,7 @@ export interface DatabaseFunction {
   readonly category: DatabaseFunctionCategory;
   readonly description: string;
   readonly packageName: string;
-  readonly riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  readonly riskLevel: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
   readonly expectedResponseTime: number; // milliseconds
   readonly parameters: DatabaseFunctionParameter[];
   readonly returnType: string;
@@ -144,7 +144,14 @@ export interface TestTeardown {
  * Test assertion definition
  */
 export interface TestAssertion {
-  readonly type: 'EQUALS' | 'NOT_EQUALS' | 'CONTAINS' | 'NOT_CONTAINS' | 'RESPONSE_TIME' | 'STATUS_CODE' | 'CUSTOM';
+  readonly type:
+    | "EQUALS"
+    | "NOT_EQUALS"
+    | "CONTAINS"
+    | "NOT_CONTAINS"
+    | "RESPONSE_TIME"
+    | "STATUS_CODE"
+    | "CUSTOM";
   readonly expected: unknown;
   readonly actual?: unknown;
   readonly description: string;
@@ -408,29 +415,29 @@ export interface ReportingConfig {
  * Report format enumeration
  */
 export enum ReportFormat {
-  HTML = 'HTML',
-  JSON = 'JSON',
-  XML = 'XML',
-  PDF = 'PDF',
-  CONSOLE = 'CONSOLE'
+  HTML = "HTML",
+  JSON = "JSON",
+  XML = "XML",
+  PDF = "PDF",
+  CONSOLE = "CONSOLE",
 }
 
 /**
  * Test execution event types
  */
 export type TestExecutionEvent =
-  | 'framework:initialized'
-  | 'execution:started'
-  | 'execution:completed'
-  | 'execution:failed'
-  | 'execution:stopped'
-  | 'suite:registered'
-  | 'test:started'
-  | 'test:completed'
-  | 'test:failed'
-  | 'coverage:calculated'
-  | 'performance:measured'
-  | 'security:scanned';
+  | "framework:initialized"
+  | "execution:started"
+  | "execution:completed"
+  | "execution:failed"
+  | "execution:stopped"
+  | "suite:registered"
+  | "test:started"
+  | "test:completed"
+  | "test:failed"
+  | "coverage:calculated"
+  | "performance:measured"
+  | "security:scanned";
 
 /**
  * Test execution event data
@@ -447,7 +454,7 @@ export interface TestExecutionEventData {
  * Mock database configuration
  */
 export interface MockDatabaseConfig {
-  readonly type: 'memory' | 'file' | 'docker';
+  readonly type: "memory" | "file" | "docker";
   readonly connectionString?: string;
   readonly schema: DatabaseSchema;
   readonly seedData?: Record<string, any[]>;
@@ -490,7 +497,7 @@ export interface ColumnSchema {
  */
 export interface Relationship {
   readonly name: string;
-  readonly type: 'ONE_TO_ONE' | 'ONE_TO_MANY' | 'MANY_TO_MANY';
+  readonly type: "ONE_TO_ONE" | "ONE_TO_MANY" | "MANY_TO_MANY";
   readonly fromTable: string;
   readonly toTable: string;
   readonly fromColumn: string;
@@ -505,7 +512,7 @@ export interface Index {
   readonly table: string;
   readonly columns: string[];
   readonly unique: boolean;
-  readonly type: 'BTREE' | 'HASH' | 'GIN' | 'GIST';
+  readonly type: "BTREE" | "HASH" | "GIN" | "GIST";
 }
 
 /**
@@ -513,7 +520,12 @@ export interface Index {
  */
 export interface Constraint {
   readonly name: string;
-  readonly type: 'PRIMARY_KEY' | 'FOREIGN_KEY' | 'UNIQUE' | 'CHECK' | 'NOT_NULL';
+  readonly type:
+    | "PRIMARY_KEY"
+    | "FOREIGN_KEY"
+    | "UNIQUE"
+    | "CHECK"
+    | "NOT_NULL";
   readonly columns: string[];
   readonly references?: string;
   readonly condition?: string;
@@ -534,7 +546,7 @@ export interface TestDataConfig {
  */
 export interface DataGenerator {
   readonly name: string;
-  readonly type: 'FAKER' | 'SEQUENCE' | 'RANDOM' | 'CUSTOM';
+  readonly type: "FAKER" | "SEQUENCE" | "RANDOM" | "CUSTOM";
   readonly config: Record<string, any>;
   readonly output: DataGeneratorOutput;
 }
@@ -566,7 +578,7 @@ export interface DataRelationship {
 export interface DataConstraint {
   readonly name: string;
   readonly table: string;
-  readonly type: 'UNIQUE' | 'RANGE' | 'PATTERN' | 'CUSTOM';
+  readonly type: "UNIQUE" | "RANGE" | "PATTERN" | "CUSTOM";
   readonly config: Record<string, any>;
 }
 
@@ -574,17 +586,17 @@ export interface DataConstraint {
  * Data volume configuration
  */
 export interface DataVolume {
-  readonly small: number;    // ~100 records
-  readonly medium: number;   // ~1,000 records
-  readonly large: number;    // ~10,000 records
-  readonly xlarge: number;   // ~100,000 records
+  readonly small: number; // ~100 records
+  readonly medium: number; // ~1,000 records
+  readonly large: number; // ~10,000 records
+  readonly xlarge: number; // ~100,000 records
 }
 
 /**
  * Test runner configuration
  */
 export interface TestRunnerConfig {
-  readonly framework: 'JEST' | 'MOCHA' | 'VITEST';
+  readonly framework: "JEST" | "MOCHA" | "VITEST";
   readonly timeout: number;
   readonly retries: number;
   readonly bail: boolean;
@@ -596,26 +608,31 @@ export interface TestRunnerConfig {
 /**
  * Utility type for test function signatures
  */
-export type TestFunction<TArgs extends unknown[] = any[], TResult = any> =
-  (...args: TArgs) => Promise<TResult> | TResult;
+export type TestFunction<TArgs extends unknown[] = any[], TResult = any> = (
+  ...args: TArgs
+) => Promise<TResult> | TResult;
 
 /**
  * Utility type for test assertions
  */
-export type AssertionFunction<T = any> = (actual: T) => boolean | Promise<boolean>;
+export type AssertionFunction<T = any> = (
+  actual: T,
+) => boolean | Promise<boolean>;
 
 /**
  * Utility type for test mock functions
  */
-export type MockFunction<TArgs extends unknown[] = any[], TResult = any> =
-  TestFunction<TArgs, TResult> & {
-    mockImplementation(fn: TestFunction<TArgs, TResult>): void;
-    mockReturnValue(value: TResult): void;
-    mockResolvedValue(value: TResult): void;
-    mockRejectedValue(error: any): void;
-    mockClear(): void;
-    mockReset(): void;
-  };
+export type MockFunction<
+  TArgs extends unknown[] = any[],
+  TResult = any,
+> = TestFunction<TArgs, TResult> & {
+  mockImplementation(fn: TestFunction<TArgs, TResult>): void;
+  mockReturnValue(value: TResult): void;
+  mockResolvedValue(value: TResult): void;
+  mockRejectedValue(error: any): void;
+  mockClear(): void;
+  mockReset(): void;
+};
 
 /**
  * Utility type for partial test configuration

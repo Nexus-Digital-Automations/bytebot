@@ -10,7 +10,7 @@
  * @author AIgent Integration Team
  */
 
-import { SecurityLevel } from '../../../types/parlant-integration.types';
+import { SecurityLevel } from "../../../types/parlant-integration.types";
 
 // Re-export SecurityLevel so it can be imported from this module
 export { SecurityLevel };
@@ -192,47 +192,47 @@ export interface ValidationMetrics {
  * Database operation types for validation classification
  */
 export enum DatabaseOperationType {
-  READ = 'read',
-  WRITE = 'write',
-  UPDATE = 'update',
-  DELETE = 'delete',
-  BULK_OPERATION = 'bulk_operation',
-  SCHEMA_CHANGE = 'schema_change',
-  TRANSACTION = 'transaction',
-  ADMIN_OPERATION = 'admin_operation',
+  READ = "read",
+  WRITE = "write",
+  UPDATE = "update",
+  DELETE = "delete",
+  BULK_OPERATION = "bulk_operation",
+  SCHEMA_CHANGE = "schema_change",
+  TRANSACTION = "transaction",
+  ADMIN_OPERATION = "admin_operation",
 }
 
 /**
  * Validation decision outcomes
  */
 export enum ValidationDecision {
-  APPROVE = 'approve',
-  DENY = 'deny',
-  MODIFY = 'modify',
-  REQUIRE_CONFIRMATION = 'require_confirmation',
-  ESCALATE = 'escalate',
-  BYPASS = 'bypass',
+  APPROVE = "approve",
+  DENY = "deny",
+  MODIFY = "modify",
+  REQUIRE_CONFIRMATION = "require_confirmation",
+  ESCALATE = "escalate",
+  BYPASS = "bypass",
 }
 
 /**
  * Authorization levels for bypass operations
  */
 export enum AuthorizationLevel {
-  USER = 'user',
-  ADMIN = 'admin',
-  SUPER_ADMIN = 'super_admin',
-  SYSTEM = 'system',
-  EMERGENCY = 'emergency',
+  USER = "user",
+  ADMIN = "admin",
+  SUPER_ADMIN = "super_admin",
+  SYSTEM = "system",
+  EMERGENCY = "emergency",
 }
 
 /**
  * Cache strategy types
  */
 export enum CacheStrategy {
-  AGGRESSIVE = 'aggressive',
-  CONSERVATIVE = 'conservative',
-  ADAPTIVE = 'adaptive',
-  DISABLED = 'disabled',
+  AGGRESSIVE = "aggressive",
+  CONSERVATIVE = "conservative",
+  ADAPTIVE = "adaptive",
+  DISABLED = "disabled",
 }
 
 // ===== SUPPORTING INTERFACES =====
@@ -442,87 +442,87 @@ export interface AuditRequirement {
 // ===== ADDITIONAL ENUMS =====
 
 export enum ConversationPriority {
-  LOW = 'low',
-  NORMAL = 'normal',
-  HIGH = 'high',
-  URGENT = 'urgent',
-  EMERGENCY = 'emergency',
+  LOW = "low",
+  NORMAL = "normal",
+  HIGH = "high",
+  URGENT = "urgent",
+  EMERGENCY = "emergency",
 }
 
 export enum ResponseType {
-  BINARY = 'binary',
-  DETAILED = 'detailed',
-  INTERACTIVE = 'interactive',
-  STREAMING = 'streaming',
+  BINARY = "binary",
+  DETAILED = "detailed",
+  INTERACTIVE = "interactive",
+  STREAMING = "streaming",
 }
 
 export enum RiskLevel {
-  MINIMAL = 'minimal',
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  CRITICAL = 'critical',
+  MINIMAL = "minimal",
+  LOW = "low",
+  MEDIUM = "medium",
+  HIGH = "high",
+  CRITICAL = "critical",
 }
 
 export enum ImpactSeverity {
-  NEGLIGIBLE = 'negligible',
-  MINOR = 'minor',
-  MODERATE = 'moderate',
-  MAJOR = 'major',
-  CRITICAL = 'critical',
+  NEGLIGIBLE = "negligible",
+  MINOR = "minor",
+  MODERATE = "moderate",
+  MAJOR = "major",
+  CRITICAL = "critical",
 }
 
 export enum CacheStatus {
-  HIT = 'hit',
-  MISS = 'miss',
-  STALE = 'stale',
-  EXPIRED = 'expired',
-  INVALIDATED = 'invalidated',
+  HIT = "hit",
+  MISS = "miss",
+  STALE = "stale",
+  EXPIRED = "expired",
+  INVALIDATED = "invalidated",
 }
 
 export enum CacheTier {
-  L1_MEMORY = 'l1_memory',
-  L2_REDIS = 'l2_redis',
-  L3_DATABASE = 'l3_database',
+  L1_MEMORY = "l1_memory",
+  L2_REDIS = "l2_redis",
+  L3_DATABASE = "l3_database",
 }
 
 export enum ValidationSource {
-  PARLANT_LIVE = 'parlant_live',
-  CACHE_L1 = 'cache_l1',
-  CACHE_L2 = 'cache_l2',
-  CACHE_L3 = 'cache_l3',
-  FALLBACK = 'fallback',
-  BYPASS = 'bypass',
+  PARLANT_LIVE = "parlant_live",
+  CACHE_L1 = "cache_l1",
+  CACHE_L2 = "cache_l2",
+  CACHE_L3 = "cache_l3",
+  FALLBACK = "fallback",
+  BYPASS = "bypass",
 }
 
 export enum BypassTriggerType {
-  TIMEOUT = 'timeout',
-  CONNECTION_FAILURE = 'connection_failure',
-  CRITICAL_OPERATION = 'critical_operation',
-  EMERGENCY_OVERRIDE = 'emergency_override',
-  MAINTENANCE_MODE = 'maintenance_mode',
+  TIMEOUT = "timeout",
+  CONNECTION_FAILURE = "connection_failure",
+  CRITICAL_OPERATION = "critical_operation",
+  EMERGENCY_OVERRIDE = "emergency_override",
+  MAINTENANCE_MODE = "maintenance_mode",
 }
 
 export enum AuditType {
-  BASIC = 'basic',
-  DETAILED = 'detailed',
-  COMPREHENSIVE = 'comprehensive',
-  FORENSIC = 'forensic',
+  BASIC = "basic",
+  DETAILED = "detailed",
+  COMPREHENSIVE = "comprehensive",
+  FORENSIC = "forensic",
 }
 
 export enum AuditDetailLevel {
-  MINIMAL = 'minimal',
-  STANDARD = 'standard',
-  DETAILED = 'detailed',
-  VERBOSE = 'verbose',
+  MINIMAL = "minimal",
+  STANDARD = "standard",
+  DETAILED = "detailed",
+  VERBOSE = "verbose",
 }
 
 // ===== COMPLEX TYPE DEFINITIONS =====
 
 export interface InterfacePreferences {
-  preferredMode: 'text' | 'voice' | 'visual';
+  preferredMode: "text" | "voice" | "visual";
   accessibility: AccessibilityOptions;
-  responseFormat: 'json' | 'natural_language' | 'structured';
+  responseFormat: "json" | "natural_language" | "structured";
 }
 
 export interface AccessibilityOptions {
@@ -568,7 +568,7 @@ export interface AlertingConfig {
 export interface AlertThreshold {
   metric: string;
   threshold: number;
-  severity: 'info' | 'warning' | 'critical';
+  severity: "info" | "warning" | "critical";
 }
 
 export interface DashboardConfig {
@@ -608,11 +608,11 @@ export interface AccessPattern {
 }
 
 export enum AccessFrequency {
-  RARE = 'rare',
-  OCCASIONAL = 'occasional',
-  REGULAR = 'regular',
-  FREQUENT = 'frequent',
-  CONSTANT = 'constant',
+  RARE = "rare",
+  OCCASIONAL = "occasional",
+  REGULAR = "regular",
+  FREQUENT = "frequent",
+  CONSTANT = "constant",
 }
 
 export interface TemporalPattern {
@@ -622,17 +622,17 @@ export interface TemporalPattern {
 }
 
 export enum DayOfWeek {
-  MONDAY = 'monday',
-  TUESDAY = 'tuesday',
-  WEDNESDAY = 'wednesday',
-  THURSDAY = 'thursday',
-  FRIDAY = 'friday',
-  SATURDAY = 'saturday',
-  SUNDAY = 'sunday',
+  MONDAY = "monday",
+  TUESDAY = "tuesday",
+  WEDNESDAY = "wednesday",
+  THURSDAY = "thursday",
+  FRIDAY = "friday",
+  SATURDAY = "saturday",
+  SUNDAY = "sunday",
 }
 
 export interface SeasonalityPattern {
-  type: 'none' | 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
+  type: "none" | "daily" | "weekly" | "monthly" | "quarterly" | "yearly";
   strength: number;
 }
 
@@ -656,7 +656,7 @@ export interface GeographicPattern {
 export interface PipelineStage {
   name: string;
   duration: number;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
+  status: "pending" | "processing" | "completed" | "failed";
   metadata: Record<string, unknown>;
 }
 
@@ -678,7 +678,7 @@ export interface QualityIndicator {
   metric: string;
   value: number;
   threshold: number;
-  status: 'good' | 'warning' | 'critical';
+  status: "good" | "warning" | "critical";
 }
 
 // ===== ERROR TYPES =====
@@ -690,27 +690,27 @@ export class ValidationLayerError extends Error {
     public readonly details?: Record<string, unknown>,
   ) {
     super(message);
-    this.name = 'ValidationLayerError';
+    this.name = "ValidationLayerError";
   }
 }
 
 export class ConversationContextError extends ValidationLayerError {
   constructor(message: string, details?: Record<string, unknown>) {
-    super(message, 'CONVERSATION_CONTEXT_ERROR', details);
-    this.name = 'ConversationContextError';
+    super(message, "CONVERSATION_CONTEXT_ERROR", details);
+    this.name = "ConversationContextError";
   }
 }
 
 export class CacheOptimizationError extends ValidationLayerError {
   constructor(message: string, details?: Record<string, unknown>) {
-    super(message, 'CACHE_OPTIMIZATION_ERROR', details);
-    this.name = 'CacheOptimizationError';
+    super(message, "CACHE_OPTIMIZATION_ERROR", details);
+    this.name = "CacheOptimizationError";
   }
 }
 
 export class BypassExecutionError extends ValidationLayerError {
   constructor(message: string, details?: Record<string, unknown>) {
-    super(message, 'BYPASS_EXECUTION_ERROR', details);
-    this.name = 'BypassExecutionError';
+    super(message, "BYPASS_EXECUTION_ERROR", details);
+    this.name = "BypassExecutionError";
   }
 }

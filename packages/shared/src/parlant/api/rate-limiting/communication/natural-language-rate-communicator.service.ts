@@ -8,7 +8,7 @@
  * @since 2025-09-22
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from "@nestjs/common";
 import {
   RateLimitContext,
   RateLimitDecision,
@@ -17,9 +17,9 @@ import {
   EducationalContent,
   RateLimitAlternative,
   UserBehaviorInsights,
-  RateLimitAnalytics
-} from '../types/rate-limiting.types';
-import { UserContext } from '../../interfaces/conversational-api.interface';
+  RateLimitAnalytics,
+} from "../types/rate-limiting.types";
+import { UserContext } from "../../interfaces/conversational-api.interface";
 
 /**
  * Natural Language Rate Communication Service
@@ -28,7 +28,9 @@ import { UserContext } from '../../interfaces/conversational-api.interface';
  */
 @Injectable()
 export class NaturalLanguageRateCommunicatorService {
-  private readonly logger = new Logger(NaturalLanguageRateCommunicatorService.name);
+  private readonly logger = new Logger(
+    NaturalLanguageRateCommunicatorService.name,
+  );
 
   // NLP and personalization engines
   private readonly intentAnalyzer: IntentAnalysisEngine;
@@ -59,13 +61,16 @@ export class NaturalLanguageRateCommunicatorService {
   async generateConversationalResponse(
     context: RateLimitContext,
     decision: RateLimitDecision,
-    userBehavior?: UserBehaviorInsights
+    userBehavior?: UserBehaviorInsights,
   ): Promise<ConversationalRateLimitResponse> {
     const startTime = Date.now();
 
     try {
       // Get conversation context and user preferences
-      const conversationContext = await this.contextManager.getContext(context.userId, context.sessionId);
+      const conversationContext = await this.contextManager.getContext(
+        context.userId,
+        context.sessionId,
+      );
       const userPreferences = this.extractUserPreferences(context.userContext);
 
       // Generate personalized explanation
@@ -73,28 +78,29 @@ export class NaturalLanguageRateCommunicatorService {
         context,
         decision,
         userPreferences,
-        conversationContext
+        conversationContext,
       );
 
       // Generate user-friendly message
-      const userFriendlyMessage = await this.responseGenerator.generateUserFriendlyMessage(
-        decision,
-        userPreferences
-      );
+      const userFriendlyMessage =
+        await this.responseGenerator.generateUserFriendlyMessage(
+          decision,
+          userPreferences,
+        );
 
       // Generate personalized suggestions
       const suggestions = await this.generatePersonalizedSuggestions(
         context,
         decision,
         userBehavior,
-        userPreferences
+        userPreferences,
       );
 
       // Generate negotiation options if applicable
       const negotiationOptions = await this.generateNegotiationOptions(
         context,
         decision,
-        userPreferences
+        userPreferences,
       );
 
       // Generate educational content
@@ -102,37 +108,46 @@ export class NaturalLanguageRateCommunicatorService {
         context,
         decision,
         userPreferences,
-        userBehavior
+        userBehavior,
       );
 
       // Generate technical details if requested
-      const technicalDetails = userPreferences.explanationStyle === 'TECHNICAL' ?
-        await this.generateTechnicalDetails(context, decision) : undefined;
+      const technicalDetails =
+        userPreferences.explanationStyle === "TECHNICAL"
+          ? await this.generateTechnicalDetails(context, decision)
+          : undefined;
 
       // Optimize response for user experience
-      const optimizedResponse = await this.responseOptimizer.optimizeResponse({
-        explanation,
-        userFriendlyMessage,
-        technicalDetails,
-        suggestions,
-        negotiationOptions,
-        educationalContent
-      }, userPreferences);
+      const optimizedResponse = await this.responseOptimizer.optimizeResponse(
+        {
+          explanation,
+          userFriendlyMessage,
+          technicalDetails,
+          suggestions,
+          negotiationOptions,
+          educationalContent,
+        },
+        userPreferences,
+      );
 
       // Update conversation context
       await this.contextManager.updateContext(
         context.userId,
         context.sessionId,
-        { decision, response: optimizedResponse }
+        { decision, response: optimizedResponse },
       );
 
       const processingTime = Date.now() - startTime;
-      this.logger.debug(`Generated conversational response in ${processingTime}ms for user: ${context.userId}`);
+      this.logger.debug(
+        `Generated conversational response in ${processingTime}ms for user: ${context.userId}`,
+      );
 
       return optimizedResponse;
-
     } catch (error) {
-      this.logger.error(`Failed to generate conversational response for user: ${context.userId}`, error);
+      this.logger.error(
+        `Failed to generate conversational response for user: ${context.userId}`,
+        error,
+      );
       return this.generateFallbackResponse(decision);
     }
   }
@@ -143,31 +158,40 @@ export class NaturalLanguageRateCommunicatorService {
   async processNegotiationRequest(
     context: RateLimitContext,
     userMessage: string,
-    currentDecision: RateLimitDecision
+    currentDecision: RateLimitDecision,
   ): Promise<NegotiationResult> {
     try {
       // Analyze user intent from natural language
-      const intentAnalysis = await this.intentAnalyzer.analyzeNegotiationIntent(userMessage, context);
+      const intentAnalysis = await this.intentAnalyzer.analyzeNegotiationIntent(
+        userMessage,
+        context,
+      );
 
       // Validate negotiation feasibility
-      const feasibilityAssessment = await this.negotiationEngine.assessFeasibility(
-        context,
-        intentAnalysis,
-        currentDecision
-      );
+      const feasibilityAssessment =
+        await this.negotiationEngine.assessFeasibility(
+          context,
+          intentAnalysis,
+          currentDecision,
+        );
 
       // Generate negotiation response
-      const negotiationResponse = await this.negotiationEngine.generateNegotiationResponse(
-        context,
-        intentAnalysis,
-        feasibilityAssessment,
-        currentDecision
-      );
+      const negotiationResponse =
+        await this.negotiationEngine.generateNegotiationResponse(
+          context,
+          intentAnalysis,
+          feasibilityAssessment,
+          currentDecision,
+        );
 
       // Update decision if negotiation is successful
-      const updatedDecision = feasibilityAssessment.approved ?
-        await this.applyNegotiationResult(context, currentDecision, negotiationResponse) :
-        currentDecision;
+      const updatedDecision = feasibilityAssessment.approved
+        ? await this.applyNegotiationResult(
+            context,
+            currentDecision,
+            negotiationResponse,
+          )
+        : currentDecision;
 
       return {
         originalDecision: currentDecision,
@@ -175,11 +199,13 @@ export class NaturalLanguageRateCommunicatorService {
         negotiationSuccessful: feasibilityAssessment.approved,
         response: negotiationResponse,
         reasoning: feasibilityAssessment.reasoning,
-        alternativeOptions: feasibilityAssessment.alternatives
+        alternativeOptions: feasibilityAssessment.alternatives,
       };
-
     } catch (error) {
-      this.logger.error(`Failed to process negotiation request for user: ${context.userId}`, error);
+      this.logger.error(
+        `Failed to process negotiation request for user: ${context.userId}`,
+        error,
+      );
       return this.generateFailedNegotiationResult(currentDecision);
     }
   }
@@ -190,17 +216,23 @@ export class NaturalLanguageRateCommunicatorService {
   async provideRateLimitingEducation(
     context: RateLimitContext,
     educationTopic: string,
-    userLevel: 'NOVICE' | 'INTERMEDIATE' | 'ADVANCED' | 'EXPERT' = 'INTERMEDIATE'
+    userLevel:
+      | "NOVICE"
+      | "INTERMEDIATE"
+      | "ADVANCED"
+      | "EXPERT" = "INTERMEDIATE",
   ): Promise<EducationalContent> {
     try {
       return await this.educationEngine.generateEducationalContent(
         educationTopic,
         userLevel,
-        context
+        context,
       );
-
     } catch (error) {
-      this.logger.error(`Failed to provide education for user: ${context.userId}`, error);
+      this.logger.error(
+        `Failed to provide education for user: ${context.userId}`,
+        error,
+      );
       return this.generateBasicEducation();
     }
   }
@@ -211,7 +243,7 @@ export class NaturalLanguageRateCommunicatorService {
   async explainDecisionInDetail(
     context: RateLimitContext,
     decision: RateLimitDecision,
-    analytics?: RateLimitAnalytics
+    analytics?: RateLimitAnalytics,
   ): Promise<DetailedExplanation> {
     try {
       const userPreferences = this.extractUserPreferences(context.userContext);
@@ -221,28 +253,39 @@ export class NaturalLanguageRateCommunicatorService {
         context,
         decision,
         analytics,
-        userPreferences
+        userPreferences,
       );
 
       // Generate visual aids if requested
-      const visualAids = userPreferences.includeVisualAids ?
-        await this.generateVisualAids(context, decision, analytics) : undefined;
+      const visualAids = userPreferences.includeVisualAids
+        ? await this.generateVisualAids(context, decision, analytics)
+        : undefined;
 
       // Generate examples relevant to user's use case
-      const examples = await this.generateRelevantExamples(context, decision, userPreferences);
+      const examples = await this.generateRelevantExamples(
+        context,
+        decision,
+        userPreferences,
+      );
 
       return {
         explanation,
         reasoning: this.generateReasoning(decision, analytics),
         impact: this.generateImpactExplanation(analytics),
-        recommendations: await this.generateDetailedRecommendations(context, decision, analytics),
+        recommendations: await this.generateDetailedRecommendations(
+          context,
+          decision,
+          analytics,
+        ),
         visualAids,
         examples,
-        followUpQuestions: this.generateFollowUpQuestions(context, decision)
+        followUpQuestions: this.generateFollowUpQuestions(context, decision),
       };
-
     } catch (error) {
-      this.logger.error(`Failed to explain decision in detail for user: ${context.userId}`, error);
+      this.logger.error(
+        `Failed to explain decision in detail for user: ${context.userId}`,
+        error,
+      );
       return this.generateBasicExplanation(decision);
     }
   }
@@ -252,11 +295,12 @@ export class NaturalLanguageRateCommunicatorService {
    */
   async generateAlternativeSuggestions(
     context: RateLimitContext,
-    decision: RateLimitDecision
+    decision: RateLimitDecision,
   ): Promise<RateLimitAlternative[]> {
     try {
       // Analyze user's typical usage patterns
-      const usagePatterns = await this.personalizationEngine.analyzeUsagePatterns(context.userId);
+      const usagePatterns =
+        await this.personalizationEngine.analyzeUsagePatterns(context.userId);
 
       // Generate context-aware alternatives
       const alternatives: RateLimitAlternative[] = [];
@@ -264,20 +308,21 @@ export class NaturalLanguageRateCommunicatorService {
       // Timing-based alternatives
       if (decision.retryAfter) {
         alternatives.push({
-          type: 'TIMING',
+          type: "TIMING",
           description: `Retry your request in ${Math.ceil(decision.retryAfter / 60)} minutes when your limits reset`,
           suggestedTime: new Date(Date.now() + decision.retryAfter * 1000),
-          estimatedSuccess: 0.95
+          estimatedSuccess: 0.95,
         });
       }
 
       // Batch processing alternatives
       if (this.canBatch(context)) {
         alternatives.push({
-          type: 'BATCH',
-          description: 'Combine multiple similar requests into a single batch operation',
+          type: "BATCH",
+          description:
+            "Combine multiple similar requests into a single batch operation",
           batchSize: this.calculateOptimalBatchSize(context, usagePatterns),
-          estimatedSuccess: 0.85
+          estimatedSuccess: 0.85,
         });
       }
 
@@ -285,24 +330,29 @@ export class NaturalLanguageRateCommunicatorService {
       const alternativeEndpoints = await this.findAlternativeEndpoints(context);
       for (const endpoint of alternativeEndpoints) {
         alternatives.push({
-          type: 'ENDPOINT',
+          type: "ENDPOINT",
           description: `Use alternative endpoint: ${endpoint.name}`,
           endpoint: endpoint.path,
           method: endpoint.method,
-          estimatedSuccess: endpoint.estimatedSuccess
+          estimatedSuccess: endpoint.estimatedSuccess,
         });
       }
 
       // Off-peak timing suggestions
-      const offPeakSuggestion = await this.generateOffPeakSuggestion(context, usagePatterns);
+      const offPeakSuggestion = await this.generateOffPeakSuggestion(
+        context,
+        usagePatterns,
+      );
       if (offPeakSuggestion) {
         alternatives.push(offPeakSuggestion);
       }
 
       return alternatives;
-
     } catch (error) {
-      this.logger.error(`Failed to generate alternative suggestions for user: ${context.userId}`, error);
+      this.logger.error(
+        `Failed to generate alternative suggestions for user: ${context.userId}`,
+        error,
+      );
       return this.generateBasicAlternatives(decision);
     }
   }
@@ -312,25 +362,30 @@ export class NaturalLanguageRateCommunicatorService {
    */
   async provideProactiveGuidance(
     context: RateLimitContext,
-    currentUsage: any
+    currentUsage: any,
   ): Promise<ProactiveGuidance> {
     try {
       const utilizationThreshold = 0.8; // 80% utilization
       const userPreferences = this.extractUserPreferences(context.userContext);
 
       // Check if user is approaching limits
-      const approachingLimits = currentUsage.utilizationPercentage > utilizationThreshold * 100;
+      const approachingLimits =
+        currentUsage.utilizationPercentage > utilizationThreshold * 100;
 
       if (!approachingLimits) {
         return {
           guidanceNeeded: false,
           message: "Your current usage is within normal limits.",
-          recommendations: []
+          recommendations: [],
         };
       }
 
       // Generate proactive guidance
-      const guidance = await this.generateProactiveRecommendations(context, currentUsage, userPreferences);
+      const guidance = await this.generateProactiveRecommendations(
+        context,
+        currentUsage,
+        userPreferences,
+      );
 
       return {
         guidanceNeeded: true,
@@ -338,12 +393,18 @@ export class NaturalLanguageRateCommunicatorService {
         recommendations: guidance.recommendations,
         urgencyLevel: guidance.urgencyLevel,
         suggestedActions: guidance.suggestedActions,
-        estimatedTimeToLimit: guidance.estimatedTimeToLimit
+        estimatedTimeToLimit: guidance.estimatedTimeToLimit,
       };
-
     } catch (error) {
-      this.logger.error(`Failed to provide proactive guidance for user: ${context.userId}`, error);
-      return { guidanceNeeded: false, message: "Unable to provide guidance at this time.", recommendations: [] };
+      this.logger.error(
+        `Failed to provide proactive guidance for user: ${context.userId}`,
+        error,
+      );
+      return {
+        guidanceNeeded: false,
+        message: "Unable to provide guidance at this time.",
+        recommendations: [],
+      };
     }
   }
 
@@ -351,7 +412,7 @@ export class NaturalLanguageRateCommunicatorService {
    * Initialize the communication system
    */
   private initializeCommunicationSystem(): void {
-    this.logger.log('Initializing Natural Language Rate Communication System');
+    this.logger.log("Initializing Natural Language Rate Communication System");
 
     // Initialize response templates
     this.responseGenerator.initializeTemplates();
@@ -364,7 +425,9 @@ export class NaturalLanguageRateCommunicatorService {
       this.contextManager.cleanupExpiredContexts();
     }, 300000); // Cleanup every 5 minutes
 
-    this.logger.log('Natural Language Rate Communication System initialized successfully');
+    this.logger.log(
+      "Natural Language Rate Communication System initialized successfully",
+    );
   }
 
   /**
@@ -372,27 +435,36 @@ export class NaturalLanguageRateCommunicatorService {
    */
   private extractUserPreferences(userContext: UserContext): UserPreferences {
     return {
-      explanationStyle: userContext.preferences?.explanationStyle || 'BASIC',
+      explanationStyle: userContext.preferences?.explanationStyle || "BASIC",
       includeExamples: userContext.preferences?.includeExamples || true,
       includeVisualAids: userContext.preferences?.includeVisualAids || false,
-      includeTechnicalDetails: userContext.preferences?.includeTechnicalDetails || false,
-      preferredLanguage: 'en', // Could be extracted from user context
+      includeTechnicalDetails:
+        userContext.preferences?.includeTechnicalDetails || false,
+      preferredLanguage: "en", // Could be extracted from user context
       communicationStyle: this.inferCommunicationStyle(userContext),
-      expertiseLevel: userContext.profile?.technicalLevel || 'INTERMEDIATE'
+      expertiseLevel: userContext.profile?.technicalLevel || "INTERMEDIATE",
     };
   }
 
   /**
    * Infer communication style from user context
    */
-  private inferCommunicationStyle(userContext: UserContext): 'FORMAL' | 'CASUAL' | 'TECHNICAL' {
-    if (userContext.profile?.role?.includes('developer') || userContext.profile?.role?.includes('engineer')) {
-      return 'TECHNICAL';
+  private inferCommunicationStyle(
+    userContext: UserContext,
+  ): "FORMAL" | "CASUAL" | "TECHNICAL" {
+    if (
+      userContext.profile?.role?.includes("developer") ||
+      userContext.profile?.role?.includes("engineer")
+    ) {
+      return "TECHNICAL";
     }
-    if (userContext.profile?.department?.includes('executive') || userContext.profile?.role?.includes('manager')) {
-      return 'FORMAL';
+    if (
+      userContext.profile?.department?.includes("executive") ||
+      userContext.profile?.role?.includes("manager")
+    ) {
+      return "FORMAL";
     }
-    return 'CASUAL';
+    return "CASUAL";
   }
 
   /**
@@ -402,40 +474,55 @@ export class NaturalLanguageRateCommunicatorService {
     context: RateLimitContext,
     decision: RateLimitDecision,
     userBehavior?: UserBehaviorInsights,
-    userPreferences?: UserPreferences
+    userPreferences?: UserPreferences,
   ): Promise<string[]> {
     const suggestions: string[] = [];
 
     // Base suggestions based on decision type
     switch (decision.decision) {
-      case 'THROTTLE':
-        suggestions.push(`Wait ${Math.ceil((decision.throttleDelay || 1000) / 1000)} seconds before your next request`);
+      case "THROTTLE":
+        suggestions.push(
+          `Wait ${Math.ceil((decision.throttleDelay || 1000) / 1000)} seconds before your next request`,
+        );
         break;
-      case 'QUEUE':
-        suggestions.push(`Your request is queued at position ${decision.queuePosition}. Estimated wait: ${decision.estimatedWaitTime} seconds`);
+      case "QUEUE":
+        suggestions.push(
+          `Your request is queued at position ${decision.queuePosition}. Estimated wait: ${decision.estimatedWaitTime} seconds`,
+        );
         break;
-      case 'DENY':
-        suggestions.push(`Wait ${Math.ceil((decision.retryAfter || 300) / 60)} minutes before retrying`);
+      case "DENY":
+        suggestions.push(
+          `Wait ${Math.ceil((decision.retryAfter || 300) / 60)} minutes before retrying`,
+        );
         break;
     }
 
     // Personalized suggestions based on user behavior
     if (userBehavior) {
-      if (userBehavior.patternRecognition.includes('burst_pattern')) {
-        suggestions.push('Consider implementing exponential backoff to space out your requests');
+      if (userBehavior.patternRecognition.includes("burst_pattern")) {
+        suggestions.push(
+          "Consider implementing exponential backoff to space out your requests",
+        );
       }
-      if (userBehavior.behaviorClassification === 'POWER_USER') {
-        suggestions.push('Explore our enterprise tier for higher rate limits');
+      if (userBehavior.behaviorClassification === "POWER_USER") {
+        suggestions.push("Explore our enterprise tier for higher rate limits");
       }
     }
 
     // Context-aware suggestions
-    if (context.securityLevel === 'HIGH' || context.securityLevel === 'CRITICAL') {
-      suggestions.push('High-security operations require additional validation time');
+    if (
+      context.securityLevel === "HIGH" ||
+      context.securityLevel === "CRITICAL"
+    ) {
+      suggestions.push(
+        "High-security operations require additional validation time",
+      );
     }
 
-    if (userPreferences?.expertiseLevel === 'EXPERT') {
-      suggestions.push('Check the X-RateLimit-* headers for detailed limit information');
+    if (userPreferences?.expertiseLevel === "EXPERT") {
+      suggestions.push(
+        "Check the X-RateLimit-* headers for detailed limit information",
+      );
     }
 
     return suggestions;
@@ -447,63 +534,63 @@ export class NaturalLanguageRateCommunicatorService {
   private async generateNegotiationOptions(
     context: RateLimitContext,
     decision: RateLimitDecision,
-    userPreferences?: UserPreferences
+    userPreferences?: UserPreferences,
   ): Promise<NegotiationOption[]> {
     const options: NegotiationOption[] = [];
 
     // Only offer negotiation for certain decisions
-    if (decision.decision === 'ALLOW') {
+    if (decision.decision === "ALLOW") {
       return options;
     }
 
     // Temporary limit increase option
-    if (decision.decision === 'THROTTLE' || decision.decision === 'QUEUE') {
+    if (decision.decision === "THROTTLE" || decision.decision === "QUEUE") {
       options.push({
-        option: 'Temporary limit increase',
-        description: 'Request a temporary increase to your rate limits for the next hour',
+        option: "Temporary limit increase",
+        description:
+          "Request a temporary increase to your rate limits for the next hour",
         tradeoffs: [
-          'Uses your daily burst allowance',
-          'Requires justification for the increased usage',
-          'May affect your usage statistics'
+          "Uses your daily burst allowance",
+          "Requires justification for the increased usage",
+          "May affect your usage statistics",
         ],
         requirements: [
-          'Valid business justification',
-          'No previous violations in the last 24 hours',
-          'Available burst capacity'
+          "Valid business justification",
+          "No previous violations in the last 24 hours",
+          "Available burst capacity",
         ],
-        estimatedOutcome: 'Temporarily double your rate limits for 1 hour'
+        estimatedOutcome: "Temporarily double your rate limits for 1 hour",
       });
     }
 
     // Priority processing option
-    if (context.userContext.roles.includes('premium') || context.userContext.roles.includes('enterprise')) {
+    if (
+      context.userContext.roles.includes("premium") ||
+      context.userContext.roles.includes("enterprise")
+    ) {
       options.push({
-        option: 'Priority processing',
-        description: 'Process your request with higher priority',
+        option: "Priority processing",
+        description: "Process your request with higher priority",
         tradeoffs: [
-          'Consumes priority tokens',
-          'May delay other users\' requests'
+          "Consumes priority tokens",
+          "May delay other users' requests",
         ],
         requirements: [
-          'Premium or Enterprise tier',
-          'Available priority tokens'
+          "Premium or Enterprise tier",
+          "Available priority tokens",
         ],
-        estimatedOutcome: 'Process your request within 30 seconds'
+        estimatedOutcome: "Process your request within 30 seconds",
       });
     }
 
     // Alternative scheduling option
     options.push({
-      option: 'Schedule for later',
-      description: 'Schedule your request for automatic execution during off-peak hours',
-      tradeoffs: [
-        'Delayed execution',
-        'Results delivered via notification'
-      ],
-      requirements: [
-        'Valid notification preferences'
-      ],
-      estimatedOutcome: 'Request executed within 2 hours with 99% success rate'
+      option: "Schedule for later",
+      description:
+        "Schedule your request for automatic execution during off-peak hours",
+      tradeoffs: ["Delayed execution", "Results delivered via notification"],
+      requirements: ["Valid notification preferences"],
+      estimatedOutcome: "Request executed within 2 hours with 99% success rate",
     });
 
     return options;
@@ -516,36 +603,43 @@ export class NaturalLanguageRateCommunicatorService {
     context: RateLimitContext,
     decision: RateLimitDecision,
     userPreferences?: UserPreferences,
-    userBehavior?: UserBehaviorInsights
+    userBehavior?: UserBehaviorInsights,
   ): Promise<EducationalContent | undefined> {
     // Only provide education for certain decisions or user preferences
-    if (decision.decision === 'ALLOW' && !userPreferences?.includeExamples) {
+    if (decision.decision === "ALLOW" && !userPreferences?.includeExamples) {
       return undefined;
     }
 
     const topic = this.selectEducationalTopic(decision, userBehavior);
-    const expertiseLevel = userPreferences?.expertiseLevel || 'INTERMEDIATE';
+    const expertiseLevel = userPreferences?.expertiseLevel || "INTERMEDIATE";
 
-    return await this.educationEngine.generateEducationalContent(topic, expertiseLevel, context);
+    return await this.educationEngine.generateEducationalContent(
+      topic,
+      expertiseLevel,
+      context,
+    );
   }
 
   /**
    * Select appropriate educational topic based on decision and behavior
    */
-  private selectEducationalTopic(decision: RateLimitDecision, userBehavior?: UserBehaviorInsights): string {
+  private selectEducationalTopic(
+    decision: RateLimitDecision,
+    userBehavior?: UserBehaviorInsights,
+  ): string {
     if (userBehavior?.abuseIndicators.length > 0) {
-      return 'RESPONSIBLE_API_USAGE';
+      return "RESPONSIBLE_API_USAGE";
     }
 
     switch (decision.decision) {
-      case 'THROTTLE':
-        return 'THROTTLING_AND_BACKOFF';
-      case 'QUEUE':
-        return 'REQUEST_QUEUING';
-      case 'DENY':
-        return 'RATE_LIMIT_BEST_PRACTICES';
+      case "THROTTLE":
+        return "THROTTLING_AND_BACKOFF";
+      case "QUEUE":
+        return "REQUEST_QUEUING";
+      case "DENY":
+        return "RATE_LIMIT_BEST_PRACTICES";
       default:
-        return 'RATE_LIMITING_BASICS';
+        return "RATE_LIMITING_BASICS";
     }
   }
 
@@ -554,7 +648,7 @@ export class NaturalLanguageRateCommunicatorService {
    */
   private async generateTechnicalDetails(
     context: RateLimitContext,
-    decision: RateLimitDecision
+    decision: RateLimitDecision,
   ): Promise<string> {
     const details = {
       timestamp: decision.timestamp,
@@ -565,7 +659,7 @@ export class NaturalLanguageRateCommunicatorService {
       method: context.method,
       userAgent: context.userAgent,
       securityLevel: context.securityLevel,
-      riskLevel: context.riskLevel
+      riskLevel: context.riskLevel,
     };
 
     return JSON.stringify(details, null, 2);
@@ -574,21 +668,26 @@ export class NaturalLanguageRateCommunicatorService {
   /**
    * Generate fallback response for errors
    */
-  private generateFallbackResponse(decision: RateLimitDecision): ConversationalRateLimitResponse {
+  private generateFallbackResponse(
+    decision: RateLimitDecision,
+  ): ConversationalRateLimitResponse {
     const messages = {
-      ALLOW: 'Your request has been approved.',
-      THROTTLE: 'Your request is being processed with a slight delay.',
-      QUEUE: 'Your request has been queued for processing.',
-      DENY: 'Your request cannot be processed at this time due to rate limits.'
+      ALLOW: "Your request has been approved.",
+      THROTTLE: "Your request is being processed with a slight delay.",
+      QUEUE: "Your request has been queued for processing.",
+      DENY: "Your request cannot be processed at this time due to rate limits.",
     };
 
     return {
-      explanation: 'Rate limiting is in effect to ensure optimal performance for all users.',
-      userFriendlyMessage: messages[decision.decision as keyof typeof messages] || 'Request processed.',
+      explanation:
+        "Rate limiting is in effect to ensure optimal performance for all users.",
+      userFriendlyMessage:
+        messages[decision.decision as keyof typeof messages] ||
+        "Request processed.",
       suggestions: [
-        'Wait before making your next request',
-        'Contact support if you need assistance'
-      ]
+        "Wait before making your next request",
+        "Contact support if you need assistance",
+      ],
     };
   }
 
@@ -597,46 +696,53 @@ export class NaturalLanguageRateCommunicatorService {
   private async applyNegotiationResult(
     context: RateLimitContext,
     originalDecision: RateLimitDecision,
-    negotiationResponse: any
+    negotiationResponse: any,
   ): Promise<RateLimitDecision> {
     // Apply negotiation result to create updated decision
     return {
       ...originalDecision,
-      decision: 'ALLOW',
-      reason: 'Approved through negotiation',
-      conversationalResponse: negotiationResponse
+      decision: "ALLOW",
+      reason: "Approved through negotiation",
+      conversationalResponse: negotiationResponse,
     };
   }
 
-  private generateFailedNegotiationResult(originalDecision: RateLimitDecision): NegotiationResult {
+  private generateFailedNegotiationResult(
+    originalDecision: RateLimitDecision,
+  ): NegotiationResult {
     return {
       originalDecision,
       updatedDecision: originalDecision,
       negotiationSuccessful: false,
       response: {
-        explanation: 'Negotiation was not successful at this time.',
-        userFriendlyMessage: 'Your original rate limit decision remains in effect.',
-        suggestions: ['Wait for limits to reset', 'Contact support for assistance']
+        explanation: "Negotiation was not successful at this time.",
+        userFriendlyMessage:
+          "Your original rate limit decision remains in effect.",
+        suggestions: [
+          "Wait for limits to reset",
+          "Contact support for assistance",
+        ],
       },
-      reasoning: 'Unable to process negotiation request',
-      alternativeOptions: []
+      reasoning: "Unable to process negotiation request",
+      alternativeOptions: [],
     };
   }
 
   private generateBasicEducation(): EducationalContent {
     return {
-      topic: 'Rate Limiting Basics',
-      explanation: 'Rate limiting controls how many requests you can make in a given time period.',
+      topic: "Rate Limiting Basics",
+      explanation:
+        "Rate limiting controls how many requests you can make in a given time period.",
       bestPractices: [
-        'Space out your requests',
-        'Implement retry logic with exponential backoff',
-        'Monitor your usage patterns'
+        "Space out your requests",
+        "Implement retry logic with exponential backoff",
+        "Monitor your usage patterns",
       ],
       examples: [
-        'Wait 1 second between requests',
-        'Use batch operations when possible'
+        "Wait 1 second between requests",
+        "Use batch operations when possible",
       ],
-      links: []
+      links: [],
     };
   }
 
@@ -644,7 +750,7 @@ export class NaturalLanguageRateCommunicatorService {
     context: RateLimitContext,
     decision: RateLimitDecision,
     analytics?: RateLimitAnalytics,
-    userPreferences?: UserPreferences
+    userPreferences?: UserPreferences,
   ): Promise<string> {
     let explanation = `Your ${context.method} request to ${context.apiEndpoint} was ${decision.decision.toLowerCase()}`;
 
@@ -662,43 +768,52 @@ export class NaturalLanguageRateCommunicatorService {
   private async generateVisualAids(
     context: RateLimitContext,
     decision: RateLimitDecision,
-    analytics?: RateLimitAnalytics
+    analytics?: RateLimitAnalytics,
   ): Promise<any> {
     // In a real implementation, this would generate charts, graphs, or other visual aids
     return {
-      type: 'usage_chart',
-      description: 'Visual representation of your current rate limit usage'
+      type: "usage_chart",
+      description: "Visual representation of your current rate limit usage",
     };
   }
 
   private async generateRelevantExamples(
     context: RateLimitContext,
     decision: RateLimitDecision,
-    userPreferences?: UserPreferences
+    userPreferences?: UserPreferences,
   ): Promise<string[]> {
     const examples: string[] = [];
 
     switch (decision.decision) {
-      case 'THROTTLE':
-        examples.push('Like a traffic light, we\'re asking you to slow down temporarily');
+      case "THROTTLE":
+        examples.push(
+          "Like a traffic light, we're asking you to slow down temporarily",
+        );
         break;
-      case 'QUEUE':
-        examples.push('Your request is in line, similar to waiting at a bank teller');
+      case "QUEUE":
+        examples.push(
+          "Your request is in line, similar to waiting at a bank teller",
+        );
         break;
-      case 'DENY':
-        examples.push('Similar to a busy restaurant, we\'re at capacity and need you to come back later');
+      case "DENY":
+        examples.push(
+          "Similar to a busy restaurant, we're at capacity and need you to come back later",
+        );
         break;
     }
 
     return examples;
   }
 
-  private generateReasoning(decision: RateLimitDecision, analytics?: RateLimitAnalytics): string {
+  private generateReasoning(
+    decision: RateLimitDecision,
+    analytics?: RateLimitAnalytics,
+  ): string {
     return `Decision made based on current system load and your usage patterns. ${decision.reason}`;
   }
 
   private generateImpactExplanation(analytics?: RateLimitAnalytics): string {
-    if (!analytics) return 'Minimal impact on your workflow expected.';
+    if (!analytics) return "Minimal impact on your workflow expected.";
 
     const impact = analytics.impactAssessment;
     return `System impact: ${impact.systemImpact}, User impact: ${impact.userImpact}, Business impact: ${impact.businessImpact}`;
@@ -707,69 +822,91 @@ export class NaturalLanguageRateCommunicatorService {
   private async generateDetailedRecommendations(
     context: RateLimitContext,
     decision: RateLimitDecision,
-    analytics?: RateLimitAnalytics
+    analytics?: RateLimitAnalytics,
   ): Promise<string[]> {
     const recommendations: string[] = [];
 
-    if (analytics?.userBehaviorInsights.patternRecognition.includes('inefficient_polling')) {
-      recommendations.push('Consider using webhooks instead of frequent polling');
+    if (
+      analytics?.userBehaviorInsights.patternRecognition.includes(
+        "inefficient_polling",
+      )
+    ) {
+      recommendations.push(
+        "Consider using webhooks instead of frequent polling",
+      );
     }
 
-    if (decision.decision === 'THROTTLE') {
-      recommendations.push('Implement exponential backoff in your client code');
+    if (decision.decision === "THROTTLE") {
+      recommendations.push("Implement exponential backoff in your client code");
     }
 
-    recommendations.push('Monitor the X-RateLimit-* response headers');
+    recommendations.push("Monitor the X-RateLimit-* response headers");
     return recommendations;
   }
 
-  private generateFollowUpQuestions(context: RateLimitContext, decision: RateLimitDecision): string[] {
+  private generateFollowUpQuestions(
+    context: RateLimitContext,
+    decision: RateLimitDecision,
+  ): string[] {
     return [
-      'Would you like to learn more about optimizing your API usage?',
-      'Do you need help implementing retry logic?',
-      'Would you like to explore our higher-tier plans?'
+      "Would you like to learn more about optimizing your API usage?",
+      "Do you need help implementing retry logic?",
+      "Would you like to explore our higher-tier plans?",
     ];
   }
 
-  private generateBasicExplanation(decision: RateLimitDecision): DetailedExplanation {
+  private generateBasicExplanation(
+    decision: RateLimitDecision,
+  ): DetailedExplanation {
     return {
       explanation: `Your request was ${decision.decision.toLowerCase()}.`,
-      reasoning: decision.reason || 'Rate limiting in effect',
-      impact: 'Temporary limitation on request processing',
-      recommendations: ['Wait before retrying', 'Check rate limit headers'],
-      examples: ['Similar to traffic control for optimal system performance'],
-      followUpQuestions: ['Need help with rate limiting?']
+      reasoning: decision.reason || "Rate limiting in effect",
+      impact: "Temporary limitation on request processing",
+      recommendations: ["Wait before retrying", "Check rate limit headers"],
+      examples: ["Similar to traffic control for optimal system performance"],
+      followUpQuestions: ["Need help with rate limiting?"],
     };
   }
 
   private canBatch(context: RateLimitContext): boolean {
     // Check if the operation type supports batching
-    const batchableOperations = ['create', 'update', 'delete', 'read'];
+    const batchableOperations = ["create", "update", "delete", "read"];
     return batchableOperations.includes(context.operation);
   }
 
-  private calculateOptimalBatchSize(context: RateLimitContext, usagePatterns: any): number {
+  private calculateOptimalBatchSize(
+    context: RateLimitContext,
+    usagePatterns: any,
+  ): number {
     // Calculate optimal batch size based on patterns and limits
-    return Math.min(10, Math.max(2, Math.floor(usagePatterns.averageRequestsPerMinute / 6)));
+    return Math.min(
+      10,
+      Math.max(2, Math.floor(usagePatterns.averageRequestsPerMinute / 6)),
+    );
   }
 
-  private async findAlternativeEndpoints(context: RateLimitContext): Promise<any[]> {
+  private async findAlternativeEndpoints(
+    context: RateLimitContext,
+  ): Promise<any[]> {
     // Find alternative endpoints that provide similar functionality
     const alternatives = [];
 
-    if (context.apiEndpoint.includes('/v1/')) {
+    if (context.apiEndpoint.includes("/v1/")) {
       alternatives.push({
-        name: 'Legacy endpoint',
-        path: context.apiEndpoint.replace('/v1/', '/v0/'),
+        name: "Legacy endpoint",
+        path: context.apiEndpoint.replace("/v1/", "/v0/"),
         method: context.method,
-        estimatedSuccess: 0.7
+        estimatedSuccess: 0.7,
       });
     }
 
     return alternatives;
   }
 
-  private async generateOffPeakSuggestion(context: RateLimitContext, usagePatterns: any): Promise<RateLimitAlternative | null> {
+  private async generateOffPeakSuggestion(
+    context: RateLimitContext,
+    usagePatterns: any,
+  ): Promise<RateLimitAlternative | null> {
     // Analyze system usage patterns to suggest off-peak times
     const currentHour = new Date().getHours();
     const offPeakHours = [2, 3, 4, 5, 6]; // Early morning hours
@@ -782,43 +919,50 @@ export class NaturalLanguageRateCommunicatorService {
       }
 
       return {
-        type: 'TIMING',
-        description: 'Schedule your request during off-peak hours for better performance',
+        type: "TIMING",
+        description:
+          "Schedule your request during off-peak hours for better performance",
         suggestedTime: nextOffPeakTime,
-        estimatedSuccess: 0.95
+        estimatedSuccess: 0.95,
       };
     }
 
     return null;
   }
 
-  private generateBasicAlternatives(decision: RateLimitDecision): RateLimitAlternative[] {
+  private generateBasicAlternatives(
+    decision: RateLimitDecision,
+  ): RateLimitAlternative[] {
     const alternatives: RateLimitAlternative[] = [];
 
     if (decision.retryAfter) {
       alternatives.push({
-        type: 'TIMING',
-        description: 'Retry after the specified wait time',
+        type: "TIMING",
+        description: "Retry after the specified wait time",
         suggestedTime: new Date(Date.now() + decision.retryAfter * 1000),
-        estimatedSuccess: 0.9
+        estimatedSuccess: 0.9,
       });
     }
 
     return alternatives;
   }
 
-  private async generateProactiveRecommendations(context: RateLimitContext, currentUsage: any, userPreferences?: UserPreferences): Promise<any> {
+  private async generateProactiveRecommendations(
+    context: RateLimitContext,
+    currentUsage: any,
+    userPreferences?: UserPreferences,
+  ): Promise<any> {
     const recommendations: string[] = [];
-    let urgencyLevel: 'LOW' | 'MEDIUM' | 'HIGH' = 'MEDIUM';
+    let urgencyLevel: "LOW" | "MEDIUM" | "HIGH" = "MEDIUM";
     const suggestedActions: string[] = [];
 
     if (currentUsage.utilizationPercentage > 90) {
-      urgencyLevel = 'HIGH';
-      recommendations.push('Reduce request frequency immediately');
-      suggestedActions.push('Pause non-critical operations');
+      urgencyLevel = "HIGH";
+      recommendations.push("Reduce request frequency immediately");
+      suggestedActions.push("Pause non-critical operations");
     } else if (currentUsage.utilizationPercentage > 85) {
-      recommendations.push('Consider spacing out your requests');
-      suggestedActions.push('Implement request queuing');
+      recommendations.push("Consider spacing out your requests");
+      suggestedActions.push("Implement request queuing");
     }
 
     const estimatedTimeToLimit = this.calculateTimeToLimit(currentUsage);
@@ -827,7 +971,7 @@ export class NaturalLanguageRateCommunicatorService {
       recommendations,
       urgencyLevel,
       suggestedActions,
-      estimatedTimeToLimit
+      estimatedTimeToLimit,
     };
   }
 
@@ -845,25 +989,44 @@ export class NaturalLanguageRateCommunicatorService {
 class IntentAnalysisEngine {
   private readonly logger = new Logger(IntentAnalysisEngine.name);
 
-  async analyzeNegotiationIntent(userMessage: string, context: RateLimitContext): Promise<NegotiationIntent> {
+  async analyzeNegotiationIntent(
+    userMessage: string,
+    context: RateLimitContext,
+  ): Promise<NegotiationIntent> {
     // Simplified NLP analysis - in a real implementation, this would use advanced NLP
     const lowerMessage = userMessage.toLowerCase();
 
-    let intent = 'UNKNOWN';
+    let intent = "UNKNOWN";
     let confidence = 0.5;
     const parameters: Record<string, any> = {};
 
-    if (lowerMessage.includes('increase') || lowerMessage.includes('higher') || lowerMessage.includes('more')) {
-      intent = 'INCREASE_LIMITS';
+    if (
+      lowerMessage.includes("increase") ||
+      lowerMessage.includes("higher") ||
+      lowerMessage.includes("more")
+    ) {
+      intent = "INCREASE_LIMITS";
       confidence = 0.8;
-    } else if (lowerMessage.includes('priority') || lowerMessage.includes('urgent') || lowerMessage.includes('emergency')) {
-      intent = 'REQUEST_PRIORITY';
+    } else if (
+      lowerMessage.includes("priority") ||
+      lowerMessage.includes("urgent") ||
+      lowerMessage.includes("emergency")
+    ) {
+      intent = "REQUEST_PRIORITY";
       confidence = 0.9;
-    } else if (lowerMessage.includes('schedule') || lowerMessage.includes('later') || lowerMessage.includes('delay')) {
-      intent = 'SCHEDULE_LATER';
+    } else if (
+      lowerMessage.includes("schedule") ||
+      lowerMessage.includes("later") ||
+      lowerMessage.includes("delay")
+    ) {
+      intent = "SCHEDULE_LATER";
       confidence = 0.7;
-    } else if (lowerMessage.includes('alternative') || lowerMessage.includes('different') || lowerMessage.includes('other')) {
-      intent = 'FIND_ALTERNATIVE';
+    } else if (
+      lowerMessage.includes("alternative") ||
+      lowerMessage.includes("different") ||
+      lowerMessage.includes("other")
+    ) {
+      intent = "FIND_ALTERNATIVE";
       confidence = 0.8;
     }
 
@@ -875,40 +1038,63 @@ class IntentAnalysisEngine {
       analysis: {
         sentiment: this.analyzeSentiment(userMessage),
         urgency: this.analyzeUrgency(userMessage),
-        politeness: this.analyzeNegotiationPoliteness(userMessage)
-      }
+        politeness: this.analyzeNegotiationPoliteness(userMessage),
+      },
     };
   }
 
-  private analyzeSentiment(message: string): 'POSITIVE' | 'NEUTRAL' | 'NEGATIVE' {
-    const positiveWords = ['please', 'thank', 'appreciate', 'understand'];
-    const negativeWords = ['frustrated', 'annoyed', 'urgent', 'critical'];
+  private analyzeSentiment(
+    message: string,
+  ): "POSITIVE" | "NEUTRAL" | "NEGATIVE" {
+    const positiveWords = ["please", "thank", "appreciate", "understand"];
+    const negativeWords = ["frustrated", "annoyed", "urgent", "critical"];
 
     const lowerMessage = message.toLowerCase();
-    const positiveCount = positiveWords.filter(word => lowerMessage.includes(word)).length;
-    const negativeCount = negativeWords.filter(word => lowerMessage.includes(word)).length;
+    const positiveCount = positiveWords.filter((word) =>
+      lowerMessage.includes(word),
+    ).length;
+    const negativeCount = negativeWords.filter((word) =>
+      lowerMessage.includes(word),
+    ).length;
 
-    if (positiveCount > negativeCount) return 'POSITIVE';
-    if (negativeCount > positiveCount) return 'NEGATIVE';
-    return 'NEUTRAL';
+    if (positiveCount > negativeCount) return "POSITIVE";
+    if (negativeCount > positiveCount) return "NEGATIVE";
+    return "NEUTRAL";
   }
 
-  private analyzeUrgency(message: string): 'LOW' | 'MEDIUM' | 'HIGH' {
-    const urgentWords = ['urgent', 'emergency', 'critical', 'immediately', 'asap'];
+  private analyzeUrgency(message: string): "LOW" | "MEDIUM" | "HIGH" {
+    const urgentWords = [
+      "urgent",
+      "emergency",
+      "critical",
+      "immediately",
+      "asap",
+    ];
     const lowerMessage = message.toLowerCase();
 
-    const urgentWordCount = urgentWords.filter(word => lowerMessage.includes(word)).length;
+    const urgentWordCount = urgentWords.filter((word) =>
+      lowerMessage.includes(word),
+    ).length;
 
-    if (urgentWordCount >= 2) return 'HIGH';
-    if (urgentWordCount >= 1) return 'MEDIUM';
-    return 'LOW';
+    if (urgentWordCount >= 2) return "HIGH";
+    if (urgentWordCount >= 1) return "MEDIUM";
+    return "LOW";
   }
 
   private analyzeNegotiationPoliteness(message: string): number {
-    const politeWords = ['please', 'could', 'would', 'kindly', 'appreciate', 'thank'];
+    const politeWords = [
+      "please",
+      "could",
+      "would",
+      "kindly",
+      "appreciate",
+      "thank",
+    ];
     const lowerMessage = message.toLowerCase();
 
-    const politeWordCount = politeWords.filter(word => lowerMessage.includes(word)).length;
+    const politeWordCount = politeWords.filter((word) =>
+      lowerMessage.includes(word),
+    ).length;
     return Math.min(1.0, politeWordCount * 0.2); // 0.0 to 1.0 scale
   }
 }
@@ -921,25 +1107,40 @@ class ResponseGenerationEngine {
   private templates: Map<string, string> = new Map();
 
   initializeTemplates(): void {
-    this.templates.set('ALLOW_BASIC', 'Your request has been approved and is being processed.');
-    this.templates.set('THROTTLE_BASIC', 'Your request is being throttled. Please wait {delay} seconds.');
-    this.templates.set('QUEUE_BASIC', 'Your request has been queued at position {position}.');
-    this.templates.set('DENY_BASIC', 'Your request has been denied. Please try again in {retryAfter} minutes.');
+    this.templates.set(
+      "ALLOW_BASIC",
+      "Your request has been approved and is being processed.",
+    );
+    this.templates.set(
+      "THROTTLE_BASIC",
+      "Your request is being throttled. Please wait {delay} seconds.",
+    );
+    this.templates.set(
+      "QUEUE_BASIC",
+      "Your request has been queued at position {position}.",
+    );
+    this.templates.set(
+      "DENY_BASIC",
+      "Your request has been denied. Please try again in {retryAfter} minutes.",
+    );
   }
 
   async generateExplanation(
     context: RateLimitContext,
     decision: RateLimitDecision,
     userPreferences: UserPreferences,
-    conversationContext: any
+    conversationContext: any,
   ): Promise<string> {
-    const baseTemplate = this.getBaseTemplate(decision.decision, userPreferences.explanationStyle);
+    const baseTemplate = this.getBaseTemplate(
+      decision.decision,
+      userPreferences.explanationStyle,
+    );
     return this.populateTemplate(baseTemplate, decision, context);
   }
 
   async generateUserFriendlyMessage(
     decision: RateLimitDecision,
-    userPreferences: UserPreferences
+    userPreferences: UserPreferences,
   ): Promise<string> {
     const emoji = this.getEmoji(decision.decision);
     const action = this.getActionDescription(decision.decision);
@@ -949,36 +1150,52 @@ class ResponseGenerationEngine {
 
   private getBaseTemplate(decision: string, style: string): string {
     const key = `${decision}_${style}`;
-    return this.templates.get(key) || this.templates.get(`${decision}_BASIC`) || 'Request processed.';
+    return (
+      this.templates.get(key) ||
+      this.templates.get(`${decision}_BASIC`) ||
+      "Request processed."
+    );
   }
 
-  private populateTemplate(template: string, decision: RateLimitDecision, context: RateLimitContext): string {
+  private populateTemplate(
+    template: string,
+    decision: RateLimitDecision,
+    context: RateLimitContext,
+  ): string {
     return template
-      .replace('{delay}', Math.ceil((decision.throttleDelay || 1000) / 1000).toString())
-      .replace('{position}', (decision.queuePosition || 1).toString())
-      .replace('{retryAfter}', Math.ceil((decision.retryAfter || 300) / 60).toString())
-      .replace('{endpoint}', context.apiEndpoint)
-      .replace('{method}', context.method);
+      .replace(
+        "{delay}",
+        Math.ceil((decision.throttleDelay || 1000) / 1000).toString(),
+      )
+      .replace("{position}", (decision.queuePosition || 1).toString())
+      .replace(
+        "{retryAfter}",
+        Math.ceil((decision.retryAfter || 300) / 60).toString(),
+      )
+      .replace("{endpoint}", context.apiEndpoint)
+      .replace("{method}", context.method);
   }
 
   private getEmoji(decision: string): string {
     const emojis = {
-      'ALLOW': '✅',
-      'THROTTLE': '⏱️',
-      'QUEUE': '📋',
-      'DENY': '❌'
+      ALLOW: "✅",
+      THROTTLE: "⏱️",
+      QUEUE: "📋",
+      DENY: "❌",
     };
-    return emojis[decision as keyof typeof emojis] || '🔄';
+    return emojis[decision as keyof typeof emojis] || "🔄";
   }
 
   private getActionDescription(decision: string): string {
     const descriptions = {
-      'ALLOW': 'Request approved',
-      'THROTTLE': 'Request throttled',
-      'QUEUE': 'Request queued',
-      'DENY': 'Request denied'
+      ALLOW: "Request approved",
+      THROTTLE: "Request throttled",
+      QUEUE: "Request queued",
+      DENY: "Request denied",
     };
-    return descriptions[decision as keyof typeof descriptions] || 'Request processed';
+    return (
+      descriptions[decision as keyof typeof descriptions] || "Request processed"
+    );
   }
 }
 
@@ -991,36 +1208,42 @@ class NegotiationEngine {
   async assessFeasibility(
     context: RateLimitContext,
     intentAnalysis: NegotiationIntent,
-    currentDecision: RateLimitDecision
+    currentDecision: RateLimitDecision,
   ): Promise<FeasibilityAssessment> {
     // Assess whether the negotiation request can be accommodated
     let approved = false;
-    let reasoning = '';
+    let reasoning = "";
     const alternatives: string[] = [];
 
     switch (intentAnalysis.intent) {
-      case 'INCREASE_LIMITS':
+      case "INCREASE_LIMITS":
         approved = this.canIncreaseLimits(context);
-        reasoning = approved ? 'Temporary limit increase available' : 'No burst capacity available';
+        reasoning = approved
+          ? "Temporary limit increase available"
+          : "No burst capacity available";
         break;
 
-      case 'REQUEST_PRIORITY':
+      case "REQUEST_PRIORITY":
         approved = this.canGrantPriority(context);
-        reasoning = approved ? 'Priority processing available' : 'No priority slots available';
+        reasoning = approved
+          ? "Priority processing available"
+          : "No priority slots available";
         break;
 
-      case 'SCHEDULE_LATER':
+      case "SCHEDULE_LATER":
         approved = true; // Scheduling is always possible
-        reasoning = 'Request can be scheduled for later execution';
+        reasoning = "Request can be scheduled for later execution";
         break;
 
-      case 'FIND_ALTERNATIVE':
+      case "FIND_ALTERNATIVE":
         approved = this.hasAlternatives(context);
-        reasoning = approved ? 'Alternative endpoints available' : 'No alternatives found';
+        reasoning = approved
+          ? "Alternative endpoints available"
+          : "No alternatives found";
         break;
 
       default:
-        reasoning = 'Unable to understand negotiation request';
+        reasoning = "Unable to understand negotiation request";
     }
 
     return {
@@ -1029,7 +1252,7 @@ class NegotiationEngine {
       confidence: intentAnalysis.confidence,
       alternatives,
       requirements: this.getRequirements(intentAnalysis.intent, context),
-      constraints: this.getConstraints(intentAnalysis.intent, context)
+      constraints: this.getConstraints(intentAnalysis.intent, context),
     };
   }
 
@@ -1037,37 +1260,45 @@ class NegotiationEngine {
     context: RateLimitContext,
     intentAnalysis: NegotiationIntent,
     feasibilityAssessment: FeasibilityAssessment,
-    currentDecision: RateLimitDecision
+    currentDecision: RateLimitDecision,
   ): Promise<ConversationalRateLimitResponse> {
-    let explanation = '';
-    let userFriendlyMessage = '';
+    let explanation = "";
+    let userFriendlyMessage = "";
     const suggestions: string[] = [];
 
     if (feasibilityAssessment.approved) {
-      explanation = `I understand your request to ${intentAnalysis.intent.toLowerCase().replace('_', ' ')}. ${feasibilityAssessment.reasoning}`;
-      userFriendlyMessage = '✅ Negotiation successful';
-      suggestions.push('Your request will be processed with the negotiated terms');
+      explanation = `I understand your request to ${intentAnalysis.intent.toLowerCase().replace("_", " ")}. ${feasibilityAssessment.reasoning}`;
+      userFriendlyMessage = "✅ Negotiation successful";
+      suggestions.push(
+        "Your request will be processed with the negotiated terms",
+      );
     } else {
       explanation = `I understand your request, but ${feasibilityAssessment.reasoning.toLowerCase()}. Let me suggest some alternatives.`;
-      userFriendlyMessage = '⚠️ Negotiation not possible';
+      userFriendlyMessage = "⚠️ Negotiation not possible";
       suggestions.push(...feasibilityAssessment.alternatives);
     }
 
     return {
       explanation,
       userFriendlyMessage,
-      suggestions
+      suggestions,
     };
   }
 
   private canIncreaseLimits(context: RateLimitContext): boolean {
     // Check if user has burst capacity or special privileges
-    return context.userContext.roles.includes('premium') || context.userContext.roles.includes('enterprise');
+    return (
+      context.userContext.roles.includes("premium") ||
+      context.userContext.roles.includes("enterprise")
+    );
   }
 
   private canGrantPriority(context: RateLimitContext): boolean {
     // Check if user can be granted priority processing
-    return context.userContext.roles.includes('enterprise') && context.securityLevel !== 'CRITICAL';
+    return (
+      context.userContext.roles.includes("enterprise") &&
+      context.securityLevel !== "CRITICAL"
+    );
   }
 
   private hasAlternatives(context: RateLimitContext): boolean {
@@ -1077,10 +1308,13 @@ class NegotiationEngine {
 
   private getRequirements(intent: string, context: RateLimitContext): string[] {
     const requirements: Record<string, string[]> = {
-      'INCREASE_LIMITS': ['Valid business justification', 'No recent violations'],
-      'REQUEST_PRIORITY': ['Enterprise tier subscription', 'Available priority tokens'],
-      'SCHEDULE_LATER': ['Valid notification preferences'],
-      'FIND_ALTERNATIVE': ['Compatible operation type']
+      INCREASE_LIMITS: ["Valid business justification", "No recent violations"],
+      REQUEST_PRIORITY: [
+        "Enterprise tier subscription",
+        "Available priority tokens",
+      ],
+      SCHEDULE_LATER: ["Valid notification preferences"],
+      FIND_ALTERNATIVE: ["Compatible operation type"],
     };
 
     return requirements[intent] || [];
@@ -1088,10 +1322,16 @@ class NegotiationEngine {
 
   private getConstraints(intent: string, context: RateLimitContext): string[] {
     const constraints: Record<string, string[]> = {
-      'INCREASE_LIMITS': ['Maximum 2x current limit', 'Duration limited to 1 hour'],
-      'REQUEST_PRIORITY': ['Subject to available capacity', 'Limited daily usage'],
-      'SCHEDULE_LATER': ['Maximum 24-hour delay', 'Off-peak hours only'],
-      'FIND_ALTERNATIVE': ['May have reduced functionality']
+      INCREASE_LIMITS: [
+        "Maximum 2x current limit",
+        "Duration limited to 1 hour",
+      ],
+      REQUEST_PRIORITY: [
+        "Subject to available capacity",
+        "Limited daily usage",
+      ],
+      SCHEDULE_LATER: ["Maximum 24-hour delay", "Off-peak hours only"],
+      FIND_ALTERNATIVE: ["May have reduced functionality"],
     };
 
     return constraints[intent] || [];
@@ -1106,8 +1346,8 @@ class EducationEngine {
 
   async generateEducationalContent(
     topic: string,
-    userLevel: 'NOVICE' | 'INTERMEDIATE' | 'ADVANCED' | 'EXPERT',
-    context: RateLimitContext
+    userLevel: "NOVICE" | "INTERMEDIATE" | "ADVANCED" | "EXPERT",
+    context: RateLimitContext,
   ): Promise<EducationalContent> {
     const content = this.getEducationalContent(topic, userLevel);
 
@@ -1116,86 +1356,93 @@ class EducationEngine {
       explanation: content.explanation,
       bestPractices: content.bestPractices,
       examples: this.generateContextualExamples(topic, context),
-      links: content.links
+      links: content.links,
     };
   }
 
   private getEducationalContent(topic: string, userLevel: string): any {
     const contentMap: Record<string, any> = {
-      'RATE_LIMITING_BASICS': {
-        explanation: 'Rate limiting controls how many requests you can make in a given time period to ensure fair usage and system stability.',
+      RATE_LIMITING_BASICS: {
+        explanation:
+          "Rate limiting controls how many requests you can make in a given time period to ensure fair usage and system stability.",
         bestPractices: [
-          'Understand your rate limits before making requests',
-          'Implement proper error handling for rate limit responses',
-          'Use exponential backoff for retries',
-          'Monitor your usage patterns'
+          "Understand your rate limits before making requests",
+          "Implement proper error handling for rate limit responses",
+          "Use exponential backoff for retries",
+          "Monitor your usage patterns",
         ],
-        links: []
+        links: [],
       },
-      'THROTTLING_AND_BACKOFF': {
-        explanation: 'Throttling temporarily slows down requests when limits are approached. Exponential backoff helps avoid overwhelming the system.',
+      THROTTLING_AND_BACKOFF: {
+        explanation:
+          "Throttling temporarily slows down requests when limits are approached. Exponential backoff helps avoid overwhelming the system.",
         bestPractices: [
-          'Implement exponential backoff with jitter',
-          'Respect Retry-After headers',
-          'Use circuit breakers for external dependencies',
-          'Monitor and alert on throttling events'
+          "Implement exponential backoff with jitter",
+          "Respect Retry-After headers",
+          "Use circuit breakers for external dependencies",
+          "Monitor and alert on throttling events",
         ],
-        links: []
+        links: [],
       },
-      'REQUEST_QUEUING': {
-        explanation: 'Request queuing ensures fair processing during high-traffic periods by placing requests in a managed queue.',
+      REQUEST_QUEUING: {
+        explanation:
+          "Request queuing ensures fair processing during high-traffic periods by placing requests in a managed queue.",
         bestPractices: [
-          'Use asynchronous patterns for better user experience',
-          'Implement progress indicators for queued requests',
-          'Set appropriate timeouts for queued operations',
-          'Consider WebSocket connections for real-time updates'
+          "Use asynchronous patterns for better user experience",
+          "Implement progress indicators for queued requests",
+          "Set appropriate timeouts for queued operations",
+          "Consider WebSocket connections for real-time updates",
         ],
-        links: []
+        links: [],
       },
-      'RESPONSIBLE_API_USAGE': {
-        explanation: 'Responsible API usage involves following best practices to ensure optimal performance for all users.',
+      RESPONSIBLE_API_USAGE: {
+        explanation:
+          "Responsible API usage involves following best practices to ensure optimal performance for all users.",
         bestPractices: [
-          'Cache responses when appropriate',
-          'Use batch operations to reduce request count',
-          'Implement efficient polling strategies',
-          'Respect system resources and other users'
+          "Cache responses when appropriate",
+          "Use batch operations to reduce request count",
+          "Implement efficient polling strategies",
+          "Respect system resources and other users",
         ],
-        links: []
-      }
+        links: [],
+      },
     };
 
-    return contentMap[topic] || contentMap['RATE_LIMITING_BASICS'];
+    return contentMap[topic] || contentMap["RATE_LIMITING_BASICS"];
   }
 
   private getTopicDisplayName(topic: string): string {
     const displayNames: Record<string, string> = {
-      'RATE_LIMITING_BASICS': 'Rate Limiting Basics',
-      'THROTTLING_AND_BACKOFF': 'Throttling and Exponential Backoff',
-      'REQUEST_QUEUING': 'Request Queuing Systems',
-      'RESPONSIBLE_API_USAGE': 'Responsible API Usage'
+      RATE_LIMITING_BASICS: "Rate Limiting Basics",
+      THROTTLING_AND_BACKOFF: "Throttling and Exponential Backoff",
+      REQUEST_QUEUING: "Request Queuing Systems",
+      RESPONSIBLE_API_USAGE: "Responsible API Usage",
     };
 
     return displayNames[topic] || topic;
   }
 
-  private generateContextualExamples(topic: string, context: RateLimitContext): string[] {
+  private generateContextualExamples(
+    topic: string,
+    context: RateLimitContext,
+  ): string[] {
     const examples: Record<string, string[]> = {
-      'RATE_LIMITING_BASICS': [
+      RATE_LIMITING_BASICS: [
         `Your ${context.method} requests to ${context.apiEndpoint} are limited to X per minute`,
-        'Check the X-RateLimit-Remaining header to see your remaining quota'
+        "Check the X-RateLimit-Remaining header to see your remaining quota",
       ],
-      'THROTTLING_AND_BACKOFF': [
-        'Wait time = base_delay * (2 ^ retry_count) + random_jitter',
-        'If throttled, wait the time specified in the Retry-After header'
+      THROTTLING_AND_BACKOFF: [
+        "Wait time = base_delay * (2 ^ retry_count) + random_jitter",
+        "If throttled, wait the time specified in the Retry-After header",
       ],
-      'REQUEST_QUEUING': [
-        'Use WebSocket connections to receive queue status updates',
-        'Poll the queue status endpoint: GET /api/queue/status/{requestId}'
+      REQUEST_QUEUING: [
+        "Use WebSocket connections to receive queue status updates",
+        "Poll the queue status endpoint: GET /api/queue/status/{requestId}",
       ],
-      'RESPONSIBLE_API_USAGE': [
-        'Batch multiple operations: POST /api/batch with array of operations',
-        'Use ETags for conditional requests: If-None-Match header'
-      ]
+      RESPONSIBLE_API_USAGE: [
+        "Batch multiple operations: POST /api/batch with array of operations",
+        "Use ETags for conditional requests: If-None-Match header",
+      ],
     };
 
     return examples[topic] || [];
@@ -1211,7 +1458,7 @@ class PersonalizationEngine {
 
   initializeModels(): void {
     // Initialize personalization models
-    this.logger.log('Personalization models initialized');
+    this.logger.log("Personalization models initialized");
   }
 
   async analyzeUsagePatterns(userId: string): Promise<UsagePatterns> {
@@ -1221,7 +1468,7 @@ class PersonalizationEngine {
       peakUsageTimes: [9, 10, 14, 15], // Hours
       preferredBatchSize: 5,
       typicalResponseTime: 150,
-      errorRate: 0.02
+      errorRate: 0.02,
     };
   }
 }
@@ -1234,19 +1481,23 @@ class ResponseOptimizer {
 
   async optimizeResponse(
     response: ConversationalRateLimitResponse,
-    userPreferences: UserPreferences
+    userPreferences: UserPreferences,
   ): Promise<ConversationalRateLimitResponse> {
     // Optimize response based on user preferences
     let optimizedResponse = { ...response };
 
     // Adjust explanation length based on user preference
-    if (userPreferences.explanationStyle === 'BRIEF') {
-      optimizedResponse.explanation = this.shortenExplanation(response.explanation);
+    if (userPreferences.explanationStyle === "BRIEF") {
+      optimizedResponse.explanation = this.shortenExplanation(
+        response.explanation,
+      );
     }
 
     // Filter suggestions based on user expertise
-    if (userPreferences.expertiseLevel === 'EXPERT') {
-      optimizedResponse.suggestions = this.addTechnicalSuggestions(response.suggestions || []);
+    if (userPreferences.expertiseLevel === "EXPERT") {
+      optimizedResponse.suggestions = this.addTechnicalSuggestions(
+        response.suggestions || [],
+      );
     }
 
     return optimizedResponse;
@@ -1254,15 +1505,15 @@ class ResponseOptimizer {
 
   private shortenExplanation(explanation: string): string {
     // Shorten explanation for brief style
-    const sentences = explanation.split('. ');
-    return sentences.slice(0, 2).join('. ') + (sentences.length > 2 ? '.' : '');
+    const sentences = explanation.split(". ");
+    return sentences.slice(0, 2).join(". ") + (sentences.length > 2 ? "." : "");
   }
 
   private addTechnicalSuggestions(suggestions: string[]): string[] {
     return [
       ...suggestions,
-      'Check response headers for detailed rate limit information',
-      'Implement client-side rate limit tracking'
+      "Check response headers for detailed rate limit information",
+      "Implement client-side rate limit tracking",
     ];
   }
 }
@@ -1274,7 +1525,10 @@ class ConversationContextManager {
   private readonly logger = new Logger(ConversationContextManager.name);
   private contexts = new Map<string, ConversationContext>();
 
-  async getContext(userId: string, sessionId: string): Promise<ConversationContext> {
+  async getContext(
+    userId: string,
+    sessionId: string,
+  ): Promise<ConversationContext> {
     const key = `${userId}:${sessionId}`;
 
     if (!this.contexts.has(key)) {
@@ -1283,14 +1537,18 @@ class ConversationContextManager {
         sessionId,
         history: [],
         preferences: {},
-        lastActivity: new Date()
+        lastActivity: new Date(),
       });
     }
 
     return this.contexts.get(key)!;
   }
 
-  async updateContext(userId: string, sessionId: string, update: any): Promise<void> {
+  async updateContext(
+    userId: string,
+    sessionId: string,
+    update: any,
+  ): Promise<void> {
     const context = await this.getContext(userId, sessionId);
     context.history.push(update);
     context.lastActivity = new Date();
@@ -1302,7 +1560,7 @@ class ConversationContextManager {
   }
 
   cleanupExpiredContexts(): void {
-    const cutoffTime = Date.now() - (30 * 60 * 1000); // 30 minutes ago
+    const cutoffTime = Date.now() - 30 * 60 * 1000; // 30 minutes ago
 
     for (const [key, context] of this.contexts.entries()) {
       if (context.lastActivity.getTime() < cutoffTime) {
@@ -1316,13 +1574,13 @@ class ConversationContextManager {
 
 // Supporting interfaces
 interface UserPreferences {
-  explanationStyle: 'BASIC' | 'DETAILED' | 'TECHNICAL';
+  explanationStyle: "BASIC" | "DETAILED" | "TECHNICAL";
   includeExamples: boolean;
   includeVisualAids: boolean;
   includeTechnicalDetails: boolean;
   preferredLanguage: string;
-  communicationStyle: 'FORMAL' | 'CASUAL' | 'TECHNICAL';
-  expertiseLevel: 'NOVICE' | 'INTERMEDIATE' | 'ADVANCED' | 'EXPERT';
+  communicationStyle: "FORMAL" | "CASUAL" | "TECHNICAL";
+  expertiseLevel: "NOVICE" | "INTERMEDIATE" | "ADVANCED" | "EXPERT";
 }
 
 interface NegotiationIntent {
@@ -1331,8 +1589,8 @@ interface NegotiationIntent {
   parameters: Record<string, any>;
   originalMessage: string;
   analysis: {
-    sentiment: 'POSITIVE' | 'NEUTRAL' | 'NEGATIVE';
-    urgency: 'LOW' | 'MEDIUM' | 'HIGH';
+    sentiment: "POSITIVE" | "NEUTRAL" | "NEGATIVE";
+    urgency: "LOW" | "MEDIUM" | "HIGH";
     politeness: number;
   };
 }
@@ -1369,7 +1627,7 @@ interface ProactiveGuidance {
   guidanceNeeded: boolean;
   message: string;
   recommendations: string[];
-  urgencyLevel?: 'LOW' | 'MEDIUM' | 'HIGH';
+  urgencyLevel?: "LOW" | "MEDIUM" | "HIGH";
   suggestedActions?: string[];
   estimatedTimeToLimit?: number;
 }

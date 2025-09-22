@@ -17,13 +17,13 @@
  * @created 2025-09-21
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { EventEmitter } from 'events';
-import { performance } from 'perf_hooks';
-import { Worker, isMainThread, parentPort, workerData } from 'worker_threads';
-import * as http from 'http';
-import * as https from 'https';
-import { URL } from 'url';
+import { Injectable, Logger } from "@nestjs/common";
+import { EventEmitter } from "events";
+import { performance } from "perf_hooks";
+import { Worker, isMainThread, parentPort, workerData } from "worker_threads";
+import * as http from "http";
+import * as https from "https";
+import { URL } from "url";
 
 // Type guards
 function isError(error: unknown): error is Error {
@@ -32,8 +32,8 @@ function isError(error: unknown): error is Error {
 
 function getErrorMessage(error: unknown): string {
   if (isError(error)) return error.message;
-  if (typeof error === 'string') return error;
-  return 'An unknown error occurred';
+  if (typeof error === "string") return error;
+  return "An unknown error occurred";
 }
 
 /**
@@ -42,7 +42,7 @@ function getErrorMessage(error: unknown): string {
 interface ConnectionConfig {
   host: string;
   port: number;
-  protocol: 'http' | 'https';
+  protocol: "http" | "https";
   maxConnections: number;
   minConnections: number;
   idleTimeout: number;
@@ -51,7 +51,7 @@ interface ConnectionConfig {
   keepAliveMsecs: number;
   maxSockets: number;
   maxFreeSockets: number;
-  scheduling: 'lifo' | 'fifo';
+  scheduling: "lifo" | "fifo";
   retryPolicy: RetryPolicy;
   healthCheck: HealthCheckConfig;
 }
@@ -110,13 +110,17 @@ interface PoolMetrics {
   connectionUtilization: number;
   poolEfficiency: number;
   failoverCount: number;
-  circuitBreakerState: 'closed' | 'open' | 'half-open';
+  circuitBreakerState: "closed" | "open" | "half-open";
 }
 
 /**
  * Load balancing strategies
  */
-type LoadBalancingStrategy = 'round-robin' | 'least-connections' | 'weighted-response-time' | 'adaptive';
+type LoadBalancingStrategy =
+  | "round-robin"
+  | "least-connections"
+  | "weighted-response-time"
+  | "adaptive";
 
 /**
  * Request with routing information
@@ -172,7 +176,7 @@ export class IntelligentConnectionPoolService {
   private readonly performanceOptimizer: PerformanceOptimizer;
 
   constructor() {
-    this.logger.log('Initializing Intelligent Connection Pool System');
+    this.logger.log("Initializing Intelligent Connection Pool System");
 
     this.metrics = this.initializeMetrics();
     this.loadBalancer = new AdaptiveLoadBalancer();
@@ -196,7 +200,9 @@ export class IntelligentConnectionPoolService {
     await pool.initialize();
 
     this.pools.set(endpoint, pool);
-    this.logger.log(`Created connection pool for ${endpoint} with ${config.maxConnections} max connections`);
+    this.logger.log(
+      `Created connection pool for ${endpoint} with ${config.maxConnections} max connections`,
+    );
   }
 
   /**
@@ -208,7 +214,7 @@ export class IntelligentConnectionPoolService {
     try {
       // Check circuit breaker state
       if (this.circuitBreaker.isOpen(request.url)) {
-        throw new Error('Circuit breaker is open for endpoint');
+        throw new Error("Circuit breaker is open for endpoint");
       }
 
       // Select optimal endpoint and connection
@@ -220,7 +226,10 @@ export class IntelligentConnectionPoolService {
       }
 
       // Get optimal connection using load balancing
-      const connection = await this.loadBalancer.selectConnection(pool, request);
+      const connection = await this.loadBalancer.selectConnection(
+        pool,
+        request,
+      );
 
       // Execute request with retry logic
       const response = await this.executeWithRetry(connection, request);
@@ -234,9 +243,8 @@ export class IntelligentConnectionPoolService {
         responseTime,
         connectionId: connection.id,
         fromCache: false,
-        retryCount: 0
+        retryCount: 0,
       };
-
     } catch (error) {
       const responseTime = performance.now() - startTime;
       this.recordError(request.url, error, responseTime);
@@ -250,7 +258,7 @@ export class IntelligentConnectionPoolService {
   private async executeWithRetry(
     connection: Connection,
     request: RoutedRequest,
-    retryCount = 0
+    retryCount = 0,
   ): Promise<any> {
     try {
       return await this.executeOnConnection(connection, request);
@@ -258,7 +266,9 @@ export class IntelligentConnectionPoolService {
       const shouldRetry = this.shouldRetry(error, retryCount, request.retries);
 
       if (shouldRetry) {
-        this.logger.warn(`Retrying request ${request.id}, attempt ${retryCount + 1}`);
+        this.logger.warn(
+          `Retrying request ${request.id}, attempt ${retryCount + 1}`,
+        );
 
         // Wait with exponential backoff
         await this.delay(this.calculateRetryDelay(retryCount));
@@ -266,7 +276,10 @@ export class IntelligentConnectionPoolService {
         // Try different connection if available
         const endpoint = this.extractEndpoint(request.url);
         const pool = this.pools.get(endpoint);
-        const newConnection = await this.loadBalancer.selectConnection(pool!, request);
+        const newConnection = await this.loadBalancer.selectConnection(
+          pool!,
+          request,
+        );
 
         return this.executeWithRetry(newConnection, request, retryCount + 1);
       }
@@ -278,57 +291,67 @@ export class IntelligentConnectionPoolService {
   /**
    * Execute request on specific connection
    */
-  private async executeOnConnection(connection: Connection, request: RoutedRequest): Promise<any> {
+  private async executeOnConnection(
+    connection: Connection,
+    request: RoutedRequest,
+  ): Promise<any> {
     const startTime = performance.now();
 
     return new Promise((resolve, reject) => {
       const url = new URL(request.url);
       const options = {
         hostname: url.hostname,
-        port: url.port || (url.protocol === 'https:' ? 443 : 80),
+        port: url.port || (url.protocol === "https:" ? 443 : 80),
         path: url.pathname + url.search,
         method: request.method,
         headers: request.headers,
         timeout: request.timeout,
-        agent: connection.socket
+        agent: connection.socket,
       };
 
-      const req = (url.protocol === 'https:' ? https.request : http.request)(options, (res) => {
-        let data = '';
+      const req = (url.protocol === "https:" ? https.request : http.request)(
+        options,
+        (res) => {
+          let data = "";
 
-        res.on('data', (chunk) => {
-          data += chunk;
-        });
-
-        res.on('end', () => {
-          const responseTime = performance.now() - startTime;
-
-          // Update connection metrics
-          connection.lastUsed = new Date();
-          connection.requestCount++;
-          connection.responseTime = responseTime;
-
-          resolve({
-            data: this.parseResponse(data, res.headers['content-type']),
-            statusCode: res.statusCode,
-            headers: res.headers
+          res.on("data", (chunk) => {
+            data += chunk;
           });
-        });
-      });
 
-      req.on('error', (error) => {
+          res.on("end", () => {
+            const responseTime = performance.now() - startTime;
+
+            // Update connection metrics
+            connection.lastUsed = new Date();
+            connection.requestCount++;
+            connection.responseTime = responseTime;
+
+            resolve({
+              data: this.parseResponse(data, res.headers["content-type"]),
+              statusCode: res.statusCode,
+              headers: res.headers,
+            });
+          });
+        },
+      );
+
+      req.on("error", (error) => {
         connection.errors++;
         connection.isHealthy = false;
         reject(error);
       });
 
-      req.on('timeout', () => {
+      req.on("timeout", () => {
         req.destroy();
-        reject(new Error('Request timeout'));
+        reject(new Error("Request timeout"));
       });
 
       if (request.body) {
-        req.write(typeof request.body === 'string' ? request.body : JSON.stringify(request.body));
+        req.write(
+          typeof request.body === "string"
+            ? request.body
+            : JSON.stringify(request.body),
+        );
       }
 
       req.end();
@@ -363,10 +386,10 @@ export class IntelligentConnectionPoolService {
   } {
     return {
       connectionEstablishment: this.metrics.averageResponseTime <= 10, // <10ms
-      poolUtilization: this.metrics.poolEfficiency >= 0.90, // >90%
+      poolUtilization: this.metrics.poolEfficiency >= 0.9, // >90%
       throughput: this.metrics.throughput >= 5000, // >5000 RPS
       connectionReuse: this.metrics.connectionUtilization >= 0.95, // >95%
-      failoverTime: true // Implement failover time tracking
+      failoverTime: true, // Implement failover time tracking
     };
   }
 
@@ -380,11 +403,11 @@ export class IntelligentConnectionPoolService {
   // Helper methods
   private extractEndpoint(url: string): string {
     const parsed = new URL(url);
-    return `${parsed.protocol}//${parsed.hostname}:${parsed.port || (parsed.protocol === 'https:' ? 443 : 80)}`;
+    return `${parsed.protocol}//${parsed.hostname}:${parsed.port || (parsed.protocol === "https:" ? 443 : 80)}`;
   }
 
   private parseResponse(data: string, contentType?: string): any {
-    if (contentType?.includes('application/json')) {
+    if (contentType?.includes("application/json")) {
       try {
         return JSON.parse(data);
       } catch {
@@ -394,13 +417,24 @@ export class IntelligentConnectionPoolService {
     return data;
   }
 
-  private shouldRetry(error: unknown, retryCount: number, maxRetries: number): boolean {
+  private shouldRetry(
+    error: unknown,
+    retryCount: number,
+    maxRetries: number,
+  ): boolean {
     if (retryCount >= maxRetries) return false;
 
     const errorMessage = getErrorMessage(error);
-    const retryableErrors = ['ECONNRESET', 'ENOTFOUND', 'ETIMEDOUT', 'ECONNREFUSED'];
+    const retryableErrors = [
+      "ECONNRESET",
+      "ENOTFOUND",
+      "ETIMEDOUT",
+      "ECONNREFUSED",
+    ];
 
-    return retryableErrors.some(retryableError => errorMessage.includes(retryableError));
+    return retryableErrors.some((retryableError) =>
+      errorMessage.includes(retryableError),
+    );
   }
 
   private calculateRetryDelay(retryCount: number): number {
@@ -412,17 +446,24 @@ export class IntelligentConnectionPoolService {
   }
 
   private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   private recordSuccess(endpoint: string, responseTime: number): void {
     this.metrics.requestsProcessed++;
-    this.metrics.averageResponseTime = (this.metrics.averageResponseTime + responseTime) / 2;
+    this.metrics.averageResponseTime =
+      (this.metrics.averageResponseTime + responseTime) / 2;
     this.circuitBreaker.recordSuccess(endpoint);
   }
 
-  private recordError(endpoint: string, error: unknown, responseTime: number): void {
-    this.logger.error(`Request error for ${endpoint}: ${getErrorMessage(error)}`);
+  private recordError(
+    endpoint: string,
+    error: unknown,
+    responseTime: number,
+  ): void {
+    this.logger.error(
+      `Request error for ${endpoint}: ${getErrorMessage(error)}`,
+    );
     this.circuitBreaker.recordFailure(endpoint);
   }
 
@@ -438,20 +479,20 @@ export class IntelligentConnectionPoolService {
       connectionUtilization: 0,
       poolEfficiency: 0,
       failoverCount: 0,
-      circuitBreakerState: 'closed'
+      circuitBreakerState: "closed",
     };
   }
 
   private setupEventListeners(): void {
-    this.eventEmitter.on('connection-created', (connectionId: string) => {
+    this.eventEmitter.on("connection-created", (connectionId: string) => {
       this.logger.debug(`Connection created: ${connectionId}`);
     });
 
-    this.eventEmitter.on('connection-destroyed', (connectionId: string) => {
+    this.eventEmitter.on("connection-destroyed", (connectionId: string) => {
       this.logger.debug(`Connection destroyed: ${connectionId}`);
     });
 
-    this.eventEmitter.on('pool-saturation', (endpoint: string) => {
+    this.eventEmitter.on("pool-saturation", (endpoint: string) => {
       this.logger.warn(`Pool saturation detected for ${endpoint}`);
     });
   }
@@ -460,7 +501,7 @@ export class IntelligentConnectionPoolService {
     setInterval(() => {
       this.updateThroughputMetrics();
       const targets = this.validatePerformanceTargets();
-      this.logger.log('Connection Pool Performance:', targets);
+      this.logger.log("Connection Pool Performance:", targets);
     }, 10000); // Every 10 seconds
   }
 
@@ -482,7 +523,7 @@ class ConnectionPool {
   constructor(
     private readonly endpoint: string,
     private readonly config: ConnectionConfig,
-    private readonly eventEmitter: EventEmitter
+    private readonly eventEmitter: EventEmitter,
   ) {
     this.metrics = this.initializePoolMetrics();
   }
@@ -506,7 +547,7 @@ class ConnectionPool {
     }
 
     // Wait for connection to become available
-    throw new Error('Pool exhausted - no connections available');
+    throw new Error("Pool exhausted - no connections available");
   }
 
   releaseConnection(connection: Connection): void {
@@ -520,23 +561,24 @@ class ConnectionPool {
   private async createConnection(): Promise<Connection> {
     const id = `conn-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
-    const agent = this.config.protocol === 'https'
-      ? new https.Agent({
-          keepAlive: this.config.keepAlive,
-          keepAliveMsecs: this.config.keepAliveMsecs,
-          maxSockets: this.config.maxSockets,
-          maxFreeSockets: this.config.maxFreeSockets,
-          timeout: this.config.connectTimeout,
-          scheduling: this.config.scheduling
-        })
-      : new http.Agent({
-          keepAlive: this.config.keepAlive,
-          keepAliveMsecs: this.config.keepAliveMsecs,
-          maxSockets: this.config.maxSockets,
-          maxFreeSockets: this.config.maxFreeSockets,
-          timeout: this.config.connectTimeout,
-          scheduling: this.config.scheduling
-        });
+    const agent =
+      this.config.protocol === "https"
+        ? new https.Agent({
+            keepAlive: this.config.keepAlive,
+            keepAliveMsecs: this.config.keepAliveMsecs,
+            maxSockets: this.config.maxSockets,
+            maxFreeSockets: this.config.maxFreeSockets,
+            timeout: this.config.connectTimeout,
+            scheduling: this.config.scheduling,
+          })
+        : new http.Agent({
+            keepAlive: this.config.keepAlive,
+            keepAliveMsecs: this.config.keepAliveMsecs,
+            maxSockets: this.config.maxSockets,
+            maxFreeSockets: this.config.maxFreeSockets,
+            timeout: this.config.connectTimeout,
+            scheduling: this.config.scheduling,
+          });
 
     const connection: Connection = {
       id,
@@ -548,13 +590,13 @@ class ConnectionPool {
       isActive: false,
       responseTime: 0,
       errors: 0,
-      endpoint: this.endpoint
+      endpoint: this.endpoint,
     };
 
     this.connections.set(id, connection);
     this.available.push(connection);
 
-    this.eventEmitter.emit('connection-created', id);
+    this.eventEmitter.emit("connection-created", id);
 
     return connection;
   }
@@ -568,7 +610,7 @@ class ConnectionPool {
       this.available.splice(index, 1);
     }
 
-    this.eventEmitter.emit('connection-destroyed', connection.id);
+    this.eventEmitter.emit("connection-destroyed", connection.id);
   }
 
   getMetrics(): PoolMetrics {
@@ -587,7 +629,7 @@ class ConnectionPool {
       connectionUtilization: 0,
       poolEfficiency: 0,
       failoverCount: 0,
-      circuitBreakerState: 'closed'
+      circuitBreakerState: "closed",
     };
   }
 }
@@ -597,17 +639,20 @@ class ConnectionPool {
  */
 class AdaptiveLoadBalancer {
   private readonly logger = new Logger(AdaptiveLoadBalancer.name);
-  private strategy: LoadBalancingStrategy = 'adaptive';
+  private strategy: LoadBalancingStrategy = "adaptive";
 
-  async selectConnection(pool: ConnectionPool, request: RoutedRequest): Promise<Connection> {
+  async selectConnection(
+    pool: ConnectionPool,
+    request: RoutedRequest,
+  ): Promise<Connection> {
     switch (this.strategy) {
-      case 'round-robin':
+      case "round-robin":
         return this.selectRoundRobin(pool);
-      case 'least-connections':
+      case "least-connections":
         return this.selectLeastConnections(pool);
-      case 'weighted-response-time':
+      case "weighted-response-time":
         return this.selectWeightedResponseTime(pool);
-      case 'adaptive':
+      case "adaptive":
       default:
         return this.selectAdaptive(pool, request);
     }
@@ -617,15 +662,22 @@ class AdaptiveLoadBalancer {
     return pool.acquireConnection();
   }
 
-  private async selectLeastConnections(pool: ConnectionPool): Promise<Connection> {
+  private async selectLeastConnections(
+    pool: ConnectionPool,
+  ): Promise<Connection> {
     return pool.acquireConnection();
   }
 
-  private async selectWeightedResponseTime(pool: ConnectionPool): Promise<Connection> {
+  private async selectWeightedResponseTime(
+    pool: ConnectionPool,
+  ): Promise<Connection> {
     return pool.acquireConnection();
   }
 
-  private async selectAdaptive(pool: ConnectionPool, request: RoutedRequest): Promise<Connection> {
+  private async selectAdaptive(
+    pool: ConnectionPool,
+    request: RoutedRequest,
+  ): Promise<Connection> {
     // Implement adaptive selection based on current conditions
     return pool.acquireConnection();
   }
@@ -636,24 +688,35 @@ class AdaptiveLoadBalancer {
  */
 class CircuitBreaker {
   private readonly logger = new Logger(CircuitBreaker.name);
-  private readonly states: Map<string, { state: string; failures: number; lastFailure: Date }> = new Map();
+  private readonly states: Map<
+    string,
+    { state: string; failures: number; lastFailure: Date }
+  > = new Map();
 
   isOpen(endpoint: string): boolean {
     const state = this.states.get(endpoint);
-    return state?.state === 'open';
+    return state?.state === "open";
   }
 
   recordSuccess(endpoint: string): void {
-    this.states.set(endpoint, { state: 'closed', failures: 0, lastFailure: new Date() });
+    this.states.set(endpoint, {
+      state: "closed",
+      failures: 0,
+      lastFailure: new Date(),
+    });
   }
 
   recordFailure(endpoint: string): void {
-    const current = this.states.get(endpoint) || { state: 'closed', failures: 0, lastFailure: new Date() };
+    const current = this.states.get(endpoint) || {
+      state: "closed",
+      failures: 0,
+      lastFailure: new Date(),
+    };
     current.failures++;
     current.lastFailure = new Date();
 
     if (current.failures >= 5) {
-      current.state = 'open';
+      current.state = "open";
     }
 
     this.states.set(endpoint, current);
@@ -689,7 +752,7 @@ class PerformanceOptimizer {
 
   async optimize(): Promise<void> {
     // Implement performance optimization logic
-    this.logger.log('Optimizing connection pool performance');
+    this.logger.log("Optimizing connection pool performance");
   }
 }
 
@@ -698,5 +761,5 @@ export {
   ConnectionConfig,
   PoolMetrics,
   RoutedRequest,
-  PoolResponse
+  PoolResponse,
 };

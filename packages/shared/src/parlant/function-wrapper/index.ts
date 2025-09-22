@@ -12,7 +12,7 @@
  */
 
 // Core Interfaces and Types
-export * from './interfaces/wrapper-types';
+export * from "./interfaces/wrapper-types";
 
 // Import runtime enum values for use in function bodies
 import {
@@ -23,15 +23,18 @@ import {
   AnyFunction,
   WrapFunction,
   SecurityRiskLevel,
-  ErrorCategory
-} from './interfaces/wrapper-types';
+  ErrorCategory,
+} from "./interfaces/wrapper-types";
 
 // Import factory for QuickStartHelper
-import { EnterpriseFunctionWrapperFactory } from './factories/function-wrapper-factory';
+import { EnterpriseFunctionWrapperFactory } from "./factories/function-wrapper-factory";
 
 // Import additional classes for use in function bodies
-import { FunctionSignatureInspector, TypeSafeWrapperCreator } from './core/signature-preserving-wrapper';
-import { WrapperRegistryManagementService } from './core/wrapper-registry-management';
+import {
+  FunctionSignatureInspector,
+  TypeSafeWrapperCreator,
+} from "./core/signature-preserving-wrapper";
+import { WrapperRegistryManagementService } from "./core/wrapper-registry-management";
 
 // Core Implementation Components
 export {
@@ -42,8 +45,8 @@ export {
   FunctionSignature,
   CompatibilityResult,
   TypeValidator,
-  TypeValidationResult
-} from './core/signature-preserving-wrapper';
+  TypeValidationResult,
+} from "./core/signature-preserving-wrapper";
 
 // Factory Components
 export {
@@ -53,8 +56,8 @@ export {
   AutoConfigOptions,
   FactoryStatistics,
   WrapperHealthStatus as FactoryWrapperHealthStatus,
-  FactoryHealthStatus
-} from './factories/function-wrapper-factory';
+  FactoryHealthStatus,
+} from "./factories/function-wrapper-factory";
 
 // Validation Components - Parameter Processing
 export {
@@ -81,8 +84,8 @@ export {
   ParameterChangeAnalysis,
   ParameterChange,
   SecurityImpactAssessment,
-  BusinessImpactAssessment
-} from './validation/parameter-capture-validation';
+  BusinessImpactAssessment,
+} from "./validation/parameter-capture-validation";
 
 // Validation Components - Return Value Processing
 export {
@@ -107,8 +110,8 @@ export {
   PropertySchema,
   ItemSchema,
   TransformationOptions,
-  TransformedReturnValue
-} from './validation/return-value-processing';
+  TransformedReturnValue,
+} from "./validation/return-value-processing";
 
 // Registry and Management Components
 export {
@@ -141,14 +144,14 @@ export {
   AggregatedPerformanceMetrics,
   WrapperInvocationEvent,
   WrapperErrorEvent,
-  WrapperPerformanceEvent
-} from './core/wrapper-registry-management';
+  WrapperPerformanceEvent,
+} from "./core/wrapper-registry-management";
 
 /**
  * Framework Version Information
  */
-export const FRAMEWORK_VERSION = '1.0.0';
-export const FRAMEWORK_NAME = 'PARLANT Function Wrapper Framework';
+export const FRAMEWORK_VERSION = "1.0.0";
+export const FRAMEWORK_NAME = "PARLANT Function Wrapper Framework";
 
 /**
  * Framework Capabilities
@@ -182,7 +185,7 @@ export const FRAMEWORK_CAPABILITIES = {
   conversationalValidation: true,
   auditTrails: true,
   businessImpactAssessment: true,
-  complianceSupport: true
+  complianceSupport: true,
 } as const;
 
 /**
@@ -203,11 +206,11 @@ export class DefaultConfigurationFactory {
       monitoring: true,
       metadata: {
         category: FunctionCategory.DATABASE_READ,
-        domain: 'database',
+        domain: "database",
         dataClassification: DataClassification.INTERNAL,
-        dependencies: ['database'],
-        tags: ['database', 'read', 'cacheable']
-      }
+        dependencies: ["database"],
+        tags: ["database", "read", "cacheable"],
+      },
     };
   }
 
@@ -223,11 +226,11 @@ export class DefaultConfigurationFactory {
       monitoring: true,
       metadata: {
         category: FunctionCategory.DATABASE_WRITE,
-        domain: 'database',
+        domain: "database",
         dataClassification: DataClassification.CONFIDENTIAL,
-        dependencies: ['database'],
-        tags: ['database', 'write', 'transaction']
-      }
+        dependencies: ["database"],
+        tags: ["database", "write", "transaction"],
+      },
     };
   }
 
@@ -244,11 +247,11 @@ export class DefaultConfigurationFactory {
       monitoring: true,
       metadata: {
         category: FunctionCategory.API_CALL,
-        domain: 'api',
+        domain: "api",
         dataClassification: DataClassification.INTERNAL,
-        dependencies: ['network'],
-        tags: ['api', 'external', 'network']
-      }
+        dependencies: ["network"],
+        tags: ["api", "external", "network"],
+      },
     };
   }
 
@@ -264,11 +267,11 @@ export class DefaultConfigurationFactory {
       monitoring: true,
       metadata: {
         category: FunctionCategory.AUTHENTICATION,
-        domain: 'security',
+        domain: "security",
         dataClassification: DataClassification.RESTRICTED,
-        dependencies: ['auth-service'],
-        tags: ['auth', 'security', 'critical']
-      }
+        dependencies: ["auth-service"],
+        tags: ["auth", "security", "critical"],
+      },
     };
   }
 
@@ -285,11 +288,11 @@ export class DefaultConfigurationFactory {
       monitoring: true,
       metadata: {
         category: FunctionCategory.UTILITY,
-        domain: 'utility',
+        domain: "utility",
         dataClassification: DataClassification.INTERNAL,
         dependencies: [],
-        tags: ['utility', 'helper', 'general']
-      }
+        tags: ["utility", "helper", "general"],
+      },
     };
   }
 }
@@ -306,9 +309,10 @@ export class QuickStartHelper {
    */
   static wrapDatabaseRead<T extends AnyFunction>(
     func: T,
-    functionId: string
+    functionId: string,
   ): WrapFunction<T> {
-    const config = DefaultConfigurationFactory.createDatabaseReadConfig(functionId);
+    const config =
+      DefaultConfigurationFactory.createDatabaseReadConfig(functionId);
     return this.factory.createWrapper(func, config);
   }
 
@@ -317,9 +321,10 @@ export class QuickStartHelper {
    */
   static wrapDatabaseWrite<T extends AnyFunction>(
     func: T,
-    functionId: string
+    functionId: string,
   ): WrapFunction<T> {
-    const config = DefaultConfigurationFactory.createDatabaseWriteConfig(functionId);
+    const config =
+      DefaultConfigurationFactory.createDatabaseWriteConfig(functionId);
     return this.factory.createWrapper(func, config);
   }
 
@@ -328,7 +333,7 @@ export class QuickStartHelper {
    */
   static wrapApi<T extends AnyFunction>(
     func: T,
-    functionId: string
+    functionId: string,
   ): WrapFunction<T> {
     const config = DefaultConfigurationFactory.createApiConfig(functionId);
     return this.factory.createWrapper(func, config);
@@ -339,7 +344,7 @@ export class QuickStartHelper {
    */
   static wrapAuth<T extends AnyFunction>(
     func: T,
-    functionId: string
+    functionId: string,
   ): WrapFunction<T> {
     const config = DefaultConfigurationFactory.createAuthConfig(functionId);
     return this.factory.createWrapper(func, config);
@@ -350,7 +355,7 @@ export class QuickStartHelper {
    */
   static wrapUtility<T extends AnyFunction>(
     func: T,
-    functionId: string
+    functionId: string,
   ): WrapFunction<T> {
     const config = DefaultConfigurationFactory.createUtilityConfig(functionId);
     return this.factory.createWrapper(func, config);
@@ -367,7 +372,7 @@ export class QuickStartHelper {
       isWrite?: boolean;
       isAuth?: boolean;
       isApi?: boolean;
-    }
+    },
   ): WrapFunction<T> {
     // Intelligent configuration selection based on hints and function analysis
     let config: WrapperConfig;
@@ -375,7 +380,8 @@ export class QuickStartHelper {
     if (hints?.isAuth) {
       config = DefaultConfigurationFactory.createAuthConfig(functionId);
     } else if (hints?.isDatabase && hints?.isWrite) {
-      config = DefaultConfigurationFactory.createDatabaseWriteConfig(functionId);
+      config =
+        DefaultConfigurationFactory.createDatabaseWriteConfig(functionId);
     } else if (hints?.isDatabase) {
       config = DefaultConfigurationFactory.createDatabaseReadConfig(functionId);
     } else if (hints?.isApi) {
@@ -383,15 +389,34 @@ export class QuickStartHelper {
     } else {
       // Analyze function name for hints
       const name = func.name.toLowerCase();
-      if (name.includes('auth') || name.includes('login') || name.includes('token')) {
+      if (
+        name.includes("auth") ||
+        name.includes("login") ||
+        name.includes("token")
+      ) {
         config = DefaultConfigurationFactory.createAuthConfig(functionId);
-      } else if (name.includes('db') || name.includes('database') || name.includes('query')) {
-        if (name.includes('create') || name.includes('update') || name.includes('delete') || name.includes('insert')) {
-          config = DefaultConfigurationFactory.createDatabaseWriteConfig(functionId);
+      } else if (
+        name.includes("db") ||
+        name.includes("database") ||
+        name.includes("query")
+      ) {
+        if (
+          name.includes("create") ||
+          name.includes("update") ||
+          name.includes("delete") ||
+          name.includes("insert")
+        ) {
+          config =
+            DefaultConfigurationFactory.createDatabaseWriteConfig(functionId);
         } else {
-          config = DefaultConfigurationFactory.createDatabaseReadConfig(functionId);
+          config =
+            DefaultConfigurationFactory.createDatabaseReadConfig(functionId);
         }
-      } else if (name.includes('api') || name.includes('http') || name.includes('fetch')) {
+      } else if (
+        name.includes("api") ||
+        name.includes("http") ||
+        name.includes("fetch")
+      ) {
         config = DefaultConfigurationFactory.createApiConfig(functionId);
       } else {
         config = DefaultConfigurationFactory.createUtilityConfig(functionId);
@@ -416,9 +441,9 @@ export class FrameworkValidationUtils {
 
     // Check required dependencies
     try {
-      require('@nestjs/common');
+      require("@nestjs/common");
     } catch {
-      issues.push('Missing required dependency: @nestjs/common');
+      issues.push("Missing required dependency: @nestjs/common");
     }
 
     // Check framework capabilities
@@ -426,7 +451,7 @@ export class FrameworkValidationUtils {
     const enabledCapabilities = capabilities.filter(([, enabled]) => enabled);
 
     if (enabledCapabilities.length < capabilities.length) {
-      warnings.push('Some framework capabilities are disabled');
+      warnings.push("Some framework capabilities are disabled");
     }
 
     return {
@@ -434,7 +459,7 @@ export class FrameworkValidationUtils {
       issues,
       warnings,
       frameworkVersion: FRAMEWORK_VERSION,
-      capabilities: FRAMEWORK_CAPABILITIES
+      capabilities: FRAMEWORK_CAPABILITIES,
     };
   }
 
@@ -447,35 +472,48 @@ export class FrameworkValidationUtils {
 
     // Required fields
     if (!config.functionId) {
-      errors.push('functionId is required');
+      errors.push("functionId is required");
     }
 
     if (!config.description) {
-      errors.push('description is required');
+      errors.push("description is required");
     }
 
     if (!config.validationLevel) {
-      errors.push('validationLevel is required');
+      errors.push("validationLevel is required");
     }
 
     // Validate function ID format
-    if (config.functionId && !/^[a-zA-Z][a-zA-Z0-9._-]*$/.test(config.functionId)) {
-      errors.push('functionId must start with a letter and contain only alphanumeric characters, dots, underscores, and hyphens');
+    if (
+      config.functionId &&
+      !/^[a-zA-Z][a-zA-Z0-9._-]*$/.test(config.functionId)
+    ) {
+      errors.push(
+        "functionId must start with a letter and contain only alphanumeric characters, dots, underscores, and hyphens",
+      );
     }
 
     // Check for performance implications
-    if (config.cacheTtl && config.cacheTtl > 3600000) { // > 1 hour
-      warnings.push('Cache TTL is very long, consider shorter duration for better data freshness');
+    if (config.cacheTtl && config.cacheTtl > 3600000) {
+      // > 1 hour
+      warnings.push(
+        "Cache TTL is very long, consider shorter duration for better data freshness",
+      );
     }
 
-    if (config.validationLevel === ValidationLevel.CRITICAL && config.cacheable) {
-      warnings.push('Critical validation functions should typically not be cached');
+    if (
+      config.validationLevel === ValidationLevel.CRITICAL &&
+      config.cacheable
+    ) {
+      warnings.push(
+        "Critical validation functions should typically not be cached",
+      );
     }
 
     return {
       valid: errors.length === 0,
       errors,
-      warnings
+      warnings,
     };
   }
 
@@ -483,25 +521,28 @@ export class FrameworkValidationUtils {
    * Analyze function compatibility
    */
   static analyzeFunctionCompatibility<T extends AnyFunction>(
-    func: T
+    func: T,
   ): CompatibilityAnalysisResult {
     try {
-      const compatibility = FunctionSignatureInspector.validateCompatibility(func);
+      const compatibility =
+        FunctionSignatureInspector.validateCompatibility(func);
 
       return {
         compatible: compatibility.compatible,
         signature: compatibility.signature,
         issues: compatibility.issues,
         warnings: compatibility.warnings,
-        recommendations: compatibility.recommendations
+        recommendations: compatibility.recommendations,
       };
     } catch (error) {
       return {
         compatible: false,
         signature: null,
-        issues: [`Analysis failed: ${error instanceof Error ? error.message : String(error)}`],
+        issues: [
+          `Analysis failed: ${error instanceof Error ? error.message : String(error)}`,
+        ],
         warnings: [],
-        recommendations: ['Ensure function is properly defined and accessible']
+        recommendations: ["Ensure function is properly defined and accessible"],
       };
     }
   }
@@ -526,7 +567,9 @@ export interface ConfigValidationResult {
 
 export interface CompatibilityAnalysisResult {
   readonly compatible: boolean;
-  readonly signature: import('./core/signature-preserving-wrapper').FunctionSignature<any> | null;
+  readonly signature:
+    | import("./core/signature-preserving-wrapper").FunctionSignature<any>
+    | null;
   readonly issues: readonly string[];
   readonly warnings: readonly string[];
   readonly recommendations: readonly string[];
@@ -539,7 +582,7 @@ export const FRAMEWORK_CONSTANTS = {
   DEFAULT_VALIDATION_TIMEOUT: 30000,
   DEFAULT_CACHE_TTL: 300000,
   DEFAULT_MAX_PARAMETER_SIZE: 10485760, // 10MB
-  DEFAULT_MAX_RETURN_SIZE: 52428800,   // 50MB
+  DEFAULT_MAX_RETURN_SIZE: 52428800, // 50MB
   DEFAULT_HEALTH_CHECK_INTERVAL: 60000,
   DEFAULT_CLEANUP_INTERVAL: 300000,
 
@@ -549,12 +592,27 @@ export const FRAMEWORK_CONSTANTS = {
   SECURITY_RISK_LEVELS: Object.values(SecurityRiskLevel),
 
   SUPPORTED_PARAMETER_TYPES: [
-    'string', 'number', 'boolean', 'object', 'array', 'function', 'undefined', 'null'
+    "string",
+    "number",
+    "boolean",
+    "object",
+    "array",
+    "function",
+    "undefined",
+    "null",
   ],
 
   SUPPORTED_RETURN_TYPES: [
-    'string', 'number', 'boolean', 'object', 'array', 'function', 'undefined', 'null', 'promise'
-  ]
+    "string",
+    "number",
+    "boolean",
+    "object",
+    "array",
+    "function",
+    "undefined",
+    "null",
+    "promise",
+  ],
 } as const;
 
 /**
@@ -565,10 +623,10 @@ export class FrameworkError extends Error {
     message: string,
     public readonly code: string,
     public readonly category: ErrorCategory,
-    public readonly metadata: Record<string, any> = {}
+    public readonly metadata: Record<string, any> = {},
   ) {
     super(message);
-    this.name = 'FrameworkError';
+    this.name = "FrameworkError";
   }
 }
 
@@ -576,11 +634,11 @@ export class ConfigurationError extends FrameworkError {
   constructor(message: string, metadata: Record<string, any> = {}) {
     super(
       message,
-      'CONFIGURATION_ERROR',
+      "CONFIGURATION_ERROR",
       ErrorCategory.CONFIGURATION_ERROR,
-      metadata
+      metadata,
     );
-    this.name = 'ConfigurationError';
+    this.name = "ConfigurationError";
   }
 }
 
@@ -588,11 +646,11 @@ export class ValidationError extends FrameworkError {
   constructor(message: string, metadata: Record<string, any> = {}) {
     super(
       message,
-      'VALIDATION_ERROR',
+      "VALIDATION_ERROR",
       ErrorCategory.VALIDATION_ERROR,
-      metadata
+      metadata,
     );
-    this.name = 'ValidationError';
+    this.name = "ValidationError";
   }
 }
 
@@ -602,35 +660,36 @@ export class ValidationError extends FrameworkError {
 export const FRAMEWORK_METADATA = {
   name: FRAMEWORK_NAME,
   version: FRAMEWORK_VERSION,
-  description: 'Universal type-safe function wrapping framework for PARLANT conversational validation',
-  author: 'Function Wrapper Framework Agent',
-  license: 'Enterprise',
+  description:
+    "Universal type-safe function wrapping framework for PARLANT conversational validation",
+  author: "Function Wrapper Framework Agent",
+  license: "Enterprise",
 
   compatibility: {
-    node: '>=16.0.0',
-    typescript: '>=4.5.0',
-    nestjs: '>=8.0.0'
+    node: ">=16.0.0",
+    typescript: ">=4.5.0",
+    nestjs: ">=8.0.0",
   },
 
   features: [
-    'Type-safe function wrapping with signature preservation',
-    'PARLANT conversational validation integration',
-    'Enterprise-grade parameter and return value processing',
-    'Comprehensive wrapper registry and lifecycle management',
-    'Advanced security validation and sanitization',
-    'Performance monitoring and optimization',
-    'Audit trails and compliance support',
-    'Batch processing and configuration templates'
+    "Type-safe function wrapping with signature preservation",
+    "PARLANT conversational validation integration",
+    "Enterprise-grade parameter and return value processing",
+    "Comprehensive wrapper registry and lifecycle management",
+    "Advanced security validation and sanitization",
+    "Performance monitoring and optimization",
+    "Audit trails and compliance support",
+    "Batch processing and configuration templates",
   ],
 
   useCases: [
-    'Database function wrapping with conversational validation',
-    'API endpoint security enhancement',
-    'Authentication and authorization validation',
-    'Business logic compliance checking',
-    'Data processing pipeline validation',
-    'Enterprise workflow orchestration'
-  ]
+    "Database function wrapping with conversational validation",
+    "API endpoint security enhancement",
+    "Authentication and authorization validation",
+    "Business logic compliance checking",
+    "Data processing pipeline validation",
+    "Enterprise workflow orchestration",
+  ],
 } as const;
 
 // Default export for convenience
@@ -654,5 +713,5 @@ export default {
   // Error classes
   FrameworkError,
   ConfigurationError,
-  ValidationError
+  ValidationError,
 };

@@ -16,7 +16,7 @@
  * - Real-time alerting and notification system
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from "@nestjs/common";
 import {
   EnterpriseErrorContext,
   ErrorMetrics,
@@ -24,8 +24,8 @@ import {
   ErrorInsights,
   EnterpriseErrorSeverity,
   EnterpriseErrorCategory,
-  NotificationUrgency
-} from '../types/error-types';
+  NotificationUrgency,
+} from "../types/error-types";
 
 // ===== MONITORING INTERFACES =====
 
@@ -46,7 +46,7 @@ export interface PerformanceMetrics {
     bySeverity: Record<EnterpriseErrorSeverity, number>;
     byCategory: Record<EnterpriseErrorCategory, number>;
     byService: Record<string, number>;
-    trend: 'INCREASING' | 'DECREASING' | 'STABLE';
+    trend: "INCREASING" | "DECREASING" | "STABLE";
     prediction: {
       nextHour: number;
       nextDay: number;
@@ -81,13 +81,13 @@ export interface PerformanceMetrics {
     cpu: {
       average: number;
       peak: number;
-      trend: 'INCREASING' | 'DECREASING' | 'STABLE';
+      trend: "INCREASING" | "DECREASING" | "STABLE";
     };
     memory: {
       average: number;
       peak: number;
       heapUsage: number;
-      trend: 'INCREASING' | 'DECREASING' | 'STABLE';
+      trend: "INCREASING" | "DECREASING" | "STABLE";
     };
     network: {
       bandwidth: number;
@@ -103,17 +103,23 @@ export interface PerformanceMetrics {
 
   /** System health indicators */
   health: {
-    overall: 'HEALTHY' | 'DEGRADED' | 'CRITICAL' | 'FAILING';
-    components: Record<string, {
-      status: 'HEALTHY' | 'DEGRADED' | 'CRITICAL' | 'FAILING';
-      score: number; // 0-100
-      lastCheck: Date;
-    }>;
-    dependencies: Record<string, {
-      status: 'AVAILABLE' | 'DEGRADED' | 'UNAVAILABLE';
-      latency: number;
-      errorRate: number;
-    }>;
+    overall: "HEALTHY" | "DEGRADED" | "CRITICAL" | "FAILING";
+    components: Record<
+      string,
+      {
+        status: "HEALTHY" | "DEGRADED" | "CRITICAL" | "FAILING";
+        score: number; // 0-100
+        lastCheck: Date;
+      }
+    >;
+    dependencies: Record<
+      string,
+      {
+        status: "AVAILABLE" | "DEGRADED" | "UNAVAILABLE";
+        latency: number;
+        errorRate: number;
+      }
+    >;
   };
 
   /** Quality metrics */
@@ -147,7 +153,9 @@ export interface PatternAnalysisConfig {
 
   /** Machine learning parameters */
   ml: {
-    algorithms: Array<'ISOLATION_FOREST' | 'LSTM' | 'ARIMA' | 'SEASONAL_DECOMPOSE' | 'DBSCAN'>;
+    algorithms: Array<
+      "ISOLATION_FOREST" | "LSTM" | "ARIMA" | "SEASONAL_DECOMPOSE" | "DBSCAN"
+    >;
     trainingWindow: number; // days
     retrainingInterval: number; // hours
     featureSelection: string[];
@@ -181,7 +189,7 @@ export interface DetectedPattern {
     detectedAt: Date;
     lastSeen: Date;
     confidence: number; // 0-1 scale
-    severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+    severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
   };
 
   /** Pattern characteristics */
@@ -194,9 +202,9 @@ export interface DetectedPattern {
       regions: string[];
     };
     temporal: {
-      pattern: 'CONSTANT' | 'PERIODIC' | 'SPORADIC' | 'TRENDING';
+      pattern: "CONSTANT" | "PERIODIC" | "SPORADIC" | "TRENDING";
       interval?: number; // minutes for periodic patterns
-      trend?: 'INCREASING' | 'DECREASING' | 'STABLE';
+      trend?: "INCREASING" | "DECREASING" | "STABLE";
     };
   };
 
@@ -211,7 +219,7 @@ export interface DetectedPattern {
   /** Impact assessment */
   impact: {
     severity: EnterpriseErrorSeverity;
-    scope: 'LOCALIZED' | 'REGIONAL' | 'GLOBAL';
+    scope: "LOCALIZED" | "REGIONAL" | "GLOBAL";
     affectedUsers: number;
     businessImpact: number; // estimated cost
     slaRisk: number; // 0-1 scale
@@ -236,7 +244,7 @@ export interface DetectedPattern {
     immediate: string[];
     preventive: string[];
     longTerm: string[];
-    priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
+    priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
   };
 }
 
@@ -252,12 +260,12 @@ export interface AnomalyDetection {
     detectedAt: Date;
     algorithm: string;
     confidence: number; // 0-1 scale
-    severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+    severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
   };
 
   /** Anomaly characteristics */
   characteristics: {
-    type: 'POINT' | 'CONTEXTUAL' | 'COLLECTIVE';
+    type: "POINT" | "CONTEXTUAL" | "COLLECTIVE";
     metric: string;
     baselineValue: number;
     observedValue: number;
@@ -410,9 +418,8 @@ export class EnterprisePerformanceMonitor {
 
       // Update predictions
       await this.updatePredictiveModels(errorContext);
-
     } catch (error) {
-      this.logger.error('Error processing error event for monitoring:', error);
+      this.logger.error("Error processing error event for monitoring:", error);
     }
   }
 
@@ -427,11 +434,10 @@ export class EnterprisePerformanceMonitor {
       return await this.calculateMetrics({
         start: oneHourAgo,
         end: now,
-        duration: 60 * 60 * 1000
+        duration: 60 * 60 * 1000,
       });
-
     } catch (error) {
-      this.logger.error('Error getting current metrics:', error);
+      this.logger.error("Error getting current metrics:", error);
       throw error;
     }
   }
@@ -441,7 +447,7 @@ export class EnterprisePerformanceMonitor {
    */
   async detectPatterns(
     timeWindow: { start: Date; end: Date },
-    config?: Partial<PatternAnalysisConfig>
+    config?: Partial<PatternAnalysisConfig>,
   ): Promise<DetectedPattern[]> {
     try {
       const analysisConfig = { ...this.analysisConfig, ...config };
@@ -453,15 +459,24 @@ export class EnterprisePerformanceMonitor {
       const detectedPatterns: DetectedPattern[] = [];
 
       // Frequency-based pattern detection
-      const frequencyPatterns = await this.detectFrequencyPatterns(errorData, analysisConfig);
+      const frequencyPatterns = await this.detectFrequencyPatterns(
+        errorData,
+        analysisConfig,
+      );
       detectedPatterns.push(...frequencyPatterns);
 
       // Temporal pattern detection
-      const temporalPatterns = await this.detectTemporalPatterns(errorData, analysisConfig);
+      const temporalPatterns = await this.detectTemporalPatterns(
+        errorData,
+        analysisConfig,
+      );
       detectedPatterns.push(...temporalPatterns);
 
       // Correlation-based pattern detection
-      const correlationPatterns = await this.detectCorrelationPatterns(errorData, analysisConfig);
+      const correlationPatterns = await this.detectCorrelationPatterns(
+        errorData,
+        analysisConfig,
+      );
       detectedPatterns.push(...correlationPatterns);
 
       // Machine learning pattern detection
@@ -477,9 +492,8 @@ export class EnterprisePerformanceMonitor {
       }
 
       return validatedPatterns;
-
     } catch (error) {
-      this.logger.error('Error detecting patterns:', error);
+      this.logger.error("Error detecting patterns:", error);
       throw error;
     }
   }
@@ -489,7 +503,7 @@ export class EnterprisePerformanceMonitor {
    */
   async detectAnomalies(
     timeWindow: { start: Date; end: Date },
-    algorithms: string[] = ['ISOLATION_FOREST', 'STATISTICAL']
+    algorithms: string[] = ["ISOLATION_FOREST", "STATISTICAL"],
   ): Promise<AnomalyDetection[]> {
     try {
       const anomalies: AnomalyDetection[] = [];
@@ -501,7 +515,7 @@ export class EnterprisePerformanceMonitor {
       for (const algorithm of algorithms) {
         const algorithmAnomalies = await this.applyAnomalyDetectionAlgorithm(
           algorithm,
-          metricsData
+          metricsData,
         );
         anomalies.push(...algorithmAnomalies);
       }
@@ -518,9 +532,8 @@ export class EnterprisePerformanceMonitor {
       }
 
       return enrichedAnomalies;
-
     } catch (error) {
-      this.logger.error('Error detecting anomalies:', error);
+      this.logger.error("Error detecting anomalies:", error);
       throw error;
     }
   }
@@ -529,7 +542,7 @@ export class EnterprisePerformanceMonitor {
    * Generate predictive analysis for error trends
    */
   async generatePredictiveAnalysis(
-    horizon: number = 60 // minutes
+    horizon: number = 60, // minutes
   ): Promise<PredictiveAnalysis> {
     try {
       const predictionId = this.generatePredictionId();
@@ -538,34 +551,39 @@ export class EnterprisePerformanceMonitor {
       const historicalData = await this.getHistoricalDataForPrediction();
 
       // Apply predictive models
-      const scenarios = await this.generatePredictiveScenarios(historicalData, horizon);
+      const scenarios = await this.generatePredictiveScenarios(
+        historicalData,
+        horizon,
+      );
 
       // Assess risks
       const riskAssessment = await this.assessPredictiveRisks(scenarios);
 
       // Generate recommendations
-      const actions = await this.generatePredictiveActions(scenarios, riskAssessment);
+      const actions = await this.generatePredictiveActions(
+        scenarios,
+        riskAssessment,
+      );
 
       const prediction: PredictiveAnalysis = {
         predictionId,
         metadata: {
           generatedAt: new Date(),
-          model: 'ENSEMBLE',
+          model: "ENSEMBLE",
           horizon,
-          confidence: this.calculatePredictionConfidence(scenarios)
+          confidence: this.calculatePredictionConfidence(scenarios),
         },
         scenarios,
         risk: riskAssessment,
-        actions
+        actions,
       };
 
       // Store prediction
       this.predictions.set(predictionId, prediction);
 
       return prediction;
-
     } catch (error) {
-      this.logger.error('Error generating predictive analysis:', error);
+      this.logger.error("Error generating predictive analysis:", error);
       throw error;
     }
   }
@@ -578,14 +596,14 @@ export class EnterprisePerformanceMonitor {
     insights: ErrorInsights[];
     recommendations: Array<{
       category: string;
-      priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
+      priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
       action: string;
       impact: string;
-      effort: 'LOW' | 'MEDIUM' | 'HIGH';
+      effort: "LOW" | "MEDIUM" | "HIGH";
     }>;
     trends: Array<{
       metric: string;
-      trend: 'IMPROVING' | 'DEGRADING' | 'STABLE';
+      trend: "IMPROVING" | "DEGRADING" | "STABLE";
       change: number; // percentage
       timeframe: string;
     }>;
@@ -593,56 +611,76 @@ export class EnterprisePerformanceMonitor {
     try {
       // Analyze current patterns and anomalies
       const activePatterns = Array.from(this.patterns.values());
-      const recentAnomalies = Array.from(this.anomalies.values())
-        .filter(a => a.metadata.detectedAt > new Date(Date.now() - 24 * 60 * 60 * 1000));
+      const recentAnomalies = Array.from(this.anomalies.values()).filter(
+        (a) =>
+          a.metadata.detectedAt > new Date(Date.now() - 24 * 60 * 60 * 1000),
+      );
 
       // Generate insights
-      const insights = await this.generatePerformanceInsights(activePatterns, recentAnomalies);
+      const insights = await this.generatePerformanceInsights(
+        activePatterns,
+        recentAnomalies,
+      );
 
       // Generate recommendations
-      const recommendations = await this.generatePerformanceRecommendations(insights);
+      const recommendations =
+        await this.generatePerformanceRecommendations(insights);
 
       // Analyze trends
       const trends = await this.analyzePerformanceTrends();
 
       // Create summary
-      const summary = await this.generatePerformanceSummary(insights, recommendations, trends);
+      const summary = await this.generatePerformanceSummary(
+        insights,
+        recommendations,
+        trends,
+      );
 
       return {
         summary,
         insights,
         recommendations,
-        trends
+        trends,
       };
-
     } catch (error) {
-      this.logger.error('Error getting performance insights:', error);
+      this.logger.error("Error getting performance insights:", error);
       throw error;
     }
   }
 
   // ===== PRIVATE HELPER METHODS =====
 
-  private async updateErrorStream(errorContext: EnterpriseErrorContext): Promise<void> {
+  private async updateErrorStream(
+    errorContext: EnterpriseErrorContext,
+  ): Promise<void> {
     const streamKey = `${errorContext.source.service}_${errorContext.classification.category}`;
-    const streamData = this.errorStream.get(streamKey) || { events: [], lastUpdate: new Date() };
+    const streamData = this.errorStream.get(streamKey) || {
+      events: [],
+      lastUpdate: new Date(),
+    };
 
     streamData.events.push({
       timestamp: errorContext.timestamp,
       severity: errorContext.classification.severity,
       category: errorContext.classification.category,
-      metadata: errorContext
+      metadata: errorContext,
     });
 
     // Keep only recent events (last 24 hours)
     const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    streamData.events = streamData.events.filter(event => event.timestamp > cutoff);
+    streamData.events = streamData.events.filter(
+      (event) => event.timestamp > cutoff,
+    );
     streamData.lastUpdate = new Date();
 
     this.errorStream.set(streamKey, streamData);
   }
 
-  private async calculateMetrics(timeWindow: { start: Date; end: Date; duration: number }): Promise<PerformanceMetrics> {
+  private async calculateMetrics(timeWindow: {
+    start: Date;
+    end: Date;
+    duration: number;
+  }): Promise<PerformanceMetrics> {
     // Implementation would calculate actual metrics from stored data
     // This is a simplified example
     return {
@@ -656,40 +694,40 @@ export class EnterprisePerformanceMonitor {
           [EnterpriseErrorSeverity.INFO]: 30,
           [EnterpriseErrorSeverity.DEBUG]: 50,
           [EnterpriseErrorSeverity.TRACE]: 100,
-          [EnterpriseErrorSeverity.FATAL]: 0
+          [EnterpriseErrorSeverity.FATAL]: 0,
         },
         byCategory: {} as Record<EnterpriseErrorCategory, number>,
         byService: {},
-        trend: 'STABLE',
+        trend: "STABLE",
         prediction: {
           nextHour: 12,
           nextDay: 250,
-          confidence: 0.85
-        }
+          confidence: 0.85,
+        },
       },
       responseTimes: {
         errorDetection: { p50: 50, p95: 200, p99: 500, max: 1000 },
         errorRecovery: { p50: 1000, p95: 5000, p99: 10000, max: 30000 },
-        errorCommunication: { p50: 100, p95: 500, p99: 1000, max: 2000 }
+        errorCommunication: { p50: 100, p95: 500, p99: 1000, max: 2000 },
       },
       resources: {
-        cpu: { average: 45, peak: 75, trend: 'STABLE' },
-        memory: { average: 60, peak: 85, heapUsage: 70, trend: 'INCREASING' },
+        cpu: { average: 45, peak: 75, trend: "STABLE" },
+        memory: { average: 60, peak: 85, heapUsage: 70, trend: "INCREASING" },
         network: { bandwidth: 100, latency: 10, packetLoss: 0.01 },
-        storage: { usage: 40, iops: 1000, latency: 5 }
+        storage: { usage: 40, iops: 1000, latency: 5 },
       },
       health: {
-        overall: 'HEALTHY',
+        overall: "HEALTHY",
         components: {},
-        dependencies: {}
+        dependencies: {},
       },
       quality: {
         errorResolutionRate: 95.5,
         meanTimeToDetection: 2.5,
         meanTimeToResolution: 15.3,
         customerSatisfaction: 4.2,
-        slaCompliance: 99.2
-      }
+        slaCompliance: 99.2,
+      },
     };
   }
 
@@ -697,42 +735,166 @@ export class EnterprisePerformanceMonitor {
   private initializeAnalysisConfig(): void {
     this.analysisConfig = {
       window: { size: 60, overlap: 50, retention: 30 },
-      thresholds: { anomalyScore: 0.8, patternConfidence: 0.7, correlationStrength: 0.6, trendSignificance: 0.05 },
-      ml: { algorithms: ['ISOLATION_FOREST'], trainingWindow: 7, retrainingInterval: 24, featureSelection: [], hyperparameters: {} },
-      alerting: { enabled: true, channels: ['email'], suppressionWindow: 30, escalationRules: [] }
+      thresholds: {
+        anomalyScore: 0.8,
+        patternConfidence: 0.7,
+        correlationStrength: 0.6,
+        trendSignificance: 0.05,
+      },
+      ml: {
+        algorithms: ["ISOLATION_FOREST"],
+        trainingWindow: 7,
+        retrainingInterval: 24,
+        featureSelection: [],
+        hyperparameters: {},
+      },
+      alerting: {
+        enabled: true,
+        channels: ["email"],
+        suppressionWindow: 30,
+        escalationRules: [],
+      },
     };
   }
-  private initializeMLModels(): void { /* ... */ }
-  private startRealTimeMonitoring(): void { /* ... */ }
-  private startPatternAnalysis(): void { /* ... */ }
-  private startAnomalyDetection(): void { /* ... */ }
-  private startPredictiveAnalysis(): void { /* ... */ }
-  private async updatePerformanceMetrics(errorContext: EnterpriseErrorContext): Promise<void> { /* ... */ }
-  private async detectImmediateAnomalies(errorContext: EnterpriseErrorContext): Promise<AnomalyDetection[]> { return []; }
-  private async processAnomaly(anomaly: AnomalyDetection): Promise<void> { /* ... */ }
-  private async updatePatternDetection(errorContext: EnterpriseErrorContext): Promise<void> { /* ... */ }
-  private async checkAlertConditions(errorContext: EnterpriseErrorContext): Promise<void> { /* ... */ }
-  private async updatePredictiveModels(errorContext: EnterpriseErrorContext): Promise<void> { /* ... */ }
-  private async getErrorDataForAnalysis(timeWindow: any): Promise<any> { return {}; }
-  private async detectFrequencyPatterns(data: any, config: any): Promise<DetectedPattern[]> { return []; }
-  private async detectTemporalPatterns(data: any, config: any): Promise<DetectedPattern[]> { return []; }
-  private async detectCorrelationPatterns(data: any, config: any): Promise<DetectedPattern[]> { return []; }
-  private async detectMLPatterns(data: any, config: any): Promise<DetectedPattern[]> { return []; }
-  private async validatePatterns(patterns: DetectedPattern[]): Promise<DetectedPattern[]> { return patterns; }
-  private async getMetricsDataForAnalysis(timeWindow: any): Promise<any> { return {}; }
-  private async applyAnomalyDetectionAlgorithm(algorithm: string, data: any): Promise<AnomalyDetection[]> { return []; }
-  private async deduplicateAnomalies(anomalies: AnomalyDetection[]): Promise<AnomalyDetection[]> { return anomalies; }
-  private async enrichAnomalies(anomalies: AnomalyDetection[]): Promise<AnomalyDetection[]> { return anomalies; }
-  private generatePredictionId(): string { return `pred_${Date.now()}_${Math.random().toString(36).substring(2)}`; }
-  private async getHistoricalDataForPrediction(): Promise<any> { return {}; }
-  private async generatePredictiveScenarios(data: any, horizon: number): Promise<any[]> { return []; }
-  private async assessPredictiveRisks(scenarios: any[]): Promise<any> { return {}; }
-  private async generatePredictiveActions(scenarios: any[], risks: any): Promise<any> { return {}; }
-  private calculatePredictionConfidence(scenarios: any[]): number { return 0.8; }
-  private async generatePerformanceInsights(patterns: DetectedPattern[], anomalies: AnomalyDetection[]): Promise<ErrorInsights[]> { return []; }
-  private async generatePerformanceRecommendations(insights: ErrorInsights[]): Promise<any[]> { return []; }
-  private async analyzePerformanceTrends(): Promise<any[]> { return []; }
-  private async generatePerformanceSummary(insights: any[], recommendations: any[], trends: any[]): Promise<string> { return 'Performance summary'; }
+  private initializeMLModels(): void {
+    /* ... */
+  }
+  private startRealTimeMonitoring(): void {
+    /* ... */
+  }
+  private startPatternAnalysis(): void {
+    /* ... */
+  }
+  private startAnomalyDetection(): void {
+    /* ... */
+  }
+  private startPredictiveAnalysis(): void {
+    /* ... */
+  }
+  private async updatePerformanceMetrics(
+    errorContext: EnterpriseErrorContext,
+  ): Promise<void> {
+    /* ... */
+  }
+  private async detectImmediateAnomalies(
+    errorContext: EnterpriseErrorContext,
+  ): Promise<AnomalyDetection[]> {
+    return [];
+  }
+  private async processAnomaly(anomaly: AnomalyDetection): Promise<void> {
+    /* ... */
+  }
+  private async updatePatternDetection(
+    errorContext: EnterpriseErrorContext,
+  ): Promise<void> {
+    /* ... */
+  }
+  private async checkAlertConditions(
+    errorContext: EnterpriseErrorContext,
+  ): Promise<void> {
+    /* ... */
+  }
+  private async updatePredictiveModels(
+    errorContext: EnterpriseErrorContext,
+  ): Promise<void> {
+    /* ... */
+  }
+  private async getErrorDataForAnalysis(timeWindow: any): Promise<any> {
+    return {};
+  }
+  private async detectFrequencyPatterns(
+    data: any,
+    config: any,
+  ): Promise<DetectedPattern[]> {
+    return [];
+  }
+  private async detectTemporalPatterns(
+    data: any,
+    config: any,
+  ): Promise<DetectedPattern[]> {
+    return [];
+  }
+  private async detectCorrelationPatterns(
+    data: any,
+    config: any,
+  ): Promise<DetectedPattern[]> {
+    return [];
+  }
+  private async detectMLPatterns(
+    data: any,
+    config: any,
+  ): Promise<DetectedPattern[]> {
+    return [];
+  }
+  private async validatePatterns(
+    patterns: DetectedPattern[],
+  ): Promise<DetectedPattern[]> {
+    return patterns;
+  }
+  private async getMetricsDataForAnalysis(timeWindow: any): Promise<any> {
+    return {};
+  }
+  private async applyAnomalyDetectionAlgorithm(
+    algorithm: string,
+    data: any,
+  ): Promise<AnomalyDetection[]> {
+    return [];
+  }
+  private async deduplicateAnomalies(
+    anomalies: AnomalyDetection[],
+  ): Promise<AnomalyDetection[]> {
+    return anomalies;
+  }
+  private async enrichAnomalies(
+    anomalies: AnomalyDetection[],
+  ): Promise<AnomalyDetection[]> {
+    return anomalies;
+  }
+  private generatePredictionId(): string {
+    return `pred_${Date.now()}_${Math.random().toString(36).substring(2)}`;
+  }
+  private async getHistoricalDataForPrediction(): Promise<any> {
+    return {};
+  }
+  private async generatePredictiveScenarios(
+    data: any,
+    horizon: number,
+  ): Promise<any[]> {
+    return [];
+  }
+  private async assessPredictiveRisks(scenarios: any[]): Promise<any> {
+    return {};
+  }
+  private async generatePredictiveActions(
+    scenarios: any[],
+    risks: any,
+  ): Promise<any> {
+    return {};
+  }
+  private calculatePredictionConfidence(scenarios: any[]): number {
+    return 0.8;
+  }
+  private async generatePerformanceInsights(
+    patterns: DetectedPattern[],
+    anomalies: AnomalyDetection[],
+  ): Promise<ErrorInsights[]> {
+    return [];
+  }
+  private async generatePerformanceRecommendations(
+    insights: ErrorInsights[],
+  ): Promise<any[]> {
+    return [];
+  }
+  private async analyzePerformanceTrends(): Promise<any[]> {
+    return [];
+  }
+  private async generatePerformanceSummary(
+    insights: any[],
+    recommendations: any[],
+    trends: any[],
+  ): Promise<string> {
+    return "Performance summary";
+  }
 }
 
 // ===== SUPPORTING INTERFACES =====

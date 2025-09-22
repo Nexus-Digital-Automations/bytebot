@@ -164,7 +164,12 @@ export interface SecurityAuditEvent {
   /** Event ID */
   eventId: string;
   /** Event type */
-  type: "authentication" | "authorization" | "session_management" | "emergency_override" | "security_violation";
+  type:
+    | "authentication"
+    | "authorization"
+    | "session_management"
+    | "emergency_override"
+    | "security_violation";
   /** Event timestamp */
   timestamp: Date;
   /** User context */
@@ -219,7 +224,12 @@ export class JwtParlantBridgeService
   private auditEvents: SecurityAuditEvent[] = [];
 
   // Configuration
-  private readonly JWT_ALGORITHMS = ["RS256", "ES256", "EdDSA", "HS256"] as const;
+  private readonly JWT_ALGORITHMS = [
+    "RS256",
+    "ES256",
+    "EdDSA",
+    "HS256",
+  ] as const;
   private readonly SESSION_TTL = 3600; // 1 hour
   private readonly EMERGENCY_OVERRIDE_TTL = 7200; // 2 hours
   private readonly AUDIT_RETENTION_DAYS = 90;
@@ -293,7 +303,11 @@ export class JwtParlantBridgeService
       const payload = await this.validateJwtToken(accessToken);
 
       // Create Parlant session
-      const parlantSessionId = await this.createParlantSession(payload, ipAddress, userAgent);
+      const parlantSessionId = await this.createParlantSession(
+        payload,
+        ipAddress,
+        userAgent,
+      );
 
       // Create session bridge
       const sessionBridge: SessionBridge = {
@@ -321,7 +335,10 @@ export class JwtParlantBridgeService
       await this.storeSessionInRedis(sessionBridge);
 
       // Create validation context
-      const validationContext = await this.createValidationContext(sessionBridge, payload);
+      const validationContext = await this.createValidationContext(
+        sessionBridge,
+        payload,
+      );
 
       // Audit event
       await this.logAuditEvent({
@@ -394,7 +411,9 @@ export class JwtParlantBridgeService
 
       const algorithm = decoded.header.alg;
       if (!this.JWT_ALGORITHMS.includes(algorithm as any)) {
-        throw new UnauthorizedException(`Unsupported JWT algorithm: ${algorithm}`);
+        throw new UnauthorizedException(
+          `Unsupported JWT algorithm: ${algorithm}`,
+        );
       }
 
       // Get appropriate secret/key for algorithm
@@ -494,9 +513,12 @@ export class JwtParlantBridgeService
   /**
    * Validate session and refresh if needed
    */
-  async validateSession(sessionId: string): Promise<ParlantValidationContext | null> {
-    const sessionBridge = this.sessionBridges.get(sessionId) ||
-                         await this.getSessionFromRedis(sessionId);
+  async validateSession(
+    sessionId: string,
+  ): Promise<ParlantValidationContext | null> {
+    const sessionBridge =
+      this.sessionBridges.get(sessionId) ||
+      (await this.getSessionFromRedis(sessionId));
 
     if (!sessionBridge) {
       return null;
@@ -513,7 +535,9 @@ export class JwtParlantBridgeService
     await this.storeSessionInRedis(sessionBridge);
 
     // Validate with Parlant
-    const isValid = await this.validateParlantSession(sessionBridge.parlantSessionId);
+    const isValid = await this.validateParlantSession(
+      sessionBridge.parlantSessionId,
+    );
     if (!isValid) {
       await this.invalidateSession(sessionId);
       return null;
@@ -527,7 +551,9 @@ export class JwtParlantBridgeService
   /**
    * Map AIgent roles to Parlant validation levels
    */
-  private mapRolesToValidationLevel(roles: Role[]): "basic" | "standard" | "elevated" | "critical" {
+  private mapRolesToValidationLevel(
+    roles: Role[],
+  ): "basic" | "standard" | "elevated" | "critical" {
     if (roles.includes(Role.SUPER_ADMIN) || roles.includes(Role.ADMIN)) {
       return "critical";
     }
@@ -567,7 +593,10 @@ export class JwtParlantBridgeService
 
       return response.data.session_id;
     } catch (error) {
-      this.logger.warn("Failed to create Parlant session, using fallback", error);
+      this.logger.warn(
+        "Failed to create Parlant session, using fallback",
+        error,
+      );
       return `parlant_fallback_${Date.now()}_${crypto.randomBytes(8).toString("hex")}`;
     }
   }
@@ -601,7 +630,10 @@ export class JwtParlantBridgeService
    * Initialize Parlant API client
    */
   private async initializeParlantClient(): Promise<void> {
-    const parlantUrl = this.configService.get("parlant.apiUrl", "http://localhost:8000");
+    const parlantUrl = this.configService.get(
+      "parlant.apiUrl",
+      "http://localhost:8000",
+    );
     const apiKey = this.configService.get("parlant.apiKey", "");
 
     this.parlantClient = axios.create({
@@ -631,7 +663,9 @@ export class JwtParlantBridgeService
       try {
         await this.getJwtSecret(algorithm);
       } catch (error) {
-        this.logger.warn(`JWT configuration missing for algorithm: ${algorithm}`);
+        this.logger.warn(
+          `JWT configuration missing for algorithm: ${algorithm}`,
+        );
       }
     }
     this.logger.log("✅ JWT configuration validated");
@@ -645,13 +679,34 @@ export class JwtParlantBridgeService
 
     switch (algorithm) {
       case "HS256":
-        return config.hmacSecret || this.configService.get("JWT_SECRET", "default-secret");
+        return (
+          config.hmacSecret ||
+          this.configService.get("JWT_SECRET", "default-secret")
+        );
       case "RS256":
-        return config.rsaPrivateKey || Buffer.from(this.configService.get("JWT_RSA_PRIVATE_KEY", ""), "base64");
+        return (
+          config.rsaPrivateKey ||
+          Buffer.from(
+            this.configService.get("JWT_RSA_PRIVATE_KEY", ""),
+            "base64",
+          )
+        );
       case "ES256":
-        return config.ecPrivateKey || Buffer.from(this.configService.get("JWT_EC_PRIVATE_KEY", ""), "base64");
+        return (
+          config.ecPrivateKey ||
+          Buffer.from(
+            this.configService.get("JWT_EC_PRIVATE_KEY", ""),
+            "base64",
+          )
+        );
       case "EdDSA":
-        return config.eddsaPrivateKey || Buffer.from(this.configService.get("JWT_EDDSA_PRIVATE_KEY", ""), "base64");
+        return (
+          config.eddsaPrivateKey ||
+          Buffer.from(
+            this.configService.get("JWT_EDDSA_PRIVATE_KEY", ""),
+            "base64",
+          )
+        );
       default:
         throw new Error(`Unsupported algorithm: ${algorithm}`);
     }
@@ -660,8 +715,19 @@ export class JwtParlantBridgeService
   /**
    * Validate JWT payload structure
    */
-  private validateJwtPayload(payload: any): asserts payload is ParlantJwtPayload {
-    const required = ["sub", "username", "email", "roles", "permissions", "sessionId", "type", "securityLevel"];
+  private validateJwtPayload(
+    payload: any,
+  ): asserts payload is ParlantJwtPayload {
+    const required = [
+      "sub",
+      "username",
+      "email",
+      "roles",
+      "permissions",
+      "sessionId",
+      "type",
+      "securityLevel",
+    ];
 
     for (const field of required) {
       if (!(field in payload)) {
@@ -716,7 +782,11 @@ export class JwtParlantBridgeService
         currentTime: new Date(),
         clientIP: sessionBridge.metadata.ipAddress as string,
         headers: {},
-        securityLevel: sessionBridge.securityLevel as "low" | "medium" | "high" | "critical",
+        securityLevel: sessionBridge.securityLevel as
+          | "low"
+          | "medium"
+          | "high"
+          | "critical",
       },
     };
 
@@ -741,7 +811,9 @@ export class JwtParlantBridgeService
   /**
    * Store session bridge in Redis
    */
-  private async storeSessionInRedis(sessionBridge: SessionBridge): Promise<void> {
+  private async storeSessionInRedis(
+    sessionBridge: SessionBridge,
+  ): Promise<void> {
     const key = `session:${sessionBridge.aigentSessionId}`;
     await this.redisClient!.setex(
       key,
@@ -753,7 +825,9 @@ export class JwtParlantBridgeService
   /**
    * Get session bridge from Redis
    */
-  private async getSessionFromRedis(sessionId: string): Promise<SessionBridge | null> {
+  private async getSessionFromRedis(
+    sessionId: string,
+  ): Promise<SessionBridge | null> {
     const key = `session:${sessionId}`;
     const data = await this.redisClient!.get(key);
 
@@ -768,7 +842,10 @@ export class JwtParlantBridgeService
       sessionBridge.expiresAt = new Date(sessionBridge.expiresAt);
       return sessionBridge;
     } catch (error) {
-      this.logger.warn(`Failed to parse session from Redis: ${sessionId}`, error);
+      this.logger.warn(
+        `Failed to parse session from Redis: ${sessionId}`,
+        error,
+      );
       return null;
     }
   }
@@ -776,7 +853,9 @@ export class JwtParlantBridgeService
   /**
    * Store emergency override in Redis
    */
-  private async storeEmergencyOverrideInRedis(override: EmergencyOverride): Promise<void> {
+  private async storeEmergencyOverrideInRedis(
+    override: EmergencyOverride,
+  ): Promise<void> {
     const key = `emergency:${override.overrideId}`;
     await this.redisClient!.setex(
       key,
@@ -788,12 +867,19 @@ export class JwtParlantBridgeService
   /**
    * Validate Parlant session
    */
-  private async validateParlantSession(parlantSessionId: string): Promise<boolean> {
+  private async validateParlantSession(
+    parlantSessionId: string,
+  ): Promise<boolean> {
     try {
-      const response = await this.parlantClient!.get(`/sessions/${parlantSessionId}/validate`);
+      const response = await this.parlantClient!.get(
+        `/sessions/${parlantSessionId}/validate`,
+      );
       return response.data.valid === true;
     } catch (error) {
-      this.logger.warn(`Failed to validate Parlant session: ${parlantSessionId}`, error);
+      this.logger.warn(
+        `Failed to validate Parlant session: ${parlantSessionId}`,
+        error,
+      );
       return true; // Fallback to allow access when Parlant is unavailable
     }
   }
@@ -807,7 +893,9 @@ export class JwtParlantBridgeService
     if (sessionBridge) {
       // Invalidate Parlant session
       try {
-        await this.parlantClient!.delete(`/sessions/${sessionBridge.parlantSessionId}`);
+        await this.parlantClient!.delete(
+          `/sessions/${sessionBridge.parlantSessionId}`,
+        );
       } catch (error) {
         this.logger.warn("Failed to invalidate Parlant session", error);
       }
@@ -823,7 +911,9 @@ export class JwtParlantBridgeService
   /**
    * Log audit event
    */
-  private async logAuditEvent(eventData: Omit<SecurityAuditEvent, "eventId" | "timestamp">): Promise<void> {
+  private async logAuditEvent(
+    eventData: Omit<SecurityAuditEvent, "eventId" | "timestamp">,
+  ): Promise<void> {
     const auditEvent: SecurityAuditEvent = {
       eventId: crypto.randomUUID(),
       timestamp: new Date(),
@@ -926,7 +1016,10 @@ export class JwtParlantBridgeService
    */
   async getHealthStatus(): Promise<{
     status: "healthy" | "degraded" | "unhealthy";
-    components: Record<string, { status: string; lastChecked: Date; details?: any }>;
+    components: Record<
+      string,
+      { status: string; lastChecked: Date; details?: any }
+    >;
     metrics: {
       activeSessions: number;
       emergencyOverrides: number;
@@ -940,7 +1033,10 @@ export class JwtParlantBridgeService
 
     // Initialize health status
     let overallStatus: "healthy" | "degraded" | "unhealthy" = "healthy";
-    const components: Record<string, { status: string; lastChecked: Date; details?: any }> = {};
+    const components: Record<
+      string,
+      { status: string; lastChecked: Date; details?: any }
+    > = {};
 
     try {
       // Check Redis connection

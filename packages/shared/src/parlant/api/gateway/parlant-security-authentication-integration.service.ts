@@ -251,7 +251,13 @@ export interface MFAStatus {
 }
 
 export interface MFAMethod {
-  methodType: "SMS" | "EMAIL" | "TOTP" | "HARDWARE_TOKEN" | "BIOMETRIC" | "PUSH";
+  methodType:
+    | "SMS"
+    | "EMAIL"
+    | "TOTP"
+    | "HARDWARE_TOKEN"
+    | "BIOMETRIC"
+    | "PUSH";
   verified: boolean;
   lastUsed: Date;
   trustLevel: "LOW" | "MEDIUM" | "HIGH";
@@ -299,7 +305,14 @@ export interface Permission {
 
 export interface PermissionCondition {
   attribute: string;
-  operator: "EQUALS" | "NOT_EQUALS" | "CONTAINS" | "IN" | "NOT_IN" | "GREATER_THAN" | "LESS_THAN";
+  operator:
+    | "EQUALS"
+    | "NOT_EQUALS"
+    | "CONTAINS"
+    | "IN"
+    | "NOT_IN"
+    | "GREATER_THAN"
+    | "LESS_THAN";
   value: any;
   required: boolean;
 }
@@ -391,7 +404,11 @@ export interface PolicyRule {
 }
 
 export interface ContextualRequirement {
-  requirementType: "TIME_BASED" | "LOCATION_BASED" | "DEVICE_BASED" | "NETWORK_BASED";
+  requirementType:
+    | "TIME_BASED"
+    | "LOCATION_BASED"
+    | "DEVICE_BASED"
+    | "NETWORK_BASED";
   criteria: ContextualCriteria;
   enforcement: "STRICT" | "FLEXIBLE" | "ADVISORY";
   violationAction: "DENY" | "WARN" | "LOG" | "CHALLENGE";
@@ -454,7 +471,11 @@ export interface AppliedPolicy {
 export interface PolicyConflict {
   conflictId: string;
   conflictingPolicies: string[];
-  resolutionMethod: "PRIORITY" | "DENY_OVERRIDES" | "ALLOW_OVERRIDES" | "MANUAL";
+  resolutionMethod:
+    | "PRIORITY"
+    | "DENY_OVERRIDES"
+    | "ALLOW_OVERRIDES"
+    | "MANUAL";
   resolution: string;
 }
 
@@ -474,7 +495,14 @@ export interface ComplianceValidation {
 }
 
 export interface ComplianceStandard {
-  standard: "SOX" | "GDPR" | "HIPAA" | "PCI_DSS" | "ISO_27001" | "NIST" | "FEDRAMP";
+  standard:
+    | "SOX"
+    | "GDPR"
+    | "HIPAA"
+    | "PCI_DSS"
+    | "ISO_27001"
+    | "NIST"
+    | "FEDRAMP";
   version: string;
   applicableControls: string[];
   complianceLevel: "BASIC" | "ENHANCED" | "FULL";
@@ -510,7 +538,13 @@ export interface ComplianceException {
 export interface AuditRequirement {
   requirementId: string;
   description: string;
-  frequency: "REAL_TIME" | "DAILY" | "WEEKLY" | "MONTHLY" | "QUARTERLY" | "ANNUALLY";
+  frequency:
+    | "REAL_TIME"
+    | "DAILY"
+    | "WEEKLY"
+    | "MONTHLY"
+    | "QUARTERLY"
+    | "ANNUALLY";
   retentionPeriod: number;
   reportingFormat: string;
   distributionList: string[];
@@ -606,7 +640,9 @@ export interface SecurityEscalation {
  */
 @Injectable()
 export class ParlantSecurityAuthenticationIntegrationService {
-  private readonly logger = new Logger(ParlantSecurityAuthenticationIntegrationService.name);
+  private readonly logger = new Logger(
+    ParlantSecurityAuthenticationIntegrationService.name,
+  );
   private readonly securityEventEmitter = new EventEmitter();
   private readonly activeSecuritySessions = new Map<string, SecurityContext>();
   private readonly threatDetectionCache = new Map<string, ThreatAssessment>();
@@ -631,15 +667,14 @@ export class ParlantSecurityAuthenticationIntegrationService {
     THREAT_CORRELATION_WINDOW: 300000, // 5 minutes
   };
 
-  constructor(
-    // TODO: Inject actual security dependencies when available
-    // private readonly threatDetectionEngine: ThreatDetectionEngine,
-    // private readonly authenticationService: AuthenticationService,
-    // private readonly authorizationEngine: AuthorizationEngine,
-    // private readonly complianceValidator: ComplianceValidator,
-    // private readonly securityAuditLogger: SecurityAuditLogger,
-    // private readonly parlantSecurityClient: ParlantSecurityClient,
-  ) {
+  constructor() // TODO: Inject actual security dependencies when available
+  // private readonly threatDetectionEngine: ThreatDetectionEngine,
+  // private readonly authenticationService: AuthenticationService,
+  // private readonly authorizationEngine: AuthorizationEngine,
+  // private readonly complianceValidator: ComplianceValidator,
+  // private readonly securityAuditLogger: SecurityAuditLogger,
+  // private readonly parlantSecurityClient: ParlantSecurityClient,
+  {
     this.initializeSecurityIntegration();
   }
 
@@ -647,17 +682,20 @@ export class ParlantSecurityAuthenticationIntegrationService {
    * Main entry point for comprehensive security validation with conversational support
    */
   async validateSecurityWithConversation(
-    request: APIRequest
+    request: APIRequest,
   ): Promise<ConversationalSecurityResponse> {
     const securityValidationStartTime = performance.now();
     const validationId = uuidv4();
 
-    this.logger.log(`Starting conversational security validation: ${validationId}`, {
-      requestId: request.id,
-      userId: request.userContext?.userId,
-      securityLevel: request.securityLevel,
-      endpoint: request.endpoint,
-    });
+    this.logger.log(
+      `Starting conversational security validation: ${validationId}`,
+      {
+        requestId: request.id,
+        userId: request.userContext?.userId,
+        securityLevel: request.securityLevel,
+        endpoint: request.endpoint,
+      },
+    );
 
     try {
       // Step 1: Build comprehensive security context
@@ -666,25 +704,25 @@ export class ParlantSecurityAuthenticationIntegrationService {
       // Step 2: Perform multi-layered threat assessment
       const threatAssessment = await this.performThreatAssessment(
         request,
-        securityContext
+        securityContext,
       );
 
       // Step 3: Validate authentication context
       const authenticationValidation = await this.validateAuthenticationContext(
         request,
-        securityContext
+        securityContext,
       );
 
       // Step 4: Evaluate authorization requirements
       const authorizationResult = await this.evaluateAuthorizationRequirements(
         request,
-        securityContext
+        securityContext,
       );
 
       // Step 5: Validate compliance requirements
       const complianceValidation = await this.validateComplianceRequirements(
         request,
-        securityContext
+        securityContext,
       );
 
       // Step 6: Create PARLANT security validation request
@@ -698,21 +736,28 @@ export class ParlantSecurityAuthenticationIntegrationService {
       };
 
       // Step 7: Execute conversational security validation
-      const conversationalResponse = await this.executeConversationalSecurityValidation(
-        parlantSecurityRequest
-      );
+      const conversationalResponse =
+        await this.executeConversationalSecurityValidation(
+          parlantSecurityRequest,
+        );
 
       // Step 8: Apply security policies and log results
       await this.applySecurityPolicies(conversationalResponse, request);
-      await this.logSecurityValidationResults(conversationalResponse, validationId);
+      await this.logSecurityValidationResults(
+        conversationalResponse,
+        validationId,
+      );
 
       const validationTime = performance.now() - securityValidationStartTime;
 
-      this.logger.log(`Conversational security validation completed: ${validationId}`, {
-        allowed: conversationalResponse.allowed,
-        validationTime: validationTime,
-        riskLevel: threatAssessment.overallThreatLevel,
-      });
+      this.logger.log(
+        `Conversational security validation completed: ${validationId}`,
+        {
+          allowed: conversationalResponse.allowed,
+          validationTime: validationTime,
+          riskLevel: threatAssessment.overallThreatLevel,
+        },
+      );
 
       // Step 9: Emit security metrics and events
       this.emitSecurityMetrics({
@@ -723,15 +768,17 @@ export class ParlantSecurityAuthenticationIntegrationService {
       });
 
       return conversationalResponse;
-
     } catch (error) {
       const validationTime = performance.now() - securityValidationStartTime;
 
-      this.logger.error(`Conversational security validation failed: ${validationId}`, {
-        error: error instanceof Error ? error.message : String(error),
-        requestId: request.id,
-        validationTime: validationTime,
-      });
+      this.logger.error(
+        `Conversational security validation failed: ${validationId}`,
+        {
+          error: error instanceof Error ? error.message : String(error),
+          requestId: request.id,
+          validationTime: validationTime,
+        },
+      );
 
       // Return secure failure response with conversational explanation
       return this.createSecureFailureResponse(error, validationTime);
@@ -743,7 +790,7 @@ export class ParlantSecurityAuthenticationIntegrationService {
    */
   async performIntelligentThreatDetection(
     request: APIRequest,
-    securityContext: SecurityContext
+    securityContext: SecurityContext,
   ): Promise<ThreatAssessment> {
     const threatDetectionStartTime = performance.now();
 
@@ -757,31 +804,31 @@ export class ParlantSecurityAuthenticationIntegrationService {
       // Step 1: Analyze behavioral patterns
       const behaviorAnalysis = await this.analyzeBehaviorPatterns(
         securityContext.behaviorProfile,
-        request
+        request,
       );
 
       // Step 2: Detect known threat signatures
       const signatureDetection = await this.detectThreatSignatures(
         request,
-        securityContext
+        securityContext,
       );
 
       // Step 3: Perform anomaly detection
       const anomalyDetection = await this.performAnomalyDetection(
         securityContext,
-        request
+        request,
       );
 
       // Step 4: Correlate with threat intelligence
       const threatIntelligence = await this.correlateThreatIntelligence(
         securityContext,
-        request
+        request,
       );
 
       // Step 5: Assess geolocation and network risks
       const geolocationRisk = await this.assessGeolocationRisk(
         securityContext.geolocation,
-        request.userContext
+        request.userContext,
       );
 
       // Step 6: Aggregate threat assessment
@@ -794,13 +841,15 @@ export class ParlantSecurityAuthenticationIntegrationService {
       ]);
 
       // Step 7: Calculate overall threat level
-      const overallThreatLevel = this.calculateOverallThreatLevel(aggregatedThreats);
+      const overallThreatLevel =
+        this.calculateOverallThreatLevel(aggregatedThreats);
 
       // Step 8: Generate risk mitigations and recommended actions
-      const riskMitigations = await this.generateRiskMitigations(aggregatedThreats);
+      const riskMitigations =
+        await this.generateRiskMitigations(aggregatedThreats);
       const recommendedActions = await this.generateSecurityActions(
         aggregatedThreats,
-        overallThreatLevel
+        overallThreatLevel,
       );
 
       const threatAssessment: ThreatAssessment = {
@@ -824,7 +873,6 @@ export class ParlantSecurityAuthenticationIntegrationService {
       });
 
       return threatAssessment;
-
     } catch (error) {
       this.logger.error(`Threat detection failed`, {
         error: error instanceof Error ? error.message : String(error),
@@ -842,7 +890,7 @@ export class ParlantSecurityAuthenticationIntegrationService {
    */
   async validateAuthenticationWithStepUp(
     request: APIRequest,
-    securityContext: SecurityContext
+    securityContext: SecurityContext,
   ): Promise<AuthenticationContext> {
     const authValidationStartTime = performance.now();
 
@@ -856,38 +904,38 @@ export class ParlantSecurityAuthenticationIntegrationService {
       // Step 1: Validate current authentication method
       const currentAuthValidation = await this.validateCurrentAuthentication(
         request.userContext,
-        securityContext
+        securityContext,
       );
 
       // Step 2: Assess authentication strength requirements
       const requiredAuthLevel = await this.assessRequiredAuthenticationLevel(
         request,
-        securityContext
+        securityContext,
       );
 
       // Step 3: Determine if step-up authentication is required
       const stepUpRequired = await this.isStepUpAuthenticationRequired(
         currentAuthValidation.authenticationLevel,
         requiredAuthLevel,
-        securityContext
+        securityContext,
       );
 
       // Step 4: Perform MFA validation if required
       const mfaValidation = await this.validateMFARequirements(
         request.userContext,
         securityContext,
-        stepUpRequired
+        stepUpRequired,
       );
 
       // Step 5: Validate tokens and session integrity
       const tokenValidation = await this.validateTokenIntegrity(
         request.headers,
-        request.userContext
+        request.userContext,
       );
 
       const sessionValidation = await this.validateSessionIntegrity(
         request.userContext?.sessionId,
-        securityContext
+        securityContext,
       );
 
       // Step 6: Calculate authentication trust score
@@ -920,7 +968,6 @@ export class ParlantSecurityAuthenticationIntegrationService {
       });
 
       return authenticationContext;
-
     } catch (error) {
       this.logger.error(`Authentication validation failed`, {
         error: error instanceof Error ? error.message : String(error),
@@ -938,7 +985,7 @@ export class ParlantSecurityAuthenticationIntegrationService {
    */
   async evaluateAuthorizationWithABAC(
     request: APIRequest,
-    securityContext: SecurityContext
+    securityContext: SecurityContext,
   ): Promise<AuthorizationRequirement> {
     const authorizationStartTime = performance.now();
 
@@ -954,27 +1001,27 @@ export class ParlantSecurityAuthenticationIntegrationService {
       const requiredPermissions = await this.extractRequiredPermissions(
         request.endpoint,
         request.method,
-        request.parameters
+        request.parameters,
       );
 
       // Step 2: Evaluate role-based access control
       const roleBasedAccess = await this.evaluateRoleBasedAccess(
         request.userContext?.roles || [],
         requiredPermissions,
-        securityContext
+        securityContext,
       );
 
       // Step 3: Evaluate attribute-based access control
       const attributeBasedAccess = await this.evaluateAttributeBasedAccess(
         request.userContext,
         request,
-        securityContext
+        securityContext,
       );
 
       // Step 4: Evaluate contextual requirements
       const contextualRequirements = await this.evaluateContextualRequirements(
         request,
-        securityContext
+        securityContext,
       );
 
       // Step 5: Perform comprehensive policy evaluation
@@ -982,7 +1029,7 @@ export class ParlantSecurityAuthenticationIntegrationService {
         requiredPermissions,
         roleBasedAccess,
         attributeBasedAccess,
-        contextualRequirements
+        contextualRequirements,
       );
 
       const authorizationRequirement: AuthorizationRequirement = {
@@ -1006,7 +1053,6 @@ export class ParlantSecurityAuthenticationIntegrationService {
       });
 
       return authorizationRequirement;
-
     } catch (error) {
       this.logger.error(`Authorization evaluation failed`, {
         error: error instanceof Error ? error.message : String(error),
@@ -1024,7 +1070,7 @@ export class ParlantSecurityAuthenticationIntegrationService {
    */
   async createEnterpriseSecurityAuditTrail(
     securityResponse: ConversationalSecurityResponse,
-    request: APIRequest
+    request: APIRequest,
   ): Promise<SecurityEvent[]> {
     const auditStartTime = performance.now();
 
@@ -1045,25 +1091,33 @@ export class ParlantSecurityAuthenticationIntegrationService {
           ? SecurityEventType.SECURITY_POLICY_VALIDATION
           : SecurityEventType.SECURITY_POLICY_VIOLATION,
         severity: this.determineSeverityFromResponse(securityResponse),
-        description: `Security validation ${securityResponse.allowed ? 'passed' : 'failed'}: ${securityResponse.userFriendlyReason}`,
-        sourceIp: request.headers['x-forwarded-for'] || request.headers['remote-addr'] || 'unknown',
+        description: `Security validation ${securityResponse.allowed ? "passed" : "failed"}: ${securityResponse.userFriendlyReason}`,
+        sourceIp:
+          request.headers["x-forwarded-for"] ||
+          request.headers["remote-addr"] ||
+          "unknown",
         userId: request.userContext?.userId,
         resolved: securityResponse.allowed,
-        resolutionMethod: securityResponse.allowed ? 'AUTOMATIC_APPROVAL' : 'AUTOMATIC_DENIAL',
+        resolutionMethod: securityResponse.allowed
+          ? "AUTOMATIC_APPROVAL"
+          : "AUTOMATIC_DENIAL",
       });
 
       // Step 2: Create events for failed security checks
-      for (const failedCheck of securityResponse.technicalDetails.failedChecks) {
+      for (const failedCheck of securityResponse.technicalDetails
+        .failedChecks) {
         auditEvents.push({
           eventId: uuidv4(),
           timestamp: new Date(),
           eventType: this.mapCheckToEventType(failedCheck.checkName),
           severity: failedCheck.severity,
           description: `Security check failed: ${failedCheck.checkName} - ${failedCheck.reason}`,
-          sourceIp: request.headers['x-forwarded-for'] || 'unknown',
+          sourceIp: request.headers["x-forwarded-for"] || "unknown",
           userId: request.userContext?.userId,
           resolved: false,
-          resolutionMethod: failedCheck.bypassPossible ? 'BYPASS_AVAILABLE' : 'NO_BYPASS',
+          resolutionMethod: failedCheck.bypassPossible
+            ? "BYPASS_AVAILABLE"
+            : "NO_BYPASS",
         });
       }
 
@@ -1075,10 +1129,12 @@ export class ParlantSecurityAuthenticationIntegrationService {
           eventType: SecurityEventType.SUSPICIOUS_ACTIVITY,
           severity: this.mapRiskLevelToSeverity(riskFactor.riskLevel),
           description: `Risk factor identified: ${riskFactor.factor} - ${riskFactor.description}`,
-          sourceIp: request.headers['x-forwarded-for'] || 'unknown',
+          sourceIp: request.headers["x-forwarded-for"] || "unknown",
           userId: request.userContext?.userId,
           resolved: false,
-          resolutionMethod: riskFactor.monitoringRequired ? 'MONITORING_REQUIRED' : 'NOTED',
+          resolutionMethod: riskFactor.monitoringRequired
+            ? "MONITORING_REQUIRED"
+            : "NOTED",
         });
       }
 
@@ -1090,7 +1146,7 @@ export class ParlantSecurityAuthenticationIntegrationService {
           eventType: SecurityEventType.SECURITY_POLICY_VIOLATION,
           severity: SecuritySeverity.INFO,
           description: `Security action recommended: ${action.title} - ${action.description}`,
-          sourceIp: request.headers['x-forwarded-for'] || 'unknown',
+          sourceIp: request.headers["x-forwarded-for"] || "unknown",
           userId: request.userContext?.userId,
           resolved: false,
           resolutionMethod: `ACTION_REQUIRED_${action.difficulty}`,
@@ -1104,10 +1160,10 @@ export class ParlantSecurityAuthenticationIntegrationService {
         eventType: SecurityEventType.SECURITY_POLICY_VALIDATION,
         severity: SecuritySeverity.INFO,
         description: `Conversational security explanation provided: ${securityResponse.conversationalExplanation}`,
-        sourceIp: request.headers['x-forwarded-for'] || 'unknown',
+        sourceIp: request.headers["x-forwarded-for"] || "unknown",
         userId: request.userContext?.userId,
         resolved: true,
-        resolutionMethod: 'CONVERSATIONAL_INTERFACE',
+        resolutionMethod: "CONVERSATIONAL_INTERFACE",
       });
 
       // Step 6: Store audit events in enterprise audit system
@@ -1122,7 +1178,6 @@ export class ParlantSecurityAuthenticationIntegrationService {
       });
 
       return auditEvents;
-
     } catch (error) {
       this.logger.error(`Enterprise security audit trail creation failed`, {
         error: error instanceof Error ? error.message : String(error),
@@ -1137,18 +1192,20 @@ export class ParlantSecurityAuthenticationIntegrationService {
   // Private helper methods for core security functionality
 
   private async initializeSecurityIntegration(): Promise<void> {
-    this.logger.log(`Initializing PARLANT Security and Authentication Integration`);
+    this.logger.log(
+      `Initializing PARLANT Security and Authentication Integration`,
+    );
 
     // Set up security event listeners
-    this.securityEventEmitter.on('threat_detected', (threat) => {
+    this.securityEventEmitter.on("threat_detected", (threat) => {
       this.handleThreatDetection(threat);
     });
 
-    this.securityEventEmitter.on('authentication_failed', (failure) => {
+    this.securityEventEmitter.on("authentication_failed", (failure) => {
       this.handleAuthenticationFailure(failure);
     });
 
-    this.securityEventEmitter.on('authorization_denied', (denial) => {
+    this.securityEventEmitter.on("authorization_denied", (denial) => {
       this.handleAuthorizationDenial(denial);
     });
 
@@ -1156,10 +1213,15 @@ export class ParlantSecurityAuthenticationIntegrationService {
     this.startSecurityMonitoring();
   }
 
-  private async buildSecurityContext(request: APIRequest): Promise<SecurityContext> {
+  private async buildSecurityContext(
+    request: APIRequest,
+  ): Promise<SecurityContext> {
     const sessionId = request.userContext?.sessionId || uuidv4();
-    const ipAddress = request.headers['x-forwarded-for'] || request.headers['remote-addr'] || 'unknown';
-    const userAgent = request.headers['user-agent'] || 'unknown';
+    const ipAddress =
+      request.headers["x-forwarded-for"] ||
+      request.headers["remote-addr"] ||
+      "unknown";
+    const userAgent = request.headers["user-agent"] || "unknown";
 
     // Check for existing security context
     const existingContext = this.activeSecuritySessions.get(sessionId);
@@ -1190,8 +1252,13 @@ export class ParlantSecurityAuthenticationIntegrationService {
       ipAddress: ipAddress,
       userAgent: userAgent,
       geolocation: await this.resolveGeolocation(ipAddress),
-      deviceFingerprint: await this.generateDeviceFingerprint(userAgent, request.headers),
-      behaviorProfile: await this.getBehaviorProfile(request.userContext?.userId),
+      deviceFingerprint: await this.generateDeviceFingerprint(
+        userAgent,
+        request.headers,
+      ),
+      behaviorProfile: await this.getBehaviorProfile(
+        request.userContext?.userId,
+      ),
       securityHistory: [],
       riskScore: await this.calculateInitialRiskScore(request),
     };
@@ -1201,7 +1268,7 @@ export class ParlantSecurityAuthenticationIntegrationService {
   }
 
   private async executeConversationalSecurityValidation(
-    parlantRequest: ParlantSecurityValidationRequest
+    parlantRequest: ParlantSecurityValidationRequest,
   ): Promise<ConversationalSecurityResponse> {
     // TODO: Replace with actual PARLANT security client integration
     // This is a mock implementation for demonstration
@@ -1209,7 +1276,8 @@ export class ParlantSecurityAuthenticationIntegrationService {
     const overallAllowed =
       parlantRequest.threatAssessment.overallThreatLevel !== "CRITICAL" &&
       parlantRequest.authenticationContext.trustScore > 0.6 &&
-      parlantRequest.authorizationRequirement.policyEvaluation.evaluationResult === "ALLOW";
+      parlantRequest.authorizationRequirement.policyEvaluation
+        .evaluationResult === "ALLOW";
 
     const mockResponse: ConversationalSecurityResponse = {
       allowed: overallAllowed,
@@ -1224,24 +1292,32 @@ export class ParlantSecurityAuthenticationIntegrationService {
           "threat_detection",
           "authentication_validation",
           "authorization_evaluation",
-          "compliance_verification"
+          "compliance_verification",
         ],
-        failedChecks: overallAllowed ? [] : [
-          {
-            checkName: "risk_assessment",
-            reason: "Risk score exceeded acceptable threshold",
-            severity: SecuritySeverity.HIGH,
-            remediationSuggestion: "Complete additional authentication factors",
-            bypassPossible: true,
-          },
-        ],
-        riskFactors: parlantRequest.threatAssessment.detectedThreats.map(threat => ({
-          factor: threat.threatType,
-          riskLevel: threat.severity === SecuritySeverity.CRITICAL ? "CRITICAL" : "MEDIUM",
-          description: threat.description,
-          mitigation: "Apply recommended security measures",
-          monitoringRequired: true,
-        })),
+        failedChecks: overallAllowed
+          ? []
+          : [
+              {
+                checkName: "risk_assessment",
+                reason: "Risk score exceeded acceptable threshold",
+                severity: SecuritySeverity.HIGH,
+                remediationSuggestion:
+                  "Complete additional authentication factors",
+                bypassPossible: true,
+              },
+            ],
+        riskFactors: parlantRequest.threatAssessment.detectedThreats.map(
+          (threat) => ({
+            factor: threat.threatType,
+            riskLevel:
+              threat.severity === SecuritySeverity.CRITICAL
+                ? "CRITICAL"
+                : "MEDIUM",
+            description: threat.description,
+            mitigation: "Apply recommended security measures",
+            monitoringRequired: true,
+          }),
+        ),
         mitigationStrategies: [
           "Enable multi-factor authentication",
           "Verify device registration",
@@ -1252,37 +1328,47 @@ export class ParlantSecurityAuthenticationIntegrationService {
           "GDPR data processing consent validated",
         ],
       },
-      recommendedActions: overallAllowed ? [] : [
-        {
-          actionId: "enable-mfa",
-          title: "Enable Multi-Factor Authentication",
-          description: "Add an additional layer of security to your account",
-          difficulty: "EASY",
-          estimatedTime: 300000, // 5 minutes
-          impact: "HIGH",
-          instructions: [
-            "Navigate to Security Settings",
-            "Select 'Enable Two-Factor Authentication'",
-            "Follow the setup wizard",
+      recommendedActions: overallAllowed
+        ? []
+        : [
+            {
+              actionId: "enable-mfa",
+              title: "Enable Multi-Factor Authentication",
+              description:
+                "Add an additional layer of security to your account",
+              difficulty: "EASY",
+              estimatedTime: 300000, // 5 minutes
+              impact: "HIGH",
+              instructions: [
+                "Navigate to Security Settings",
+                "Select 'Enable Two-Factor Authentication'",
+                "Follow the setup wizard",
+              ],
+            },
           ],
-        },
-      ],
-      alternativeOptions: overallAllowed ? [] : [
-        {
-          alternativeId: "supervisor-approval",
-          title: "Request Supervisor Approval",
-          description: "Have your supervisor approve this high-risk operation",
-          requirements: ["Supervisor contact information", "Business justification"],
-          riskLevel: "MEDIUM",
-          approvalRequired: true,
-        },
-      ],
+      alternativeOptions: overallAllowed
+        ? []
+        : [
+            {
+              alternativeId: "supervisor-approval",
+              title: "Request Supervisor Approval",
+              description:
+                "Have your supervisor approve this high-risk operation",
+              requirements: [
+                "Supervisor contact information",
+                "Business justification",
+              ],
+              riskLevel: "MEDIUM",
+              approvalRequired: true,
+            },
+          ],
       escalationOptions: [
         {
           escalationLevel: "SECURITY_TEAM",
           contactInfo: "security@enterprise.com",
           expectedResponseTime: 1800000, // 30 minutes
-          escalationCriteria: "High-risk security events requiring manual review",
+          escalationCriteria:
+            "High-risk security events requiring manual review",
           automaticEscalation: !overallAllowed,
         },
       ],
@@ -1295,7 +1381,7 @@ export class ParlantSecurityAuthenticationIntegrationService {
 
   private async performThreatAssessment(
     request: APIRequest,
-    securityContext: SecurityContext
+    securityContext: SecurityContext,
   ): Promise<ThreatAssessment> {
     // Mock implementation
     return {
@@ -1309,7 +1395,7 @@ export class ParlantSecurityAuthenticationIntegrationService {
 
   private async validateAuthenticationContext(
     request: APIRequest,
-    securityContext: SecurityContext
+    securityContext: SecurityContext,
   ): Promise<AuthenticationContext> {
     // Mock implementation
     return {
@@ -1358,7 +1444,7 @@ export class ParlantSecurityAuthenticationIntegrationService {
 
   private async evaluateAuthorizationRequirements(
     request: APIRequest,
-    securityContext: SecurityContext
+    securityContext: SecurityContext,
   ): Promise<AuthorizationRequirement> {
     // Mock implementation
     return {
@@ -1373,7 +1459,11 @@ export class ParlantSecurityAuthenticationIntegrationService {
       ],
       roleBasedAccess: {
         requiredRoles: ["user"],
-        roleHierarchy: { parentRoles: [], childRoles: [], inheritanceRules: [] },
+        roleHierarchy: {
+          parentRoles: [],
+          childRoles: [],
+          inheritanceRules: [],
+        },
         dynamicRoles: [],
         roleValidation: {
           valid: true,
@@ -1403,7 +1493,7 @@ export class ParlantSecurityAuthenticationIntegrationService {
 
   private async validateComplianceRequirements(
     request: APIRequest,
-    securityContext: SecurityContext
+    securityContext: SecurityContext,
   ): Promise<ComplianceValidation> {
     // Mock implementation
     return {
@@ -1451,18 +1541,20 @@ export class ParlantSecurityAuthenticationIntegrationService {
 
   private createSecureFailureResponse(
     error: unknown,
-    validationTime: number
+    validationTime: number,
   ): ConversationalSecurityResponse {
     return {
       allowed: false,
-      conversationalExplanation: "We encountered a security system error while processing your request. For your protection, access has been denied. Please try again or contact support if the issue persists.",
-      userFriendlyReason: "Security system error - access denied for protection",
+      conversationalExplanation:
+        "We encountered a security system error while processing your request. For your protection, access has been denied. Please try again or contact support if the issue persists.",
+      userFriendlyReason:
+        "Security system error - access denied for protection",
       technicalDetails: {
         securityChecksPerformed: ["system_health_check"],
         failedChecks: [
           {
             checkName: "security_system_availability",
-            reason: `Security validation system failure: ${error instanceof Error ? error.message : 'Unknown error'}`,
+            reason: `Security validation system failure: ${error instanceof Error ? error.message : "Unknown error"}`,
             severity: SecuritySeverity.CRITICAL,
             remediationSuggestion: "Contact system administrator",
             bypassPossible: false,
@@ -1517,9 +1609,11 @@ export class ParlantSecurityAuthenticationIntegrationService {
 
   // Additional mock implementations for supporting functionality
 
-  private async resolveGeolocation(ipAddress: string): Promise<GeolocationData | undefined> {
+  private async resolveGeolocation(
+    ipAddress: string,
+  ): Promise<GeolocationData | undefined> {
     // Mock implementation
-    if (ipAddress === 'unknown') return undefined;
+    if (ipAddress === "unknown") return undefined;
 
     return {
       country: "US",
@@ -1534,7 +1628,7 @@ export class ParlantSecurityAuthenticationIntegrationService {
 
   private async generateDeviceFingerprint(
     userAgent: string,
-    headers: Record<string, string>
+    headers: Record<string, string>,
   ): Promise<DeviceFingerprint> {
     // Mock implementation
     return {
@@ -1557,17 +1651,29 @@ export class ParlantSecurityAuthenticationIntegrationService {
     };
   }
 
-  private async calculateInitialRiskScore(request: APIRequest): Promise<number> {
+  private async calculateInitialRiskScore(
+    request: APIRequest,
+  ): Promise<number> {
     // Mock implementation
     return Math.random() * 50; // Low initial risk
   }
 
-  private determineSeverityFromResponse(response: ConversationalSecurityResponse): SecuritySeverity {
+  private determineSeverityFromResponse(
+    response: ConversationalSecurityResponse,
+  ): SecuritySeverity {
     if (!response.allowed) {
-      if (response.technicalDetails.failedChecks.some(check => check.severity === SecuritySeverity.CRITICAL)) {
+      if (
+        response.technicalDetails.failedChecks.some(
+          (check) => check.severity === SecuritySeverity.CRITICAL,
+        )
+      ) {
         return SecuritySeverity.CRITICAL;
       }
-      if (response.technicalDetails.riskFactors.some(factor => factor.riskLevel === "CRITICAL")) {
+      if (
+        response.technicalDetails.riskFactors.some(
+          (factor) => factor.riskLevel === "CRITICAL",
+        )
+      ) {
         return SecuritySeverity.HIGH;
       }
       return SecuritySeverity.MEDIUM;
@@ -1577,25 +1683,27 @@ export class ParlantSecurityAuthenticationIntegrationService {
 
   private mapCheckToEventType(checkName: string): SecurityEventType {
     const mapping: Record<string, SecurityEventType> = {
-      'authentication_check': SecurityEventType.FAILED_AUTHENTICATION,
-      'authorization_check': SecurityEventType.UNAUTHORIZED_ACCESS,
-      'threat_detection': SecurityEventType.SUSPICIOUS_ACTIVITY,
-      'compliance_check': SecurityEventType.SECURITY_POLICY_VIOLATION,
+      authentication_check: SecurityEventType.FAILED_AUTHENTICATION,
+      authorization_check: SecurityEventType.UNAUTHORIZED_ACCESS,
+      threat_detection: SecurityEventType.SUSPICIOUS_ACTIVITY,
+      compliance_check: SecurityEventType.SECURITY_POLICY_VIOLATION,
     };
     return mapping[checkName] || SecurityEventType.SECURITY_POLICY_VIOLATION;
   }
 
   private mapRiskLevelToSeverity(riskLevel: string): SecuritySeverity {
     const mapping: Record<string, SecuritySeverity> = {
-      'LOW': SecuritySeverity.LOW,
-      'MEDIUM': SecuritySeverity.MEDIUM,
-      'HIGH': SecuritySeverity.HIGH,
-      'CRITICAL': SecuritySeverity.CRITICAL,
+      LOW: SecuritySeverity.LOW,
+      MEDIUM: SecuritySeverity.MEDIUM,
+      HIGH: SecuritySeverity.HIGH,
+      CRITICAL: SecuritySeverity.CRITICAL,
     };
     return mapping[riskLevel] || SecuritySeverity.MEDIUM;
   }
 
-  private async storeSecurityAuditEvents(events: SecurityEvent[]): Promise<void> {
+  private async storeSecurityAuditEvents(
+    events: SecurityEvent[],
+  ): Promise<void> {
     // Mock implementation - store in enterprise audit system
     this.logger.debug(`Storing ${events.length} security audit events`);
   }
@@ -1631,7 +1739,7 @@ export class ParlantSecurityAuthenticationIntegrationService {
       authenticationSuccessRate: 0.95 + Math.random() * 0.05,
     };
 
-    this.securityMetrics.set('health_check', {
+    this.securityMetrics.set("health_check", {
       timestamp: new Date(),
       metrics: healthMetrics,
     });
@@ -1641,14 +1749,21 @@ export class ParlantSecurityAuthenticationIntegrationService {
     // Clean up expired security sessions
     const now = Date.now();
     for (const [sessionId, context] of this.activeSecuritySessions.entries()) {
-      const lastActivity = context.securityHistory[context.securityHistory.length - 1]?.timestamp;
-      if (lastActivity && now - lastActivity.getTime() > this.SECURITY_THRESHOLDS.SESSION_TIMEOUT) {
+      const lastActivity =
+        context.securityHistory[context.securityHistory.length - 1]?.timestamp;
+      if (
+        lastActivity &&
+        now - lastActivity.getTime() > this.SECURITY_THRESHOLDS.SESSION_TIMEOUT
+      ) {
         this.activeSecuritySessions.delete(sessionId);
       }
     }
   }
 
-  private cacheThreatAssessment(requestId: string, assessment: ThreatAssessment): void {
+  private cacheThreatAssessment(
+    requestId: string,
+    assessment: ThreatAssessment,
+  ): void {
     this.threatDetectionCache.set(requestId, assessment);
 
     // Set up cache cleanup
@@ -1658,7 +1773,7 @@ export class ParlantSecurityAuthenticationIntegrationService {
   }
 
   private emitSecurityMetrics(metrics: any): void {
-    this.securityEventEmitter.emit('security_metrics', metrics);
+    this.securityEventEmitter.emit("security_metrics", metrics);
   }
 
   // Additional security implementations would continue here...

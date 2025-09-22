@@ -40,11 +40,7 @@ import { EnterpriseMonitoringController } from "./enterprise-monitoring.controll
  */
 @Global()
 @Module({
-  imports: [
-    ConfigModule,
-    EventEmitterModule,
-    ScheduleModule.forRoot(),
-  ],
+  imports: [ConfigModule, EventEmitterModule, ScheduleModule.forRoot()],
   providers: [
     MetricsService,
     ParlantMonitoringService,
@@ -99,11 +95,16 @@ export class MonitoringModule {
     });
 
     // Initialize enterprise monitoring metrics
-    this.metricsService.incrementCounter("enterprise_monitoring_initialized", 1, {
-      module: "enterprise-monitoring",
-      timestamp: new Date().toISOString(),
-      features: "function-monitoring,alerting,incident-response,dashboard,capacity-planning",
-    });
+    this.metricsService.incrementCounter(
+      "enterprise_monitoring_initialized",
+      1,
+      {
+        module: "enterprise-monitoring",
+        timestamp: new Date().toISOString(),
+        features:
+          "function-monitoring,alerting,incident-response,dashboard,capacity-planning",
+      },
+    );
 
     console.log("🚀 Enterprise PARLANT Function Monitoring System initialized");
     console.log("   ✅ Sub-1000ms performance tracking active");
@@ -114,7 +115,9 @@ export class MonitoringModule {
     console.log("   ✅ Security event monitoring and compliance tracking");
     console.log("   ✅ 99.9% uptime monitoring with intelligent health checks");
     console.log("   ✅ Production monitoring infrastructure deployed");
-    console.log(`   📊 Monitoring ${this.getEstimatedFunctionCount()}+ PARLANT database functions`);
+    console.log(
+      `   📊 Monitoring ${this.getEstimatedFunctionCount()}+ PARLANT database functions`,
+    );
   }
 
   /**

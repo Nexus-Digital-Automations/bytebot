@@ -54,7 +54,9 @@ interface EnhancedJwtPayload extends jwt.JwtPayload {
 /**
  * Type guard to validate enterprise JWT payload has required properties
  */
-function isValidEnterpriseJwtPayload(payload: unknown): payload is EnhancedJwtPayload {
+function isValidEnterpriseJwtPayload(
+  payload: unknown,
+): payload is EnhancedJwtPayload {
   return (
     typeof payload === 'object' &&
     payload !== null &&
@@ -91,14 +93,20 @@ class SafeEnterpriseJwtAccess {
   }
 
   static getPermissions(payload: unknown): Permission[] {
-    if (isValidEnterpriseJwtPayload(payload) && Array.isArray(payload.permissions)) {
+    if (
+      isValidEnterpriseJwtPayload(payload) &&
+      Array.isArray(payload.permissions)
+    ) {
       return payload.permissions;
     }
     return [];
   }
 
   static getEmail(payload: unknown): string | null {
-    if (isValidEnterpriseJwtPayload(payload) && typeof payload.email === 'string') {
+    if (
+      isValidEnterpriseJwtPayload(payload) &&
+      typeof payload.email === 'string'
+    ) {
       return payload.email;
     }
     return null;
@@ -623,10 +631,12 @@ export class EnterpriseAuthGuard implements CanActivate {
    */
   private createUserFromPayload(payload: EnhancedJwtPayload): ByteBotdUser {
     const sub = SafeEnterpriseJwtAccess.getSub(payload) || 'unknown';
-    const email = SafeEnterpriseJwtAccess.getEmail(payload) || 'unknown@unknown.local';
+    const email =
+      SafeEnterpriseJwtAccess.getEmail(payload) || 'unknown@unknown.local';
     const username = SafeEnterpriseJwtAccess.getUsername(payload) || 'unknown';
     const roles = SafeEnterpriseJwtAccess.getRoles(payload);
-    const sessionId = SafeEnterpriseJwtAccess.getSessionId(payload) || 'unknown-session';
+    const sessionId =
+      SafeEnterpriseJwtAccess.getSessionId(payload) || 'unknown-session';
     const permissions = SafeEnterpriseJwtAccess.getPermissions(payload);
 
     return {

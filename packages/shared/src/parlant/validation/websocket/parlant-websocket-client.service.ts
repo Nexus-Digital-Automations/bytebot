@@ -18,16 +18,16 @@
  * @author AIgent Integration Team
  */
 
-import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import WebSocket from 'ws';
-import { EventEmitter } from 'events';
-import { performance } from 'perf_hooks';
+import { Injectable, Logger, OnApplicationShutdown } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import WebSocket from "ws";
+import { EventEmitter } from "events";
+import { performance } from "perf_hooks";
 import {
   ValidationRequest,
   ValidationResponse,
   ValidationLayerError,
-} from '../types/validation-layer.types';
+} from "../types/validation-layer.types";
 
 // ===== WEBSOCKET MESSAGE TYPES =====
 
@@ -51,15 +51,15 @@ interface ParlantWebSocketMessage {
  * PARLANT WebSocket message types
  */
 enum ParlantMessageType {
-  VALIDATION_REQUEST = 'validation_request',
-  VALIDATION_RESPONSE = 'validation_response',
-  STATUS_UPDATE = 'status_update',
-  ERROR_NOTIFICATION = 'error_notification',
-  HEARTBEAT = 'heartbeat',
-  AUTH_CHALLENGE = 'auth_challenge',
-  AUTH_RESPONSE = 'auth_response',
-  SESSION_START = 'session_start',
-  SESSION_END = 'session_end',
+  VALIDATION_REQUEST = "validation_request",
+  VALIDATION_RESPONSE = "validation_response",
+  STATUS_UPDATE = "status_update",
+  ERROR_NOTIFICATION = "error_notification",
+  HEARTBEAT = "heartbeat",
+  AUTH_CHALLENGE = "auth_challenge",
+  AUTH_RESPONSE = "auth_response",
+  SESSION_START = "session_start",
+  SESSION_END = "session_end",
 }
 
 /**
@@ -100,7 +100,10 @@ interface ConnectionMetrics {
 // ===== WEBSOCKET CLIENT SERVICE =====
 
 @Injectable()
-export class ParlantWebSocketClient extends EventEmitter implements OnApplicationShutdown {
+export class ParlantWebSocketClient
+  extends EventEmitter
+  implements OnApplicationShutdown
+{
   private readonly logger = new Logger(ParlantWebSocketClient.name);
   private websocket: WebSocket | null = null;
   private connectionConfig!: ConnectionConfig;
@@ -125,15 +128,21 @@ export class ParlantWebSocketClient extends EventEmitter implements OnApplicatio
    */
   private initializeConfiguration(): void {
     this.connectionConfig = {
-      url: this.configService.get<string>('PARLANT_WEBSOCKET_URL') || 'ws://localhost:8080/parlant',
-      timeout: this.configService.get<number>('PARLANT_WS_TIMEOUT') || 5000,
-      maxReconnectAttempts: this.configService.get<number>('PARLANT_WS_MAX_RECONNECT') || 10,
-      reconnectDelay: this.configService.get<number>('PARLANT_WS_RECONNECT_DELAY') || 1000,
-      heartbeatInterval: this.configService.get<number>('PARLANT_WS_HEARTBEAT_INTERVAL') || 30000,
-      authToken: this.configService.get<string>('PARLANT_AUTH_TOKEN') || '',
+      url:
+        this.configService.get<string>("PARLANT_WEBSOCKET_URL") ||
+        "ws://localhost:8080/parlant",
+      timeout: this.configService.get<number>("PARLANT_WS_TIMEOUT") || 5000,
+      maxReconnectAttempts:
+        this.configService.get<number>("PARLANT_WS_MAX_RECONNECT") || 10,
+      reconnectDelay:
+        this.configService.get<number>("PARLANT_WS_RECONNECT_DELAY") || 1000,
+      heartbeatInterval:
+        this.configService.get<number>("PARLANT_WS_HEARTBEAT_INTERVAL") ||
+        30000,
+      authToken: this.configService.get<string>("PARLANT_AUTH_TOKEN") || "",
     };
 
-    this.logger.log('WebSocket client configuration initialized', {
+    this.logger.log("WebSocket client configuration initialized", {
       url: this.connectionConfig.url,
       timeout: this.connectionConfig.timeout,
     });
@@ -159,16 +168,17 @@ export class ParlantWebSocketClient extends EventEmitter implements OnApplicatio
    */
   async connect(sessionContext: SessionContext): Promise<void> {
     if (this.isConnected || this.isConnecting) {
-      this.logger.warn('Connection already established or in progress');
+      this.logger.warn("Connection already established or in progress");
       return;
     }
 
     if (this.circuitBreakerState === CircuitBreakerState.OPEN) {
       const timeSinceFailure = Date.now() - this.lastFailureTime;
-      if (timeSinceFailure < 60000) { // 1 minute circuit breaker timeout
+      if (timeSinceFailure < 60000) {
+        // 1 minute circuit breaker timeout
         throw new ValidationLayerError(
-          'Circuit breaker open - connection temporarily disabled',
-          'CIRCUIT_BREAKER_OPEN'
+          "Circuit breaker open - connection temporarily disabled",
+          "CIRCUIT_BREAKER_OPEN",
         );
       }
       this.circuitBreakerState = CircuitBreakerState.HALF_OPEN;
@@ -192,13 +202,15 @@ export class ParlantWebSocketClient extends EventEmitter implements OnApplicatio
       this.startHeartbeat();
       await this.authenticateSession();
 
-      this.logger.log('WebSocket connection established successfully', {
+      this.logger.log("WebSocket connection established successfully", {
         connectTime: this.connectionMetrics.connectTime,
         sessionId: sessionContext.sessionId,
       });
 
-      this.emit('connected', { sessionContext, connectTime: this.connectionMetrics.connectTime });
-
+      this.emit("connected", {
+        sessionContext,
+        connectTime: this.connectionMetrics.connectTime,
+      });
     } catch (error) {
       this.handleConnectionError(error as Error);
       throw error;
@@ -211,26 +223,30 @@ export class ParlantWebSocketClient extends EventEmitter implements OnApplicatio
   private async establishConnection(): Promise<void> {
     return new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {
-        reject(new ValidationLayerError(
-          `Connection timeout after ${this.connectionConfig.timeout}ms`,
-          'CONNECTION_TIMEOUT'
-        ));
+        reject(
+          new ValidationLayerError(
+            `Connection timeout after ${this.connectionConfig.timeout}ms`,
+            "CONNECTION_TIMEOUT",
+          ),
+        );
       }, this.connectionConfig.timeout);
 
       this.websocket = new WebSocket(this.connectionConfig.url);
 
-      this.websocket.on('open', () => {
+      this.websocket.on("open", () => {
         clearTimeout(timeout);
         resolve();
       });
 
-      this.websocket.on('error', (error) => {
+      this.websocket.on("error", (error) => {
         clearTimeout(timeout);
-        reject(new ValidationLayerError(
-          `WebSocket connection error: ${error.message}`,
-          'CONNECTION_ERROR',
-          { error: error.message }
-        ));
+        reject(
+          new ValidationLayerError(
+            `WebSocket connection error: ${error.message}`,
+            "CONNECTION_ERROR",
+            { error: error.message },
+          ),
+        );
       });
     });
   }
@@ -241,19 +257,19 @@ export class ParlantWebSocketClient extends EventEmitter implements OnApplicatio
   private setupEventHandlers(): void {
     if (!this.websocket) return;
 
-    this.websocket.on('message', (data) => {
+    this.websocket.on("message", (data) => {
       this.handleIncomingMessage(data.toString());
     });
 
-    this.websocket.on('close', (code, reason) => {
+    this.websocket.on("close", (code, reason) => {
       this.handleConnectionClose(code, reason.toString());
     });
 
-    this.websocket.on('error', (error) => {
+    this.websocket.on("error", (error) => {
       this.handleWebSocketError(error);
     });
 
-    this.websocket.on('ping', () => {
+    this.websocket.on("ping", () => {
       this.websocket?.pong();
     });
   }
@@ -263,7 +279,10 @@ export class ParlantWebSocketClient extends EventEmitter implements OnApplicatio
    */
   private async authenticateSession(): Promise<void> {
     if (!this.sessionContext) {
-      throw new ValidationLayerError('No session context available for authentication', 'NO_SESSION_CONTEXT');
+      throw new ValidationLayerError(
+        "No session context available for authentication",
+        "NO_SESSION_CONTEXT",
+      );
     }
 
     const authMessage: ParlantWebSocketMessage = {
@@ -284,9 +303,14 @@ export class ParlantWebSocketClient extends EventEmitter implements OnApplicatio
   /**
    * Send validation request to PARLANT
    */
-  async sendValidationRequest(request: ValidationRequest): Promise<ValidationResponse> {
+  async sendValidationRequest(
+    request: ValidationRequest,
+  ): Promise<ValidationResponse> {
     if (!this.isConnected) {
-      throw new ValidationLayerError('WebSocket not connected', 'NOT_CONNECTED');
+      throw new ValidationLayerError(
+        "WebSocket not connected",
+        "NOT_CONNECTED",
+      );
     }
 
     const startTime = performance.now();
@@ -306,11 +330,13 @@ export class ParlantWebSocketClient extends EventEmitter implements OnApplicatio
       // Setup timeout for response
       const timeout = setTimeout(() => {
         this.pendingRequests.delete(messageId);
-        reject(new ValidationLayerError(
-          `Validation request timeout after ${request.timeoutMs}ms`,
-          'REQUEST_TIMEOUT',
-          { requestId: request.id, messageId }
-        ));
+        reject(
+          new ValidationLayerError(
+            `Validation request timeout after ${request.timeoutMs}ms`,
+            "REQUEST_TIMEOUT",
+            { requestId: request.id, messageId },
+          ),
+        );
       }, request.timeoutMs);
 
       // Track pending request
@@ -336,7 +362,10 @@ export class ParlantWebSocketClient extends EventEmitter implements OnApplicatio
    */
   private async sendMessage(message: ParlantWebSocketMessage): Promise<void> {
     if (!this.websocket || this.websocket.readyState !== WebSocket.OPEN) {
-      throw new ValidationLayerError('WebSocket not ready for sending', 'NOT_READY');
+      throw new ValidationLayerError(
+        "WebSocket not ready for sending",
+        "NOT_READY",
+      );
     }
 
     try {
@@ -344,18 +373,17 @@ export class ParlantWebSocketClient extends EventEmitter implements OnApplicatio
       this.websocket.send(messageData);
       this.connectionMetrics.messagesSeint++;
 
-      this.logger.debug('WebSocket message sent', {
+      this.logger.debug("WebSocket message sent", {
         type: message.type,
         messageId: message.messageId,
         size: messageData.length,
       });
-
     } catch (error) {
       this.connectionMetrics.errorCount++;
       throw new ValidationLayerError(
         `Failed to send WebSocket message: ${(error as Error).message}`,
-        'SEND_ERROR',
-        { messageType: message.type, messageId: message.messageId }
+        "SEND_ERROR",
+        { messageType: message.type, messageId: message.messageId },
       );
     }
   }
@@ -368,7 +396,7 @@ export class ParlantWebSocketClient extends EventEmitter implements OnApplicatio
       const message: ParlantWebSocketMessage = JSON.parse(data);
       this.connectionMetrics.messagesReceived++;
 
-      this.logger.debug('WebSocket message received', {
+      this.logger.debug("WebSocket message received", {
         type: message.type,
         messageId: message.messageId,
       });
@@ -395,12 +423,13 @@ export class ParlantWebSocketClient extends EventEmitter implements OnApplicatio
           break;
 
         default:
-          this.logger.warn('Unknown message type received', { type: message.type });
+          this.logger.warn("Unknown message type received", {
+            type: message.type,
+          });
       }
-
     } catch (error) {
       this.connectionMetrics.errorCount++;
-      this.logger.error('Failed to process incoming message', {
+      this.logger.error("Failed to process incoming message", {
         error: (error as Error).message,
         data: data.substring(0, 500), // Truncate for logging
       });
@@ -415,7 +444,7 @@ export class ParlantWebSocketClient extends EventEmitter implements OnApplicatio
     const pendingRequest = this.pendingRequests.get(message.messageId);
 
     if (!pendingRequest) {
-      this.logger.warn('Received response for unknown request', {
+      this.logger.warn("Received response for unknown request", {
         messageId: message.messageId,
         responseId: response.requestId,
       });
@@ -433,7 +462,7 @@ export class ParlantWebSocketClient extends EventEmitter implements OnApplicatio
     // Resolve the promise
     pendingRequest.resolve(response);
 
-    this.logger.debug('Validation response processed', {
+    this.logger.debug("Validation response processed", {
       requestId: response.requestId,
       decision: response.decision,
       responseTime,
@@ -445,9 +474,9 @@ export class ParlantWebSocketClient extends EventEmitter implements OnApplicatio
    */
   private handleStatusUpdate(message: ParlantWebSocketMessage): void {
     const status = message.payload.status;
-    this.emit('statusUpdate', status);
+    this.emit("statusUpdate", status);
 
-    this.logger.debug('Status update received', { status });
+    this.logger.debug("Status update received", { status });
   }
 
   /**
@@ -464,16 +493,18 @@ export class ParlantWebSocketClient extends EventEmitter implements OnApplicatio
       if (pendingRequest) {
         clearTimeout(pendingRequest.timeout);
         this.pendingRequests.delete(messageId);
-        pendingRequest.reject(new ValidationLayerError(
-          error.message || 'PARLANT error notification',
-          error.code || 'PARLANT_ERROR',
-          error
-        ));
+        pendingRequest.reject(
+          new ValidationLayerError(
+            error.message || "PARLANT error notification",
+            error.code || "PARLANT_ERROR",
+            error,
+          ),
+        );
       }
     }
 
-    this.emit('error', error);
-    this.logger.error('Error notification received', { error });
+    this.emit("error", error);
+    this.logger.error("Error notification received", { error });
   }
 
   /**
@@ -486,13 +517,15 @@ export class ParlantWebSocketClient extends EventEmitter implements OnApplicatio
     const response: ParlantWebSocketMessage = {
       type: ParlantMessageType.HEARTBEAT,
       messageId: this.generateMessageId(),
-      payload: { response: 'pong' },
+      payload: { response: "pong" },
       timestamp: Date.now(),
       sessionContext: this.sessionContext || undefined,
     };
 
     this.sendMessage(response).catch((error) => {
-      this.logger.error('Failed to respond to heartbeat', { error: error.message });
+      this.logger.error("Failed to respond to heartbeat", {
+        error: error.message,
+      });
     });
   }
 
@@ -503,13 +536,13 @@ export class ParlantWebSocketClient extends EventEmitter implements OnApplicatio
     const authResult = message.payload.authResult;
 
     if (authResult.success) {
-      this.logger.log('Session authenticated successfully', {
+      this.logger.log("Session authenticated successfully", {
         sessionId: this.sessionContext?.sessionId,
       });
-      this.emit('authenticated', authResult);
+      this.emit("authenticated", authResult);
     } else {
-      this.logger.error('Authentication failed', { reason: authResult.reason });
-      this.emit('authenticationFailed', authResult);
+      this.logger.error("Authentication failed", { reason: authResult.reason });
+      this.emit("authenticationFailed", authResult);
     }
   }
 
@@ -528,7 +561,7 @@ export class ParlantWebSocketClient extends EventEmitter implements OnApplicatio
         };
 
         this.sendMessage(heartbeat).catch((error) => {
-          this.logger.error('Heartbeat failed', { error: error.message });
+          this.logger.error("Heartbeat failed", { error: error.message });
         });
       }
     }, this.connectionConfig.heartbeatInterval);
@@ -541,19 +574,23 @@ export class ParlantWebSocketClient extends EventEmitter implements OnApplicatio
     this.isConnected = false;
     this.clearHeartbeat();
 
-    this.logger.warn('WebSocket connection closed', { code, reason });
+    this.logger.warn("WebSocket connection closed", { code, reason });
 
     // Reject all pending requests
-    this.rejectPendingRequests(new ValidationLayerError(
-      'Connection closed',
-      'CONNECTION_CLOSED',
-      { code, reason }
-    ));
+    this.rejectPendingRequests(
+      new ValidationLayerError("Connection closed", "CONNECTION_CLOSED", {
+        code,
+        reason,
+      }),
+    );
 
-    this.emit('disconnected', { code, reason });
+    this.emit("disconnected", { code, reason });
 
     // Attempt reconnection if not intentional
-    if (code !== 1000 && this.reconnectAttempts < this.connectionConfig.maxReconnectAttempts) {
+    if (
+      code !== 1000 &&
+      this.reconnectAttempts < this.connectionConfig.maxReconnectAttempts
+    ) {
       this.scheduleReconnection();
     }
   }
@@ -563,8 +600,8 @@ export class ParlantWebSocketClient extends EventEmitter implements OnApplicatio
    */
   private handleWebSocketError(error: Error): void {
     this.connectionMetrics.errorCount++;
-    this.logger.error('WebSocket error', { error: error.message });
-    this.emit('error', error);
+    this.logger.error("WebSocket error", { error: error.message });
+    this.emit("error", error);
   }
 
   /**
@@ -577,26 +614,30 @@ export class ParlantWebSocketClient extends EventEmitter implements OnApplicatio
 
     if (this.connectionMetrics.errorCount > 5) {
       this.circuitBreakerState = CircuitBreakerState.OPEN;
-      this.logger.error('Circuit breaker opened due to repeated failures');
+      this.logger.error("Circuit breaker opened due to repeated failures");
     }
 
-    this.logger.error('Connection error', { error: error.message });
+    this.logger.error("Connection error", { error: error.message });
   }
 
   /**
    * Schedule reconnection attempt
    */
   private scheduleReconnection(): void {
-    const delay = this.connectionConfig.reconnectDelay * Math.pow(2, this.reconnectAttempts);
+    const delay =
+      this.connectionConfig.reconnectDelay *
+      Math.pow(2, this.reconnectAttempts);
 
-    this.logger.log(`Scheduling reconnection attempt ${this.reconnectAttempts + 1} in ${delay}ms`);
+    this.logger.log(
+      `Scheduling reconnection attempt ${this.reconnectAttempts + 1} in ${delay}ms`,
+    );
 
     setTimeout(() => {
       if (this.sessionContext) {
         this.reconnectAttempts++;
         this.connectionMetrics.reconnectCount++;
         this.connect(this.sessionContext).catch((error) => {
-          this.logger.error('Reconnection failed', { error: error.message });
+          this.logger.error("Reconnection failed", { error: error.message });
         });
       }
     }, delay);
@@ -631,7 +672,7 @@ export class ParlantWebSocketClient extends EventEmitter implements OnApplicatio
     const messageCount = this.connectionMetrics.messagesReceived;
 
     this.connectionMetrics.averageResponseTime =
-      ((currentAverage * (messageCount - 1)) + responseTime) / messageCount;
+      (currentAverage * (messageCount - 1) + responseTime) / messageCount;
   }
 
   /**
@@ -650,13 +691,12 @@ export class ParlantWebSocketClient extends EventEmitter implements OnApplicatio
     }
 
     this.clearHeartbeat();
-    this.rejectPendingRequests(new ValidationLayerError(
-      'Client disconnecting',
-      'CLIENT_DISCONNECT'
-    ));
+    this.rejectPendingRequests(
+      new ValidationLayerError("Client disconnecting", "CLIENT_DISCONNECT"),
+    );
 
     if (this.websocket) {
-      this.websocket.close(1000, 'Client disconnect');
+      this.websocket.close(1000, "Client disconnect");
       this.websocket = null;
     }
 
@@ -664,7 +704,7 @@ export class ParlantWebSocketClient extends EventEmitter implements OnApplicatio
     this.isConnecting = false;
     this.sessionContext = null;
 
-    this.logger.log('WebSocket client disconnected');
+    this.logger.log("WebSocket client disconnected");
   }
 
   /**
@@ -677,7 +717,11 @@ export class ParlantWebSocketClient extends EventEmitter implements OnApplicatio
   /**
    * Get connection status
    */
-  getStatus(): { connected: boolean; connecting: boolean; circuitBreakerState: CircuitBreakerState } {
+  getStatus(): {
+    connected: boolean;
+    connecting: boolean;
+    circuitBreakerState: CircuitBreakerState;
+  } {
     return {
       connected: this.isConnected,
       connecting: this.isConnecting,
@@ -704,7 +748,7 @@ interface PendingRequest {
 }
 
 enum CircuitBreakerState {
-  CLOSED = 'closed',
-  OPEN = 'open',
-  HALF_OPEN = 'half_open',
+  CLOSED = "closed",
+  OPEN = "open",
+  HALF_OPEN = "half_open",
 }

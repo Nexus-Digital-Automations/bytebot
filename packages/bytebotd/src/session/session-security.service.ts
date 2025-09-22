@@ -940,22 +940,22 @@ export class SessionSecurityService implements OnModuleInit, OnApplicationShutdo
   }
 
   // Additional placeholder methods for comprehensive implementation...
-  private async validateSessionExists(sessionId: string): Promise<boolean> { return true; }
-  private async validateDeviceFingerprint(context: SessionValidationContext): Promise<boolean> { return true; }
-  private async validateGeolocation(context: SessionValidationContext): Promise<boolean> { return true; }
-  private async validateAuthenticationFactors(context: SessionValidationContext): Promise<boolean> { return true; }
-  private async validateBehavioralProfile(context: SessionValidationContext): Promise<boolean> { return true; }
-  private async performComplianceChecks(context: SessionValidationContext): Promise<boolean> { return true; }
+  private validateSessionExists(sessionId: string): boolean { return true; }
+  private validateDeviceFingerprint(context: SessionValidationContext): boolean { return true; }
+  private validateGeolocation(context: SessionValidationContext): boolean { return true; }
+  private validateAuthenticationFactors(context: SessionValidationContext): boolean { return true; }
+  private validateBehavioralProfile(context: SessionValidationContext): boolean { return true; }
+  private performComplianceChecks(context: SessionValidationContext): boolean { return true; }
   private calculateOverallValidationResult(results: SessionValidationDetails): ValidationResult { return ValidationResult.VALID; }
   private getValidationSeverity(result: ValidationResult): AuditSeverity { return AuditSeverity.INFO; }
-  private async detectBruteForceAttack(context: SessionValidationContext): Promise<ThreatDetectionResult | null> { return null; }
-  private async detectSessionHijacking(context: SessionValidationContext): Promise<ThreatDetectionResult | null> { return null; }
-  private async detectBehavioralAnomalies(context: SessionValidationContext): Promise<ThreatDetectionResult | null> { return null; }
-  private async detectGeolocationAnomalies(context: SessionValidationContext): Promise<ThreatDetectionResult | null> { return null; }
-  private async detectDeviceFingerprintMismatch(context: SessionValidationContext): Promise<ThreatDetectionResult | null> { return null; }
-  private async triggerAutomaticResponse(threat: ThreatDetectionResult): Promise<void> { }
-  private async loadBehavioralProfiles(): Promise<void> { }
-  private async persistBehavioralProfiles(): Promise<void> { }
-  private async performContinuousThreatMonitoring(): Promise<void> { }
-  private async performKeyRotation(): Promise<void> { }
+  private detectBruteForceAttack(context: SessionValidationContext): ThreatDetectionResult | null { return null; }
+  private detectSessionHijacking(context: SessionValidationContext): ThreatDetectionResult | null { return null; }
+  private detectBehavioralAnomalies(context: SessionValidationContext): ThreatDetectionResult | null { return null; }
+  private detectGeolocationAnomalies(context: SessionValidationContext): ThreatDetectionResult | null { return null; }
+  private detectDeviceFingerprintMismatch(context: SessionValidationContext): ThreatDetectionResult | null { return null; }
+  private triggerAutomaticResponse(threat: ThreatDetectionResult): void { }
+  private loadBehavioralProfiles(): void { }
+  private persistBehavioralProfiles(): void { }
+  private performContinuousThreatMonitoring(): void { }
+  private performKeyRotation(): void { }
 }

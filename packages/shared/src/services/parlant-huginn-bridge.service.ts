@@ -340,7 +340,8 @@ export class ParlantHuginnBridgeService
         success: true,
         result: enhancedResult,
         totalExecutionTimeMs: totalExecutionTime,
-        performanceAchieved: totalExecutionTime < this.getConfig().performanceTarget,
+        performanceAchieved:
+          totalExecutionTime < this.getConfig().performanceTarget,
         intelligenceMetadata: {
           validationLevel: workflowConfig.validationLevel,
           autonomousApproval: workflowConfig.autonomousApproval || false,
@@ -483,7 +484,9 @@ export class ParlantHuginnBridgeService
 
   private initializeHttpClient(): void {
     if (!this.config) {
-      throw new Error('Configuration must be loaded before initializing HTTP client');
+      throw new Error(
+        "Configuration must be loaded before initializing HTTP client",
+      );
     }
 
     this.httpClient = axios.create({
@@ -540,7 +543,9 @@ export class ParlantHuginnBridgeService
    */
   private getHttpClient(): AxiosInstance {
     if (!this.httpClient) {
-      throw new Error('HTTP client not initialized. Call onModuleInit() first.');
+      throw new Error(
+        "HTTP client not initialized. Call onModuleInit() first.",
+      );
     }
     return this.httpClient;
   }
@@ -550,14 +555,16 @@ export class ParlantHuginnBridgeService
    */
   private getConfig(): HuginnIntegrationConfig {
     if (!this.config) {
-      throw new Error('Configuration not loaded. Call onModuleInit() first.');
+      throw new Error("Configuration not loaded. Call onModuleInit() first.");
     }
     return this.config;
   }
 
   private initializeWebSocketConnection(): void {
     if (!this.config) {
-      throw new Error('Configuration must be loaded before initializing WebSocket connection');
+      throw new Error(
+        "Configuration must be loaded before initializing WebSocket connection",
+      );
     }
 
     // WebSocket implementation for real-time communication with Huginn
@@ -1517,7 +1524,8 @@ export class ParlantHuginnBridgeService
 
     const longRunningSteps = stepResults.filter(
       (result) =>
-        (result.executionTimeMs as number) > this.getConfig().performanceTarget / 2,
+        (result.executionTimeMs as number) >
+        this.getConfig().performanceTarget / 2,
     );
     if (longRunningSteps.length > 0) {
       recommendations.push(

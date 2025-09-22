@@ -31,13 +31,13 @@
  * @classification Enterprise Testing Infrastructure
  */
 
-import { Browser, Page, chromium, firefox, webkit } from 'playwright';
-import { testingFrameworkConfig } from '../config/testing-framework.config';
-import { TestDataGenerator } from '../utils/test-data-generator';
-import { ScreenshotCapture } from '../utils/screenshot-capture';
-import { VideoRecorder } from '../utils/video-recorder';
-import { NetworkInterceptor } from '../utils/network-interceptor';
-import { PerformanceMonitor } from '../utils/performance-monitor';
+import { Browser, Page, chromium, firefox, webkit } from "playwright";
+import { testingFrameworkConfig } from "../config/testing-framework.config";
+import { TestDataGenerator } from "../utils/test-data-generator";
+import { ScreenshotCapture } from "../utils/screenshot-capture";
+import { VideoRecorder } from "../utils/video-recorder";
+import { NetworkInterceptor } from "../utils/network-interceptor";
+import { PerformanceMonitor } from "../utils/performance-monitor";
 
 export interface E2ETestSuite {
   name: string;
@@ -45,7 +45,7 @@ export interface E2ETestSuite {
   environment: TestEnvironment;
   userJourneys: UserJourney[];
   configuration: E2ETestConfiguration;
-  teardownStrategy: 'aggressive' | 'conservative' | 'none';
+  teardownStrategy: "aggressive" | "conservative" | "none";
 }
 
 export interface TestEnvironment {
@@ -80,7 +80,7 @@ export interface TestUser {
 }
 
 export interface BrowserConfig {
-  browsers: ('chromium' | 'firefox' | 'webkit')[];
+  browsers: ("chromium" | "firefox" | "webkit")[];
   headless: boolean;
   viewport: { width: number; height: number };
   slowMo?: number;
@@ -101,7 +101,7 @@ export interface E2ETestConfiguration {
 export interface UserJourney {
   name: string;
   description: string;
-  priority: 'low' | 'medium' | 'high' | 'critical';
+  priority: "low" | "medium" | "high" | "critical";
   testSteps: E2ETestStep[];
   prerequisites?: PrerequisiteCondition[];
   expectedOutcome: ExpectedOutcome;
@@ -122,27 +122,41 @@ export interface E2ETestStep {
 }
 
 export interface E2EAction {
-  type: 'navigate' | 'click' | 'type' | 'select' | 'wait' | 'assert' | 'api_call' | 'custom';
+  type:
+    | "navigate"
+    | "click"
+    | "type"
+    | "select"
+    | "wait"
+    | "assert"
+    | "api_call"
+    | "custom";
   selector?: string;
   value?: any;
   options?: any;
 }
 
 export interface WaitCondition {
-  type: 'selector' | 'text' | 'url' | 'request' | 'response' | 'timeout';
+  type: "selector" | "text" | "url" | "request" | "response" | "timeout";
   target: string;
   timeout?: number;
 }
 
 export interface StepValidation {
-  type: 'element_exists' | 'text_contains' | 'url_contains' | 'api_response' | 'performance' | 'custom';
+  type:
+    | "element_exists"
+    | "text_contains"
+    | "url_contains"
+    | "api_response"
+    | "performance"
+    | "custom";
   target: string;
   expected: any;
   description: string;
 }
 
 export interface PrerequisiteCondition {
-  type: 'authentication' | 'data_setup' | 'service_availability' | 'custom';
+  type: "authentication" | "data_setup" | "service_availability" | "custom";
   description: string;
   setup: () => Promise<void>;
   teardown?: () => Promise<void>;
@@ -173,7 +187,7 @@ export interface PerformanceThresholds {
 
 export interface E2ETestResult {
   journeyName: string;
-  status: 'passed' | 'failed' | 'skipped';
+  status: "passed" | "failed" | "skipped";
   startTime: Date;
   endTime: Date;
   duration: number;
@@ -188,7 +202,7 @@ export interface E2ETestResult {
 
 export interface StepResult {
   stepId: string;
-  status: 'passed' | 'failed' | 'skipped';
+  status: "passed" | "failed" | "skipped";
   duration: number;
   screenshot?: string;
   error?: string;
@@ -250,7 +264,9 @@ export class E2ETestFramework {
   /**
    * Execute comprehensive E2E test suite
    */
-  public async executeE2ETestSuite(testSuite: E2ETestSuite): Promise<E2ETestResult[]> {
+  public async executeE2ETestSuite(
+    testSuite: E2ETestSuite,
+  ): Promise<E2ETestResult[]> {
     console.log(`🎭 Executing E2E Test Suite: ${testSuite.name}`);
 
     const results: E2ETestResult[] = [];
@@ -261,9 +277,9 @@ export class E2ETestFramework {
 
       // Execute user journeys
       if (testSuite.configuration.parallelExecution) {
-        results.push(...await this.executeUserJourneysParallel(testSuite));
+        results.push(...(await this.executeUserJourneysParallel(testSuite)));
       } else {
-        results.push(...await this.executeUserJourneysSequential(testSuite));
+        results.push(...(await this.executeUserJourneysSequential(testSuite)));
       }
 
       // Generate E2E test report
@@ -271,7 +287,6 @@ export class E2ETestFramework {
 
       console.log(`✅ E2E Test Suite completed: ${testSuite.name}`);
       return results;
-
     } catch (error) {
       console.error(`❌ E2E Test Suite failed: ${testSuite.name}`, error);
       throw error;
@@ -284,7 +299,9 @@ export class E2ETestFramework {
   /**
    * Execute user journeys in parallel
    */
-  private async executeUserJourneysParallel(testSuite: E2ETestSuite): Promise<E2ETestResult[]> {
+  private async executeUserJourneysParallel(
+    testSuite: E2ETestSuite,
+  ): Promise<E2ETestResult[]> {
     const journeys = testSuite.userJourneys;
     const maxConcurrent = testSuite.configuration.maxConcurrentTests;
     const results: E2ETestResult[] = [];
@@ -295,17 +312,17 @@ export class E2ETestFramework {
     for (const batch of batches) {
       console.log(`🚀 Executing batch of ${batch.length} user journeys...`);
 
-      const batchPromises = batch.map(journey =>
-        this.executeUserJourney(journey, testSuite)
+      const batchPromises = batch.map((journey) =>
+        this.executeUserJourney(journey, testSuite),
       );
 
       const batchResults = await Promise.allSettled(batchPromises);
 
       for (const result of batchResults) {
-        if (result.status === 'fulfilled') {
+        if (result.status === "fulfilled") {
           results.push(result.value);
         } else {
-          console.error('Batch execution failed:', result.reason);
+          console.error("Batch execution failed:", result.reason);
         }
       }
     }
@@ -316,7 +333,9 @@ export class E2ETestFramework {
   /**
    * Execute user journeys sequentially
    */
-  private async executeUserJourneysSequential(testSuite: E2ETestSuite): Promise<E2ETestResult[]> {
+  private async executeUserJourneysSequential(
+    testSuite: E2ETestSuite,
+  ): Promise<E2ETestResult[]> {
     const results: E2ETestResult[] = [];
 
     for (const journey of testSuite.userJourneys) {
@@ -337,7 +356,7 @@ export class E2ETestFramework {
    */
   private async executeUserJourney(
     journey: UserJourney,
-    testSuite: E2ETestSuite
+    testSuite: E2ETestSuite,
   ): Promise<E2ETestResult> {
     console.log(`👤 Executing User Journey: ${journey.name}`);
 
@@ -347,14 +366,19 @@ export class E2ETestFramework {
 
     // Execute journey in each browser
     for (const browserType of browsers) {
-      const result = await this.executeJourneyInBrowser(journey, testSuite, browserType);
+      const result = await this.executeJourneyInBrowser(
+        journey,
+        testSuite,
+        browserType,
+      );
       allResults.push(result);
     }
 
     // Return the result from the primary browser (first in list)
     const primaryResult = allResults[0];
     primaryResult.endTime = new Date();
-    primaryResult.duration = primaryResult.endTime.getTime() - startTime.getTime();
+    primaryResult.duration =
+      primaryResult.endTime.getTime() - startTime.getTime();
 
     return primaryResult;
   }
@@ -365,7 +389,7 @@ export class E2ETestFramework {
   private async executeJourneyInBrowser(
     journey: UserJourney,
     testSuite: E2ETestSuite,
-    browserType: 'chromium' | 'firefox' | 'webkit'
+    browserType: "chromium" | "firefox" | "webkit",
   ): Promise<E2ETestResult> {
     const testId = `${journey.name}_${browserType}_${Date.now()}`;
     let browser: Browser | null = null;
@@ -373,7 +397,7 @@ export class E2ETestFramework {
 
     const result: E2ETestResult = {
       journeyName: journey.name,
-      status: 'passed',
+      status: "passed",
       startTime: new Date(),
       endTime: new Date(),
       duration: 0,
@@ -387,14 +411,17 @@ export class E2ETestFramework {
         firstContentfulPaint: 0,
         largestContentfulPaint: 0,
         cumulativeLayoutShift: 0,
-        memoryUsage: 0
+        memoryUsage: 0,
       },
-      errors: []
+      errors: [],
     };
 
     try {
       // Launch browser
-      browser = await this.launchBrowser(browserType, testSuite.environment.browserConfig);
+      browser = await this.launchBrowser(
+        browserType,
+        testSuite.environment.browserConfig,
+      );
       this.activeBrowsers.set(testId, browser);
 
       // Create page
@@ -414,8 +441,8 @@ export class E2ETestFramework {
         const stepResult = await this.executeTestStep(step, page, testSuite);
         result.stepResults.push(stepResult);
 
-        if (stepResult.status === 'failed') {
-          result.status = 'failed';
+        if (stepResult.status === "failed") {
+          result.status = "failed";
           break;
         }
       }
@@ -425,23 +452,24 @@ export class E2ETestFramework {
 
       // Validate performance thresholds
       if (journey.performanceThresholds) {
-        await this.validatePerformanceThresholds(journey.performanceThresholds, result);
+        await this.validatePerformanceThresholds(
+          journey.performanceThresholds,
+          result,
+        );
       }
-
     } catch (error) {
-      result.status = 'failed';
+      result.status = "failed";
       result.errors.push({
-        step: 'journey_execution',
+        step: "journey_execution",
         message: error.message,
         stack: error.stack,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       if (testSuite.configuration.screenshotOnFailure && page) {
         const screenshot = await this.screenshotCapture.captureFullPage(page);
         result.screenshots.push(screenshot);
       }
-
     } finally {
       // Cleanup
       if (page) {
@@ -463,7 +491,7 @@ export class E2ETestFramework {
   private async executeTestStep(
     step: E2ETestStep,
     page: Page,
-    testSuite: E2ETestSuite
+    testSuite: E2ETestSuite,
   ): Promise<StepResult> {
     console.log(`  📋 Executing Step: ${step.name}`);
 
@@ -471,9 +499,9 @@ export class E2ETestFramework {
 
     const stepResult: StepResult = {
       stepId: step.id,
-      status: 'passed',
+      status: "passed",
       duration: 0,
-      validationResults: []
+      validationResults: [],
     };
 
     try {
@@ -487,28 +515,35 @@ export class E2ETestFramework {
 
       // Take screenshot if requested
       if (step.screenshot) {
-        stepResult.screenshot = await this.screenshotCapture.captureStep(page, step.id);
+        stepResult.screenshot = await this.screenshotCapture.captureStep(
+          page,
+          step.id,
+        );
       }
 
       // Execute validations
       if (step.validations) {
         for (const validation of step.validations) {
-          const validationResult = await this.executeStepValidation(validation, page);
+          const validationResult = await this.executeStepValidation(
+            validation,
+            page,
+          );
           stepResult.validationResults.push(validationResult);
 
           if (!validationResult.passed) {
-            stepResult.status = 'failed';
+            stepResult.status = "failed";
           }
         }
       }
-
     } catch (error) {
-      stepResult.status = 'failed';
+      stepResult.status = "failed";
       stepResult.error = error.message;
 
       // Capture screenshot on failure
-      stepResult.screenshot = await this.screenshotCapture.captureStep(page, step.id);
-
+      stepResult.screenshot = await this.screenshotCapture.captureStep(
+        page,
+        step.id,
+      );
     } finally {
       const endTime = performance.now();
       stepResult.duration = endTime - startTime;
@@ -520,45 +555,49 @@ export class E2ETestFramework {
   /**
    * Execute step action
    */
-  private async executeStepAction(action: E2EAction, page: Page, input?: any): Promise<void> {
+  private async executeStepAction(
+    action: E2EAction,
+    page: Page,
+    input?: any,
+  ): Promise<void> {
     switch (action.type) {
-      case 'navigate':
-        await page.goto(action.value, { waitUntil: 'networkidle' });
+      case "navigate":
+        await page.goto(action.value, { waitUntil: "networkidle" });
         break;
 
-      case 'click':
+      case "click":
         if (action.selector) {
           await page.click(action.selector, action.options);
         }
         break;
 
-      case 'type':
+      case "type":
         if (action.selector && action.value) {
           await page.fill(action.selector, action.value);
         }
         break;
 
-      case 'select':
+      case "select":
         if (action.selector && action.value) {
           await page.selectOption(action.selector, action.value);
         }
         break;
 
-      case 'wait':
+      case "wait":
         if (action.value) {
           await page.waitForTimeout(action.value);
         }
         break;
 
-      case 'assert':
+      case "assert":
         await this.executeAssertion(action, page);
         break;
 
-      case 'api_call':
+      case "api_call":
         await this.executeApiCall(action, input);
         break;
 
-      case 'custom':
+      case "custom":
         await this.executeCustomAction(action, page, input);
         break;
 
@@ -571,21 +610,21 @@ export class E2ETestFramework {
    * Browser and Page Management
    */
   private async launchBrowser(
-    browserType: 'chromium' | 'firefox' | 'webkit',
-    config: BrowserConfig
+    browserType: "chromium" | "firefox" | "webkit",
+    config: BrowserConfig,
   ): Promise<Browser> {
     const launchOptions = {
       headless: config.headless,
       slowMo: config.slowMo || 0,
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
     };
 
     switch (browserType) {
-      case 'chromium':
+      case "chromium":
         return await chromium.launch(launchOptions);
-      case 'firefox':
+      case "firefox":
         return await firefox.launch(launchOptions);
-      case 'webkit':
+      case "webkit":
         return await webkit.launch(launchOptions);
       default:
         throw new Error(`Unsupported browser type: ${browserType}`);
@@ -595,14 +634,17 @@ export class E2ETestFramework {
   private async setupPageMonitoring(
     page: Page,
     result: E2ETestResult,
-    config: E2ETestConfiguration
+    config: E2ETestConfiguration,
   ): Promise<void> {
     // Setup viewport
     await page.setViewportSize(testingFrameworkConfig.e2e.viewport);
 
     // Setup network monitoring
     if (config.networkLogging) {
-      await this.networkInterceptor.setupNetworkLogging(page, result.networkLogs);
+      await this.networkInterceptor.setupNetworkLogging(
+        page,
+        result.networkLogs,
+      );
     }
 
     // Setup performance monitoring
@@ -621,54 +663,58 @@ export class E2ETestFramework {
    */
   private async executeStepValidation(
     validation: StepValidation,
-    page: Page
+    page: Page,
   ): Promise<ValidationResult> {
     const validationResult: ValidationResult = {
       type: validation.type,
       passed: false,
       expected: validation.expected,
       actual: null,
-      description: validation.description
+      description: validation.description,
     };
 
     try {
       switch (validation.type) {
-        case 'element_exists':
+        case "element_exists":
           const element = await page.$(validation.target);
           validationResult.actual = element !== null;
-          validationResult.passed = validationResult.actual === validation.expected;
+          validationResult.passed =
+            validationResult.actual === validation.expected;
           break;
 
-        case 'text_contains':
+        case "text_contains":
           const textContent = await page.textContent(validation.target);
-          validationResult.actual = textContent?.includes(validation.expected) || false;
+          validationResult.actual =
+            textContent?.includes(validation.expected) || false;
           validationResult.passed = validationResult.actual;
           break;
 
-        case 'url_contains':
+        case "url_contains":
           const currentUrl = page.url();
           validationResult.actual = currentUrl.includes(validation.expected);
           validationResult.passed = validationResult.actual;
           break;
 
-        case 'api_response':
+        case "api_response":
           // Implementation for API response validation
           validationResult.passed = true;
           break;
 
-        case 'performance':
+        case "performance":
           // Implementation for performance validation
           validationResult.passed = true;
           break;
 
-        case 'custom':
-          validationResult.passed = await this.executeCustomValidation(validation, page);
+        case "custom":
+          validationResult.passed = await this.executeCustomValidation(
+            validation,
+            page,
+          );
           break;
 
         default:
           throw new Error(`Unknown validation type: ${validation.type}`);
       }
-
     } catch (error) {
       validationResult.passed = false;
       validationResult.actual = error.message;
@@ -680,16 +726,16 @@ export class E2ETestFramework {
   private async validateExpectedOutcome(
     expectedOutcome: ExpectedOutcome,
     page: Page,
-    result: E2ETestResult
+    result: E2ETestResult,
   ): Promise<void> {
     for (const criterion of expectedOutcome.successCriteria) {
       const passed = await criterion.validation();
       if (!passed) {
-        result.status = 'failed';
+        result.status = "failed";
         result.errors.push({
-          step: 'outcome_validation',
+          step: "outcome_validation",
           message: `Success criterion failed: ${criterion.description}`,
-          timestamp: new Date()
+          timestamp: new Date(),
         });
       }
     }
@@ -697,11 +743,11 @@ export class E2ETestFramework {
     for (const condition of expectedOutcome.failureConditions) {
       const failed = await condition.condition();
       if (failed) {
-        result.status = 'failed';
+        result.status = "failed";
         result.errors.push({
-          step: 'failure_condition',
+          step: "failure_condition",
           message: `Failure condition met: ${condition.description}`,
-          timestamp: new Date()
+          timestamp: new Date(),
         });
       }
     }
@@ -709,15 +755,15 @@ export class E2ETestFramework {
 
   private async validatePerformanceThresholds(
     thresholds: PerformanceThresholds,
-    result: E2ETestResult
+    result: E2ETestResult,
   ): Promise<void> {
     const metrics = result.performanceMetrics;
 
     if (metrics.loadTime > thresholds.loadTime) {
       result.errors.push({
-        step: 'performance_validation',
+        step: "performance_validation",
         message: `Load time ${metrics.loadTime}ms exceeds threshold ${thresholds.loadTime}ms`,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
     }
 
@@ -727,7 +773,10 @@ export class E2ETestFramework {
   /**
    * Helper Methods
    */
-  private createJourneyBatches(journeys: UserJourney[], batchSize: number): UserJourney[][] {
+  private createJourneyBatches(
+    journeys: UserJourney[],
+    batchSize: number,
+  ): UserJourney[][] {
     const batches: UserJourney[][] = [];
     for (let i = 0; i < journeys.length; i += batchSize) {
       batches.push(journeys.slice(i, i + batchSize));
@@ -735,28 +784,37 @@ export class E2ETestFramework {
     return batches;
   }
 
-  private async waitForConditions(conditions: WaitCondition[], page: Page): Promise<void> {
+  private async waitForConditions(
+    conditions: WaitCondition[],
+    page: Page,
+  ): Promise<void> {
     for (const condition of conditions) {
       switch (condition.type) {
-        case 'selector':
-          await page.waitForSelector(condition.target, { timeout: condition.timeout });
+        case "selector":
+          await page.waitForSelector(condition.target, {
+            timeout: condition.timeout,
+          });
           break;
-        case 'text':
+        case "text":
           await page.waitForFunction(
-            text => document.body.textContent?.includes(text),
+            (text) => document.body.textContent?.includes(text),
             condition.target,
-            { timeout: condition.timeout }
+            { timeout: condition.timeout },
           );
           break;
-        case 'url':
-          await page.waitForURL(condition.target, { timeout: condition.timeout });
+        case "url":
+          await page.waitForURL(condition.target, {
+            timeout: condition.timeout,
+          });
           break;
         // Additional wait conditions...
       }
     }
   }
 
-  private async executePrerequisites(prerequisites: PrerequisiteCondition[]): Promise<void> {
+  private async executePrerequisites(
+    prerequisites: PrerequisiteCondition[],
+  ): Promise<void> {
     for (const prerequisite of prerequisites) {
       await prerequisite.setup();
     }
@@ -770,20 +828,31 @@ export class E2ETestFramework {
     // Implementation for API call execution
   }
 
-  private async executeCustomAction(action: E2EAction, page: Page, input: any): Promise<void> {
+  private async executeCustomAction(
+    action: E2EAction,
+    page: Page,
+    input: any,
+  ): Promise<void> {
     // Implementation for custom action execution
   }
 
-  private async executeCustomValidation(validation: StepValidation, page: Page): Promise<boolean> {
+  private async executeCustomValidation(
+    validation: StepValidation,
+    page: Page,
+  ): Promise<boolean> {
     // Implementation for custom validation
     return true;
   }
 
-  private async setupE2ETestEnvironment(testSuite: E2ETestSuite): Promise<void> {
+  private async setupE2ETestEnvironment(
+    testSuite: E2ETestSuite,
+  ): Promise<void> {
     // Implementation for E2E test environment setup
   }
 
-  private async teardownE2ETestEnvironment(testSuite: E2ETestSuite): Promise<void> {
+  private async teardownE2ETestEnvironment(
+    testSuite: E2ETestSuite,
+  ): Promise<void> {
     // Cleanup all active browsers and pages
     for (const [testId, page] of this.activePages) {
       await page.close();
@@ -798,7 +867,7 @@ export class E2ETestFramework {
 
   private async generateE2ETestReport(
     testSuite: E2ETestSuite,
-    results: E2ETestResult[]
+    results: E2ETestResult[],
   ): Promise<void> {
     // Implementation for E2E test report generation
   }
@@ -810,11 +879,11 @@ export const e2eTestFramework = new E2ETestFramework();
 // Convenience methods for E2E testing
 export const createE2ETest = (testSuite: E2ETestSuite): void => {
   describe(`E2E Test Suite: ${testSuite.name}`, () => {
-    it('should complete all user journeys successfully', async () => {
+    it("should complete all user journeys successfully", async () => {
       const results = await e2eTestFramework.executeE2ETestSuite(testSuite);
 
       for (const result of results) {
-        expect(result.status).toBe('passed');
+        expect(result.status).toBe("passed");
       }
     }, 600000); // 10 minute timeout for E2E tests
   });

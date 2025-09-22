@@ -108,7 +108,15 @@ export interface PermissionCondition {
   /** Condition type */
   type: "time" | "location" | "attribute" | "context" | "resource";
   /** Condition operator */
-  operator: "equals" | "not_equals" | "contains" | "not_contains" | "greater_than" | "less_than" | "in" | "not_in";
+  operator:
+    | "equals"
+    | "not_equals"
+    | "contains"
+    | "not_contains"
+    | "greater_than"
+    | "less_than"
+    | "in"
+    | "not_in";
   /** Condition value */
   value: unknown;
   /** Condition field */
@@ -453,13 +461,22 @@ export class ParlantAuthorizationEngineService
   private readonly roleHierarchyCache = new Map<string, string[]>();
 
   // Authorization cache
-  private readonly authorizationCache = new Map<string, AuthorizationCacheEntry>();
+  private readonly authorizationCache = new Map<
+    string,
+    AuthorizationCacheEntry
+  >();
   private readonly cacheExpirationTime = 300000; // 5 minutes
   private readonly maxCacheSize = 10000;
 
   // Permission escalation tracking
-  private readonly escalationRequests = new Map<string, PermissionEscalationRequest>();
-  private readonly temporaryPermissions = new Map<string, Map<string, Permission[]>>();
+  private readonly escalationRequests = new Map<
+    string,
+    PermissionEscalationRequest
+  >();
+  private readonly temporaryPermissions = new Map<
+    string,
+    Map<string, Permission[]>
+  >();
 
   // Performance metrics
   private readonly metrics = {
@@ -506,10 +523,15 @@ export class ParlantAuthorizationEngineService
       await this.startPeriodicTasks();
       await this.validateAuthorizationConfig();
 
-      this.logger.log("✅ Advanced Authorization Engine Service initialized successfully");
+      this.logger.log(
+        "✅ Advanced Authorization Engine Service initialized successfully",
+      );
       this.emit("authz:service:initialized");
     } catch (error) {
-      this.logger.error("❌ Failed to initialize Authorization Engine Service", error);
+      this.logger.error(
+        "❌ Failed to initialize Authorization Engine Service",
+        error,
+      );
       throw new ParlantIntegrationError(
         "Authorization Engine Service initialization failed",
         "AUTHZ_SERVICE_INIT_ERROR",
@@ -522,13 +544,17 @@ export class ParlantAuthorizationEngineService
    * Clean up on module destruction
    */
   async onModuleDestroy(): Promise<void> {
-    this.logger.log("🔄 Shutting down Advanced Authorization Engine Service...");
+    this.logger.log(
+      "🔄 Shutting down Advanced Authorization Engine Service...",
+    );
 
     await this.stopPeriodicTasks();
     await this.saveUserRoleAssignments();
     await this.saveMetrics();
 
-    this.logger.log("✅ Advanced Authorization Engine Service shutdown complete");
+    this.logger.log(
+      "✅ Advanced Authorization Engine Service shutdown complete",
+    );
   }
 
   /**
@@ -552,10 +578,15 @@ export class ParlantAuthorizationEngineService
       }
 
       // Get user roles with inheritance
-      const userRoles = await this.getUserRolesWithInheritance(request.userContext.userId);
+      const userRoles = await this.getUserRolesWithInheritance(
+        request.userContext.userId,
+      );
 
       // Get effective permissions
-      const effectivePermissions = await this.getEffectivePermissions(userRoles, request);
+      const effectivePermissions = await this.getEffectivePermissions(
+        userRoles,
+        request,
+      );
 
       // Evaluate permissions against request
       const evaluationResult = await this.evaluatePermissions(
@@ -570,7 +601,10 @@ export class ParlantAuthorizationEngineService
       );
 
       // Perform risk assessment
-      const riskScore = await this.performRiskAssessment(request, contextualResult);
+      const riskScore = await this.performRiskAssessment(
+        request,
+        contextualResult,
+      );
 
       // Apply risk-based adjustments
       const finalResult = await this.applyRiskBasedAdjustments(
@@ -608,7 +642,7 @@ export class ParlantAuthorizationEngineService
       });
 
       this.logger.debug(
-        `✅ Authorization ${result.decision}: ${request.userContext.userId} -> ${request.resource.type}:${request.resource.id}:${request.action} (${(performance.now() - startTime).toFixed(2)}ms)`
+        `✅ Authorization ${result.decision}: ${request.userContext.userId} -> ${request.resource.type}:${request.resource.id}:${request.action} (${(performance.now() - startTime).toFixed(2)}ms)`,
       );
 
       return result;
@@ -677,14 +711,18 @@ export class ParlantAuthorizationEngineService
       });
 
       this.logger.debug(
-        `✅ Temporary permissions granted to ${userId}: ${permissions.length} permissions for ${duration}ms`
+        `✅ Temporary permissions granted to ${userId}: ${permissions.length} permissions for ${duration}ms`,
       );
     } catch (error) {
       this.logger.error("❌ Failed to grant temporary permissions", error);
       throw new ParlantIntegrationError(
         "Temporary permission grant failed",
         "TEMP_PERMISSION_ERROR",
-        { userId, reason, error: error instanceof Error ? error.message : String(error) },
+        {
+          userId,
+          reason,
+          error: error instanceof Error ? error.message : String(error),
+        },
       );
     }
   }
@@ -718,7 +756,7 @@ export class ParlantAuthorizationEngineService
       });
 
       this.logger.debug(
-        `✅ Permission escalation requested: ${escalationId} by ${request.requestingUser}`
+        `✅ Permission escalation requested: ${escalationId} by ${request.requestingUser}`,
       );
 
       return escalationId;
@@ -754,7 +792,11 @@ export class ParlantAuthorizationEngineService
   /**
    * Assign role to user
    */
-  async assignRoleToUser(userId: string, roleId: string, assignedBy: string): Promise<void> {
+  async assignRoleToUser(
+    userId: string,
+    roleId: string,
+    assignedBy: string,
+  ): Promise<void> {
     try {
       // Validate role exists
       const role = this.roles.get(roleId);
@@ -782,14 +824,21 @@ export class ParlantAuthorizationEngineService
           timestamp: new Date(),
         });
 
-        this.logger.debug(`✅ Role assigned: ${role.name} to ${userId} by ${assignedBy}`);
+        this.logger.debug(
+          `✅ Role assigned: ${role.name} to ${userId} by ${assignedBy}`,
+        );
       }
     } catch (error) {
       this.logger.error("❌ Role assignment failed", error);
       throw new ParlantIntegrationError(
         "Role assignment failed",
         "ROLE_ASSIGNMENT_ERROR",
-        { userId, roleId, assignedBy, error: error instanceof Error ? error.message : String(error) },
+        {
+          userId,
+          roleId,
+          assignedBy,
+          error: error instanceof Error ? error.message : String(error),
+        },
       );
     }
   }
@@ -797,7 +846,11 @@ export class ParlantAuthorizationEngineService
   /**
    * Remove role from user
    */
-  async removeRoleFromUser(userId: string, roleId: string, removedBy: string): Promise<void> {
+  async removeRoleFromUser(
+    userId: string,
+    roleId: string,
+    removedBy: string,
+  ): Promise<void> {
     try {
       const currentRoles = this.userRoleAssignments.get(userId) || [];
       const roleIndex = currentRoles.indexOf(roleId);
@@ -822,14 +875,21 @@ export class ParlantAuthorizationEngineService
           timestamp: new Date(),
         });
 
-        this.logger.debug(`✅ Role removed: ${roleName} from ${userId} by ${removedBy}`);
+        this.logger.debug(
+          `✅ Role removed: ${roleName} from ${userId} by ${removedBy}`,
+        );
       }
     } catch (error) {
       this.logger.error("❌ Role removal failed", error);
       throw new ParlantIntegrationError(
         "Role removal failed",
         "ROLE_REMOVAL_ERROR",
-        { userId, roleId, removedBy, error: error instanceof Error ? error.message : String(error) },
+        {
+          userId,
+          roleId,
+          removedBy,
+          error: error instanceof Error ? error.message : String(error),
+        },
       );
     }
   }
@@ -859,20 +919,22 @@ export class ParlantAuthorizationEngineService
     const allRoleIds = new Set<string>();
 
     // Add direct roles
-    directRoleIds.forEach(roleId => allRoleIds.add(roleId));
+    directRoleIds.forEach((roleId) => allRoleIds.add(roleId));
 
     // Add inherited roles if inheritance is enabled
     if (this.config.enableInheritance) {
       for (const roleId of directRoleIds) {
         const inheritedRoleIds = this.roleHierarchyCache.get(roleId) || [];
-        inheritedRoleIds.forEach(inheritedRoleId => allRoleIds.add(inheritedRoleId));
+        inheritedRoleIds.forEach((inheritedRoleId) =>
+          allRoleIds.add(inheritedRoleId),
+        );
       }
     }
 
     // Return actual role objects
     return Array.from(allRoleIds)
-      .map(roleId => this.roles.get(roleId))
-      .filter(role => role !== undefined) as Role[];
+      .map((roleId) => this.roles.get(roleId))
+      .filter((role) => role !== undefined) as Role[];
   }
 
   private async getEffectivePermissions(
@@ -880,7 +942,9 @@ export class ParlantAuthorizationEngineService
     request: AuthorizationRequest,
   ): Promise<Permission[]> {
     const rolePermissions = await this.getRolePermissions(userRoles);
-    const temporaryPermissions = this.getUserTemporaryPermissions(request.userContext.userId);
+    const temporaryPermissions = this.getUserTemporaryPermissions(
+      request.userContext.userId,
+    );
 
     return [...rolePermissions, ...temporaryPermissions];
   }
@@ -894,7 +958,7 @@ export class ParlantAuthorizationEngineService
 
       // Check role constraints
       for (const constraint of role.constraints) {
-        if (!await this.evaluateRoleConstraint(constraint, role)) {
+        if (!(await this.evaluateRoleConstraint(constraint, role))) {
           // Remove permissions if constraint fails
           // This is simplified - in practice, you'd have more complex logic
           continue;
@@ -922,7 +986,11 @@ export class ParlantAuthorizationEngineService
   private async evaluatePermissions(
     permissions: Permission[],
     request: AuthorizationRequest,
-  ): Promise<{ decision: "allow" | "deny"; matchedPermissions: Permission[]; reasons: string[] }> {
+  ): Promise<{
+    decision: "allow" | "deny";
+    matchedPermissions: Permission[];
+    reasons: string[];
+  }> {
     const matchedPermissions: Permission[] = [];
     const reasons: string[] = [];
     let hasAllow = false;
@@ -934,7 +1002,10 @@ export class ParlantAuthorizationEngineService
         matchedPermissions.push(permission);
 
         // Evaluate permission conditions
-        const conditionsResult = await this.evaluatePermissionConditions(permission, request);
+        const conditionsResult = await this.evaluatePermissionConditions(
+          permission,
+          request,
+        );
 
         if (conditionsResult.satisfied) {
           if (permission.effect === "allow") {
@@ -945,7 +1016,9 @@ export class ParlantAuthorizationEngineService
             reasons.push(`Denied by permission: ${permission.name}`);
           }
         } else {
-          reasons.push(`Permission ${permission.name} conditions not satisfied: ${conditionsResult.failedConditions.join(", ")}`);
+          reasons.push(
+            `Permission ${permission.name} conditions not satisfied: ${conditionsResult.failedConditions.join(", ")}`,
+          );
         }
       }
     }
@@ -965,7 +1038,10 @@ export class ParlantAuthorizationEngineService
     request: AuthorizationRequest,
   ): Promise<boolean> {
     // Check resource type
-    if (permission.resourceType !== "*" && permission.resourceType !== request.resource.type) {
+    if (
+      permission.resourceType !== "*" &&
+      permission.resourceType !== request.resource.type
+    ) {
       return false;
     }
 
@@ -1013,10 +1089,16 @@ export class ParlantAuthorizationEngineService
     // Extract value from context based on condition type and field
     switch (condition.type) {
       case "time":
-        contextValue = this.getTimeValue(condition.field, request.context.timestamp);
+        contextValue = this.getTimeValue(
+          condition.field,
+          request.context.timestamp,
+        );
         break;
       case "location":
-        contextValue = this.getLocationValue(condition.field, request.context.environment.location);
+        contextValue = this.getLocationValue(
+          condition.field,
+          request.context.environment.location,
+        );
         break;
       case "attribute":
         contextValue = this.getAttributeValue(condition.field, request);
@@ -1032,7 +1114,11 @@ export class ParlantAuthorizationEngineService
     }
 
     // Evaluate condition based on operator
-    return this.evaluateConditionOperator(condition.operator, contextValue, condition.value);
+    return this.evaluateConditionOperator(
+      condition.operator,
+      contextValue,
+      condition.value,
+    );
   }
 
   private getTimeValue(field: string, timestamp: Date): unknown {
@@ -1048,7 +1134,10 @@ export class ParlantAuthorizationEngineService
     }
   }
 
-  private getLocationValue(field: string, location?: GeographicLocation): unknown {
+  private getLocationValue(
+    field: string,
+    location?: GeographicLocation,
+  ): unknown {
     if (!location) return null;
 
     switch (field) {
@@ -1063,11 +1152,17 @@ export class ParlantAuthorizationEngineService
     }
   }
 
-  private getAttributeValue(field: string, request: AuthorizationRequest): unknown {
+  private getAttributeValue(
+    field: string,
+    request: AuthorizationRequest,
+  ): unknown {
     return request.attributes?.[field] || null;
   }
 
-  private getContextValue(field: string, context: AuthorizationContext): unknown {
+  private getContextValue(
+    field: string,
+    context: AuthorizationContext,
+  ): unknown {
     // Navigate nested context structure
     const fieldParts = field.split(".");
     let value: any = context;
@@ -1083,7 +1178,10 @@ export class ParlantAuthorizationEngineService
     return value;
   }
 
-  private getResourceValue(field: string, resource: ResourceIdentifier): unknown {
+  private getResourceValue(
+    field: string,
+    resource: ResourceIdentifier,
+  ): unknown {
     switch (field) {
       case "type":
         return resource.type;
@@ -1115,18 +1213,32 @@ export class ParlantAuthorizationEngineService
       case "less_than":
         return Number(contextValue) < Number(conditionValue);
       case "in":
-        return Array.isArray(conditionValue) && conditionValue.includes(contextValue);
+        return (
+          Array.isArray(conditionValue) && conditionValue.includes(contextValue)
+        );
       case "not_in":
-        return Array.isArray(conditionValue) && !conditionValue.includes(contextValue);
+        return (
+          Array.isArray(conditionValue) &&
+          !conditionValue.includes(contextValue)
+        );
       default:
         return false;
     }
   }
 
   private async applyContextualRules(
-    evaluationResult: { decision: "allow" | "deny"; matchedPermissions: Permission[]; reasons: string[] },
+    evaluationResult: {
+      decision: "allow" | "deny";
+      matchedPermissions: Permission[];
+      reasons: string[];
+    },
     request: AuthorizationRequest,
-  ): Promise<{ decision: "allow" | "deny" | "conditional"; matchedPermissions: Permission[]; reasons: string[]; conditionalRequirements?: ConditionalRequirement[] }> {
+  ): Promise<{
+    decision: "allow" | "deny" | "conditional";
+    matchedPermissions: Permission[];
+    reasons: string[];
+    conditionalRequirements?: ConditionalRequirement[];
+  }> {
     const conditionalRequirements: ConditionalRequirement[] = [];
 
     // Apply security level requirements
@@ -1134,14 +1246,18 @@ export class ParlantAuthorizationEngineService
       if (!request.context.session.mfaVerified) {
         conditionalRequirements.push({
           type: "mfa",
-          description: "Multi-factor authentication required for critical security level",
+          description:
+            "Multi-factor authentication required for critical security level",
           parameters: { methods: ["totp", "hardware_token"] },
         });
       }
     }
 
     // Apply high-risk resource requirements
-    if (request.resource.type === "sensitive_data" && evaluationResult.decision === "allow") {
+    if (
+      request.resource.type === "sensitive_data" &&
+      evaluationResult.decision === "allow"
+    ) {
       conditionalRequirements.push({
         type: "approval",
         description: "Manager approval required for sensitive data access",
@@ -1154,17 +1270,24 @@ export class ParlantAuthorizationEngineService
     if ((hour < 6 || hour > 22) && evaluationResult.decision === "allow") {
       conditionalRequirements.push({
         type: "additional_auth",
-        description: "Additional authentication required for after-hours access",
+        description:
+          "Additional authentication required for after-hours access",
         parameters: { authMethod: "supervisor_approval" },
       });
     }
 
-    const decision = conditionalRequirements.length > 0 ? "conditional" : evaluationResult.decision;
+    const decision =
+      conditionalRequirements.length > 0
+        ? "conditional"
+        : evaluationResult.decision;
 
     return {
       ...evaluationResult,
       decision,
-      conditionalRequirements: conditionalRequirements.length > 0 ? conditionalRequirements : undefined,
+      conditionalRequirements:
+        conditionalRequirements.length > 0
+          ? conditionalRequirements
+          : undefined,
     };
   }
 
@@ -1231,13 +1354,14 @@ export class ParlantAuthorizationEngineService
     if (riskScore > 0.6 && contextualResult.decision === "allow") {
       // Medium risk - require MFA if not already required
       const mfaRequired = contextualResult.conditionalRequirements?.some(
-        (req: ConditionalRequirement) => req.type === "mfa"
+        (req: ConditionalRequirement) => req.type === "mfa",
       );
 
       if (!mfaRequired && !request.context.session.mfaVerified) {
         const mfaRequirement: ConditionalRequirement = {
           type: "mfa",
-          description: "Multi-factor authentication required due to elevated risk",
+          description:
+            "Multi-factor authentication required due to elevated risk",
           parameters: { methods: ["totp", "sms"] },
         };
 
@@ -1297,7 +1421,10 @@ export class ParlantAuthorizationEngineService
     return Math.max(0.1, Math.min(1.0, confidence));
   }
 
-  private determineComplianceStatus(result: any, request: AuthorizationRequest): string[] {
+  private determineComplianceStatus(
+    result: any,
+    request: AuthorizationRequest,
+  ): string[] {
     const status: string[] = [];
 
     if (result.decision === "allow") {
@@ -1344,7 +1471,10 @@ export class ParlantAuthorizationEngineService
       contextHash: this.generateContextHash(request.context),
     };
 
-    return crypto.createHash("sha256").update(JSON.stringify(keyData)).digest("hex");
+    return crypto
+      .createHash("sha256")
+      .update(JSON.stringify(keyData))
+      .digest("hex");
   }
 
   private generateContextHash(context: AuthorizationContext): string {
@@ -1355,14 +1485,19 @@ export class ParlantAuthorizationEngineService
       environment: context.environment,
     };
 
-    return crypto.createHash("sha256").update(JSON.stringify(relevantContext)).digest("hex");
+    return crypto
+      .createHash("sha256")
+      .update(JSON.stringify(relevantContext))
+      .digest("hex");
   }
 
   private isCacheValid(cacheEntry: AuthorizationCacheEntry): boolean {
     return cacheEntry.expiresAt > new Date();
   }
 
-  private updateCachedResult(cacheEntry: AuthorizationCacheEntry): AuthorizationResult {
+  private updateCachedResult(
+    cacheEntry: AuthorizationCacheEntry,
+  ): AuthorizationResult {
     cacheEntry.hitCount++;
     cacheEntry.lastAccessed = new Date();
 
@@ -1375,7 +1510,10 @@ export class ParlantAuthorizationEngineService
     };
   }
 
-  private cacheAuthorizationResult(key: string, result: AuthorizationResult): void {
+  private cacheAuthorizationResult(
+    key: string,
+    result: AuthorizationResult,
+  ): void {
     if (this.authorizationCache.size >= this.maxCacheSize) {
       this.evictOldestCacheEntry();
     }
@@ -1422,7 +1560,10 @@ export class ParlantAuthorizationEngineService
     }
   }
 
-  private updateMetrics(result: AuthorizationResult, evaluationTime: number): void {
+  private updateMetrics(
+    result: AuthorizationResult,
+    evaluationTime: number,
+  ): void {
     this.metrics.authorizationsProcessed++;
 
     if (result.decision === "deny") {
@@ -1436,11 +1577,18 @@ export class ParlantAuthorizationEngineService
     );
   }
 
-  private updateAverage(currentAverage: number, newValue: number, count: number): number {
+  private updateAverage(
+    currentAverage: number,
+    newValue: number,
+    count: number,
+  ): number {
     return (currentAverage * (count - 1) + newValue) / count;
   }
 
-  private async evaluateRoleConstraint(constraint: RoleConstraint, role: Role): Promise<boolean> {
+  private async evaluateRoleConstraint(
+    constraint: RoleConstraint,
+    role: Role,
+  ): Promise<boolean> {
     // Simplified constraint evaluation
     switch (constraint.type) {
       case "time":
@@ -1452,15 +1600,19 @@ export class ParlantAuthorizationEngineService
     }
   }
 
-  private evaluateTimeConstraint(configuration: Record<string, unknown>): boolean {
+  private evaluateTimeConstraint(
+    configuration: Record<string, unknown>,
+  ): boolean {
     const hour = new Date().getHours();
-    const startHour = configuration.startHour as number || 0;
-    const endHour = configuration.endHour as number || 24;
+    const startHour = (configuration.startHour as number) || 0;
+    const endHour = (configuration.endHour as number) || 24;
 
     return hour >= startHour && hour < endHour;
   }
 
-  private evaluateLocationConstraint(configuration: Record<string, unknown>): boolean {
+  private evaluateLocationConstraint(
+    configuration: Record<string, unknown>,
+  ): boolean {
     // Simplified location constraint - would need actual location data
     return true;
   }
@@ -1470,7 +1622,9 @@ export class ParlantAuthorizationEngineService
     await this.createDefaultRoles();
     await this.createDefaultPermissions();
 
-    this.logger.debug(`📋 Loaded ${this.roles.size} roles and ${this.permissions.size} permissions`);
+    this.logger.debug(
+      `📋 Loaded ${this.roles.size} roles and ${this.permissions.size} permissions`,
+    );
   }
 
   private async createDefaultRoles(): Promise<void> {
@@ -1557,7 +1711,10 @@ export class ParlantAuthorizationEngineService
     this.logger.debug("🔗 Built role hierarchy cache");
   }
 
-  private computeInheritedRoles(roleId: string, visited: Set<string>): Set<string> {
+  private computeInheritedRoles(
+    roleId: string,
+    visited: Set<string>,
+  ): Set<string> {
     if (visited.has(roleId)) {
       return new Set(); // Circular dependency protection
     }
@@ -1569,8 +1726,13 @@ export class ParlantAuthorizationEngineService
     if (role) {
       for (const parentRoleId of role.parentRoles) {
         inheritedRoles.add(parentRoleId);
-        const parentInherited = this.computeInheritedRoles(parentRoleId, visited);
-        parentInherited.forEach(inheritedRole => inheritedRoles.add(inheritedRole));
+        const parentInherited = this.computeInheritedRoles(
+          parentRoleId,
+          visited,
+        );
+        parentInherited.forEach((inheritedRole) =>
+          inheritedRoles.add(inheritedRole),
+        );
       }
     }
 
@@ -1597,14 +1759,20 @@ export class ParlantAuthorizationEngineService
 
   private async startPeriodicTasks(): Promise<void> {
     // Cache cleanup every 10 minutes
-    this.cacheCleanupTimer = setInterval(() => {
-      this.performCacheCleanup();
-    }, 10 * 60 * 1000);
+    this.cacheCleanupTimer = setInterval(
+      () => {
+        this.performCacheCleanup();
+      },
+      10 * 60 * 1000,
+    );
 
     // Escalation cleanup every 30 minutes
-    this.escalationCleanupTimer = setInterval(() => {
-      this.performEscalationCleanup();
-    }, 30 * 60 * 1000);
+    this.escalationCleanupTimer = setInterval(
+      () => {
+        this.performEscalationCleanup();
+      },
+      30 * 60 * 1000,
+    );
 
     // Metrics update every minute
     this.metricsTimer = setInterval(() => {
@@ -1658,7 +1826,9 @@ export class ParlantAuthorizationEngineService
     }
 
     if (cleanedCount > 0) {
-      this.logger.debug(`🧹 Cleaned up ${cleanedCount} old escalation requests`);
+      this.logger.debug(
+        `🧹 Cleaned up ${cleanedCount} old escalation requests`,
+      );
     }
   }
 

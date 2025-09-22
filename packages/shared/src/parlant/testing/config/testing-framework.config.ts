@@ -53,8 +53,8 @@ export interface TestingFrameworkConfig {
     testMatch: string[];
     setupFiles: string[];
     coverageThreshold: number;
-    mockStrategy: 'automatic' | 'manual' | 'hybrid';
-    isolationLevel: 'strict' | 'relaxed';
+    mockStrategy: "automatic" | "manual" | "hybrid";
+    isolationLevel: "strict" | "relaxed";
   };
 
   // Integration testing configuration
@@ -194,78 +194,71 @@ export const testingFrameworkConfig: TestingFrameworkConfig = {
     coverage: {
       enabled: true,
       threshold: 95,
-      reportFormats: ['html', 'lcov', 'json', 'text']
+      reportFormats: ["html", "lcov", "json", "text"],
     },
     reporting: {
-      formats: ['junit', 'html', 'json', 'console'],
-      outputDir: './test-results',
-      realTimeUpdates: true
-    }
+      formats: ["junit", "html", "json", "console"],
+      outputDir: "./test-results",
+      realTimeUpdates: true,
+    },
   },
 
   unit: {
-    framework: 'jest',
-    testMatch: [
-      '**/__tests__/**/*.test.ts',
-      '**/*.spec.ts'
-    ],
+    framework: "jest",
+    testMatch: ["**/__tests__/**/*.test.ts", "**/*.spec.ts"],
     setupFiles: [
-      './testing/utils/test-setup.ts',
-      './testing/mocks/global-mocks.ts'
+      "./testing/utils/test-setup.ts",
+      "./testing/mocks/global-mocks.ts",
     ],
     coverageThreshold: 95,
-    mockStrategy: 'hybrid',
-    isolationLevel: 'strict'
+    mockStrategy: "hybrid",
+    isolationLevel: "strict",
   },
 
   integration: {
-    testEnvironment: 'node',
+    testEnvironment: "node",
     databaseSetup: {
       enabled: true,
       resetBetweenTests: true,
-      seedData: true
+      seedData: true,
     },
     networkTesting: {
       mockExternal: true,
       timeoutMs: 10000,
-      retryAttempts: 3
+      retryAttempts: 3,
     },
-    crossComponentValidation: true
+    crossComponentValidation: true,
   },
 
   e2e: {
-    browser: 'chromium',
+    browser: "chromium",
     headless: true,
     viewport: {
       width: 1920,
-      height: 1080
+      height: 1080,
     },
     scenarios: {
       userJourneys: [
-        'authentication-flow',
-        'api-interaction',
-        'error-handling',
-        'performance-validation'
+        "authentication-flow",
+        "api-interaction",
+        "error-handling",
+        "performance-validation",
       ],
       criticalPaths: [
-        'user-registration',
-        'data-processing',
-        'security-validation'
+        "user-registration",
+        "data-processing",
+        "security-validation",
       ],
-      errorHandling: [
-        'network-failures',
-        'timeout-scenarios',
-        'invalid-data'
-      ]
+      errorHandling: ["network-failures", "timeout-scenarios", "invalid-data"],
     },
     performance: {
       lighthouse: true,
       loadTimes: 3000,
       resourceLimits: {
-        memory: '512MB',
-        cpu: '2 cores'
-      }
-    }
+        memory: "512MB",
+        cpu: "2 cores",
+      },
+    },
   },
 
   performance: {
@@ -273,77 +266,82 @@ export const testingFrameworkConfig: TestingFrameworkConfig = {
       maxConcurrentUsers: 1000,
       rampUpDuration: 300, // 5 minutes
       testDuration: 1800, // 30 minutes
-      targetResponseTime: 100 // milliseconds
+      targetResponseTime: 100, // milliseconds
     },
     stressTesting: {
       enabled: true,
       breakingPointAnalysis: true,
-      memoryLeakDetection: true
+      memoryLeakDetection: true,
     },
     benchmarking: {
       baseline: {
         responseTime: 50,
         throughput: 1000,
         memoryUsage: 256,
-        cpuUsage: 50
+        cpuUsage: 50,
       },
       thresholds: {
         responseTimeMax: 100,
         throughputMin: 800,
         memoryUsageMax: 512,
-        cpuUsageMax: 80
+        cpuUsageMax: 80,
       },
       regression: {
         enabled: true,
-        tolerance: 0.1 // 10% performance regression tolerance
-      }
-    }
+        tolerance: 0.1, // 10% performance regression tolerance
+      },
+    },
   },
 
   security: {
     penetrationTesting: {
       enabled: true,
       automated: true,
-      tools: ['owasp-zap', 'burp-suite', 'nmap', 'sqlmap']
+      tools: ["owasp-zap", "burp-suite", "nmap", "sqlmap"],
     },
     vulnerabilityScanning: {
       enabled: true,
-      frequency: 'daily',
-      reportCritical: true
+      frequency: "daily",
+      reportCritical: true,
     },
     authenticationTesting: {
       scenarios: [
-        'valid-credentials',
-        'invalid-credentials',
-        'brute-force-protection',
-        'session-hijacking',
-        'jwt-validation'
+        "valid-credentials",
+        "invalid-credentials",
+        "brute-force-protection",
+        "session-hijacking",
+        "jwt-validation",
       ],
       bruteForceProtection: true,
-      sessionManagement: true
+      sessionManagement: true,
     },
     dataProtection: {
       encryptionValidation: true,
       dataLeakage: true,
-      gdprCompliance: true
-    }
+      gdprCompliance: true,
+    },
   },
 
   compatibility: {
     backwardCompatibility: {
-      versions: ['1.0.0', '1.1.0', '1.2.0', '2.0.0'],
+      versions: ["1.0.0", "1.1.0", "1.2.0", "2.0.0"],
       apiCompatibility: true,
-      configurationMigration: true
+      configurationMigration: true,
     },
     forwardCompatibility: {
       enabled: true,
-      previewVersions: ['3.0.0-beta', '3.0.0-rc']
+      previewVersions: ["3.0.0-beta", "3.0.0-rc"],
     },
     crossPlatform: {
-      operating_systems: ['ubuntu-20.04', 'ubuntu-22.04', 'windows-2019', 'macos-11'],
-      node_versions: ['18.x', '20.x', '22.x'],
-      browsers: ['chrome', 'firefox', 'safari', 'edge']
-    }
+      operating_systems: [
+        "ubuntu-20.04",
+        "ubuntu-22.04",
+        "windows-2019",
+        "macos-11",
+      ],
+      node_versions: ["18.x", "20.x", "22.x"],
+      browsers: ["chrome", "firefox", "safari", "edge"],
+    },
   },
 
   qualityGates: {
@@ -351,26 +349,26 @@ export const testingFrameworkConfig: TestingFrameworkConfig = {
     gates: {
       coverage: {
         minimum: 95,
-        blocksDeployment: true
+        blocksDeployment: true,
       },
       performance: {
         responseTime: 100,
         throughput: 1000,
-        errorRate: 0.01 // 1% error rate maximum
+        errorRate: 0.01, // 1% error rate maximum
       },
       security: {
         vulnerabilities: {
           critical: 0,
           high: 0,
-          medium: 5
-        }
+          medium: 5,
+        },
       },
       compatibility: {
         backwardCompatibility: true,
-        apiBreakingChanges: false
-      }
-    }
-  }
+        apiBreakingChanges: false,
+      },
+    },
+  },
 };
 
 export default testingFrameworkConfig;

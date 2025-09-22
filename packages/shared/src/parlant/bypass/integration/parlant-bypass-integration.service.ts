@@ -9,8 +9,8 @@
  * @compliance GDPR, SOX, HIPAA, SOC2
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { EventEmitter } from 'events';
+import { Injectable, Logger } from "@nestjs/common";
+import { EventEmitter } from "events";
 import {
   BypassOperationType,
   BypassRole,
@@ -24,16 +24,16 @@ import {
   BusinessImpactLevel,
   BypassPriority,
   SecurityViolationType,
-  ViolationSeverity
-} from '../types/bypass-core.types';
+  ViolationSeverity,
+} from "../types/bypass-core.types";
 
 // Import bypass services
-import { EmergencyTokenManagerService } from '../tokens/emergency-token-manager.service';
-import { BypassAuthorizationEngineService } from '../authorization/bypass-authorization-engine.service';
-import { AutomaticBypassTriggersService } from '../monitoring/automatic-bypass-triggers.service';
-import { BypassAbuseDetectionService } from '../prevention/bypass-abuse-detection.service';
-import { BypassAuditForensicsService } from '../audit/bypass-audit-forensics.service';
-import { BypassMonitoringHealthService } from '../monitoring/bypass-monitoring-health.service';
+import { EmergencyTokenManagerService } from "../tokens/emergency-token-manager.service";
+import { BypassAuthorizationEngineService } from "../authorization/bypass-authorization-engine.service";
+import { AutomaticBypassTriggersService } from "../monitoring/automatic-bypass-triggers.service";
+import { BypassAbuseDetectionService } from "../prevention/bypass-abuse-detection.service";
+import { BypassAuditForensicsService } from "../audit/bypass-audit-forensics.service";
+import { BypassMonitoringHealthService } from "../monitoring/bypass-monitoring-health.service";
 
 /**
  * PARLANT service context
@@ -68,12 +68,12 @@ export interface ParlantServiceContext {
  * PARLANT capabilities
  */
 export enum ParlantCapability {
-  FUNCTION_VALIDATION = 'function_validation',
-  CONVERSATION_MANAGEMENT = 'conversation_management',
-  PARTICIPANT_MANAGEMENT = 'participant_management',
-  APPROVAL_WORKFLOWS = 'approval_workflows',
-  REAL_TIME_MONITORING = 'real_time_monitoring',
-  SECURITY_VALIDATION = 'security_validation'
+  FUNCTION_VALIDATION = "function_validation",
+  CONVERSATION_MANAGEMENT = "conversation_management",
+  PARTICIPANT_MANAGEMENT = "participant_management",
+  APPROVAL_WORKFLOWS = "approval_workflows",
+  REAL_TIME_MONITORING = "real_time_monitoring",
+  SECURITY_VALIDATION = "security_validation",
 }
 
 /**
@@ -205,39 +205,39 @@ export interface IntegrationConfiguration {
  */
 export enum BypassMode {
   /** Always attempt PARLANT first */
-  PARLANT_FIRST = 'parlant_first',
+  PARLANT_FIRST = "parlant_first",
 
   /** Bypass only when PARLANT fails */
-  FAILOVER_ONLY = 'failover_only',
+  FAILOVER_ONLY = "failover_only",
 
   /** Parallel execution with bypass */
-  PARALLEL_EXECUTION = 'parallel_execution',
+  PARALLEL_EXECUTION = "parallel_execution",
 
   /** Bypass only (emergency mode) */
-  BYPASS_ONLY = 'bypass_only'
+  BYPASS_ONLY = "bypass_only",
 }
 
 /**
  * Fallback strategies
  */
 export enum FallbackStrategy {
-  AUTOMATIC_BYPASS = 'automatic_bypass',
-  MANUAL_APPROVAL = 'manual_approval',
-  DEGRADED_FUNCTIONALITY = 'degraded_functionality',
-  OPERATION_QUEUING = 'operation_queuing',
-  CIRCUIT_BREAKER = 'circuit_breaker'
+  AUTOMATIC_BYPASS = "automatic_bypass",
+  MANUAL_APPROVAL = "manual_approval",
+  DEGRADED_FUNCTIONALITY = "degraded_functionality",
+  OPERATION_QUEUING = "operation_queuing",
+  CIRCUIT_BREAKER = "circuit_breaker",
 }
 
 /**
  * Integration features
  */
 export enum IntegrationFeature {
-  HEALTH_MONITORING = 'health_monitoring',
-  AUTOMATIC_FAILOVER = 'automatic_failover',
-  LOAD_BALANCING = 'load_balancing',
-  RETRY_MECHANISMS = 'retry_mechanisms',
-  PERFORMANCE_MONITORING = 'performance_monitoring',
-  AUDIT_INTEGRATION = 'audit_integration'
+  HEALTH_MONITORING = "health_monitoring",
+  AUTOMATIC_FAILOVER = "automatic_failover",
+  LOAD_BALANCING = "load_balancing",
+  RETRY_MECHANISMS = "retry_mechanisms",
+  PERFORMANCE_MONITORING = "performance_monitoring",
+  AUDIT_INTEGRATION = "audit_integration",
 }
 
 /**
@@ -313,12 +313,12 @@ export interface OperationExecutionResult {
  * Execution paths
  */
 export enum ExecutionPath {
-  PARLANT_SUCCESS = 'parlant_success',
-  PARLANT_FAILURE_BYPASS_SUCCESS = 'parlant_failure_bypass_success',
-  PARLANT_FAILURE_BYPASS_FAILURE = 'parlant_failure_bypass_failure',
-  BYPASS_ONLY_SUCCESS = 'bypass_only_success',
-  BYPASS_ONLY_FAILURE = 'bypass_only_failure',
-  PARALLEL_EXECUTION = 'parallel_execution'
+  PARLANT_SUCCESS = "parlant_success",
+  PARLANT_FAILURE_BYPASS_SUCCESS = "parlant_failure_bypass_success",
+  PARLANT_FAILURE_BYPASS_FAILURE = "parlant_failure_bypass_failure",
+  BYPASS_ONLY_SUCCESS = "bypass_only_success",
+  BYPASS_ONLY_FAILURE = "bypass_only_failure",
+  PARALLEL_EXECUTION = "parallel_execution",
 }
 
 /**
@@ -348,15 +348,15 @@ export interface OperationError {
  * Error sources
  */
 export enum ErrorSource {
-  PARLANT_SERVICE = 'parlant_service',
-  BYPASS_SYSTEM = 'bypass_system',
-  AUTHORIZATION_ENGINE = 'authorization_engine',
-  TOKEN_MANAGER = 'token_manager',
-  ABUSE_DETECTION = 'abuse_detection',
-  AUDIT_SYSTEM = 'audit_system',
-  NETWORK = 'network',
-  TIMEOUT = 'timeout',
-  VALIDATION = 'validation'
+  PARLANT_SERVICE = "parlant_service",
+  BYPASS_SYSTEM = "bypass_system",
+  AUTHORIZATION_ENGINE = "authorization_engine",
+  TOKEN_MANAGER = "token_manager",
+  ABUSE_DETECTION = "abuse_detection",
+  AUDIT_SYSTEM = "audit_system",
+  NETWORK = "network",
+  TIMEOUT = "timeout",
+  VALIDATION = "validation",
 }
 
 /**
@@ -412,13 +412,13 @@ export interface BypassExecutionInfo {
  * Bypass reasons
  */
 export enum BypassReason {
-  PARLANT_UNAVAILABLE = 'parlant_unavailable',
-  PARLANT_TIMEOUT = 'parlant_timeout',
-  PARLANT_ERROR = 'parlant_error',
-  EMERGENCY_TRIGGER = 'emergency_trigger',
-  MANUAL_BYPASS = 'manual_bypass',
-  PERFORMANCE_OPTIMIZATION = 'performance_optimization',
-  MAINTENANCE_MODE = 'maintenance_mode'
+  PARLANT_UNAVAILABLE = "parlant_unavailable",
+  PARLANT_TIMEOUT = "parlant_timeout",
+  PARLANT_ERROR = "parlant_error",
+  EMERGENCY_TRIGGER = "emergency_trigger",
+  MANUAL_BYPASS = "manual_bypass",
+  PERFORMANCE_OPTIMIZATION = "performance_optimization",
+  MAINTENANCE_MODE = "maintenance_mode",
 }
 
 /**
@@ -445,7 +445,7 @@ export class ParlantBypassIntegrationService extends EventEmitter {
     private readonly automaticTriggers: AutomaticBypassTriggersService,
     private readonly abuseDetection: BypassAbuseDetectionService,
     private readonly auditForensics: BypassAuditForensicsService,
-    private readonly monitoringHealth: BypassMonitoringHealthService
+    private readonly monitoringHealth: BypassMonitoringHealthService,
   ) {
     super();
 
@@ -457,12 +457,12 @@ export class ParlantBypassIntegrationService extends EventEmitter {
       consecutiveFailures: 0,
       currentWorkload: 0,
       availableEndpoints: [],
-      version: 'unknown',
-      capabilities: []
+      version: "unknown",
+      capabilities: [],
     };
 
     this.integrationConfig = {
-      parlantEndpoint: process.env.PARLANT_ENDPOINT || 'http://localhost:3001',
+      parlantEndpoint: process.env.PARLANT_ENDPOINT || "http://localhost:3001",
       serviceTimeoutMs: 5000,
       healthCheckIntervalMs: 30000,
       failureThreshold: 3,
@@ -470,14 +470,14 @@ export class ParlantBypassIntegrationService extends EventEmitter {
       bypassMode: BypassMode.PARLANT_FIRST,
       fallbackStrategies: [
         FallbackStrategy.AUTOMATIC_BYPASS,
-        FallbackStrategy.CIRCUIT_BREAKER
+        FallbackStrategy.CIRCUIT_BREAKER,
       ],
       features: [
         IntegrationFeature.HEALTH_MONITORING,
         IntegrationFeature.AUTOMATIC_FAILOVER,
         IntegrationFeature.PERFORMANCE_MONITORING,
-        IntegrationFeature.AUDIT_INTEGRATION
-      ]
+        IntegrationFeature.AUDIT_INTEGRATION,
+      ],
     };
 
     this.initializeIntegration();
@@ -487,27 +487,39 @@ export class ParlantBypassIntegrationService extends EventEmitter {
   /**
    * Execute operation with intelligent PARLANT/bypass coordination
    */
-  async executeOperation(request: BypassOperationRequest): Promise<OperationExecutionResult> {
+  async executeOperation(
+    request: BypassOperationRequest,
+  ): Promise<OperationExecutionResult> {
     const startTime = Date.now();
     const executionId = this.generateExecutionId();
 
-    this.logger.log(`Executing operation ${request.functionName} (${executionId})`);
+    this.logger.log(
+      `Executing operation ${request.functionName} (${executionId})`,
+    );
 
     try {
       // Determine execution strategy
       const strategy = await this.determineExecutionStrategy(request);
 
       // Execute with chosen strategy
-      const result = await this.executeWithStrategy(request, strategy, executionId);
+      const result = await this.executeWithStrategy(
+        request,
+        strategy,
+        executionId,
+      );
 
       // Log successful execution
       await this.logOperationExecution(request, result, executionId);
 
       return result;
-
     } catch (error) {
       // Handle execution error
-      const errorResult = await this.handleExecutionError(request, error, executionId, startTime);
+      const errorResult = await this.handleExecutionError(
+        request,
+        error,
+        executionId,
+        startTime,
+      );
 
       // Log failed execution
       await this.logOperationExecution(request, errorResult, executionId);
@@ -535,16 +547,16 @@ export class ParlantBypassIntegrationService extends EventEmitter {
           consecutiveFailures: 0,
           currentWorkload: Math.random() * 100,
           availableEndpoints: [
-            '/validate-function',
-            '/create-conversation',
-            '/manage-participants'
+            "/validate-function",
+            "/create-conversation",
+            "/manage-participants",
           ],
-          version: '1.0.0',
+          version: "1.0.0",
           capabilities: [
             ParlantCapability.FUNCTION_VALIDATION,
             ParlantCapability.CONVERSATION_MANAGEMENT,
-            ParlantCapability.PARTICIPANT_MANAGEMENT
-          ]
+            ParlantCapability.PARTICIPANT_MANAGEMENT,
+          ],
         };
       } else {
         this.parlantServiceContext.status = ServiceStatus.MAJOR_OUTAGE;
@@ -556,12 +568,11 @@ export class ParlantBypassIntegrationService extends EventEmitter {
       // The service health is tracked internally through health checks
 
       return this.parlantServiceContext;
-
     } catch (error) {
       this.parlantServiceContext.status = ServiceStatus.MAJOR_OUTAGE;
       this.parlantServiceContext.consecutiveFailures++;
 
-      this.logger.error('PARLANT health check failed:', error);
+      this.logger.error("PARLANT health check failed:", error);
       return this.parlantServiceContext;
     }
   }
@@ -573,9 +584,11 @@ export class ParlantBypassIntegrationService extends EventEmitter {
     operationType: BypassOperationType,
     functionName: string,
     userContext: UserOperationContext,
-    reason: string
+    reason: string,
   ): Promise<EmergencyBypassToken> {
-    this.logger.warn(`Emergency bypass requested for ${functionName} by ${userContext.userId}`);
+    this.logger.warn(
+      `Emergency bypass requested for ${functionName} by ${userContext.userId}`,
+    );
 
     // Create bypass request
     const bypassRequest: EmergencyBypassRequest = {
@@ -598,8 +611,9 @@ export class ParlantBypassIntegrationService extends EventEmitter {
         businessImpact: BusinessImpactLevel.HIGH,
         technicalDetails: {
           parlantFailures: this.parlantServiceContext.consecutiveFailures,
-          lastSuccessfulPing: this.parlantServiceContext.lastSuccessfulPing.toISOString()
-        }
+          lastSuccessfulPing:
+            this.parlantServiceContext.lastSuccessfulPing.toISOString(),
+        },
       },
       status: BypassRequestStatus.SUBMITTED,
       approvalWorkflow: {
@@ -613,9 +627,9 @@ export class ParlantBypassIntegrationService extends EventEmitter {
           expectedCompletionAt: new Date(Date.now() + 600000), // 10 minutes
           totalTimeLimit: 600000,
           escalationRules: [],
-          notifications: []
-        }
-      }
+          notifications: [],
+        },
+      },
     };
 
     // Get authorization decision
@@ -629,10 +643,10 @@ export class ParlantBypassIntegrationService extends EventEmitter {
         timestamp: new Date(),
         ipAddress: userContext.ipAddress,
         userAgent: userContext.userAgent,
-        systemHealth: 'degraded',
+        systemHealth: "degraded",
         businessImpact: BusinessImpactLevel.HIGH,
-        priority: BypassPriority.HIGH
-      }
+        priority: BypassPriority.HIGH,
+      },
     });
 
     if (!authDecision.authorized) {
@@ -653,8 +667,8 @@ export class ParlantBypassIntegrationService extends EventEmitter {
         ipAddress: userContext.ipAddress,
         userAgent: userContext.userAgent,
         location: userContext.location,
-        systemHealth: 'degraded'
-      }
+        systemHealth: "degraded",
+      },
     });
 
     // Log bypass request
@@ -666,10 +680,10 @@ export class ParlantBypassIntegrationService extends EventEmitter {
       ipAddress: userContext.ipAddress,
       userAgent: userContext.userAgent,
       location: userContext.location,
-      sessionId: userContext.sessionId
+      sessionId: userContext.sessionId,
     });
 
-    this.emit('emergency-bypass-requested', { token, bypassRequest });
+    this.emit("emergency-bypass-requested", { token, bypassRequest });
 
     return token;
   }
@@ -687,7 +701,7 @@ export class ParlantBypassIntegrationService extends EventEmitter {
       integrationMode: this.determineIntegrationMode(),
       activeBypassOperations: await this.getActiveBypassOperations(),
       performanceMetrics: await this.getIntegrationPerformanceMetrics(),
-      lastStatusUpdate: new Date()
+      lastStatusUpdate: new Date(),
     };
   }
 
@@ -698,14 +712,16 @@ export class ParlantBypassIntegrationService extends EventEmitter {
     const previousMode = this.integrationConfig.bypassMode;
     this.integrationConfig.bypassMode = mode;
 
-    this.logger.warn(`Integration mode switched from ${previousMode} to ${mode}: ${reason}`);
+    this.logger.warn(
+      `Integration mode switched from ${previousMode} to ${mode}: ${reason}`,
+    );
 
     // Emit mode change event
-    this.emit('integration-mode-changed', {
+    this.emit("integration-mode-changed", {
       previousMode,
       newMode: mode,
       reason,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     // Log mode change
@@ -714,17 +730,17 @@ export class ParlantBypassIntegrationService extends EventEmitter {
         type: SecurityViolationType.POLICY_VIOLATION,
         severity: ViolationSeverity.MEDIUM,
         description: `Integration mode changed to ${mode}`,
-        remediation: 'Monitor system behavior'
+        remediation: "Monitor system behavior",
       },
       {
-        id: 'system',
+        id: "system",
         type: ActorType.SYSTEM_SERVICE,
-        name: 'Integration Service',
+        name: "Integration Service",
         role: BypassRole.EMERGENCY_ADMIN,
-        ipAddress: 'localhost',
-        userAgent: 'Integration Service'
+        ipAddress: "localhost",
+        userAgent: "Integration Service",
       },
-      { reason, previousMode, newMode: mode }
+      { reason, previousMode, newMode: mode },
     );
   }
 
@@ -739,7 +755,7 @@ export class ParlantBypassIntegrationService extends EventEmitter {
     // Initialize execution strategies
     this.initializeExecutionStrategies();
 
-    this.logger.log('PARLANT bypass integration initialized');
+    this.logger.log("PARLANT bypass integration initialized");
   }
 
   /**
@@ -747,8 +763,8 @@ export class ParlantBypassIntegrationService extends EventEmitter {
    */
   private initializeExecutionStrategies(): void {
     // PARLANT-first strategy
-    this.executionStrategies.set('parlant_first', {
-      name: 'PARLANT First',
+    this.executionStrategies.set("parlant_first", {
+      name: "PARLANT First",
       useParlant: true,
       useBypass: true,
       parallel: false,
@@ -758,13 +774,13 @@ export class ParlantBypassIntegrationService extends EventEmitter {
         initialDelayMs: 1000,
         delayMultiplier: 2,
         maxDelayMs: 5000,
-        retryOnErrors: ['NETWORK_ERROR', 'TIMEOUT', 'SERVICE_UNAVAILABLE']
-      }
+        retryOnErrors: ["NETWORK_ERROR", "TIMEOUT", "SERVICE_UNAVAILABLE"],
+      },
     });
 
     // Bypass-only strategy
-    this.executionStrategies.set('bypass_only', {
-      name: 'Bypass Only',
+    this.executionStrategies.set("bypass_only", {
+      name: "Bypass Only",
       useParlant: false,
       useBypass: true,
       parallel: false,
@@ -774,13 +790,13 @@ export class ParlantBypassIntegrationService extends EventEmitter {
         initialDelayMs: 500,
         delayMultiplier: 1.5,
         maxDelayMs: 2000,
-        retryOnErrors: ['NETWORK_ERROR', 'TIMEOUT']
-      }
+        retryOnErrors: ["NETWORK_ERROR", "TIMEOUT"],
+      },
     });
 
     // Parallel execution strategy
-    this.executionStrategies.set('parallel', {
-      name: 'Parallel Execution',
+    this.executionStrategies.set("parallel", {
+      name: "Parallel Execution",
       useParlant: true,
       useBypass: true,
       parallel: true,
@@ -790,8 +806,8 @@ export class ParlantBypassIntegrationService extends EventEmitter {
         initialDelayMs: 200,
         delayMultiplier: 1,
         maxDelayMs: 1000,
-        retryOnErrors: []
-      }
+        retryOnErrors: [],
+      },
     });
   }
 
@@ -809,36 +825,38 @@ export class ParlantBypassIntegrationService extends EventEmitter {
       this.updateCircuitBreakers();
     }, 60000); // 1 minute
 
-    this.logger.log('Health monitoring started');
+    this.logger.log("Health monitoring started");
   }
 
   /**
    * Determine execution strategy
    */
-  private async determineExecutionStrategy(request: BypassOperationRequest): Promise<ExecutionStrategy> {
+  private async determineExecutionStrategy(
+    request: BypassOperationRequest,
+  ): Promise<ExecutionStrategy> {
     // Check circuit breaker
-    const circuitBreaker = this.circuitBreakerState.get('parlant');
-    if (circuitBreaker?.state === 'OPEN') {
-      return this.executionStrategies.get('bypass_only')!;
+    const circuitBreaker = this.circuitBreakerState.get("parlant");
+    if (circuitBreaker?.state === "OPEN") {
+      return this.executionStrategies.get("bypass_only")!;
     }
 
     // Check PARLANT service health
     if (this.parlantServiceContext.status !== ServiceStatus.OPERATIONAL) {
-      return this.executionStrategies.get('bypass_only')!;
+      return this.executionStrategies.get("bypass_only")!;
     }
 
     // Check integration mode
     switch (this.integrationConfig.bypassMode) {
       case BypassMode.BYPASS_ONLY:
-        return this.executionStrategies.get('bypass_only')!;
+        return this.executionStrategies.get("bypass_only")!;
 
       case BypassMode.PARALLEL_EXECUTION:
-        return this.executionStrategies.get('parallel')!;
+        return this.executionStrategies.get("parallel")!;
 
       case BypassMode.PARLANT_FIRST:
       case BypassMode.FAILOVER_ONLY:
       default:
-        return this.executionStrategies.get('parlant_first')!;
+        return this.executionStrategies.get("parlant_first")!;
     }
   }
 
@@ -848,7 +866,7 @@ export class ParlantBypassIntegrationService extends EventEmitter {
   private async executeWithStrategy(
     request: BypassOperationRequest,
     strategy: ExecutionStrategy,
-    executionId: string
+    executionId: string,
   ): Promise<OperationExecutionResult> {
     const startTime = Date.now();
 
@@ -859,7 +877,12 @@ export class ParlantBypassIntegrationService extends EventEmitter {
     } else if (!strategy.useParlant && strategy.useBypass) {
       return this.executeBypassOnly(request, strategy, executionId, startTime);
     } else {
-      return this.executeParlantWithFallback(request, strategy, executionId, startTime);
+      return this.executeParlantWithFallback(
+        request,
+        strategy,
+        executionId,
+        startTime,
+      );
     }
   }
 
@@ -870,11 +893,14 @@ export class ParlantBypassIntegrationService extends EventEmitter {
     request: BypassOperationRequest,
     strategy: ExecutionStrategy,
     executionId: string,
-    startTime: number
+    startTime: number,
   ): Promise<OperationExecutionResult> {
     // Try PARLANT first
     try {
-      const parlantResult = await this.executeParlantOperation(request, strategy.timeoutMs);
+      const parlantResult = await this.executeParlantOperation(
+        request,
+        strategy.timeoutMs,
+      );
 
       return {
         success: true,
@@ -886,7 +912,7 @@ export class ParlantBypassIntegrationService extends EventEmitter {
           authorizationTime: 0,
           validationTime: 0,
           networkLatency: this.parlantServiceContext.responseTime,
-          queueTime: 0
+          queueTime: 0,
         },
         securityValidation: {
           valid: true,
@@ -896,28 +922,32 @@ export class ParlantBypassIntegrationService extends EventEmitter {
           fraudDetection: {
             fraudScore: 0,
             indicators: [],
-            recommendation: FraudRecommendation.ALLOW
-          }
-        }
+            recommendation: FraudRecommendation.ALLOW,
+          },
+        },
       };
-
     } catch (parlantError: unknown) {
       const parlantErrorMessage = this.extractErrorMessage(parlantError);
-      this.logger.warn(`PARLANT execution failed, falling back to bypass: ${parlantErrorMessage}`);
+      this.logger.warn(
+        `PARLANT execution failed, falling back to bypass: ${parlantErrorMessage}`,
+      );
 
       // Fallback to bypass
       try {
-        const bypassResult = await this.executeBypassOperation(request, executionId);
+        const bypassResult = await this.executeBypassOperation(
+          request,
+          executionId,
+        );
 
         return {
           success: true,
           result: bypassResult.result,
           error: {
-            code: 'PARLANT_FALLBACK',
-            message: 'PARLANT failed, bypass successful',
+            code: "PARLANT_FALLBACK",
+            message: "PARLANT failed, bypass successful",
             source: ErrorSource.PARLANT_SERVICE,
             metadata: { parlantError: parlantErrorMessage },
-            retryable: false
+            retryable: false,
           },
           executionPath: ExecutionPath.PARLANT_FAILURE_BYPASS_SUCCESS,
           performanceMetrics: {
@@ -927,7 +957,7 @@ export class ParlantBypassIntegrationService extends EventEmitter {
             authorizationTime: 50,
             validationTime: 30,
             networkLatency: 0,
-            queueTime: 0
+            queueTime: 0,
           },
           securityValidation: bypassResult.securityValidation,
           bypassInfo: {
@@ -936,23 +966,22 @@ export class ParlantBypassIntegrationService extends EventEmitter {
             authorizationLevel: BypassAuthorizationLevel.EMERGENCY_SINGLE,
             automaticTrigger: true,
             approvalRequired: false,
-            riskScore: bypassResult.securityValidation.riskScore
-          }
+            riskScore: bypassResult.securityValidation.riskScore,
+          },
         };
-
       } catch (bypassError: unknown) {
         const bypassErrorMessage = this.extractErrorMessage(bypassError);
         return {
           success: false,
           error: {
-            code: 'BOTH_SYSTEMS_FAILED',
-            message: 'Both PARLANT and bypass systems failed',
+            code: "BOTH_SYSTEMS_FAILED",
+            message: "Both PARLANT and bypass systems failed",
             source: ErrorSource.BYPASS_SYSTEM,
             metadata: {
               parlantError: parlantErrorMessage,
-              bypassError: bypassErrorMessage
+              bypassError: bypassErrorMessage,
             },
-            retryable: true
+            retryable: true,
           },
           executionPath: ExecutionPath.PARLANT_FAILURE_BYPASS_FAILURE,
           performanceMetrics: {
@@ -962,24 +991,26 @@ export class ParlantBypassIntegrationService extends EventEmitter {
             authorizationTime: 0,
             validationTime: 0,
             networkLatency: 0,
-            queueTime: 0
+            queueTime: 0,
           },
           securityValidation: {
             valid: false,
             riskScore: 100,
             checksPerformed: [],
-            violations: [{
-              type: SecurityViolationType.ANOMALOUS_BEHAVIOR,
-              severity: ViolationSeverity.CRITICAL,
-              description: 'Both systems failed',
-              remediation: 'Manual intervention required'
-            }],
+            violations: [
+              {
+                type: SecurityViolationType.ANOMALOUS_BEHAVIOR,
+                severity: ViolationSeverity.CRITICAL,
+                description: "Both systems failed",
+                remediation: "Manual intervention required",
+              },
+            ],
             fraudDetection: {
               fraudScore: 0,
               indicators: [],
-              recommendation: FraudRecommendation.BLOCK
-            }
-          }
+              recommendation: FraudRecommendation.BLOCK,
+            },
+          },
         };
       }
     }
@@ -992,10 +1023,13 @@ export class ParlantBypassIntegrationService extends EventEmitter {
     request: BypassOperationRequest,
     strategy: ExecutionStrategy,
     executionId: string,
-    startTime: number
+    startTime: number,
   ): Promise<OperationExecutionResult> {
     try {
-      const bypassResult = await this.executeBypassOperation(request, executionId);
+      const bypassResult = await this.executeBypassOperation(
+        request,
+        executionId,
+      );
 
       return {
         success: true,
@@ -1007,7 +1041,7 @@ export class ParlantBypassIntegrationService extends EventEmitter {
           authorizationTime: 50,
           validationTime: 30,
           networkLatency: 0,
-          queueTime: 0
+          queueTime: 0,
         },
         securityValidation: bypassResult.securityValidation,
         bypassInfo: {
@@ -1016,20 +1050,19 @@ export class ParlantBypassIntegrationService extends EventEmitter {
           authorizationLevel: BypassAuthorizationLevel.EMERGENCY_SINGLE,
           automaticTrigger: false,
           approvalRequired: false,
-          riskScore: bypassResult.securityValidation.riskScore
-        }
+          riskScore: bypassResult.securityValidation.riskScore,
+        },
       };
-
     } catch (error: unknown) {
       const errorMessage = this.extractErrorMessage(error);
       return {
         success: false,
         error: {
-          code: 'BYPASS_EXECUTION_FAILED',
+          code: "BYPASS_EXECUTION_FAILED",
           message: errorMessage,
           source: ErrorSource.BYPASS_SYSTEM,
           metadata: {},
-          retryable: true
+          retryable: true,
         },
         executionPath: ExecutionPath.BYPASS_ONLY_FAILURE,
         performanceMetrics: {
@@ -1038,7 +1071,7 @@ export class ParlantBypassIntegrationService extends EventEmitter {
           authorizationTime: 0,
           validationTime: 0,
           networkLatency: 0,
-          queueTime: 0
+          queueTime: 0,
         },
         securityValidation: {
           valid: false,
@@ -1048,9 +1081,9 @@ export class ParlantBypassIntegrationService extends EventEmitter {
           fraudDetection: {
             fraudScore: 0,
             indicators: [],
-            recommendation: FraudRecommendation.BLOCK
-          }
-        }
+            recommendation: FraudRecommendation.BLOCK,
+          },
+        },
       };
     }
   }
@@ -1062,10 +1095,13 @@ export class ParlantBypassIntegrationService extends EventEmitter {
     request: BypassOperationRequest,
     strategy: ExecutionStrategy,
     executionId: string,
-    startTime: number
+    startTime: number,
   ): Promise<OperationExecutionResult> {
     try {
-      const result = await this.executeParlantOperation(request, strategy.timeoutMs);
+      const result = await this.executeParlantOperation(
+        request,
+        strategy.timeoutMs,
+      );
 
       return {
         success: true,
@@ -1077,7 +1113,7 @@ export class ParlantBypassIntegrationService extends EventEmitter {
           authorizationTime: 0,
           validationTime: 0,
           networkLatency: this.parlantServiceContext.responseTime,
-          queueTime: 0
+          queueTime: 0,
         },
         securityValidation: {
           valid: true,
@@ -1087,11 +1123,10 @@ export class ParlantBypassIntegrationService extends EventEmitter {
           fraudDetection: {
             fraudScore: 0,
             indicators: [],
-            recommendation: FraudRecommendation.ALLOW
-          }
-        }
+            recommendation: FraudRecommendation.ALLOW,
+          },
+        },
       };
-
     } catch (error) {
       throw error; // No fallback in PARLANT-only mode
     }
@@ -1104,15 +1139,15 @@ export class ParlantBypassIntegrationService extends EventEmitter {
     request: BypassOperationRequest,
     strategy: ExecutionStrategy,
     executionId: string,
-    startTime: number
+    startTime: number,
   ): Promise<OperationExecutionResult> {
     const [parlantResult, bypassResult] = await Promise.allSettled([
       this.executeParlantOperation(request, strategy.timeoutMs),
-      this.executeBypassOperation(request, executionId)
+      this.executeBypassOperation(request, executionId),
     ]);
 
     // Prefer PARLANT result if successful
-    if (parlantResult.status === 'fulfilled') {
+    if (parlantResult.status === "fulfilled") {
       return {
         success: true,
         result: parlantResult.value,
@@ -1120,13 +1155,15 @@ export class ParlantBypassIntegrationService extends EventEmitter {
         performanceMetrics: {
           totalExecutionTime: Date.now() - startTime,
           parlantExecutionTime: Date.now() - startTime,
-          bypassExecutionTime: bypassResult.status === 'fulfilled'
-            ? (bypassResult.value as BypassOperationResult).performanceMetrics.duration
-            : 0,
+          bypassExecutionTime:
+            bypassResult.status === "fulfilled"
+              ? (bypassResult.value as BypassOperationResult).performanceMetrics
+                  .duration
+              : 0,
           authorizationTime: 25,
           validationTime: 15,
           networkLatency: this.parlantServiceContext.responseTime,
-          queueTime: 0
+          queueTime: 0,
         },
         securityValidation: {
           valid: true,
@@ -1136,14 +1173,14 @@ export class ParlantBypassIntegrationService extends EventEmitter {
           fraudDetection: {
             fraudScore: 0,
             indicators: [],
-            recommendation: FraudRecommendation.ALLOW
-          }
-        }
+            recommendation: FraudRecommendation.ALLOW,
+          },
+        },
       };
     }
 
     // Fallback to bypass result
-    if (bypassResult.status === 'fulfilled') {
+    if (bypassResult.status === "fulfilled") {
       const bypass = bypassResult.value as BypassOperationResult;
       return {
         success: true,
@@ -1156,7 +1193,7 @@ export class ParlantBypassIntegrationService extends EventEmitter {
           authorizationTime: 50,
           validationTime: 30,
           networkLatency: 0,
-          queueTime: 0
+          queueTime: 0,
         },
         securityValidation: bypass.securityValidation,
         bypassInfo: {
@@ -1165,31 +1202,39 @@ export class ParlantBypassIntegrationService extends EventEmitter {
           authorizationLevel: BypassAuthorizationLevel.EMERGENCY_SINGLE,
           automaticTrigger: true,
           approvalRequired: false,
-          riskScore: bypass.securityValidation.riskScore
-        }
+          riskScore: bypass.securityValidation.riskScore,
+        },
       };
     }
 
     // Both failed
-    throw new Error('Both PARLANT and bypass execution failed');
+    throw new Error("Both PARLANT and bypass execution failed");
   }
 
   /**
    * Execute PARLANT operation (mock)
    */
-  private async executeParlantOperation(request: BypassOperationRequest, timeoutMs: number): Promise<any> {
+  private async executeParlantOperation(
+    request: BypassOperationRequest,
+    timeoutMs: number,
+  ): Promise<any> {
     // Mock PARLANT execution
-    await new Promise(resolve => setTimeout(resolve, Math.random() * 100 + 50)); // 50-150ms
+    await new Promise((resolve) =>
+      setTimeout(resolve, Math.random() * 100 + 50),
+    ); // 50-150ms
 
     // Simulate random failures
-    if (this.parlantServiceContext.status !== ServiceStatus.OPERATIONAL || Math.random() < 0.1) {
-      throw new Error('PARLANT service unavailable');
+    if (
+      this.parlantServiceContext.status !== ServiceStatus.OPERATIONAL ||
+      Math.random() < 0.1
+    ) {
+      throw new Error("PARLANT service unavailable");
     }
 
     return {
       success: true,
       result: `PARLANT executed ${request.functionName}`,
-      parlantValidation: true
+      parlantValidation: true,
     };
   }
 
@@ -1198,29 +1243,33 @@ export class ParlantBypassIntegrationService extends EventEmitter {
    */
   private async executeBypassOperation(
     request: BypassOperationRequest,
-    executionId: string
+    executionId: string,
   ): Promise<BypassOperationResult> {
     // Mock bypass operation execution
     const startTime = Date.now();
 
     // Simulate operation execution
-    await new Promise(resolve => setTimeout(resolve, Math.random() * 200 + 100)); // 100-300ms
+    await new Promise((resolve) =>
+      setTimeout(resolve, Math.random() * 200 + 100),
+    ); // 100-300ms
 
     const success = Math.random() > 0.05; // 95% success rate
     const endTime = Date.now();
 
     const result: BypassOperationResult = {
       operationId: executionId,
-      tokenId: 'mock_token_' + Math.random().toString(36).substr(2, 9),
+      tokenId: "mock_token_" + Math.random().toString(36).substr(2, 9),
       functionName: request.functionName,
       executedAt: new Date(),
       success,
       result: success ? `Bypass executed ${request.functionName}` : undefined,
-      error: success ? undefined : {
-        code: 'BYPASS_EXECUTION_ERROR',
-        message: 'Mock bypass execution failed',
-        metadata: {}
-      },
+      error: success
+        ? undefined
+        : {
+            code: "BYPASS_EXECUTION_ERROR",
+            message: "Mock bypass execution failed",
+            metadata: {},
+          },
       performanceMetrics: {
         startTime: new Date(startTime),
         endTime: new Date(endTime),
@@ -1228,31 +1277,35 @@ export class ParlantBypassIntegrationService extends EventEmitter {
         authTime: 50,
         authzTime: 30,
         dbTime: 20,
-        networkLatency: 10
+        networkLatency: 10,
       },
       securityValidation: {
         valid: success,
         riskScore: Math.random() * 40 + 20, // 20-60
         checksPerformed: [
           {
-            checkName: 'authorization_check',
+            checkName: "authorization_check",
             passed: success,
-            details: 'Authorization validation',
-            riskContribution: 10
-          }
+            details: "Authorization validation",
+            riskContribution: 10,
+          },
         ],
-        violations: success ? [] : [{
-          type: SecurityViolationType.ANOMALOUS_BEHAVIOR,
-          severity: ViolationSeverity.MEDIUM,
-          description: 'Bypass operation failed',
-          remediation: 'Retry operation'
-        }],
+        violations: success
+          ? []
+          : [
+              {
+                type: SecurityViolationType.ANOMALOUS_BEHAVIOR,
+                severity: ViolationSeverity.MEDIUM,
+                description: "Bypass operation failed",
+                remediation: "Retry operation",
+              },
+            ],
         fraudDetection: {
           fraudScore: Math.random() * 20,
           indicators: [],
-          recommendation: FraudRecommendation.ALLOW
-        }
-      }
+          recommendation: FraudRecommendation.ALLOW,
+        },
+      },
     };
 
     return result;
@@ -1264,23 +1317,25 @@ export class ParlantBypassIntegrationService extends EventEmitter {
   private async logOperationExecution(
     request: BypassOperationRequest,
     result: OperationExecutionResult,
-    executionId: string
+    executionId: string,
   ): Promise<void> {
     // Log to audit system
     if (result.bypassInfo) {
       await this.auditForensics.logBypassOperation(
         {
           operationId: executionId,
-          tokenId: result.bypassInfo.tokenId || 'unknown',
+          tokenId: result.bypassInfo.tokenId || "unknown",
           functionName: request.functionName,
           executedAt: new Date(),
           success: result.success,
           result: result.result,
-          error: result.error ? {
-            code: result.error.code,
-            message: result.error.message,
-            metadata: result.error.metadata
-          } : undefined,
+          error: result.error
+            ? {
+                code: result.error.code,
+                message: result.error.message,
+                metadata: result.error.metadata,
+              }
+            : undefined,
           performanceMetrics: {
             startTime: new Date(),
             endTime: new Date(),
@@ -1288,9 +1343,9 @@ export class ParlantBypassIntegrationService extends EventEmitter {
             authTime: result.performanceMetrics.authorizationTime,
             authzTime: 0,
             dbTime: 0,
-            networkLatency: result.performanceMetrics.networkLatency
+            networkLatency: result.performanceMetrics.networkLatency,
           },
-          securityValidation: result.securityValidation
+          securityValidation: result.securityValidation,
         },
         {
           id: request.userContext.userId,
@@ -1300,17 +1355,17 @@ export class ParlantBypassIntegrationService extends EventEmitter {
           ipAddress: request.userContext.ipAddress,
           userAgent: request.userContext.userAgent,
           location: request.userContext.location,
-          sessionId: request.userContext.sessionId
-        }
+          sessionId: request.userContext.sessionId,
+        },
       );
     }
 
     // Emit integration event
-    this.emit('operation-executed', {
+    this.emit("operation-executed", {
       executionId,
       request,
       result,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 
@@ -1321,7 +1376,7 @@ export class ParlantBypassIntegrationService extends EventEmitter {
     request: BypassOperationRequest,
     error: unknown,
     executionId: string,
-    startTime: number
+    startTime: number,
   ): Promise<OperationExecutionResult> {
     const errorMessage = this.extractErrorMessage(error);
     this.logger.error(`Operation execution failed (${executionId}):`, error);
@@ -1329,11 +1384,11 @@ export class ParlantBypassIntegrationService extends EventEmitter {
     return {
       success: false,
       error: {
-        code: 'EXECUTION_ERROR',
+        code: "EXECUTION_ERROR",
         message: errorMessage,
         source: ErrorSource.BYPASS_SYSTEM,
         metadata: { executionId },
-        retryable: true
+        retryable: true,
       },
       executionPath: ExecutionPath.PARLANT_FAILURE_BYPASS_FAILURE,
       performanceMetrics: {
@@ -1343,24 +1398,26 @@ export class ParlantBypassIntegrationService extends EventEmitter {
         authorizationTime: 0,
         validationTime: 0,
         networkLatency: 0,
-        queueTime: 0
+        queueTime: 0,
       },
       securityValidation: {
         valid: false,
         riskScore: 100,
         checksPerformed: [],
-        violations: [{
-          type: SecurityViolationType.ANOMALOUS_BEHAVIOR,
-          severity: ViolationSeverity.HIGH,
-          description: 'Operation execution failed',
-          remediation: 'Review error and retry'
-        }],
+        violations: [
+          {
+            type: SecurityViolationType.ANOMALOUS_BEHAVIOR,
+            severity: ViolationSeverity.HIGH,
+            description: "Operation execution failed",
+            remediation: "Review error and retry",
+          },
+        ],
         fraudDetection: {
           fraudScore: 0,
           indicators: [],
-          recommendation: FraudRecommendation.REVIEW
-        }
-      }
+          recommendation: FraudRecommendation.REVIEW,
+        },
+      },
     };
   }
 
@@ -1371,31 +1428,33 @@ export class ParlantBypassIntegrationService extends EventEmitter {
     // Mock circuit breaker logic
     const parlantFailures = this.parlantServiceContext.consecutiveFailures;
 
-    let circuitBreaker = this.circuitBreakerState.get('parlant');
+    let circuitBreaker = this.circuitBreakerState.get("parlant");
     if (!circuitBreaker) {
       circuitBreaker = {
-        state: 'CLOSED',
+        state: "CLOSED",
         failureCount: 0,
         lastFailureTime: null,
-        nextRetryTime: null
+        nextRetryTime: null,
       };
     }
 
     if (parlantFailures >= this.integrationConfig.failureThreshold) {
-      if (circuitBreaker.state === 'CLOSED') {
-        circuitBreaker.state = 'OPEN';
+      if (circuitBreaker.state === "CLOSED") {
+        circuitBreaker.state = "OPEN";
         circuitBreaker.nextRetryTime = new Date(Date.now() + 300000); // 5 minutes
-        this.logger.warn('PARLANT circuit breaker opened due to consecutive failures');
+        this.logger.warn(
+          "PARLANT circuit breaker opened due to consecutive failures",
+        );
       }
-    } else if (parlantFailures === 0 && circuitBreaker.state === 'OPEN') {
+    } else if (parlantFailures === 0 && circuitBreaker.state === "OPEN") {
       if (Date.now() > (circuitBreaker.nextRetryTime?.getTime() || 0)) {
-        circuitBreaker.state = 'HALF_OPEN';
-        this.logger.log('PARLANT circuit breaker moved to half-open state');
+        circuitBreaker.state = "HALF_OPEN";
+        this.logger.log("PARLANT circuit breaker moved to half-open state");
       }
     }
 
     circuitBreaker.failureCount = parlantFailures;
-    this.circuitBreakerState.set('parlant', circuitBreaker);
+    this.circuitBreakerState.set("parlant", circuitBreaker);
   }
 
   /**
@@ -1427,10 +1486,13 @@ export class ParlantBypassIntegrationService extends EventEmitter {
       parlantSuccessRate: Math.random() * 20 + 80, // 80-100%
       bypassSuccessRate: Math.random() * 10 + 90, // 90-100%
       averageResponseTime: Math.random() * 200 + 100,
-      parlantAvailability: this.parlantServiceContext.status === ServiceStatus.OPERATIONAL ? 100 : 0,
+      parlantAvailability:
+        this.parlantServiceContext.status === ServiceStatus.OPERATIONAL
+          ? 100
+          : 0,
       bypassAvailability: 99.9,
       failoverRate: Math.random() * 5, // 0-5%
-      totalOperationsToday: Math.floor(Math.random() * 1000) + 100
+      totalOperationsToday: Math.floor(Math.random() * 1000) + 100,
     };
   }
 
@@ -1442,23 +1504,23 @@ export class ParlantBypassIntegrationService extends EventEmitter {
       return error.message;
     }
 
-    if (typeof error === 'string') {
+    if (typeof error === "string") {
       return error;
     }
 
-    if (error && typeof error === 'object') {
+    if (error && typeof error === "object") {
       const errorObj = error as Record<string, unknown>;
 
       // Try common error message properties
-      if (typeof errorObj.message === 'string') {
+      if (typeof errorObj.message === "string") {
         return errorObj.message;
       }
 
-      if (typeof errorObj.error === 'string') {
+      if (typeof errorObj.error === "string") {
         return errorObj.error;
       }
 
-      if (typeof errorObj.description === 'string') {
+      if (typeof errorObj.description === "string") {
         return errorObj.description;
       }
 
@@ -1466,14 +1528,16 @@ export class ParlantBypassIntegrationService extends EventEmitter {
       try {
         return JSON.stringify(error);
       } catch {
-        return 'Failed to serialize error object';
+        return "Failed to serialize error object";
       }
     }
 
     // Fallback for null, undefined, or other types
-    return error === null ? 'Error is null' :
-           error === undefined ? 'Error is undefined' :
-           `Unknown error type: ${typeof error}`;
+    return error === null
+      ? "Error is null"
+      : error === undefined
+        ? "Error is undefined"
+        : `Unknown error type: ${typeof error}`;
   }
 }
 
@@ -1482,7 +1546,7 @@ export class ParlantBypassIntegrationService extends EventEmitter {
 // =============================================================================
 
 interface CircuitBreakerState {
-  state: 'OPEN' | 'CLOSED' | 'HALF_OPEN';
+  state: "OPEN" | "CLOSED" | "HALF_OPEN";
   failureCount: number;
   lastFailureTime: Date | null;
   nextRetryTime: Date | null;
@@ -1508,6 +1572,9 @@ export interface IntegrationPerformanceMetrics {
 }
 
 // Re-export needed enums and types from other modules
-import { BypassRequestStatus, WorkflowStatus } from '../types/bypass-core.types';
-import { ActorType } from '../audit/bypass-audit-forensics.service';
-import { FraudRecommendation } from '../types/bypass-core.types';
+import {
+  BypassRequestStatus,
+  WorkflowStatus,
+} from "../types/bypass-core.types";
+import { ActorType } from "../audit/bypass-audit-forensics.service";
+import { FraudRecommendation } from "../types/bypass-core.types";

@@ -8,10 +8,10 @@
  * @since 2025-09-22
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { EventEmitter } from 'events';
-import { v4 as uuidv4 } from 'uuid';
-import { performance } from 'perf_hooks';
+import { Injectable, Logger } from "@nestjs/common";
+import { EventEmitter } from "events";
+import { v4 as uuidv4 } from "uuid";
+import { performance } from "perf_hooks";
 import {
   ConversationalInterface,
   ConversationMessage,
@@ -29,8 +29,8 @@ import {
   NaturalLanguageProcessor,
   ResponseGenerator,
   VisualizationEngine,
-  InteractiveComponent
-} from '../interfaces/real-time-monitoring.interface';
+  InteractiveComponent,
+} from "../interfaces/real-time-monitoring.interface";
 
 /**
  * Conversational Monitoring Dashboard Service
@@ -46,10 +46,15 @@ import {
  */
 @Injectable()
 export class ConversationalMonitoringDashboardService {
-  private readonly logger = new Logger(ConversationalMonitoringDashboardService.name);
+  private readonly logger = new Logger(
+    ConversationalMonitoringDashboardService.name,
+  );
 
   // Core dashboard components
-  private activeConversationalInterfaces = new Map<string, ConversationalInterface>();
+  private activeConversationalInterfaces = new Map<
+    string,
+    ConversationalInterface
+  >();
   private streamingDataSources = new Map<string, MonitoringEventStream>();
   private naturalLanguageProcessor: NaturalLanguageProcessor;
   private responseGenerator: ResponseGenerator;
@@ -65,7 +70,7 @@ export class ConversationalMonitoringDashboardService {
     totalQueries: 0,
     averageResponseTime: 0,
     userSatisfactionScore: 0.0,
-    streamingLatency: 0
+    streamingLatency: 0,
   };
 
   constructor() {
@@ -92,12 +97,12 @@ export class ConversationalMonitoringDashboardService {
         recentOperations: [params.operationId],
         userPatterns: await this.analyzeUserPatterns(params.userId),
         conversationContext: {
-          currentTopic: 'operation_monitoring',
+          currentTopic: "operation_monitoring",
           recentEntities: [],
           contextStack: [],
-          confidence: 1.0
+          confidence: 1.0,
         },
-        learningProfile: await this.buildLearningProfile(params.userId)
+        learningProfile: await this.buildLearningProfile(params.userId),
       };
 
       // Create conversational interface
@@ -108,7 +113,7 @@ export class ConversationalMonitoringDashboardService {
         naturalLanguageProcessor: this.naturalLanguageProcessor,
         responseGenerator: this.responseGenerator,
         userPreferences: params.userPreferences,
-        contextMemory
+        contextMemory,
       };
 
       // Initialize welcome conversation
@@ -116,28 +121,40 @@ export class ConversationalMonitoringDashboardService {
       conversationalInterface.conversationHistory.push(welcomeMessage);
 
       // Set up streaming data subscription
-      await this.setupStreamingDataSubscription(params.sessionId, params.operationId);
+      await this.setupStreamingDataSubscription(
+        params.sessionId,
+        params.operationId,
+      );
 
       // Store interface
-      this.activeConversationalInterfaces.set(params.sessionId, conversationalInterface);
+      this.activeConversationalInterfaces.set(
+        params.sessionId,
+        conversationalInterface,
+      );
 
       const setupTime = performance.now() - startTime;
 
-      this.logger.log(`Conversational interface created in ${setupTime.toFixed(2)}ms`, {
-        sessionId: params.sessionId,
-        operationId: params.operationId,
-        technicalLevel: params.technicalLevel,
-        setupTime
-      });
+      this.logger.log(
+        `Conversational interface created in ${setupTime.toFixed(2)}ms`,
+        {
+          sessionId: params.sessionId,
+          operationId: params.operationId,
+          technicalLevel: params.technicalLevel,
+          setupTime,
+        },
+      );
 
       return conversationalInterface;
     } catch (error) {
       const setupTime = performance.now() - startTime;
-      this.logger.error(`Failed to create conversational interface after ${setupTime.toFixed(2)}ms`, {
-        sessionId: params.sessionId,
-        error: error instanceof Error ? error.message : String(error),
-        setupTime
-      });
+      this.logger.error(
+        `Failed to create conversational interface after ${setupTime.toFixed(2)}ms`,
+        {
+          sessionId: params.sessionId,
+          error: error instanceof Error ? error.message : String(error),
+          setupTime,
+        },
+      );
       throw error;
     }
   }
@@ -148,13 +165,14 @@ export class ConversationalMonitoringDashboardService {
   async processNaturalLanguageQuery(
     query: string,
     sessionId: string,
-    context?: QueryContext
+    context?: QueryContext,
   ): Promise<ConversationalResponse> {
     const startTime = performance.now();
     this.dashboardMetrics.totalQueries++;
 
     try {
-      const conversationalInterface = this.activeConversationalInterfaces.get(sessionId);
+      const conversationalInterface =
+        this.activeConversationalInterfaces.get(sessionId);
       if (!conversationalInterface) {
         throw new Error(`Conversational interface not found: ${sessionId}`);
       }
@@ -165,12 +183,15 @@ export class ConversationalMonitoringDashboardService {
         context: conversationalInterface.contextMemory.conversationContext,
         userPreferences: conversationalInterface.userPreferences,
         historicalQueries: conversationalInterface.conversationHistory
-          .filter(msg => msg.type === 'user')
-          .slice(-5) // Last 5 user queries for context
+          .filter((msg) => msg.type === "user")
+          .slice(-5), // Last 5 user queries for context
       });
 
       // Validate and enhance query intent
-      const enhancedIntent = await this.enhanceQueryIntent(queryIntent, conversationalInterface);
+      const enhancedIntent = await this.enhanceQueryIntent(
+        queryIntent,
+        conversationalInterface,
+      );
 
       // Execute query with intelligent caching
       const queryResult = await this.executeQuery(enhancedIntent, sessionId);
@@ -181,11 +202,15 @@ export class ConversationalMonitoringDashboardService {
         intent: enhancedIntent,
         userPreferences: conversationalInterface.userPreferences,
         contextMemory: conversationalInterface.contextMemory,
-        visualizationHints: await this.getVisualizationHints(queryResult)
+        visualizationHints: await this.getVisualizationHints(queryResult),
       });
 
       // Update conversation history
-      await this.updateConversationHistory(conversationalInterface, query, response);
+      await this.updateConversationHistory(
+        conversationalInterface,
+        query,
+        response,
+      );
 
       // Update context memory with learned patterns
       await this.updateContextMemory(conversationalInterface, query, response);
@@ -194,23 +219,29 @@ export class ConversationalMonitoringDashboardService {
       this.dashboardMetrics.averageResponseTime =
         (this.dashboardMetrics.averageResponseTime + processingTime) / 2;
 
-      this.logger.log(`Natural language query processed in ${processingTime.toFixed(2)}ms`, {
-        sessionId,
-        queryType: enhancedIntent.type,
-        responseLength: response.content.length,
-        processingTime,
-        cached: queryResult.cached
-      });
+      this.logger.log(
+        `Natural language query processed in ${processingTime.toFixed(2)}ms`,
+        {
+          sessionId,
+          queryType: enhancedIntent.type,
+          responseLength: response.content.length,
+          processingTime,
+          cached: queryResult.cached,
+        },
+      );
 
       return response;
     } catch (error) {
       const processingTime = performance.now() - startTime;
-      this.logger.error(`Query processing failed after ${processingTime.toFixed(2)}ms`, {
-        sessionId,
-        query: query.substring(0, 100),
-        error: error instanceof Error ? error.message : String(error),
-        processingTime
-      });
+      this.logger.error(
+        `Query processing failed after ${processingTime.toFixed(2)}ms`,
+        {
+          sessionId,
+          query: query.substring(0, 100),
+          error: error instanceof Error ? error.message : String(error),
+          processingTime,
+        },
+      );
 
       // Generate error response
       return await this.generateErrorResponse(error, query, sessionId);
@@ -223,7 +254,7 @@ export class ConversationalMonitoringDashboardService {
   async createDataVisualization(
     data: StreamingData,
     visualizationType: VisualizationType,
-    userPreferences: ConversationalPreferences
+    userPreferences: ConversationalPreferences,
   ): Promise<DashboardVisualization> {
     const startTime = performance.now();
 
@@ -235,38 +266,43 @@ export class ConversationalMonitoringDashboardService {
         interactivityLevel: this.determineInteractivityLevel(userPreferences),
         colorScheme: await this.selectColorScheme(userPreferences),
         responsiveDesign: true,
-        realTimeUpdates: true
+        realTimeUpdates: true,
       });
 
       // Add conversational explanations
-      visualization.conversationalExplanation = await this.generateVisualizationExplanation(
-        visualization,
-        userPreferences
-      );
+      visualization.conversationalExplanation =
+        await this.generateVisualizationExplanation(
+          visualization,
+          userPreferences,
+        );
 
       // Add interactive elements
-      visualization.interactiveComponents = await this.createInteractiveComponents(
-        visualization,
-        userPreferences
-      );
+      visualization.interactiveComponents =
+        await this.createInteractiveComponents(visualization, userPreferences);
 
       const creationTime = performance.now() - startTime;
 
-      this.logger.debug(`Visualization created in ${creationTime.toFixed(2)}ms`, {
-        type: visualizationType,
-        dataPoints: data.dataPoints?.length || 0,
-        creationTime,
-        interactive: visualization.interactiveComponents.length > 0
-      });
+      this.logger.debug(
+        `Visualization created in ${creationTime.toFixed(2)}ms`,
+        {
+          type: visualizationType,
+          dataPoints: data.dataPoints?.length || 0,
+          creationTime,
+          interactive: visualization.interactiveComponents.length > 0,
+        },
+      );
 
       return visualization;
     } catch (error) {
       const creationTime = performance.now() - startTime;
-      this.logger.error(`Visualization creation failed after ${creationTime.toFixed(2)}ms`, {
-        type: visualizationType,
-        error: error instanceof Error ? error.message : String(error),
-        creationTime
-      });
+      this.logger.error(
+        `Visualization creation failed after ${creationTime.toFixed(2)}ms`,
+        {
+          type: visualizationType,
+          error: error instanceof Error ? error.message : String(error),
+          creationTime,
+        },
+      );
       throw error;
     }
   }
@@ -277,7 +313,7 @@ export class ConversationalMonitoringDashboardService {
   async setupStreamingInterface(
     sessionId: string,
     operationId: string,
-    webSocketConnection: WebSocketConnection
+    webSocketConnection: WebSocketConnection,
   ): Promise<StreamingInterface> {
     const startTime = performance.now();
 
@@ -294,23 +330,24 @@ export class ConversationalMonitoringDashboardService {
         compressionEnabled: true,
         rateLimiting: {
           maxUpdatesPerSecond: 10,
-          burstLimit: 50
-        }
+          burstLimit: 50,
+        },
       };
 
       // Set up data streaming pipeline
-      const streamingInterface = await this.createStreamingPipeline(subscription);
+      const streamingInterface =
+        await this.createStreamingPipeline(subscription);
 
       // Configure real-time data processing
-      streamingInterface.on('data', async (data: StreamingData) => {
+      streamingInterface.on("data", async (data: StreamingData) => {
         await this.processStreamingData(data, sessionId);
       });
 
-      streamingInterface.on('error', (error: Error) => {
-        this.logger.error('Streaming interface error', {
+      streamingInterface.on("error", (error: Error) => {
+        this.logger.error("Streaming interface error", {
           sessionId,
           operationId,
-          error: error.message
+          error: error.message,
         });
       });
 
@@ -319,22 +356,28 @@ export class ConversationalMonitoringDashboardService {
 
       const setupTime = performance.now() - startTime;
 
-      this.logger.log(`Streaming interface established in ${setupTime.toFixed(2)}ms`, {
-        sessionId,
-        operationId,
-        setupTime,
-        compressionEnabled: subscription.compressionEnabled
-      });
+      this.logger.log(
+        `Streaming interface established in ${setupTime.toFixed(2)}ms`,
+        {
+          sessionId,
+          operationId,
+          setupTime,
+          compressionEnabled: subscription.compressionEnabled,
+        },
+      );
 
       return streamingInterface;
     } catch (error) {
       const setupTime = performance.now() - startTime;
-      this.logger.error(`Streaming interface setup failed after ${setupTime.toFixed(2)}ms`, {
-        sessionId,
-        operationId,
-        error: error instanceof Error ? error.message : String(error),
-        setupTime
-      });
+      this.logger.error(
+        `Streaming interface setup failed after ${setupTime.toFixed(2)}ms`,
+        {
+          sessionId,
+          operationId,
+          error: error instanceof Error ? error.message : String(error),
+          setupTime,
+        },
+      );
       throw error;
     }
   }
@@ -345,19 +388,20 @@ export class ConversationalMonitoringDashboardService {
   async generateFollowUpSuggestions(
     conversationHistory: ConversationMessage[],
     currentContext: ContextMemory,
-    operationData: RealTimeMetrics
+    operationData: RealTimeMetrics,
   ): Promise<FollowUpSuggestion[]> {
     const startTime = performance.now();
 
     try {
       // Analyze conversation patterns
-      const conversationAnalysis = await this.analyzeConversationPatterns(conversationHistory);
+      const conversationAnalysis =
+        await this.analyzeConversationPatterns(conversationHistory);
 
       // Identify potential interests
       const userInterests = await this.identifyUserInterests(
         conversationHistory,
         currentContext,
-        operationData
+        operationData,
       );
 
       // Generate contextual suggestions
@@ -366,62 +410,71 @@ export class ConversationalMonitoringDashboardService {
       // Performance-related suggestions
       if (this.shouldSuggestPerformanceQueries(operationData)) {
         suggestions.push({
-          type: 'performance_analysis',
-          query: 'Show me performance bottlenecks in the last 5 minutes',
-          description: 'Analyze recent performance issues',
-          priority: 'high',
-          estimatedValue: 0.8
+          type: "performance_analysis",
+          query: "Show me performance bottlenecks in the last 5 minutes",
+          description: "Analyze recent performance issues",
+          priority: "high",
+          estimatedValue: 0.8,
         });
       }
 
       // Trend analysis suggestions
       if (this.shouldSuggestTrendAnalysis(conversationAnalysis)) {
         suggestions.push({
-          type: 'trend_analysis',
-          query: 'What are the trends in error rates today?',
-          description: 'Examine error rate patterns',
-          priority: 'medium',
-          estimatedValue: 0.6
+          type: "trend_analysis",
+          query: "What are the trends in error rates today?",
+          description: "Examine error rate patterns",
+          priority: "medium",
+          estimatedValue: 0.6,
         });
       }
 
       // Predictive suggestions
       if (this.shouldSuggestPredictiveAnalysis(operationData)) {
         suggestions.push({
-          type: 'predictive_analysis',
-          query: 'Predict system performance for the next hour',
-          description: 'Forecast upcoming performance',
-          priority: 'medium',
-          estimatedValue: 0.7
+          type: "predictive_analysis",
+          query: "Predict system performance for the next hour",
+          description: "Forecast upcoming performance",
+          priority: "medium",
+          estimatedValue: 0.7,
         });
       }
 
       // Drill-down suggestions based on recent queries
-      const drillDownSuggestions = await this.generateDrillDownSuggestions(conversationHistory);
+      const drillDownSuggestions =
+        await this.generateDrillDownSuggestions(conversationHistory);
       suggestions.push(...drillDownSuggestions);
 
       // Sort by priority and estimated value
       const sortedSuggestions = suggestions.sort((a, b) => {
         const priorityWeight = { high: 3, medium: 2, low: 1 };
-        return (priorityWeight[b.priority] * b.estimatedValue) -
-               (priorityWeight[a.priority] * a.estimatedValue);
+        return (
+          priorityWeight[b.priority] * b.estimatedValue -
+          priorityWeight[a.priority] * a.estimatedValue
+        );
       });
 
       const generationTime = performance.now() - startTime;
 
-      this.logger.debug(`Follow-up suggestions generated in ${generationTime.toFixed(2)}ms`, {
-        suggestionsCount: sortedSuggestions.length,
-        generationTime,
-        topPriority: sortedSuggestions[0]?.priority
-      });
+      this.logger.debug(
+        `Follow-up suggestions generated in ${generationTime.toFixed(2)}ms`,
+        {
+          suggestionsCount: sortedSuggestions.length,
+          generationTime,
+          topPriority: sortedSuggestions[0]?.priority,
+        },
+      );
 
       return sortedSuggestions.slice(0, 5); // Return top 5 suggestions
     } catch (error) {
       const generationTime = performance.now() - startTime;
-      this.logger.error(`Follow-up generation failed after ${generationTime.toFixed(2)}ms`, {
-        error: error instanceof Error ? error.message : String(error),
-        generationTime
-      });
+      this.logger.error(
+        `Follow-up generation failed after ${generationTime.toFixed(2)}ms`,
+        {
+          error: error instanceof Error ? error.message : String(error),
+          generationTime,
+        },
+      );
       return [];
     }
   }
@@ -432,7 +485,7 @@ export class ConversationalMonitoringDashboardService {
   async createInteractiveDashboard(
     sessionId: string,
     operationId: string,
-    userPreferences: ConversationalPreferences
+    userPreferences: ConversationalPreferences,
   ): Promise<InteractiveDashboard> {
     const startTime = performance.now();
 
@@ -441,13 +494,18 @@ export class ConversationalMonitoringDashboardService {
       const dashboardLayout = await this.designDashboardLayout(userPreferences);
 
       // Initialize real-time data widgets
-      const widgets = await this.createDashboardWidgets(operationId, dashboardLayout);
+      const widgets = await this.createDashboardWidgets(
+        operationId,
+        dashboardLayout,
+      );
 
       // Set up conversational overlay
-      const conversationalOverlay = await this.createConversationalOverlay(sessionId);
+      const conversationalOverlay =
+        await this.createConversationalOverlay(sessionId);
 
       // Configure interactive elements
-      const interactiveElements = await this.configureInteractiveElements(widgets);
+      const interactiveElements =
+        await this.configureInteractiveElements(widgets);
 
       const dashboard: InteractiveDashboard = {
         dashboardId: uuidv4(),
@@ -458,8 +516,10 @@ export class ConversationalMonitoringDashboardService {
         conversationalOverlay,
         interactiveElements,
         realTimeUpdates: true,
-        customizationOptions: await this.getCustomizationOptions(userPreferences),
-        accessibilityFeatures: await this.configureAccessibilityFeatures(userPreferences)
+        customizationOptions:
+          await this.getCustomizationOptions(userPreferences),
+        accessibilityFeatures:
+          await this.configureAccessibilityFeatures(userPreferences),
       };
 
       // Store dashboard session
@@ -468,30 +528,36 @@ export class ConversationalMonitoringDashboardService {
         startTime: new Date(),
         lastActivity: new Date(),
         userInteractions: 0,
-        dataUpdates: 0
+        dataUpdates: 0,
       };
 
       this.activeDashboards.set(sessionId, dashboardSession);
 
       const creationTime = performance.now() - startTime;
 
-      this.logger.log(`Interactive dashboard created in ${creationTime.toFixed(2)}ms`, {
-        sessionId,
-        operationId,
-        widgetsCount: widgets.length,
-        creationTime,
-        layoutType: dashboardLayout.type
-      });
+      this.logger.log(
+        `Interactive dashboard created in ${creationTime.toFixed(2)}ms`,
+        {
+          sessionId,
+          operationId,
+          widgetsCount: widgets.length,
+          creationTime,
+          layoutType: dashboardLayout.type,
+        },
+      );
 
       return dashboard;
     } catch (error) {
       const creationTime = performance.now() - startTime;
-      this.logger.error(`Dashboard creation failed after ${creationTime.toFixed(2)}ms`, {
-        sessionId,
-        operationId,
-        error: error instanceof Error ? error.message : String(error),
-        creationTime
-      });
+      this.logger.error(
+        `Dashboard creation failed after ${creationTime.toFixed(2)}ms`,
+        {
+          sessionId,
+          operationId,
+          error: error instanceof Error ? error.message : String(error),
+          creationTime,
+        },
+      );
       throw error;
     }
   }
@@ -513,7 +579,7 @@ export class ConversationalMonitoringDashboardService {
       },
       generateEmbeddings: async (text) => {
         return await this.generateTextEmbeddings(text);
-      }
+      },
     };
   }
 
@@ -530,7 +596,7 @@ export class ConversationalMonitoringDashboardService {
       },
       suggestActions: async (context) => {
         return await this.suggestContextualActions(context);
-      }
+      },
     };
   }
 
@@ -547,7 +613,7 @@ export class ConversationalMonitoringDashboardService {
       },
       generateInsights: async (visualization) => {
         return await this.generateVisualizationInsights(visualization);
-      }
+      },
     };
   }
 
@@ -562,39 +628,50 @@ export class ConversationalMonitoringDashboardService {
     return {};
   }
 
-  private async generateWelcomeMessage(params: any): Promise<ConversationMessage> {
+  private async generateWelcomeMessage(
+    params: any,
+  ): Promise<ConversationMessage> {
     return {
       id: uuidv4(),
       timestamp: new Date(),
-      type: 'system',
+      type: "system",
       content: `Welcome! I'm here to help you monitor operation ${params.operationId}. You can ask me about performance metrics, system status, or any specific concerns.`,
       metadata: {
-        operationId: params.operationId
-      }
+        operationId: params.operationId,
+      },
     };
   }
 
-  private async setupStreamingDataSubscription(sessionId: string, operationId: string): Promise<void> {
+  private async setupStreamingDataSubscription(
+    sessionId: string,
+    operationId: string,
+  ): Promise<void> {
     // TODO: Implement streaming data subscription setup
   }
 
   private async performNLPAnalysis(params: any): Promise<QueryIntent> {
     // TODO: Implement advanced NLP analysis
     return {
-      type: 'status',
-      action: 'get_status',
+      type: "status",
+      action: "get_status",
       targets: [params.query],
       filters: [],
-      outputFormat: 'conversation'
+      outputFormat: "conversation",
     };
   }
 
   // Additional placeholder methods...
-  private async enhanceQueryIntent(intent: QueryIntent, interface: ConversationalInterface): Promise<QueryIntent> {
+  private async enhanceQueryIntent(
+    intent: QueryIntent,
+    interface: ConversationalInterface,
+  ): Promise<QueryIntent> {
     return intent;
   }
 
-  private async executeQuery(intent: QueryIntent, sessionId: string): Promise<QueryResult> {
+  private async executeQuery(
+    intent: QueryIntent,
+    sessionId: string,
+  ): Promise<QueryResult> {
     return { queryId: uuidv4(), success: true, data: {}, cached: false };
   }
 
@@ -602,36 +679,58 @@ export class ConversationalMonitoringDashboardService {
     return {};
   }
 
-  private async updateConversationHistory(interface: ConversationalInterface, query: string, response: ConversationalResponse): Promise<void> {
+  private async updateConversationHistory(
+    interface: ConversationalInterface,
+    query: string,
+    response: ConversationalResponse,
+  ): Promise<void> {
     // TODO: Implement conversation history update
   }
 
-  private async updateContextMemory(interface: ConversationalInterface, query: string, response: ConversationalResponse): Promise<void> {
+  private async updateContextMemory(
+    interface: ConversationalInterface,
+    query: string,
+    response: ConversationalResponse,
+  ): Promise<void> {
     // TODO: Implement context memory update
   }
 
-  private async generateErrorResponse(error: any, query: string, sessionId: string): Promise<ConversationalResponse> {
+  private async generateErrorResponse(
+    error: any,
+    query: string,
+    sessionId: string,
+  ): Promise<ConversationalResponse> {
     return {
       queryId: uuidv4(),
       content: `I encountered an error processing your query: "${query.substring(0, 50)}...". Please try rephrasing your question.`,
-      followUpActions: []
+      followUpActions: [],
     };
   }
 
   // Additional method placeholders continue...
-  private determineInteractivityLevel(preferences: ConversationalPreferences): string {
-    return preferences.visualAidsEnabled ? 'high' : 'medium';
+  private determineInteractivityLevel(
+    preferences: ConversationalPreferences,
+  ): string {
+    return preferences.visualAidsEnabled ? "high" : "medium";
   }
 
-  private async selectColorScheme(preferences: ConversationalPreferences): Promise<string> {
-    return 'default';
+  private async selectColorScheme(
+    preferences: ConversationalPreferences,
+  ): Promise<string> {
+    return "default";
   }
 
-  private async generateVisualizationExplanation(viz: any, preferences: ConversationalPreferences): Promise<string> {
-    return 'This visualization shows the current system metrics.';
+  private async generateVisualizationExplanation(
+    viz: any,
+    preferences: ConversationalPreferences,
+  ): Promise<string> {
+    return "This visualization shows the current system metrics.";
   }
 
-  private async createInteractiveComponents(viz: any, preferences: ConversationalPreferences): Promise<InteractiveComponent[]> {
+  private async createInteractiveComponents(
+    viz: any,
+    preferences: ConversationalPreferences,
+  ): Promise<InteractiveComponent[]> {
     return [];
   }
 
@@ -647,7 +746,10 @@ export class ConversationalMonitoringDashboardService {
     return new EventEmitter();
   }
 
-  private async processStreamingData(data: StreamingData, sessionId: string): Promise<void> {
+  private async processStreamingData(
+    data: StreamingData,
+    sessionId: string,
+  ): Promise<void> {
     // TODO: Implement streaming data processing
   }
 
@@ -687,7 +789,7 @@ interface FollowUpSuggestion {
   type: string;
   query: string;
   description: string;
-  priority: 'high' | 'medium' | 'low';
+  priority: "high" | "medium" | "low";
   estimatedValue: number;
 }
 
@@ -717,4 +819,10 @@ interface QueryContext {
   sessionHistory: ConversationMessage[];
 }
 
-type VisualizationType = 'line_chart' | 'bar_chart' | 'heat_map' | 'gauge' | 'table' | 'custom';
+type VisualizationType =
+  | "line_chart"
+  | "bar_chart"
+  | "heat_map"
+  | "gauge"
+  | "table"
+  | "custom";

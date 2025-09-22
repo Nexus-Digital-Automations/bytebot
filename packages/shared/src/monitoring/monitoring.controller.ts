@@ -51,7 +51,7 @@ export class MonitoringController {
   @Header("Content-Type", "text/plain; version=0.0.4; charset=utf-8")
   async getPrometheusMetrics(
     // @ts-ignore: Decorator signature resolution issue in TS 5.x
-    @Res() response: Response
+    @Res() response: Response,
   ): Promise<void> {
     const operationId = this.generateOperationId();
     this.logger.debug(`[${operationId}] Prometheus metrics endpoint accessed`);

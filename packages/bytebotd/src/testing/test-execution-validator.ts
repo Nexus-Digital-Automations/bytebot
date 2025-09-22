@@ -116,9 +116,15 @@ export class TestExecutionValidator extends EventEmitter {
   /**
    * Validate test execution performance
    */
-  public async validateTestExecution(config: TestExecutionConfig): Promise<PerformanceValidationResult> {
-    console.log('🔍 [VALIDATOR] Starting test execution performance validation...');
-    console.log(`📋 [VALIDATOR] Config: pattern=${config.testPattern}, workers=${config.maxWorkers}`);
+  public async validateTestExecution(
+    config: TestExecutionConfig,
+  ): Promise<PerformanceValidationResult> {
+    console.log(
+      '🔍 [VALIDATOR] Starting test execution performance validation...',
+    );
+    console.log(
+      `📋 [VALIDATOR] Config: pattern=${config.testPattern}, workers=${config.maxWorkers}`,
+    );
     const validationStart = performance.now();
     const initialMemory = process.memoryUsage();
 
@@ -129,30 +135,41 @@ export class TestExecutionValidator extends EventEmitter {
       const testSuites = await this.discoverTestSuites(config.testPattern);
       console.log(`📊 [VALIDATOR] Discovered ${testSuites.length} test suites`);
       for (const suitePath of testSuites) {
-        const metrics = await this.executeTestSuiteWithMetrics(suitePath, config);
+        const metrics = await this.executeTestSuiteWithMetrics(
+          suitePath,
+          config,
+        );
         suiteMetrics.set(suitePath, metrics);
-        
+
         // Store metrics for historical tracking
         this.storeMetrics(suitePath, metrics);
       }
 
       // Validate concurrent test execution
-      const concurrencyMetrics = await this.validateConcurrentExecution(testSuites, config);
+      const concurrencyMetrics = await this.validateConcurrentExecution(
+        testSuites,
+        config,
+      );
       console.log(`🔀 [VALIDATOR] Concurrency validation completed`);
 
       // Analyze overall performance
       const validationResult = this.analyzePerformanceResults(
         suiteMetrics,
         concurrencyMetrics,
-        performance.now() - validationStart
+        performance.now() - validationStart,
       );
 
-      console.log(`📈 [VALIDATOR] Validation completed - Grade: ${validationResult.performanceGrade}`);
-      console.log(`⏱️ [VALIDATOR] Total execution time: ${validationResult.overallExecutionTime.toFixed(2)}ms`);
-      console.log(`🧠 [VALIDATOR] Memory efficiency: ${validationResult.memoryEfficiency.toFixed(2)}%`);
+      console.log(
+        `📈 [VALIDATOR] Validation completed - Grade: ${validationResult.performanceGrade}`,
+      );
+      console.log(
+        `⏱️ [VALIDATOR] Total execution time: ${validationResult.overallExecutionTime.toFixed(2)}ms`,
+      );
+      console.log(
+        `🧠 [VALIDATOR] Memory efficiency: ${validationResult.memoryEfficiency.toFixed(2)}%`,
+      );
 
       return validationResult;
-
     } catch (error) {
       console.error('❌ [VALIDATOR] Test execution validation failed:', error);
       throw error;
@@ -164,7 +181,7 @@ export class TestExecutionValidator extends EventEmitter {
    */
   private async executeTestSuiteWithMetrics(
     suitePath: string,
-    config: TestExecutionConfig
+    config: TestExecutionConfig,
   ): Promise<TestSuiteMetrics> {
     console.log(`🧪 [VALIDATOR] Executing test suite: ${suitePath}`);
 
@@ -175,7 +192,9 @@ export class TestExecutionValidator extends EventEmitter {
 
     const testResults: Array<{
       name: string;
-      status: 'passed' | 'failed' | 'skipped';executionTime: number;error?: string;
+      status: 'passed' | 'failed' | 'skipped';
+      executionTime: number;
+      error?: string;
     }> = [];
 
     const errorTypes = new Map<string, number>();
@@ -189,7 +208,7 @@ export class TestExecutionValidator extends EventEmitter {
       const jestProcess = spawn('npx', jestCommand, {
         cwd: process.cwd(),
         stdio: ['pipe', 'pipe', 'pipe'],
-        env: { ...process.env, NODE_ENV: 'test' }
+        env: { ...process.env, NODE_ENV: 'test' },
       });
 
       let jestOutput = '';
@@ -226,25 +245,53 @@ export class TestExecutionValidator extends EventEmitter {
       const finalMemory = process.memoryUsage();
 
       // Calculate metrics
-      const passedTests = testResults.filter(t => t.status === 'passed').length;const failedTests = testResults.filter(t => t.status === 'failed').length;const skippedTests = testResults.filter(t => t.status === 'skipped').length;const testTimes = testResults.filter(t => t.status === 'passed' || t.status === 'failed').map(t => t.executionTime);const averageTestTime = testTimes.length > 0 
-        ? testTimes.reduce((a, b) => a + b, 0) / testTimes.length 
-        : 0;
+      const passedTests = testResults.filter(
+        (t) => t.status === 'passed',
+      ).length;
+      const failedTests = testResults.filter(
+        (t) => t.status === 'failed',
+      ).length;
+      const skippedTests = testResults.filter(
+        (t) => t.status === 'skipped',
+      ).length;
+      const testTimes = testResults
+        .filter((t) => t.status === 'passed' || t.status === 'failed')
+        .map((t) => t.executionTime);
+      const averageTestTime =
+        testTimes.length > 0
+          ? testTimes.reduce((a, b) => a + b, 0) / testTimes.length
+          : 0;
 
-      const slowestTest = testResults.reduce((slowest, current) => 
-        current.executionTime > slowest.executionTime ? current : slowest,
-        { name: 'none', executionTime: 0 });const fastestTest = testResults.reduce((fastest, current) => 
-        current.executionTime < fastest.executionTime ? current : fastest,
-        { name: 'none', executionTime: Infinity });// Calculate reliability metrics
-      const successRate = testResults.length > 0 ? (passedTests / testResults.length) * 100 : 0;
-      const flakinessScore = this.calculateFlakinessScore(suiteName, testResults);
+      const slowestTest = testResults.reduce(
+        (slowest, current) =>
+          current.executionTime > slowest.executionTime ? current : slowest,
+        { name: 'none', executionTime: 0 },
+      );
+      const fastestTest = testResults.reduce(
+        (fastest, current) =>
+          current.executionTime < fastest.executionTime ? current : fastest,
+        { name: 'none', executionTime: Infinity },
+      ); // Calculate reliability metrics
+      const successRate =
+        testResults.length > 0 ? (passedTests / testResults.length) * 100 : 0;
+      const flakinessScore = this.calculateFlakinessScore(
+        suiteName,
+        testResults,
+      );
 
       // Estimate concurrency metrics (simplified)
-      const maxConcurrentTests = Math.min(config.maxWorkers, testResults.length);
+      const maxConcurrentTests = Math.min(
+        config.maxWorkers,
+        testResults.length,
+      );
       const concurrentExecutionTime = executionTime;
       const sequentialExecutionTime = testTimes.reduce((a, b) => a + b, 0);
-      const parallelizationBenefit = sequentialExecutionTime > 0 
-        ? ((sequentialExecutionTime - concurrentExecutionTime) / sequentialExecutionTime) * 100 
-        : 0;
+      const parallelizationBenefit =
+        sequentialExecutionTime > 0
+          ? ((sequentialExecutionTime - concurrentExecutionTime) /
+              sequentialExecutionTime) *
+            100
+          : 0;
 
       const metrics: TestSuiteMetrics = {
         suiteName,
@@ -256,35 +303,52 @@ export class TestExecutionValidator extends EventEmitter {
         averageTestTime,
         slowestTest: {
           name: slowestTest.name,
-          executionTime: slowestTest.executionTime
+          executionTime: slowestTest.executionTime,
         },
         fastestTest: {
-          name: fastestTest.name === 'none' ? 'N/A' : fastestTest.name,executionTime: fastestTest.executionTime === Infinity ? 0 : fastestTest.executionTime},
+          name: fastestTest.name === 'none' ? 'N/A' : fastestTest.name,
+          executionTime:
+            fastestTest.executionTime === Infinity
+              ? 0
+              : fastestTest.executionTime,
+        },
         memoryUsage: {
           initial: initialMemory,
           peak: peakMemory,
           final: finalMemory,
-          increase: (finalMemory.heapUsed - initialMemory.heapUsed) / 1024 / 1024 // MB
+          increase:
+            (finalMemory.heapUsed - initialMemory.heapUsed) / 1024 / 1024, // MB
         },
         reliability: {
           successRate,
           flakinessScore,
-          errorTypes
+          errorTypes,
         },
         concurrency: {
           maxConcurrentTests,
           concurrentExecutionTime,
           sequentialExecutionTime,
-          parallelizationBenefit
-        }
+          parallelizationBenefit,
+        },
       };
 
       // End performance monitoring
-      performanceFramework.endMeasurement(suiteName, 'test-execution', exitCode === 0);
+      performanceFramework.endMeasurement(
+        suiteName,
+        'test-execution',
+        exitCode === 0,
+      );
 
-      console.log(`✅ [VALIDATOR] Suite ${suiteName}: ${passedTests}/${testResults.length} passed, ${executionTime.toFixed(2)}ms`);return metrics;} catch (error) {
-      console.error(`❌ [VALIDATOR] Suite ${suiteName} execution failed:`, error);
-      
+      console.log(
+        `✅ [VALIDATOR] Suite ${suiteName}: ${passedTests}/${testResults.length} passed, ${executionTime.toFixed(2)}ms`,
+      );
+      return metrics;
+    } catch (error) {
+      console.error(
+        `❌ [VALIDATOR] Suite ${suiteName} execution failed:`,
+        error,
+      );
+
       // Return error metrics
       return {
         suiteName,
@@ -294,20 +358,25 @@ export class TestExecutionValidator extends EventEmitter {
         skippedTests: 0,
         totalExecutionTime: performance.now() - executionStart,
         averageTestTime: 0,
-        slowestTest: { name: 'error', executionTime: 0 },fastestTest: { name: 'error', executionTime: 0 },memoryUsage: {initial: initialMemory,
+        slowestTest: { name: 'error', executionTime: 0 },
+        fastestTest: { name: 'error', executionTime: 0 },
+        memoryUsage: {
+          initial: initialMemory,
           peak: peakMemory,
           final: process.memoryUsage(),
-          increase: 0
+          increase: 0,
         },
         reliability: {
           successRate: 0,
           flakinessScore: 100,
-          errorTypes: new Map([['execution_error', 1]])},concurrency: {
+          errorTypes: new Map([['execution_error', 1]]),
+        },
+        concurrency: {
           maxConcurrentTests: 0,
           concurrentExecutionTime: 0,
           sequentialExecutionTime: 0,
-          parallelizationBenefit: 0
-        }
+          parallelizationBenefit: 0,
+        },
       };
     }
   }
@@ -317,7 +386,7 @@ export class TestExecutionValidator extends EventEmitter {
    */
   private async validateConcurrentExecution(
     testSuites: string[],
-    config: TestExecutionConfig
+    config: TestExecutionConfig,
   ): Promise<{
     concurrentExecutionTime: number;
     sequentialExecutionTime: number;
@@ -330,34 +399,59 @@ export class TestExecutionValidator extends EventEmitter {
 
     // Sequential execution timing
     const sequentialStart = performance.now();
-    for (const suitePath of testSuites.slice(0, 3)) { // Test first 3 suites
-      await this.executeTestSuiteWithMetrics(suitePath, { ...config, maxWorkers: 1, runInBand: true });
+    for (const suitePath of testSuites.slice(0, 3)) {
+      // Test first 3 suites
+      await this.executeTestSuiteWithMetrics(suitePath, {
+        ...config,
+        maxWorkers: 1,
+        runInBand: true,
+      });
     }
     const sequentialTime = performance.now() - sequentialStart;
 
     // Concurrent execution timing
     const concurrentStart = performance.now();
-    const concurrentPromises = testSuites.slice(0, 3).map(suitePath => 
-      this.executeTestSuiteWithMetrics(suitePath, { ...config, maxWorkers: 4, runInBand: false })
-    );
-    
+    const concurrentPromises = testSuites
+      .slice(0, 3)
+      .map((suitePath) =>
+        this.executeTestSuiteWithMetrics(suitePath, {
+          ...config,
+          maxWorkers: 4,
+          runInBand: false,
+        }),
+      );
+
     try {
       await Promise.all(concurrentPromises);
     } catch (error) {
-      concurrencyIssues.push(`Concurrent execution failed: ${error instanceof Error ? error.message : String(error)}`);}const concurrentTime = performance.now() - concurrentStart;
+      concurrencyIssues.push(
+        `Concurrent execution failed: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+    const concurrentTime = performance.now() - concurrentStart;
 
-    const parallelizationBenefit = sequentialTime > 0 
-      ? ((sequentialTime - concurrentTime) / sequentialTime) * 100 
-      : 0;
+    const parallelizationBenefit =
+      sequentialTime > 0
+        ? ((sequentialTime - concurrentTime) / sequentialTime) * 100
+        : 0;
 
-    console.log(`📊 [VALIDATOR] Concurrency results: Sequential=${sequentialTime.toFixed(2)}ms, Concurrent=${concurrentTime.toFixed(2)}ms`);console.log(`📈 [VALIDATOR] Parallelization benefit: ${parallelizationBenefit.toFixed(1)}%`);
+    console.log(
+      `📊 [VALIDATOR] Concurrency results: Sequential=${sequentialTime.toFixed(2)}ms, Concurrent=${concurrentTime.toFixed(2)}ms`,
+    );
+    console.log(
+      `📈 [VALIDATOR] Parallelization benefit: ${parallelizationBenefit.toFixed(1)}%`,
+    );
 
     if (parallelizationBenefit < 20) {
-      concurrencyIssues.push('Low parallelization benefit - tests may have dependencies or resource contention');}return {
+      concurrencyIssues.push(
+        'Low parallelization benefit - tests may have dependencies or resource contention',
+      );
+    }
+    return {
       concurrentExecutionTime: concurrentTime,
       sequentialExecutionTime: sequentialTime,
       parallelizationBenefit,
-      concurrencyIssues
+      concurrencyIssues,
     };
   }
 
@@ -367,28 +461,42 @@ export class TestExecutionValidator extends EventEmitter {
   private analyzePerformanceResults(
     suiteMetrics: Map<string, TestSuiteMetrics>,
     concurrencyMetrics: any,
-    totalExecutionTime: number
+    totalExecutionTime: number,
   ): PerformanceValidationResult {
     const allMetrics = Array.from(suiteMetrics.values());
     const totalSuites = allMetrics.length;
     const totalTests = allMetrics.reduce((sum, m) => sum + m.testCount, 0);
-    const averageTestTime = allMetrics.reduce((sum, m) => sum + m.averageTestTime, 0) / totalSuites;
+    const averageTestTime =
+      allMetrics.reduce((sum, m) => sum + m.averageTestTime, 0) / totalSuites;
 
     // Calculate memory efficiency
-    const totalMemoryIncrease = allMetrics.reduce((sum, m) => sum + m.memoryUsage.increase, 0);
-    const memoryEfficiency = Math.max(0, 100 - (totalMemoryIncrease / 10)); // Penalty for high memory usage
+    const totalMemoryIncrease = allMetrics.reduce(
+      (sum, m) => sum + m.memoryUsage.increase,
+      0,
+    );
+    const memoryEfficiency = Math.max(0, 100 - totalMemoryIncrease / 10); // Penalty for high memory usage
 
     // Calculate reliability score
-    const overallSuccessRate = allMetrics.reduce((sum, m) => sum + m.reliability.successRate, 0) / totalSuites;
-    const averageFlakinessScore = allMetrics.reduce((sum, m) => sum + m.reliability.flakinessScore, 0) / totalSuites;
-    const reliabilityScore = (overallSuccessRate + (100 - averageFlakinessScore)) / 2;
+    const overallSuccessRate =
+      allMetrics.reduce((sum, m) => sum + m.reliability.successRate, 0) /
+      totalSuites;
+    const averageFlakinessScore =
+      allMetrics.reduce((sum, m) => sum + m.reliability.flakinessScore, 0) /
+      totalSuites;
+    const reliabilityScore =
+      (overallSuccessRate + (100 - averageFlakinessScore)) / 2;
 
     // Calculate parallelization effectiveness
-    const parallelizationEffectiveness = concurrencyMetrics.parallelizationBenefit;
+    const parallelizationEffectiveness =
+      concurrencyMetrics.parallelizationBenefit;
 
     // Determine performance grade
     let performanceGrade: 'A' | 'B' | 'C' | 'D' | 'F' = 'F';
-    const scores = [memoryEfficiency, reliabilityScore, Math.min(parallelizationEffectiveness, 100)];
+    const scores = [
+      memoryEfficiency,
+      reliabilityScore,
+      Math.min(parallelizationEffectiveness, 100),
+    ];
     const averageScore = scores.reduce((a, b) => a + b, 0) / scores.length;
 
     if (averageScore >= 90) performanceGrade = 'A';
@@ -405,41 +513,59 @@ export class TestExecutionValidator extends EventEmitter {
     }> = [];
 
     // Execution time bottlenecks
-    const slowSuites = allMetrics.filter(m => m.averageTestTime > 2000);
-    slowSuites.forEach(suite => {
+    const slowSuites = allMetrics.filter((m) => m.averageTestTime > 2000);
+    slowSuites.forEach((suite) => {
       bottlenecks.push({
         type: 'execution_time',
         description: `Suite ${suite.suiteName} has slow average test time: ${suite.averageTestTime.toFixed(2)}ms`,
         impact: 'high',
-        recommendation: 'Optimize test logic, implement mocking, or reduce test scope'
+        recommendation:
+          'Optimize test logic, implement mocking, or reduce test scope',
       });
     });
 
     // Memory usage bottlenecks
-    const memoryIntensiveSuites = allMetrics.filter(m => m.memoryUsage.increase > 50);
-    memoryIntensiveSuites.forEach(suite => {
+    const memoryIntensiveSuites = allMetrics.filter(
+      (m) => m.memoryUsage.increase > 50,
+    );
+    memoryIntensiveSuites.forEach((suite) => {
       bottlenecks.push({
         type: 'memory_usage',
         description: `Suite ${suite.suiteName} has high memory usage: ${suite.memoryUsage.increase.toFixed(2)}MB increase`,
-        impact: 'medium',recommendation: 'Implement proper cleanup and optimize data structures'});});
+        impact: 'medium',
+        recommendation: 'Implement proper cleanup and optimize data structures',
+      });
+    });
 
     // Reliability bottlenecks
-    const unreliableSuites = allMetrics.filter(m => m.reliability.successRate < 95);
-    unreliableSuites.forEach(suite => {
+    const unreliableSuites = allMetrics.filter(
+      (m) => m.reliability.successRate < 95,
+    );
+    unreliableSuites.forEach((suite) => {
       bottlenecks.push({
         type: 'reliability',
         description: `Suite ${suite.suiteName} has low success rate: ${suite.reliability.successRate.toFixed(1)}%`,
-        impact: 'high',recommendation: 'Fix failing tests and reduce test flakiness'});});
+        impact: 'high',
+        recommendation: 'Fix failing tests and reduce test flakiness',
+      });
+    });
 
     // Concurrency bottlenecks
     if (parallelizationEffectiveness < 30) {
       bottlenecks.push({
         type: 'concurrency',
         description: `Low parallelization benefit: ${parallelizationEffectiveness.toFixed(1)}%`,
-        impact: 'medium',recommendation: 'Reduce test dependencies and optimize for concurrent execution'});}
+        impact: 'medium',
+        recommendation:
+          'Reduce test dependencies and optimize for concurrent execution',
+      });
+    }
 
     // Generate optimization opportunities
-    const optimizationOpportunities = this.generateOptimizationOpportunities(allMetrics, concurrencyMetrics);
+    const optimizationOpportunities = this.generateOptimizationOpportunities(
+      allMetrics,
+      concurrencyMetrics,
+    );
 
     // Detect regressions
     const regressions = this.detectPerformanceRegressions(allMetrics);
@@ -455,7 +581,7 @@ export class TestExecutionValidator extends EventEmitter {
       performanceGrade,
       bottlenecks,
       optimizationOpportunities,
-      regressions
+      regressions,
     };
   }
 
@@ -466,14 +592,37 @@ export class TestExecutionValidator extends EventEmitter {
     // For now, return a representative set of test files
     // In a real implementation, this would scan the filesystem
     return [
-      'src/auth/__tests__/auth.service.spec.ts','src/health/__tests__/health.service.spec.ts','src/computer-use/__tests__/computer-use.service.spec.ts','src/input-tracking/__tests__/input-tracking.service.spec.ts','src/mcp/__tests__/bytebot-mcp.module.spec.ts'];}
+      'src/auth/__tests__/auth.service.spec.ts',
+      'src/health/__tests__/health.service.spec.ts',
+      'src/computer-use/__tests__/computer-use.service.spec.ts',
+      'src/input-tracking/__tests__/input-tracking.service.spec.ts',
+      'src/mcp/__tests__/bytebot-mcp.module.spec.ts',
+    ];
+  }
 
   /**
    * Build Jest command for execution
    */
-  private buildJestCommand(suitePath: string, config: TestExecutionConfig): string[] {
+  private buildJestCommand(
+    suitePath: string,
+    config: TestExecutionConfig,
+  ): string[] {
     const command = [
-      'jest',suitePath,'--json','--testTimeout', config.timeout.toString(),'--maxWorkers', config.maxWorkers.toString()];if (config.coverage) command.push('--coverage');if (config.verbose) command.push('--verbose');if (config.runInBand) command.push('--runInBand');if (config.detectOpenHandles) command.push('--detectOpenHandles');if (config.forceExit) command.push('--forceExit');return command;}
+      'jest',
+      suitePath,
+      '--json',
+      '--testTimeout',
+      config.timeout.toString(),
+      '--maxWorkers',
+      config.maxWorkers.toString(),
+    ];
+    if (config.coverage) command.push('--coverage');
+    if (config.verbose) command.push('--verbose');
+    if (config.runInBand) command.push('--runInBand');
+    if (config.detectOpenHandles) command.push('--detectOpenHandles');
+    if (config.forceExit) command.push('--forceExit');
+    return command;
+  }
 
   /**
    * Parse Jest output for test results
@@ -481,29 +630,59 @@ export class TestExecutionValidator extends EventEmitter {
   private parseJestOutput(output: string): {
     tests: Array<{
       name: string;
-      status: 'passed' | 'failed' | 'skipped';executionTime: number;error?: string;
+      status: 'passed' | 'failed' | 'skipped';
+      executionTime: number;
+      error?: string;
     }>;
     errors: string[];
   } {
     // Simplified parser - in reality would parse actual Jest JSON output
     const tests = [
-      { name: 'sample-test-1', status: 'passed' as const, executionTime: 150 },{ name: 'sample-test-2', status: 'passed' as const, executionTime: 200 },{ name: 'sample-test-3', status: 'failed' as const, executionTime: 300, error: 'Assertion failed' }];const errors = ['Sample error message'];return { tests, errors };}
+      { name: 'sample-test-1', status: 'passed' as const, executionTime: 150 },
+      { name: 'sample-test-2', status: 'passed' as const, executionTime: 200 },
+      {
+        name: 'sample-test-3',
+        status: 'failed' as const,
+        executionTime: 300,
+        error: 'Assertion failed',
+      },
+    ];
+    const errors = ['Sample error message'];
+    return { tests, errors };
+  }
 
   /**
    * Extract suite name from file path
    */
   private extractSuiteName(suitePath: string): string {
-    const parts = suitePath.split('/');const lastPart = parts[parts.length - 1];if (!lastPart) {
-      return 'unknown-suite';}return lastPart.replace('.spec.ts', '').replace('.test.ts', '');}/**
+    const parts = suitePath.split('/');
+    const lastPart = parts[parts.length - 1];
+    if (!lastPart) {
+      return 'unknown-suite';
+    }
+    return lastPart.replace('.spec.ts', '').replace('.test.ts', '');
+  } /**
    * Categorize error for tracking
    */
   private categorizeError(error: string): string {
-    if (error.includes('timeout')) return 'timeout';if (error.includes('memory')) return 'memory';if (error.includes('assertion')) return 'assertion';if (error.includes('network')) return 'network';return 'other';}/**
+    if (error.includes('timeout')) return 'timeout';
+    if (error.includes('memory')) return 'memory';
+    if (error.includes('assertion')) return 'assertion';
+    if (error.includes('network')) return 'network';
+    return 'other';
+  } /**
    * Calculate flakiness score based on historical data
    */
-  private calculateFlakinessScore(suiteName: string, testResults: any[]): number {
+  private calculateFlakinessScore(
+    suiteName: string,
+    testResults: any[],
+  ): number {
     // Simplified calculation - in reality would use historical data
-    const failureRate = testResults.filter(t => t.status === 'failed').length / testResults.length;return failureRate * 100;}
+    const failureRate =
+      testResults.filter((t) => t.status === 'failed').length /
+      testResults.length;
+    return failureRate * 100;
+  }
 
   /**
    * Store metrics for historical tracking
@@ -525,20 +704,51 @@ export class TestExecutionValidator extends EventEmitter {
    * Generate optimization opportunities
    */
   private generateOptimizationOpportunities(
-    allMetrics: TestSuiteMetrics[], 
-    concurrencyMetrics: any
+    allMetrics: TestSuiteMetrics[],
+    concurrencyMetrics: any,
   ): string[] {
     const opportunities: string[] = [];
 
-    const totalExecutionTime = allMetrics.reduce((sum, m) => sum + m.totalExecutionTime, 0);
-    const averageTestTime = allMetrics.reduce((sum, m) => sum + m.averageTestTime, 0) / allMetrics.length;
-    const totalMemoryIncrease = allMetrics.reduce((sum, m) => sum + m.memoryUsage.increase, 0);
+    const totalExecutionTime = allMetrics.reduce(
+      (sum, m) => sum + m.totalExecutionTime,
+      0,
+    );
+    const averageTestTime =
+      allMetrics.reduce((sum, m) => sum + m.averageTestTime, 0) /
+      allMetrics.length;
+    const totalMemoryIncrease = allMetrics.reduce(
+      (sum, m) => sum + m.memoryUsage.increase,
+      0,
+    );
 
     if (totalExecutionTime > 60000) {
-      opportunities.push('Consider implementing test parallelization to reduce total execution time');}if (averageTestTime > 1000) {
-      opportunities.push('Optimize individual test execution time through mocking and test simplification');}if (totalMemoryIncrease > 200) {
-      opportunities.push('Implement better memory management and cleanup in tests');}if (concurrencyMetrics.parallelizationBenefit < 30) {
-      opportunities.push('Reduce test dependencies to improve parallel execution effectiveness');}opportunities.push('Consider implementing test result caching for unchanged code');opportunities.push('Evaluate test isolation to reduce setup/teardown overhead');return opportunities;}
+      opportunities.push(
+        'Consider implementing test parallelization to reduce total execution time',
+      );
+    }
+    if (averageTestTime > 1000) {
+      opportunities.push(
+        'Optimize individual test execution time through mocking and test simplification',
+      );
+    }
+    if (totalMemoryIncrease > 200) {
+      opportunities.push(
+        'Implement better memory management and cleanup in tests',
+      );
+    }
+    if (concurrencyMetrics.parallelizationBenefit < 30) {
+      opportunities.push(
+        'Reduce test dependencies to improve parallel execution effectiveness',
+      );
+    }
+    opportunities.push(
+      'Consider implementing test result caching for unchanged code',
+    );
+    opportunities.push(
+      'Evaluate test isolation to reduce setup/teardown overhead',
+    );
+    return opportunities;
+  }
 
   /**
    * Detect performance regressions
@@ -560,12 +770,14 @@ export class TestExecutionValidator extends EventEmitter {
     }> = [];
 
     // Example regression detection
-    allMetrics.forEach(metrics => {
+    allMetrics.forEach((metrics) => {
       if (metrics.averageTestTime > 2000) {
         regressions.push({
           test: metrics.suiteName,
-          metric: 'averageTestTime',previousValue: 1500,currentValue: metrics.averageTestTime,
-          regression: ((metrics.averageTestTime - 1500) / 1500) * 100
+          metric: 'averageTestTime',
+          previousValue: 1500,
+          currentValue: metrics.averageTestTime,
+          regression: ((metrics.averageTestTime - 1500) / 1500) * 100,
         });
       }
     });
@@ -594,27 +806,39 @@ export class TestExecutionValidator extends EventEmitter {
   } {
     const allMetrics = Array.from(this.testMetrics.values()).flat();
     const totalSuites = this.testMetrics.size;
-    
-    const averageExecutionTime = allMetrics.length > 0 
-      ? allMetrics.reduce((sum, m) => sum + m.totalExecutionTime, 0) / allMetrics.length 
-      : 0;
 
-    const memoryEfficiency = allMetrics.length > 0 
-      ? Math.max(0, 100 - (allMetrics.reduce((sum, m) => sum + m.memoryUsage.increase, 0) / 10))
-      : 100;
+    const averageExecutionTime =
+      allMetrics.length > 0
+        ? allMetrics.reduce((sum, m) => sum + m.totalExecutionTime, 0) /
+          allMetrics.length
+        : 0;
 
-    const reliabilityScore = allMetrics.length > 0 
-      ? allMetrics.reduce((sum, m) => sum + m.reliability.successRate, 0) / allMetrics.length 
-      : 100;
+    const memoryEfficiency =
+      allMetrics.length > 0
+        ? Math.max(
+            0,
+            100 -
+              allMetrics.reduce((sum, m) => sum + m.memoryUsage.increase, 0) /
+                10,
+          )
+        : 100;
 
-    const recommendations = this.generateOptimizationOpportunities(allMetrics, { parallelizationBenefit: 50 });
+    const reliabilityScore =
+      allMetrics.length > 0
+        ? allMetrics.reduce((sum, m) => sum + m.reliability.successRate, 0) /
+          allMetrics.length
+        : 100;
+
+    const recommendations = this.generateOptimizationOpportunities(allMetrics, {
+      parallelizationBenefit: 50,
+    });
 
     return {
       totalSuites,
       averageExecutionTime,
       memoryEfficiency,
       reliabilityScore,
-      recommendations
+      recommendations,
     };
   }
 }

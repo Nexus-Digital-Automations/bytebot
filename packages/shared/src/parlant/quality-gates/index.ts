@@ -12,61 +12,65 @@
  */
 
 // Core Types and Interfaces
-export * from './core/quality-gate-types';
-export * from './core/quality-gate-framework';
+export * from "./core/quality-gate-types";
+export * from "./core/quality-gate-framework";
 
 // Quality Gate Implementations
-export * from './gates/performance-gate';
-export * from './gates/security-gate';
+export * from "./gates/performance-gate";
+export * from "./gates/security-gate";
 
 // Explicitly re-export to resolve ambiguity
-export { ComplianceStatus } from './core/quality-gate-types';
+export { ComplianceStatus } from "./core/quality-gate-types";
 
 // Rollback System
-export * from './rollback/rollback-engine';
+export * from "./rollback/rollback-engine";
 
 // Configuration System
-export * from './config/quality-gates-config';
+export * from "./config/quality-gates-config";
 
 // Main Framework Service
-export { QualityGateFrameworkService } from './core/quality-gate-framework';
+export { QualityGateFrameworkService } from "./core/quality-gate-framework";
 
 // Gate Implementations
-export { PerformanceQualityGate } from './gates/performance-gate';
-export { SecurityQualityGate } from './gates/security-gate';
+export { PerformanceQualityGate } from "./gates/performance-gate";
+export { SecurityQualityGate } from "./gates/security-gate";
 
 // Rollback Engine
-export { RollbackEngine } from './rollback/rollback-engine';
+export { RollbackEngine } from "./rollback/rollback-engine";
 
 // Configuration Factory
-export { DefaultQualityGatesConfigFactory, ConfigurationValidator } from './config/quality-gates-config';
+export {
+  DefaultQualityGatesConfigFactory,
+  ConfigurationValidator,
+} from "./config/quality-gates-config";
 
 /**
  * Quality Gates Framework Version
  */
-export const QUALITY_GATES_VERSION = '1.0.0';
+export const QUALITY_GATES_VERSION = "1.0.0";
 
 /**
  * Quality Gates Framework Metadata
  */
 export const QUALITY_GATES_METADATA = {
-  name: 'PARLANT Quality Gates Framework',
+  name: "PARLANT Quality Gates Framework",
   version: QUALITY_GATES_VERSION,
-  description: 'Comprehensive quality gate system for PARLANT database function wrapping',
-  author: 'Quality Gates Framework Agent',
-  created: '2025-09-20',
+  description:
+    "Comprehensive quality gate system for PARLANT database function wrapping",
+  author: "Quality Gates Framework Agent",
+  created: "2025-09-20",
 
   features: [
-    'Performance validation with sub-1000ms response time requirements',
-    'Security validation with zero critical vulnerability tolerance',
-    'Test coverage validation with 95%+ requirements',
-    'Function wrapper integrity validation',
-    'Automated rollback mechanisms with multiple strategies',
-    'Approval workflow automation for production deployments',
-    'Enterprise compliance validation and audit systems',
-    'Real-time monitoring and alerting',
-    'Comprehensive configuration management',
-    'Multi-environment support (dev, staging, production, test)'
+    "Performance validation with sub-1000ms response time requirements",
+    "Security validation with zero critical vulnerability tolerance",
+    "Test coverage validation with 95%+ requirements",
+    "Function wrapper integrity validation",
+    "Automated rollback mechanisms with multiple strategies",
+    "Approval workflow automation for production deployments",
+    "Enterprise compliance validation and audit systems",
+    "Real-time monitoring and alerting",
+    "Comprehensive configuration management",
+    "Multi-environment support (dev, staging, production, test)",
   ],
 
   capabilities: {
@@ -75,7 +79,7 @@ export const QUALITY_GATES_METADATA = {
       security: true,
       coverage: true,
       integrity: true,
-      custom: true
+      custom: true,
     },
 
     rollback: {
@@ -83,7 +87,7 @@ export const QUALITY_GATES_METADATA = {
       gradual: true,
       canary: true,
       blueGreen: true,
-      manual: true
+      manual: true,
     },
 
     approval: {
@@ -91,7 +95,7 @@ export const QUALITY_GATES_METADATA = {
       dualApproval: true,
       roleBasedApproval: true,
       autoApproval: true,
-      escalation: true
+      escalation: true,
     },
 
     compliance: {
@@ -101,7 +105,7 @@ export const QUALITY_GATES_METADATA = {
       pciDss: true,
       iso27001: true,
       nist: true,
-      soc2: true
+      soc2: true,
     },
 
     monitoring: {
@@ -109,23 +113,23 @@ export const QUALITY_GATES_METADATA = {
       alerting: true,
       dashboards: true,
       auditTrails: true,
-      reporting: true
-    }
+      reporting: true,
+    },
   },
 
   requirements: {
-    node: '>=16.0.0',
-    typescript: '>=4.5.0',
-    nestjs: '>=8.0.0'
+    node: ">=16.0.0",
+    typescript: ">=4.5.0",
+    nestjs: ">=8.0.0",
   },
 
   integrations: [
-    'PARLANT Function Wrapper Framework',
-    'Enterprise Authentication Systems',
-    'CI/CD Pipelines',
-    'Monitoring and Alerting Systems',
-    'Compliance Management Tools'
-  ]
+    "PARLANT Function Wrapper Framework",
+    "Enterprise Authentication Systems",
+    "CI/CD Pipelines",
+    "Monitoring and Alerting Systems",
+    "Compliance Management Tools",
+  ],
 } as const;
 
 /**
@@ -146,5 +150,5 @@ export default {
 
   // Metadata
   VERSION: QUALITY_GATES_VERSION,
-  METADATA: QUALITY_GATES_METADATA
+  METADATA: QUALITY_GATES_METADATA,
 };

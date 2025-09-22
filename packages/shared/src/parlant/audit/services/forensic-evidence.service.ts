@@ -19,9 +19,9 @@
  * @author Claude Code - Audit Trail System Agent
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Injectable, Logger } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { EventEmitter2 } from "@nestjs/event-emitter";
 import {
   AuditEvent,
   AuditEventId,
@@ -31,12 +31,16 @@ import {
   ChainOfCustodyEntry,
   LegalMetadata,
   DigitalSignature,
-} from '../types/audit-core.types';
+} from "../types/audit-core.types";
+import { EvidenceItem } from "../types/audit-extended.types";
 import {
-  EvidenceItem,
-} from '../types/audit-extended.types';
-import { createHash, randomBytes, createHmac, createSign, createVerify } from 'crypto';
-import { performance } from 'perf_hooks';
+  createHash,
+  randomBytes,
+  createHmac,
+  createSign,
+  createVerify,
+} from "crypto";
+import { performance } from "perf_hooks";
 
 // ===========================
 // MISSING TYPE DEFINITIONS
@@ -46,11 +50,11 @@ import { performance } from 'perf_hooks';
  * Evidence collection method
  */
 export enum EvidenceCollectionMethod {
-  AUTOMATED = 'automated',
-  MANUAL = 'manual',
-  HYBRID = 'hybrid',
-  REAL_TIME = 'real_time',
-  BATCH = 'batch',
+  AUTOMATED = "automated",
+  MANUAL = "manual",
+  HYBRID = "hybrid",
+  REAL_TIME = "real_time",
+  BATCH = "batch",
 }
 
 /**
@@ -191,14 +195,14 @@ export interface EvidenceCollectionMetadata {
  * Evidence collection methods
  */
 export enum EvidenceCollectionMethod {
-  AUTOMATED_CAPTURE = 'automated_capture',
-  MANUAL_EXTRACTION = 'manual_extraction',
-  LIVE_IMAGING = 'live_imaging',
-  MEMORY_DUMP = 'memory_dump',
-  NETWORK_CAPTURE = 'network_capture',
-  DATABASE_EXPORT = 'database_export',
-  LOG_EXTRACTION = 'log_extraction',
-  FILE_SYSTEM_COPY = 'file_system_copy',
+  AUTOMATED_CAPTURE = "automated_capture",
+  MANUAL_EXTRACTION = "manual_extraction",
+  LIVE_IMAGING = "live_imaging",
+  MEMORY_DUMP = "memory_dump",
+  NETWORK_CAPTURE = "network_capture",
+  DATABASE_EXPORT = "database_export",
+  LOG_EXTRACTION = "log_extraction",
+  FILE_SYSTEM_COPY = "file_system_copy",
 }
 
 /**
@@ -271,13 +275,13 @@ export interface CollectionAuthorization {
  * Authorization types
  */
 export enum AuthorizationType {
-  COURT_ORDER = 'court_order',
-  SEARCH_WARRANT = 'search_warrant',
-  REGULATORY_ORDER = 'regulatory_order',
-  CONSENT = 'consent',
-  BUSINESS_AUTHORIZATION = 'business_authorization',
-  EMERGENCY_AUTHORIZATION = 'emergency_authorization',
-  POLICY_AUTHORIZATION = 'policy_authorization',
+  COURT_ORDER = "court_order",
+  SEARCH_WARRANT = "search_warrant",
+  REGULATORY_ORDER = "regulatory_order",
+  CONSENT = "consent",
+  BUSINESS_AUTHORIZATION = "business_authorization",
+  EMERGENCY_AUTHORIZATION = "emergency_authorization",
+  POLICY_AUTHORIZATION = "policy_authorization",
 }
 
 /**
@@ -338,12 +342,12 @@ export interface CollectionEnvironment {
  * Environment types
  */
 export enum EnvironmentType {
-  PRODUCTION = 'production',
-  STAGING = 'staging',
-  TESTING = 'testing',
-  DEVELOPMENT = 'development',
-  DISASTER_RECOVERY = 'disaster_recovery',
-  OFFLINE = 'offline',
+  PRODUCTION = "production",
+  STAGING = "staging",
+  TESTING = "testing",
+  DEVELOPMENT = "development",
+  DISASTER_RECOVERY = "disaster_recovery",
+  OFFLINE = "offline",
 }
 
 /**
@@ -519,10 +523,10 @@ export interface SecurityPolicy {
  * Policy enforcement
  */
 export enum PolicyEnforcement {
-  ENFORCED = 'enforced',
-  AUDIT_ONLY = 'audit_only',
-  DISABLED = 'disabled',
-  WARNING_ONLY = 'warning_only',
+  ENFORCED = "enforced",
+  AUDIT_ONLY = "audit_only",
+  DISABLED = "disabled",
+  WARNING_ONLY = "warning_only",
 }
 
 /**
@@ -589,20 +593,20 @@ export interface FirewallRule {
  * Firewall policies
  */
 export enum FirewallPolicy {
-  ALLOW = 'allow',
-  DENY = 'deny',
-  LOG = 'log',
+  ALLOW = "allow",
+  DENY = "deny",
+  LOG = "log",
 }
 
 /**
  * Firewall actions
  */
 export enum FirewallAction {
-  ALLOW = 'allow',
-  DENY = 'deny',
-  DROP = 'drop',
-  REJECT = 'reject',
-  LOG = 'log',
+  ALLOW = "allow",
+  DENY = "deny",
+  DROP = "drop",
+  REJECT = "reject",
+  LOG = "log",
 }
 
 /**
@@ -847,11 +851,11 @@ export interface RoutingInfo {
  * Route types
  */
 export enum RouteType {
-  STATIC = 'static',
-  DYNAMIC = 'dynamic',
-  DEFAULT = 'default',
-  HOST = 'host',
-  NETWORK = 'network',
+  STATIC = "static",
+  DYNAMIC = "dynamic",
+  DEFAULT = "default",
+  HOST = "host",
+  NETWORK = "network",
 }
 
 /**
@@ -938,13 +942,13 @@ export interface NetworkConnection {
  * Connection states
  */
 export enum ConnectionState {
-  ESTABLISHED = 'established',
-  LISTENING = 'listening',
-  TIME_WAIT = 'time_wait',
-  CLOSE_WAIT = 'close_wait',
-  FIN_WAIT = 'fin_wait',
-  SYN_SENT = 'syn_sent',
-  SYN_RECEIVED = 'syn_received',
+  ESTABLISHED = "established",
+  LISTENING = "listening",
+  TIME_WAIT = "time_wait",
+  CLOSE_WAIT = "close_wait",
+  FIN_WAIT = "fin_wait",
+  SYN_SENT = "syn_sent",
+  SYN_RECEIVED = "syn_received",
 }
 
 /**
@@ -1005,11 +1009,11 @@ export interface NetworkService {
  * Service status
  */
 export enum ServiceStatus {
-  RUNNING = 'running',
-  STOPPED = 'stopped',
-  STARTING = 'starting',
-  STOPPING = 'stopping',
-  FAILED = 'failed',
+  RUNNING = "running",
+  STOPPED = "stopped",
+  STARTING = "starting",
+  STOPPING = "stopping",
+  FAILED = "failed",
 }
 
 /**
@@ -1061,24 +1065,24 @@ export interface TrafficSelector {
  * Selector types
  */
 export enum SelectorType {
-  SOURCE_IP = 'source_ip',
-  DESTINATION_IP = 'destination_ip',
-  SOURCE_PORT = 'source_port',
-  DESTINATION_PORT = 'destination_port',
-  PROTOCOL = 'protocol',
-  DSCP = 'dscp',
-  APPLICATION = 'application',
+  SOURCE_IP = "source_ip",
+  DESTINATION_IP = "destination_ip",
+  SOURCE_PORT = "source_port",
+  DESTINATION_PORT = "destination_port",
+  PROTOCOL = "protocol",
+  DSCP = "dscp",
+  APPLICATION = "application",
 }
 
 /**
  * Match criteria
  */
 export enum MatchCriteria {
-  EXACT = 'exact',
-  PREFIX = 'prefix',
-  RANGE = 'range',
-  REGEX = 'regex',
-  WILDCARD = 'wildcard',
+  EXACT = "exact",
+  PREFIX = "prefix",
+  RANGE = "range",
+  REGEX = "regex",
+  WILDCARD = "wildcard",
 }
 
 /**
@@ -1096,11 +1100,11 @@ export interface QosAction {
  * QoS action types
  */
 export enum QosActionType {
-  SET_PRIORITY = 'set_priority',
-  LIMIT_BANDWIDTH = 'limit_bandwidth',
-  GUARANTEE_BANDWIDTH = 'guarantee_bandwidth',
-  DROP_PACKET = 'drop_packet',
-  MARK_PACKET = 'mark_packet',
+  SET_PRIORITY = "set_priority",
+  LIMIT_BANDWIDTH = "limit_bandwidth",
+  GUARANTEE_BANDWIDTH = "guarantee_bandwidth",
+  DROP_PACKET = "drop_packet",
+  MARK_PACKET = "mark_packet",
 }
 
 /**
@@ -1127,9 +1131,9 @@ export interface BandwidthPolicy {
  * Traffic direction
  */
 export enum TrafficDirection {
-  INGRESS = 'ingress',
-  EGRESS = 'egress',
-  BIDIRECTIONAL = 'bidirectional',
+  INGRESS = "ingress",
+  EGRESS = "egress",
+  BIDIRECTIONAL = "bidirectional",
 }
 
 /**
@@ -1170,10 +1174,10 @@ export interface SecurityProtocol {
  * Protocol status
  */
 export enum ProtocolStatus {
-  ACTIVE = 'active',
-  INACTIVE = 'inactive',
-  NEGOTIATING = 'negotiating',
-  FAILED = 'failed',
+  ACTIVE = "active",
+  INACTIVE = "inactive",
+  NEGOTIATING = "negotiating",
+  FAILED = "failed",
 }
 
 /**
@@ -1214,11 +1218,11 @@ export interface DetectionMethod {
  * Detection method types
  */
 export enum DetectionMethodType {
-  SIGNATURE_BASED = 'signature_based',
-  ANOMALY_BASED = 'anomaly_based',
-  BEHAVIOR_BASED = 'behavior_based',
-  HEURISTIC = 'heuristic',
-  MACHINE_LEARNING = 'machine_learning',
+  SIGNATURE_BASED = "signature_based",
+  ANOMALY_BASED = "anomaly_based",
+  BEHAVIOR_BASED = "behavior_based",
+  HEURISTIC = "heuristic",
+  MACHINE_LEARNING = "machine_learning",
 }
 
 /**
@@ -1259,12 +1263,12 @@ export interface IdsResponseAction {
  * IDS action types
  */
 export enum IdsActionType {
-  ALERT = 'alert',
-  BLOCK_CONNECTION = 'block_connection',
-  QUARANTINE_HOST = 'quarantine_host',
-  LOG_EVENT = 'log_event',
-  NOTIFY_ADMINISTRATOR = 'notify_administrator',
-  EXECUTE_SCRIPT = 'execute_script',
+  ALERT = "alert",
+  BLOCK_CONNECTION = "block_connection",
+  QUARANTINE_HOST = "quarantine_host",
+  LOG_EVENT = "log_event",
+  NOTIFY_ADMINISTRATOR = "notify_administrator",
+  EXECUTE_SCRIPT = "execute_script",
 }
 
 /**
@@ -1285,24 +1289,24 @@ export interface TriggerCondition {
  * Condition types
  */
 export enum ConditionType {
-  SEVERITY = 'severity',
-  SOURCE_IP = 'source_ip',
-  DESTINATION_IP = 'destination_ip',
-  PROTOCOL = 'protocol',
-  SIGNATURE_ID = 'signature_id',
-  FREQUENCY = 'frequency',
+  SEVERITY = "severity",
+  SOURCE_IP = "source_ip",
+  DESTINATION_IP = "destination_ip",
+  PROTOCOL = "protocol",
+  SIGNATURE_ID = "signature_id",
+  FREQUENCY = "frequency",
 }
 
 /**
  * Condition operators
  */
 export enum ConditionOperator {
-  EQUALS = 'equals',
-  NOT_EQUALS = 'not_equals',
-  GREATER_THAN = 'greater_than',
-  LESS_THAN = 'less_than',
-  CONTAINS = 'contains',
-  MATCHES = 'matches',
+  EQUALS = "equals",
+  NOT_EQUALS = "not_equals",
+  GREATER_THAN = "greater_than",
+  LESS_THAN = "less_than",
+  CONTAINS = "contains",
+  MATCHES = "matches",
 }
 
 /**
@@ -1329,11 +1333,11 @@ export interface VpnConfiguration {
  * VPN types
  */
 export enum VpnType {
-  SITE_TO_SITE = 'site_to_site',
-  REMOTE_ACCESS = 'remote_access',
-  CLIENT_TO_SITE = 'client_to_site',
-  SSL_VPN = 'ssl_vpn',
-  IPSEC_VPN = 'ipsec_vpn',
+  SITE_TO_SITE = "site_to_site",
+  REMOTE_ACCESS = "remote_access",
+  CLIENT_TO_SITE = "client_to_site",
+  SSL_VPN = "ssl_vpn",
+  IPSEC_VPN = "ipsec_vpn",
 }
 
 /**
@@ -1360,21 +1364,21 @@ export interface VpnEndpoint {
  * Endpoint types
  */
 export enum EndpointType {
-  GATEWAY = 'gateway',
-  CLIENT = 'client',
-  PEER = 'peer',
-  SERVER = 'server',
+  GATEWAY = "gateway",
+  CLIENT = "client",
+  PEER = "peer",
+  SERVER = "server",
 }
 
 /**
  * Connection status
  */
 export enum ConnectionStatus {
-  CONNECTED = 'connected',
-  DISCONNECTED = 'disconnected',
-  CONNECTING = 'connecting',
-  FAILED = 'failed',
-  SUSPENDED = 'suspended',
+  CONNECTED = "connected",
+  DISCONNECTED = "disconnected",
+  CONNECTING = "connecting",
+  FAILED = "failed",
+  SUSPENDED = "suspended",
 }
 
 /**
@@ -1415,11 +1419,11 @@ export interface VpnAuthenticationSettings {
  * VPN authentication methods
  */
 export enum VpnAuthenticationMethod {
-  PRE_SHARED_KEY = 'pre_shared_key',
-  CERTIFICATE = 'certificate',
-  KERBEROS = 'kerberos',
-  RADIUS = 'radius',
-  LDAP = 'ldap',
+  PRE_SHARED_KEY = "pre_shared_key",
+  CERTIFICATE = "certificate",
+  KERBEROS = "kerberos",
+  RADIUS = "radius",
+  LDAP = "ldap",
 }
 
 /**
@@ -1477,10 +1481,10 @@ export interface MonitoringTool {
  * Tool status
  */
 export enum ToolStatus {
-  ACTIVE = 'active',
-  INACTIVE = 'inactive',
-  ERROR = 'error',
-  MAINTENANCE = 'maintenance',
+  ACTIVE = "active",
+  INACTIVE = "inactive",
+  ERROR = "error",
+  MAINTENANCE = "maintenance",
 }
 
 /**
@@ -1572,12 +1576,12 @@ export interface PerformanceThreshold {
  * Threshold operators
  */
 export enum ThresholdOperator {
-  GREATER_THAN = 'greater_than',
-  LESS_THAN = 'less_than',
-  EQUALS = 'equals',
-  NOT_EQUALS = 'not_equals',
-  GREATER_THAN_OR_EQUAL = 'greater_than_or_equal',
-  LESS_THAN_OR_EQUAL = 'less_than_or_equal',
+  GREATER_THAN = "greater_than",
+  LESS_THAN = "less_than",
+  EQUALS = "equals",
+  NOT_EQUALS = "not_equals",
+  GREATER_THAN_OR_EQUAL = "greater_than_or_equal",
+  LESS_THAN_OR_EQUAL = "less_than_or_equal",
 }
 
 /**
@@ -1604,11 +1608,11 @@ export interface SecurityContext {
  * Threat levels
  */
 export enum ThreatLevel {
-  LOW = 'low',
-  MODERATE = 'moderate',
-  HIGH = 'high',
-  SEVERE = 'severe',
-  CRITICAL = 'critical',
+  LOW = "low",
+  MODERATE = "moderate",
+  HIGH = "high",
+  SEVERE = "severe",
+  CRITICAL = "critical",
 }
 
 /**
@@ -1635,32 +1639,32 @@ export interface SecurityControl {
  * Security control types
  */
 export enum SecurityControlType {
-  PREVENTIVE = 'preventive',
-  DETECTIVE = 'detective',
-  CORRECTIVE = 'corrective',
-  COMPENSATING = 'compensating',
-  DETERRENT = 'deterrent',
-  RECOVERY = 'recovery',
+  PREVENTIVE = "preventive",
+  DETECTIVE = "detective",
+  CORRECTIVE = "corrective",
+  COMPENSATING = "compensating",
+  DETERRENT = "deterrent",
+  RECOVERY = "recovery",
 }
 
 /**
  * Implementation status
  */
 export enum ImplementationStatus {
-  NOT_IMPLEMENTED = 'not_implemented',
-  PARTIALLY_IMPLEMENTED = 'partially_implemented',
-  FULLY_IMPLEMENTED = 'fully_implemented',
-  NOT_APPLICABLE = 'not_applicable',
+  NOT_IMPLEMENTED = "not_implemented",
+  PARTIALLY_IMPLEMENTED = "partially_implemented",
+  FULLY_IMPLEMENTED = "fully_implemented",
+  NOT_APPLICABLE = "not_applicable",
 }
 
 /**
  * Effectiveness rating
  */
 export enum EffectivenessRating {
-  INEFFECTIVE = 'ineffective',
-  PARTIALLY_EFFECTIVE = 'partially_effective',
-  EFFECTIVE = 'effective',
-  HIGHLY_EFFECTIVE = 'highly_effective',
+  INEFFECTIVE = "ineffective",
+  PARTIALLY_EFFECTIVE = "partially_effective",
+  EFFECTIVE = "effective",
+  HIGHLY_EFFECTIVE = "highly_effective",
 }
 
 /**
@@ -1684,11 +1688,11 @@ export interface IncidentStatus {
  * Response status
  */
 export enum ResponseStatus {
-  NORMAL = 'normal',
-  ALERT = 'alert',
-  RESPONSE_ACTIVE = 'response_active',
-  RECOVERY = 'recovery',
-  POST_INCIDENT = 'post_incident',
+  NORMAL = "normal",
+  ALERT = "alert",
+  RESPONSE_ACTIVE = "response_active",
+  RECOVERY = "recovery",
+  POST_INCIDENT = "post_incident",
 }
 
 /**
@@ -1729,11 +1733,11 @@ export interface FrameworkCompliance {
  * Framework compliance status
  */
 export enum FrameworkComplianceStatus {
-  COMPLIANT = 'compliant',
-  NON_COMPLIANT = 'non_compliant',
-  PARTIALLY_COMPLIANT = 'partially_compliant',
-  UNDER_REVIEW = 'under_review',
-  NOT_ASSESSED = 'not_assessed',
+  COMPLIANT = "compliant",
+  NON_COMPLIANT = "non_compliant",
+  PARTIALLY_COMPLIANT = "partially_compliant",
+  UNDER_REVIEW = "under_review",
+  NOT_ASSESSED = "not_assessed",
 }
 
 /**
@@ -1860,9 +1864,9 @@ export interface TemperatureReading {
  * Temperature units
  */
 export enum TemperatureUnit {
-  CELSIUS = 'celsius',
-  FAHRENHEIT = 'fahrenheit',
-  KELVIN = 'kelvin',
+  CELSIUS = "celsius",
+  FAHRENHEIT = "fahrenheit",
+  KELVIN = "kelvin",
 }
 
 /**
@@ -1883,10 +1887,10 @@ export interface TemperatureThreshold {
  * Temperature threshold types
  */
 export enum TemperatureThresholdType {
-  LOW_WARNING = 'low_warning',
-  LOW_CRITICAL = 'low_critical',
-  HIGH_WARNING = 'high_warning',
-  HIGH_CRITICAL = 'high_critical',
+  LOW_WARNING = "low_warning",
+  LOW_CRITICAL = "low_critical",
+  HIGH_WARNING = "high_warning",
+  HIGH_CRITICAL = "high_critical",
 }
 
 /**
@@ -1924,10 +1928,10 @@ export interface HumidityThreshold {
  * Humidity threshold types
  */
 export enum HumidityThresholdType {
-  LOW_WARNING = 'low_warning',
-  LOW_CRITICAL = 'low_critical',
-  HIGH_WARNING = 'high_warning',
-  HIGH_CRITICAL = 'high_critical',
+  LOW_WARNING = "low_warning",
+  LOW_CRITICAL = "low_critical",
+  HIGH_WARNING = "high_warning",
+  HIGH_CRITICAL = "high_critical",
 }
 
 /**
@@ -2002,11 +2006,11 @@ export interface ChemicalContaminant {
  * Danger levels
  */
 export enum DangerLevel {
-  SAFE = 'safe',
-  CAUTION = 'caution',
-  WARNING = 'warning',
-  DANGER = 'danger',
-  EXTREME_DANGER = 'extreme_danger',
+  SAFE = "safe",
+  CAUTION = "caution",
+  WARNING = "warning",
+  DANGER = "danger",
+  EXTREME_DANGER = "extreme_danger",
 }
 
 /**
@@ -2050,10 +2054,10 @@ export interface VibrationThreshold {
  * Vibration threshold types
  */
 export enum VibrationThresholdType {
-  AMPLITUDE_HIGH = 'amplitude_high',
-  FREQUENCY_HIGH = 'frequency_high',
-  AMPLITUDE_LOW = 'amplitude_low',
-  FREQUENCY_LOW = 'frequency_low',
+  AMPLITUDE_HIGH = "amplitude_high",
+  FREQUENCY_HIGH = "frequency_high",
+  AMPLITUDE_LOW = "amplitude_low",
+  FREQUENCY_LOW = "frequency_low",
 }
 
 /**
@@ -2142,11 +2146,11 @@ export interface PowerSource {
  * Power source status
  */
 export enum PowerSourceStatus {
-  NORMAL = 'normal',
-  BACKUP = 'backup',
-  BATTERY = 'battery',
-  GENERATOR = 'generator',
-  FAILED = 'failed',
+  NORMAL = "normal",
+  BACKUP = "backup",
+  BATTERY = "battery",
+  GENERATOR = "generator",
+  FAILED = "failed",
 }
 
 /**
@@ -2207,10 +2211,10 @@ export interface VoltageThreshold {
  * Voltage threshold types
  */
 export enum VoltageThresholdType {
-  OVER_VOLTAGE = 'over_voltage',
-  UNDER_VOLTAGE = 'under_voltage',
-  SURGE = 'surge',
-  SAG = 'sag',
+  OVER_VOLTAGE = "over_voltage",
+  UNDER_VOLTAGE = "under_voltage",
+  SURGE = "surge",
+  SAG = "sag",
 }
 
 /**
@@ -2251,9 +2255,9 @@ export interface CurrentThreshold {
  * Current threshold types
  */
 export enum CurrentThresholdType {
-  OVER_CURRENT = 'over_current',
-  UNDER_CURRENT = 'under_current',
-  IMBALANCE = 'imbalance',
+  OVER_CURRENT = "over_current",
+  UNDER_CURRENT = "under_current",
+  IMBALANCE = "imbalance",
 }
 
 /**
@@ -2291,9 +2295,9 @@ export interface FrequencyThreshold {
  * Frequency threshold types
  */
 export enum FrequencyThresholdType {
-  HIGH_FREQUENCY = 'high_frequency',
-  LOW_FREQUENCY = 'low_frequency',
-  DEVIATION = 'deviation',
+  HIGH_FREQUENCY = "high_frequency",
+  LOW_FREQUENCY = "low_frequency",
+  DEVIATION = "deviation",
 }
 
 /**
@@ -2337,22 +2341,22 @@ export interface UpsStatus {
  * UPS modes
  */
 export enum UpsMode {
-  ONLINE = 'online',
-  BATTERY = 'battery',
-  BYPASS = 'bypass',
-  OFF = 'off',
-  TEST = 'test',
+  ONLINE = "online",
+  BATTERY = "battery",
+  BYPASS = "bypass",
+  OFF = "off",
+  TEST = "test",
 }
 
 /**
  * UPS health
  */
 export enum UpsHealth {
-  GOOD = 'good',
-  WARNING = 'warning',
-  REPLACE_BATTERY = 'replace_battery',
-  REPLACE_UPS = 'replace_ups',
-  FAILED = 'failed',
+  GOOD = "good",
+  WARNING = "warning",
+  REPLACE_BATTERY = "replace_battery",
+  REPLACE_UPS = "replace_ups",
+  FAILED = "failed",
 }
 
 /**
@@ -2413,11 +2417,11 @@ export interface CoolingStatus {
  * Cooling system types
  */
 export enum CoolingSystemType {
-  AIR_CONDITIONING = 'air_conditioning',
-  LIQUID_COOLING = 'liquid_cooling',
-  NATURAL_CONVECTION = 'natural_convection',
-  FORCED_AIR = 'forced_air',
-  IMMERSION_COOLING = 'immersion_cooling',
+  AIR_CONDITIONING = "air_conditioning",
+  LIQUID_COOLING = "liquid_cooling",
+  NATURAL_CONVECTION = "natural_convection",
+  FORCED_AIR = "forced_air",
+  IMMERSION_COOLING = "immersion_cooling",
 }
 
 /**
@@ -2441,11 +2445,11 @@ export interface CoolingCapacity {
  * Cooling system status
  */
 export enum CoolingSystemStatus {
-  OPERATING = 'operating',
-  STANDBY = 'standby',
-  MAINTENANCE = 'maintenance',
-  FAILED = 'failed',
-  OFFLINE = 'offline',
+  OPERATING = "operating",
+  STANDBY = "standby",
+  MAINTENANCE = "maintenance",
+  FAILED = "failed",
+  OFFLINE = "offline",
 }
 
 /**
@@ -2492,25 +2496,25 @@ export interface PhysicalAccessControl {
  * Access control types
  */
 export enum AccessControlType {
-  CARD_READER = 'card_reader',
-  BIOMETRIC_SCANNER = 'biometric_scanner',
-  KEYPAD = 'keypad',
-  SECURITY_GUARD = 'security_guard',
-  CAMERA_SYSTEM = 'camera_system',
-  MOTION_DETECTOR = 'motion_detector',
+  CARD_READER = "card_reader",
+  BIOMETRIC_SCANNER = "biometric_scanner",
+  KEYPAD = "keypad",
+  SECURITY_GUARD = "security_guard",
+  CAMERA_SYSTEM = "camera_system",
+  MOTION_DETECTOR = "motion_detector",
 }
 
 /**
  * Physical authentication methods
  */
 export enum PhysicalAuthenticationMethod {
-  RFID_CARD = 'rfid_card',
-  MAGNETIC_STRIPE = 'magnetic_stripe',
-  FINGERPRINT = 'fingerprint',
-  RETINA_SCAN = 'retina_scan',
-  FACE_RECOGNITION = 'face_recognition',
-  PIN_CODE = 'pin_code',
-  KEY = 'key',
+  RFID_CARD = "rfid_card",
+  MAGNETIC_STRIPE = "magnetic_stripe",
+  FINGERPRINT = "fingerprint",
+  RETINA_SCAN = "retina_scan",
+  FACE_RECOGNITION = "face_recognition",
+  PIN_CODE = "pin_code",
+  KEY = "key",
 }
 
 /**
@@ -2540,24 +2544,24 @@ export interface AccessLogEntry {
  * Access results
  */
 export enum AccessResult {
-  GRANTED = 'granted',
-  DENIED = 'denied',
-  FORCED_ENTRY = 'forced_entry',
-  TAILGATING = 'tailgating',
-  EMERGENCY_OVERRIDE = 'emergency_override',
+  GRANTED = "granted",
+  DENIED = "denied",
+  FORCED_ENTRY = "forced_entry",
+  TAILGATING = "tailgating",
+  EMERGENCY_OVERRIDE = "emergency_override",
 }
 
 /**
  * Access control status
  */
 export enum AccessControlStatus {
-  ACTIVE = 'active',
-  INACTIVE = 'inactive',
-  MAINTENANCE = 'maintenance',
-  BYPASSED = 'bypassed',
-  FAILED = 'failed',
+  ACTIVE = "active",
+  INACTIVE = "inactive",
+  MAINTENANCE = "maintenance",
+  BYPASSED = "bypassed",
+  FAILED = "failed",
 }
 
 // Continue with remaining types in next part...
 
-export * from './forensic-evidence.service';
+export * from "./forensic-evidence.service";

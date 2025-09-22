@@ -8,12 +8,12 @@
  * @since 2025-09-22
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
-import { ConversationalRateLimiterService } from '../core/conversational-rate-limiter.service';
-import { MultiTierRateManagerService } from '../framework/multi-tier-rate-manager.service';
-import { NaturalLanguageRateCommunicatorService } from '../communication/natural-language-rate-communicator.service';
-import { EnterpriseTrafficManagerService } from '../enterprise/enterprise-traffic-manager.service';
-import { RateLimitingAnalyticsService } from '../analytics/rate-limiting-analytics.service';
+import { Test, TestingModule } from "@nestjs/testing";
+import { ConversationalRateLimiterService } from "../core/conversational-rate-limiter.service";
+import { MultiTierRateManagerService } from "../framework/multi-tier-rate-manager.service";
+import { NaturalLanguageRateCommunicatorService } from "../communication/natural-language-rate-communicator.service";
+import { EnterpriseTrafficManagerService } from "../enterprise/enterprise-traffic-manager.service";
+import { RateLimitingAnalyticsService } from "../analytics/rate-limiting-analytics.service";
 import {
   RateLimitConfiguration,
   RateLimitContext,
@@ -22,11 +22,15 @@ import {
   APIRateLimits,
   OperationRateLimits,
   GlobalRateLimits,
-  EnterpriseRateLimitConfig
-} from '../types/rate-limiting.types';
-import { UserContext, SecurityLevel, RiskLevel } from '../../interfaces/conversational-api.interface';
+  EnterpriseRateLimitConfig,
+} from "../types/rate-limiting.types";
+import {
+  UserContext,
+  SecurityLevel,
+  RiskLevel,
+} from "../../interfaces/conversational-api.interface";
 
-describe('PARLANT Phase 1 - Comprehensive Rate Limiting System', () => {
+describe("PARLANT Phase 1 - Comprehensive Rate Limiting System", () => {
   let conversationalRateLimiter: ConversationalRateLimiterService;
   let multiTierManager: MultiTierRateManagerService;
   let naturalLanguageCommunicator: NaturalLanguageRateCommunicatorService;
@@ -45,69 +49,86 @@ describe('PARLANT Phase 1 - Comprehensive Rate Limiting System', () => {
       providers: [
         {
           provide: ConversationalRateLimiterService,
-          useFactory: () => new ConversationalRateLimiterService(testConfiguration)
+          useFactory: () =>
+            new ConversationalRateLimiterService(testConfiguration),
         },
         {
           provide: MultiTierRateManagerService,
-          useFactory: () => new MultiTierRateManagerService(testConfiguration)
+          useFactory: () => new MultiTierRateManagerService(testConfiguration),
         },
         NaturalLanguageRateCommunicatorService,
         {
           provide: EnterpriseTrafficManagerService,
-          useFactory: () => new EnterpriseTrafficManagerService(testConfiguration)
+          useFactory: () =>
+            new EnterpriseTrafficManagerService(testConfiguration),
         },
-        RateLimitingAnalyticsService
-      ]
+        RateLimitingAnalyticsService,
+      ],
     }).compile();
 
-    conversationalRateLimiter = module.get<ConversationalRateLimiterService>(ConversationalRateLimiterService);
-    multiTierManager = module.get<MultiTierRateManagerService>(MultiTierRateManagerService);
-    naturalLanguageCommunicator = module.get<NaturalLanguageRateCommunicatorService>(NaturalLanguageRateCommunicatorService);
-    enterpriseTrafficManager = module.get<EnterpriseTrafficManagerService>(EnterpriseTrafficManagerService);
-    analyticsService = module.get<RateLimitingAnalyticsService>(RateLimitingAnalyticsService);
+    conversationalRateLimiter = module.get<ConversationalRateLimiterService>(
+      ConversationalRateLimiterService,
+    );
+    multiTierManager = module.get<MultiTierRateManagerService>(
+      MultiTierRateManagerService,
+    );
+    naturalLanguageCommunicator =
+      module.get<NaturalLanguageRateCommunicatorService>(
+        NaturalLanguageRateCommunicatorService,
+      );
+    enterpriseTrafficManager = module.get<EnterpriseTrafficManagerService>(
+      EnterpriseTrafficManagerService,
+    );
+    analyticsService = module.get<RateLimitingAnalyticsService>(
+      RateLimitingAnalyticsService,
+    );
 
     // Initialize test contexts
     testUserContext = createTestUserContext();
     testContext = createTestRateLimitContext(testUserContext);
   });
 
-  describe('Core ConversationalRateLimiter', () => {
-    describe('Basic Rate Limiting', () => {
-      it('should allow requests within limits', async () => {
-        const decision = await conversationalRateLimiter.evaluateRequest(testContext);
+  describe("Core ConversationalRateLimiter", () => {
+    describe("Basic Rate Limiting", () => {
+      it("should allow requests within limits", async () => {
+        const decision =
+          await conversationalRateLimiter.evaluateRequest(testContext);
 
-        expect(decision.decision).toBe('ALLOW');
+        expect(decision.decision).toBe("ALLOW");
         expect(decision.processingTime).toBeLessThan(50); // Target: <50ms
         expect(decision.conversationalResponse).toBeDefined();
         expect(decision.analytics).toBeDefined();
       }, 10000);
 
-      it('should deny requests exceeding limits', async () => {
+      it("should deny requests exceeding limits", async () => {
         // Simulate high-frequency requests
         const highFrequencyContext = {
           ...testContext,
           recentHistory: Array(100).fill({
             timestamp: new Date(),
             endpoint: testContext.apiEndpoint,
-            outcome: 'ALLOWED'
-          })
+            outcome: "ALLOWED",
+          }),
         };
 
-        const decision = await conversationalRateLimiter.evaluateRequest(highFrequencyContext);
+        const decision =
+          await conversationalRateLimiter.evaluateRequest(highFrequencyContext);
 
-        expect(['DENY', 'THROTTLE', 'QUEUE']).toContain(decision.decision);
+        expect(["DENY", "THROTTLE", "QUEUE"]).toContain(decision.decision);
         expect(decision.reason).toBeTruthy();
         expect(decision.conversationalResponse).toBeDefined();
       });
 
-      it('should handle concurrent requests efficiently', async () => {
+      it("should handle concurrent requests efficiently", async () => {
         const concurrentRequests = 100;
-        const promises = Array(concurrentRequests).fill(null).map((_, index) =>
-          conversationalRateLimiter.evaluateRequest({
-            ...testContext,
-            requestId: `concurrent-${index}`
-          })
-        );
+        const promises = Array(concurrentRequests)
+          .fill(null)
+          .map((_, index) =>
+            conversationalRateLimiter.evaluateRequest({
+              ...testContext,
+              requestId: `concurrent-${index}`,
+            }),
+          );
 
         const startTime = Date.now();
         const results = await Promise.all(promises);
@@ -118,89 +139,101 @@ describe('PARLANT Phase 1 - Comprehensive Rate Limiting System', () => {
         expect(results).toHaveLength(concurrentRequests);
 
         // All requests should have valid decisions
-        results.forEach(result => {
-          expect(['ALLOW', 'DENY', 'THROTTLE', 'QUEUE']).toContain(result.decision);
+        results.forEach((result) => {
+          expect(["ALLOW", "DENY", "THROTTLE", "QUEUE"]).toContain(
+            result.decision,
+          );
           expect(result.processingTime).toBeLessThan(50);
         });
       });
     });
 
-    describe('Conversational Capabilities', () => {
-      it('should provide natural language explanations', async () => {
-        const decision = await conversationalRateLimiter.evaluateRequest(testContext);
+    describe("Conversational Capabilities", () => {
+      it("should provide natural language explanations", async () => {
+        const decision =
+          await conversationalRateLimiter.evaluateRequest(testContext);
 
         expect(decision.conversationalResponse).toBeDefined();
         expect(decision.conversationalResponse!.explanation).toBeTruthy();
-        expect(decision.conversationalResponse!.userFriendlyMessage).toBeTruthy();
+        expect(
+          decision.conversationalResponse!.userFriendlyMessage,
+        ).toBeTruthy();
         expect(decision.conversationalResponse!.suggestions).toBeDefined();
       });
 
-      it('should support rate limit negotiation', async () => {
+      it("should support rate limit negotiation", async () => {
         const preliminaryDecision: RateLimitDecision = {
-          decision: 'THROTTLE',
-          reason: 'Rate limit exceeded',
-          code: 'RATE_LIMIT_THROTTLE',
+          decision: "THROTTLE",
+          reason: "Rate limit exceeded",
+          code: "RATE_LIMIT_THROTTLE",
           timestamp: new Date(),
           processingTime: 25,
-          throttleDelay: 5000
+          throttleDelay: 5000,
         };
 
-        const negotiationResult = await conversationalRateLimiter.negotiateRateLimits(
-          testContext,
-          'I need urgent access to complete this task',
-          preliminaryDecision
-        );
+        const negotiationResult =
+          await conversationalRateLimiter.negotiateRateLimits(
+            testContext,
+            "I need urgent access to complete this task",
+            preliminaryDecision,
+          );
 
         expect(negotiationResult).toBeDefined();
         expect(negotiationResult.conversationalResponse).toBeDefined();
-        expect(negotiationResult.conversationalResponse!.explanation).toBeTruthy();
+        expect(
+          negotiationResult.conversationalResponse!.explanation,
+        ).toBeTruthy();
       });
 
-      it('should adapt explanations to user expertise level', async () => {
+      it("should adapt explanations to user expertise level", async () => {
         const expertContext = {
           ...testContext,
           userContext: {
             ...testUserContext,
             profile: {
               ...testUserContext.profile,
-              technicalLevel: 'EXPERT' as const
-            }
-          }
+              technicalLevel: "EXPERT" as const,
+            },
+          },
         };
 
-        const decision = await conversationalRateLimiter.evaluateRequest(expertContext);
+        const decision =
+          await conversationalRateLimiter.evaluateRequest(expertContext);
         const explanation = await conversationalRateLimiter.explainDecision(
           expertContext,
           decision,
-          'TECHNICAL'
+          "TECHNICAL",
         );
 
         expect(explanation.technicalDetails).toBeDefined();
-        expect(explanation.explanation).toContain('technical'); // Should contain technical language
+        expect(explanation.explanation).toContain("technical"); // Should contain technical language
       });
     });
 
-    describe('Performance Requirements', () => {
-      it('should process decisions under 50ms target', async () => {
+    describe("Performance Requirements", () => {
+      it("should process decisions under 50ms target", async () => {
         const iterations = 50;
         const processingTimes: number[] = [];
 
         for (let i = 0; i < iterations; i++) {
           const decision = await conversationalRateLimiter.evaluateRequest({
             ...testContext,
-            requestId: `perf-test-${i}`
+            requestId: `perf-test-${i}`,
           });
           processingTimes.push(decision.processingTime);
         }
 
-        const averageTime = processingTimes.reduce((sum, time) => sum + time, 0) / iterations;
-        const p95Time = processingTimes.sort((a, b) => a - b)[Math.floor(iterations * 0.95)];
+        const averageTime =
+          processingTimes.reduce((sum, time) => sum + time, 0) / iterations;
+        const p95Time = processingTimes.sort((a, b) => a - b)[
+          Math.floor(iterations * 0.95)
+        ];
 
         expect(averageTime).toBeLessThan(30); // Average under 30ms
         expect(p95Time).toBeLessThan(50); // P95 under 50ms
       });
 
-      it('should handle high throughput (1000+ requests/second)', async () => {
+      it("should handle high throughput (1000+ requests/second)", async () => {
         const requestsPerSecond = 1000;
         const testDurationMs = 2000; // 2 seconds
         const totalRequests = (requestsPerSecond * testDurationMs) / 1000;
@@ -209,14 +242,16 @@ describe('PARLANT Phase 1 - Comprehensive Rate Limiting System', () => {
         const promises: Promise<RateLimitDecision>[] = [];
 
         for (let i = 0; i < totalRequests; i++) {
-          promises.push(conversationalRateLimiter.evaluateRequest({
-            ...testContext,
-            requestId: `throughput-test-${i}`
-          }));
+          promises.push(
+            conversationalRateLimiter.evaluateRequest({
+              ...testContext,
+              requestId: `throughput-test-${i}`,
+            }),
+          );
 
           // Add small delay to simulate realistic request spacing
           if (i % 100 === 0) {
-            await new Promise(resolve => setTimeout(resolve, 1));
+            await new Promise((resolve) => setTimeout(resolve, 1));
           }
         }
 
@@ -228,17 +263,20 @@ describe('PARLANT Phase 1 - Comprehensive Rate Limiting System', () => {
         expect(results).toHaveLength(totalRequests);
 
         // Ensure all requests were processed with valid decisions
-        results.forEach(result => {
-          expect(['ALLOW', 'DENY', 'THROTTLE', 'QUEUE']).toContain(result.decision);
+        results.forEach((result) => {
+          expect(["ALLOW", "DENY", "THROTTLE", "QUEUE"]).toContain(
+            result.decision,
+          );
         });
       }, 30000);
     });
   });
 
-  describe('Multi-Tier Rate Management', () => {
-    describe('Tier Coordination', () => {
-      it('should evaluate all tiers correctly', async () => {
-        const evaluation = await multiTierManager.evaluateMultiTierLimits(testContext);
+  describe("Multi-Tier Rate Management", () => {
+    describe("Tier Coordination", () => {
+      it("should evaluate all tiers correctly", async () => {
+        const evaluation =
+          await multiTierManager.evaluateMultiTierLimits(testContext);
 
         expect(evaluation.tierResults).toBeDefined();
         expect(evaluation.tierResults.user).toBeDefined();
@@ -249,45 +287,53 @@ describe('PARLANT Phase 1 - Comprehensive Rate Limiting System', () => {
         expect(evaluation.processingTime).toBeLessThan(100);
       });
 
-      it('should handle tier conflicts intelligently', async () => {
+      it("should handle tier conflicts intelligently", async () => {
         // Create context that would pass user limits but fail global limits
         const conflictContext = {
           ...testContext,
-          operation: 'high-resource-operation'
+          operation: "high-resource-operation",
         };
 
-        const evaluation = await multiTierManager.evaluateMultiTierLimits(conflictContext);
+        const evaluation =
+          await multiTierManager.evaluateMultiTierLimits(conflictContext);
 
         expect(evaluation.coordinationApplied).toBe(true);
         expect(evaluation.decision).toBeDefined();
-        expect(['ALLOW', 'DENY', 'THROTTLE', 'QUEUE']).toContain(evaluation.decision);
+        expect(["ALLOW", "DENY", "THROTTLE", "QUEUE"]).toContain(
+          evaluation.decision,
+        );
       });
     });
 
-    describe('Emergency Mode', () => {
-      it('should activate emergency mode correctly', async () => {
-        await multiTierManager.activateEmergencyMode('System overload detected', 'HIGH');
+    describe("Emergency Mode", () => {
+      it("should activate emergency mode correctly", async () => {
+        await multiTierManager.activateEmergencyMode(
+          "System overload detected",
+          "HIGH",
+        );
 
         // Test that emergency mode affects decisions
-        const decision = await multiTierManager.evaluateMultiTierLimits(testContext);
+        const decision =
+          await multiTierManager.evaluateMultiTierLimits(testContext);
 
         expect(decision).toBeDefined();
         // In emergency mode, more restrictive decisions should be made
       });
 
-      it('should deactivate emergency mode and restore normal operations', async () => {
-        await multiTierManager.activateEmergencyMode('Test emergency', 'LOW');
+      it("should deactivate emergency mode and restore normal operations", async () => {
+        await multiTierManager.activateEmergencyMode("Test emergency", "LOW");
         await multiTierManager.deactivateEmergencyMode();
 
-        const decision = await multiTierManager.evaluateMultiTierLimits(testContext);
+        const decision =
+          await multiTierManager.evaluateMultiTierLimits(testContext);
 
         expect(decision).toBeDefined();
         // Normal operations should be restored
       });
     });
 
-    describe('State Management', () => {
-      it('should maintain consistent state across requests', async () => {
+    describe("State Management", () => {
+      it("should maintain consistent state across requests", async () => {
         const state1 = await multiTierManager.getMultiTierState(testContext);
 
         // Process some requests
@@ -298,20 +344,23 @@ describe('PARLANT Phase 1 - Comprehensive Rate Limiting System', () => {
 
         expect(state1.lastUpdated).toBeDefined();
         expect(state2.lastUpdated).toBeDefined();
-        expect(state2.lastUpdated.getTime()).toBeGreaterThan(state1.lastUpdated.getTime());
+        expect(state2.lastUpdated.getTime()).toBeGreaterThan(
+          state1.lastUpdated.getTime(),
+        );
       });
     });
   });
 
-  describe('Natural Language Communication', () => {
-    describe('Response Generation', () => {
-      it('should generate appropriate responses for different decisions', async () => {
-        const decisions: Array<{ decision: string; expectedContent: string }> = [
-          { decision: 'ALLOW', expectedContent: 'approved' },
-          { decision: 'THROTTLE', expectedContent: 'throttle' },
-          { decision: 'QUEUE', expectedContent: 'queue' },
-          { decision: 'DENY', expectedContent: 'denied' }
-        ];
+  describe("Natural Language Communication", () => {
+    describe("Response Generation", () => {
+      it("should generate appropriate responses for different decisions", async () => {
+        const decisions: Array<{ decision: string; expectedContent: string }> =
+          [
+            { decision: "ALLOW", expectedContent: "approved" },
+            { decision: "THROTTLE", expectedContent: "throttle" },
+            { decision: "QUEUE", expectedContent: "queue" },
+            { decision: "DENY", expectedContent: "denied" },
+          ];
 
         for (const { decision, expectedContent } of decisions) {
           const mockDecision: RateLimitDecision = {
@@ -319,78 +368,84 @@ describe('PARLANT Phase 1 - Comprehensive Rate Limiting System', () => {
             reason: `Test ${decision} decision`,
             code: `RATE_LIMIT_${decision}`,
             timestamp: new Date(),
-            processingTime: 25
+            processingTime: 25,
           };
 
-          const response = await naturalLanguageCommunicator.generateConversationalResponse(
-            testContext,
-            mockDecision
-          );
+          const response =
+            await naturalLanguageCommunicator.generateConversationalResponse(
+              testContext,
+              mockDecision,
+            );
 
-          expect(response.userFriendlyMessage.toLowerCase()).toContain(expectedContent.toLowerCase());
+          expect(response.userFriendlyMessage.toLowerCase()).toContain(
+            expectedContent.toLowerCase(),
+          );
           expect(response.explanation).toBeTruthy();
           expect(response.suggestions).toBeDefined();
         }
       });
 
-      it('should provide educational content when appropriate', async () => {
-        const educationalContent = await naturalLanguageCommunicator.provideRateLimitingEducation(
-          testContext,
-          'RATE_LIMITING_BASICS',
-          'INTERMEDIATE'
-        );
+      it("should provide educational content when appropriate", async () => {
+        const educationalContent =
+          await naturalLanguageCommunicator.provideRateLimitingEducation(
+            testContext,
+            "RATE_LIMITING_BASICS",
+            "INTERMEDIATE",
+          );
 
-        expect(educationalContent.topic).toBe('Rate Limiting Basics');
+        expect(educationalContent.topic).toBe("Rate Limiting Basics");
         expect(educationalContent.explanation).toBeTruthy();
         expect(educationalContent.bestPractices).toBeDefined();
         expect(educationalContent.examples).toBeDefined();
       });
     });
 
-    describe('User Negotiation', () => {
-      it('should process negotiation requests', async () => {
+    describe("User Negotiation", () => {
+      it("should process negotiation requests", async () => {
         const currentDecision: RateLimitDecision = {
-          decision: 'DENY',
-          reason: 'Rate limit exceeded',
-          code: 'RATE_LIMIT_DENY',
+          decision: "DENY",
+          reason: "Rate limit exceeded",
+          code: "RATE_LIMIT_DENY",
           timestamp: new Date(),
           processingTime: 25,
-          retryAfter: 300
+          retryAfter: 300,
         };
 
-        const negotiationResult = await naturalLanguageCommunicator.processNegotiationRequest(
-          testContext,
-          'This is urgent and business-critical, can you please increase my limits?',
-          currentDecision
-        );
+        const negotiationResult =
+          await naturalLanguageCommunicator.processNegotiationRequest(
+            testContext,
+            "This is urgent and business-critical, can you please increase my limits?",
+            currentDecision,
+          );
 
         expect(negotiationResult.originalDecision).toBe(currentDecision);
         expect(negotiationResult.response).toBeDefined();
         expect(negotiationResult.response.explanation).toBeTruthy();
-        expect(typeof negotiationResult.negotiationSuccessful).toBe('boolean');
+        expect(typeof negotiationResult.negotiationSuccessful).toBe("boolean");
       });
     });
 
-    describe('Alternative Suggestions', () => {
-      it('should generate relevant alternatives', async () => {
+    describe("Alternative Suggestions", () => {
+      it("should generate relevant alternatives", async () => {
         const deniedDecision: RateLimitDecision = {
-          decision: 'DENY',
-          reason: 'Rate limit exceeded',
-          code: 'RATE_LIMIT_DENY',
+          decision: "DENY",
+          reason: "Rate limit exceeded",
+          code: "RATE_LIMIT_DENY",
           timestamp: new Date(),
           processingTime: 25,
-          retryAfter: 300
+          retryAfter: 300,
         };
 
-        const alternatives = await naturalLanguageCommunicator.generateAlternativeSuggestions(
-          testContext,
-          deniedDecision
-        );
+        const alternatives =
+          await naturalLanguageCommunicator.generateAlternativeSuggestions(
+            testContext,
+            deniedDecision,
+          );
 
         expect(alternatives).toHaveLength(2); // At least timing and batch alternatives
-        expect(alternatives.some(alt => alt.type === 'TIMING')).toBe(true);
+        expect(alternatives.some((alt) => alt.type === "TIMING")).toBe(true);
 
-        alternatives.forEach(alternative => {
+        alternatives.forEach((alternative) => {
           expect(alternative.description).toBeTruthy();
           expect(alternative.estimatedSuccess).toBeGreaterThan(0);
           expect(alternative.estimatedSuccess).toBeLessThanOrEqual(1);
@@ -398,32 +453,34 @@ describe('PARLANT Phase 1 - Comprehensive Rate Limiting System', () => {
       });
     });
 
-    describe('Proactive Guidance', () => {
-      it('should provide proactive guidance when approaching limits', async () => {
+    describe("Proactive Guidance", () => {
+      it("should provide proactive guidance when approaching limits", async () => {
         const highUsageContext = {
           requestsThisSecond: 45,
           requestsThisMinute: 850,
           requestsThisHour: 4800,
-          utilizationPercentage: 85
+          utilizationPercentage: 85,
         };
 
-        const guidance = await naturalLanguageCommunicator.provideProactiveGuidance(
-          testContext,
-          highUsageContext
-        );
+        const guidance =
+          await naturalLanguageCommunicator.provideProactiveGuidance(
+            testContext,
+            highUsageContext,
+          );
 
         expect(guidance.guidanceNeeded).toBe(true);
-        expect(guidance.message).toContain('approaching');
+        expect(guidance.message).toContain("approaching");
         expect(guidance.recommendations).toBeDefined();
         expect(guidance.urgencyLevel).toBeDefined();
       });
     });
   });
 
-  describe('Enterprise Traffic Management', () => {
-    describe('SLA Compliance', () => {
-      it('should monitor SLA compliance', async () => {
-        const complianceReport = await enterpriseTrafficManager.monitorSLACompliance();
+  describe("Enterprise Traffic Management", () => {
+    describe("SLA Compliance", () => {
+      it("should monitor SLA compliance", async () => {
+        const complianceReport =
+          await enterpriseTrafficManager.monitorSLACompliance();
 
         expect(complianceReport.overallCompliance).toBeDefined();
         expect(complianceReport.complianceScore).toBeGreaterThanOrEqual(0);
@@ -432,34 +489,36 @@ describe('PARLANT Phase 1 - Comprehensive Rate Limiting System', () => {
         expect(complianceReport.remediationActions).toBeDefined();
       });
 
-      it('should handle SLA violations correctly', async () => {
+      it("should handle SLA violations correctly", async () => {
         // Simulate SLA violation conditions
         const violationContext = {
           ...testContext,
-          expectedComplexity: 10000 // Very high complexity
+          expectedComplexity: 10000, // Very high complexity
         };
 
         const preliminaryDecision: RateLimitDecision = {
-          decision: 'DENY',
-          reason: 'SLA would be violated',
-          code: 'SLA_VIOLATION_PREVENTION',
+          decision: "DENY",
+          reason: "SLA would be violated",
+          code: "SLA_VIOLATION_PREVENTION",
           timestamp: new Date(),
-          processingTime: 150 // High processing time
+          processingTime: 150, // High processing time
         };
 
-        const enterpriseDecision = await enterpriseTrafficManager.processEnterpriseRequest(
-          violationContext,
-          preliminaryDecision
-        );
+        const enterpriseDecision =
+          await enterpriseTrafficManager.processEnterpriseRequest(
+            violationContext,
+            preliminaryDecision,
+          );
 
         expect(enterpriseDecision.slaEvaluation).toBeDefined();
         expect(enterpriseDecision.complianceStatus).toBeDefined();
       });
     });
 
-    describe('Traffic Optimization', () => {
-      it('should optimize traffic distribution', async () => {
-        const optimizationResult = await enterpriseTrafficManager.optimizeTrafficDistribution();
+    describe("Traffic Optimization", () => {
+      it("should optimize traffic distribution", async () => {
+        const optimizationResult =
+          await enterpriseTrafficManager.optimizeTrafficDistribution();
 
         expect(optimizationResult.trafficAnalysis).toBeDefined();
         expect(optimizationResult.optimizations).toBeDefined();
@@ -468,9 +527,10 @@ describe('PARLANT Phase 1 - Comprehensive Rate Limiting System', () => {
       });
     });
 
-    describe('Capacity Planning', () => {
-      it('should manage capacity planning', async () => {
-        const capacityResult = await enterpriseTrafficManager.manageCapacityPlanning();
+    describe("Capacity Planning", () => {
+      it("should manage capacity planning", async () => {
+        const capacityResult =
+          await enterpriseTrafficManager.manageCapacityPlanning();
 
         expect(capacityResult.currentCapacity).toBeDefined();
         expect(capacityResult.predictions).toBeDefined();
@@ -480,18 +540,19 @@ describe('PARLANT Phase 1 - Comprehensive Rate Limiting System', () => {
       });
     });
 
-    describe('Emergency Scenarios', () => {
-      it('should handle emergency scenarios', async () => {
+    describe("Emergency Scenarios", () => {
+      it("should handle emergency scenarios", async () => {
         const emergencyScenario = {
-          type: 'SYSTEM_OVERLOAD',
-          description: 'Sudden traffic spike detected',
-          severity: 'HIGH'
+          type: "SYSTEM_OVERLOAD",
+          description: "Sudden traffic spike detected",
+          severity: "HIGH",
         };
 
-        const emergencyResponse = await enterpriseTrafficManager.handleEmergencyScenario(
-          emergencyScenario,
-          'HIGH'
-        );
+        const emergencyResponse =
+          await enterpriseTrafficManager.handleEmergencyScenario(
+            emergencyScenario,
+            "HIGH",
+          );
 
         expect(emergencyResponse.scenario).toBe(emergencyScenario);
         expect(emergencyResponse.impactAssessment).toBeDefined();
@@ -501,9 +562,10 @@ describe('PARLANT Phase 1 - Comprehensive Rate Limiting System', () => {
       });
     });
 
-    describe('Enterprise Metrics', () => {
-      it('should generate comprehensive enterprise metrics', async () => {
-        const metrics = await enterpriseTrafficManager.generateEnterpriseMetrics();
+    describe("Enterprise Metrics", () => {
+      it("should generate comprehensive enterprise metrics", async () => {
+        const metrics =
+          await enterpriseTrafficManager.generateEnterpriseMetrics();
 
         expect(metrics.traffic).toBeDefined();
         expect(metrics.sla).toBeDefined();
@@ -517,18 +579,21 @@ describe('PARLANT Phase 1 - Comprehensive Rate Limiting System', () => {
     });
   });
 
-  describe('Analytics and Monitoring', () => {
-    describe('Real-time Analytics', () => {
-      it('should analyze rate limiting decisions', async () => {
+  describe("Analytics and Monitoring", () => {
+    describe("Real-time Analytics", () => {
+      it("should analyze rate limiting decisions", async () => {
         const decision: RateLimitDecision = {
-          decision: 'ALLOW',
-          reason: 'Within limits',
-          code: 'RATE_LIMIT_OK',
+          decision: "ALLOW",
+          reason: "Within limits",
+          code: "RATE_LIMIT_OK",
           timestamp: new Date(),
-          processingTime: 25
+          processingTime: 25,
         };
 
-        const analytics = await analyticsService.analyzeRateLimitDecision(testContext, decision);
+        const analytics = await analyticsService.analyzeRateLimitDecision(
+          testContext,
+          decision,
+        );
 
         expect(analytics.impactAssessment).toBeDefined();
         expect(analytics.performanceMetrics).toBeDefined();
@@ -537,10 +602,10 @@ describe('PARLANT Phase 1 - Comprehensive Rate Limiting System', () => {
         expect(analytics.processingTime).toBeLessThan(100);
       });
 
-      it('should generate comprehensive metrics', async () => {
+      it("should generate comprehensive metrics", async () => {
         const timeRange = {
           start: new Date(Date.now() - 3600000), // 1 hour ago
-          end: new Date()
+          end: new Date(),
         };
 
         const metrics = await analyticsService.generateMetrics(timeRange);
@@ -554,30 +619,34 @@ describe('PARLANT Phase 1 - Comprehensive Rate Limiting System', () => {
       });
     });
 
-    describe('Predictive Analytics', () => {
-      it('should predict future patterns', async () => {
-        const prediction = await analyticsService.predictFuturePatterns(24, 0.8); // 24 hours, 80% confidence
+    describe("Predictive Analytics", () => {
+      it("should predict future patterns", async () => {
+        const prediction = await analyticsService.predictFuturePatterns(
+          24,
+          0.8,
+        ); // 24 hours, 80% confidence
 
         expect(prediction.predictions).toBeDefined();
         expect(prediction.recommendations).toBeDefined();
         expect(prediction.riskFactors).toBeDefined();
 
-        prediction.predictions.forEach(pred => {
+        prediction.predictions.forEach((pred) => {
           expect(pred.confidence).toBeGreaterThanOrEqual(0);
           expect(pred.confidence).toBeLessThanOrEqual(1);
         });
       });
     });
 
-    describe('User Behavior Analysis', () => {
-      it('should analyze user behavior patterns', async () => {
-        const behaviorAnalysis = await analyticsService.analyzeUserBehaviorPatterns(
-          testContext.userId,
-          {
-            start: new Date(Date.now() - 86400000), // 24 hours ago
-            end: new Date()
-          }
-        );
+    describe("User Behavior Analysis", () => {
+      it("should analyze user behavior patterns", async () => {
+        const behaviorAnalysis =
+          await analyticsService.analyzeUserBehaviorPatterns(
+            testContext.userId,
+            {
+              start: new Date(Date.now() - 86400000), // 24 hours ago
+              end: new Date(),
+            },
+          );
 
         expect(behaviorAnalysis.behaviorSummary).toBeTruthy();
         expect(behaviorAnalysis.riskLevel).toBeDefined();
@@ -586,11 +655,11 @@ describe('PARLANT Phase 1 - Comprehensive Rate Limiting System', () => {
       });
     });
 
-    describe('Anomaly Detection', () => {
-      it('should detect anomalies', async () => {
+    describe("Anomaly Detection", () => {
+      it("should detect anomalies", async () => {
         const timeRange = {
           start: new Date(Date.now() - 3600000),
-          end: new Date()
+          end: new Date(),
         };
 
         const anomalies = await analyticsService.detectAnomalies(timeRange);
@@ -603,8 +672,8 @@ describe('PARLANT Phase 1 - Comprehensive Rate Limiting System', () => {
       });
     });
 
-    describe('Dashboard and Reporting', () => {
-      it('should generate dashboard data', async () => {
+    describe("Dashboard and Reporting", () => {
+      it("should generate dashboard data", async () => {
         const dashboardData = await analyticsService.generateDashboardData();
 
         expect(dashboardData.overview).toBeDefined();
@@ -614,15 +683,18 @@ describe('PARLANT Phase 1 - Comprehensive Rate Limiting System', () => {
         expect(dashboardData.alerts).toBeDefined();
       });
 
-      it('should generate analytics reports', async () => {
+      it("should generate analytics reports", async () => {
         const timeRange = {
           start: new Date(Date.now() - 86400000),
-          end: new Date()
+          end: new Date(),
         };
 
-        const report = await analyticsService.generateAnalyticsReport(timeRange, 'TECHNICAL');
+        const report = await analyticsService.generateAnalyticsReport(
+          timeRange,
+          "TECHNICAL",
+        );
 
-        expect(report.reportType).toBe('TECHNICAL');
+        expect(report.reportType).toBe("TECHNICAL");
         expect(report.summary).toBeDefined();
         expect(report.summary.keyMetrics).toBeDefined();
         expect(report.summary.keyInsights).toBeDefined();
@@ -631,34 +703,41 @@ describe('PARLANT Phase 1 - Comprehensive Rate Limiting System', () => {
       });
     });
 
-    describe('Optimization Recommendations', () => {
-      it('should provide optimization recommendations', async () => {
-        const recommendations = await analyticsService.getOptimizationRecommendations();
+    describe("Optimization Recommendations", () => {
+      it("should provide optimization recommendations", async () => {
+        const recommendations =
+          await analyticsService.getOptimizationRecommendations();
 
         expect(recommendations.immediate).toBeDefined();
         expect(recommendations.shortTerm).toBeDefined();
         expect(recommendations.longTerm).toBeDefined();
         expect(recommendations.estimatedImpact).toBeDefined();
-        expect(recommendations.estimatedImpact.performance).toBeGreaterThanOrEqual(0);
-        expect(recommendations.estimatedImpact.costSavings).toBeGreaterThanOrEqual(0);
+        expect(
+          recommendations.estimatedImpact.performance,
+        ).toBeGreaterThanOrEqual(0);
+        expect(
+          recommendations.estimatedImpact.costSavings,
+        ).toBeGreaterThanOrEqual(0);
       });
     });
   });
 
-  describe('Load Testing and Stress Testing', () => {
-    describe('High Load Scenarios', () => {
-      it('should handle burst traffic (5000 requests in 1 second)', async () => {
+  describe("Load Testing and Stress Testing", () => {
+    describe("High Load Scenarios", () => {
+      it("should handle burst traffic (5000 requests in 1 second)", async () => {
         const burstSize = 5000;
         const promises: Promise<RateLimitDecision>[] = [];
 
         const startTime = Date.now();
 
         for (let i = 0; i < burstSize; i++) {
-          promises.push(conversationalRateLimiter.evaluateRequest({
-            ...testContext,
-            requestId: `burst-${i}`,
-            timestamp: new Date()
-          }));
+          promises.push(
+            conversationalRateLimiter.evaluateRequest({
+              ...testContext,
+              requestId: `burst-${i}`,
+              timestamp: new Date(),
+            }),
+          );
         }
 
         const results = await Promise.all(promises);
@@ -669,18 +748,26 @@ describe('PARLANT Phase 1 - Comprehensive Rate Limiting System', () => {
         expect(results).toHaveLength(burstSize);
 
         // System should gracefully handle the burst
-        const allowedCount = results.filter(r => r.decision === 'ALLOW').length;
-        const throttledCount = results.filter(r => r.decision === 'THROTTLE').length;
-        const queuedCount = results.filter(r => r.decision === 'QUEUE').length;
-        const deniedCount = results.filter(r => r.decision === 'DENY').length;
+        const allowedCount = results.filter(
+          (r) => r.decision === "ALLOW",
+        ).length;
+        const throttledCount = results.filter(
+          (r) => r.decision === "THROTTLE",
+        ).length;
+        const queuedCount = results.filter(
+          (r) => r.decision === "QUEUE",
+        ).length;
+        const deniedCount = results.filter((r) => r.decision === "DENY").length;
 
-        expect(allowedCount + throttledCount + queuedCount + deniedCount).toBe(burstSize);
+        expect(allowedCount + throttledCount + queuedCount + deniedCount).toBe(
+          burstSize,
+        );
 
         // Some requests should be throttled/queued during burst
         expect(throttledCount + queuedCount).toBeGreaterThan(0);
       }, 30000);
 
-      it('should maintain performance under sustained load (10,000 req/sec for 10 seconds)', async () => {
+      it("should maintain performance under sustained load (10,000 req/sec for 10 seconds)", async () => {
         const requestsPerSecond = 10000;
         const durationSeconds = 10;
         const totalRequests = requestsPerSecond * durationSeconds;
@@ -696,11 +783,13 @@ describe('PARLANT Phase 1 - Comprehensive Rate Limiting System', () => {
 
           for (let i = 0; i < batchSize; i++) {
             const requestIndex = batch * batchSize + i;
-            batchPromises.push(conversationalRateLimiter.evaluateRequest({
-              ...testContext,
-              requestId: `sustained-load-${requestIndex}`,
-              timestamp: new Date()
-            }));
+            batchPromises.push(
+              conversationalRateLimiter.evaluateRequest({
+                ...testContext,
+                requestId: `sustained-load-${requestIndex}`,
+                timestamp: new Date(),
+              }),
+            );
           }
 
           const batchResults = await Promise.all(batchPromises);
@@ -708,7 +797,7 @@ describe('PARLANT Phase 1 - Comprehensive Rate Limiting System', () => {
           completedRequests += batchSize;
 
           // Small delay between batches to simulate realistic load
-          await new Promise(resolve => setTimeout(resolve, 10));
+          await new Promise((resolve) => setTimeout(resolve, 10));
         }
 
         const endTime = Date.now();
@@ -719,13 +808,15 @@ describe('PARLANT Phase 1 - Comprehensive Rate Limiting System', () => {
         expect(results).toHaveLength(totalRequests);
 
         // System should remain responsive
-        const averageProcessingTime = results.reduce((sum, r) => sum + r.processingTime, 0) / results.length;
+        const averageProcessingTime =
+          results.reduce((sum, r) => sum + r.processingTime, 0) /
+          results.length;
         expect(averageProcessingTime).toBeLessThan(100); // Average processing time under 100ms
       }, 120000);
     });
 
-    describe('Memory and Resource Management', () => {
-      it('should not leak memory during extended operations', async () => {
+    describe("Memory and Resource Management", () => {
+      it("should not leak memory during extended operations", async () => {
         const initialMemory = process.memoryUsage();
         const iterations = 1000;
 
@@ -733,7 +824,7 @@ describe('PARLANT Phase 1 - Comprehensive Rate Limiting System', () => {
         for (let i = 0; i < iterations; i++) {
           await conversationalRateLimiter.evaluateRequest({
             ...testContext,
-            requestId: `memory-test-${i}`
+            requestId: `memory-test-${i}`,
           });
 
           // Force garbage collection every 100 iterations
@@ -744,92 +835,105 @@ describe('PARLANT Phase 1 - Comprehensive Rate Limiting System', () => {
 
         const finalMemory = process.memoryUsage();
         const memoryIncrease = finalMemory.heapUsed - initialMemory.heapUsed;
-        const memoryIncreasePercent = (memoryIncrease / initialMemory.heapUsed) * 100;
+        const memoryIncreasePercent =
+          (memoryIncrease / initialMemory.heapUsed) * 100;
 
         // Memory increase should be reasonable (less than 50% increase)
         expect(memoryIncreasePercent).toBeLessThan(50);
       }, 30000);
     });
 
-    describe('Error Handling and Recovery', () => {
-      it('should handle service failures gracefully', async () => {
+    describe("Error Handling and Recovery", () => {
+      it("should handle service failures gracefully", async () => {
         // Simulate service failure by providing invalid configuration
         const invalidConfig = {
           ...testConfiguration,
-          userLimits: null as any
+          userLimits: null as any,
         };
 
-        const faultyService = new ConversationalRateLimiterService(invalidConfig);
+        const faultyService = new ConversationalRateLimiterService(
+          invalidConfig,
+        );
 
         // Should not crash and should provide fallback response
         const decision = await faultyService.evaluateRequest(testContext);
 
         expect(decision).toBeDefined();
-        expect(['ALLOW', 'DENY']).toContain(decision.decision); // Fallback decisions
+        expect(["ALLOW", "DENY"]).toContain(decision.decision); // Fallback decisions
       });
 
-      it('should recover from temporary failures', async () => {
+      it("should recover from temporary failures", async () => {
         // Test multiple requests to ensure system recovers
         const results: RateLimitDecision[] = [];
 
         for (let i = 0; i < 10; i++) {
           const decision = await conversationalRateLimiter.evaluateRequest({
             ...testContext,
-            requestId: `recovery-test-${i}`
+            requestId: `recovery-test-${i}`,
           });
           results.push(decision);
         }
 
         // All requests should be processed successfully
         expect(results).toHaveLength(10);
-        results.forEach(result => {
-          expect(['ALLOW', 'DENY', 'THROTTLE', 'QUEUE']).toContain(result.decision);
+        results.forEach((result) => {
+          expect(["ALLOW", "DENY", "THROTTLE", "QUEUE"]).toContain(
+            result.decision,
+          );
         });
       });
     });
   });
 
-  describe('Security and Abuse Prevention', () => {
-    describe('Abuse Detection', () => {
-      it('should detect rapid-fire abuse patterns', async () => {
+  describe("Security and Abuse Prevention", () => {
+    describe("Abuse Detection", () => {
+      it("should detect rapid-fire abuse patterns", async () => {
         const abuseContext = {
           ...testContext,
-          userAgent: 'automated-bot/1.0',
+          userAgent: "automated-bot/1.0",
           recentHistory: Array(1000).fill({
             timestamp: new Date(Date.now() - 1000), // All within last second
             endpoint: testContext.apiEndpoint,
-            outcome: 'ALLOWED'
-          })
+            outcome: "ALLOWED",
+          }),
         };
 
-        const decision = await conversationalRateLimiter.evaluateRequest(abuseContext);
+        const decision =
+          await conversationalRateLimiter.evaluateRequest(abuseContext);
 
-        expect(['DENY', 'THROTTLE']).toContain(decision.decision);
-        expect(decision.reason).toContain('rate limit'); // Should mention rate limiting
+        expect(["DENY", "THROTTLE"]).toContain(decision.decision);
+        expect(decision.reason).toContain("rate limit"); // Should mention rate limiting
       });
 
-      it('should handle suspicious user agents', async () => {
+      it("should handle suspicious user agents", async () => {
         const suspiciousContext = {
           ...testContext,
-          userAgent: 'python-requests/2.25.1' // Automated client
+          userAgent: "python-requests/2.25.1", // Automated client
         };
 
-        const decision = await conversationalRateLimiter.evaluateRequest(suspiciousContext);
-        const analytics = await analyticsService.analyzeRateLimitDecision(suspiciousContext, decision);
+        const decision =
+          await conversationalRateLimiter.evaluateRequest(suspiciousContext);
+        const analytics = await analyticsService.analyzeRateLimitDecision(
+          suspiciousContext,
+          decision,
+        );
 
-        expect(analytics.userBehaviorInsights.abuseIndicators).toContain('automated_client');
+        expect(analytics.userBehaviorInsights.abuseIndicators).toContain(
+          "automated_client",
+        );
       });
     });
 
-    describe('Security Level Enforcement', () => {
-      it('should apply stricter limits for high-security operations', async () => {
+    describe("Security Level Enforcement", () => {
+      it("should apply stricter limits for high-security operations", async () => {
         const highSecurityContext = {
           ...testContext,
-          securityLevel: 'CRITICAL' as SecurityLevel,
-          riskLevel: 'HIGH' as RiskLevel
+          securityLevel: "CRITICAL" as SecurityLevel,
+          riskLevel: "HIGH" as RiskLevel,
         };
 
-        const decision = await conversationalRateLimiter.evaluateRequest(highSecurityContext);
+        const decision =
+          await conversationalRateLimiter.evaluateRequest(highSecurityContext);
 
         // High security operations should have stricter evaluation
         expect(decision).toBeDefined();
@@ -838,42 +942,54 @@ describe('PARLANT Phase 1 - Comprehensive Rate Limiting System', () => {
     });
   });
 
-  describe('Integration Testing', () => {
-    describe('End-to-End Scenarios', () => {
-      it('should handle complete user journey from request to response', async () => {
+  describe("Integration Testing", () => {
+    describe("End-to-End Scenarios", () => {
+      it("should handle complete user journey from request to response", async () => {
         // 1. Initial request (should be allowed)
-        const initialDecision = await conversationalRateLimiter.evaluateRequest(testContext);
-        expect(initialDecision.decision).toBe('ALLOW');
+        const initialDecision =
+          await conversationalRateLimiter.evaluateRequest(testContext);
+        expect(initialDecision.decision).toBe("ALLOW");
 
         // 2. Analytics processing
-        const analytics = await analyticsService.analyzeRateLimitDecision(testContext, initialDecision);
+        const analytics = await analyticsService.analyzeRateLimitDecision(
+          testContext,
+          initialDecision,
+        );
         expect(analytics).toBeDefined();
 
         // 3. Enterprise processing
-        const enterpriseDecision = await enterpriseTrafficManager.processEnterpriseRequest(
-          testContext,
-          initialDecision
-        );
+        const enterpriseDecision =
+          await enterpriseTrafficManager.processEnterpriseRequest(
+            testContext,
+            initialDecision,
+          );
         expect(enterpriseDecision.finalDecision).toBeDefined();
 
         // 4. Generate conversational response
-        const response = await naturalLanguageCommunicator.generateConversationalResponse(
-          testContext,
-          enterpriseDecision.finalDecision
-        );
+        const response =
+          await naturalLanguageCommunicator.generateConversationalResponse(
+            testContext,
+            enterpriseDecision.finalDecision,
+          );
         expect(response.explanation).toBeTruthy();
 
         // 5. Complete flow should be fast
         expect(enterpriseDecision.processingTime).toBeLessThan(200); // Under 200ms for complete flow
       });
 
-      it('should maintain consistency across all components', async () => {
-        const multiTierEvaluation = await multiTierManager.evaluateMultiTierLimits(testContext);
-        const conversationalDecision = await conversationalRateLimiter.evaluateRequest(testContext);
+      it("should maintain consistency across all components", async () => {
+        const multiTierEvaluation =
+          await multiTierManager.evaluateMultiTierLimits(testContext);
+        const conversationalDecision =
+          await conversationalRateLimiter.evaluateRequest(testContext);
 
         // Both evaluations should be consistent for the same context
-        expect(['ALLOW', 'DENY', 'THROTTLE', 'QUEUE']).toContain(multiTierEvaluation.decision);
-        expect(['ALLOW', 'DENY', 'THROTTLE', 'QUEUE']).toContain(conversationalDecision.decision);
+        expect(["ALLOW", "DENY", "THROTTLE", "QUEUE"]).toContain(
+          multiTierEvaluation.decision,
+        );
+        expect(["ALLOW", "DENY", "THROTTLE", "QUEUE"]).toContain(
+          conversationalDecision.decision,
+        );
       });
     });
   });
@@ -890,195 +1006,195 @@ function createTestRateLimitConfiguration(): RateLimitConfiguration {
     burstLimit: 100,
     concurrentConnections: 10,
     byRole: {
-      'enterprise': {
+      enterprise: {
         requestsPerSecond: 100,
         requestsPerMinute: 2000,
         requestsPerHour: 10000,
         burstLimit: 200,
-        specialPrivileges: ['priority_processing']
+        specialPrivileges: ["priority_processing"],
       },
-      'premium': {
+      premium: {
         requestsPerSecond: 75,
         requestsPerMinute: 1500,
         requestsPerHour: 7500,
         burstLimit: 150,
-        specialPrivileges: []
-      }
+        specialPrivileges: [],
+      },
     },
     byTier: {
-      'gold': {
+      gold: {
         requestsPerSecond: 100,
         requestsPerMinute: 2000,
         requestsPerHour: 10000,
         burstLimit: 200,
         priorityLevel: 3,
-        queuePriority: 1
-      }
-    }
+        queuePriority: 1,
+      },
+    },
   };
 
   const apiLimits: APIRateLimits = {
     endpointLimits: {
-      '/api/v1/users': {
-        path: '/api/v1/users',
+      "/api/v1/users": {
+        path: "/api/v1/users",
         requestsPerSecond: 100,
         requestsPerMinute: 2000,
         burstLimit: 200,
-        securityLevel: 'MEDIUM',
-        costWeight: 1.0
-      }
+        securityLevel: "MEDIUM",
+        costWeight: 1.0,
+      },
     },
     methodLimits: {
-      'POST': {
-        method: 'POST',
+      POST: {
+        method: "POST",
         requestsPerSecond: 50,
         burstLimit: 100,
-        securityMultiplier: 1.5
+        securityMultiplier: 1.5,
       },
-      'GET': {
-        method: 'GET',
+      GET: {
+        method: "GET",
         requestsPerSecond: 200,
         burstLimit: 400,
-        securityMultiplier: 1.0
-      }
+        securityMultiplier: 1.0,
+      },
     },
     resourceLimits: {
-      'user_data': {
-        resourceType: 'user_data',
+      user_data: {
+        resourceType: "user_data",
         requestsPerSecond: 100,
         concurrentOperations: 50,
         maxPayloadSize: 1024000,
-        costWeight: 2.0
-      }
+        costWeight: 2.0,
+      },
     },
     pathPatternLimits: [
       {
-        pattern: '/api/v1/admin/*',
+        pattern: "/api/v1/admin/*",
         regex: /\/api\/v1\/admin\/.*/,
         limits: {
-          path: '/api/v1/admin/*',
+          path: "/api/v1/admin/*",
           requestsPerSecond: 10,
           requestsPerMinute: 100,
           burstLimit: 20,
-          securityLevel: 'HIGH',
-          costWeight: 3.0
+          securityLevel: "HIGH",
+          costWeight: 3.0,
         },
-        priority: 1
-      }
-    ]
+        priority: 1,
+      },
+    ],
   };
 
   const operationLimits: OperationRateLimits = {
     operationLimits: {
-      'read': {
-        operationType: 'read',
+      read: {
+        operationType: "read",
         requestsPerSecond: 200,
         requestsPerMinute: 5000,
         burstLimit: 400,
         concurrentExecutions: 100,
         maxExecutionTime: 1000,
-        resourceConsumptionLimit: 1.0
+        resourceConsumptionLimit: 1.0,
       },
-      'write': {
-        operationType: 'write',
+      write: {
+        operationType: "write",
         requestsPerSecond: 50,
         requestsPerMinute: 1000,
         burstLimit: 100,
         concurrentExecutions: 25,
         maxExecutionTime: 5000,
-        resourceConsumptionLimit: 2.0
-      }
+        resourceConsumptionLimit: 2.0,
+      },
     },
     complexityLimits: {
       lowComplexity: {
-        operationType: 'low',
+        operationType: "low",
         requestsPerSecond: 500,
         requestsPerMinute: 10000,
         burstLimit: 1000,
         concurrentExecutions: 200,
         maxExecutionTime: 500,
-        resourceConsumptionLimit: 0.5
+        resourceConsumptionLimit: 0.5,
       },
       mediumComplexity: {
-        operationType: 'medium',
+        operationType: "medium",
         requestsPerSecond: 100,
         requestsPerMinute: 2000,
         burstLimit: 200,
         concurrentExecutions: 50,
         maxExecutionTime: 2000,
-        resourceConsumptionLimit: 1.0
+        resourceConsumptionLimit: 1.0,
       },
       highComplexity: {
-        operationType: 'high',
+        operationType: "high",
         requestsPerSecond: 25,
         requestsPerMinute: 500,
         burstLimit: 50,
         concurrentExecutions: 10,
         maxExecutionTime: 10000,
-        resourceConsumptionLimit: 4.0
+        resourceConsumptionLimit: 4.0,
       },
       criticalComplexity: {
-        operationType: 'critical',
+        operationType: "critical",
         requestsPerSecond: 5,
         requestsPerMinute: 100,
         burstLimit: 10,
         concurrentExecutions: 2,
         maxExecutionTime: 30000,
-        resourceConsumptionLimit: 10.0
-      }
+        resourceConsumptionLimit: 10.0,
+      },
     },
     securityLevelLimits: {
-      'LOW': {
+      LOW: {
         requestsPerSecond: 200,
         additionalValidationTime: 0,
         requiredConfirmations: 0,
-        auditLevel: 'basic'
+        auditLevel: "basic",
       },
-      'MEDIUM': {
+      MEDIUM: {
         requestsPerSecond: 100,
         additionalValidationTime: 50,
         requiredConfirmations: 0,
-        auditLevel: 'standard'
+        auditLevel: "standard",
       },
-      'HIGH': {
+      HIGH: {
         requestsPerSecond: 25,
         additionalValidationTime: 200,
         requiredConfirmations: 1,
-        auditLevel: 'enhanced'
+        auditLevel: "enhanced",
       },
-      'CRITICAL': {
+      CRITICAL: {
         requestsPerSecond: 5,
         additionalValidationTime: 1000,
         requiredConfirmations: 2,
-        auditLevel: 'comprehensive'
-      }
+        auditLevel: "comprehensive",
+      },
     },
     riskBasedLimits: {
-      'LOW': {
+      LOW: {
         requestsPerSecond: 200,
         cooldownPeriod: 0,
         escalationThreshold: 1000,
-        monitoringLevel: 'basic'
+        monitoringLevel: "basic",
       },
-      'MEDIUM': {
+      MEDIUM: {
         requestsPerSecond: 100,
         cooldownPeriod: 60,
         escalationThreshold: 500,
-        monitoringLevel: 'standard'
+        monitoringLevel: "standard",
       },
-      'HIGH': {
+      HIGH: {
         requestsPerSecond: 25,
         cooldownPeriod: 300,
         escalationThreshold: 100,
-        monitoringLevel: 'enhanced'
+        monitoringLevel: "enhanced",
       },
-      'CRITICAL': {
+      CRITICAL: {
         requestsPerSecond: 5,
         cooldownPeriod: 1800,
         escalationThreshold: 10,
-        monitoringLevel: 'comprehensive'
-      }
-    }
+        monitoringLevel: "comprehensive",
+      },
+    },
   };
 
   const globalLimits: GlobalRateLimits = {
@@ -1089,10 +1205,10 @@ function createTestRateLimitConfiguration(): RateLimitConfiguration {
     emergencyMode: {
       triggerThreshold: 90,
       restrictionLevel: 0.5,
-      allowedOperations: ['health-check', 'emergency'],
+      allowedOperations: ["health-check", "emergency"],
       durationMinutes: 30,
-      autoRecovery: true
-    }
+      autoRecovery: true,
+    },
   };
 
   const enterpriseConfig: EnterpriseRateLimitConfig = {
@@ -1104,43 +1220,43 @@ function createTestRateLimitConfiguration(): RateLimitConfiguration {
         latencyPenaltyPerMs: 0.01,
         throughputPenaltyPerRequest: 0.001,
         availabilityPenaltyPerMinute: 10.0,
-        maxPenaltyPerDay: 1000
-      }
+        maxPenaltyPerDay: 1000,
+      },
     },
     fairQueuing: {
       enabled: true,
-      algorithm: 'WEIGHTED_FAIR_QUEUING',
+      algorithm: "WEIGHTED_FAIR_QUEUING",
       weights: {
-        'enterprise': 3,
-        'premium': 2,
-        'standard': 1
+        enterprise: 3,
+        premium: 2,
+        standard: 1,
       },
       maxQueueSize: 1000,
-      dropStrategy: 'WEIGHTED_RANDOM_EARLY_DETECTION'
+      dropStrategy: "WEIGHTED_RANDOM_EARLY_DETECTION",
     },
     priorityManagement: {
       priorityLevels: 4,
       priorityMapping: {
-        'enterprise': 3,
-        'premium': 2,
-        'standard': 1,
-        'basic': 0
+        enterprise: 3,
+        premium: 2,
+        standard: 1,
+        basic: 0,
       },
       preemptionEnabled: true,
       starvationPrevention: {
         enabled: true,
         maxWaitTime: 300000,
         promotionThreshold: 120000,
-        agingFactor: 1.1
-      }
+        agingFactor: 1.1,
+      },
     },
     analytics: {
       enabled: true,
       retentionDays: 90,
       aggregationIntervals: [60, 300, 3600, 86400],
-      exportFormats: ['json', 'csv', 'parquet'],
-      realTimeAnalytics: true
-    }
+      exportFormats: ["json", "csv", "parquet"],
+      realTimeAnalytics: true,
+    },
   };
 
   return {
@@ -1155,134 +1271,136 @@ function createTestRateLimitConfiguration(): RateLimitConfiguration {
         enabled: true,
         ttl: 3600,
         maxSize: 10000,
-        algorithm: 'LRU',
+        algorithm: "LRU",
         distributedCache: {
           enabled: true,
           replicationFactor: 3,
-          consistencyLevel: 'EVENTUAL',
-          partitioningStrategy: 'hash'
-        }
+          consistencyLevel: "EVENTUAL",
+          partitioningStrategy: "hash",
+        },
       },
       batchingConfig: {
         enabled: true,
         batchSize: 100,
         maxWaitTime: 10,
-        dynamicSizing: true
+        dynamicSizing: true,
       },
       connectionPoolConfig: {
         minConnections: 10,
         maxConnections: 100,
         acquisitionTimeout: 5000,
         idleTimeout: 300000,
-        leakDetectionThreshold: 60000
-      }
+        leakDetectionThreshold: 60000,
+      },
     },
     conversational: {
       naturalLanguageEnabled: true,
-      explanationLevel: 'DETAILED',
+      explanationLevel: "DETAILED",
       negotiationEnabled: true,
       alternativeSuggestions: true,
-      userEducationEnabled: true
-    }
+      userEducationEnabled: true,
+    },
   };
 }
 
 function createTestUserContext(): UserContext {
   return {
-    userId: 'test-user-123',
-    username: 'testuser',
-    organizationId: 'test-org-456',
-    roles: ['premium', 'developer'],
-    permissions: ['read', 'write'],
+    userId: "test-user-123",
+    username: "testuser",
+    organizationId: "test-org-456",
+    roles: ["premium", "developer"],
+    permissions: ["read", "write"],
     profile: {
-      technicalLevel: 'INTERMEDIATE',
-      role: 'developer',
-      department: 'engineering',
+      technicalLevel: "INTERMEDIATE",
+      role: "developer",
+      department: "engineering",
       capabilities: [
         {
-          domain: 'api_usage',
-          level: 'ADVANCED',
-          certifications: ['api_expert']
-        }
-      ]
+          domain: "api_usage",
+          level: "ADVANCED",
+          certifications: ["api_expert"],
+        },
+      ],
     },
     preferences: {
-      explanationStyle: 'DETAILED',
+      explanationStyle: "DETAILED",
       includeExamples: true,
       includeVisualAids: false,
       includeTechnicalDetails: true,
       monitoringPreferences: {
-        technicalDetailLevel: 'MEDIUM',
-        updateFrequency: 'REAL_TIME',
+        technicalDetailLevel: "MEDIUM",
+        updateFrequency: "REAL_TIME",
         alertThresholds: [
           {
-            metric: 'response_time',
+            metric: "response_time",
             threshold: 100,
-            severity: 'MEDIUM'
-          }
-        ]
-      }
+            severity: "MEDIUM",
+          },
+        ],
+      },
     },
-    capabilities: ['api_access', 'data_analysis'],
-    timezone: 'America/New_York',
-    sessionId: 'session-789',
-    deviceId: 'device-abc',
+    capabilities: ["api_access", "data_analysis"],
+    timezone: "America/New_York",
+    sessionId: "session-789",
+    deviceId: "device-abc",
     recentConversations: [
       {
-        conversationId: 'conv-1',
+        conversationId: "conv-1",
         timestamp: new Date(Date.now() - 3600000),
-        intent: 'api_request',
-        outcome: 'SUCCESS',
-        duration: 150
-      }
+        intent: "api_request",
+        outcome: "SUCCESS",
+        duration: 150,
+      },
     ],
     datePreferences: {
-      format: 'YYYY-MM-DD',
-      timezone: 'America/New_York',
-      calendarType: 'GREGORIAN'
+      format: "YYYY-MM-DD",
+      timezone: "America/New_York",
+      calendarType: "GREGORIAN",
     },
     notificationPreferences: {
       channels: [
         {
-          type: 'EMAIL',
-          address: 'test@example.com',
-          priority: 'MEDIUM'
-        }
+          type: "EMAIL",
+          address: "test@example.com",
+          priority: "MEDIUM",
+        },
       ],
-      frequency: 'IMMEDIATE',
+      frequency: "IMMEDIATE",
       quietHours: {
-        startTime: '22:00',
-        endTime: '06:00',
-        timezone: 'America/New_York'
-      }
-    }
+        startTime: "22:00",
+        endTime: "06:00",
+        timezone: "America/New_York",
+      },
+    },
   };
 }
 
-function createTestRateLimitContext(userContext: UserContext): RateLimitContext {
+function createTestRateLimitContext(
+  userContext: UserContext,
+): RateLimitContext {
   return {
     userId: userContext.userId,
     userContext,
-    apiEndpoint: '/api/v1/users',
-    method: 'GET',
-    operation: 'read',
-    securityLevel: 'MEDIUM',
-    riskLevel: 'LOW',
+    apiEndpoint: "/api/v1/users",
+    method: "GET",
+    operation: "read",
+    securityLevel: "MEDIUM",
+    riskLevel: "LOW",
     timestamp: new Date(),
-    requestId: 'req-123',
+    requestId: "req-123",
     sessionId: userContext.sessionId,
-    clientIP: '192.168.1.100',
-    userAgent: 'Mozilla/5.0 (compatible; TestClient/1.0)',
+    clientIP: "192.168.1.100",
+    userAgent: "Mozilla/5.0 (compatible; TestClient/1.0)",
     payloadSize: 1024,
     expectedComplexity: 100,
     recentHistory: [
       {
         timestamp: new Date(Date.now() - 60000),
-        endpoint: '/api/v1/users',
-        outcome: 'ALLOWED',
-        reason: 'Within limits',
-        waitTime: 0
-      }
-    ]
+        endpoint: "/api/v1/users",
+        outcome: "ALLOWED",
+        reason: "Within limits",
+        waitTime: 0,
+      },
+    ],
   };
 }

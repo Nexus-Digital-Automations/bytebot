@@ -22,8 +22,8 @@
  * @version 1.0.0 - SOPHISTICATED TRANSACTION COORDINATION WITH PARLANT VALIDATION
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { EventEmitter } from 'events';
+import { Injectable, Logger } from "@nestjs/common";
+import { EventEmitter } from "events";
 import {
   TransactionMetadata,
   TransactionOperation,
@@ -44,38 +44,52 @@ import {
   ParlantTransactionValidationResponse,
   TransactionRiskAssessment,
   TransactionRollbackInfo,
-} from '../types';
+} from "../types";
 import {
   ParlantValidationRequest,
   ParlantValidationResponse,
   ParlantUserContext,
   SecurityLevel,
-} from '../../../types/parlant-integration.types';
+} from "../../../types/parlant-integration.types";
 
 /**
  * Transaction coordinator service for PARLANT integration
  */
 @Injectable()
 export class ParlantTransactionCoordinatorService extends EventEmitter {
-  private readonly logger = new Logger(ParlantTransactionCoordinatorService.name);
+  private readonly logger = new Logger(
+    ParlantTransactionCoordinatorService.name,
+  );
 
   // Transaction registry for active transactions
   private readonly activeTransactions = new Map<string, TransactionMetadata>();
 
   // Transaction operation registry
-  private readonly transactionOperations = new Map<string, TransactionOperation[]>();
+  private readonly transactionOperations = new Map<
+    string,
+    TransactionOperation[]
+  >();
 
   // Transaction execution contexts
-  private readonly executionContexts = new Map<string, TransactionExecutionContext>();
+  private readonly executionContexts = new Map<
+    string,
+    TransactionExecutionContext
+  >();
 
   // Transaction performance monitors
-  private readonly performanceMonitors = new Map<string, TransactionPerformanceMonitor>();
+  private readonly performanceMonitors = new Map<
+    string,
+    TransactionPerformanceMonitor
+  >();
 
   // Transaction audit loggers
   private readonly auditLoggers = new Map<string, TransactionAuditLogger>();
 
   // Transaction validation cache
-  private readonly validationCache = new Map<string, ParlantTransactionValidationResponse>();
+  private readonly validationCache = new Map<
+    string,
+    ParlantTransactionValidationResponse
+  >();
 
   // Transaction dependency graph
   private readonly dependencyGraph = new Map<string, Set<string>>();
@@ -100,7 +114,7 @@ export class ParlantTransactionCoordinatorService extends EventEmitter {
 
   constructor() {
     super();
-    this.logger.log('PARLANT Transaction Coordinator Service initialized');
+    this.logger.log("PARLANT Transaction Coordinator Service initialized");
 
     // Set up event listeners for monitoring
     this.setupEventListeners();
@@ -122,12 +136,14 @@ export class ParlantTransactionCoordinatorService extends EventEmitter {
       timeout?: number;
       configuration?: Partial<TransactionConfiguration>;
       parentTransactionId?: string;
-    } = {}
+    } = {},
   ): Promise<TransactionMetadata> {
     const startTime = Date.now();
     const transactionId = this.generateTransactionId();
 
-    this.logger.log(`Initializing transaction ${transactionId} with ${operations.length} operations`);
+    this.logger.log(
+      `Initializing transaction ${transactionId} with ${operations.length} operations`,
+    );
 
     try {
       // Create transaction metadata
@@ -135,7 +151,8 @@ export class ParlantTransactionCoordinatorService extends EventEmitter {
         transactionId,
         operationType,
         state: TransactionState.INITIALIZED,
-        isolationLevel: options.isolationLevel || TransactionIsolationLevel.READ_COMMITTED,
+        isolationLevel:
+          options.isolationLevel || TransactionIsolationLevel.READ_COMMITTED,
         priority: options.priority || TransactionPriority.NORMAL,
         userContext,
         securityLevel: options.securityLevel || SecurityLevel._MEDIUM,
@@ -146,7 +163,10 @@ export class ParlantTransactionCoordinatorService extends EventEmitter {
         childTransactionIds: [],
         databaseConnections: [],
         performanceMetrics: this.initializePerformanceMetrics(),
-        configuration: { ...this.defaultConfiguration, ...options.configuration },
+        configuration: {
+          ...this.defaultConfiguration,
+          ...options.configuration,
+        },
       };
 
       // Validate operations
@@ -157,8 +177,12 @@ export class ParlantTransactionCoordinatorService extends EventEmitter {
       const auditLogger = this.createAuditLogger(transactionId, userContext);
 
       // Record transaction initialization
-      performanceMonitor.recordOperationStart('transaction_initialization');
-      auditLogger.logStateChange(TransactionState.INITIALIZED, TransactionState.INITIALIZED, 'Transaction initialized');
+      performanceMonitor.recordOperationStart("transaction_initialization");
+      auditLogger.logStateChange(
+        TransactionState.INITIALIZED,
+        TransactionState.INITIALIZED,
+        "Transaction initialized",
+      );
 
       // Register transaction
       this.activeTransactions.set(transactionId, transaction);
@@ -173,14 +197,22 @@ export class ParlantTransactionCoordinatorService extends EventEmitter {
       transaction.performanceMetrics.validationStartTime = Date.now();
 
       // Emit transaction initialized event
-      this.emit('transactionInitialized', { transactionId, transaction, operations });
+      this.emit("transactionInitialized", {
+        transactionId,
+        transaction,
+        operations,
+      });
 
-      this.logger.log(`Transaction ${transactionId} initialized successfully in ${Date.now() - startTime}ms`);
+      this.logger.log(
+        `Transaction ${transactionId} initialized successfully in ${Date.now() - startTime}ms`,
+      );
 
       return transaction;
-
     } catch (error) {
-      this.logger.error(`Failed to initialize transaction: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to initialize transaction: ${error.message}`,
+        error.stack,
+      );
       throw new Error(`Transaction initialization failed: ${error.message}`);
     }
   }
@@ -188,7 +220,9 @@ export class ParlantTransactionCoordinatorService extends EventEmitter {
   /**
    * Begin transaction validation with PARLANT
    */
-  async beginValidation(transactionId: string): Promise<ParlantTransactionValidationResponse> {
+  async beginValidation(
+    transactionId: string,
+  ): Promise<ParlantTransactionValidationResponse> {
     const startTime = Date.now();
     this.logger.log(`Beginning validation for transaction ${transactionId}`);
 
@@ -198,29 +232,41 @@ export class ParlantTransactionCoordinatorService extends EventEmitter {
       const auditLogger = this.getAuditLogger(transactionId);
 
       // Update transaction state
-      await this.updateTransactionState(transactionId, TransactionState.PENDING_VALIDATION, 'Beginning PARLANT validation');
+      await this.updateTransactionState(
+        transactionId,
+        TransactionState.PENDING_VALIDATION,
+        "Beginning PARLANT validation",
+      );
 
       // Check validation cache
       const cacheKey = this.generateValidationCacheKey(transaction, operations);
       const cachedResponse = this.validationCache.get(cacheKey);
       if (cachedResponse && this.isValidationCacheValid(cachedResponse)) {
-        this.logger.log(`Using cached validation for transaction ${transactionId}`);
+        this.logger.log(
+          `Using cached validation for transaction ${transactionId}`,
+        );
         return cachedResponse;
       }
 
       // Create risk assessment
-      const riskAssessment = this.assessTransactionRisk(transaction, operations);
+      const riskAssessment = this.assessTransactionRisk(
+        transaction,
+        operations,
+      );
 
       // Prepare validation request
       const validationRequest: ParlantTransactionValidationRequest = {
         operationId: `${transactionId}_validation`,
-        functionName: 'database_transaction_execution',
-        packageName: 'parlant-transaction-coordinator',
-        description: this.generateTransactionDescription(transaction, operations),
+        functionName: "database_transaction_execution",
+        packageName: "parlant-transaction-coordinator",
+        description: this.generateTransactionDescription(
+          transaction,
+          operations,
+        ),
         parameters: {
           transactionId,
           operationType: transaction.operationType,
-          operations: operations.map(op => ({
+          operations: operations.map((op) => ({
             operationId: op.operationId,
             type: op.type,
             description: op.description,
@@ -234,7 +280,7 @@ export class ParlantTransactionCoordinatorService extends EventEmitter {
         timeout: transaction.configuration.customValidationTimeout,
         transaction,
         operations,
-        validationScope: 'TRANSACTION',
+        validationScope: "TRANSACTION",
         riskAssessment,
       };
 
@@ -242,7 +288,8 @@ export class ParlantTransactionCoordinatorService extends EventEmitter {
       auditLogger.logValidationRequest(validationRequest);
 
       // Perform PARLANT validation (simulated for now)
-      const validationResponse = await this.performParlantValidation(validationRequest);
+      const validationResponse =
+        await this.performParlantValidation(validationRequest);
 
       // Log validation response
       auditLogger.logValidationResponse(validationResponse);
@@ -254,28 +301,45 @@ export class ParlantTransactionCoordinatorService extends EventEmitter {
       transaction.parlantConversationId = validationResponse.conversationId;
       transaction.performanceMetrics.validationEndTime = Date.now();
       transaction.performanceMetrics.validationDuration =
-        transaction.performanceMetrics.validationEndTime - (transaction.performanceMetrics.validationStartTime || 0);
+        transaction.performanceMetrics.validationEndTime -
+        (transaction.performanceMetrics.validationStartTime || 0);
 
       if (validationResponse.approved) {
-        await this.updateTransactionState(transactionId, TransactionState.VALIDATED, 'PARLANT validation approved');
+        await this.updateTransactionState(
+          transactionId,
+          TransactionState.VALIDATED,
+          "PARLANT validation approved",
+        );
       } else {
-        await this.updateTransactionState(transactionId, TransactionState.FAILED, `PARLANT validation rejected: ${validationResponse.reason}`);
-        await this.initiateRollback(transactionId, 'Validation rejected');
+        await this.updateTransactionState(
+          transactionId,
+          TransactionState.FAILED,
+          `PARLANT validation rejected: ${validationResponse.reason}`,
+        );
+        await this.initiateRollback(transactionId, "Validation rejected");
       }
 
-      this.logger.log(`Validation for transaction ${transactionId} completed in ${Date.now() - startTime}ms: ${validationResponse.approved ? 'APPROVED' : 'REJECTED'}`);
+      this.logger.log(
+        `Validation for transaction ${transactionId} completed in ${Date.now() - startTime}ms: ${validationResponse.approved ? "APPROVED" : "REJECTED"}`,
+      );
 
       return validationResponse;
-
     } catch (error) {
-      this.logger.error(`Validation failed for transaction ${transactionId}: ${error.message}`, error.stack);
+      this.logger.error(
+        `Validation failed for transaction ${transactionId}: ${error.message}`,
+        error.stack,
+      );
       await this.handleTransactionError(transactionId, {
         type: TransactionErrorType.VALIDATION_FAILED,
         message: error.message,
-        code: 'VALIDATION_ERROR',
+        code: "VALIDATION_ERROR",
         details: { originalError: error },
         timestamp: new Date(),
-        recoverySuggestions: ['Retry validation', 'Check user permissions', 'Verify operation parameters'],
+        recoverySuggestions: [
+          "Retry validation",
+          "Check user permissions",
+          "Verify operation parameters",
+        ],
         isRecoverable: true,
       });
       throw error;
@@ -285,7 +349,9 @@ export class ParlantTransactionCoordinatorService extends EventEmitter {
   /**
    * Execute validated transaction
    */
-  async executeTransaction(transactionId: string): Promise<TransactionOperationResult[]> {
+  async executeTransaction(
+    transactionId: string,
+  ): Promise<TransactionOperationResult[]> {
     const startTime = Date.now();
     this.logger.log(`Executing transaction ${transactionId}`);
 
@@ -297,18 +363,28 @@ export class ParlantTransactionCoordinatorService extends EventEmitter {
 
       // Validate transaction state
       if (transaction.state !== TransactionState.VALIDATED) {
-        throw new Error(`Transaction ${transactionId} is not in validated state. Current state: ${transaction.state}`);
+        throw new Error(
+          `Transaction ${transactionId} is not in validated state. Current state: ${transaction.state}`,
+        );
       }
 
       // Update transaction state
-      await this.updateTransactionState(transactionId, TransactionState.EXECUTING, 'Beginning transaction execution');
+      await this.updateTransactionState(
+        transactionId,
+        TransactionState.EXECUTING,
+        "Beginning transaction execution",
+      );
 
       // Record execution start
       transaction.performanceMetrics.executionStartTime = Date.now();
-      performanceMonitor.recordOperationStart('transaction_execution');
+      performanceMonitor.recordOperationStart("transaction_execution");
 
       // Create execution context
-      const executionContext = this.createExecutionContext(transactionId, transaction, operations);
+      const executionContext = this.createExecutionContext(
+        transactionId,
+        transaction,
+        operations,
+      );
       this.executionContexts.set(transactionId, executionContext);
 
       // Execute operations in dependency order
@@ -316,12 +392,16 @@ export class ParlantTransactionCoordinatorService extends EventEmitter {
       const executionOrder = this.determineExecutionOrder(operations);
 
       for (const operation of executionOrder) {
-        this.logger.log(`Executing operation ${operation.operationId} in transaction ${transactionId}`);
+        this.logger.log(
+          `Executing operation ${operation.operationId} in transaction ${transactionId}`,
+        );
 
         try {
           // Check for timeout
           if (this.isTransactionTimedOut(transaction)) {
-            throw new Error(`Transaction ${transactionId} timed out during execution`);
+            throw new Error(
+              `Transaction ${transactionId} timed out during execution`,
+            );
           }
 
           // Execute operation
@@ -330,23 +410,33 @@ export class ParlantTransactionCoordinatorService extends EventEmitter {
 
           // Record operation completion
           const operationEndTime = Date.now();
-          result.performanceMetrics.executionDuration = operationEndTime - operationStartTime;
+          result.performanceMetrics.executionDuration =
+            operationEndTime - operationStartTime;
 
-          performanceMonitor.recordOperationCompletion(operation.operationId, result);
+          performanceMonitor.recordOperationCompletion(
+            operation.operationId,
+            result,
+          );
           auditLogger.logOperationExecution(operation, result);
 
           if (!result.success) {
-            throw new Error(`Operation ${operation.operationId} failed: ${result.error?.message}`);
+            throw new Error(
+              `Operation ${operation.operationId} failed: ${result.error?.message}`,
+            );
           }
 
           results.push(result);
           transaction.performanceMetrics.operationCount++;
-
         } catch (operationError) {
-          this.logger.error(`Operation ${operation.operationId} failed in transaction ${transactionId}: ${operationError.message}`);
+          this.logger.error(
+            `Operation ${operation.operationId} failed in transaction ${transactionId}: ${operationError.message}`,
+          );
 
           // Initiate rollback
-          await this.initiateRollback(transactionId, `Operation ${operation.operationId} failed: ${operationError.message}`);
+          await this.initiateRollback(
+            transactionId,
+            `Operation ${operation.operationId} failed: ${operationError.message}`,
+          );
           throw operationError;
         }
       }
@@ -357,21 +447,30 @@ export class ParlantTransactionCoordinatorService extends EventEmitter {
       // Update performance metrics
       transaction.performanceMetrics.executionEndTime = Date.now();
       transaction.performanceMetrics.executionDuration =
-        transaction.performanceMetrics.executionEndTime - (transaction.performanceMetrics.executionStartTime || 0);
+        transaction.performanceMetrics.executionEndTime -
+        (transaction.performanceMetrics.executionStartTime || 0);
 
-      this.logger.log(`Transaction ${transactionId} executed successfully in ${Date.now() - startTime}ms`);
+      this.logger.log(
+        `Transaction ${transactionId} executed successfully in ${Date.now() - startTime}ms`,
+      );
 
       return results;
-
     } catch (error) {
-      this.logger.error(`Transaction execution failed for ${transactionId}: ${error.message}`, error.stack);
+      this.logger.error(
+        `Transaction execution failed for ${transactionId}: ${error.message}`,
+        error.stack,
+      );
       await this.handleTransactionError(transactionId, {
         type: TransactionErrorType.EXECUTION_FAILED,
         message: error.message,
-        code: 'EXECUTION_ERROR',
+        code: "EXECUTION_ERROR",
         details: { originalError: error },
         timestamp: new Date(),
-        recoverySuggestions: ['Review operation parameters', 'Check database connectivity', 'Verify user permissions'],
+        recoverySuggestions: [
+          "Review operation parameters",
+          "Check database connectivity",
+          "Verify user permissions",
+        ],
         isRecoverable: false,
       });
       throw error;
@@ -390,33 +489,49 @@ export class ParlantTransactionCoordinatorService extends EventEmitter {
 
       // Validate transaction state
       if (transaction.state !== TransactionState.EXECUTING) {
-        throw new Error(`Cannot commit transaction ${transactionId} in state ${transaction.state}`);
+        throw new Error(
+          `Cannot commit transaction ${transactionId} in state ${transaction.state}`,
+        );
       }
 
       // Update transaction state
-      await this.updateTransactionState(transactionId, TransactionState.COMMITTED, 'Transaction committed successfully');
+      await this.updateTransactionState(
+        transactionId,
+        TransactionState.COMMITTED,
+        "Transaction committed successfully",
+      );
 
       // Record completion
       transaction.completedAt = new Date();
 
       // Log commit
-      auditLogger.logStateChange(TransactionState.EXECUTING, TransactionState.COMMITTED, 'Transaction committed');
+      auditLogger.logStateChange(
+        TransactionState.EXECUTING,
+        TransactionState.COMMITTED,
+        "Transaction committed",
+      );
 
       // Emit commit event
-      this.emit('transactionCommitted', { transactionId, transaction });
+      this.emit("transactionCommitted", { transactionId, transaction });
 
       // Clean up resources
       await this.cleanupTransaction(transactionId);
-
     } catch (error) {
-      this.logger.error(`Failed to commit transaction ${transactionId}: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to commit transaction ${transactionId}: ${error.message}`,
+        error.stack,
+      );
       await this.handleTransactionError(transactionId, {
         type: TransactionErrorType.EXECUTION_FAILED,
         message: `Commit failed: ${error.message}`,
-        code: 'COMMIT_ERROR',
+        code: "COMMIT_ERROR",
         details: { originalError: error },
         timestamp: new Date(),
-        recoverySuggestions: ['Retry commit', 'Check database connectivity', 'Review transaction state'],
+        recoverySuggestions: [
+          "Retry commit",
+          "Check database connectivity",
+          "Review transaction state",
+        ],
         isRecoverable: true,
       });
       throw error;
@@ -429,7 +544,9 @@ export class ParlantTransactionCoordinatorService extends EventEmitter {
    * Initiate transaction rollback
    */
   async initiateRollback(transactionId: string, reason: string): Promise<void> {
-    this.logger.log(`Initiating rollback for transaction ${transactionId}: ${reason}`);
+    this.logger.log(
+      `Initiating rollback for transaction ${transactionId}: ${reason}`,
+    );
 
     try {
       const transaction = this.getTransaction(transactionId);
@@ -437,13 +554,17 @@ export class ParlantTransactionCoordinatorService extends EventEmitter {
       const auditLogger = this.getAuditLogger(transactionId);
 
       // Update transaction state
-      await this.updateTransactionState(transactionId, TransactionState.ROLLED_BACK, `Rollback initiated: ${reason}`);
+      await this.updateTransactionState(
+        transactionId,
+        TransactionState.ROLLED_BACK,
+        `Rollback initiated: ${reason}`,
+      );
 
       // Create rollback info
       let rollbackInfo: TransactionRollbackInfo = {
         reason,
-        status: 'PENDING',
-        operationsToRollback: operations.map(op => op.operationId),
+        status: "PENDING",
+        operationsToRollback: operations.map((op) => op.operationId),
         startTime: new Date(),
       };
 
@@ -461,7 +582,7 @@ export class ParlantTransactionCoordinatorService extends EventEmitter {
                 performanceMetrics: {},
                 auditInfo: {
                   auditId: `rollback_${operation.operationId}`,
-                  type: 'OPERATION',
+                  type: "OPERATION",
                   timestamp: new Date(),
                   userContext: transaction.userContext,
                   details: { rollback: true },
@@ -472,18 +593,27 @@ export class ParlantTransactionCoordinatorService extends EventEmitter {
               await operation.rollbackExecutor(executionContext, mockResult);
             }
           } catch (rollbackError) {
-            this.logger.error(`Failed to rollback operation ${operation.operationId}: ${rollbackError.message}`);
+            this.logger.error(
+              `Failed to rollback operation ${operation.operationId}: ${rollbackError.message}`,
+            );
             rollbackInfo = {
               ...rollbackInfo,
               rollbackError: {
                 type: TransactionErrorType.ROLLBACK_FAILED,
                 message: rollbackError.message,
-                code: 'ROLLBACK_ERROR',
-                details: { operationId: operation.operationId, originalError: rollbackError },
+                code: "ROLLBACK_ERROR",
+                details: {
+                  operationId: operation.operationId,
+                  originalError: rollbackError,
+                },
                 timestamp: new Date(),
-                recoverySuggestions: ['Manual rollback required', 'Check database state', 'Contact administrator'],
+                recoverySuggestions: [
+                  "Manual rollback required",
+                  "Check database state",
+                  "Contact administrator",
+                ],
                 isRecoverable: false,
-              }
+              },
             };
           }
         }
@@ -492,28 +622,42 @@ export class ParlantTransactionCoordinatorService extends EventEmitter {
       // Update rollback completion
       rollbackInfo = {
         ...rollbackInfo,
-        status: rollbackInfo.rollbackError ? 'FAILED' : 'COMPLETED',
-        completionTime: new Date()
+        status: rollbackInfo.rollbackError ? "FAILED" : "COMPLETED",
+        completionTime: new Date(),
       };
 
       // Log rollback completion
-      auditLogger.logStateChange(TransactionState.EXECUTING, TransactionState.ROLLED_BACK, `Rollback ${rollbackInfo.status.toLowerCase()}`);
+      auditLogger.logStateChange(
+        TransactionState.EXECUTING,
+        TransactionState.ROLLED_BACK,
+        `Rollback ${rollbackInfo.status.toLowerCase()}`,
+      );
 
       // Emit rollback event
-      this.emit('transactionRolledBack', { transactionId, transaction, rollbackInfo });
+      this.emit("transactionRolledBack", {
+        transactionId,
+        transaction,
+        rollbackInfo,
+      });
 
       // Clean up resources
       await this.cleanupTransaction(transactionId);
-
     } catch (error) {
-      this.logger.error(`Rollback failed for transaction ${transactionId}: ${error.message}`, error.stack);
+      this.logger.error(
+        `Rollback failed for transaction ${transactionId}: ${error.message}`,
+        error.stack,
+      );
       await this.handleTransactionError(transactionId, {
         type: TransactionErrorType.ROLLBACK_FAILED,
         message: error.message,
-        code: 'ROLLBACK_ERROR',
+        code: "ROLLBACK_ERROR",
         details: { originalError: error },
         timestamp: new Date(),
-        recoverySuggestions: ['Manual intervention required', 'Check database integrity', 'Contact administrator'],
+        recoverySuggestions: [
+          "Manual intervention required",
+          "Check database integrity",
+          "Contact administrator",
+        ],
         isRecoverable: false,
       });
       throw error;
@@ -547,7 +691,7 @@ export class ParlantTransactionCoordinatorService extends EventEmitter {
    */
   private validateOperations(operations: TransactionOperation[]): void {
     if (!operations || operations.length === 0) {
-      throw new Error('At least one operation is required for a transaction');
+      throw new Error("At least one operation is required for a transaction");
     }
 
     const operationIds = new Set<string>();
@@ -562,7 +706,9 @@ export class ParlantTransactionCoordinatorService extends EventEmitter {
         if (!operationIds.has(dependency)) {
           // Dependencies should be resolved within the operation set
           // For now, we'll just log a warning
-          this.logger.warn(`Operation ${operation.operationId} has unresolved dependency: ${dependency}`);
+          this.logger.warn(
+            `Operation ${operation.operationId} has unresolved dependency: ${dependency}`,
+          );
         }
       }
     }
@@ -571,7 +717,10 @@ export class ParlantTransactionCoordinatorService extends EventEmitter {
   /**
    * Build dependency graph for operations
    */
-  private buildDependencyGraph(transactionId: string, operations: TransactionOperation[]): void {
+  private buildDependencyGraph(
+    transactionId: string,
+    operations: TransactionOperation[],
+  ): void {
     const graph = new Map<string, Set<string>>();
 
     for (const operation of operations) {
@@ -584,19 +733,23 @@ export class ParlantTransactionCoordinatorService extends EventEmitter {
   /**
    * Determine execution order based on dependencies
    */
-  private determineExecutionOrder(operations: TransactionOperation[]): TransactionOperation[] {
+  private determineExecutionOrder(
+    operations: TransactionOperation[],
+  ): TransactionOperation[] {
     // Simple topological sort for operation dependencies
     const ordered: TransactionOperation[] = [];
     const remaining = [...operations];
     const completed = new Set<string>();
 
     while (remaining.length > 0) {
-      const nextOperations = remaining.filter(op =>
-        op.dependencies.every(dep => completed.has(dep))
+      const nextOperations = remaining.filter((op) =>
+        op.dependencies.every((dep) => completed.has(dep)),
       );
 
       if (nextOperations.length === 0) {
-        this.logger.warn('Circular dependency detected in operations, proceeding with original order');
+        this.logger.warn(
+          "Circular dependency detected in operations, proceeding with original order",
+        );
         return operations;
       }
 
@@ -617,7 +770,7 @@ export class ParlantTransactionCoordinatorService extends EventEmitter {
   private createExecutionContext(
     transactionId: string,
     transaction: TransactionMetadata,
-    operations: TransactionOperation[]
+    operations: TransactionOperation[],
   ): TransactionExecutionContext {
     return {
       transaction,
@@ -634,40 +787,50 @@ export class ParlantTransactionCoordinatorService extends EventEmitter {
    */
   private assessTransactionRisk(
     transaction: TransactionMetadata,
-    operations: TransactionOperation[]
+    operations: TransactionOperation[],
   ): TransactionRiskAssessment {
-    let riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' = 'LOW';
+    let riskLevel: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL" = "LOW";
     const riskFactors: string[] = [];
     const potentialImpact: string[] = [];
     const mitigationStrategies: string[] = [];
 
     // Assess based on operation types
-    const hasWriteOperations = operations.some(op =>
-      [TransactionOperationType.WRITE, TransactionOperationType.UPDATE, TransactionOperationType.DELETE].includes(op.type)
+    const hasWriteOperations = operations.some((op) =>
+      [
+        TransactionOperationType.WRITE,
+        TransactionOperationType.UPDATE,
+        TransactionOperationType.DELETE,
+      ].includes(op.type),
     );
 
     if (hasWriteOperations) {
-      riskLevel = 'MEDIUM';
-      riskFactors.push('Contains write operations');
-      potentialImpact.push('Data modification');
-      mitigationStrategies.push('Backup verification', 'Rollback capabilities');
+      riskLevel = "MEDIUM";
+      riskFactors.push("Contains write operations");
+      potentialImpact.push("Data modification");
+      mitigationStrategies.push("Backup verification", "Rollback capabilities");
     }
 
     // Assess based on operation count
     if (operations.length > 10) {
-      riskLevel = 'HIGH';
-      riskFactors.push('Large number of operations');
-      potentialImpact.push('Extended execution time', 'Increased lock contention');
-      mitigationStrategies.push('Batch processing', 'Operation splitting');
+      riskLevel = "HIGH";
+      riskFactors.push("Large number of operations");
+      potentialImpact.push(
+        "Extended execution time",
+        "Increased lock contention",
+      );
+      mitigationStrategies.push("Batch processing", "Operation splitting");
     }
 
     // Assess based on priority
-    if (transaction.priority === TransactionPriority.CRITICAL || transaction.priority === TransactionPriority.SYSTEM) {
-      if (riskLevel === 'LOW') riskLevel = 'MEDIUM';
-      if (riskLevel === 'MEDIUM') riskLevel = 'HIGH';
-      riskFactors.push('High priority transaction');
-      potentialImpact.push('System-wide impact');
-      mitigationStrategies.push('Enhanced monitoring', 'Elevated approval');
+    if (
+      transaction.priority === TransactionPriority.CRITICAL ||
+      transaction.priority === TransactionPriority.SYSTEM
+    ) {
+      if (riskLevel === "LOW") riskLevel = "MEDIUM";
+      if (riskLevel === "MEDIUM") riskLevel = "HIGH";
+      riskFactors.push("High priority transaction");
+      potentialImpact.push("System-wide impact");
+      mitigationStrategies.push("Enhanced monitoring", "Elevated approval");
     }
 
     return {
@@ -675,7 +838,9 @@ export class ParlantTransactionCoordinatorService extends EventEmitter {
       riskFactors,
       potentialImpact,
       mitigationStrategies,
-      requiresElevatedApproval: riskLevel === 'CRITICAL' || transaction.priority === TransactionPriority.SYSTEM,
+      requiresElevatedApproval:
+        riskLevel === "CRITICAL" ||
+        transaction.priority === TransactionPriority.SYSTEM,
     };
   }
 
@@ -684,9 +849,11 @@ export class ParlantTransactionCoordinatorService extends EventEmitter {
    */
   private generateTransactionDescription(
     transaction: TransactionMetadata,
-    operations: TransactionOperation[]
+    operations: TransactionOperation[],
   ): string {
-    const operationSummary = operations.map(op => `${op.type}: ${op.description}`).join('; ');
+    const operationSummary = operations
+      .map((op) => `${op.type}: ${op.description}`)
+      .join("; ");
     return `Database transaction (${transaction.operationType}) with ${operations.length} operations: ${operationSummary}`;
   }
 
@@ -694,23 +861,29 @@ export class ParlantTransactionCoordinatorService extends EventEmitter {
    * Perform PARLANT validation (simulated)
    */
   private async performParlantValidation(
-    request: ParlantTransactionValidationRequest
+    request: ParlantTransactionValidationRequest,
   ): Promise<ParlantTransactionValidationResponse> {
     // Simulate validation logic
-    const approved = request.riskAssessment.riskLevel !== 'CRITICAL';
+    const approved = request.riskAssessment.riskLevel !== "CRITICAL";
 
     return {
       approved,
       conversationId: `conv_${Date.now()}`,
-      reason: approved ? 'Transaction approved based on risk assessment' : 'Transaction rejected due to high risk',
+      reason: approved
+        ? "Transaction approved based on risk assessment"
+        : "Transaction rejected due to high risk",
       confidence: approved ? 0.9 : 0.95,
       metadata: {
         validationTime: Date.now(),
-        validatorId: 'parlant-transaction-validator',
-        validationVersion: '1.0.0',
+        validatorId: "parlant-transaction-validator",
+        validationVersion: "1.0.0",
       },
-      approvedOperations: approved ? request.operations.map(op => op.operationId) : [],
-      rejectedOperations: approved ? [] : request.operations.map(op => op.operationId),
+      approvedOperations: approved
+        ? request.operations.map((op) => op.operationId)
+        : [],
+      rejectedOperations: approved
+        ? []
+        : request.operations.map((op) => op.operationId),
       conditionalApprovals: [],
     };
   }
@@ -720,18 +893,22 @@ export class ParlantTransactionCoordinatorService extends EventEmitter {
    */
   private generateValidationCacheKey(
     transaction: TransactionMetadata,
-    operations: TransactionOperation[]
+    operations: TransactionOperation[],
   ): string {
     const operationHash = operations
-      .map(op => `${op.operationId}:${op.type}:${JSON.stringify(op.parameters)}`)
-      .join('|');
+      .map(
+        (op) => `${op.operationId}:${op.type}:${JSON.stringify(op.parameters)}`,
+      )
+      .join("|");
     return `${transaction.operationType}_${transaction.securityLevel}_${operationHash}`;
   }
 
   /**
    * Check if validation cache is valid
    */
-  private isValidationCacheValid(response: ParlantTransactionValidationResponse): boolean {
+  private isValidationCacheValid(
+    response: ParlantTransactionValidationResponse,
+  ): boolean {
     // Simple cache validity check based on timestamp
     const cacheAge = Date.now() - response.metadata.validationTime;
     return cacheAge < 300000; // 5 minutes
@@ -751,7 +928,7 @@ export class ParlantTransactionCoordinatorService extends EventEmitter {
   private async updateTransactionState(
     transactionId: string,
     newState: TransactionState,
-    reason: string
+    reason: string,
   ): Promise<void> {
     const transaction = this.getTransaction(transactionId);
     const oldState = transaction.state;
@@ -762,9 +939,16 @@ export class ParlantTransactionCoordinatorService extends EventEmitter {
     const auditLogger = this.getAuditLogger(transactionId);
     auditLogger.logStateChange(oldState, newState, reason);
 
-    this.emit('transactionStateChanged', { transactionId, oldState, newState, reason });
+    this.emit("transactionStateChanged", {
+      transactionId,
+      oldState,
+      newState,
+      reason,
+    });
 
-    this.logger.log(`Transaction ${transactionId} state changed from ${oldState} to ${newState}: ${reason}`);
+    this.logger.log(
+      `Transaction ${transactionId} state changed from ${oldState} to ${newState}: ${reason}`,
+    );
   }
 
   /**
@@ -772,25 +956,39 @@ export class ParlantTransactionCoordinatorService extends EventEmitter {
    */
   private async handleTransactionError(
     transactionId: string,
-    error: TransactionError
+    error: TransactionError,
   ): Promise<void> {
     const auditLogger = this.getAuditLogger(transactionId);
     auditLogger.logError(error);
 
-    this.emit('transactionError', { transactionId, error });
+    this.emit("transactionError", { transactionId, error });
 
     // Attempt automatic recovery if error is recoverable
-    if (error.isRecoverable && this.getTransaction(transactionId).configuration.enableAutoRetry) {
+    if (
+      error.isRecoverable &&
+      this.getTransaction(transactionId).configuration.enableAutoRetry
+    ) {
       const transaction = this.getTransaction(transactionId);
-      if (transaction.performanceMetrics.retryCount < transaction.configuration.maxRetryAttempts) {
-        this.logger.log(`Attempting automatic recovery for transaction ${transactionId} (attempt ${transaction.performanceMetrics.retryCount + 1})`);
+      if (
+        transaction.performanceMetrics.retryCount <
+        transaction.configuration.maxRetryAttempts
+      ) {
+        this.logger.log(
+          `Attempting automatic recovery for transaction ${transactionId} (attempt ${transaction.performanceMetrics.retryCount + 1})`,
+        );
         transaction.performanceMetrics.retryCount++;
 
         // Wait before retry
-        await new Promise(resolve => setTimeout(resolve, transaction.configuration.retryDelay));
+        await new Promise((resolve) =>
+          setTimeout(resolve, transaction.configuration.retryDelay),
+        );
 
         // Emit retry event
-        this.emit('transactionRetry', { transactionId, error, attempt: transaction.performanceMetrics.retryCount });
+        this.emit("transactionRetry", {
+          transactionId,
+          error,
+          attempt: transaction.performanceMetrics.retryCount,
+        });
       }
     }
   }
@@ -809,26 +1007,28 @@ export class ParlantTransactionCoordinatorService extends EventEmitter {
     this.auditLoggers.delete(transactionId);
     this.dependencyGraph.delete(transactionId);
 
-    this.emit('transactionCleanedUp', { transactionId });
+    this.emit("transactionCleanedUp", { transactionId });
   }
 
   /**
    * Set up event listeners for monitoring
    */
   private setupEventListeners(): void {
-    this.on('transactionInitialized', ({ transactionId }) => {
+    this.on("transactionInitialized", ({ transactionId }) => {
       this.logger.log(`Transaction ${transactionId} initialized`);
     });
 
-    this.on('transactionCommitted', ({ transactionId }) => {
+    this.on("transactionCommitted", ({ transactionId }) => {
       this.logger.log(`Transaction ${transactionId} committed successfully`);
     });
 
-    this.on('transactionRolledBack', ({ transactionId, rollbackInfo }) => {
-      this.logger.log(`Transaction ${transactionId} rolled back: ${rollbackInfo.reason}`);
+    this.on("transactionRolledBack", ({ transactionId, rollbackInfo }) => {
+      this.logger.log(
+        `Transaction ${transactionId} rolled back: ${rollbackInfo.reason}`,
+      );
     });
 
-    this.on('transactionError', ({ transactionId, error }) => {
+    this.on("transactionError", ({ transactionId, error }) => {
       this.logger.error(`Transaction ${transactionId} error: ${error.message}`);
     });
   }
@@ -836,23 +1036,34 @@ export class ParlantTransactionCoordinatorService extends EventEmitter {
   /**
    * Create performance monitor for transaction
    */
-  private createPerformanceMonitor(transactionId: string): TransactionPerformanceMonitor {
-    const operationMetrics = new Map<string, { startTime: number; endTime?: number }>();
+  private createPerformanceMonitor(
+    transactionId: string,
+  ): TransactionPerformanceMonitor {
+    const operationMetrics = new Map<
+      string,
+      { startTime: number; endTime?: number }
+    >();
 
     return {
       recordOperationStart: (operationId: string) => {
         operationMetrics.set(operationId, { startTime: Date.now() });
       },
 
-      recordOperationCompletion: (operationId: string, result: TransactionOperationResult) => {
+      recordOperationCompletion: (
+        operationId: string,
+        result: TransactionOperationResult,
+      ) => {
         const metrics = operationMetrics.get(operationId);
         if (metrics) {
           metrics.endTime = Date.now();
-          result.performanceMetrics.executionDuration = metrics.endTime - metrics.startTime;
+          result.performanceMetrics.executionDuration =
+            metrics.endTime - metrics.startTime;
         }
       },
 
-      recordResourceUsage: (metrics: Partial<TransactionPerformanceMetrics>) => {
+      recordResourceUsage: (
+        metrics: Partial<TransactionPerformanceMetrics>,
+      ) => {
         const transaction = this.getTransaction(transactionId);
         Object.assign(transaction.performanceMetrics, metrics);
       },
@@ -866,14 +1077,21 @@ export class ParlantTransactionCoordinatorService extends EventEmitter {
   /**
    * Create audit logger for transaction
    */
-  private createAuditLogger(transactionId: string, userContext: ParlantUserContext): TransactionAuditLogger {
+  private createAuditLogger(
+    transactionId: string,
+    userContext: ParlantUserContext,
+  ): TransactionAuditLogger {
     const auditTrail: TransactionAuditInfo[] = [];
 
     return {
-      logStateChange: (oldState: TransactionState, newState: TransactionState, reason: string) => {
+      logStateChange: (
+        oldState: TransactionState,
+        newState: TransactionState,
+        reason: string,
+      ) => {
         auditTrail.push({
           auditId: `${transactionId}_state_${Date.now()}`,
-          type: 'STATE_CHANGE',
+          type: "STATE_CHANGE",
           timestamp: new Date(),
           userContext,
           details: { oldState, newState, reason },
@@ -881,13 +1099,20 @@ export class ParlantTransactionCoordinatorService extends EventEmitter {
         });
       },
 
-      logOperationExecution: (operation: TransactionOperation, result: TransactionOperationResult) => {
+      logOperationExecution: (
+        operation: TransactionOperation,
+        result: TransactionOperationResult,
+      ) => {
         auditTrail.push({
           auditId: `${transactionId}_op_${operation.operationId}_${Date.now()}`,
-          type: 'OPERATION',
+          type: "OPERATION",
           timestamp: new Date(),
           userContext,
-          details: { operation: operation.operationId, success: result.success, error: result.error },
+          details: {
+            operation: operation.operationId,
+            success: result.success,
+            error: result.error,
+          },
           securityLevel: SecurityLevel._MEDIUM,
         });
       },
@@ -895,10 +1120,13 @@ export class ParlantTransactionCoordinatorService extends EventEmitter {
       logValidationRequest: (request: ParlantValidationRequest) => {
         auditTrail.push({
           auditId: `${transactionId}_val_req_${Date.now()}`,
-          type: 'VALIDATION',
+          type: "VALIDATION",
           timestamp: new Date(),
           userContext,
-          details: { request: request.operationId, functionName: request.functionName },
+          details: {
+            request: request.operationId,
+            functionName: request.functionName,
+          },
           securityLevel: request.securityLevel,
         });
       },
@@ -906,7 +1134,7 @@ export class ParlantTransactionCoordinatorService extends EventEmitter {
       logValidationResponse: (response: ParlantValidationResponse) => {
         auditTrail.push({
           auditId: `${transactionId}_val_resp_${Date.now()}`,
-          type: 'VALIDATION',
+          type: "VALIDATION",
           timestamp: new Date(),
           userContext,
           details: { approved: response.approved, reason: response.reason },
@@ -917,10 +1145,14 @@ export class ParlantTransactionCoordinatorService extends EventEmitter {
       logError: (error: TransactionError) => {
         auditTrail.push({
           auditId: `${transactionId}_error_${Date.now()}`,
-          type: 'ERROR',
+          type: "ERROR",
           timestamp: new Date(),
           userContext,
-          details: { errorType: error.type, message: error.message, code: error.code },
+          details: {
+            errorType: error.type,
+            message: error.message,
+            code: error.code,
+          },
           securityLevel: SecurityLevel.HIGH,
         });
       },
@@ -945,7 +1177,9 @@ export class ParlantTransactionCoordinatorService extends EventEmitter {
   /**
    * Get transaction operations
    */
-  private getTransactionOperations(transactionId: string): TransactionOperation[] {
+  private getTransactionOperations(
+    transactionId: string,
+  ): TransactionOperation[] {
     const operations = this.transactionOperations.get(transactionId);
     if (!operations) {
       throw new Error(`Operations for transaction ${transactionId} not found`);
@@ -956,10 +1190,14 @@ export class ParlantTransactionCoordinatorService extends EventEmitter {
   /**
    * Get performance monitor
    */
-  private getPerformanceMonitor(transactionId: string): TransactionPerformanceMonitor {
+  private getPerformanceMonitor(
+    transactionId: string,
+  ): TransactionPerformanceMonitor {
     const monitor = this.performanceMonitors.get(transactionId);
     if (!monitor) {
-      throw new Error(`Performance monitor for transaction ${transactionId} not found`);
+      throw new Error(
+        `Performance monitor for transaction ${transactionId} not found`,
+      );
     }
     return monitor;
   }
@@ -970,7 +1208,9 @@ export class ParlantTransactionCoordinatorService extends EventEmitter {
   private getAuditLogger(transactionId: string): TransactionAuditLogger {
     const logger = this.auditLoggers.get(transactionId);
     if (!logger) {
-      throw new Error(`Audit logger for transaction ${transactionId} not found`);
+      throw new Error(
+        `Audit logger for transaction ${transactionId} not found`,
+      );
     }
     return logger;
   }
@@ -988,7 +1228,9 @@ export class ParlantTransactionCoordinatorService extends EventEmitter {
    * Get all active transactions
    */
   getActiveTransactions(): TransactionMetadata[] {
-    return Array.from(this.activeTransactions.values()).map(tx => ({ ...tx }));
+    return Array.from(this.activeTransactions.values()).map((tx) => ({
+      ...tx,
+    }));
   }
 
   /**
@@ -1008,7 +1250,10 @@ export class ParlantTransactionCoordinatorService extends EventEmitter {
   /**
    * Cancel transaction
    */
-  async cancelTransaction(transactionId: string, reason: string = 'User requested cancellation'): Promise<void> {
+  async cancelTransaction(
+    transactionId: string,
+    reason: string = "User requested cancellation",
+  ): Promise<void> {
     this.logger.log(`Cancelling transaction ${transactionId}: ${reason}`);
     await this.initiateRollback(transactionId, reason);
   }

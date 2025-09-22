@@ -33,9 +33,9 @@ import {
   Module,
   NestModule,
   MiddlewareConsumer,
-} from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { IsString, IsNumber, IsOptional, IsArray } from 'class-validator';
+} from "@nestjs/common";
+import { ApiTags, ApiOperation, ApiResponse } from "@nestjs/swagger";
+import { IsString, IsNumber, IsOptional, IsArray } from "class-validator";
 
 // Import enhanced PARLANT middleware components
 import {
@@ -46,12 +46,12 @@ import {
   ContextAwareAuth,
   ParlantContext,
   EnhancedUser,
-} from '../decorators/enhanced-parlant-decorators';
+} from "../decorators/enhanced-parlant-decorators";
 
 import {
   EnhancedUniversalParlantMiddleware,
   ParlantRequestContext,
-} from '../core/universal-parlant-middleware';
+} from "../core/universal-parlant-middleware";
 
 import {
   SecurityLevel,
@@ -59,7 +59,7 @@ import {
   ApprovalLevel,
   EnhancedParlantRequest,
   UserContext,
-} from '../types/enhanced-parlant-types';
+} from "../types/enhanced-parlant-types";
 
 // ===== BASIC DTOs =====
 
@@ -95,7 +95,7 @@ export class UpdateTaskDto {
 
   @IsString()
   @IsOptional()
-  status?: 'pending' | 'in_progress' | 'completed' | 'cancelled';
+  status?: "pending" | "in_progress" | "completed" | "cancelled";
 
   @IsNumber()
   @IsOptional()
@@ -121,18 +121,18 @@ export class TaskQueryDto {
 
   @IsString()
   @IsOptional()
-  sortBy?: string = 'createdAt';
+  sortBy?: string = "createdAt";
 
   @IsString()
   @IsOptional()
-  sortOrder?: 'asc' | 'desc' = 'desc';
+  sortOrder?: "asc" | "desc" = "desc";
 }
 
 export interface Task {
   id: string;
   title: string;
   description?: string;
-  status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
+  status: "pending" | "in_progress" | "completed" | "cancelled";
   category?: string;
   priority: number;
   tags: string[];
@@ -152,7 +152,7 @@ export class TasksService {
       id: `task-${Date.now()}-${Math.random().toString(36).substring(7)}`,
       title: createTaskDto.title,
       description: createTaskDto.description,
-      status: 'pending',
+      status: "pending",
       category: createTaskDto.category,
       priority: createTaskDto.priority || 1,
       tags: createTaskDto.tags || [],
@@ -164,16 +164,27 @@ export class TasksService {
     return task;
   }
 
-  async findAll(query: TaskQueryDto): Promise<{ tasks: Task[]; total: number; page: number; totalPages: number }> {
+  async findAll(
+    query: TaskQueryDto,
+  ): Promise<{
+    tasks: Task[];
+    total: number;
+    page: number;
+    totalPages: number;
+  }> {
     let filteredTasks = [...this.tasks];
 
     // Apply filters
     if (query.status) {
-      filteredTasks = filteredTasks.filter(task => task.status === query.status);
+      filteredTasks = filteredTasks.filter(
+        (task) => task.status === query.status,
+      );
     }
 
     if (query.category) {
-      filteredTasks = filteredTasks.filter(task => task.category === query.category);
+      filteredTasks = filteredTasks.filter(
+        (task) => task.category === query.category,
+      );
     }
 
     // Apply sorting
@@ -181,7 +192,7 @@ export class TasksService {
       const aValue = a[query.sortBy as keyof Task];
       const bValue = b[query.sortBy as keyof Task];
 
-      if (query.sortOrder === 'asc') {
+      if (query.sortOrder === "asc") {
         return aValue > bValue ? 1 : -1;
       } else {
         return aValue < bValue ? 1 : -1;
@@ -204,11 +215,11 @@ export class TasksService {
   }
 
   async findById(id: string): Promise<Task | null> {
-    return this.tasks.find(task => task.id === id) || null;
+    return this.tasks.find((task) => task.id === id) || null;
   }
 
   async update(id: string, updateTaskDto: UpdateTaskDto): Promise<Task | null> {
-    const taskIndex = this.tasks.findIndex(task => task.id === id);
+    const taskIndex = this.tasks.findIndex((task) => task.id === id);
     if (taskIndex === -1) {
       return null;
     }
@@ -224,7 +235,7 @@ export class TasksService {
   }
 
   async delete(id: string): Promise<boolean> {
-    const taskIndex = this.tasks.findIndex(task => task.id === id);
+    const taskIndex = this.tasks.findIndex((task) => task.id === id);
     if (taskIndex === -1) {
       return false;
     }
@@ -236,8 +247,8 @@ export class TasksService {
 
 // ===== BASIC CONTROLLER WITH ENHANCED PARLANT VALIDATION =====
 
-@ApiTags('Tasks')
-@Controller('api/tasks')
+@ApiTags("Tasks")
+@Controller("api/tasks")
 export class BasicTasksController {
   constructor(private readonly tasksService: TasksService) {}
 
@@ -245,13 +256,17 @@ export class BasicTasksController {
    * Create a new task with basic PARLANT validation
    */
   @Post()
-  @ApiOperation({ summary: 'Create a new task' })
-  @ApiResponse({ status: 201, description: 'Task created successfully' })
-  @ApiResponse({ status: 400, description: 'Invalid input data' })
-  @ApiResponse({ status: 403, description: 'Access denied by PARLANT validation' })
+  @ApiOperation({ summary: "Create a new task" })
+  @ApiResponse({ status: 201, description: "Task created successfully" })
+  @ApiResponse({ status: 400, description: "Invalid input data" })
+  @ApiResponse({
+    status: 403,
+    description: "Access denied by PARLANT validation",
+  })
   @EnhancedParlantValidated({
-    intent: 'Create a new task for project management',
-    description: 'Standard endpoint for creating tasks with basic validation and monitoring',
+    intent: "Create a new task for project management",
+    description:
+      "Standard endpoint for creating tasks with basic validation and monitoring",
     securityLevel: SecurityLevel._MEDIUM,
     enableMetrics: true,
     enableAuditTrail: true,
@@ -259,7 +274,7 @@ export class BasicTasksController {
     cachingStrategy: {
       enabled: false, // Don't cache creation operations
       ttl: 0,
-      scope: 'user',
+      scope: "user",
     },
     parameterValidation: {
       validateTypes: true,
@@ -276,10 +291,10 @@ export class BasicTasksController {
   async createTask(
     @Body() createTaskDto: CreateTaskDto,
     @ParlantContext() parlantContext?: ParlantRequestContext,
-    @EnhancedUser() user?: UserContext
+    @EnhancedUser() user?: UserContext,
   ): Promise<Task> {
     // Log the operation with PARLANT context
-    console.log('Task creation initiated', {
+    console.log("Task creation initiated", {
       operationId: parlantContext?.operationId,
       userId: user?.id,
       securityLevel: parlantContext?.securityLevel,
@@ -289,7 +304,7 @@ export class BasicTasksController {
     const task = await this.tasksService.create(createTaskDto);
 
     // Log successful creation
-    console.log('Task created successfully', {
+    console.log("Task created successfully", {
       taskId: task.id,
       operationId: parlantContext?.operationId,
       processingTime: parlantContext?.processingTime,
@@ -302,18 +317,19 @@ export class BasicTasksController {
    * Get tasks with intelligent caching
    */
   @Get()
-  @ApiOperation({ summary: 'Get tasks with filtering and pagination' })
-  @ApiResponse({ status: 200, description: 'Tasks retrieved successfully' })
+  @ApiOperation({ summary: "Get tasks with filtering and pagination" })
+  @ApiResponse({ status: 200, description: "Tasks retrieved successfully" })
   @EnhancedParlantValidated({
-    intent: 'Retrieve task list with filtering and pagination',
-    description: 'High-performance endpoint for task retrieval with intelligent caching',
+    intent: "Retrieve task list with filtering and pagination",
+    description:
+      "High-performance endpoint for task retrieval with intelligent caching",
     securityLevel: SecurityLevel._LOW, // Read operations are lower risk
     enableMetrics: true,
     performanceTarget: 300, // 300ms target for read operations
     cachingStrategy: {
       enabled: true,
       ttl: 300000, // 5 minutes cache
-      scope: 'user',
+      scope: "user",
       keyGenerator: (context, args) => {
         const query = args[0] as TaskQueryDto;
         return `tasks:list:${JSON.stringify(query)}`;
@@ -323,15 +339,20 @@ export class BasicTasksController {
   @IntelligentCache({
     enabled: true,
     ttl: 300000, // 5 minutes
-    scope: 'user',
+    scope: "user",
     compressionEnabled: true,
   })
   @PerformanceMonitored(300)
   async getTasks(
     @Query() query: TaskQueryDto,
-    @ParlantContext() parlantContext?: ParlantRequestContext
-  ): Promise<{ tasks: Task[]; total: number; page: number; totalPages: number }> {
-    console.log('Task list retrieval', {
+    @ParlantContext() parlantContext?: ParlantRequestContext,
+  ): Promise<{
+    tasks: Task[];
+    total: number;
+    page: number;
+    totalPages: number;
+  }> {
+    console.log("Task list retrieval", {
       operationId: parlantContext?.operationId,
       cacheHit: parlantContext?.cacheHit,
       query,
@@ -343,29 +364,29 @@ export class BasicTasksController {
   /**
    * Get a specific task by ID
    */
-  @Get(':id')
-  @ApiOperation({ summary: 'Get a specific task by ID' })
-  @ApiResponse({ status: 200, description: 'Task retrieved successfully' })
-  @ApiResponse({ status: 404, description: 'Task not found' })
+  @Get(":id")
+  @ApiOperation({ summary: "Get a specific task by ID" })
+  @ApiResponse({ status: 200, description: "Task retrieved successfully" })
+  @ApiResponse({ status: 404, description: "Task not found" })
   @EnhancedParlantValidated({
-    intent: 'Retrieve specific task details by unique identifier',
-    description: 'Endpoint for fetching individual task information',
+    intent: "Retrieve specific task details by unique identifier",
+    description: "Endpoint for fetching individual task information",
     securityLevel: SecurityLevel._LOW,
     cachingStrategy: {
       enabled: true,
       ttl: 600000, // 10 minutes cache for individual tasks
-      scope: 'global', // Tasks can be cached globally
+      scope: "global", // Tasks can be cached globally
     },
   })
   @IntelligentCache({
     enabled: true,
     ttl: 600000,
-    scope: 'global',
+    scope: "global",
   })
-  async getTaskById(@Param('id') id: string): Promise<Task> {
+  async getTaskById(@Param("id") id: string): Promise<Task> {
     const task = await this.tasksService.findById(id);
     if (!task) {
-      throw new Error('Task not found');
+      throw new Error("Task not found");
     }
     return task;
   }
@@ -373,14 +394,17 @@ export class BasicTasksController {
   /**
    * Update a task with medium security validation
    */
-  @Put(':id')
-  @ApiOperation({ summary: 'Update an existing task' })
-  @ApiResponse({ status: 200, description: 'Task updated successfully' })
-  @ApiResponse({ status: 404, description: 'Task not found' })
-  @ApiResponse({ status: 403, description: 'Access denied by PARLANT validation' })
+  @Put(":id")
+  @ApiOperation({ summary: "Update an existing task" })
+  @ApiResponse({ status: 200, description: "Task updated successfully" })
+  @ApiResponse({ status: 404, description: "Task not found" })
+  @ApiResponse({
+    status: 403,
+    description: "Access denied by PARLANT validation",
+  })
   @EnhancedParlantValidated({
-    intent: 'Update existing task with new information',
-    description: 'Endpoint for modifying task properties and status',
+    intent: "Update existing task with new information",
+    description: "Endpoint for modifying task properties and status",
     securityLevel: SecurityLevel._MEDIUM,
     enableMetrics: true,
     enableAuditTrail: true,
@@ -391,18 +415,18 @@ export class BasicTasksController {
     },
     contextRequirements: {
       requireAuthentication: true,
-      requiredPermissions: ['TASK_UPDATE'],
+      requiredPermissions: ["TASK_UPDATE"],
     },
   })
   @TypeSafeValidation()
   @PerformanceMonitored(400)
   async updateTask(
-    @Param('id') id: string,
+    @Param("id") id: string,
     @Body() updateTaskDto: UpdateTaskDto,
     @ParlantContext() parlantContext?: ParlantRequestContext,
-    @EnhancedUser() user?: UserContext
+    @EnhancedUser() user?: UserContext,
   ): Promise<Task> {
-    console.log('Task update initiated', {
+    console.log("Task update initiated", {
       taskId: id,
       operationId: parlantContext?.operationId,
       userId: user?.id,
@@ -411,10 +435,10 @@ export class BasicTasksController {
 
     const task = await this.tasksService.update(id, updateTaskDto);
     if (!task) {
-      throw new Error('Task not found');
+      throw new Error("Task not found");
     }
 
-    console.log('Task updated successfully', {
+    console.log("Task updated successfully", {
       taskId: id,
       operationId: parlantContext?.operationId,
     });
@@ -425,39 +449,43 @@ export class BasicTasksController {
   /**
    * Delete a task with high security validation
    */
-  @Delete(':id')
-  @ApiOperation({ summary: 'Delete a task' })
-  @ApiResponse({ status: 200, description: 'Task deleted successfully' })
-  @ApiResponse({ status: 404, description: 'Task not found' })
-  @ApiResponse({ status: 403, description: 'Access denied - insufficient permissions' })
+  @Delete(":id")
+  @ApiOperation({ summary: "Delete a task" })
+  @ApiResponse({ status: 200, description: "Task deleted successfully" })
+  @ApiResponse({ status: 404, description: "Task not found" })
+  @ApiResponse({
+    status: 403,
+    description: "Access denied - insufficient permissions",
+  })
   @EnhancedParlantValidated({
-    intent: 'Permanently delete a task from the system',
-    description: 'High-security endpoint for task deletion with comprehensive validation',
+    intent: "Permanently delete a task from the system",
+    description:
+      "High-security endpoint for task deletion with comprehensive validation",
     securityLevel: SecurityLevel._HIGH, // Deletion is high-risk
     validationMode: ValidationMode._INTERACTIVE, // Require interactive validation
     approvalLevel: ApprovalLevel._SINGLE_APPROVAL,
     enableMetrics: true,
     enableAuditTrail: true,
-    businessCategory: 'DATA_DELETION',
-    complianceFlags: ['GDPR_APPLICABLE'],
+    businessCategory: "DATA_DELETION",
+    complianceFlags: ["GDPR_APPLICABLE"],
     contextRequirements: {
       requireAuthentication: true,
-      requiredRoles: ['ADMIN', 'TASK_MANAGER'],
-      requiredPermissions: ['TASK_DELETE'],
+      requiredRoles: ["ADMIN", "TASK_MANAGER"],
+      requiredPermissions: ["TASK_DELETE"],
       minimumSecurityClearance: SecurityLevel._MEDIUM,
     },
     customErrorHandling: {
       escalationRules: [
         {
-          condition: (error) => error.message.includes('not found'),
-          escalationLevel: 'LOW',
+          condition: (error) => error.message.includes("not found"),
+          escalationLevel: "LOW",
           notificationTargets: [],
           requiresHumanIntervention: false,
         },
         {
-          condition: (error) => error.message.includes('permission'),
-          escalationLevel: 'MEDIUM',
-          notificationTargets: ['security@company.com'],
+          condition: (error) => error.message.includes("permission"),
+          escalationLevel: "MEDIUM",
+          notificationTargets: ["security@company.com"],
           requiresHumanIntervention: true,
         },
       ],
@@ -465,17 +493,17 @@ export class BasicTasksController {
   })
   @ContextAwareAuth({
     requireAuthentication: true,
-    requiredRoles: ['ADMIN', 'TASK_MANAGER'],
-    requiredPermissions: ['TASK_DELETE'],
+    requiredRoles: ["ADMIN", "TASK_MANAGER"],
+    requiredPermissions: ["TASK_DELETE"],
     minimumSecurityClearance: SecurityLevel._MEDIUM,
   })
   @PerformanceMonitored(600)
   async deleteTask(
-    @Param('id') id: string,
+    @Param("id") id: string,
     @ParlantContext() parlantContext?: ParlantRequestContext,
-    @EnhancedUser() user?: UserContext
+    @EnhancedUser() user?: UserContext,
   ): Promise<{ success: boolean; message: string }> {
-    console.log('Task deletion initiated', {
+    console.log("Task deletion initiated", {
       taskId: id,
       operationId: parlantContext?.operationId,
       userId: user?.id,
@@ -485,10 +513,10 @@ export class BasicTasksController {
 
     const success = await this.tasksService.delete(id);
     if (!success) {
-      throw new Error('Task not found');
+      throw new Error("Task not found");
     }
 
-    console.log('Task deleted successfully', {
+    console.log("Task deleted successfully", {
       taskId: id,
       operationId: parlantContext?.operationId,
       userId: user?.id,
@@ -496,37 +524,37 @@ export class BasicTasksController {
 
     return {
       success: true,
-      message: 'Task deleted successfully',
+      message: "Task deleted successfully",
     };
   }
 }
 
 // ===== READ-ONLY CONTROLLER EXAMPLE =====
 
-@ApiTags('Task Reports')
-@Controller('api/reports/tasks')
+@ApiTags("Task Reports")
+@Controller("api/reports/tasks")
 export class TaskReportsController {
   constructor(private readonly tasksService: TasksService) {}
 
   /**
    * Get task statistics with heavy caching
    */
-  @Get('statistics')
-  @ApiOperation({ summary: 'Get task statistics and metrics' })
+  @Get("statistics")
+  @ApiOperation({ summary: "Get task statistics and metrics" })
   @EnhancedParlantValidated({
-    intent: 'Retrieve comprehensive task statistics and analytics',
-    description: 'Read-only endpoint for task metrics with aggressive caching',
+    intent: "Retrieve comprehensive task statistics and analytics",
+    description: "Read-only endpoint for task metrics with aggressive caching",
     securityLevel: SecurityLevel._LOW,
     cachingStrategy: {
       enabled: true,
       ttl: 1800000, // 30 minutes cache for statistics
-      scope: 'global',
+      scope: "global",
     },
   })
   @IntelligentCache({
     enabled: true,
     ttl: 1800000,
-    scope: 'global',
+    scope: "global",
     compressionEnabled: true,
   })
   @PerformanceMonitored(200) // Very fast for cached data
@@ -589,9 +617,7 @@ export class TasksModule implements NestModule {
 export class BasicIntegrationAppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     // Global middleware application
-    consumer
-      .apply(EnhancedUniversalParlantMiddleware)
-      .forRoutes('*'); // Apply to all routes
+    consumer.apply(EnhancedUniversalParlantMiddleware).forRoutes("*"); // Apply to all routes
   }
 }
 
@@ -602,14 +628,14 @@ export class BasicIntegrationAppModule implements NestModule {
  * Minimal configuration for simple CRUD operations
  */
 export class MinimalExampleController {
-  @Get('simple')
+  @Get("simple")
   @EnhancedParlantValidated({
-    intent: 'Simple data retrieval',
-    description: 'Basic endpoint with minimal configuration',
+    intent: "Simple data retrieval",
+    description: "Basic endpoint with minimal configuration",
     securityLevel: SecurityLevel._LOW,
   })
   async getSimpleData(): Promise<{ message: string }> {
-    return { message: 'Hello from PARLANT-validated endpoint!' };
+    return { message: "Hello from PARLANT-validated endpoint!" };
   }
 }
 
@@ -618,32 +644,32 @@ export class MinimalExampleController {
  * Configuration focused on performance and caching
  */
 export class PerformanceOptimizedController {
-  @Get('fast-data')
+  @Get("fast-data")
   @EnhancedParlantValidated({
-    intent: 'High-performance data retrieval',
-    description: 'Optimized endpoint with aggressive caching',
+    intent: "High-performance data retrieval",
+    description: "Optimized endpoint with aggressive caching",
     securityLevel: SecurityLevel._LOW,
     performanceTarget: 100, // Very fast target
     cachingStrategy: {
       enabled: true,
       ttl: 3600000, // 1 hour cache
-      scope: 'global',
+      scope: "global",
       compressionEnabled: true,
     },
   })
   @IntelligentCache({
     enabled: true,
     ttl: 3600000,
-    scope: 'global',
+    scope: "global",
     compressionEnabled: true,
   })
   @PerformanceMonitored(100)
   async getFastData(): Promise<{ data: string; timestamp: Date }> {
     // Simulate some processing
-    await new Promise(resolve => setTimeout(resolve, 50));
+    await new Promise((resolve) => setTimeout(resolve, 50));
 
     return {
-      data: 'High-performance cached data',
+      data: "High-performance cached data",
       timestamp: new Date(),
     };
   }
@@ -654,32 +680,32 @@ export class PerformanceOptimizedController {
  * Configuration with comprehensive security validation
  */
 export class SecurityFocusedController {
-  @Post('secure-operation')
+  @Post("secure-operation")
   @EnhancedParlantValidated({
-    intent: 'Perform secure administrative operation',
-    description: 'High-security endpoint with comprehensive validation',
+    intent: "Perform secure administrative operation",
+    description: "High-security endpoint with comprehensive validation",
     securityLevel: SecurityLevel._HIGH,
     validationMode: ValidationMode._SYNCHRONOUS,
     approvalLevel: ApprovalLevel._SINGLE_APPROVAL,
     enableAuditTrail: true,
     contextRequirements: {
       requireAuthentication: true,
-      requiredRoles: ['ADMIN'],
-      requiredPermissions: ['ADMIN_OPERATION'],
+      requiredRoles: ["ADMIN"],
+      requiredPermissions: ["ADMIN_OPERATION"],
       minimumSecurityClearance: SecurityLevel._HIGH,
     },
   })
   @ContextAwareAuth({
     requireAuthentication: true,
-    requiredRoles: ['ADMIN'],
-    requiredPermissions: ['ADMIN_OPERATION'],
+    requiredRoles: ["ADMIN"],
+    requiredPermissions: ["ADMIN_OPERATION"],
   })
   async performSecureOperation(
     @Body() operationData: any,
     @ParlantContext() parlantContext?: ParlantRequestContext,
-    @EnhancedUser() user?: UserContext
+    @EnhancedUser() user?: UserContext,
   ): Promise<{ success: boolean; operationId: string }> {
-    console.log('Secure operation performed', {
+    console.log("Secure operation performed", {
       operationId: parlantContext?.operationId,
       userId: user?.id,
       validationTime: parlantContext?.processingTime,
@@ -687,7 +713,7 @@ export class SecurityFocusedController {
 
     return {
       success: true,
-      operationId: parlantContext?.operationId || 'unknown',
+      operationId: parlantContext?.operationId || "unknown",
     };
   }
 }

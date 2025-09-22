@@ -11,7 +11,7 @@
  * @created 2025-09-19
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from "@nestjs/common";
 import {
   AnyFunction,
   WrapFunction,
@@ -28,15 +28,15 @@ import {
   BatchConfig,
   ValidationLevel,
   FunctionCategory,
-  DataClassification
-} from '../interfaces/wrapper-types';
+  DataClassification,
+} from "../interfaces/wrapper-types";
 import {
   SignaturePreservingWrapper,
   TypeSafeWrapperCreator,
   FunctionSignatureInspector,
   TypeValidator,
-  WrapperStatistics
-} from '../core/signature-preserving-wrapper';
+  WrapperStatistics,
+} from "../core/signature-preserving-wrapper";
 
 // Re-export types for external use
 export { WrapperStatistics };
@@ -46,9 +46,14 @@ export { WrapperStatistics };
  * Creates and manages PARLANT-validated function wrappers with comprehensive configuration
  */
 @Injectable()
-export class EnterpriseFunctionWrapperFactory implements FunctionWrapperFactory {
+export class EnterpriseFunctionWrapperFactory
+  implements FunctionWrapperFactory
+{
   private readonly logger = new Logger(EnterpriseFunctionWrapperFactory.name);
-  private readonly wrapperRegistry = new Map<string, SignaturePreservingWrapper<any>>();
+  private readonly wrapperRegistry = new Map<
+    string,
+    SignaturePreservingWrapper<any>
+  >();
   private readonly validationRules = new Map<string, ValidationRule>();
   private readonly statistics = new Map<string, WrapperStatistics>();
 
@@ -61,7 +66,7 @@ export class EnterpriseFunctionWrapperFactory implements FunctionWrapperFactory 
       this.updateConfiguration(initialConfiguration);
     }
 
-    this.logger.log('Enterprise Function Wrapper Factory initialized');
+    this.logger.log("Enterprise Function Wrapper Factory initialized");
   }
 
   /**
@@ -73,7 +78,7 @@ export class EnterpriseFunctionWrapperFactory implements FunctionWrapperFactory 
    */
   public createWrapper<T extends AnyFunction>(
     originalFunction: T,
-    config: WrapperConfig
+    config: WrapperConfig,
   ): WrapFunction<T> {
     this.logger.debug(`Creating wrapper for function: ${config.functionId}`);
 
@@ -82,19 +87,26 @@ export class EnterpriseFunctionWrapperFactory implements FunctionWrapperFactory 
       this.validateWrapperConfig(config);
 
       // Validate function compatibility
-      const compatibility = FunctionSignatureInspector.validateCompatibility(originalFunction);
+      const compatibility =
+        FunctionSignatureInspector.validateCompatibility(originalFunction);
       if (!compatibility.compatible) {
-        throw new Error(`Function ${config.functionId} is not compatible: ${compatibility.issues.join(', ')}`);
+        throw new Error(
+          `Function ${config.functionId} is not compatible: ${compatibility.issues.join(", ")}`,
+        );
       }
 
       // Merge with default configuration
       const enhancedConfig = this.enhanceConfig(config);
 
       // Apply global validation rules
-      const configWithGlobalRules = this.applyGlobalValidationRules(enhancedConfig);
+      const configWithGlobalRules =
+        this.applyGlobalValidationRules(enhancedConfig);
 
       // Create wrapper with enhanced configuration
-      const wrapper = new SignaturePreservingWrapper(originalFunction, configWithGlobalRules);
+      const wrapper = new SignaturePreservingWrapper(
+        originalFunction,
+        configWithGlobalRules,
+      );
       const wrappedFunction = wrapper.createWrappedFunction();
 
       // Register wrapper for management
@@ -103,15 +115,22 @@ export class EnterpriseFunctionWrapperFactory implements FunctionWrapperFactory 
       // Initialize statistics tracking
       this.initializeStatistics(config.functionId, wrapper);
 
-      this.logger.log(`Successfully created wrapper for function: ${config.functionId}`);
+      this.logger.log(
+        `Successfully created wrapper for function: ${config.functionId}`,
+      );
       return wrappedFunction;
-
     } catch (error) {
-      this.logger.error(`Failed to create wrapper for ${config.functionId}:`, error);
-      throw new WrapperCreationError(`Failed to create wrapper: ${error instanceof Error ? error.message : String(error)}`, {
-        functionId: config.functionId,
-        originalError: error
-      });
+      this.logger.error(
+        `Failed to create wrapper for ${config.functionId}:`,
+        error,
+      );
+      throw new WrapperCreationError(
+        `Failed to create wrapper: ${error instanceof Error ? error.message : String(error)}`,
+        {
+          functionId: config.functionId,
+          originalError: error,
+        },
+      );
     }
   }
 
@@ -124,32 +143,35 @@ export class EnterpriseFunctionWrapperFactory implements FunctionWrapperFactory 
    */
   public createBatchWrappers<T extends Record<string, AnyFunction>>(
     functions: T,
-    configs: Record<keyof T, WrapperConfig>
+    configs: Record<keyof T, WrapperConfig>,
   ): { [K in keyof T]: WrapFunction<T[K]> } {
-    this.logger.log(`Creating batch wrappers for ${Object.keys(functions).length} functions`);
+    this.logger.log(
+      `Creating batch wrappers for ${Object.keys(functions).length} functions`,
+    );
 
     const results = {} as { [K in keyof T]: WrapFunction<T[K]> };
     const errors: WrapperCreationError[] = [];
 
     // Process functions in parallel or sequential based on configuration
-    const processingPromises = Object.entries(functions).map(async ([key, func]) => {
-      try {
-        const config = configs[key as keyof T];
-        if (!config) {
-          throw new Error(`No configuration provided for function: ${key}`);
+    const processingPromises = Object.entries(functions).map(
+      async ([key, func]) => {
+        try {
+          const config = configs[key as keyof T];
+          if (!config) {
+            throw new Error(`No configuration provided for function: ${key}`);
+          }
+
+          const wrapped = this.createWrapper(func as any, config);
+          results[key as keyof T] = wrapped as WrapFunction<T[keyof T]>;
+        } catch (error) {
+          const wrapperError = new WrapperCreationError(
+            `Failed to create wrapper for ${key}: ${error instanceof Error ? error.message : String(error)}`,
+            { functionId: key, originalError: error },
+          );
+          errors.push(wrapperError);
         }
-
-        const wrapped = this.createWrapper(func as any, config);
-        results[key as keyof T] = wrapped as WrapFunction<T[keyof T]>;
-
-      } catch (error) {
-        const wrapperError = new WrapperCreationError(
-          `Failed to create wrapper for ${key}: ${error instanceof Error ? error.message : String(error)}`,
-          { functionId: key, originalError: error }
-        );
-        errors.push(wrapperError);
-      }
-    });
+      },
+    );
 
     // Wait for all processing to complete
     if (this.configuration.performanceConfig.enableOptimization) {
@@ -157,7 +179,7 @@ export class EnterpriseFunctionWrapperFactory implements FunctionWrapperFactory 
       Promise.allSettled(processingPromises);
     } else {
       // Sequential processing for better error handling
-      processingPromises.forEach(promise => {
+      processingPromises.forEach((promise) => {
         try {
           promise;
         } catch (error) {
@@ -168,11 +190,20 @@ export class EnterpriseFunctionWrapperFactory implements FunctionWrapperFactory 
 
     // Handle any errors
     if (errors.length > 0) {
-      this.logger.warn(`Batch wrapper creation completed with ${errors.length} errors`);
-      errors.forEach(error => this.logger.error(error instanceof Error ? error.message : String(error), error.metadata));
+      this.logger.warn(
+        `Batch wrapper creation completed with ${errors.length} errors`,
+      );
+      errors.forEach((error) =>
+        this.logger.error(
+          error instanceof Error ? error.message : String(error),
+          error.metadata,
+        ),
+      );
     }
 
-    this.logger.log(`Batch wrapper creation completed: ${Object.keys(results).length} successful, ${errors.length} failed`);
+    this.logger.log(
+      `Batch wrapper creation completed: ${Object.keys(results).length} successful, ${errors.length} failed`,
+    );
     return results;
   }
 
@@ -199,7 +230,7 @@ export class EnterpriseFunctionWrapperFactory implements FunctionWrapperFactory 
     // Update configuration
     this.configuration = {
       ...this.configuration,
-      globalValidationRules: Array.from(this.validationRules.values())
+      globalValidationRules: Array.from(this.validationRules.values()),
     };
 
     this.logger.log(`Successfully registered validation rule: ${rule.id}`);
@@ -220,15 +251,18 @@ export class EnterpriseFunctionWrapperFactory implements FunctionWrapperFactory 
    * @param config - New configuration
    */
   public updateConfiguration(config: Partial<FactoryConfiguration>): void {
-    this.logger.debug('Updating factory configuration');
+    this.logger.debug("Updating factory configuration");
 
     // Validate configuration updates
     this.validateFactoryConfiguration(config);
 
     // Deep merge configurations
-    this.configuration = this.deepMergeConfiguration(this.configuration, config);
+    this.configuration = this.deepMergeConfiguration(
+      this.configuration,
+      config,
+    );
 
-    this.logger.log('Factory configuration updated successfully');
+    this.logger.log("Factory configuration updated successfully");
   }
 
   /**
@@ -240,12 +274,17 @@ export class EnterpriseFunctionWrapperFactory implements FunctionWrapperFactory 
    */
   public createAutoConfiguredWrapper<T extends AnyFunction>(
     originalFunction: T,
-    options: AutoConfigOptions
+    options: AutoConfigOptions,
   ): WrapFunction<T> {
-    this.logger.debug(`Creating auto-configured wrapper for: ${options.functionId}`);
+    this.logger.debug(
+      `Creating auto-configured wrapper for: ${options.functionId}`,
+    );
 
     // Analyze function to determine optimal configuration
-    const autoConfig = this.analyzeAndConfigureFunction(originalFunction, options);
+    const autoConfig = this.analyzeAndConfigureFunction(
+      originalFunction,
+      options,
+    );
 
     return this.createWrapper(originalFunction, autoConfig);
   }
@@ -261,14 +300,14 @@ export class EnterpriseFunctionWrapperFactory implements FunctionWrapperFactory 
   public createTypedWrapper<T extends AnyFunction>(
     originalFunction: T,
     config: WrapperConfig,
-    typeValidator: TypeValidator<T>
+    typeValidator: TypeValidator<T>,
   ): WrapFunction<T> {
     this.logger.debug(`Creating typed wrapper for: ${config.functionId}`);
 
     return TypeSafeWrapperCreator.createValidatedWrapper(
       originalFunction,
       config,
-      typeValidator
+      typeValidator,
     );
   }
 
@@ -313,7 +352,7 @@ export class EnterpriseFunctionWrapperFactory implements FunctionWrapperFactory 
       wrapper.resetStatistics();
     });
     this.statistics.clear();
-    this.logger.log('All wrapper statistics reset');
+    this.logger.log("All wrapper statistics reset");
   }
 
   /**
@@ -355,8 +394,12 @@ export class EnterpriseFunctionWrapperFactory implements FunctionWrapperFactory 
    * @param useCase - Use case for configuration
    * @returns Configuration template
    */
-  public createConfigurationTemplate(useCase: ConfigurationUseCase): WrapperConfig {
-    this.logger.debug(`Creating configuration template for use case: ${useCase}`);
+  public createConfigurationTemplate(
+    useCase: ConfigurationUseCase,
+  ): WrapperConfig {
+    this.logger.debug(
+      `Creating configuration template for use case: ${useCase}`,
+    );
 
     switch (useCase) {
       case ConfigurationUseCase.DATABASE_READ:
@@ -389,11 +432,13 @@ export class EnterpriseFunctionWrapperFactory implements FunctionWrapperFactory 
    */
   private validateWrapperConfig(config: WrapperConfig): void {
     if (!config.functionId || config.functionId.trim().length === 0) {
-      throw new Error('Function ID is required and cannot be empty');
+      throw new Error("Function ID is required and cannot be empty");
     }
 
     if (!config.description || config.description.trim().length === 0) {
-      throw new Error('Function description is required for PARLANT validation');
+      throw new Error(
+        "Function description is required for PARLANT validation",
+      );
     }
 
     if (!Object.values(ValidationLevel).includes(config.validationLevel)) {
@@ -401,12 +446,15 @@ export class EnterpriseFunctionWrapperFactory implements FunctionWrapperFactory 
     }
 
     // Validate timeout values
-    if (config.validationTimeout !== undefined && config.validationTimeout <= 0) {
-      throw new Error('Validation timeout must be positive');
+    if (
+      config.validationTimeout !== undefined &&
+      config.validationTimeout <= 0
+    ) {
+      throw new Error("Validation timeout must be positive");
     }
 
     if (config.cacheTtl !== undefined && config.cacheTtl <= 0) {
-      throw new Error('Cache TTL must be positive');
+      throw new Error("Cache TTL must be positive");
     }
 
     // Validate batch configuration
@@ -416,7 +464,9 @@ export class EnterpriseFunctionWrapperFactory implements FunctionWrapperFactory 
 
     // Validate custom validation rules
     if (config.customValidation) {
-      config.customValidation.forEach(rule => this.validateValidationRule(rule));
+      config.customValidation.forEach((rule) =>
+        this.validateValidationRule(rule),
+      );
     }
   }
 
@@ -427,15 +477,18 @@ export class EnterpriseFunctionWrapperFactory implements FunctionWrapperFactory 
    */
   private validateBatchConfig(batchConfig: BatchConfig): void {
     if (batchConfig.maxBatchSize <= 0) {
-      throw new Error('Max batch size must be positive');
+      throw new Error("Max batch size must be positive");
     }
 
     if (batchConfig.batchTimeout <= 0) {
-      throw new Error('Batch timeout must be positive');
+      throw new Error("Batch timeout must be positive");
     }
 
-    if (batchConfig.maxParallelThreads !== undefined && batchConfig.maxParallelThreads <= 0) {
-      throw new Error('Max parallel threads must be positive');
+    if (
+      batchConfig.maxParallelThreads !== undefined &&
+      batchConfig.maxParallelThreads <= 0
+    ) {
+      throw new Error("Max parallel threads must be positive");
     }
   }
 
@@ -446,19 +499,19 @@ export class EnterpriseFunctionWrapperFactory implements FunctionWrapperFactory 
    */
   private validateValidationRule(rule: ValidationRule): void {
     if (!rule.id || rule.id.trim().length === 0) {
-      throw new Error('Validation rule ID is required');
+      throw new Error("Validation rule ID is required");
     }
 
     if (!rule.description || rule.description.trim().length === 0) {
-      throw new Error('Validation rule description is required');
+      throw new Error("Validation rule description is required");
     }
 
-    if (typeof rule.validator !== 'function') {
-      throw new Error('Validation rule validator must be a function');
+    if (typeof rule.validator !== "function") {
+      throw new Error("Validation rule validator must be a function");
     }
 
     if (rule.priority !== undefined && rule.priority < 0) {
-      throw new Error('Validation rule priority must be non-negative');
+      throw new Error("Validation rule priority must be non-negative");
     }
   }
 
@@ -467,7 +520,9 @@ export class EnterpriseFunctionWrapperFactory implements FunctionWrapperFactory 
    *
    * @param config - Configuration to validate
    */
-  private validateFactoryConfiguration(config: Partial<FactoryConfiguration>): void {
+  private validateFactoryConfiguration(
+    config: Partial<FactoryConfiguration>,
+  ): void {
     if (config.defaultParlantConfig) {
       this.validateParlantConfig(config.defaultParlantConfig);
     }
@@ -496,11 +551,11 @@ export class EnterpriseFunctionWrapperFactory implements FunctionWrapperFactory 
    */
   private validateParlantConfig(config: Partial<ParlantClientConfig>): void {
     if (config.serviceUrl && !this.isValidUrl(config.serviceUrl)) {
-      throw new Error('Invalid PARLANT service URL');
+      throw new Error("Invalid PARLANT service URL");
     }
 
     if (config.timeout !== undefined && config.timeout <= 0) {
-      throw new Error('PARLANT timeout must be positive');
+      throw new Error("PARLANT timeout must be positive");
     }
   }
 
@@ -511,11 +566,11 @@ export class EnterpriseFunctionWrapperFactory implements FunctionWrapperFactory 
    */
   private validateCacheConfig(config: Partial<CacheConfiguration>): void {
     if (config.defaultTtl !== undefined && config.defaultTtl <= 0) {
-      throw new Error('Cache default TTL must be positive');
+      throw new Error("Cache default TTL must be positive");
     }
 
     if (config.maxSize !== undefined && config.maxSize <= 0) {
-      throw new Error('Cache max size must be positive');
+      throw new Error("Cache max size must be positive");
     }
   }
 
@@ -524,13 +579,15 @@ export class EnterpriseFunctionWrapperFactory implements FunctionWrapperFactory 
    *
    * @param config - Monitoring configuration to validate
    */
-  private validateMonitoringConfig(config: Partial<MonitoringConfiguration>): void {
+  private validateMonitoringConfig(
+    config: Partial<MonitoringConfiguration>,
+  ): void {
     if (config.metricsInterval !== undefined && config.metricsInterval <= 0) {
-      throw new Error('Metrics interval must be positive');
+      throw new Error("Metrics interval must be positive");
     }
 
     if (config.metricsRetention !== undefined && config.metricsRetention <= 0) {
-      throw new Error('Metrics retention must be positive');
+      throw new Error("Metrics retention must be positive");
     }
   }
 
@@ -539,13 +596,18 @@ export class EnterpriseFunctionWrapperFactory implements FunctionWrapperFactory 
    *
    * @param config - Performance configuration to validate
    */
-  private validatePerformanceConfig(config: Partial<PerformanceConfiguration>): void {
-    if (config.concurrentExecutionLimit !== undefined && config.concurrentExecutionLimit <= 0) {
-      throw new Error('Concurrent execution limit must be positive');
+  private validatePerformanceConfig(
+    config: Partial<PerformanceConfiguration>,
+  ): void {
+    if (
+      config.concurrentExecutionLimit !== undefined &&
+      config.concurrentExecutionLimit <= 0
+    ) {
+      throw new Error("Concurrent execution limit must be positive");
     }
 
     if (config.queueSize !== undefined && config.queueSize <= 0) {
-      throw new Error('Queue size must be positive');
+      throw new Error("Queue size must be positive");
     }
   }
 
@@ -559,8 +621,11 @@ export class EnterpriseFunctionWrapperFactory implements FunctionWrapperFactory 
     // More detailed validation would be implemented based on specific security requirements
     if (config.encryptionConfig && config.encryptionConfig.keyManagement) {
       const keyMgmt = config.encryptionConfig.keyManagement;
-      if (keyMgmt.rotationInterval !== undefined && keyMgmt.rotationInterval <= 0) {
-        throw new Error('Key rotation interval must be positive');
+      if (
+        keyMgmt.rotationInterval !== undefined &&
+        keyMgmt.rotationInterval <= 0
+      ) {
+        throw new Error("Key rotation interval must be positive");
       }
     }
   }
@@ -590,11 +655,20 @@ export class EnterpriseFunctionWrapperFactory implements FunctionWrapperFactory 
     return {
       ...config,
       // Apply default values from factory configuration
-      cacheable: config.cacheable ?? this.configuration.defaultCacheConfig.defaultTtl > 0,
-      cacheTtl: config.cacheTtl ?? this.configuration.defaultCacheConfig.defaultTtl,
-      monitoring: config.monitoring ?? this.configuration.defaultMonitoringConfig.enablePerformanceMonitoring,
-      validationTimeout: config.validationTimeout ?? this.configuration.defaultParlantConfig.timeout,
-      asyncMode: config.asyncMode ?? this.configuration.performanceConfig.enableOptimization,
+      cacheable:
+        config.cacheable ??
+        this.configuration.defaultCacheConfig.defaultTtl > 0,
+      cacheTtl:
+        config.cacheTtl ?? this.configuration.defaultCacheConfig.defaultTtl,
+      monitoring:
+        config.monitoring ??
+        this.configuration.defaultMonitoringConfig.enablePerformanceMonitoring,
+      validationTimeout:
+        config.validationTimeout ??
+        this.configuration.defaultParlantConfig.timeout,
+      asyncMode:
+        config.asyncMode ??
+        this.configuration.performanceConfig.enableOptimization,
 
       // Apply default error strategy if not provided
       errorStrategy: config.errorStrategy ?? this.createDefaultErrorStrategy(),
@@ -602,12 +676,12 @@ export class EnterpriseFunctionWrapperFactory implements FunctionWrapperFactory 
       // Apply default metadata if not provided
       metadata: {
         category: FunctionCategory.UTILITY,
-        domain: 'general',
+        domain: "general",
         dataClassification: DataClassification.INTERNAL,
         dependencies: [],
         tags: [],
-        ...config.metadata
-      }
+        ...config.metadata,
+      },
     };
   }
 
@@ -632,7 +706,7 @@ export class EnterpriseFunctionWrapperFactory implements FunctionWrapperFactory 
 
     return {
       ...config,
-      customValidation: mergedRules
+      customValidation: mergedRules,
     };
   }
 
@@ -642,7 +716,10 @@ export class EnterpriseFunctionWrapperFactory implements FunctionWrapperFactory 
    * @param functionId - Function identifier
    * @param wrapper - Wrapper instance
    */
-  private registerWrapper(functionId: string, wrapper: SignaturePreservingWrapper<any>): void {
+  private registerWrapper(
+    functionId: string,
+    wrapper: SignaturePreservingWrapper<any>,
+  ): void {
     this.wrapperRegistry.set(functionId, wrapper);
     this.logger.debug(`Registered wrapper: ${functionId}`);
   }
@@ -653,7 +730,10 @@ export class EnterpriseFunctionWrapperFactory implements FunctionWrapperFactory 
    * @param functionId - Function identifier
    * @param wrapper - Wrapper instance
    */
-  private initializeStatistics(functionId: string, wrapper: SignaturePreservingWrapper<any>): void {
+  private initializeStatistics(
+    functionId: string,
+    wrapper: SignaturePreservingWrapper<any>,
+  ): void {
     // Initial statistics will be captured as wrapper executes
     this.statistics.set(functionId, wrapper.getStatistics());
   }
@@ -667,18 +747,30 @@ export class EnterpriseFunctionWrapperFactory implements FunctionWrapperFactory 
    */
   private analyzeAndConfigureFunction<T extends AnyFunction>(
     func: T,
-    options: AutoConfigOptions
+    options: AutoConfigOptions,
   ): WrapperConfig {
     const signature = FunctionSignatureInspector.extractSignature(func);
 
     // Determine validation level based on function characteristics
     let validationLevel: ValidationLevel;
 
-    if (options.securityLevel === 'critical' || signature.name.includes('auth') || signature.name.includes('security')) {
+    if (
+      options.securityLevel === "critical" ||
+      signature.name.includes("auth") ||
+      signature.name.includes("security")
+    ) {
       validationLevel = ValidationLevel.CRITICAL;
-    } else if (options.securityLevel === 'high' || signature.name.includes('write') || signature.name.includes('delete')) {
+    } else if (
+      options.securityLevel === "high" ||
+      signature.name.includes("write") ||
+      signature.name.includes("delete")
+    ) {
       validationLevel = ValidationLevel.HIGH;
-    } else if (options.securityLevel === 'medium' || signature.name.includes('read') || signature.name.includes('get')) {
+    } else if (
+      options.securityLevel === "medium" ||
+      signature.name.includes("read") ||
+      signature.name.includes("get")
+    ) {
       validationLevel = ValidationLevel.MEDIUM;
     } else {
       validationLevel = ValidationLevel.LOW;
@@ -686,13 +778,21 @@ export class EnterpriseFunctionWrapperFactory implements FunctionWrapperFactory 
 
     // Determine function category
     let category: FunctionCategory;
-    if (signature.name.includes('db') || signature.name.includes('database')) {
-      category = signature.name.includes('write') ? FunctionCategory.DATABASE_WRITE : FunctionCategory.DATABASE_READ;
-    } else if (signature.name.includes('api') || signature.name.includes('http')) {
+    if (signature.name.includes("db") || signature.name.includes("database")) {
+      category = signature.name.includes("write")
+        ? FunctionCategory.DATABASE_WRITE
+        : FunctionCategory.DATABASE_READ;
+    } else if (
+      signature.name.includes("api") ||
+      signature.name.includes("http")
+    ) {
       category = FunctionCategory.API_CALL;
-    } else if (signature.name.includes('file') || signature.name.includes('fs')) {
+    } else if (
+      signature.name.includes("file") ||
+      signature.name.includes("fs")
+    ) {
       category = FunctionCategory.FILE_OPERATION;
-    } else if (signature.name.includes('auth')) {
+    } else if (signature.name.includes("auth")) {
       category = FunctionCategory.AUTHENTICATION;
     } else {
       category = FunctionCategory.UTILITY;
@@ -701,18 +801,21 @@ export class EnterpriseFunctionWrapperFactory implements FunctionWrapperFactory 
     // Create optimized configuration
     return {
       functionId: options.functionId,
-      description: options.description || `Auto-configured wrapper for ${signature.name}`,
+      description:
+        options.description || `Auto-configured wrapper for ${signature.name}`,
       validationLevel,
-      cacheable: options.cacheable ?? (category === FunctionCategory.DATABASE_READ),
+      cacheable:
+        options.cacheable ?? category === FunctionCategory.DATABASE_READ,
       monitoring: options.monitoring ?? true,
       asyncMode: signature.isAsync,
       metadata: {
         category,
-        domain: options.domain || 'auto-detected',
-        dataClassification: options.dataClassification || DataClassification.INTERNAL,
+        domain: options.domain || "auto-detected",
+        dataClassification:
+          options.dataClassification || DataClassification.INTERNAL,
         dependencies: [],
-        tags: ['auto-configured', signature.isAsync ? 'async' : 'sync']
-      }
+        tags: ["auto-configured", signature.isAsync ? "async" : "sync"],
+      },
     };
   }
 
@@ -724,21 +827,21 @@ export class EnterpriseFunctionWrapperFactory implements FunctionWrapperFactory 
   private createDefaultConfiguration(): FactoryConfiguration {
     return {
       defaultParlantConfig: {
-        serviceUrl: process.env.PARLANT_API_URL || 'http://localhost:8000',
-        apiKey: process.env.PARLANT_API_KEY || 'development-key',
+        serviceUrl: process.env.PARLANT_API_URL || "http://localhost:8000",
+        apiKey: process.env.PARLANT_API_KEY || "development-key",
         timeout: 30000,
         retryConfig: {
           maxRetries: 3,
           baseDelay: 1000,
-          backoffStrategy: 'exponential' as any,
-          maxDelay: 10000
-        }
+          backoffStrategy: "exponential" as any,
+          maxDelay: 10000,
+        },
       },
       defaultCacheConfig: {
-        provider: 'memory' as any,
+        provider: "memory" as any,
         defaultTtl: 300000, // 5 minutes
         maxSize: 1000,
-        evictionStrategy: 'lru' as any
+        evictionStrategy: "lru" as any,
       },
       defaultMonitoringConfig: {
         enablePerformanceMonitoring: true,
@@ -750,60 +853,60 @@ export class EnterpriseFunctionWrapperFactory implements FunctionWrapperFactory 
           errorRateThreshold: 0.05,
           memoryThreshold: 0.8,
           cpuThreshold: 0.8,
-          cacheHitRateThreshold: 0.7
-        }
+          cacheHitRateThreshold: 0.7,
+        },
       },
       globalValidationRules: [],
       performanceConfig: {
         enableOptimization: true,
         concurrentExecutionLimit: 100,
         queueSize: 1000,
-        adaptiveTuning: true
+        adaptiveTuning: true,
       },
       securityConfig: {
         enableSecurityValidation: true,
         encryptionConfig: {
           enableEncryption: false,
-          algorithm: 'aes_256_gcm' as any,
+          algorithm: "aes_256_gcm" as any,
           keyManagement: {
             rotationInterval: 86400000, // 24 hours
-            keyStorage: 'memory' as any,
+            keyStorage: "memory" as any,
             enableKeyEscrow: false,
             keyDerivation: {
-              function: 'pbkdf2' as any,
+              function: "pbkdf2" as any,
               iterations: 100000,
               saltLength: 32,
-              keyLength: 32
-            }
+              keyLength: 32,
+            },
           },
-          encryptionScope: []
+          encryptionScope: [],
         },
         accessControlConfig: {
           enableAccessControl: true,
-          defaultPolicy: 'role_based' as any,
+          defaultPolicy: "role_based" as any,
           rbacConfig: {
             enableRbac: true,
             roleHierarchy: {
               roles: [],
-              inheritanceRules: []
+              inheritanceRules: [],
             },
             permissionAssignments: {
               functionPermissions: {},
-              defaultPermissions: ['execute'],
-              permissionGroups: []
+              defaultPermissions: ["execute"],
+              permissionGroups: [],
             },
-            enableRoleInheritance: true
-          }
+            enableRoleInheritance: true,
+          },
         },
         auditConfig: {
           enableAuditLogging: true,
-          auditLevel: 'standard' as any,
+          auditLevel: "standard" as any,
           retentionPeriod: 2592000000, // 30 days
           storageConfig: {
-            storageProvider: 'database' as any,
+            storageProvider: "database" as any,
             enableEncryption: true,
             enableCompression: true,
-            partitioningStrategy: 'by_date' as any
+            partitioningStrategy: "by_date" as any,
           },
           complianceConfig: {
             enableComplianceChecking: true,
@@ -811,20 +914,20 @@ export class EnterpriseFunctionWrapperFactory implements FunctionWrapperFactory 
             reportingConfig: {
               enableAutomatedReporting: false,
               reportingSchedule: {
-                frequency: 'monthly' as any,
+                frequency: "monthly" as any,
                 scheduleDetails: {
                   hourOfDay: 0,
-                  minuteOfHour: 0
+                  minuteOfHour: 0,
                 },
-                timeZone: 'UTC'
+                timeZone: "UTC",
               },
-              reportFormats: ['json' as any],
-              reportRecipients: []
+              reportFormats: ["json" as any],
+              reportRecipients: [],
             },
-            dataRetentionPolicies: []
-          }
-        }
-      }
+            dataRetentionPolicies: [],
+          },
+        },
+      },
     };
   }
 
@@ -838,16 +941,16 @@ export class EnterpriseFunctionWrapperFactory implements FunctionWrapperFactory 
       retryConfig: {
         maxRetries: 3,
         baseDelay: 1000,
-        backoffStrategy: 'exponential' as any,
-        maxDelay: 10000
+        backoffStrategy: "exponential" as any,
+        maxDelay: 10000,
       },
-      fallbackBehavior: 'throw_error' as any,
+      fallbackBehavior: "throw_error" as any,
       circuitBreakerConfig: {
         failureThreshold: 5,
         successThreshold: 3,
         timeout: 60000,
-        monitoringWindow: 300000
-      }
+        monitoringWindow: 300000,
+      },
     };
   }
 
@@ -860,18 +963,22 @@ export class EnterpriseFunctionWrapperFactory implements FunctionWrapperFactory 
    */
   private deepMergeConfiguration(
     target: FactoryConfiguration,
-    source: Partial<FactoryConfiguration>
+    source: Partial<FactoryConfiguration>,
   ): FactoryConfiguration {
     const result = { ...target };
 
-    Object.keys(source).forEach(key => {
+    Object.keys(source).forEach((key) => {
       const sourceValue = source[key as keyof FactoryConfiguration];
       const targetValue = target[key as keyof FactoryConfiguration];
 
-      if (sourceValue && typeof sourceValue === 'object' && !Array.isArray(sourceValue)) {
+      if (
+        sourceValue &&
+        typeof sourceValue === "object" &&
+        !Array.isArray(sourceValue)
+      ) {
         result[key as keyof FactoryConfiguration] = {
           ...targetValue,
-          ...sourceValue
+          ...sourceValue,
         } as any;
       } else {
         result[key as keyof FactoryConfiguration] = sourceValue as any;
@@ -888,19 +995,19 @@ export class EnterpriseFunctionWrapperFactory implements FunctionWrapperFactory 
    */
   private createDatabaseReadTemplate(): WrapperConfig {
     return {
-      functionId: 'database-read-template',
-      description: 'Database read operation with caching and monitoring',
+      functionId: "database-read-template",
+      description: "Database read operation with caching and monitoring",
       validationLevel: ValidationLevel.MEDIUM,
       cacheable: true,
       cacheTtl: 300000, // 5 minutes
       monitoring: true,
       metadata: {
         category: FunctionCategory.DATABASE_READ,
-        domain: 'database',
+        domain: "database",
         dataClassification: DataClassification.INTERNAL,
-        dependencies: ['database'],
-        tags: ['database', 'read', 'cacheable']
-      }
+        dependencies: ["database"],
+        tags: ["database", "read", "cacheable"],
+      },
     };
   }
 
@@ -911,18 +1018,18 @@ export class EnterpriseFunctionWrapperFactory implements FunctionWrapperFactory 
    */
   private createDatabaseWriteTemplate(): WrapperConfig {
     return {
-      functionId: 'database-write-template',
-      description: 'Database write operation with high-security validation',
+      functionId: "database-write-template",
+      description: "Database write operation with high-security validation",
       validationLevel: ValidationLevel.HIGH,
       cacheable: false,
       monitoring: true,
       metadata: {
         category: FunctionCategory.DATABASE_WRITE,
-        domain: 'database',
+        domain: "database",
         dataClassification: DataClassification.CONFIDENTIAL,
-        dependencies: ['database'],
-        tags: ['database', 'write', 'transaction']
-      }
+        dependencies: ["database"],
+        tags: ["database", "write", "transaction"],
+      },
     };
   }
 
@@ -933,8 +1040,8 @@ export class EnterpriseFunctionWrapperFactory implements FunctionWrapperFactory 
    */
   private createApiCallTemplate(): WrapperConfig {
     return {
-      functionId: 'api-call-template',
-      description: 'External API call with retry and monitoring',
+      functionId: "api-call-template",
+      description: "External API call with retry and monitoring",
       validationLevel: ValidationLevel.MEDIUM,
       cacheable: true,
       cacheTtl: 60000, // 1 minute
@@ -943,18 +1050,18 @@ export class EnterpriseFunctionWrapperFactory implements FunctionWrapperFactory 
         retryConfig: {
           maxRetries: 5,
           baseDelay: 1000,
-          backoffStrategy: 'exponential' as any,
-          maxDelay: 30000
+          backoffStrategy: "exponential" as any,
+          maxDelay: 30000,
         },
-        fallbackBehavior: 'return_cached' as any
+        fallbackBehavior: "return_cached" as any,
       },
       metadata: {
         category: FunctionCategory.API_CALL,
-        domain: 'external',
+        domain: "external",
         dataClassification: DataClassification.INTERNAL,
-        dependencies: ['network'],
-        tags: ['api', 'external', 'network']
-      }
+        dependencies: ["network"],
+        tags: ["api", "external", "network"],
+      },
     };
   }
 
@@ -965,18 +1072,18 @@ export class EnterpriseFunctionWrapperFactory implements FunctionWrapperFactory 
    */
   private createAuthenticationTemplate(): WrapperConfig {
     return {
-      functionId: 'authentication-template',
-      description: 'Authentication operation with critical security validation',
+      functionId: "authentication-template",
+      description: "Authentication operation with critical security validation",
       validationLevel: ValidationLevel.CRITICAL,
       cacheable: false,
       monitoring: true,
       metadata: {
         category: FunctionCategory.AUTHENTICATION,
-        domain: 'security',
+        domain: "security",
         dataClassification: DataClassification.RESTRICTED,
-        dependencies: ['auth-service'],
-        tags: ['auth', 'security', 'critical']
-      }
+        dependencies: ["auth-service"],
+        tags: ["auth", "security", "critical"],
+      },
     };
   }
 
@@ -987,18 +1094,18 @@ export class EnterpriseFunctionWrapperFactory implements FunctionWrapperFactory 
    */
   private createFileOperationTemplate(): WrapperConfig {
     return {
-      functionId: 'file-operation-template',
-      description: 'File system operation with validation and monitoring',
+      functionId: "file-operation-template",
+      description: "File system operation with validation and monitoring",
       validationLevel: ValidationLevel.HIGH,
       cacheable: false,
       monitoring: true,
       metadata: {
         category: FunctionCategory.FILE_OPERATION,
-        domain: 'filesystem',
+        domain: "filesystem",
         dataClassification: DataClassification.INTERNAL,
-        dependencies: ['filesystem'],
-        tags: ['file', 'filesystem', 'io']
-      }
+        dependencies: ["filesystem"],
+        tags: ["file", "filesystem", "io"],
+      },
     };
   }
 
@@ -1009,19 +1116,19 @@ export class EnterpriseFunctionWrapperFactory implements FunctionWrapperFactory 
    */
   private createComputationTemplate(): WrapperConfig {
     return {
-      functionId: 'computation-template',
-      description: 'Computational operation with performance monitoring',
+      functionId: "computation-template",
+      description: "Computational operation with performance monitoring",
       validationLevel: ValidationLevel.LOW,
       cacheable: true,
       cacheTtl: 600000, // 10 minutes
       monitoring: true,
       metadata: {
         category: FunctionCategory.COMPUTATION,
-        domain: 'compute',
+        domain: "compute",
         dataClassification: DataClassification.INTERNAL,
         dependencies: [],
-        tags: ['compute', 'calculation', 'performance']
-      }
+        tags: ["compute", "calculation", "performance"],
+      },
     };
   }
 
@@ -1032,18 +1139,18 @@ export class EnterpriseFunctionWrapperFactory implements FunctionWrapperFactory 
    */
   private createDefaultTemplate(): WrapperConfig {
     return {
-      functionId: 'default-template',
-      description: 'General-purpose function wrapper',
+      functionId: "default-template",
+      description: "General-purpose function wrapper",
       validationLevel: ValidationLevel.MEDIUM,
       cacheable: false,
       monitoring: true,
       metadata: {
         category: FunctionCategory.UTILITY,
-        domain: 'general',
+        domain: "general",
         dataClassification: DataClassification.INTERNAL,
         dependencies: [],
-        tags: ['general', 'utility']
-      }
+        tags: ["general", "utility"],
+      },
     };
   }
 }
@@ -1057,7 +1164,7 @@ export class WrapperCreationError extends Error {
 
   constructor(message: string, metadata: Record<string, any> = {}) {
     super(message);
-    this.name = 'WrapperCreationError';
+    this.name = "WrapperCreationError";
     this.metadata = metadata;
   }
 }
@@ -1067,14 +1174,14 @@ export class WrapperCreationError extends Error {
  * Predefined use cases for configuration templates
  */
 export enum ConfigurationUseCase {
-  DATABASE_READ = 'database_read',
-  DATABASE_WRITE = 'database_write',
-  API_CALL = 'api_call',
-  AUTHENTICATION = 'authentication',
-  FILE_OPERATION = 'file_operation',
-  COMPUTATION = 'computation',
-  MONITORING = 'monitoring',
-  UTILITY = 'utility'
+  DATABASE_READ = "database_read",
+  DATABASE_WRITE = "database_write",
+  API_CALL = "api_call",
+  AUTHENTICATION = "authentication",
+  FILE_OPERATION = "file_operation",
+  COMPUTATION = "computation",
+  MONITORING = "monitoring",
+  UTILITY = "utility",
 }
 
 /**
@@ -1089,7 +1196,7 @@ export interface AutoConfigOptions {
   readonly description?: string;
 
   /** Security level hint */
-  readonly securityLevel?: 'low' | 'medium' | 'high' | 'critical';
+  readonly securityLevel?: "low" | "medium" | "high" | "critical";
 
   /** Domain hint */
   readonly domain?: string;
@@ -1140,7 +1247,7 @@ export interface WrapperHealthStatus {
   readonly functionId: string;
 
   /** Health status */
-  readonly status: 'healthy' | 'degraded' | 'unhealthy';
+  readonly status: "healthy" | "degraded" | "unhealthy";
 
   /** Last execution time */
   readonly lastExecution: Date | null;
@@ -1161,7 +1268,7 @@ export interface WrapperHealthStatus {
  */
 export interface FactoryHealthStatus {
   /** Overall factory health */
-  readonly overallStatus: 'healthy' | 'degraded' | 'unhealthy';
+  readonly overallStatus: "healthy" | "degraded" | "unhealthy";
 
   /** Individual wrapper health statuses */
   readonly wrapperStatuses: readonly WrapperHealthStatus[];

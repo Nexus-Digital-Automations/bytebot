@@ -71,7 +71,11 @@ export interface BusinessContext {
 export interface BusinessImpact {
   affectedUsers: number;
   estimatedRevenue: number;
-  systemCriticality: "NON_CRITICAL" | "IMPORTANT" | "CRITICAL" | "MISSION_CRITICAL";
+  systemCriticality:
+    | "NON_CRITICAL"
+    | "IMPORTANT"
+    | "CRITICAL"
+    | "MISSION_CRITICAL";
   downTimeRisk: number;
 }
 
@@ -191,7 +195,9 @@ export interface ConversationalTrafficManager {
   analyzeTrafficPatterns(metrics: TrafficMetrics): Promise<TrafficAnalysis>;
   optimizeRouting(analysis: TrafficAnalysis): Promise<RoutingOptimization>;
   handleCongestion(congestion: CongestionEvent): Promise<CongestionResponse>;
-  predictTrafficSpikes(historicalData: TrafficData[]): Promise<TrafficPrediction>;
+  predictTrafficSpikes(
+    historicalData: TrafficData[],
+  ): Promise<TrafficPrediction>;
 }
 
 export interface TrafficMetrics {
@@ -275,9 +281,15 @@ export interface AlertingRule {
  */
 export interface ConversationalPerformanceMonitor {
   analyzePerformance(metrics: PerformanceMetrics): Promise<PerformanceAnalysis>;
-  generateInsights(analysis: PerformanceAnalysis): Promise<PerformanceInsight[]>;
-  recommendOptimizations(insights: PerformanceInsight[]): Promise<OptimizationRecommendation[]>;
-  createConversationalDashboard(data: DashboardData): Promise<ConversationalDashboard>;
+  generateInsights(
+    analysis: PerformanceAnalysis,
+  ): Promise<PerformanceInsight[]>;
+  recommendOptimizations(
+    insights: PerformanceInsight[],
+  ): Promise<OptimizationRecommendation[]>;
+  createConversationalDashboard(
+    data: DashboardData,
+  ): Promise<ConversationalDashboard>;
 }
 
 export interface PerformanceAnalysis {
@@ -415,7 +427,9 @@ export interface AlertPreference {
  */
 @Injectable()
 export class ParlantEnterpriseGatewayMiddlewareService {
-  private readonly logger = new Logger(ParlantEnterpriseGatewayMiddlewareService.name);
+  private readonly logger = new Logger(
+    ParlantEnterpriseGatewayMiddlewareService.name,
+  );
   private readonly conversationCache = new Map<string, ConversationContext>();
   private readonly validationCache = new Map<string, ParlantValidationResult>();
   private readonly performanceMetrics = new Map<string, PerformanceMetrics>();
@@ -440,14 +454,13 @@ export class ParlantEnterpriseGatewayMiddlewareService {
     ESCALATION_THRESHOLDS: [80, 90, 95], // percentage utilization
   };
 
-  constructor(
-    // TODO: Inject actual dependencies when available
-    // private readonly parlantClient: ParlantClient,
-    // private readonly rateLimiter: EnterpriseRateLimiter,
-    // private readonly threatDetector: ThreatDetectionEngine,
-    // private readonly performanceAnalyzer: PerformanceAnalyzer,
-    // private readonly auditLogger: EnterpriseAuditLogger,
-  ) {
+  constructor() // TODO: Inject actual dependencies when available
+  // private readonly parlantClient: ParlantClient,
+  // private readonly rateLimiter: EnterpriseRateLimiter,
+  // private readonly threatDetector: ThreatDetectionEngine,
+  // private readonly performanceAnalyzer: PerformanceAnalyzer,
+  // private readonly auditLogger: EnterpriseAuditLogger,
+  {
     this.initializeMiddleware();
   }
 
@@ -455,7 +468,7 @@ export class ParlantEnterpriseGatewayMiddlewareService {
    * Main middleware entry point for conversational validation
    */
   async processConversationalValidation(
-    request: APIRequest
+    request: APIRequest,
   ): Promise<ParlantValidationResult> {
     const validationStartTime = performance.now();
     const validationId = uuidv4();
@@ -494,14 +507,14 @@ export class ParlantEnterpriseGatewayMiddlewareService {
       // Step 4: Execute conversational validation
       const validationResult = await this.executeConversationalValidation(
         parlantRequest,
-        validationId
+        validationId,
       );
 
       // Step 5: Process validation result and apply business rules
       const processedResult = await this.processValidationResult(
         validationResult,
         request,
-        validationStartTime
+        validationStartTime,
       );
 
       // Step 6: Cache result for performance optimization
@@ -520,7 +533,6 @@ export class ParlantEnterpriseGatewayMiddlewareService {
       });
 
       return processedResult;
-
     } catch (error) {
       const processingTime = performance.now() - validationStartTime;
 
@@ -531,7 +543,11 @@ export class ParlantEnterpriseGatewayMiddlewareService {
       });
 
       // Return secure failure result
-      return this.createSecureFailureResult(validationId, error, processingTime);
+      return this.createSecureFailureResult(
+        validationId,
+        error,
+        processingTime,
+      );
     }
   }
 
@@ -540,7 +556,7 @@ export class ParlantEnterpriseGatewayMiddlewareService {
    */
   async processRateLimitingWithNegotiation(
     request: APIRequest,
-    userContext: UserContext
+    userContext: UserContext,
   ): Promise<ConversationalRateLimitResult> {
     const rateLimitStartTime = performance.now();
 
@@ -562,20 +578,21 @@ export class ParlantEnterpriseGatewayMiddlewareService {
         const negotiationOptions = await this.generateNegotiationOptions(
           userContext,
           currentUsage,
-          rateLimit
+          rateLimit,
         );
 
         // Step 4: Create adaptive recommendations
-        const adaptiveRecommendations = await this.generateAdaptiveRecommendations(
-          userContext,
-          currentUsage,
-          utilizationPercentage
-        );
+        const adaptiveRecommendations =
+          await this.generateAdaptiveRecommendations(
+            userContext,
+            currentUsage,
+            utilizationPercentage,
+          );
 
         // Step 5: Define escalation path
         const escalationPath = await this.defineEscalationPath(
           userContext,
-          utilizationPercentage
+          utilizationPercentage,
         );
 
         return {
@@ -592,11 +609,12 @@ export class ParlantEnterpriseGatewayMiddlewareService {
       // Step 6: Allow request but monitor for adaptive optimization
       if (utilizationPercentage > 80) {
         // Generate proactive recommendations
-        const adaptiveRecommendations = await this.generateAdaptiveRecommendations(
-          userContext,
-          currentUsage,
-          utilizationPercentage
-        );
+        const adaptiveRecommendations =
+          await this.generateAdaptiveRecommendations(
+            userContext,
+            currentUsage,
+            utilizationPercentage,
+          );
 
         return {
           allowed: true,
@@ -605,7 +623,10 @@ export class ParlantEnterpriseGatewayMiddlewareService {
           negotiationAvailable: false,
           conversationalOptions: [],
           adaptiveRecommendations: adaptiveRecommendations,
-          escalationPath: await this.defineEscalationPath(userContext, utilizationPercentage),
+          escalationPath: await this.defineEscalationPath(
+            userContext,
+            utilizationPercentage,
+          ),
         };
       }
 
@@ -617,9 +638,11 @@ export class ParlantEnterpriseGatewayMiddlewareService {
         negotiationAvailable: false,
         conversationalOptions: [],
         adaptiveRecommendations: [],
-        escalationPath: await this.defineEscalationPath(userContext, utilizationPercentage),
+        escalationPath: await this.defineEscalationPath(
+          userContext,
+          utilizationPercentage,
+        ),
       };
-
     } catch (error) {
       this.logger.error(`Rate limiting negotiation failed`, {
         error: error instanceof Error ? error.message : String(error),
@@ -635,7 +658,12 @@ export class ParlantEnterpriseGatewayMiddlewareService {
         negotiationAvailable: false,
         conversationalOptions: [],
         adaptiveRecommendations: [],
-        escalationPath: { levels: [], currentLevel: 0, automaticEscalation: false, escalationTimeout: 0 },
+        escalationPath: {
+          levels: [],
+          currentLevel: 0,
+          automaticEscalation: false,
+          escalationTimeout: 0,
+        },
       };
     }
   }
@@ -644,7 +672,7 @@ export class ParlantEnterpriseGatewayMiddlewareService {
    * Implements traffic management with conversational intelligence
    */
   async processIntelligentTrafficManagement(
-    metrics: TrafficMetrics
+    metrics: TrafficMetrics,
   ): Promise<RoutingOptimization> {
     const trafficStartTime = performance.now();
 
@@ -659,25 +687,23 @@ export class ParlantEnterpriseGatewayMiddlewareService {
       const trafficAnalysis = await this.analyzeTrafficPatterns(metrics);
 
       // Step 2: Identify optimization opportunities
-      const optimizationOpportunities = await this.identifyOptimizationOpportunities(
-        trafficAnalysis
-      );
+      const optimizationOpportunities =
+        await this.identifyOptimizationOpportunities(trafficAnalysis);
 
       // Step 3: Generate intelligent routing recommendations
       const routingRecommendations = await this.generateRoutingRecommendations(
         trafficAnalysis,
-        optimizationOpportunities
+        optimizationOpportunities,
       );
 
       // Step 4: Apply approved optimizations
       const routingOptimization = await this.applyRoutingOptimizations(
-        routingRecommendations
+        routingRecommendations,
       );
 
       // Step 5: Create monitoring plan for changes
-      const monitoringPlan = await this.createOptimizationMonitoringPlan(
-        routingOptimization
-      );
+      const monitoringPlan =
+        await this.createOptimizationMonitoringPlan(routingOptimization);
 
       this.logger.log(`Traffic management optimization applied`, {
         optimizationApplied: routingOptimization.optimizationApplied,
@@ -692,7 +718,6 @@ export class ParlantEnterpriseGatewayMiddlewareService {
         expectedImprovement: routingOptimization.expectedImprovement,
         monitoringPlan: monitoringPlan,
       };
-
     } catch (error) {
       this.logger.error(`Traffic management optimization failed`, {
         error: error instanceof Error ? error.message : String(error),
@@ -707,7 +732,7 @@ export class ParlantEnterpriseGatewayMiddlewareService {
    * Implements performance monitoring with conversational analytics
    */
   async processPerformanceMonitoringWithAnalytics(
-    metrics: PerformanceMetrics
+    metrics: PerformanceMetrics,
   ): Promise<ConversationalDashboard> {
     const monitoringStartTime = performance.now();
 
@@ -722,14 +747,12 @@ export class ParlantEnterpriseGatewayMiddlewareService {
       const performanceAnalysis = await this.analyzePerformanceMetrics(metrics);
 
       // Step 2: Generate actionable insights
-      const performanceInsights = await this.generatePerformanceInsights(
-        performanceAnalysis
-      );
+      const performanceInsights =
+        await this.generatePerformanceInsights(performanceAnalysis);
 
       // Step 3: Create optimization recommendations
-      const optimizationRecommendations = await this.createOptimizationRecommendations(
-        performanceInsights
-      );
+      const optimizationRecommendations =
+        await this.createOptimizationRecommendations(performanceInsights);
 
       // Step 4: Build conversational dashboard
       const conversationalDashboard = await this.buildConversationalDashboard({
@@ -751,7 +774,6 @@ export class ParlantEnterpriseGatewayMiddlewareService {
       });
 
       return conversationalDashboard;
-
     } catch (error) {
       this.logger.error(`Performance monitoring analytics failed`, {
         error: error instanceof Error ? error.message : String(error),
@@ -767,7 +789,7 @@ export class ParlantEnterpriseGatewayMiddlewareService {
    */
   async createEnterpriseAuditTrail(
     validationResult: ParlantValidationResult,
-    request: APIRequest
+    request: APIRequest,
   ): Promise<AuditEntry[]> {
     const auditStartTime = performance.now();
 
@@ -796,19 +818,21 @@ export class ParlantEnterpriseGatewayMiddlewareService {
         },
         complianceMarkers: await this.generateComplianceMarkers(
           validationResult,
-          request
+          request,
         ),
       });
 
       // Step 2: Create conversation context audit entries
       if (validationResult.conversationalContext) {
-        for (const interaction of validationResult.conversationalContext.previousInteractions) {
+        for (const interaction of validationResult.conversationalContext
+          .previousInteractions) {
           auditEntries.push({
             timestamp: interaction.timestamp,
             action: `CONVERSATIONAL_${interaction.type}`,
             actor: request.userContext?.userId || "SYSTEM",
             details: {
-              conversationId: validationResult.conversationalContext.conversationId,
+              conversationId:
+                validationResult.conversationalContext.conversationId,
               content: interaction.content,
               metadata: interaction.metadata,
             },
@@ -858,7 +882,6 @@ export class ParlantEnterpriseGatewayMiddlewareService {
       });
 
       return auditEntries;
-
     } catch (error) {
       this.logger.error(`Enterprise audit trail creation failed`, {
         error: error instanceof Error ? error.message : String(error),
@@ -899,13 +922,14 @@ export class ParlantEnterpriseGatewayMiddlewareService {
   private isCachedValidationValid(result: ParlantValidationResult): boolean {
     // Check if cached result is still valid (within cache TTL)
     const CACHE_TTL = 300000; // 5 minutes
-    const cacheAge = Date.now() - new Date(result.auditTrail[0]?.timestamp || 0).getTime();
+    const cacheAge =
+      Date.now() - new Date(result.auditTrail[0]?.timestamp || 0).getTime();
     return cacheAge < CACHE_TTL && result.confidence > 0.8;
   }
 
   private enhanceCachedResult(
     cachedResult: ParlantValidationResult,
-    newValidationId: string
+    newValidationId: string,
   ): ParlantValidationResult {
     return {
       ...cachedResult,
@@ -923,7 +947,9 @@ export class ParlantEnterpriseGatewayMiddlewareService {
     };
   }
 
-  private async buildConversationContext(request: APIRequest): Promise<ConversationContext> {
+  private async buildConversationContext(
+    request: APIRequest,
+  ): Promise<ConversationContext> {
     const conversationId = uuidv4();
     const sessionId = request.userContext?.sessionId || uuidv4();
 
@@ -942,7 +968,9 @@ export class ParlantEnterpriseGatewayMiddlewareService {
       conversationId: conversationId,
       sessionId: sessionId,
       previousInteractions: [],
-      userPreferences: await this.getUserPreferences(request.userContext?.userId),
+      userPreferences: await this.getUserPreferences(
+        request.userContext?.userId,
+      ),
       contextualMemory: {},
     };
 
@@ -950,19 +978,23 @@ export class ParlantEnterpriseGatewayMiddlewareService {
     return newContext;
   }
 
-  private async extractBusinessContext(request: APIRequest): Promise<BusinessContext> {
+  private async extractBusinessContext(
+    request: APIRequest,
+  ): Promise<BusinessContext> {
     // Extract business context from request
     return {
       operationPriority: this.determineOperationPriority(request),
       businessImpact: await this.assessBusinessImpact(request),
       complianceRequirements: await this.getComplianceRequirements(request),
-      riskTolerance: await this.getUserRiskTolerance(request.userContext?.userId),
+      riskTolerance: await this.getUserRiskTolerance(
+        request.userContext?.userId,
+      ),
     };
   }
 
   private async executeConversationalValidation(
     parlantRequest: ParlantValidationRequest,
-    validationId: string
+    validationId: string,
   ): Promise<ParlantValidationResult> {
     // TODO: Replace with actual PARLANT client integration
     // This is a mock implementation for demonstration
@@ -971,7 +1003,8 @@ export class ParlantEnterpriseGatewayMiddlewareService {
       validationId: validationId,
       approved: true,
       confidence: 0.95,
-      explanation: "Operation validated through conversational AI analysis. All security and business requirements met.",
+      explanation:
+        "Operation validated through conversational AI analysis. All security and business requirements met.",
       conversationalContext: parlantRequest.conversationContext!,
       userInteractionRequired: false,
       suggestedActions: [
@@ -1007,7 +1040,7 @@ export class ParlantEnterpriseGatewayMiddlewareService {
   private async processValidationResult(
     validationResult: ParlantValidationResult,
     request: APIRequest,
-    startTime: number
+    startTime: number,
   ): Promise<ParlantValidationResult> {
     // Apply business rules and post-processing
     const processingTime = performance.now() - startTime;
@@ -1031,7 +1064,10 @@ export class ParlantEnterpriseGatewayMiddlewareService {
     return validationResult;
   }
 
-  private cacheValidationResult(cacheKey: string, result: ParlantValidationResult): void {
+  private cacheValidationResult(
+    cacheKey: string,
+    result: ParlantValidationResult,
+  ): void {
     this.validationCache.set(cacheKey, result);
 
     // Set up cache cleanup
@@ -1042,7 +1078,7 @@ export class ParlantEnterpriseGatewayMiddlewareService {
 
   private async logValidationMetrics(
     result: ParlantValidationResult,
-    startTime: number
+    startTime: number,
   ): Promise<void> {
     const processingTime = performance.now() - startTime;
 
@@ -1057,7 +1093,7 @@ export class ParlantEnterpriseGatewayMiddlewareService {
 
   private async auditValidationDecision(
     result: ParlantValidationResult,
-    request: APIRequest
+    request: APIRequest,
   ): Promise<void> {
     // Create comprehensive audit entries
     await this.createEnterpriseAuditTrail(result, request);
@@ -1066,13 +1102,14 @@ export class ParlantEnterpriseGatewayMiddlewareService {
   private createSecureFailureResult(
     validationId: string,
     error: unknown,
-    processingTime: number
+    processingTime: number,
   ): ParlantValidationResult {
     return {
       validationId: validationId,
       approved: false,
       confidence: 0.0,
-      explanation: "Validation failed due to system error. Request denied for security.",
+      explanation:
+        "Validation failed due to system error. Request denied for security.",
       conversationalContext: {
         conversationId: validationId,
         sessionId: "error-session",
@@ -1151,13 +1188,14 @@ export class ParlantEnterpriseGatewayMiddlewareService {
   private async generateNegotiationOptions(
     userContext: UserContext,
     currentUsage: number,
-    rateLimit: any
+    rateLimit: any,
   ): Promise<NegotiationOption[]> {
     // Mock implementation
     return [
       {
         optionId: "temporary-increase",
-        description: "Request temporary rate limit increase for urgent operations",
+        description:
+          "Request temporary rate limit increase for urgent operations",
         requestIncrease: Math.floor(rateLimit.limit * 0.5),
         justificationRequired: true,
         approvalLevel: "SUPERVISOR",
@@ -1169,14 +1207,15 @@ export class ParlantEnterpriseGatewayMiddlewareService {
   private async generateAdaptiveRecommendations(
     userContext: UserContext,
     currentUsage: number,
-    utilizationPercentage: number
+    utilizationPercentage: number,
   ): Promise<AdaptiveRecommendation[]> {
     // Mock implementation
     const recommendations: AdaptiveRecommendation[] = [];
 
     if (utilizationPercentage > 80) {
       recommendations.push({
-        recommendation: "Consider batching requests to optimize rate limit usage",
+        recommendation:
+          "Consider batching requests to optimize rate limit usage",
         rationale: "Batching can reduce overall API calls by up to 40%",
         expectedImprovement: 40,
         implementationSteps: [
@@ -1192,7 +1231,7 @@ export class ParlantEnterpriseGatewayMiddlewareService {
 
   private async defineEscalationPath(
     userContext: UserContext,
-    utilizationPercentage: number
+    utilizationPercentage: number,
   ): Promise<EscalationPath> {
     // Mock implementation
     return {
@@ -1216,7 +1255,9 @@ export class ParlantEnterpriseGatewayMiddlewareService {
     };
   }
 
-  private async analyzeTrafficPatterns(metrics: TrafficMetrics): Promise<TrafficAnalysis> {
+  private async analyzeTrafficPatterns(
+    metrics: TrafficMetrics,
+  ): Promise<TrafficAnalysis> {
     // Mock implementation
     return {
       overallHealth: "GOOD",
@@ -1243,14 +1284,14 @@ export class ParlantEnterpriseGatewayMiddlewareService {
   }
 
   private async identifyOptimizationOpportunities(
-    analysis: TrafficAnalysis
+    analysis: TrafficAnalysis,
   ): Promise<OptimizationOpportunity[]> {
     return analysis.optimizationOpportunities;
   }
 
   private async generateRoutingRecommendations(
     analysis: TrafficAnalysis,
-    opportunities: OptimizationOpportunity[]
+    opportunities: OptimizationOpportunity[],
   ): Promise<RoutingRule[]> {
     // Mock implementation
     return [
@@ -1264,7 +1305,9 @@ export class ParlantEnterpriseGatewayMiddlewareService {
     ];
   }
 
-  private async applyRoutingOptimizations(rules: RoutingRule[]): Promise<RoutingOptimization> {
+  private async applyRoutingOptimizations(
+    rules: RoutingRule[],
+  ): Promise<RoutingOptimization> {
     // Mock implementation
     return {
       optimizationApplied: true,
@@ -1280,7 +1323,7 @@ export class ParlantEnterpriseGatewayMiddlewareService {
   }
 
   private async createOptimizationMonitoringPlan(
-    optimization: RoutingOptimization
+    optimization: RoutingOptimization,
   ): Promise<MonitoringPlan> {
     // Mock implementation
     return {
@@ -1302,7 +1345,9 @@ export class ParlantEnterpriseGatewayMiddlewareService {
     };
   }
 
-  private async analyzePerformanceMetrics(metrics: PerformanceMetrics): Promise<PerformanceAnalysis> {
+  private async analyzePerformanceMetrics(
+    metrics: PerformanceMetrics,
+  ): Promise<PerformanceAnalysis> {
     // Mock implementation
     return {
       overallScore: 85,
@@ -1312,7 +1357,9 @@ export class ParlantEnterpriseGatewayMiddlewareService {
           area: "THROUGHPUT",
           score: 90,
           description: "Excellent request processing throughput",
-          maintainanceRecommendations: ["Continue current optimization strategies"],
+          maintainanceRecommendations: [
+            "Continue current optimization strategies",
+          ],
         },
       ],
       improvementAreas: [
@@ -1336,14 +1383,15 @@ export class ParlantEnterpriseGatewayMiddlewareService {
   }
 
   private async generatePerformanceInsights(
-    analysis: PerformanceAnalysis
+    analysis: PerformanceAnalysis,
   ): Promise<PerformanceInsight[]> {
     // Mock implementation
     return [
       {
         insightId: "caching-opportunity",
         category: "PERFORMANCE",
-        description: "Response time can be improved by implementing intelligent caching",
+        description:
+          "Response time can be improved by implementing intelligent caching",
         evidence: [
           {
             metric: "cache_hit_rate",
@@ -1360,7 +1408,7 @@ export class ParlantEnterpriseGatewayMiddlewareService {
   }
 
   private async createOptimizationRecommendations(
-    insights: PerformanceInsight[]
+    insights: PerformanceInsight[],
   ): Promise<OptimizationRecommendation[]> {
     // Mock implementation
     return [
@@ -1385,7 +1433,9 @@ export class ParlantEnterpriseGatewayMiddlewareService {
     ];
   }
 
-  private async buildConversationalDashboard(data: DashboardData): Promise<ConversationalDashboard> {
+  private async buildConversationalDashboard(
+    data: DashboardData,
+  ): Promise<ConversationalDashboard> {
     // Mock implementation
     return {
       dashboardId: uuidv4(),
@@ -1429,28 +1479,43 @@ export class ParlantEnterpriseGatewayMiddlewareService {
           dataRetention: 86400000, // 24 hours
         },
         layoutOptions: [
-          { layoutId: "overview", name: "Overview", description: "High-level metrics" },
+          {
+            layoutId: "overview",
+            name: "Overview",
+            description: "High-level metrics",
+          },
         ],
         themeOptions: [
-          { themeId: "dark", name: "Dark Theme", description: "Dark mode interface" },
+          {
+            themeId: "dark",
+            name: "Dark Theme",
+            description: "Dark mode interface",
+          },
         ],
       },
     };
   }
 
-  private async setupRealTimeMonitoring(dashboard: ConversationalDashboard): Promise<void> {
+  private async setupRealTimeMonitoring(
+    dashboard: ConversationalDashboard,
+  ): Promise<void> {
     // Mock implementation
-    this.logger.log(`Real-time monitoring setup for dashboard: ${dashboard.dashboardId}`);
+    this.logger.log(
+      `Real-time monitoring setup for dashboard: ${dashboard.dashboardId}`,
+    );
   }
 
   private async generateComplianceMarkers(
     validationResult: ParlantValidationResult,
-    request: APIRequest
+    request: APIRequest,
   ): Promise<string[]> {
     // Mock implementation
     const markers = ["PARLANT_VALIDATION"];
 
-    if (request.securityLevel === "HIGH" || request.securityLevel === "CRITICAL") {
+    if (
+      request.securityLevel === "HIGH" ||
+      request.securityLevel === "CRITICAL"
+    ) {
       markers.push("HIGH_SECURITY_OPERATION");
     }
 
@@ -1473,7 +1538,9 @@ export class ParlantEnterpriseGatewayMiddlewareService {
     };
   }
 
-  private determineOperationPriority(request: APIRequest): "LOW" | "MEDIUM" | "HIGH" | "CRITICAL" {
+  private determineOperationPriority(
+    request: APIRequest,
+  ): "LOW" | "MEDIUM" | "HIGH" | "CRITICAL" {
     // Mock implementation based on security level
     switch (request.securityLevel) {
       case "CRITICAL":
@@ -1487,7 +1554,9 @@ export class ParlantEnterpriseGatewayMiddlewareService {
     }
   }
 
-  private async assessBusinessImpact(request: APIRequest): Promise<BusinessImpact> {
+  private async assessBusinessImpact(
+    request: APIRequest,
+  ): Promise<BusinessImpact> {
     // Mock implementation
     return {
       affectedUsers: 100,
@@ -1497,7 +1566,9 @@ export class ParlantEnterpriseGatewayMiddlewareService {
     };
   }
 
-  private async getComplianceRequirements(request: APIRequest): Promise<ComplianceRequirement[]> {
+  private async getComplianceRequirements(
+    request: APIRequest,
+  ): Promise<ComplianceRequirement[]> {
     // Mock implementation
     return [
       {
@@ -1509,7 +1580,9 @@ export class ParlantEnterpriseGatewayMiddlewareService {
     ];
   }
 
-  private async getUserRiskTolerance(userId?: string): Promise<"CONSERVATIVE" | "MODERATE" | "AGGRESSIVE"> {
+  private async getUserRiskTolerance(
+    userId?: string,
+  ): Promise<"CONSERVATIVE" | "MODERATE" | "AGGRESSIVE"> {
     // Mock implementation
     return "MODERATE";
   }
@@ -1555,7 +1628,11 @@ export class ParlantEnterpriseGatewayMiddlewareService {
     const now = Date.now();
     for (const [key, context] of this.conversationCache.entries()) {
       // Remove conversations older than 1 hour
-      if (now - new Date(context.previousInteractions[0]?.timestamp || 0).getTime() > 3600000) {
+      if (
+        now -
+          new Date(context.previousInteractions[0]?.timestamp || 0).getTime() >
+        3600000
+      ) {
         this.conversationCache.delete(key);
       }
     }

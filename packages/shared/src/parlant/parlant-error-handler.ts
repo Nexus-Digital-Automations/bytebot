@@ -25,14 +25,14 @@ import {
   HttpException,
   HttpStatus,
   Logger,
-  Injectable
-} from '@nestjs/common';
-import { Request, Response } from 'express';
+  Injectable,
+} from "@nestjs/common";
+import { Request, Response } from "express";
 import {
   ConversationalValidationError,
   RiskLevel,
-  SecurityLevel
-} from './parlant-validation.decorator';
+  SecurityLevel,
+} from "./parlant-validation.decorator";
 
 // ===== ERROR CLASSIFICATION INTERFACES =====
 
@@ -40,35 +40,35 @@ import {
  * Error severity levels for classification
  */
 export enum ErrorSeverity {
-  LOW = 'LOW',
-  MEDIUM = 'MEDIUM',
-  HIGH = 'HIGH',
-  CRITICAL = 'CRITICAL'
+  LOW = "LOW",
+  MEDIUM = "MEDIUM",
+  HIGH = "HIGH",
+  CRITICAL = "CRITICAL",
 }
 
 /**
  * Error categories for classification
  */
 export enum ErrorCategory {
-  VALIDATION = 'VALIDATION',
-  AUTHENTICATION = 'AUTHENTICATION',
-  AUTHORIZATION = 'AUTHORIZATION',
-  BUSINESS_LOGIC = 'BUSINESS_LOGIC',
-  SYSTEM = 'SYSTEM',
-  INTEGRATION = 'INTEGRATION',
-  PERFORMANCE = 'PERFORMANCE',
-  SECURITY = 'SECURITY'
+  VALIDATION = "VALIDATION",
+  AUTHENTICATION = "AUTHENTICATION",
+  AUTHORIZATION = "AUTHORIZATION",
+  BUSINESS_LOGIC = "BUSINESS_LOGIC",
+  SYSTEM = "SYSTEM",
+  INTEGRATION = "INTEGRATION",
+  PERFORMANCE = "PERFORMANCE",
+  SECURITY = "SECURITY",
 }
 
 /**
  * Error recovery strategies
  */
 export enum RecoveryStrategy {
-  RETRY = 'RETRY',
-  FALLBACK = 'FALLBACK',
-  ESCALATE = 'ESCALATE',
-  IGNORE = 'IGNORE',
-  MANUAL_INTERVENTION = 'MANUAL_INTERVENTION'
+  RETRY = "RETRY",
+  FALLBACK = "FALLBACK",
+  ESCALATE = "ESCALATE",
+  IGNORE = "IGNORE",
+  MANUAL_INTERVENTION = "MANUAL_INTERVENTION",
 }
 
 /**
@@ -215,121 +215,132 @@ export interface ParlantErrorResponse {
 @Injectable()
 export class ParlantErrorFilter implements ExceptionFilter {
   private readonly logger = new Logger(ParlantErrorFilter.name);
-  private readonly errorCache = new Map<string, {
-    response: ParlantErrorResponse;
-    timestamp: Date;
-    count: number;
-  }>();
+  private readonly errorCache = new Map<
+    string,
+    {
+      response: ParlantErrorResponse;
+      timestamp: Date;
+      count: number;
+    }
+  >();
 
   // Error frequency tracking
-  private readonly errorFrequency = new Map<string, Array<{ timestamp: Date; userId?: string }>>();
+  private readonly errorFrequency = new Map<
+    string,
+    Array<{ timestamp: Date; userId?: string }>
+  >();
 
   // Pre-defined guidance templates
   private readonly guidanceTemplates = {
     [ErrorCategory.VALIDATION]: {
-      explanation: 'Your request couldn\'t be processed due to validation issues with the provided data.',
+      explanation:
+        "Your request couldn't be processed due to validation issues with the provided data.",
       immediateActions: [
-        'Check that all required fields are provided',
-        'Verify data formats match the expected patterns',
-        'Ensure numeric values are within acceptable ranges'
+        "Check that all required fields are provided",
+        "Verify data formats match the expected patterns",
+        "Ensure numeric values are within acceptable ranges",
       ],
       preventionTips: [
-        'Always validate input data before submitting',
-        'Use the API documentation to verify required parameters',
-        'Test with small data sets first before large operations'
-      ]
+        "Always validate input data before submitting",
+        "Use the API documentation to verify required parameters",
+        "Test with small data sets first before large operations",
+      ],
     },
     [ErrorCategory.AUTHENTICATION]: {
-      explanation: 'Your request couldn\'t be authenticated. This usually means your login credentials are invalid or expired.',
+      explanation:
+        "Your request couldn't be authenticated. This usually means your login credentials are invalid or expired.",
       immediateActions: [
-        'Check if you\'re still logged in',
-        'Try logging out and logging back in',
-        'Verify your username and password are correct'
+        "Check if you're still logged in",
+        "Try logging out and logging back in",
+        "Verify your username and password are correct",
       ],
       preventionTips: [
-        'Use strong, unique passwords',
-        'Enable two-factor authentication if available',
-        'Avoid sharing login credentials'
-      ]
+        "Use strong, unique passwords",
+        "Enable two-factor authentication if available",
+        "Avoid sharing login credentials",
+      ],
     },
     [ErrorCategory.AUTHORIZATION]: {
-      explanation: 'You don\'t have sufficient permissions to perform this operation.',
+      explanation:
+        "You don't have sufficient permissions to perform this operation.",
       immediateActions: [
-        'Contact your administrator to request appropriate permissions',
-        'Check if you\'re using the correct user account',
-        'Verify you\'re accessing the right environment (dev/staging/prod)'
+        "Contact your administrator to request appropriate permissions",
+        "Check if you're using the correct user account",
+        "Verify you're accessing the right environment (dev/staging/prod)",
       ],
       preventionTips: [
-        'Understand your role permissions before attempting operations',
-        'Request access in advance for planned operations',
-        'Follow the principle of least privilege'
-      ]
+        "Understand your role permissions before attempting operations",
+        "Request access in advance for planned operations",
+        "Follow the principle of least privilege",
+      ],
     },
     [ErrorCategory.BUSINESS_LOGIC]: {
-      explanation: 'The operation couldn\'t be completed due to business rule violations.',
+      explanation:
+        "The operation couldn't be completed due to business rule violations.",
       immediateActions: [
-        'Review the business requirements for this operation',
-        'Check if prerequisite conditions are met',
-        'Verify the operation is appropriate for the current context'
+        "Review the business requirements for this operation",
+        "Check if prerequisite conditions are met",
+        "Verify the operation is appropriate for the current context",
       ],
       preventionTips: [
-        'Familiarize yourself with business rules and workflows',
-        'Validate business logic before technical implementation',
-        'Consider edge cases and exceptional scenarios'
-      ]
+        "Familiarize yourself with business rules and workflows",
+        "Validate business logic before technical implementation",
+        "Consider edge cases and exceptional scenarios",
+      ],
     },
     [ErrorCategory.SYSTEM]: {
-      explanation: 'A system error occurred while processing your request.',
+      explanation: "A system error occurred while processing your request.",
       immediateActions: [
-        'Try the operation again in a few moments',
-        'Check system status page for ongoing issues',
-        'Contact support if the problem persists'
+        "Try the operation again in a few moments",
+        "Check system status page for ongoing issues",
+        "Contact support if the problem persists",
       ],
       preventionTips: [
-        'Monitor system health dashboards',
-        'Plan operations during low-traffic periods',
-        'Have rollback plans for critical operations'
-      ]
+        "Monitor system health dashboards",
+        "Plan operations during low-traffic periods",
+        "Have rollback plans for critical operations",
+      ],
     },
     [ErrorCategory.INTEGRATION]: {
-      explanation: 'An integration with an external service failed.',
+      explanation: "An integration with an external service failed.",
       immediateActions: [
-        'Check if the external service is operational',
-        'Verify network connectivity',
-        'Try the operation again after a brief delay'
+        "Check if the external service is operational",
+        "Verify network connectivity",
+        "Try the operation again after a brief delay",
       ],
       preventionTips: [
-        'Monitor external service status',
-        'Implement fallback mechanisms',
-        'Use circuit breakers for unreliable services'
-      ]
+        "Monitor external service status",
+        "Implement fallback mechanisms",
+        "Use circuit breakers for unreliable services",
+      ],
     },
     [ErrorCategory.PERFORMANCE]: {
-      explanation: 'The operation took too long to complete and was terminated.',
+      explanation:
+        "The operation took too long to complete and was terminated.",
       immediateActions: [
-        'Try reducing the scope of the operation',
-        'Break large operations into smaller chunks',
-        'Retry during off-peak hours'
+        "Try reducing the scope of the operation",
+        "Break large operations into smaller chunks",
+        "Retry during off-peak hours",
       ],
       preventionTips: [
-        'Optimize queries and operations for performance',
-        'Use pagination for large data sets',
-        'Monitor and analyze performance metrics'
-      ]
+        "Optimize queries and operations for performance",
+        "Use pagination for large data sets",
+        "Monitor and analyze performance metrics",
+      ],
     },
     [ErrorCategory.SECURITY]: {
-      explanation: 'The operation was blocked due to security policies.',
+      explanation: "The operation was blocked due to security policies.",
       immediateActions: [
-        'Review security requirements for this operation',
-        'Ensure you\'re following security best practices',
-        'Contact security team if you believe this is incorrect'
+        "Review security requirements for this operation",
+        "Ensure you're following security best practices",
+        "Contact security team if you believe this is incorrect",
       ],
       preventionTips: [
-        'Stay updated on security policies and procedures',
-        'Use secure development practices',
-        'Regularly review and audit security configurations'
-      ]
-    }
+        "Stay updated on security policies and procedures",
+        "Use secure development practices",
+        "Regularly review and audit security configurations",
+      ],
+    },
   };
 
   catch(exception: unknown, host: ArgumentsHost): void {
@@ -352,7 +363,10 @@ export class ParlantErrorFilter implements ExceptionFilter {
   /**
    * Build comprehensive error response with conversational guidance
    */
-  private buildErrorResponse(exception: unknown, request: Request): ParlantErrorResponse {
+  private buildErrorResponse(
+    exception: unknown,
+    request: Request,
+  ): ParlantErrorResponse {
     const correlationId = this.generateCorrelationId();
     const timestamp = new Date().toISOString();
 
@@ -364,30 +378,35 @@ export class ParlantErrorFilter implements ExceptionFilter {
 
     // Build base error response
     let statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
-    let message = 'An unexpected error occurred';
-    let errorType = 'Internal Server Error';
+    let message = "An unexpected error occurred";
+    let errorType = "Internal Server Error";
 
     if (exception instanceof HttpException) {
       statusCode = exception.getStatus();
       message = exception.message;
       const response = exception.getResponse();
-      errorType = typeof response === 'object' && response && 'error' in response
-        ? String(response.error)
-        : exception.constructor.name;
+      errorType =
+        typeof response === "object" && response && "error" in response
+          ? String(response.error)
+          : exception.constructor.name;
     } else if (exception instanceof ConversationalValidationError) {
       statusCode = HttpStatus.FORBIDDEN;
       message = exception.message;
-      errorType = 'Conversational Validation Failed';
+      errorType = "Conversational Validation Failed";
     } else if (exception instanceof Error) {
       message = exception.message;
       errorType = exception.constructor.name;
-    } else if (typeof exception === 'string') {
+    } else if (typeof exception === "string") {
       message = exception;
-      errorType = 'String Error';
+      errorType = "String Error";
     }
 
     // Generate conversational guidance
-    const guidance = this.generateConversationalGuidance(classification, exception, userContext);
+    const guidance = this.generateConversationalGuidance(
+      classification,
+      exception,
+      userContext,
+    );
 
     // Generate recovery options
     const recovery = this.generateRecoveryOptions(classification, exception);
@@ -409,10 +428,11 @@ export class ParlantErrorFilter implements ExceptionFilter {
           operationId: correlationId,
           timestamp,
           duration: 0, // Would be calculated from request start time
-          stackTrace: process.env.NODE_ENV === 'development' && exception instanceof Error
-            ? exception.stack
-            : undefined
-        }
+          stackTrace:
+            process.env.NODE_ENV === "development" && exception instanceof Error
+              ? exception.stack
+              : undefined,
+        },
       },
       guidance,
       recovery,
@@ -423,11 +443,11 @@ export class ParlantErrorFilter implements ExceptionFilter {
         requestContext: {
           method: request.method,
           path: request.path,
-          userAgent: request.headers['user-agent']?.substring(0, 100),
-          ipAddress: this.getClientIpAddress(request)
+          userAgent: request.headers["user-agent"]?.substring(0, 100),
+          ipAddress: this.getClientIpAddress(request),
         },
-        frequencyData
-      }
+        frequencyData,
+      },
     };
 
     return errorResponse;
@@ -445,7 +465,7 @@ export class ParlantErrorFilter implements ExceptionFilter {
       return {
         category: ErrorCategory.VALIDATION,
         severity: this.mapRiskLevelToSeverity(exception.riskLevel),
-        errorCode: 'PARLANT_VALIDATION_FAILED'
+        errorCode: "PARLANT_VALIDATION_FAILED",
       };
     }
 
@@ -456,7 +476,7 @@ export class ParlantErrorFilter implements ExceptionFilter {
         return {
           category: ErrorCategory.AUTHENTICATION,
           severity: ErrorSeverity.HIGH,
-          errorCode: 'AUTHENTICATION_FAILED'
+          errorCode: "AUTHENTICATION_FAILED",
         };
       }
 
@@ -464,7 +484,7 @@ export class ParlantErrorFilter implements ExceptionFilter {
         return {
           category: ErrorCategory.AUTHORIZATION,
           severity: ErrorSeverity.HIGH,
-          errorCode: 'AUTHORIZATION_FAILED'
+          errorCode: "AUTHORIZATION_FAILED",
         };
       }
 
@@ -472,7 +492,7 @@ export class ParlantErrorFilter implements ExceptionFilter {
         return {
           category: ErrorCategory.VALIDATION,
           severity: ErrorSeverity.MEDIUM,
-          errorCode: 'VALIDATION_ERROR'
+          errorCode: "VALIDATION_ERROR",
         };
       }
 
@@ -480,7 +500,7 @@ export class ParlantErrorFilter implements ExceptionFilter {
         return {
           category: ErrorCategory.PERFORMANCE,
           severity: ErrorSeverity.MEDIUM,
-          errorCode: 'RATE_LIMIT_EXCEEDED'
+          errorCode: "RATE_LIMIT_EXCEEDED",
         };
       }
 
@@ -488,7 +508,7 @@ export class ParlantErrorFilter implements ExceptionFilter {
         return {
           category: ErrorCategory.SYSTEM,
           severity: ErrorSeverity.CRITICAL,
-          errorCode: 'SYSTEM_ERROR'
+          errorCode: "SYSTEM_ERROR",
         };
       }
     }
@@ -497,7 +517,7 @@ export class ParlantErrorFilter implements ExceptionFilter {
     return {
       category: ErrorCategory.SYSTEM,
       severity: ErrorSeverity.CRITICAL,
-      errorCode: 'UNKNOWN_ERROR'
+      errorCode: "UNKNOWN_ERROR",
     };
   }
 
@@ -505,9 +525,13 @@ export class ParlantErrorFilter implements ExceptionFilter {
    * Generate conversational guidance based on error classification
    */
   private generateConversationalGuidance(
-    classification: { category: ErrorCategory; severity: ErrorSeverity; errorCode: string },
+    classification: {
+      category: ErrorCategory;
+      severity: ErrorSeverity;
+      errorCode: string;
+    },
     exception: unknown,
-    userContext?: { userId: string; userRole: string; sessionId: string }
+    userContext?: { userId: string; userRole: string; sessionId: string },
   ): ConversationalGuidance {
     const template = this.guidanceTemplates[classification.category];
 
@@ -515,7 +539,7 @@ export class ParlantErrorFilter implements ExceptionFilter {
       explanation: template.explanation,
       immediateActions: [...template.immediateActions],
       alternatives: [],
-      preventionTips: [...template.preventionTips]
+      preventionTips: [...template.preventionTips],
     };
 
     // Enhance guidance based on specific error types
@@ -525,26 +549,36 @@ export class ParlantErrorFilter implements ExceptionFilter {
 
     // Add role-specific guidance
     if (userContext?.userRole) {
-      guidance = this.addRoleSpecificGuidance(guidance, userContext.userRole, classification);
+      guidance = this.addRoleSpecificGuidance(
+        guidance,
+        userContext.userRole,
+        classification,
+      );
     }
 
     // Add escalation guidance for high severity errors
     if (classification.severity === ErrorSeverity.CRITICAL) {
-      guidance.escalationGuidance = 'This is a critical error. Please contact the system administrator immediately at admin@company.com or call the emergency hotline.';
-      guidance.estimatedResolutionTime = 'Critical issues are typically resolved within 1-2 hours during business hours.';
+      guidance.escalationGuidance =
+        "This is a critical error. Please contact the system administrator immediately at admin@company.com or call the emergency hotline.";
+      guidance.estimatedResolutionTime =
+        "Critical issues are typically resolved within 1-2 hours during business hours.";
     } else if (classification.severity === ErrorSeverity.HIGH) {
-      guidance.escalationGuidance = 'If this problem persists, please contact support at support@company.com with the correlation ID.';
-      guidance.estimatedResolutionTime = 'High priority issues are typically resolved within 4-8 hours.';
+      guidance.escalationGuidance =
+        "If this problem persists, please contact support at support@company.com with the correlation ID.";
+      guidance.estimatedResolutionTime =
+        "High priority issues are typically resolved within 4-8 hours.";
     }
 
     // Add documentation links
-    guidance.documentationLinks = this.getRelevantDocumentation(classification.category);
+    guidance.documentationLinks = this.getRelevantDocumentation(
+      classification.category,
+    );
 
     // Add interactive help options
     guidance.interactiveHelp = {
       chatbotAvailable: true,
       scheduleCallbackAvailable: classification.severity >= ErrorSeverity.HIGH,
-      liveSupportAvailable: classification.severity === ErrorSeverity.CRITICAL
+      liveSupportAvailable: classification.severity === ErrorSeverity.CRITICAL,
     };
 
     return guidance;
@@ -555,7 +589,7 @@ export class ParlantErrorFilter implements ExceptionFilter {
    */
   private enhanceValidationGuidance(
     guidance: ConversationalGuidance,
-    error: ConversationalValidationError
+    error: ConversationalValidationError,
   ): ConversationalGuidance {
     const enhanced = { ...guidance };
 
@@ -568,15 +602,21 @@ export class ParlantErrorFilter implements ExceptionFilter {
     // Add confidence-based guidance
     if (error.confidence !== undefined) {
       if (error.confidence < 0.5) {
-        enhanced.immediateActions.unshift('The system had low confidence in understanding your intent. Please rephrase your request more clearly.');
+        enhanced.immediateActions.unshift(
+          "The system had low confidence in understanding your intent. Please rephrase your request more clearly.",
+        );
       } else if (error.confidence < 0.7) {
-        enhanced.immediateActions.unshift('Please provide more context or clarify your intended action.');
+        enhanced.immediateActions.unshift(
+          "Please provide more context or clarify your intended action.",
+        );
       }
     }
 
     // Add risk-level specific guidance
     if (error.riskLevel) {
-      enhanced.preventionTips.push(`This operation requires ${error.riskLevel} risk authorization. Ensure you have the appropriate permissions.`);
+      enhanced.preventionTips.push(
+        `This operation requires ${error.riskLevel} risk authorization. Ensure you have the appropriate permissions.`,
+      );
     }
 
     return enhanced;
@@ -588,27 +628,37 @@ export class ParlantErrorFilter implements ExceptionFilter {
   private addRoleSpecificGuidance(
     guidance: ConversationalGuidance,
     userRole: string,
-    classification: { category: ErrorCategory; severity: ErrorSeverity }
+    classification: { category: ErrorCategory; severity: ErrorSeverity },
   ): ConversationalGuidance {
     const enhanced = { ...guidance };
 
     switch (userRole.toUpperCase()) {
-      case 'ADMIN':
-        enhanced.immediateActions.push('As an administrator, you can check system logs and configuration settings.');
+      case "ADMIN":
+        enhanced.immediateActions.push(
+          "As an administrator, you can check system logs and configuration settings.",
+        );
         if (classification.category === ErrorCategory.SYSTEM) {
-          enhanced.immediateActions.push('Review system health dashboards and consider scaling resources if needed.');
+          enhanced.immediateActions.push(
+            "Review system health dashboards and consider scaling resources if needed.",
+          );
         }
         break;
 
-      case 'OPERATOR':
-        enhanced.immediateActions.push('Check operational dashboards for system status and ongoing issues.');
+      case "OPERATOR":
+        enhanced.immediateActions.push(
+          "Check operational dashboards for system status and ongoing issues.",
+        );
         if (classification.category === ErrorCategory.PERFORMANCE) {
-          enhanced.immediateActions.push('Consider optimizing the operation or scheduling it for off-peak hours.');
+          enhanced.immediateActions.push(
+            "Consider optimizing the operation or scheduling it for off-peak hours.",
+          );
         }
         break;
 
-      case 'USER':
-        enhanced.preventionTips.push('Contact your team lead or administrator if you frequently encounter this error.');
+      case "USER":
+        enhanced.preventionTips.push(
+          "Contact your team lead or administrator if you frequently encounter this error.",
+        );
         break;
 
       default:
@@ -623,12 +673,16 @@ export class ParlantErrorFilter implements ExceptionFilter {
    * Generate recovery options based on error classification
    */
   private generateRecoveryOptions(
-    classification: { category: ErrorCategory; severity: ErrorSeverity; errorCode: string },
-    exception: unknown
-  ): ParlantErrorResponse['recovery'] {
-    const recovery: ParlantErrorResponse['recovery'] = {
+    classification: {
+      category: ErrorCategory;
+      severity: ErrorSeverity;
+      errorCode: string;
+    },
+    exception: unknown,
+  ): ParlantErrorResponse["recovery"] {
+    const recovery: ParlantErrorResponse["recovery"] = {
       autoRetryAvailable: false,
-      recommendedStrategy: RecoveryStrategy.MANUAL_INTERVENTION
+      recommendedStrategy: RecoveryStrategy.MANUAL_INTERVENTION,
     };
 
     switch (classification.category) {
@@ -636,30 +690,30 @@ export class ParlantErrorFilter implements ExceptionFilter {
         recovery.autoRetryAvailable = true;
         recovery.recommendedStrategy = RecoveryStrategy.RETRY;
         recovery.manualRetryInstructions = [
-          'Wait 30 seconds before retrying',
-          'Consider reducing the scope of your operation',
-          'Try again during off-peak hours'
+          "Wait 30 seconds before retrying",
+          "Consider reducing the scope of your operation",
+          "Try again during off-peak hours",
         ];
-        recovery.estimatedRecoveryTime = '1-2 minutes';
+        recovery.estimatedRecoveryTime = "1-2 minutes";
         break;
 
       case ErrorCategory.INTEGRATION:
         recovery.autoRetryAvailable = true;
         recovery.recommendedStrategy = RecoveryStrategy.FALLBACK;
         recovery.fallbackOptions = [
-          'Use alternative integration endpoint if available',
-          'Switch to manual process temporarily',
-          'Defer operation until service is restored'
+          "Use alternative integration endpoint if available",
+          "Switch to manual process temporarily",
+          "Defer operation until service is restored",
         ];
-        recovery.estimatedRecoveryTime = '5-15 minutes';
+        recovery.estimatedRecoveryTime = "5-15 minutes";
         break;
 
       case ErrorCategory.VALIDATION:
         recovery.recommendedStrategy = RecoveryStrategy.MANUAL_INTERVENTION;
         recovery.manualRetryInstructions = [
-          'Correct the validation errors identified',
-          'Verify all required fields are provided',
-          'Check data formats and constraints'
+          "Correct the validation errors identified",
+          "Verify all required fields are provided",
+          "Check data formats and constraints",
         ];
         break;
 
@@ -667,20 +721,20 @@ export class ParlantErrorFilter implements ExceptionFilter {
       case ErrorCategory.AUTHORIZATION:
         recovery.recommendedStrategy = RecoveryStrategy.ESCALATE;
         recovery.manualRetryInstructions = [
-          'Re-authenticate with valid credentials',
-          'Contact administrator for permission grants',
-          'Verify you\'re using the correct user account'
+          "Re-authenticate with valid credentials",
+          "Contact administrator for permission grants",
+          "Verify you're using the correct user account",
         ];
         break;
 
       case ErrorCategory.SYSTEM:
         if (classification.severity === ErrorSeverity.CRITICAL) {
           recovery.recommendedStrategy = RecoveryStrategy.ESCALATE;
-          recovery.estimatedRecoveryTime = '1-2 hours';
+          recovery.estimatedRecoveryTime = "1-2 hours";
         } else {
           recovery.autoRetryAvailable = true;
           recovery.recommendedStrategy = RecoveryStrategy.RETRY;
-          recovery.estimatedRecoveryTime = '2-5 minutes';
+          recovery.estimatedRecoveryTime = "2-5 minutes";
         }
         break;
 
@@ -695,13 +749,15 @@ export class ParlantErrorFilter implements ExceptionFilter {
   /**
    * Extract user context from request
    */
-  private extractUserContext(request: Request): { userId: string; userRole: string; sessionId: string } | undefined {
+  private extractUserContext(
+    request: Request,
+  ): { userId: string; userRole: string; sessionId: string } | undefined {
     const user = (request as any).user;
     if (user) {
       return {
-        userId: user.id || 'unknown',
-        userRole: user.role || 'unknown',
-        sessionId: request.headers['x-session-id'] as string || 'unknown'
+        userId: user.id || "unknown",
+        userRole: user.role || "unknown",
+        sessionId: (request.headers["x-session-id"] as string) || "unknown",
       };
     }
     return undefined;
@@ -710,13 +766,15 @@ export class ParlantErrorFilter implements ExceptionFilter {
   /**
    * Extract conversation context from PARLANT validation errors
    */
-  private extractConversationContext(exception: unknown): ParlantErrorResponse['details']['conversationContext'] {
+  private extractConversationContext(
+    exception: unknown,
+  ): ParlantErrorResponse["details"]["conversationContext"] {
     if (exception instanceof ConversationalValidationError) {
       return {
-        conversationId: exception.conversationId || 'unknown',
+        conversationId: exception.conversationId || "unknown",
         securityLevel: SecurityLevel.MEDIUM, // Default, would be extracted from context
-        validationMode: 'CONVERSATIONAL',
-        businessCategory: 'UNKNOWN'
+        validationMode: "CONVERSATIONAL",
+        businessCategory: "UNKNOWN",
       };
     }
     return undefined;
@@ -725,12 +783,14 @@ export class ParlantErrorFilter implements ExceptionFilter {
   /**
    * Extract security context from validation errors
    */
-  private extractSecurityContext(exception: unknown): ParlantErrorResponse['details']['securityContext'] {
+  private extractSecurityContext(
+    exception: unknown,
+  ): ParlantErrorResponse["details"]["securityContext"] {
     if (exception instanceof ConversationalValidationError) {
       return {
         riskLevel: exception.riskLevel || RiskLevel._MODERATE,
         requiredPermissions: [],
-        complianceFlags: []
+        complianceFlags: [],
       };
     }
     return undefined;
@@ -739,59 +799,63 @@ export class ParlantErrorFilter implements ExceptionFilter {
   /**
    * Get relevant documentation links for error category
    */
-  private getRelevantDocumentation(category: ErrorCategory): Array<{ title: string; url: string; description: string }> {
-    const baseUrl = 'https://docs.company.com';
+  private getRelevantDocumentation(
+    category: ErrorCategory,
+  ): Array<{ title: string; url: string; description: string }> {
+    const baseUrl = "https://docs.company.com";
 
     switch (category) {
       case ErrorCategory.VALIDATION:
         return [
           {
-            title: 'API Validation Guide',
+            title: "API Validation Guide",
             url: `${baseUrl}/api/validation`,
-            description: 'Complete guide to API parameter validation and error handling'
+            description:
+              "Complete guide to API parameter validation and error handling",
           },
           {
-            title: 'Data Format Reference',
+            title: "Data Format Reference",
             url: `${baseUrl}/reference/data-formats`,
-            description: 'Reference for all supported data formats and constraints'
-          }
+            description:
+              "Reference for all supported data formats and constraints",
+          },
         ];
 
       case ErrorCategory.AUTHENTICATION:
         return [
           {
-            title: 'Authentication Setup',
+            title: "Authentication Setup",
             url: `${baseUrl}/auth/setup`,
-            description: 'Step-by-step guide to setting up authentication'
+            description: "Step-by-step guide to setting up authentication",
           },
           {
-            title: 'Troubleshooting Login Issues',
+            title: "Troubleshooting Login Issues",
             url: `${baseUrl}/auth/troubleshooting`,
-            description: 'Common authentication problems and solutions'
-          }
+            description: "Common authentication problems and solutions",
+          },
         ];
 
       case ErrorCategory.AUTHORIZATION:
         return [
           {
-            title: 'User Permissions Guide',
+            title: "User Permissions Guide",
             url: `${baseUrl}/permissions/overview`,
-            description: 'Understanding user roles and permissions'
+            description: "Understanding user roles and permissions",
           },
           {
-            title: 'Access Request Process',
+            title: "Access Request Process",
             url: `${baseUrl}/permissions/request-access`,
-            description: 'How to request additional permissions'
-          }
+            description: "How to request additional permissions",
+          },
         ];
 
       default:
         return [
           {
-            title: 'General Troubleshooting',
+            title: "General Troubleshooting",
             url: `${baseUrl}/troubleshooting`,
-            description: 'General troubleshooting guide for common issues'
-          }
+            description: "General troubleshooting guide for common issues",
+          },
         ];
     }
   }
@@ -799,20 +863,31 @@ export class ParlantErrorFilter implements ExceptionFilter {
   /**
    * Get error frequency data for analytics
    */
-  private getErrorFrequencyData(errorCode: string): { similarErrorsToday: number; similarErrorsThisWeek: number; lastOccurrence?: string } {
+  private getErrorFrequencyData(errorCode: string): {
+    similarErrorsToday: number;
+    similarErrorsThisWeek: number;
+    lastOccurrence?: string;
+  } {
     const errors = this.errorFrequency.get(errorCode) || [];
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
-    const errorsToday = errors.filter(error => error.timestamp >= today).length;
-    const errorsThisWeek = errors.filter(error => error.timestamp >= weekAgo).length;
-    const lastOccurrence = errors.length > 0 ? errors[errors.length - 1].timestamp.toISOString() : undefined;
+    const errorsToday = errors.filter(
+      (error) => error.timestamp >= today,
+    ).length;
+    const errorsThisWeek = errors.filter(
+      (error) => error.timestamp >= weekAgo,
+    ).length;
+    const lastOccurrence =
+      errors.length > 0
+        ? errors[errors.length - 1].timestamp.toISOString()
+        : undefined;
 
     return {
       similarErrorsToday: errorsToday,
       similarErrorsThisWeek: errorsThisWeek,
-      lastOccurrence
+      lastOccurrence,
     };
   }
 
@@ -825,7 +900,7 @@ export class ParlantErrorFilter implements ExceptionFilter {
 
     errors.push({
       timestamp: new Date(),
-      userId: errorResponse.metadata.userContext?.userId
+      userId: errorResponse.metadata.userContext?.userId,
     });
 
     // Keep only last 1000 errors per code
@@ -839,7 +914,11 @@ export class ParlantErrorFilter implements ExceptionFilter {
   /**
    * Log error for monitoring and analytics
    */
-  private logError(exception: unknown, request: Request, errorResponse: ParlantErrorResponse): void {
+  private logError(
+    exception: unknown,
+    request: Request,
+    errorResponse: ParlantErrorResponse,
+  ): void {
     const logLevel = this.getLogLevel(errorResponse.details.severity);
     const logMessage = `[${errorResponse.metadata.correlationId}] ${errorResponse.message}`;
 
@@ -851,19 +930,19 @@ export class ParlantErrorFilter implements ExceptionFilter {
       statusCode: errorResponse.statusCode,
       method: request.method,
       path: request.path,
-      userAgent: request.headers['user-agent'],
+      userAgent: request.headers["user-agent"],
       userContext: errorResponse.metadata.userContext,
-      stack: exception instanceof Error ? exception.stack : undefined
+      stack: exception instanceof Error ? exception.stack : undefined,
     };
 
     switch (logLevel) {
-      case 'error':
+      case "error":
         this.logger.error(logMessage, logContext);
         break;
-      case 'warn':
+      case "warn":
         this.logger.warn(logMessage, logContext);
         break;
-      case 'log':
+      case "log":
         this.logger.log(logMessage, logContext);
         break;
       default:
@@ -893,25 +972,25 @@ export class ParlantErrorFilter implements ExceptionFilter {
   private getLogLevel(severity: ErrorSeverity): string {
     switch (severity) {
       case ErrorSeverity.CRITICAL:
-        return 'error';
+        return "error";
       case ErrorSeverity.HIGH:
-        return 'error';
+        return "error";
       case ErrorSeverity.MEDIUM:
-        return 'warn';
+        return "warn";
       case ErrorSeverity.LOW:
-        return 'log';
+        return "log";
       default:
-        return 'debug';
+        return "debug";
     }
   }
 
   private getClientIpAddress(request: Request): string {
     return (
-      request.headers['x-forwarded-for']?.toString().split(',')[0]?.trim() ||
-      request.headers['x-real-ip']?.toString() ||
+      request.headers["x-forwarded-for"]?.toString().split(",")[0]?.trim() ||
+      request.headers["x-real-ip"]?.toString() ||
       (request as any).connection?.remoteAddress ||
       (request as any).socket?.remoteAddress ||
-      'unknown'
+      "unknown"
     );
   }
 

@@ -28,13 +28,18 @@
  * @version 1.0.0 - Enterprise Configuration Framework
  */
 
-import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
-import { Cron, CronExpression } from '@nestjs/schedule';
-import { Watch } from 'fs';
-import * as fs from 'fs/promises';
-import * as crypto from 'crypto';
+import {
+  Injectable,
+  Logger,
+  OnModuleInit,
+  OnModuleDestroy,
+} from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { EventEmitter2, OnEvent } from "@nestjs/event-emitter";
+import { Cron, CronExpression } from "@nestjs/schedule";
+import { Watch } from "fs";
+import * as fs from "fs/promises";
+import * as crypto from "crypto";
 import {
   SecurityLevel,
   ValidationMode,
@@ -43,7 +48,7 @@ import {
   FunctionSecurityLevel,
   RiskLevel,
   ParticipantRole,
-} from '../types/parlant.types';
+} from "../types/parlant.types";
 
 // Configuration management interfaces
 interface ParlantConfiguration {
@@ -384,19 +389,19 @@ interface ConfigurationSnapshot {
 }
 
 enum ChangeType {
-  CREATE = 'CREATE',
-  UPDATE = 'UPDATE',
-  DELETE = 'DELETE',
-  ROLLBACK = 'ROLLBACK',
-  EMERGENCY = 'EMERGENCY',
+  CREATE = "CREATE",
+  UPDATE = "UPDATE",
+  DELETE = "DELETE",
+  ROLLBACK = "ROLLBACK",
+  EMERGENCY = "EMERGENCY",
 }
 
 enum ChangeScope {
-  GLOBAL = 'GLOBAL',
-  SERVICE = 'SERVICE',
-  ENDPOINT = 'ENDPOINT',
-  FEATURE = 'FEATURE',
-  EMERGENCY = 'EMERGENCY',
+  GLOBAL = "GLOBAL",
+  SERVICE = "SERVICE",
+  ENDPOINT = "ENDPOINT",
+  FEATURE = "FEATURE",
+  EMERGENCY = "EMERGENCY",
 }
 
 // Configuration management operations
@@ -431,7 +436,9 @@ interface ConfigurationValidationRequest {
 }
 
 @Injectable()
-export class ParlantConfigurationManagerService implements OnModuleInit, OnModuleDestroy {
+export class ParlantConfigurationManagerService
+  implements OnModuleInit, OnModuleDestroy
+{
   private readonly logger = new Logger(ParlantConfigurationManagerService.name);
 
   // Configuration storage and caching
@@ -464,7 +471,7 @@ export class ParlantConfigurationManagerService implements OnModuleInit, OnModul
   }
 
   async onModuleInit() {
-    this.logger.log('PARLANT Configuration Manager initializing...');
+    this.logger.log("PARLANT Configuration Manager initializing...");
 
     // Load configuration from storage
     await this.loadConfigurationFromStorage();
@@ -481,16 +488,18 @@ export class ParlantConfigurationManagerService implements OnModuleInit, OnModul
     // Start configuration monitoring
     this.startConfigurationMonitoring();
 
-    this.logger.log('PARLANT Configuration Manager initialized successfully', {
+    this.logger.log("PARLANT Configuration Manager initialized successfully", {
       configurationVersion: this.currentConfiguration.version,
-      servicesConfigured: Object.keys(this.currentConfiguration.services).length,
-      endpointsConfigured: Object.keys(this.currentConfiguration.endpoints).length,
+      servicesConfigured: Object.keys(this.currentConfiguration.services)
+        .length,
+      endpointsConfigured: Object.keys(this.currentConfiguration.endpoints)
+        .length,
       featureFlagsActive: this.featureFlags.size,
     });
   }
 
   async onModuleDestroy() {
-    this.logger.log('PARLANT Configuration Manager shutting down...');
+    this.logger.log("PARLANT Configuration Manager shutting down...");
 
     // Save current configuration state
     await this.saveConfigurationSnapshot();
@@ -501,7 +510,7 @@ export class ParlantConfigurationManagerService implements OnModuleInit, OnModul
     // Cleanup resources
     this.cleanup();
 
-    this.logger.log('PARLANT Configuration Manager shutdown complete');
+    this.logger.log("PARLANT Configuration Manager shutdown complete");
   }
 
   /**
@@ -526,12 +535,18 @@ export class ParlantConfigurationManagerService implements OnModuleInit, OnModul
       let effectiveConfig = this.buildBaseConfiguration();
 
       // Apply global configuration
-      effectiveConfig = this.mergeConfiguration(effectiveConfig, this.currentConfiguration.global);
+      effectiveConfig = this.mergeConfiguration(
+        effectiveConfig,
+        this.currentConfiguration.global,
+      );
 
       // Apply service-specific configuration
       const serviceConfig = this.currentConfiguration.services[serviceName];
       if (serviceConfig) {
-        effectiveConfig = this.mergeConfiguration(effectiveConfig, serviceConfig);
+        effectiveConfig = this.mergeConfiguration(
+          effectiveConfig,
+          serviceConfig,
+        );
       }
 
       // Apply endpoint-specific configuration
@@ -539,18 +554,28 @@ export class ParlantConfigurationManagerService implements OnModuleInit, OnModul
         const endpointKey = `${serviceName}:${endpoint}`;
         const endpointConfig = this.currentConfiguration.endpoints[endpointKey];
         if (endpointConfig) {
-          effectiveConfig = this.mergeConfiguration(effectiveConfig, endpointConfig);
+          effectiveConfig = this.mergeConfiguration(
+            effectiveConfig,
+            endpointConfig,
+          );
         }
       }
 
       // Apply environment-specific overrides
       if (environment) {
         const envOverrides = await this.getEnvironmentOverrides(environment);
-        effectiveConfig = this.mergeConfiguration(effectiveConfig, envOverrides);
+        effectiveConfig = this.mergeConfiguration(
+          effectiveConfig,
+          envOverrides,
+        );
       }
 
       // Apply feature flags
-      effectiveConfig = await this.applyFeatureFlags(effectiveConfig, serviceName, endpoint);
+      effectiveConfig = await this.applyFeatureFlags(
+        effectiveConfig,
+        serviceName,
+        endpoint,
+      );
 
       // Apply emergency overrides if active
       if (this.hasActiveEmergencyOverrides()) {
@@ -558,9 +583,10 @@ export class ParlantConfigurationManagerService implements OnModuleInit, OnModul
       }
 
       // Validate final configuration
-      const validationResult = await this.validateConfiguration(effectiveConfig);
+      const validationResult =
+        await this.validateConfiguration(effectiveConfig);
       if (!validationResult.valid) {
-        this.logger.warn('Configuration validation failed', {
+        this.logger.warn("Configuration validation failed", {
           serviceName,
           endpoint,
           errors: validationResult.errors,
@@ -571,7 +597,7 @@ export class ParlantConfigurationManagerService implements OnModuleInit, OnModul
       this.cacheConfiguration(cacheKey, effectiveConfig);
 
       const processingTime = Date.now() - startTime;
-      this.logger.debug('Effective configuration generated', {
+      this.logger.debug("Effective configuration generated", {
         serviceName,
         endpoint,
         environment,
@@ -580,9 +606,8 @@ export class ParlantConfigurationManagerService implements OnModuleInit, OnModul
       });
 
       return effectiveConfig;
-
     } catch (error) {
-      this.logger.error('Failed to generate effective configuration', {
+      this.logger.error("Failed to generate effective configuration", {
         serviceName,
         endpoint,
         environment,
@@ -597,11 +622,13 @@ export class ParlantConfigurationManagerService implements OnModuleInit, OnModul
   /**
    * Update configuration with change tracking and approval workflow
    */
-  async updateConfiguration(request: ConfigurationUpdateRequest): Promise<ConfigurationChangeResult> {
+  async updateConfiguration(
+    request: ConfigurationUpdateRequest,
+  ): Promise<ConfigurationChangeResult> {
     const changeId = this.generateChangeId();
     const timestamp = new Date();
 
-    this.logger.log('Configuration update request received', {
+    this.logger.log("Configuration update request received", {
       changeId,
       scope: request.scope,
       target: request.target,
@@ -646,7 +673,7 @@ export class ParlantConfigurationManagerService implements OnModuleInit, OnModul
         return {
           success: true,
           changeId,
-          status: 'PENDING_APPROVAL',
+          status: "PENDING_APPROVAL",
           approvalRequired: true,
         };
       }
@@ -664,7 +691,7 @@ export class ParlantConfigurationManagerService implements OnModuleInit, OnModul
         await this.distributeConfigurationUpdate(change);
 
         // Emit configuration change event
-        this.eventEmitter.emit('configuration.updated', {
+        this.eventEmitter.emit("configuration.updated", {
           changeId,
           scope: change.scope,
           target: request.target,
@@ -675,13 +702,12 @@ export class ParlantConfigurationManagerService implements OnModuleInit, OnModul
       return {
         success: applyResult.success,
         changeId,
-        status: applyResult.success ? 'APPLIED' : 'FAILED',
+        status: applyResult.success ? "APPLIED" : "FAILED",
         errors: applyResult.errors,
         warnings: applyResult.warnings,
       };
-
     } catch (error) {
-      this.logger.error('Configuration update failed', {
+      this.logger.error("Configuration update failed", {
         changeId,
         error: error instanceof Error ? error.message : String(error),
       });
@@ -689,7 +715,9 @@ export class ParlantConfigurationManagerService implements OnModuleInit, OnModul
       return {
         success: false,
         changeId,
-        errors: [`Configuration update failed: ${error instanceof Error ? error.message : String(error)}`],
+        errors: [
+          `Configuration update failed: ${error instanceof Error ? error.message : String(error)}`,
+        ],
       };
     }
   }
@@ -697,21 +725,24 @@ export class ParlantConfigurationManagerService implements OnModuleInit, OnModul
   /**
    * Feature flag management
    */
-  async updateFeatureFlag(name: string, config: Partial<FeatureFlag>): Promise<void> {
+  async updateFeatureFlag(
+    name: string,
+    config: Partial<FeatureFlag>,
+  ): Promise<void> {
     const existingFlag = this.featureFlags.get(name);
 
     const updatedFlag: FeatureFlag = {
       name,
       enabled: config.enabled ?? true,
-      environments: config.environments ?? ['*'],
-      services: config.services ?? ['*'],
+      environments: config.environments ?? ["*"],
+      services: config.services ?? ["*"],
       rolloutPercentage: config.rolloutPercentage ?? 100,
       conditions: config.conditions ?? [],
       metadata: {
         ...existingFlag?.metadata,
         ...config.metadata,
         lastModified: new Date(),
-        modifiedBy: 'system',
+        modifiedBy: "system",
       },
     };
 
@@ -723,7 +754,7 @@ export class ParlantConfigurationManagerService implements OnModuleInit, OnModul
     // Distribute feature flag update
     await this.distributeFeatureFlagUpdate(updatedFlag);
 
-    this.logger.log('Feature flag updated', {
+    this.logger.log("Feature flag updated", {
       name,
       enabled: updatedFlag.enabled,
       rolloutPercentage: updatedFlag.rolloutPercentage,
@@ -739,7 +770,7 @@ export class ParlantConfigurationManagerService implements OnModuleInit, OnModul
   ): Promise<void> {
     const emergencyId = this.generateEmergencyId();
 
-    this.logger.warn('Emergency configuration override activated', {
+    this.logger.warn("Emergency configuration override activated", {
       emergencyId,
       type: override.type,
       scope: override.scope,
@@ -759,15 +790,14 @@ export class ParlantConfigurationManagerService implements OnModuleInit, OnModul
       // Distribute emergency configuration
       await this.distributeEmergencyConfiguration(override);
 
-      this.eventEmitter.emit('emergency.override.activated', {
+      this.eventEmitter.emit("emergency.override.activated", {
         emergencyId,
         override,
         activatedBy,
         timestamp: new Date(),
       });
-
     } catch (error) {
-      this.logger.error('Emergency override activation failed', {
+      this.logger.error("Emergency override activation failed", {
         emergencyId,
         error: error instanceof Error ? error.message : String(error),
       });
@@ -784,7 +814,7 @@ export class ParlantConfigurationManagerService implements OnModuleInit, OnModul
     rolledBackBy: string,
     reason: string,
   ): Promise<RollbackResult> {
-    this.logger.warn('Configuration rollback initiated', {
+    this.logger.warn("Configuration rollback initiated", {
       snapshotId,
       rolledBackBy,
       reason,
@@ -813,7 +843,7 @@ export class ParlantConfigurationManagerService implements OnModuleInit, OnModul
         timestamp: new Date(),
         changeType: ChangeType.ROLLBACK,
         scope: ChangeScope.GLOBAL,
-        path: 'configuration.global',
+        path: "configuration.global",
         oldValue: this.currentConfiguration,
         newValue: snapshot.configuration,
         changedBy: rolledBackBy,
@@ -834,7 +864,7 @@ export class ParlantConfigurationManagerService implements OnModuleInit, OnModul
       // Invalidate all caches
       this.invalidateAllCaches();
 
-      this.logger.log('Configuration rollback completed successfully', {
+      this.logger.log("Configuration rollback completed successfully", {
         snapshotId,
         rolledBackBy,
         rollbackChangeId: rollbackChange.id,
@@ -845,16 +875,17 @@ export class ParlantConfigurationManagerService implements OnModuleInit, OnModul
         rollbackChangeId: rollbackChange.id,
         appliedAt: new Date(),
       };
-
     } catch (error) {
-      this.logger.error('Configuration rollback failed', {
+      this.logger.error("Configuration rollback failed", {
         snapshotId,
         error: error instanceof Error ? error.message : String(error),
       });
 
       return {
         success: false,
-        errors: [`Rollback failed: ${error instanceof Error ? error.message : String(error)}`],
+        errors: [
+          `Rollback failed: ${error instanceof Error ? error.message : String(error)}`,
+        ],
       };
     }
   }
@@ -868,18 +899,21 @@ export class ParlantConfigurationManagerService implements OnModuleInit, OnModul
       // Check configuration integrity
       const integrityCheck = await this.verifyConfigurationIntegrity();
       if (!integrityCheck.valid) {
-        this.logger.error('Configuration integrity check failed', {
+        this.logger.error("Configuration integrity check failed", {
           errors: integrityCheck.errors,
         });
 
         // Trigger alert
-        this.eventEmitter.emit('configuration.integrity.failed', integrityCheck);
+        this.eventEmitter.emit(
+          "configuration.integrity.failed",
+          integrityCheck,
+        );
       }
 
       // Check distribution status
       const distributionHealth = await this.checkDistributionHealth();
       if (distributionHealth.failedTargets > 0) {
-        this.logger.warn('Configuration distribution issues detected', {
+        this.logger.warn("Configuration distribution issues detected", {
           failedTargets: distributionHealth.failedTargets,
           totalTargets: distributionHealth.totalTargets,
         });
@@ -888,13 +922,12 @@ export class ParlantConfigurationManagerService implements OnModuleInit, OnModul
       // Check feature flag health
       const featureFlagHealth = await this.checkFeatureFlagHealth();
       if (featureFlagHealth.issues.length > 0) {
-        this.logger.warn('Feature flag issues detected', {
+        this.logger.warn("Feature flag issues detected", {
           issues: featureFlagHealth.issues,
         });
       }
-
     } catch (error) {
-      this.logger.error('Configuration health monitoring failed', {
+      this.logger.error("Configuration health monitoring failed", {
         error: error instanceof Error ? error.message : String(error),
       });
     }
@@ -913,27 +946,29 @@ export class ParlantConfigurationManagerService implements OnModuleInit, OnModul
       const syncResult = await this.performConfigurationSync();
 
       if (syncResult.syncedServices > 0) {
-        this.logger.debug('Configuration synchronized', {
+        this.logger.debug("Configuration synchronized", {
           syncedServices: syncResult.syncedServices,
           skippedServices: syncResult.skippedServices,
           failedServices: syncResult.failedServices,
         });
       }
-
     } catch (error) {
-      this.logger.error('Configuration synchronization failed', {
+      this.logger.error("Configuration synchronization failed", {
         error: error instanceof Error ? error.message : String(error),
       });
     }
   }
 
   // Event handlers for configuration changes
-  @OnEvent('service.started')
+  @OnEvent("service.started")
   async handleServiceStarted(event: ServiceStartedEvent) {
-    this.logger.debug('Service started, registering for configuration distribution', {
-      serviceName: event.serviceName,
-      serviceId: event.serviceId,
-    });
+    this.logger.debug(
+      "Service started, registering for configuration distribution",
+      {
+        serviceName: event.serviceName,
+        serviceId: event.serviceId,
+      },
+    );
 
     // Register service for configuration distribution
     this.distributionTargets.add(event.serviceId);
@@ -942,28 +977,36 @@ export class ParlantConfigurationManagerService implements OnModuleInit, OnModul
     await this.distributeConfigurationToService(event.serviceId);
   }
 
-  @OnEvent('service.stopped')
+  @OnEvent("service.stopped")
   async handleServiceStopped(event: ServiceStoppedEvent) {
-    this.logger.debug('Service stopped, removing from configuration distribution', {
-      serviceName: event.serviceName,
-      serviceId: event.serviceId,
-    });
+    this.logger.debug(
+      "Service stopped, removing from configuration distribution",
+      {
+        serviceName: event.serviceName,
+        serviceId: event.serviceId,
+      },
+    );
 
     // Remove service from distribution targets
     this.distributionTargets.delete(event.serviceId);
   }
 
-  @OnEvent('configuration.change.approved')
-  async handleConfigurationChangeApproved(event: ConfigurationChangeApprovedEvent) {
+  @OnEvent("configuration.change.approved")
+  async handleConfigurationChangeApproved(
+    event: ConfigurationChangeApprovedEvent,
+  ) {
     const change = this.pendingChanges.get(event.changeId);
     if (!change) {
-      this.logger.warn('Approved configuration change not found in pending changes', {
-        changeId: event.changeId,
-      });
+      this.logger.warn(
+        "Approved configuration change not found in pending changes",
+        {
+          changeId: event.changeId,
+        },
+      );
       return;
     }
 
-    this.logger.log('Configuration change approved, applying...', {
+    this.logger.log("Configuration change approved, applying...", {
       changeId: event.changeId,
       approver: event.approver,
     });
@@ -985,9 +1028,8 @@ export class ParlantConfigurationManagerService implements OnModuleInit, OnModul
         // Distribute update
         await this.distributeConfigurationUpdate(change);
       }
-
     } catch (error) {
-      this.logger.error('Failed to apply approved configuration change', {
+      this.logger.error("Failed to apply approved configuration change", {
         changeId: event.changeId,
         error: error instanceof Error ? error.message : String(error),
       });
@@ -997,20 +1039,26 @@ export class ParlantConfigurationManagerService implements OnModuleInit, OnModul
   // Private helper methods
   private initializeConfigurationManager(): void {
     // Initialize cryptographic keys
-    this.configurationSigningKey = this.configService.get('config.signingKey', 'dev-key');
-    this.configurationEncryptionKey = this.configService.get('config.encryptionKey', 'dev-key');
+    this.configurationSigningKey = this.configService.get(
+      "config.signingKey",
+      "dev-key",
+    );
+    this.configurationEncryptionKey = this.configService.get(
+      "config.encryptionKey",
+      "dev-key",
+    );
 
     // Initialize configuration validators
     this.initializeConfigurationValidators();
 
-    this.logger.log('Configuration manager initialized with security keys');
+    this.logger.log("Configuration manager initialized with security keys");
   }
 
   private loadInitialConfiguration(): void {
     // Load default configuration
     this.currentConfiguration = this.buildDefaultConfiguration();
 
-    this.logger.log('Initial configuration loaded', {
+    this.logger.log("Initial configuration loaded", {
       version: this.currentConfiguration.version,
       environment: this.currentConfiguration.environment,
     });
@@ -1018,9 +1066,9 @@ export class ParlantConfigurationManagerService implements OnModuleInit, OnModul
 
   private buildDefaultConfiguration(): ParlantConfiguration {
     return {
-      version: '1.0.0',
+      version: "1.0.0",
       timestamp: new Date(),
-      environment: this.configService.get('NODE_ENV', 'development'),
+      environment: this.configService.get("NODE_ENV", "development"),
       global: this.buildDefaultGlobalConfiguration(),
       services: {},
       endpoints: {},
@@ -1032,12 +1080,12 @@ export class ParlantConfigurationManagerService implements OnModuleInit, OnModul
       },
       emergency: this.buildDefaultEmergencyConfiguration(),
       metadata: {
-        createdBy: 'system',
+        createdBy: "system",
         createdAt: new Date(),
-        lastModifiedBy: 'system',
+        lastModifiedBy: "system",
         lastModifiedAt: new Date(),
-        version: '1.0.0',
-        checksum: '',
+        version: "1.0.0",
+        checksum: "",
         distributionStatus: {
           totalServices: 0,
           successfulDistributions: 0,
@@ -1048,7 +1096,7 @@ export class ParlantConfigurationManagerService implements OnModuleInit, OnModul
         validationResults: [],
         dependencies: [],
       },
-      signature: '',
+      signature: "",
     };
   }
 
@@ -1079,7 +1127,7 @@ export class ParlantConfigurationManagerService implements OnModuleInit, OnModul
         metricsInterval: 30000,
       },
       complianceConfiguration: {
-        enabledFrameworks: ['SOX', 'GDPR'],
+        enabledFrameworks: ["SOX", "GDPR"],
         auditTrail: true,
         dataGovernance: true,
         accessControls: true,
@@ -1101,7 +1149,7 @@ export class ParlantConfigurationManagerService implements OnModuleInit, OnModul
       escalationChain: [],
       fallbackConfiguration: {
         enabled: true,
-        mode: 'SAFE_MODE',
+        mode: "SAFE_MODE",
         configuration: {},
         triggers: [],
       },
@@ -1109,13 +1157,17 @@ export class ParlantConfigurationManagerService implements OnModuleInit, OnModul
     };
   }
 
-  private generateCacheKey(serviceName: string, endpoint?: string, environment?: string): string {
-    return `config:${serviceName}:${endpoint || '*'}:${environment || 'default'}`;
+  private generateCacheKey(
+    serviceName: string,
+    endpoint?: string,
+    environment?: string,
+  ): string {
+    return `config:${serviceName}:${endpoint || "*"}:${environment || "default"}`;
   }
 
   private isCacheValid(cached: any): boolean {
     const maxAge = 300000; // 5 minutes
-    return (Date.now() - cached.timestamp) < maxAge;
+    return Date.now() - cached.timestamp < maxAge;
   }
 
   private buildBaseConfiguration(): any {
@@ -1140,7 +1192,11 @@ export class ParlantConfigurationManagerService implements OnModuleInit, OnModul
     return {};
   }
 
-  private async applyFeatureFlags(config: any, serviceName: string, endpoint?: string): Promise<any> {
+  private async applyFeatureFlags(
+    config: any,
+    serviceName: string,
+    endpoint?: string,
+  ): Promise<any> {
     // Apply feature flags to configuration
     for (const [name, flag] of this.featureFlags.entries()) {
       if (this.isFeatureFlagApplicable(flag, serviceName, endpoint)) {
@@ -1162,7 +1218,7 @@ export class ParlantConfigurationManagerService implements OnModuleInit, OnModul
   private async validateConfiguration(config: any): Promise<ValidationResult> {
     // Validate configuration against business rules and constraints
     return {
-      validator: 'system',
+      validator: "system",
       valid: true,
       errors: [],
       warnings: [],
@@ -1177,7 +1233,10 @@ export class ParlantConfigurationManagerService implements OnModuleInit, OnModul
     });
   }
 
-  private getFallbackConfiguration(serviceName: string, endpoint?: string): any {
+  private getFallbackConfiguration(
+    serviceName: string,
+    endpoint?: string,
+  ): any {
     // Return safe fallback configuration
     return this.buildBaseConfiguration();
   }
@@ -1185,42 +1244,42 @@ export class ParlantConfigurationManagerService implements OnModuleInit, OnModul
   // Additional stub methods for comprehensive functionality
   private async loadConfigurationFromStorage(): Promise<void> {
     // Would implement configuration loading from persistent storage
-    this.logger.debug('Loading configuration from storage...');
+    this.logger.debug("Loading configuration from storage...");
   }
 
   private initializeConfigurationWatchers(): void {
     // Would implement file system watchers for configuration changes
-    this.logger.debug('Initializing configuration watchers...');
+    this.logger.debug("Initializing configuration watchers...");
   }
 
   private async startConfigurationDistribution(): Promise<void> {
     // Would implement configuration distribution to services
-    this.logger.debug('Starting configuration distribution...');
+    this.logger.debug("Starting configuration distribution...");
   }
 
   private initializeFeatureFlagManagement(): void {
     // Would implement feature flag management system
-    this.logger.debug('Initializing feature flag management...');
+    this.logger.debug("Initializing feature flag management...");
   }
 
   private startConfigurationMonitoring(): void {
     // Would implement configuration monitoring
-    this.logger.debug('Starting configuration monitoring...');
+    this.logger.debug("Starting configuration monitoring...");
   }
 
   private async saveConfigurationSnapshot(): Promise<void> {
     // Would implement configuration snapshot saving
-    this.logger.debug('Saving configuration snapshot...');
+    this.logger.debug("Saving configuration snapshot...");
   }
 
   private stopConfigurationWatchers(): void {
     // Would implement stopping configuration watchers
-    this.logger.debug('Stopping configuration watchers...');
+    this.logger.debug("Stopping configuration watchers...");
   }
 
   private cleanup(): void {
     // Would implement cleanup of resources
-    this.logger.debug('Cleaning up configuration manager resources...');
+    this.logger.debug("Cleaning up configuration manager resources...");
   }
 
   private generateChangeId(): string {
@@ -1231,10 +1290,12 @@ export class ParlantConfigurationManagerService implements OnModuleInit, OnModul
     return `emergency_${Date.now()}_${Math.random().toString(36).substring(7)}`;
   }
 
-  private async validateUpdateRequest(request: ConfigurationUpdateRequest): Promise<ValidationResult> {
+  private async validateUpdateRequest(
+    request: ConfigurationUpdateRequest,
+  ): Promise<ValidationResult> {
     // Would implement comprehensive validation
     return {
-      validator: 'system',
+      validator: "system",
       valid: true,
       errors: [],
       warnings: [],
@@ -1250,17 +1311,23 @@ export class ParlantConfigurationManagerService implements OnModuleInit, OnModul
     return `${request.scope}.${request.target}`;
   }
 
-  private async getCurrentValue(request: ConfigurationUpdateRequest): Promise<any> {
+  private async getCurrentValue(
+    request: ConfigurationUpdateRequest,
+  ): Promise<any> {
     // Would implement current value retrieval
     return {};
   }
 
-  private async triggerApprovalWorkflow(change: ConfigurationChange): Promise<void> {
+  private async triggerApprovalWorkflow(
+    change: ConfigurationChange,
+  ): Promise<void> {
     // Would implement approval workflow
-    this.logger.debug('Triggering approval workflow', { changeId: change.id });
+    this.logger.debug("Triggering approval workflow", { changeId: change.id });
   }
 
-  private async applyConfigurationChange(change: ConfigurationChange): Promise<ApplyResult> {
+  private async applyConfigurationChange(
+    change: ConfigurationChange,
+  ): Promise<ApplyResult> {
     // Would implement configuration change application
     return {
       success: true,
@@ -1271,12 +1338,18 @@ export class ParlantConfigurationManagerService implements OnModuleInit, OnModul
 
   private recordConfigurationChange(change: ConfigurationChange): void {
     // Would implement change recording
-    this.logger.debug('Recording configuration change', { changeId: change.id });
+    this.logger.debug("Recording configuration change", {
+      changeId: change.id,
+    });
   }
 
-  private async distributeConfigurationUpdate(change: ConfigurationChange): Promise<void> {
+  private async distributeConfigurationUpdate(
+    change: ConfigurationChange,
+  ): Promise<void> {
     // Would implement configuration distribution
-    this.logger.debug('Distributing configuration update', { changeId: change.id });
+    this.logger.debug("Distributing configuration update", {
+      changeId: change.id,
+    });
   }
 
   private invalidateConfigurationCache(): void {
@@ -1285,34 +1358,53 @@ export class ParlantConfigurationManagerService implements OnModuleInit, OnModul
 
   private async distributeFeatureFlagUpdate(flag: FeatureFlag): Promise<void> {
     // Would implement feature flag distribution
-    this.logger.debug('Distributing feature flag update', { flagName: flag.name });
+    this.logger.debug("Distributing feature flag update", {
+      flagName: flag.name,
+    });
   }
 
-  private async applyEmergencyOverride(override: EmergencyOverride): Promise<void> {
+  private async applyEmergencyOverride(
+    override: EmergencyOverride,
+  ): Promise<void> {
     // Would implement emergency override application
-    this.logger.debug('Applying emergency override', { type: override.type });
+    this.logger.debug("Applying emergency override", { type: override.type });
   }
 
-  private async recordEmergencyAction(id: string, override: EmergencyOverride, activatedBy: string): Promise<void> {
+  private async recordEmergencyAction(
+    id: string,
+    override: EmergencyOverride,
+    activatedBy: string,
+  ): Promise<void> {
     // Would implement emergency action recording
-    this.logger.debug('Recording emergency action', { emergencyId: id });
+    this.logger.debug("Recording emergency action", { emergencyId: id });
   }
 
-  private async notifyEmergencyContacts(override: EmergencyOverride, activatedBy: string): Promise<void> {
+  private async notifyEmergencyContacts(
+    override: EmergencyOverride,
+    activatedBy: string,
+  ): Promise<void> {
     // Would implement emergency contact notification
-    this.logger.debug('Notifying emergency contacts', { activatedBy });
+    this.logger.debug("Notifying emergency contacts", { activatedBy });
   }
 
-  private async distributeEmergencyConfiguration(override: EmergencyOverride): Promise<void> {
+  private async distributeEmergencyConfiguration(
+    override: EmergencyOverride,
+  ): Promise<void> {
     // Would implement emergency configuration distribution
-    this.logger.debug('Distributing emergency configuration');
+    this.logger.debug("Distributing emergency configuration");
   }
 
-  private findConfigurationSnapshot(snapshotId: string): ConfigurationSnapshot | undefined {
-    return this.configurationHistory.find(snapshot => snapshot.id === snapshotId);
+  private findConfigurationSnapshot(
+    snapshotId: string,
+  ): ConfigurationSnapshot | undefined {
+    return this.configurationHistory.find(
+      (snapshot) => snapshot.id === snapshotId,
+    );
   }
 
-  private async validateRollback(snapshot: ConfigurationSnapshot): Promise<RollbackValidation> {
+  private async validateRollback(
+    snapshot: ConfigurationSnapshot,
+  ): Promise<RollbackValidation> {
     // Would implement rollback validation
     return {
       feasible: true,
@@ -1330,7 +1422,7 @@ export class ParlantConfigurationManagerService implements OnModuleInit, OnModul
     return {
       valid: true,
       errors: [],
-      checksum: 'valid',
+      checksum: "valid",
     };
   }
 
@@ -1365,19 +1457,28 @@ export class ParlantConfigurationManagerService implements OnModuleInit, OnModul
     };
   }
 
-  private async distributeConfigurationToService(serviceId: string): Promise<void> {
+  private async distributeConfigurationToService(
+    serviceId: string,
+  ): Promise<void> {
     // Would implement service-specific configuration distribution
-    this.logger.debug('Distributing configuration to service', { serviceId });
+    this.logger.debug("Distributing configuration to service", { serviceId });
   }
 
   private initializeConfigurationValidators(): void {
     // Would implement configuration validators
-    this.logger.debug('Initializing configuration validators...');
+    this.logger.debug("Initializing configuration validators...");
   }
 
-  private isFeatureFlagApplicable(flag: FeatureFlag, serviceName: string, endpoint?: string): boolean {
+  private isFeatureFlagApplicable(
+    flag: FeatureFlag,
+    serviceName: string,
+    endpoint?: string,
+  ): boolean {
     // Would implement feature flag applicability logic
-    return flag.enabled && (flag.services.includes('*') || flag.services.includes(serviceName));
+    return (
+      flag.enabled &&
+      (flag.services.includes("*") || flag.services.includes(serviceName))
+    );
   }
 
   private applyFeatureFlag(config: any, flag: FeatureFlag): any {
@@ -1396,15 +1497,19 @@ export class ParlantConfigurationManagerService implements OnModuleInit, OnModul
     return { ...this.currentConfiguration.metadata };
   }
 
-  async queryConfiguration(query: ConfigurationQuery): Promise<ParlantConfiguration> {
+  async queryConfiguration(
+    query: ConfigurationQuery,
+  ): Promise<ParlantConfiguration> {
     // Would implement configuration querying
     return { ...this.currentConfiguration };
   }
 
-  async validateConfigurationRequest(request: ConfigurationValidationRequest): Promise<ValidationResult> {
+  async validateConfigurationRequest(
+    request: ConfigurationValidationRequest,
+  ): Promise<ValidationResult> {
     // Would implement configuration validation
     return {
-      validator: 'system',
+      validator: "system",
       valid: true,
       errors: [],
       warnings: [],
@@ -1504,45 +1609,185 @@ interface ConfigurationChangeApprovedEvent {
 }
 
 // Stub interfaces for complex types (would be fully implemented)
-interface CachingConfiguration { enabled: boolean; ttl: number; maxSize: number; compressionEnabled: boolean; }
-interface ResourceLimits { maxMemoryMB: number; maxCpuPercent: number; maxConcurrentRequests: number; }
-interface FailoverRule { condition: string; action: string; timeout: number; }
-interface HealthCheckConfiguration { enabled: boolean; interval: number; timeout: number; }
-interface UniversalMiddlewareConfig { enabled: boolean; priority: number; }
-interface ErrorMiddlewareConfig { enabled: boolean; conversationalMode: boolean; }
-interface AuditMiddlewareConfig { enabled: boolean; detailLevel: string; }
-interface PerformanceMiddlewareConfig { enabled: boolean; metricsEnabled: boolean; }
-interface AutoDecoratorConfig { enabled: boolean; intelligentAnalysis: boolean; }
-interface UniversalDecoratorConfig { enabled: boolean; fullFeatureSet: boolean; }
-interface ComplianceDecoratorConfig { enabled: boolean; frameworks: string[]; }
-interface PerformanceDecoratorConfig { enabled: boolean; optimizationMode: string; }
-interface RetryPolicy { maxRetries: number; backoffMultiplier: number; }
-interface FallbackStrategy { strategy: string; configuration: Record<string, any>; }
-interface LoadBalancingConfig { strategy: string; healthCheckEnabled: boolean; }
-interface CircuitBreakerConfig { enabled: boolean; failureThreshold: number; }
-interface HealthMonitoringConfig { enabled: boolean; interval: number; }
-interface PerformanceMonitoringConfig { enabled: boolean; metricsEnabled: boolean; }
-interface ValidationRule { name: string; condition: string; action: string; priority: number; }
-interface ApprovalWorkflow { step: number; role: string; timeout: number; }
-interface SLARequirements { responseTime: number; availability: number; }
-interface BusinessRule { name: string; condition: string; action: string; priority: number; }
-interface ComplianceFramework { name: string; version: string; enabled: boolean; }
-interface DataGovernance { classification: string[]; retention: number; }
-interface AccessControls { rbac: boolean; mfa: boolean; }
-interface RetentionPolicy { dataType: string; retentionDays: number; }
-interface EncryptionStandard { algorithm: string; keyLength: number; }
-interface FeatureCondition { type: string; value: string; }
-interface FeatureFlagMetadata { lastModified: Date; modifiedBy: string; }
-interface ExperimentVariant { name: string; weight: number; configuration: Record<string, any>; }
-interface TrafficAllocation { strategy: string; percentage: number; }
-interface SuccessMetric { name: string; target: number; }
-interface RolloutStrategy { type: string; duration: number; }
-interface RolloutStage { stage: number; percentage: number; duration: number; }
-interface SuccessCriteria { metrics: string[]; thresholds: Record<string, number>; }
-interface RollbackTrigger { condition: string; action: string; }
-interface FallbackTrigger { condition: string; mode: string; }
-interface RecoveryStep { step: number; action: string; timeout: number; }
-interface SnapshotMetadata { createdBy: string; reason: string; }
-interface ValidationError { path: string; message: string; severity: string; }
-interface ValidationWarning { path: string; message: string; }
-interface ConfigurationValidator { validate: (config: any) => ValidationResult; }
+interface CachingConfiguration {
+  enabled: boolean;
+  ttl: number;
+  maxSize: number;
+  compressionEnabled: boolean;
+}
+interface ResourceLimits {
+  maxMemoryMB: number;
+  maxCpuPercent: number;
+  maxConcurrentRequests: number;
+}
+interface FailoverRule {
+  condition: string;
+  action: string;
+  timeout: number;
+}
+interface HealthCheckConfiguration {
+  enabled: boolean;
+  interval: number;
+  timeout: number;
+}
+interface UniversalMiddlewareConfig {
+  enabled: boolean;
+  priority: number;
+}
+interface ErrorMiddlewareConfig {
+  enabled: boolean;
+  conversationalMode: boolean;
+}
+interface AuditMiddlewareConfig {
+  enabled: boolean;
+  detailLevel: string;
+}
+interface PerformanceMiddlewareConfig {
+  enabled: boolean;
+  metricsEnabled: boolean;
+}
+interface AutoDecoratorConfig {
+  enabled: boolean;
+  intelligentAnalysis: boolean;
+}
+interface UniversalDecoratorConfig {
+  enabled: boolean;
+  fullFeatureSet: boolean;
+}
+interface ComplianceDecoratorConfig {
+  enabled: boolean;
+  frameworks: string[];
+}
+interface PerformanceDecoratorConfig {
+  enabled: boolean;
+  optimizationMode: string;
+}
+interface RetryPolicy {
+  maxRetries: number;
+  backoffMultiplier: number;
+}
+interface FallbackStrategy {
+  strategy: string;
+  configuration: Record<string, any>;
+}
+interface LoadBalancingConfig {
+  strategy: string;
+  healthCheckEnabled: boolean;
+}
+interface CircuitBreakerConfig {
+  enabled: boolean;
+  failureThreshold: number;
+}
+interface HealthMonitoringConfig {
+  enabled: boolean;
+  interval: number;
+}
+interface PerformanceMonitoringConfig {
+  enabled: boolean;
+  metricsEnabled: boolean;
+}
+interface ValidationRule {
+  name: string;
+  condition: string;
+  action: string;
+  priority: number;
+}
+interface ApprovalWorkflow {
+  step: number;
+  role: string;
+  timeout: number;
+}
+interface SLARequirements {
+  responseTime: number;
+  availability: number;
+}
+interface BusinessRule {
+  name: string;
+  condition: string;
+  action: string;
+  priority: number;
+}
+interface ComplianceFramework {
+  name: string;
+  version: string;
+  enabled: boolean;
+}
+interface DataGovernance {
+  classification: string[];
+  retention: number;
+}
+interface AccessControls {
+  rbac: boolean;
+  mfa: boolean;
+}
+interface RetentionPolicy {
+  dataType: string;
+  retentionDays: number;
+}
+interface EncryptionStandard {
+  algorithm: string;
+  keyLength: number;
+}
+interface FeatureCondition {
+  type: string;
+  value: string;
+}
+interface FeatureFlagMetadata {
+  lastModified: Date;
+  modifiedBy: string;
+}
+interface ExperimentVariant {
+  name: string;
+  weight: number;
+  configuration: Record<string, any>;
+}
+interface TrafficAllocation {
+  strategy: string;
+  percentage: number;
+}
+interface SuccessMetric {
+  name: string;
+  target: number;
+}
+interface RolloutStrategy {
+  type: string;
+  duration: number;
+}
+interface RolloutStage {
+  stage: number;
+  percentage: number;
+  duration: number;
+}
+interface SuccessCriteria {
+  metrics: string[];
+  thresholds: Record<string, number>;
+}
+interface RollbackTrigger {
+  condition: string;
+  action: string;
+}
+interface FallbackTrigger {
+  condition: string;
+  mode: string;
+}
+interface RecoveryStep {
+  step: number;
+  action: string;
+  timeout: number;
+}
+interface SnapshotMetadata {
+  createdBy: string;
+  reason: string;
+}
+interface ValidationError {
+  path: string;
+  message: string;
+  severity: string;
+}
+interface ValidationWarning {
+  path: string;
+  message: string;
+}
+interface ConfigurationValidator {
+  validate: (config: any) => ValidationResult;
+}

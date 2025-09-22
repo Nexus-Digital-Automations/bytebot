@@ -10,10 +10,10 @@
  * @author Metadata Management Agent #6
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import * as fs from 'fs/promises';
-import * as path from 'path';
+import { Injectable, Logger } from "@nestjs/common";
+import { EventEmitter2 } from "@nestjs/event-emitter";
+import * as fs from "fs/promises";
+import * as path from "path";
 import {
   FunctionMetadata,
   FunctionExample,
@@ -24,28 +24,28 @@ import {
   DocumentationType,
   DeprecationInfo,
   FunctionRegistryEntry,
-  SourceLocation
-} from '../core/registry.interface';
-import { AuthorInfo } from '../../../types/parlant-integration.types';
+  SourceLocation,
+} from "../core/registry.interface";
+import { AuthorInfo } from "../../../types/parlant-integration.types";
 
 /**
  * Metadata extraction modes
  */
 export enum MetadataExtractionMode {
-  _BASIC = 'basic',
-  _ENHANCED = 'enhanced',
-  _COMPREHENSIVE = 'comprehensive',
-  _AI_ASSISTED = 'ai_assisted'
+  _BASIC = "basic",
+  _ENHANCED = "enhanced",
+  _COMPREHENSIVE = "comprehensive",
+  _AI_ASSISTED = "ai_assisted",
 }
 
 /**
  * Documentation quality levels
  */
 export enum DocumentationQuality {
-  _POOR = 'poor',
-  _BASIC = 'basic',
-  _GOOD = 'good',
-  _EXCELLENT = 'excellent'
+  _POOR = "poor",
+  _BASIC = "basic",
+  _GOOD = "good",
+  _EXCELLENT = "excellent",
 }
 
 /**
@@ -74,19 +74,19 @@ export interface MetadataImprovementSuggestion {
 }
 
 export enum SuggestionType {
-  _MISSING_FIELD = 'missing_field',
-  _IMPROVE_DESCRIPTION = 'improve_description',
-  _ADD_EXAMPLE = 'add_example',
-  _UPDATE_PERFORMANCE = 'update_performance',
-  _ADD_DOCUMENTATION = 'add_documentation',
-  _DEPRECATION_WARNING = 'deprecation_warning'
+  _MISSING_FIELD = "missing_field",
+  _IMPROVE_DESCRIPTION = "improve_description",
+  _ADD_EXAMPLE = "add_example",
+  _UPDATE_PERFORMANCE = "update_performance",
+  _ADD_DOCUMENTATION = "add_documentation",
+  _DEPRECATION_WARNING = "deprecation_warning",
 }
 
 export enum SuggestionPriority {
-  _LOW = 'low',
-  _MEDIUM = 'medium',
-  _HIGH = 'high',
-  _CRITICAL = 'critical'
+  _LOW = "low",
+  _MEDIUM = "medium",
+  _HIGH = "high",
+  _CRITICAL = "critical",
 }
 
 /**
@@ -141,9 +141,9 @@ export interface PerformanceTrend {
 }
 
 export enum TrendDirection {
-  _IMPROVING = 'improving',
-  _STABLE = 'stable',
-  _DEGRADING = 'degrading'
+  _IMPROVING = "improving",
+  _STABLE = "stable",
+  _DEGRADING = "degrading",
 }
 
 export interface PerformanceRecommendation {
@@ -155,26 +155,26 @@ export interface PerformanceRecommendation {
 }
 
 export enum RecommendationType {
-  _OPTIMIZE_ALGORITHM = 'optimize_algorithm',
-  _REDUCE_MEMORY_USAGE = 'reduce_memory_usage',
-  _IMPROVE_CACHING = 'improve_caching',
-  _ASYNC_PROCESSING = 'async_processing',
-  _BATCH_OPERATIONS = 'batch_operations'
+  _OPTIMIZE_ALGORITHM = "optimize_algorithm",
+  _REDUCE_MEMORY_USAGE = "reduce_memory_usage",
+  _IMPROVE_CACHING = "improve_caching",
+  _ASYNC_PROCESSING = "async_processing",
+  _BATCH_OPERATIONS = "batch_operations",
 }
 
 export enum ImpactLevel {
-  _LOW = 'low',
-  _MEDIUM = 'medium',
-  _HIGH = 'high',
-  _VERY_HIGH = 'very_high'
+  _LOW = "low",
+  _MEDIUM = "medium",
+  _HIGH = "high",
+  _VERY_HIGH = "very_high",
 }
 
 export enum EffortLevel {
-  _MINIMAL = 'minimal',
-  _LOW = 'low',
-  _MEDIUM = 'medium',
-  _HIGH = 'high',
-  _VERY_HIGH = 'very_high'
+  _MINIMAL = "minimal",
+  _LOW = "low",
+  _MEDIUM = "medium",
+  _HIGH = "high",
+  _VERY_HIGH = "very_high",
 }
 
 /**
@@ -192,22 +192,22 @@ export interface SemanticAnalysisResult {
 }
 
 export enum FunctionCategory {
-  _UTILITY = 'utility',
-  _BUSINESS_LOGIC = 'business_logic',
-  _DATA_PROCESSING = 'data_processing',
-  _API_ENDPOINT = 'api_endpoint',
-  _EVENT_HANDLER = 'event_handler',
-  _VALIDATION = 'validation',
-  _TRANSFORMATION = 'transformation',
-  _AGGREGATION = 'aggregation'
+  _UTILITY = "utility",
+  _BUSINESS_LOGIC = "business_logic",
+  _DATA_PROCESSING = "data_processing",
+  _API_ENDPOINT = "api_endpoint",
+  _EVENT_HANDLER = "event_handler",
+  _VALIDATION = "validation",
+  _TRANSFORMATION = "transformation",
+  _AGGREGATION = "aggregation",
 }
 
 export enum ComplexityLevel {
-  _TRIVIAL = 'trivial',
-  _SIMPLE = 'simple',
-  _MODERATE = 'moderate',
-  _COMPLEX = 'complex',
-  _VERY_COMPLEX = 'very_complex'
+  _TRIVIAL = "trivial",
+  _SIMPLE = "simple",
+  _MODERATE = "moderate",
+  _COMPLEX = "complex",
+  _VERY_COMPLEX = "very_complex",
 }
 
 export interface MaintainabilityScore {
@@ -223,15 +223,15 @@ export interface MaintainabilityFactor {
 }
 
 export enum CohesionLevel {
-  _LOW = 'low',
-  _MEDIUM = 'medium',
-  _HIGH = 'high'
+  _LOW = "low",
+  _MEDIUM = "medium",
+  _HIGH = "high",
 }
 
 export enum CouplingLevel {
-  _LOOSE = 'loose',
-  _MEDIUM = 'medium',
-  _TIGHT = 'tight'
+  _LOOSE = "loose",
+  _MEDIUM = "medium",
+  _TIGHT = "tight",
 }
 
 /**
@@ -240,12 +240,13 @@ export enum CouplingLevel {
 @Injectable()
 export class MetadataManagerService {
   private readonly logger = new Logger(MetadataManagerService.name);
-  private readonly documentationTemplates = new Map<string, DocumentationTemplate>();
+  private readonly documentationTemplates = new Map<
+    string,
+    DocumentationTemplate
+  >();
   private readonly metadataCache = new Map<string, FunctionMetadata>();
 
-  constructor(
-    private readonly eventEmitter: EventEmitter2
-  ) {
+  constructor(private readonly eventEmitter: EventEmitter2) {
     this.initializeService();
   }
 
@@ -254,10 +255,12 @@ export class MetadataManagerService {
    */
   async extractMetadata(
     functionEntry: FunctionRegistryEntry,
-    mode: MetadataExtractionMode = MetadataExtractionMode._ENHANCED
+    mode: MetadataExtractionMode = MetadataExtractionMode._ENHANCED,
   ): Promise<MetadataExtractionResult> {
     const startTime = Date.now();
-    this.logger.log(`Extracting metadata for function: ${functionEntry.name} in ${mode} mode`);
+    this.logger.log(
+      `Extracting metadata for function: ${functionEntry.name} in ${mode} mode`,
+    );
 
     try {
       // Read source file
@@ -272,18 +275,30 @@ export class MetadataManagerService {
           metadata = await this.extractBasicMetadata(functionEntry, sourceCode);
           break;
         case MetadataExtractionMode._ENHANCED:
-          metadata = await this.extractEnhancedMetadata(functionEntry, sourceCode);
+          metadata = await this.extractEnhancedMetadata(
+            functionEntry,
+            sourceCode,
+          );
           break;
         case MetadataExtractionMode._COMPREHENSIVE:
-          metadata = await this.extractComprehensiveMetadata(functionEntry, sourceCode);
+          metadata = await this.extractComprehensiveMetadata(
+            functionEntry,
+            sourceCode,
+          );
           break;
         case MetadataExtractionMode._AI_ASSISTED:
-          const result = await this.extractAiAssistedMetadata(functionEntry, sourceCode);
+          const result = await this.extractAiAssistedMetadata(
+            functionEntry,
+            sourceCode,
+          );
           metadata = result.metadata;
           warnings = result.warnings;
           break;
         default:
-          metadata = await this.extractEnhancedMetadata(functionEntry, sourceCode);
+          metadata = await this.extractEnhancedMetadata(
+            functionEntry,
+            sourceCode,
+          );
       }
 
       // Assess quality and completeness
@@ -292,21 +307,26 @@ export class MetadataManagerService {
       const confidence = this.calculateConfidence(metadata, mode);
 
       // Generate improvement suggestions
-      const suggestions = await this.generateImprovementSuggestions(metadata, functionEntry);
+      const suggestions = await this.generateImprovementSuggestions(
+        metadata,
+        functionEntry,
+      );
 
       const extractionTime = Date.now() - startTime;
 
-      this.logger.log(`Metadata extraction completed for ${functionEntry.name} in ${extractionTime}ms`);
+      this.logger.log(
+        `Metadata extraction completed for ${functionEntry.name} in ${extractionTime}ms`,
+      );
 
       // Cache the metadata
       this.metadataCache.set(functionEntry.id, metadata);
 
       // Emit event
-      this.eventEmitter.emit('metadata.extracted', {
+      this.eventEmitter.emit("metadata.extracted", {
         functionId: functionEntry.id,
         quality,
         completeness,
-        extractionTime
+        extractionTime,
       });
 
       return {
@@ -316,11 +336,13 @@ export class MetadataManagerService {
         confidence,
         extractionTime,
         warnings,
-        suggestions
+        suggestions,
       };
-
     } catch (error) {
-      this.logger.error(`Failed to extract metadata for function ${functionEntry.name}: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
+      this.logger.error(
+        `Failed to extract metadata for function ${functionEntry.name}: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
       throw error;
     }
   }
@@ -330,9 +352,11 @@ export class MetadataManagerService {
    */
   async generateDocumentation(
     functionEntry: FunctionRegistryEntry,
-    templateName: string = 'default'
+    templateName: string = "default",
   ): Promise<string> {
-    this.logger.log(`Generating documentation for function: ${functionEntry.name}`);
+    this.logger.log(
+      `Generating documentation for function: ${functionEntry.name}`,
+    );
 
     try {
       // Get documentation template
@@ -352,15 +376,19 @@ export class MetadataManagerService {
       const documentation = await this.applyDocumentationTemplate(
         template,
         functionEntry,
-        metadata
+        metadata,
       );
 
-      this.logger.log(`Documentation generated for function: ${functionEntry.name}`);
+      this.logger.log(
+        `Documentation generated for function: ${functionEntry.name}`,
+      );
 
       return documentation;
-
     } catch (error) {
-      this.logger.error(`Failed to generate documentation for function ${functionEntry.name}: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
+      this.logger.error(
+        `Failed to generate documentation for function ${functionEntry.name}: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
       throw error;
     }
   }
@@ -370,13 +398,16 @@ export class MetadataManagerService {
    */
   async analyzePerformance(
     functionEntry: FunctionRegistryEntry,
-    executionHistory?: PerformanceBenchmark[]
+    executionHistory?: PerformanceBenchmark[],
   ): Promise<PerformanceAnalysisResult> {
-    this.logger.log(`Analyzing performance for function: ${functionEntry.name}`);
+    this.logger.log(
+      `Analyzing performance for function: ${functionEntry.name}`,
+    );
 
     try {
       // Static analysis
-      const staticCharacteristics = await this.analyzeStaticPerformance(functionEntry);
+      const staticCharacteristics =
+        await this.analyzeStaticPerformance(functionEntry);
 
       // Runtime analysis (if execution history available)
       const runtimeBenchmarks = executionHistory || [];
@@ -388,22 +419,26 @@ export class MetadataManagerService {
       const recommendations = await this.generatePerformanceRecommendations(
         staticCharacteristics,
         runtimeBenchmarks,
-        trends
+        trends,
       );
 
       const result: PerformanceAnalysisResult = {
         characteristics: staticCharacteristics,
         benchmarks: runtimeBenchmarks,
         trends,
-        recommendations
+        recommendations,
       };
 
-      this.logger.log(`Performance analysis completed for function: ${functionEntry.name}`);
+      this.logger.log(
+        `Performance analysis completed for function: ${functionEntry.name}`,
+      );
 
       return result;
-
     } catch (error) {
-      this.logger.error(`Failed to analyze performance for function ${functionEntry.name}: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
+      this.logger.error(
+        `Failed to analyze performance for function ${functionEntry.name}: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
       throw error;
     }
   }
@@ -411,14 +446,19 @@ export class MetadataManagerService {
   /**
    * Perform semantic analysis of function
    */
-  async analyzeSemantics(functionEntry: FunctionRegistryEntry): Promise<SemanticAnalysisResult> {
+  async analyzeSemantics(
+    functionEntry: FunctionRegistryEntry,
+  ): Promise<SemanticAnalysisResult> {
     this.logger.log(`Analyzing semantics for function: ${functionEntry.name}`);
 
     try {
       const sourceCode = await this.readSourceFile(functionEntry);
 
       // Analyze function purpose
-      const purpose = await this.inferFunctionPurpose(functionEntry, sourceCode);
+      const purpose = await this.inferFunctionPurpose(
+        functionEntry,
+        sourceCode,
+      );
 
       // Categorize function
       const category = this.categorizeFunction(functionEntry, sourceCode);
@@ -447,15 +487,19 @@ export class MetadataManagerService {
         complexity,
         maintainability,
         cohesion,
-        coupling
+        coupling,
       };
 
-      this.logger.log(`Semantic analysis completed for function: ${functionEntry.name}`);
+      this.logger.log(
+        `Semantic analysis completed for function: ${functionEntry.name}`,
+      );
 
       return result;
-
     } catch (error) {
-      this.logger.error(`Failed to analyze semantics for function ${functionEntry.name}: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
+      this.logger.error(
+        `Failed to analyze semantics for function ${functionEntry.name}: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
       throw error;
     }
   }
@@ -465,7 +509,7 @@ export class MetadataManagerService {
    */
   async updateMetadata(
     functionId: string,
-    metadata: Partial<FunctionMetadata>
+    metadata: Partial<FunctionMetadata>,
   ): Promise<void> {
     this.logger.log(`Updating metadata for function: ${functionId}`);
 
@@ -483,16 +527,18 @@ export class MetadataManagerService {
       this.metadataCache.set(functionId, updatedMetadata);
 
       // Emit event
-      this.eventEmitter.emit('metadata.updated', {
+      this.eventEmitter.emit("metadata.updated", {
         functionId,
         updatedFields: Object.keys(metadata),
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       this.logger.log(`Metadata updated for function: ${functionId}`);
-
     } catch (error) {
-      this.logger.error(`Failed to update metadata for function ${functionId}: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
+      this.logger.error(
+        `Failed to update metadata for function ${functionId}: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
       throw error;
     }
   }
@@ -505,42 +551,50 @@ export class MetadataManagerService {
    * Initialize the service
    */
   private async initializeService(): Promise<void> {
-    this.logger.log('Initializing Metadata Manager Service');
+    this.logger.log("Initializing Metadata Manager Service");
 
     try {
       // Load documentation templates
       await this.loadDocumentationTemplates();
 
-      this.logger.log('Metadata Manager Service initialized successfully');
-
+      this.logger.log("Metadata Manager Service initialized successfully");
     } catch (error) {
-      this.logger.error(`Failed to initialize Metadata Manager Service: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
+      this.logger.error(
+        `Failed to initialize Metadata Manager Service: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
     }
   }
 
   /**
    * Read source file for function
    */
-  private async readSourceFile(functionEntry: FunctionRegistryEntry): Promise<string> {
+  private async readSourceFile(
+    functionEntry: FunctionRegistryEntry,
+  ): Promise<string> {
     // This would extract the function's location from the registry entry
     // and read the actual source file
     const filePath = this.resolveFunctionSourcePath(functionEntry);
 
     try {
-      return await fs.readFile(filePath, 'utf-8');
+      return await fs.readFile(filePath, "utf-8");
     } catch (error) {
-      this.logger.warn(`Could not read source file ${filePath}: ${error instanceof Error ? error.message : String(error)}`);
-      return '';
+      this.logger.warn(
+        `Could not read source file ${filePath}: ${error instanceof Error ? error.message : String(error)}`,
+      );
+      return "";
     }
   }
 
   /**
    * Resolve function source path
    */
-  private resolveFunctionSourcePath(functionEntry: FunctionRegistryEntry): string {
+  private resolveFunctionSourcePath(
+    functionEntry: FunctionRegistryEntry,
+  ): string {
     // This would use the function's location information to find the source file
     // For now, return a placeholder path
-    return functionEntry.qualifiedName.replace(/\./g, '/') + '.ts';
+    return functionEntry.qualifiedName.replace(/\./g, "/") + ".ts";
   }
 
   /**
@@ -548,18 +602,18 @@ export class MetadataManagerService {
    */
   private async extractBasicMetadata(
     functionEntry: FunctionRegistryEntry,
-    sourceCode: string
+    sourceCode: string,
   ): Promise<FunctionMetadata> {
     return {
       description: `Function: ${functionEntry.name}`,
-      purpose: 'Function purpose to be determined',
+      purpose: "Function purpose to be determined",
       examples: [],
-      tags: ['function', 'auto-generated'],
+      tags: ["function", "auto-generated"],
       relatedFunctions: [],
       performance: this.createDefaultPerformanceCharacteristics(),
       author: this.createDefaultAuthorInfo(),
       documentation: [],
-      deprecation: undefined
+      deprecation: undefined,
     };
   }
 
@@ -568,9 +622,12 @@ export class MetadataManagerService {
    */
   private async extractEnhancedMetadata(
     functionEntry: FunctionRegistryEntry,
-    sourceCode: string
+    sourceCode: string,
   ): Promise<FunctionMetadata> {
-    const basicMetadata = await this.extractBasicMetadata(functionEntry, sourceCode);
+    const basicMetadata = await this.extractBasicMetadata(
+      functionEntry,
+      sourceCode,
+    );
 
     // Extract JSDoc comments
     const jsdoc = this.extractJSDocComments(sourceCode);
@@ -579,7 +636,8 @@ export class MetadataManagerService {
     const signatureInfo = this.extractSignatureInfo(functionEntry);
 
     // Generate enhanced description
-    const description = jsdoc.description || this.generateDescriptionFromSignature(signatureInfo);
+    const description =
+      jsdoc.description || this.generateDescriptionFromSignature(signatureInfo);
 
     // Extract examples from comments
     const examples = this.extractExamplesFromComments(jsdoc);
@@ -593,7 +651,7 @@ export class MetadataManagerService {
       purpose: jsdoc.purpose || this.inferPurposeFromName(functionEntry.name),
       examples,
       tags: [...basicMetadata.tags, ...semanticTags],
-      performance: await this.analyzeStaticPerformance(functionEntry)
+      performance: await this.analyzeStaticPerformance(functionEntry),
     };
   }
 
@@ -602,30 +660,40 @@ export class MetadataManagerService {
    */
   private async extractComprehensiveMetadata(
     functionEntry: FunctionRegistryEntry,
-    sourceCode: string
+    sourceCode: string,
   ): Promise<FunctionMetadata> {
-    const enhancedMetadata = await this.extractEnhancedMetadata(functionEntry, sourceCode);
+    const enhancedMetadata = await this.extractEnhancedMetadata(
+      functionEntry,
+      sourceCode,
+    );
 
     // Perform semantic analysis
     const semanticAnalysis = await this.analyzeSemantics(functionEntry);
 
     // Generate comprehensive examples
-    const comprehensiveExamples = await this.generateComprehensiveExamples(functionEntry);
+    const comprehensiveExamples =
+      await this.generateComprehensiveExamples(functionEntry);
 
     // Find related functions
     const relatedFunctions = await this.findRelatedFunctions(functionEntry);
 
     // Extract or generate documentation links
-    const documentation = await this.extractDocumentationLinks(functionEntry, sourceCode);
+    const documentation = await this.extractDocumentationLinks(
+      functionEntry,
+      sourceCode,
+    );
 
     return {
       ...enhancedMetadata,
-      description: this.enhanceDescription(enhancedMetadata.description, semanticAnalysis),
+      description: this.enhanceDescription(
+        enhancedMetadata.description,
+        semanticAnalysis,
+      ),
       purpose: semanticAnalysis.purpose,
       examples: [...enhancedMetadata.examples, ...comprehensiveExamples],
       tags: [...enhancedMetadata.tags, ...semanticAnalysis.tags],
       relatedFunctions,
-      documentation
+      documentation,
     };
   }
 
@@ -634,25 +702,30 @@ export class MetadataManagerService {
    */
   private async extractAiAssistedMetadata(
     functionEntry: FunctionRegistryEntry,
-    sourceCode: string
+    sourceCode: string,
   ): Promise<{ metadata: FunctionMetadata; warnings: string[] }> {
-    const comprehensiveMetadata = await this.extractComprehensiveMetadata(functionEntry, sourceCode);
+    const comprehensiveMetadata = await this.extractComprehensiveMetadata(
+      functionEntry,
+      sourceCode,
+    );
     const warnings: string[] = [];
 
     // AI-assisted enhancements would go here
     // For now, return the comprehensive metadata with potential warnings
 
     if (comprehensiveMetadata.description.length < 50) {
-      warnings.push('Function description is very short and may need enhancement');
+      warnings.push(
+        "Function description is very short and may need enhancement",
+      );
     }
 
     if (comprehensiveMetadata.examples.length === 0) {
-      warnings.push('No usage examples found for this function');
+      warnings.push("No usage examples found for this function");
     }
 
     return {
       metadata: comprehensiveMetadata,
-      warnings
+      warnings,
     };
   }
 
@@ -677,7 +750,9 @@ export class MetadataManagerService {
 
     // Extract description (first line after /**)
     const descriptionMatch = jsdoc.match(/\/\*\*\s*\n\s*\*\s*(.+)/);
-    const description = descriptionMatch ? descriptionMatch[1].trim() : undefined;
+    const description = descriptionMatch
+      ? descriptionMatch[1].trim()
+      : undefined;
 
     // Extract @purpose tag
     const purposeMatch = jsdoc.match(/@purpose\s+(.+)/);
@@ -685,19 +760,21 @@ export class MetadataManagerService {
 
     // Extract @example tags
     const exampleMatches = jsdoc.match(/@example\s+([\s\S]*?)(?=@\w+|\*\/)/g);
-    const examples = exampleMatches ? exampleMatches.map(match =>
-      match.replace(/@example\s+/, '').trim()
-    ) : [];
+    const examples = exampleMatches
+      ? exampleMatches.map((match) => match.replace(/@example\s+/, "").trim())
+      : [];
 
     // Extract other tags
     const tagMatches = jsdoc.match(/@(\w+)/g);
-    const tags = tagMatches ? tagMatches.map(tag => tag.replace('@', '')) : [];
+    const tags = tagMatches
+      ? tagMatches.map((tag) => tag.replace("@", ""))
+      : [];
 
     return {
       description,
       purpose,
       examples,
-      tags
+      tags,
     };
   }
 
@@ -712,9 +789,9 @@ export class MetadataManagerService {
   } {
     return {
       name: functionEntry.name,
-      parameters: functionEntry.signature.parameters.map(p => p.name),
+      parameters: functionEntry.signature.parameters.map((p) => p.name),
       returnType: functionEntry.signature.returnType.name,
-      isAsync: functionEntry.signature.isAsync
+      isAsync: functionEntry.signature.isAsync,
     };
   }
 
@@ -728,9 +805,11 @@ export class MetadataManagerService {
     isAsync: boolean;
   }): string {
     const { name, parameters, returnType, isAsync } = signatureInfo;
-    const asyncPrefix = isAsync ? 'Asynchronously ' : '';
-    const paramText = parameters.length > 0 ? ` with parameters: ${parameters.join(', ')}` : '';
-    const returnText = returnType !== 'void' ? ` and returns ${returnType}` : '';
+    const asyncPrefix = isAsync ? "Asynchronously " : "";
+    const paramText =
+      parameters.length > 0 ? ` with parameters: ${parameters.join(", ")}` : "";
+    const returnText =
+      returnType !== "void" ? ` and returns ${returnType}` : "";
 
     return `${asyncPrefix}${this.humanizeFunctionName(name)}${paramText}${returnText}.`;
   }
@@ -741,15 +820,17 @@ export class MetadataManagerService {
   private humanizeFunctionName(name: string): string {
     // Convert camelCase to readable text
     return name
-      .replace(/([A-Z])/g, ' $1')
+      .replace(/([A-Z])/g, " $1")
       .toLowerCase()
-      .replace(/^./, str => str.toUpperCase());
+      .replace(/^./, (str) => str.toUpperCase());
   }
 
   /**
    * Extract examples from comments
    */
-  private extractExamplesFromComments(jsdoc: { examples?: string[] }): FunctionExample[] {
+  private extractExamplesFromComments(jsdoc: {
+    examples?: string[];
+  }): FunctionExample[] {
     if (!jsdoc.examples) return [];
 
     return jsdoc.examples.map((example, index) => ({
@@ -757,53 +838,72 @@ export class MetadataManagerService {
       description: `Usage example for this function`,
       code: example.trim(),
       expectedOutput: undefined,
-      category: ExampleCategory._BASIC_USAGE
+      category: ExampleCategory._BASIC_USAGE,
     }));
   }
 
   /**
    * Extract semantic tags from function and source
    */
-  private extractSemanticTags(functionEntry: FunctionRegistryEntry, sourceCode: string): string[] {
+  private extractSemanticTags(
+    functionEntry: FunctionRegistryEntry,
+    sourceCode: string,
+  ): string[] {
     const tags: string[] = [];
 
     // Analyze function name
     const name = functionEntry.name.toLowerCase();
 
-    if (name.includes('async') || functionEntry.signature.isAsync) {
-      tags.push('async');
+    if (name.includes("async") || functionEntry.signature.isAsync) {
+      tags.push("async");
     }
 
-    if (name.includes('validate') || name.includes('check')) {
-      tags.push('validation');
+    if (name.includes("validate") || name.includes("check")) {
+      tags.push("validation");
     }
 
-    if (name.includes('transform') || name.includes('convert')) {
-      tags.push('transformation');
+    if (name.includes("transform") || name.includes("convert")) {
+      tags.push("transformation");
     }
 
-    if (name.includes('get') || name.includes('fetch') || name.includes('retrieve')) {
-      tags.push('getter');
+    if (
+      name.includes("get") ||
+      name.includes("fetch") ||
+      name.includes("retrieve")
+    ) {
+      tags.push("getter");
     }
 
-    if (name.includes('set') || name.includes('update') || name.includes('modify')) {
-      tags.push('setter');
+    if (
+      name.includes("set") ||
+      name.includes("update") ||
+      name.includes("modify")
+    ) {
+      tags.push("setter");
     }
 
-    if (name.includes('create') || name.includes('make') || name.includes('build')) {
-      tags.push('factory');
+    if (
+      name.includes("create") ||
+      name.includes("make") ||
+      name.includes("build")
+    ) {
+      tags.push("factory");
     }
 
-    if (name.includes('delete') || name.includes('remove') || name.includes('destroy')) {
-      tags.push('destructor');
+    if (
+      name.includes("delete") ||
+      name.includes("remove") ||
+      name.includes("destroy")
+    ) {
+      tags.push("destructor");
     }
 
     // Analyze parameter count
     const paramCount = functionEntry.signature.parameters.length;
     if (paramCount === 0) {
-      tags.push('no-params');
+      tags.push("no-params");
     } else if (paramCount > 5) {
-      tags.push('many-params');
+      tags.push("many-params");
     }
 
     return tags;
@@ -814,13 +914,13 @@ export class MetadataManagerService {
    */
   private createDefaultPerformanceCharacteristics(): PerformanceCharacteristics {
     return {
-      timeComplexity: 'O(1)',
-      spaceComplexity: 'O(1)',
+      timeComplexity: "O(1)",
+      spaceComplexity: "O(1)",
       averageExecutionTime: undefined,
       memoryUsage: undefined,
       cpuIntensity: IntensityLevel._LOW,
       ioIntensity: IntensityLevel._LOW,
-      networkUsage: IntensityLevel._NONE
+      networkUsage: IntensityLevel._NONE,
     };
   }
 
@@ -829,12 +929,12 @@ export class MetadataManagerService {
    */
   private createDefaultAuthorInfo(): AuthorInfo {
     return {
-      name: 'Unknown',
+      name: "Unknown",
       email: undefined,
       team: undefined,
       createdAt: new Date(),
       lastModifiedBy: undefined,
-      lastModifiedAt: undefined
+      lastModifiedAt: undefined,
     };
   }
 
@@ -843,16 +943,16 @@ export class MetadataManagerService {
    */
   private inferPurposeFromName(name: string): string {
     const purposes: Record<string, string> = {
-      get: 'Retrieves data or values',
-      set: 'Sets or updates data or values',
-      create: 'Creates new instances or resources',
-      delete: 'Removes or destroys instances or resources',
-      update: 'Modifies existing data or resources',
-      validate: 'Validates input data or conditions',
-      transform: 'Transforms data from one format to another',
-      calculate: 'Performs calculations or computations',
-      process: 'Processes data or performs operations',
-      handle: 'Handles events or requests'
+      get: "Retrieves data or values",
+      set: "Sets or updates data or values",
+      create: "Creates new instances or resources",
+      delete: "Removes or destroys instances or resources",
+      update: "Modifies existing data or resources",
+      validate: "Validates input data or conditions",
+      transform: "Transforms data from one format to another",
+      calculate: "Performs calculations or computations",
+      process: "Processes data or performs operations",
+      handle: "Handles events or requests",
     };
 
     const nameLower = name.toLowerCase();
@@ -862,13 +962,15 @@ export class MetadataManagerService {
       }
     }
 
-    return 'Performs specific functionality within the application';
+    return "Performs specific functionality within the application";
   }
 
   /**
    * Analyze static performance characteristics
    */
-  private async analyzeStaticPerformance(functionEntry: FunctionRegistryEntry): Promise<PerformanceCharacteristics> {
+  private async analyzeStaticPerformance(
+    functionEntry: FunctionRegistryEntry,
+  ): Promise<PerformanceCharacteristics> {
     // This would perform static analysis of the function code
     // For now, return enhanced default characteristics
 
@@ -880,9 +982,10 @@ export class MetadataManagerService {
       spaceComplexity: this.estimateSpaceComplexity(paramCount),
       averageExecutionTime: undefined,
       memoryUsage: undefined,
-      cpuIntensity: paramCount > 3 ? IntensityLevel._MEDIUM : IntensityLevel._LOW,
+      cpuIntensity:
+        paramCount > 3 ? IntensityLevel._MEDIUM : IntensityLevel._LOW,
       ioIntensity: isAsync ? IntensityLevel._MEDIUM : IntensityLevel._LOW,
-      networkUsage: isAsync ? IntensityLevel._LOW : IntensityLevel._NONE
+      networkUsage: isAsync ? IntensityLevel._LOW : IntensityLevel._NONE,
     };
   }
 
@@ -890,24 +993,26 @@ export class MetadataManagerService {
    * Estimate time complexity based on parameters
    */
   private estimateTimeComplexity(paramCount: number): string {
-    if (paramCount === 0) return 'O(1)';
-    if (paramCount <= 2) return 'O(1)';
-    if (paramCount <= 5) return 'O(n)';
-    return 'O(n²)';
+    if (paramCount === 0) return "O(1)";
+    if (paramCount <= 2) return "O(1)";
+    if (paramCount <= 5) return "O(n)";
+    return "O(n²)";
   }
 
   /**
    * Estimate space complexity based on parameters
    */
   private estimateSpaceComplexity(paramCount: number): string {
-    if (paramCount <= 3) return 'O(1)';
-    return 'O(n)';
+    if (paramCount <= 3) return "O(1)";
+    return "O(n)";
   }
 
   /**
    * Assess documentation quality
    */
-  private assessDocumentationQuality(metadata: FunctionMetadata): DocumentationQuality {
+  private assessDocumentationQuality(
+    metadata: FunctionMetadata,
+  ): DocumentationQuality {
     let score = 0;
 
     // Check description quality
@@ -955,7 +1060,10 @@ export class MetadataManagerService {
   /**
    * Calculate extraction confidence
    */
-  private calculateConfidence(metadata: FunctionMetadata, mode: MetadataExtractionMode): number {
+  private calculateConfidence(
+    metadata: FunctionMetadata,
+    mode: MetadataExtractionMode,
+  ): number {
     let confidence = 0.5;
 
     // Base confidence by mode
@@ -996,7 +1104,7 @@ export class MetadataManagerService {
    */
   private async generateImprovementSuggestions(
     metadata: FunctionMetadata,
-    functionEntry: FunctionRegistryEntry
+    functionEntry: FunctionRegistryEntry,
   ): Promise<MetadataImprovementSuggestion[]> {
     const suggestions: MetadataImprovementSuggestion[] = [];
 
@@ -1004,11 +1112,11 @@ export class MetadataManagerService {
     if (!metadata.description || metadata.description.length < 20) {
       suggestions.push({
         type: SuggestionType._IMPROVE_DESCRIPTION,
-        field: 'description',
-        current: metadata.description || '',
+        field: "description",
+        current: metadata.description || "",
         suggested: `Provide a detailed description of what ${functionEntry.name} does`,
-        reason: 'Clear descriptions improve code maintainability',
-        priority: SuggestionPriority._HIGH
+        reason: "Clear descriptions improve code maintainability",
+        priority: SuggestionPriority._HIGH,
       });
     }
 
@@ -1016,11 +1124,11 @@ export class MetadataManagerService {
     if (metadata.examples.length === 0) {
       suggestions.push({
         type: SuggestionType._ADD_EXAMPLE,
-        field: 'examples',
-        current: 'No examples',
-        suggested: 'Add usage examples',
-        reason: 'Examples help developers understand how to use the function',
-        priority: SuggestionPriority._MEDIUM
+        field: "examples",
+        current: "No examples",
+        suggested: "Add usage examples",
+        reason: "Examples help developers understand how to use the function",
+        priority: SuggestionPriority._MEDIUM,
       });
     }
 
@@ -1028,11 +1136,11 @@ export class MetadataManagerService {
     if (metadata.documentation.length === 0) {
       suggestions.push({
         type: SuggestionType._ADD_DOCUMENTATION,
-        field: 'documentation',
-        current: 'No documentation links',
-        suggested: 'Add links to relevant documentation',
-        reason: 'Documentation links provide additional context',
-        priority: SuggestionPriority._LOW
+        field: "documentation",
+        current: "No documentation links",
+        suggested: "Add links to relevant documentation",
+        reason: "Documentation links provide additional context",
+        priority: SuggestionPriority._LOW,
       });
     }
 
@@ -1045,40 +1153,40 @@ export class MetadataManagerService {
   private async loadDocumentationTemplates(): Promise<void> {
     // Load default templates
     const defaultTemplate: DocumentationTemplate = {
-      name: 'default',
-      description: 'Default function documentation template',
-      category: 'general',
+      name: "default",
+      description: "Default function documentation template",
+      category: "general",
       sections: [
         {
-          name: 'description',
+          name: "description",
           required: true,
-          template: '## Description\n\n{{description}}\n\n',
-          placeholders: ['description']
+          template: "## Description\n\n{{description}}\n\n",
+          placeholders: ["description"],
         },
         {
-          name: 'parameters',
+          name: "parameters",
           required: false,
-          template: '## Parameters\n\n{{parameters}}\n\n',
-          placeholders: ['parameters']
+          template: "## Parameters\n\n{{parameters}}\n\n",
+          placeholders: ["parameters"],
         },
         {
-          name: 'examples',
+          name: "examples",
           required: false,
-          template: '## Examples\n\n{{examples}}\n\n',
-          placeholders: ['examples']
-        }
+          template: "## Examples\n\n{{examples}}\n\n",
+          placeholders: ["examples"],
+        },
       ],
       variables: [
         {
-          name: 'description',
-          type: 'string',
-          description: 'Function description'
-        }
+          name: "description",
+          type: "string",
+          description: "Function description",
+        },
       ],
-      examples: ['Default template example']
+      examples: ["Default template example"],
     };
 
-    this.documentationTemplates.set('default', defaultTemplate);
+    this.documentationTemplates.set("default", defaultTemplate);
   }
 
   /**
@@ -1087,14 +1195,21 @@ export class MetadataManagerService {
   private async applyDocumentationTemplate(
     template: DocumentationTemplate,
     functionEntry: FunctionRegistryEntry,
-    metadata: FunctionMetadata
+    metadata: FunctionMetadata,
   ): Promise<string> {
-    let documentation = '';
+    let documentation = "";
 
     // Apply each section
     for (const section of template.sections) {
-      if (section.required || this.shouldIncludeSection(section.name, metadata)) {
-        const sectionContent = this.renderTemplateSection(section, functionEntry, metadata);
+      if (
+        section.required ||
+        this.shouldIncludeSection(section.name, metadata)
+      ) {
+        const sectionContent = this.renderTemplateSection(
+          section,
+          functionEntry,
+          metadata,
+        );
         documentation += sectionContent;
       }
     }
@@ -1105,11 +1220,14 @@ export class MetadataManagerService {
   /**
    * Check if section should be included
    */
-  private shouldIncludeSection(sectionName: string, metadata: FunctionMetadata): boolean {
+  private shouldIncludeSection(
+    sectionName: string,
+    metadata: FunctionMetadata,
+  ): boolean {
     switch (sectionName) {
-      case 'examples':
+      case "examples":
         return metadata.examples.length > 0;
-      case 'documentation':
+      case "documentation":
         return metadata.documentation.length > 0;
       default:
         return true;
@@ -1122,14 +1240,18 @@ export class MetadataManagerService {
   private renderTemplateSection(
     section: DocumentationSection,
     functionEntry: FunctionRegistryEntry,
-    metadata: FunctionMetadata
+    metadata: FunctionMetadata,
   ): string {
     let content = section.template;
 
     // Replace placeholders
     for (const placeholder of section.placeholders) {
-      const value = this.getPlaceholderValue(placeholder, functionEntry, metadata);
-      content = content.replace(new RegExp(`{{${placeholder}}}`, 'g'), value);
+      const value = this.getPlaceholderValue(
+        placeholder,
+        functionEntry,
+        metadata,
+      );
+      content = content.replace(new RegExp(`{{${placeholder}}}`, "g"), value);
     }
 
     return content;
@@ -1141,17 +1263,17 @@ export class MetadataManagerService {
   private getPlaceholderValue(
     placeholder: string,
     functionEntry: FunctionRegistryEntry,
-    metadata: FunctionMetadata
+    metadata: FunctionMetadata,
   ): string {
     switch (placeholder) {
-      case 'description':
+      case "description":
         return metadata.description;
-      case 'parameters':
+      case "parameters":
         return this.formatParameters(functionEntry.signature.parameters);
-      case 'examples':
+      case "examples":
         return this.formatExamples(metadata.examples);
       default:
-        return '';
+        return "";
     }
   }
 
@@ -1160,12 +1282,15 @@ export class MetadataManagerService {
    */
   private formatParameters(parameters: any[]): string {
     if (parameters.length === 0) {
-      return 'No parameters required.';
+      return "No parameters required.";
     }
 
     return parameters
-      .map(param => `- **${param.name}** (${param.type.name}): ${param.description || 'Parameter description'}`)
-      .join('\n');
+      .map(
+        (param) =>
+          `- **${param.name}** (${param.type.name}): ${param.description || "Parameter description"}`,
+      )
+      .join("\n");
   }
 
   /**
@@ -1173,12 +1298,15 @@ export class MetadataManagerService {
    */
   private formatExamples(examples: FunctionExample[]): string {
     if (examples.length === 0) {
-      return 'No examples available.';
+      return "No examples available.";
     }
 
     return examples
-      .map(example => `### ${example.title}\n\n${example.description}\n\n\`\`\`typescript\n${example.code}\n\`\`\``)
-      .join('\n\n');
+      .map(
+        (example) =>
+          `### ${example.title}\n\n${example.description}\n\n\`\`\`typescript\n${example.code}\n\`\`\``,
+      )
+      .join("\n\n");
   }
 
   /**
@@ -1191,38 +1319,56 @@ export class MetadataManagerService {
    */
 
   // Placeholder implementations for referenced methods
-  private async generateComprehensiveExamples(functionEntry: FunctionRegistryEntry): Promise<FunctionExample[]> {
+  private async generateComprehensiveExamples(
+    functionEntry: FunctionRegistryEntry,
+  ): Promise<FunctionExample[]> {
     return [];
   }
 
-  private async findRelatedFunctions(functionEntry: FunctionRegistryEntry): Promise<string[]> {
+  private async findRelatedFunctions(
+    functionEntry: FunctionRegistryEntry,
+  ): Promise<string[]> {
     return [];
   }
 
-  private async extractDocumentationLinks(functionEntry: FunctionRegistryEntry, sourceCode: string): Promise<DocumentationLink[]> {
+  private async extractDocumentationLinks(
+    functionEntry: FunctionRegistryEntry,
+    sourceCode: string,
+  ): Promise<DocumentationLink[]> {
     return [];
   }
 
-  private enhanceDescription(description: string, semanticAnalysis: SemanticAnalysisResult): string {
+  private enhanceDescription(
+    description: string,
+    semanticAnalysis: SemanticAnalysisResult,
+  ): string {
     return description;
   }
 
-  private async inferFunctionPurpose(functionEntry: FunctionRegistryEntry, sourceCode: string): Promise<string> {
+  private async inferFunctionPurpose(
+    functionEntry: FunctionRegistryEntry,
+    sourceCode: string,
+  ): Promise<string> {
     return this.inferPurposeFromName(functionEntry.name);
   }
 
-  private categorizeFunction(functionEntry: FunctionRegistryEntry, sourceCode: string): FunctionCategory {
+  private categorizeFunction(
+    functionEntry: FunctionRegistryEntry,
+    sourceCode: string,
+  ): FunctionCategory {
     return FunctionCategory._UTILITY;
   }
 
-  private calculatePerformanceTrends(benchmarks: PerformanceBenchmark[]): PerformanceTrend[] {
+  private calculatePerformanceTrends(
+    benchmarks: PerformanceBenchmark[],
+  ): PerformanceTrend[] {
     return [];
   }
 
   private async generatePerformanceRecommendations(
     characteristics: PerformanceCharacteristics,
     benchmarks: PerformanceBenchmark[],
-    trends: PerformanceTrend[]
+    trends: PerformanceTrend[],
   ): Promise<PerformanceRecommendation[]> {
     return [];
   }
@@ -1234,7 +1380,7 @@ export class MetadataManagerService {
   private assessMaintainability(sourceCode: string): MaintainabilityScore {
     return {
       score: 0.8,
-      factors: []
+      factors: [],
     };
   }
 

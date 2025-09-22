@@ -66,12 +66,12 @@ export enum ScreenshotType {
  * Image quality levels for optimization
  */
 export enum ImageQuality {
-  MAXIMUM = 'maximum',     // 100% quality, largest file
-  HIGH = 'high',           // 90% quality
-  STANDARD = 'standard',   // 80% quality (default)
+  MAXIMUM = 'maximum', // 100% quality, largest file
+  HIGH = 'high', // 90% quality
+  STANDARD = 'standard', // 80% quality (default)
   OPTIMIZED = 'optimized', // 70% quality, good compression
   COMPRESSED = 'compressed', // 60% quality, high compression
-  MINIMAL = 'minimal',     // 40% quality, smallest file
+  MINIMAL = 'minimal', // 40% quality, smallest file
 }
 
 /**
@@ -96,12 +96,12 @@ export enum ImageProcessingOperation {
  * Storage options for screenshots
  */
 export enum StorageOption {
-  MEMORY = 'memory',         // Keep in memory only
+  MEMORY = 'memory', // Keep in memory only
   LOCAL_DISK = 'local_disk', // Save to local filesystem
   CLOUD_STORAGE = 'cloud_storage', // Upload to cloud storage
-  DATABASE = 'database',     // Store in database as BLOB
-  CDN = 'cdn',              // Upload to CDN
-  TEMPORARY = 'temporary',   // Temporary storage with TTL
+  DATABASE = 'database', // Store in database as BLOB
+  CDN = 'cdn', // Upload to CDN
+  TEMPORARY = 'temporary', // Temporary storage with TTL
 }
 
 /**
@@ -251,7 +251,10 @@ export class ImageProcessing {
   })
   @IsOptional()
   @IsArray({ message: 'Operations must be an array' })
-  @IsEnum(ImageProcessingOperation, { each: true, message: 'Invalid processing operation' })
+  @IsEnum(ImageProcessingOperation, {
+    each: true,
+    message: 'Invalid processing operation',
+  })
   @ArrayMaxSize(10, { message: 'Too many processing operations' })
   operations?: ImageProcessingOperation[];
 
@@ -302,12 +305,12 @@ export class ImageProcessing {
   @IsOptional()
   @IsObject()
   filters?: {
-    brightness?: number;    // -100 to 100
-    contrast?: number;      // -100 to 100
-    saturation?: number;    // -100 to 100
-    hue?: number;          // -180 to 180
-    blur?: number;         // 0 to 10
-    sharpen?: number;      // 0 to 10
+    brightness?: number; // -100 to 100
+    contrast?: number; // -100 to 100
+    saturation?: number; // -100 to 100
+    hue?: number; // -180 to 180
+    blur?: number; // 0 to 10
+    sharpen?: number; // 0 to 10
   };
 
   @ApiPropertyOptional({
@@ -318,7 +321,12 @@ export class ImageProcessing {
   watermark?: {
     text?: string;
     image?: string;
-    position?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center';
+    position?:
+      | 'top-left'
+      | 'top-right'
+      | 'bottom-left'
+      | 'bottom-right'
+      | 'center';
     opacity?: number;
     scale?: number;
   };
@@ -454,7 +462,7 @@ export class CaptureScreenshotDto {
   @IsString({ message: 'Element selector must be a string' })
   @MaxLength(1000, { message: 'Element selector too long' })
   @Matches(/^[a-zA-Z0-9\s\-_#.,:[\]()>"'=*+~^$|\\]+$/, {
-    message: 'Invalid CSS selector format'
+    message: 'Invalid CSS selector format',
   })
   elementSelector?: string;
 
@@ -521,7 +529,7 @@ export class CaptureScreenshotDto {
   @MinLength(1, { message: 'Filename cannot be empty' })
   @MaxLength(200, { message: 'Filename too long' })
   @Matches(/^[a-zA-Z0-9\-_. ]+$/, {
-    message: 'Filename contains invalid characters'
+    message: 'Filename contains invalid characters',
   })
   filename?: string;
 
@@ -730,7 +738,11 @@ export class ScreenshotResponseDto {
   error?: {
     code: string;
     message: string;
-    category: 'capture_failed' | 'processing_failed' | 'storage_failed' | 'validation_failed';
+    category:
+      | 'capture_failed'
+      | 'processing_failed'
+      | 'storage_failed'
+      | 'validation_failed';
     severity: 'low' | 'medium' | 'high' | 'critical';
     retryable: boolean;
     context: {

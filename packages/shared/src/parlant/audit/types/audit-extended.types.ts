@@ -19,8 +19,8 @@ import {
   ComplianceFramework,
   SensitiveDataType,
   RiskLevel,
-} from './audit-core.types';
-import { ParlantValidationResponse } from '../../../types/parlant.types';
+} from "./audit-core.types";
+import { ParlantValidationResponse } from "../../../types/parlant.types";
 
 // ===========================
 // AUDIT PARLANT RESPONSE
@@ -96,26 +96,26 @@ export interface ProcessingStep {
  * Processing step types
  */
 export enum ProcessingStepType {
-  PARSING = 'parsing',
-  VALIDATION = 'validation',
-  TRANSFORMATION = 'transformation',
-  ENRICHMENT = 'enrichment',
-  FILTERING = 'filtering',
-  AGGREGATION = 'aggregation',
-  NORMALIZATION = 'normalization',
-  SERIALIZATION = 'serialization',
+  PARSING = "parsing",
+  VALIDATION = "validation",
+  TRANSFORMATION = "transformation",
+  ENRICHMENT = "enrichment",
+  FILTERING = "filtering",
+  AGGREGATION = "aggregation",
+  NORMALIZATION = "normalization",
+  SERIALIZATION = "serialization",
 }
 
 /**
  * Processing step status
  */
 export enum ProcessingStepStatus {
-  PENDING = 'pending',
-  RUNNING = 'running',
-  COMPLETED = 'completed',
-  FAILED = 'failed',
-  SKIPPED = 'skipped',
-  TIMEOUT = 'timeout',
+  PENDING = "pending",
+  RUNNING = "running",
+  COMPLETED = "completed",
+  FAILED = "failed",
+  SKIPPED = "skipped",
+  TIMEOUT = "timeout",
 }
 
 /**
@@ -188,25 +188,25 @@ export interface QualityAssuranceCheck {
  * Quality check types
  */
 export enum QualityCheckType {
-  COMPLETENESS = 'completeness',
-  ACCURACY = 'accuracy',
-  CONSISTENCY = 'consistency',
-  RELEVANCE = 'relevance',
-  TIMELINESS = 'timeliness',
-  VALIDITY = 'validity',
-  UNIQUENESS = 'uniqueness',
-  INTEGRITY = 'integrity',
+  COMPLETENESS = "completeness",
+  ACCURACY = "accuracy",
+  CONSISTENCY = "consistency",
+  RELEVANCE = "relevance",
+  TIMELINESS = "timeliness",
+  VALIDITY = "validity",
+  UNIQUENESS = "uniqueness",
+  INTEGRITY = "integrity",
 }
 
 /**
  * Quality check results
  */
 export enum QualityCheckResult {
-  PASSED = 'passed',
-  FAILED = 'failed',
-  WARNING = 'warning',
-  INFORMATION = 'information',
-  NOT_APPLICABLE = 'not_applicable',
+  PASSED = "passed",
+  FAILED = "failed",
+  WARNING = "warning",
+  INFORMATION = "information",
+  NOT_APPLICABLE = "not_applicable",
 }
 
 /**
@@ -282,25 +282,25 @@ export interface DecisionFactor {
  * Decision factor categories
  */
 export enum DecisionFactorCategory {
-  SECURITY = 'security',
-  COMPLIANCE = 'compliance',
-  RISK = 'risk',
-  PERFORMANCE = 'performance',
-  BUSINESS = 'business',
-  TECHNICAL = 'technical',
-  USER = 'user',
-  CONTEXTUAL = 'contextual',
+  SECURITY = "security",
+  COMPLIANCE = "compliance",
+  RISK = "risk",
+  PERFORMANCE = "performance",
+  BUSINESS = "business",
+  TECHNICAL = "technical",
+  USER = "user",
+  CONTEXTUAL = "contextual",
 }
 
 /**
  * Influence levels
  */
 export enum InfluenceLevel {
-  NEGLIGIBLE = 'negligible',
-  LOW = 'low',
-  MODERATE = 'moderate',
-  HIGH = 'high',
-  CRITICAL = 'critical',
+  NEGLIGIBLE = "negligible",
+  LOW = "low",
+  MODERATE = "moderate",
+  HIGH = "high",
+  CRITICAL = "critical",
 }
 
 /**
@@ -330,10 +330,10 @@ export interface DecisionTreeNode {
  * Decision node types
  */
 export enum DecisionNodeType {
-  ROOT = 'root',
-  CONDITION = 'condition',
-  DECISION = 'decision',
-  LEAF = 'leaf',
+  ROOT = "root",
+  CONDITION = "condition",
+  DECISION = "decision",
+  LEAF = "leaf",
 }
 
 /**
@@ -383,12 +383,12 @@ export interface ImpactAssessment {
  * Impact levels
  */
 export enum ImpactLevel {
-  MINIMAL = 'minimal',
-  LOW = 'low',
-  MODERATE = 'moderate',
-  HIGH = 'high',
-  SEVERE = 'severe',
-  CATASTROPHIC = 'catastrophic',
+  MINIMAL = "minimal",
+  LOW = "low",
+  MODERATE = "moderate",
+  HIGH = "high",
+  SEVERE = "severe",
+  CATASTROPHIC = "catastrophic",
 }
 
 /**
@@ -441,26 +441,26 @@ export interface EvidenceItem {
  * Evidence types
  */
 export enum EvidenceType {
-  HISTORICAL_DATA = 'historical_data',
-  STATISTICAL_ANALYSIS = 'statistical_analysis',
-  EXPERT_OPINION = 'expert_opinion',
-  POLICY_REFERENCE = 'policy_reference',
-  TECHNICAL_ANALYSIS = 'technical_analysis',
-  USER_FEEDBACK = 'user_feedback',
-  SYSTEM_METRICS = 'system_metrics',
-  THIRD_PARTY_VALIDATION = 'third_party_validation',
+  HISTORICAL_DATA = "historical_data",
+  STATISTICAL_ANALYSIS = "statistical_analysis",
+  EXPERT_OPINION = "expert_opinion",
+  POLICY_REFERENCE = "policy_reference",
+  TECHNICAL_ANALYSIS = "technical_analysis",
+  USER_FEEDBACK = "user_feedback",
+  SYSTEM_METRICS = "system_metrics",
+  THIRD_PARTY_VALIDATION = "third_party_validation",
 }
 
 /**
  * Reliability levels
  */
 export enum ReliabilityLevel {
-  VERY_LOW = 'very_low',
-  LOW = 'low',
-  MODERATE = 'moderate',
-  HIGH = 'high',
-  VERY_HIGH = 'very_high',
-  ABSOLUTE = 'absolute',
+  VERY_LOW = "very_low",
+  LOW = "low",
+  MODERATE = "moderate",
+  HIGH = "high",
+  VERY_HIGH = "very_high",
+  ABSOLUTE = "absolute",
 }
 
 /**
@@ -527,12 +527,12 @@ export interface ConfidenceFactor {
  * Confidence factor categories
  */
 export enum ConfidenceFactorCategory {
-  DATA_QUALITY = 'data_quality',
-  MODEL_PERFORMANCE = 'model_performance',
-  HISTORICAL_ACCURACY = 'historical_accuracy',
-  DOMAIN_EXPERTISE = 'domain_expertise',
-  CONTEXTUAL_RELEVANCE = 'contextual_relevance',
-  VALIDATION_COVERAGE = 'validation_coverage',
+  DATA_QUALITY = "data_quality",
+  MODEL_PERFORMANCE = "model_performance",
+  HISTORICAL_ACCURACY = "historical_accuracy",
+  DOMAIN_EXPERTISE = "domain_expertise",
+  CONTEXTUAL_RELEVANCE = "contextual_relevance",
+  VALIDATION_COVERAGE = "validation_coverage",
 }
 
 /**
@@ -576,13 +576,13 @@ export interface UncertaintySource {
  * Uncertainty source types
  */
 export enum UncertaintySourceType {
-  DATA_INCOMPLETE = 'data_incomplete',
-  DATA_INACCURATE = 'data_inaccurate',
-  MODEL_LIMITATION = 'model_limitation',
-  ENVIRONMENTAL_CHANGE = 'environmental_change',
-  HUMAN_FACTOR = 'human_factor',
-  SYSTEM_VARIABILITY = 'system_variability',
-  EXTERNAL_DEPENDENCY = 'external_dependency',
+  DATA_INCOMPLETE = "data_incomplete",
+  DATA_INACCURATE = "data_inaccurate",
+  MODEL_LIMITATION = "model_limitation",
+  ENVIRONMENTAL_CHANGE = "environmental_change",
+  HUMAN_FACTOR = "human_factor",
+  SYSTEM_VARIABILITY = "system_variability",
+  EXTERNAL_DEPENDENCY = "external_dependency",
 }
 
 /**
@@ -623,13 +623,13 @@ export interface DistributionParameters {
  * Distribution types
  */
 export enum DistributionType {
-  NORMAL = 'normal',
-  UNIFORM = 'uniform',
-  EXPONENTIAL = 'exponential',
-  BETA = 'beta',
-  GAMMA = 'gamma',
-  POISSON = 'poisson',
-  BINOMIAL = 'binomial',
+  NORMAL = "normal",
+  UNIFORM = "uniform",
+  EXPONENTIAL = "exponential",
+  BETA = "beta",
+  GAMMA = "gamma",
+  POISSON = "poisson",
+  BINOMIAL = "binomial",
 }
 
 /**
@@ -784,11 +784,11 @@ export interface InteractionEffect {
  * Interaction effect types
  */
 export enum InteractionEffectType {
-  SYNERGISTIC = 'synergistic',
-  ANTAGONISTIC = 'antagonistic',
-  MULTIPLICATIVE = 'multiplicative',
-  ADDITIVE = 'additive',
-  CONDITIONAL = 'conditional',
+  SYNERGISTIC = "synergistic",
+  ANTAGONISTIC = "antagonistic",
+  MULTIPLICATIVE = "multiplicative",
+  ADDITIVE = "additive",
+  CONDITIONAL = "conditional",
 }
 
 /**
@@ -835,24 +835,24 @@ export interface StressTestResult {
  * Stress test types
  */
 export enum StressTestType {
-  LOAD_TESTING = 'load_testing',
-  VOLUME_TESTING = 'volume_testing',
-  SPIKE_TESTING = 'spike_testing',
-  ENDURANCE_TESTING = 'endurance_testing',
-  BOUNDARY_TESTING = 'boundary_testing',
-  CHAOS_TESTING = 'chaos_testing',
+  LOAD_TESTING = "load_testing",
+  VOLUME_TESTING = "volume_testing",
+  SPIKE_TESTING = "spike_testing",
+  ENDURANCE_TESTING = "endurance_testing",
+  BOUNDARY_TESTING = "boundary_testing",
+  CHAOS_TESTING = "chaos_testing",
 }
 
 /**
  * Stress test outcomes
  */
 export enum StressTestOutcome {
-  PASSED = 'passed',
-  FAILED = 'failed',
-  DEGRADED = 'degraded',
-  UNSTABLE = 'unstable',
-  TIMEOUT = 'timeout',
-  ERROR = 'error',
+  PASSED = "passed",
+  FAILED = "failed",
+  DEGRADED = "degraded",
+  UNSTABLE = "unstable",
+  TIMEOUT = "timeout",
+  ERROR = "error",
 }
 
 /**
@@ -893,11 +893,11 @@ export interface OperatingBoundary {
  * Boundary types
  */
 export enum BoundaryType {
-  HARD_LIMIT = 'hard_limit',
-  SOFT_LIMIT = 'soft_limit',
-  RECOMMENDED_RANGE = 'recommended_range',
-  PERFORMANCE_BOUNDARY = 'performance_boundary',
-  SAFETY_BOUNDARY = 'safety_boundary',
+  HARD_LIMIT = "hard_limit",
+  SOFT_LIMIT = "soft_limit",
+  RECOMMENDED_RANGE = "recommended_range",
+  PERFORMANCE_BOUNDARY = "performance_boundary",
+  SAFETY_BOUNDARY = "safety_boundary",
 }
 
 /**
@@ -927,11 +927,11 @@ export interface BoundaryViolation {
  * Boundary violation types
  */
 export enum BoundaryViolationType {
-  EXCEEDS_MAXIMUM = 'exceeds_maximum',
-  BELOW_MINIMUM = 'below_minimum',
-  OUTSIDE_OPTIMAL_RANGE = 'outside_optimal_range',
-  RATE_LIMIT_EXCEEDED = 'rate_limit_exceeded',
-  RESOURCE_EXHAUSTED = 'resource_exhausted',
+  EXCEEDS_MAXIMUM = "exceeds_maximum",
+  BELOW_MINIMUM = "below_minimum",
+  OUTSIDE_OPTIMAL_RANGE = "outside_optimal_range",
+  RATE_LIMIT_EXCEEDED = "rate_limit_exceeded",
+  RESOURCE_EXHAUSTED = "resource_exhausted",
 }
 
 /**
@@ -958,11 +958,11 @@ export interface SafetyMargin {
  * Margin adequacy levels
  */
 export enum MarginAdequacy {
-  EXCESSIVE = 'excessive',
-  ADEQUATE = 'adequate',
-  MINIMAL = 'minimal',
-  INSUFFICIENT = 'insufficient',
-  CRITICAL = 'critical',
+  EXCESSIVE = "excessive",
+  ADEQUATE = "adequate",
+  MINIMAL = "minimal",
+  INSUFFICIENT = "insufficient",
+  CRITICAL = "critical",
 }
 
 /**
@@ -995,14 +995,14 @@ export interface FailureMode {
  * Failure types
  */
 export enum FailureType {
-  HARDWARE_FAILURE = 'hardware_failure',
-  SOFTWARE_FAILURE = 'software_failure',
-  NETWORK_FAILURE = 'network_failure',
-  DATA_CORRUPTION = 'data_corruption',
-  SECURITY_BREACH = 'security_breach',
-  HUMAN_ERROR = 'human_error',
-  EXTERNAL_DEPENDENCY = 'external_dependency',
-  RESOURCE_EXHAUSTION = 'resource_exhaustion',
+  HARDWARE_FAILURE = "hardware_failure",
+  SOFTWARE_FAILURE = "software_failure",
+  NETWORK_FAILURE = "network_failure",
+  DATA_CORRUPTION = "data_corruption",
+  SECURITY_BREACH = "security_breach",
+  HUMAN_ERROR = "human_error",
+  EXTERNAL_DEPENDENCY = "external_dependency",
+  RESOURCE_EXHAUSTION = "resource_exhaustion",
 }
 
 /**
@@ -1140,14 +1140,14 @@ export interface ContentCheck {
  * Content check types
  */
 export enum ContentCheckType {
-  RELEVANCE = 'relevance',
-  ACCURACY = 'accuracy',
-  COMPLETENESS = 'completeness',
-  CLARITY = 'clarity',
-  CONSISTENCY = 'consistency',
-  APPROPRIATENESS = 'appropriateness',
-  BIAS_DETECTION = 'bias_detection',
-  SENTIMENT_ANALYSIS = 'sentiment_analysis',
+  RELEVANCE = "relevance",
+  ACCURACY = "accuracy",
+  COMPLETENESS = "completeness",
+  CLARITY = "clarity",
+  CONSISTENCY = "consistency",
+  APPROPRIATENESS = "appropriateness",
+  BIAS_DETECTION = "bias_detection",
+  SENTIMENT_ANALYSIS = "sentiment_analysis",
 }
 
 /**
@@ -1194,13 +1194,13 @@ export interface BiasIndicator {
  * Bias types
  */
 export enum BiasType {
-  GENDER_BIAS = 'gender_bias',
-  RACIAL_BIAS = 'racial_bias',
-  AGE_BIAS = 'age_bias',
-  CULTURAL_BIAS = 'cultural_bias',
-  CONFIRMATION_BIAS = 'confirmation_bias',
-  SELECTION_BIAS = 'selection_bias',
-  ANCHORING_BIAS = 'anchoring_bias',
+  GENDER_BIAS = "gender_bias",
+  RACIAL_BIAS = "racial_bias",
+  AGE_BIAS = "age_bias",
+  CULTURAL_BIAS = "cultural_bias",
+  CONFIRMATION_BIAS = "confirmation_bias",
+  SELECTION_BIAS = "selection_bias",
+  ANCHORING_BIAS = "anchoring_bias",
 }
 
 /**
@@ -1278,12 +1278,12 @@ export interface StyleIssue {
  * Style issue types
  */
 export enum StyleIssueType {
-  PASSIVE_VOICE = 'passive_voice',
-  WORDINESS = 'wordiness',
-  UNCLEAR_REFERENCE = 'unclear_reference',
-  INCONSISTENT_TERMINOLOGY = 'inconsistent_terminology',
-  INAPPROPRIATE_TONE = 'inappropriate_tone',
-  POOR_STRUCTURE = 'poor_structure',
+  PASSIVE_VOICE = "passive_voice",
+  WORDINESS = "wordiness",
+  UNCLEAR_REFERENCE = "unclear_reference",
+  INCONSISTENT_TERMINOLOGY = "inconsistent_terminology",
+  INAPPROPRIATE_TONE = "inappropriate_tone",
+  POOR_STRUCTURE = "poor_structure",
 }
 
 /**
@@ -1361,11 +1361,11 @@ export interface DeviationAnalysis {
  * Acceptability levels
  */
 export enum AcceptabilityLevel {
-  FULLY_ACCEPTABLE = 'fully_acceptable',
-  ACCEPTABLE = 'acceptable',
-  QUESTIONABLE = 'questionable',
-  UNACCEPTABLE = 'unacceptable',
-  HIGHLY_CONCERNING = 'highly_concerning',
+  FULLY_ACCEPTABLE = "fully_acceptable",
+  ACCEPTABLE = "acceptable",
+  QUESTIONABLE = "questionable",
+  UNACCEPTABLE = "unacceptable",
+  HIGHLY_CONCERNING = "highly_concerning",
 }
 
 /**
@@ -1392,12 +1392,12 @@ export interface TrendAnalysis {
  * Trend directions
  */
 export enum TrendDirection {
-  INCREASING = 'increasing',
-  DECREASING = 'decreasing',
-  STABLE = 'stable',
-  CYCLICAL = 'cyclical',
-  VOLATILE = 'volatile',
-  UNKNOWN = 'unknown',
+  INCREASING = "increasing",
+  DECREASING = "decreasing",
+  STABLE = "stable",
+  CYCLICAL = "cyclical",
+  VOLATILE = "volatile",
+  UNKNOWN = "unknown",
 }
 
 /**
@@ -1486,11 +1486,11 @@ export interface Contradiction {
  * Contradiction types
  */
 export enum ContradictionType {
-  LOGICAL_CONTRADICTION = 'logical_contradiction',
-  FACTUAL_CONTRADICTION = 'factual_contradiction',
-  TEMPORAL_CONTRADICTION = 'temporal_contradiction',
-  CAUSAL_CONTRADICTION = 'causal_contradiction',
-  DEFINITIONAL_CONTRADICTION = 'definitional_contradiction',
+  LOGICAL_CONTRADICTION = "logical_contradiction",
+  FACTUAL_CONTRADICTION = "factual_contradiction",
+  TEMPORAL_CONTRADICTION = "temporal_contradiction",
+  CAUSAL_CONTRADICTION = "causal_contradiction",
+  DEFINITIONAL_CONTRADICTION = "definitional_contradiction",
 }
 
 /**
@@ -1602,24 +1602,24 @@ export interface ExternalReference {
  * Reference types
  */
 export enum ReferenceType {
-  ACADEMIC_PAPER = 'academic_paper',
-  TECHNICAL_DOCUMENTATION = 'technical_documentation',
-  POLICY_DOCUMENT = 'policy_document',
-  LEGAL_STATUTE = 'legal_statute',
-  INDUSTRY_STANDARD = 'industry_standard',
-  INTERNAL_DOCUMENT = 'internal_document',
-  WEB_RESOURCE = 'web_resource',
+  ACADEMIC_PAPER = "academic_paper",
+  TECHNICAL_DOCUMENTATION = "technical_documentation",
+  POLICY_DOCUMENT = "policy_document",
+  LEGAL_STATUTE = "legal_statute",
+  INDUSTRY_STANDARD = "industry_standard",
+  INTERNAL_DOCUMENT = "internal_document",
+  WEB_RESOURCE = "web_resource",
 }
 
 /**
  * Reference validity
  */
 export enum ReferenceValidity {
-  VALID = 'valid',
-  INVALID = 'invalid',
-  QUESTIONABLE = 'questionable',
-  UNVERIFIABLE = 'unverifiable',
-  OUTDATED = 'outdated',
+  VALID = "valid",
+  INVALID = "invalid",
+  QUESTIONABLE = "questionable",
+  UNVERIFIABLE = "unverifiable",
+  OUTDATED = "outdated",
 }
 
 /**
@@ -1714,11 +1714,11 @@ export interface MissingElement {
  * Importance levels
  */
 export enum ImportanceLevel {
-  CRITICAL = 'critical',
-  HIGH = 'high',
-  MEDIUM = 'medium',
-  LOW = 'low',
-  OPTIONAL = 'optional',
+  CRITICAL = "critical",
+  HIGH = "high",
+  MEDIUM = "medium",
+  LOW = "low",
+  OPTIONAL = "optional",
 }
 
 /**
@@ -1738,4 +1738,4 @@ export interface OptionalElement {
   recommendation: string;
 }
 
-export * from './audit-extended.types';
+export * from "./audit-extended.types";

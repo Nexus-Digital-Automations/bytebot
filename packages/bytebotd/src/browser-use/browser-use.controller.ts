@@ -588,14 +588,14 @@ export class BrowserUseController {
         sessionStatus = (await this.browserSessionService.getSessions({
           status: undefined,
           limit: 1,
-          offset: 0
+          offset: 0,
         })) as any;
       } else {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
         allSessions = (await this.browserSessionService.getSessions({
           status: undefined,
           limit: 100,
-          offset: 0
+          offset: 0,
         })) as any;
       }
 

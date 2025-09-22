@@ -21,7 +21,7 @@ export {
   type CacheStrategy,
   type RetryPolicy,
   type ValidationPerformanceTarget,
-} from './core/universal-parlant-middleware';
+} from "./core/universal-parlant-middleware";
 
 // ===== ENHANCED DECORATORS =====
 export {
@@ -38,7 +38,7 @@ export {
   PARLANT_AUDIT_METADATA_KEY,
   PARLANT_CACHE_METADATA_KEY,
   PARLANT_TYPE_METADATA_KEY,
-} from './decorators/enhanced-parlant-decorators';
+} from "./decorators/enhanced-parlant-decorators";
 
 export type {
   EnhancedParlantValidationConfig,
@@ -57,12 +57,10 @@ export type {
   ReturnValueValidator,
   MethodPerformanceMetrics,
   MethodAuditEvent,
-} from './decorators/enhanced-parlant-decorators';
+} from "./decorators/enhanced-parlant-decorators";
 
 // ===== REQUEST/RESPONSE INTERCEPTORS =====
-export {
-  ParlantRequestResponseInterceptor,
-} from './interceptors/parlant-request-response-interceptor';
+export { ParlantRequestResponseInterceptor } from "./interceptors/parlant-request-response-interceptor";
 
 export type {
   ParlantInterceptorConfig,
@@ -72,7 +70,7 @@ export type {
   ProcessingStage,
   ThreatDetectionResult,
   ResponseTransformationContext,
-} from './interceptors/parlant-request-response-interceptor';
+} from "./interceptors/parlant-request-response-interceptor";
 
 // ===== ENHANCED TYPE DEFINITIONS =====
 export {
@@ -100,7 +98,7 @@ export {
   // Default configurations
   DEFAULT_PERFORMANCE_CONFIG,
   DEFAULT_SECURITY_CONFIG,
-} from './types/enhanced-parlant-types';
+} from "./types/enhanced-parlant-types";
 
 export type {
   ParlantOperationId,
@@ -169,7 +167,7 @@ export type {
   DepartmentId,
   PermissionId,
   RoleId,
-} from './types/enhanced-parlant-types';
+} from "./types/enhanced-parlant-types";
 
 // ===== INTEGRATION EXAMPLES =====
 export {
@@ -181,39 +179,39 @@ export {
   PerformanceOptimizedController,
   SecurityFocusedController,
   TasksService,
-} from './examples/basic-integration';
+} from "./examples/basic-integration";
 
 export type {
   CreateTaskDto,
   UpdateTaskDto,
   TaskQueryDto,
   Task,
-} from './examples/basic-integration';
+} from "./examples/basic-integration";
 
 // ===== UTILITY CONSTANTS =====
 
 /**
  * Framework version information
  */
-export const PARLANT_MIDDLEWARE_VERSION = '2.0.0';
+export const PARLANT_MIDDLEWARE_VERSION = "2.0.0";
 
 /**
  * Performance targets for validation
  */
 export const PERFORMANCE_TARGETS = {
-  FAST: 100,       // Sub-100ms for cached operations
-  STANDARD: 500,   // Sub-500ms for standard operations
-  COMPLEX: 1000,   // Sub-1000ms for complex operations
-  CRITICAL: 5000,  // Sub-5000ms for critical operations
+  FAST: 100, // Sub-100ms for cached operations
+  STANDARD: 500, // Sub-500ms for standard operations
+  COMPLEX: 1000, // Sub-1000ms for complex operations
+  CRITICAL: 5000, // Sub-5000ms for critical operations
 } as const;
 
 /**
  * Default cache TTL values (in milliseconds)
  */
 export const CACHE_TTL = {
-  SHORT: 60000,      // 1 minute
-  MEDIUM: 300000,    // 5 minutes
-  LONG: 1800000,     // 30 minutes
+  SHORT: 60000, // 1 minute
+  MEDIUM: 300000, // 5 minutes
+  LONG: 1800000, // 30 minutes
   EXTENDED: 3600000, // 1 hour
 } as const;
 
@@ -246,7 +244,7 @@ export const RISK_LEVEL_SCORES = {
  */
 export function createBasicValidationConfig(
   intent: string,
-  securityLevel: SecurityLevel = SecurityLevel._MEDIUM
+  securityLevel: SecurityLevel = SecurityLevel._MEDIUM,
 ): EnhancedParlantValidationConfig {
   return {
     intent,
@@ -269,7 +267,7 @@ export function createBasicValidationConfig(
  */
 export function createPerformanceValidationConfig(
   intent: string,
-  targetTime: number = PERFORMANCE_TARGETS.FAST
+  targetTime: number = PERFORMANCE_TARGETS.FAST,
 ): EnhancedParlantValidationConfig {
   return {
     intent,
@@ -280,7 +278,7 @@ export function createPerformanceValidationConfig(
     cachingStrategy: {
       enabled: true,
       ttl: CACHE_TTL.MEDIUM,
-      scope: 'user',
+      scope: "user",
     },
     parameterValidation: {
       validateTypes: false, // Skip for performance
@@ -294,7 +292,7 @@ export function createPerformanceValidationConfig(
  */
 export function createSecurityValidationConfig(
   intent: string,
-  requiredRoles: string[] = []
+  requiredRoles: string[] = [],
 ): EnhancedParlantValidationConfig {
   return {
     intent,
@@ -319,9 +317,9 @@ export function createSecurityValidationConfig(
     customErrorHandling: {
       escalationRules: [
         {
-          condition: (error) => error.message.includes('permission'),
-          escalationLevel: 'HIGH',
-          notificationTargets: ['security@company.com'],
+          condition: (error) => error.message.includes("permission"),
+          escalationLevel: "HIGH",
+          notificationTargets: ["security@company.com"],
           requiresHumanIntervention: true,
         },
       ],
@@ -335,14 +333,14 @@ export function createSecurityValidationConfig(
  * Utility type for extracting PARLANT context from request
  */
 export type ExtractParlantContext<T> = T extends EnhancedParlantRequest
-  ? T['parlant']
+  ? T["parlant"]
   : never;
 
 /**
  * Utility type for extracting user context from request
  */
 export type ExtractUserContext<T> = T extends EnhancedParlantRequest
-  ? T['user']
+  ? T["user"]
   : never;
 
 /**
@@ -350,13 +348,17 @@ export type ExtractUserContext<T> = T extends EnhancedParlantRequest
  */
 export type IsSecurityLevelSufficient<
   Required extends SecurityLevel,
-  Provided extends SecurityLevel
-> = typeof SECURITY_LEVEL_SCORES[Provided] extends infer ProvidedScore
-  ? typeof SECURITY_LEVEL_SCORES[Required] extends infer RequiredScore
+  Provided extends SecurityLevel,
+> = (typeof SECURITY_LEVEL_SCORES)[Provided] extends infer ProvidedScore
+  ? (typeof SECURITY_LEVEL_SCORES)[Required] extends infer RequiredScore
     ? ProvidedScore extends number
       ? RequiredScore extends number
-        ? ProvidedScore extends { readonly [K in keyof typeof SECURITY_LEVEL_SCORES]: number }[keyof typeof SECURITY_LEVEL_SCORES]
-          ? RequiredScore extends { readonly [K in keyof typeof SECURITY_LEVEL_SCORES]: number }[keyof typeof SECURITY_LEVEL_SCORES]
+        ? ProvidedScore extends {
+            readonly [K in keyof typeof SECURITY_LEVEL_SCORES]: number;
+          }[keyof typeof SECURITY_LEVEL_SCORES]
+          ? RequiredScore extends {
+              readonly [K in keyof typeof SECURITY_LEVEL_SCORES]: number;
+            }[keyof typeof SECURITY_LEVEL_SCORES]
             ? ProvidedScore extends RequiredScore
               ? true
               : false
@@ -373,24 +375,25 @@ export type IsSecurityLevelSufficient<
  * Enhanced PARLANT Middleware Framework information
  */
 export const FRAMEWORK_INFO = {
-  name: 'Enhanced PARLANT Universal Middleware Framework',
+  name: "Enhanced PARLANT Universal Middleware Framework",
   version: PARLANT_MIDDLEWARE_VERSION,
-  description: 'Enterprise-grade conversational validation for Bytebot ecosystem',
-  author: 'Claude Code - PARLANT Framework Team',
+  description:
+    "Enterprise-grade conversational validation for Bytebot ecosystem",
+  author: "Claude Code - PARLANT Framework Team",
   features: [
-    'Universal middleware pipeline',
-    'Sub-1000ms performance optimization',
-    'Complete TypeScript type safety',
-    'Enterprise security features',
-    'Intelligent caching strategies',
-    'Comprehensive monitoring',
-    'Advanced decorator patterns',
-    'Request/response interception',
+    "Universal middleware pipeline",
+    "Sub-1000ms performance optimization",
+    "Complete TypeScript type safety",
+    "Enterprise security features",
+    "Intelligent caching strategies",
+    "Comprehensive monitoring",
+    "Advanced decorator patterns",
+    "Request/response interception",
   ],
   compatibility: {
-    nestjs: '^10.0.0',
-    typescript: '^5.0.0',
-    node: '^18.0.0',
+    nestjs: "^10.0.0",
+    typescript: "^5.0.0",
+    node: "^18.0.0",
   },
 } as const;
 

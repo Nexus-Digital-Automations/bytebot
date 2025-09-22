@@ -562,7 +562,8 @@ export class ThreatAnalyzer {
     score: number,
     config: ThreatAnalysisConfig,
   ): ThreatSeverity {
-    if (score >= config.riskThresholds.critical) return ThreatSeverity._CRITICAL;
+    if (score >= config.riskThresholds.critical)
+      return ThreatSeverity._CRITICAL;
     if (score >= config.riskThresholds.high) return ThreatSeverity._HIGH;
     if (score >= config.riskThresholds.medium) return ThreatSeverity._MEDIUM;
     return ThreatSeverity._LOW;

@@ -11,11 +11,11 @@
  * @created 2025-09-20
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { EventEmitter } from 'events';
-import { createHash } from 'crypto';
-import { performance } from 'perf_hooks';
-import { LRUCache } from 'lru-cache';
+import { Injectable, Logger } from "@nestjs/common";
+import { EventEmitter } from "events";
+import { createHash } from "crypto";
+import { performance } from "perf_hooks";
+import { LRUCache } from "lru-cache";
 
 // Type guard utilities for error handling
 function isError(error: unknown): error is Error {
@@ -26,20 +26,20 @@ function getErrorMessage(error: unknown): string {
   if (isError(error)) {
     return error.message;
   }
-  if (typeof error === 'string') {
+  if (typeof error === "string") {
     return error;
   }
-  return 'An unknown error occurred';
+  return "An unknown error occurred";
 }
 import {
   WrapperRegistryManagementService,
-  WrapperInfo
-} from '../function-wrapper/core/wrapper-registry-management';
+  WrapperInfo,
+} from "../function-wrapper/core/wrapper-registry-management";
 import {
   ValidationLevel,
   FunctionCategory,
-  DataClassification
-} from '../function-wrapper/interfaces/wrapper-types';
+  DataClassification,
+} from "../function-wrapper/interfaces/wrapper-types";
 
 /**
  * High-Performance Caching Service
@@ -69,7 +69,7 @@ export class HighPerformanceCachingService {
 
   constructor(
     private readonly wrapperRegistry: WrapperRegistryManagementService,
-    config?: Partial<HighPerformanceCachingConfiguration>
+    config?: Partial<HighPerformanceCachingConfiguration>,
   ) {
     this.cachingConfig = this.createDefaultCachingConfiguration(config);
 
@@ -89,7 +89,7 @@ export class HighPerformanceCachingService {
 
     this.setupEventListeners();
     this.initializeCachingSystem();
-    this.logger.log('High-Performance Caching Service initialized');
+    this.logger.log("High-Performance Caching Service initialized");
   }
 
   /**
@@ -103,7 +103,7 @@ export class HighPerformanceCachingService {
   public async getCachedResult<T>(
     functionId: string,
     parameters: any[],
-    context: CacheContext
+    context: CacheContext,
   ): Promise<CacheResult<T> | null> {
     const startTime = performance.now();
     const cacheKey = this.generateCacheKey(functionId, parameters, context);
@@ -113,48 +113,58 @@ export class HighPerformanceCachingService {
       const l1Result = await this.l1Cache.get<T>(cacheKey);
       if (l1Result) {
         const retrievalTime = performance.now() - startTime;
-        this.recordCacheHit('L1', cacheKey, retrievalTime);
-        this.cacheAnalytics.recordAccess(cacheKey, 'L1', 'hit', retrievalTime);
-        return this.enrichCacheResult(l1Result, 'L1', retrievalTime);
+        this.recordCacheHit("L1", cacheKey, retrievalTime);
+        this.cacheAnalytics.recordAccess(cacheKey, "L1", "hit", retrievalTime);
+        return this.enrichCacheResult(l1Result, "L1", retrievalTime);
       }
 
       // Check L2 cache (distributed)
       const l2Result = await this.l2Cache.get<T>(cacheKey);
       if (l2Result) {
         const retrievalTime = performance.now() - startTime;
-        this.recordCacheHit('L2', cacheKey, retrievalTime);
-        this.cacheAnalytics.recordAccess(cacheKey, 'L2', 'hit', retrievalTime);
+        this.recordCacheHit("L2", cacheKey, retrievalTime);
+        this.cacheAnalytics.recordAccess(cacheKey, "L2", "hit", retrievalTime);
 
         // Promote to L1 cache for faster future access
         await this.l1Cache.set(cacheKey, l2Result.data, l2Result.metadata.ttl);
 
-        return this.enrichCacheResult(l2Result, 'L2', retrievalTime);
+        return this.enrichCacheResult(l2Result, "L2", retrievalTime);
       }
 
       // Check L3 cache (persistent)
       const l3Result = await this.l3Cache.get<T>(cacheKey);
       if (l3Result) {
         const retrievalTime = performance.now() - startTime;
-        this.recordCacheHit('L3', cacheKey, retrievalTime);
-        this.cacheAnalytics.recordAccess(cacheKey, 'L3', 'hit', retrievalTime);
+        this.recordCacheHit("L3", cacheKey, retrievalTime);
+        this.cacheAnalytics.recordAccess(cacheKey, "L3", "hit", retrievalTime);
 
         // Promote to L2 and L1 caches
         await this.l2Cache.set(cacheKey, l3Result.data, l3Result.metadata.ttl);
-        await this.l1Cache.set(cacheKey, l3Result.data, Math.min(l3Result.metadata.ttl, this.cachingConfig.l1Config.defaultTtl));
+        await this.l1Cache.set(
+          cacheKey,
+          l3Result.data,
+          Math.min(
+            l3Result.metadata.ttl,
+            this.cachingConfig.l1Config.defaultTtl,
+          ),
+        );
 
-        return this.enrichCacheResult(l3Result, 'L3', retrievalTime);
+        return this.enrichCacheResult(l3Result, "L3", retrievalTime);
       }
 
       // Cache miss across all tiers
       const missTime = performance.now() - startTime;
       this.recordCacheMiss(cacheKey, missTime);
-      this.cacheAnalytics.recordAccess(cacheKey, 'MISS', 'miss', missTime);
+      this.cacheAnalytics.recordAccess(cacheKey, "MISS", "miss", missTime);
 
       return null;
-
     } catch (error) {
       this.logger.error(`Cache retrieval error for key: ${cacheKey}`, error);
-      this.cacheAnalytics.recordError(cacheKey, 'retrieval', error instanceof Error ? error.message : String(error));
+      this.cacheAnalytics.recordError(
+        cacheKey,
+        "retrieval",
+        error instanceof Error ? error.message : String(error),
+      );
       return null;
     }
   }
@@ -172,7 +182,7 @@ export class HighPerformanceCachingService {
     functionId: string,
     parameters: any[],
     result: T,
-    context: CacheContext
+    context: CacheContext,
   ): Promise<CacheStorageResult> {
     const startTime = performance.now();
     const cacheKey = this.generateCacheKey(functionId, parameters, context);
@@ -190,7 +200,7 @@ export class HighPerformanceCachingService {
         parameters,
         result,
         wrapperInfo,
-        context
+        context,
       );
 
       // Create cache entry with metadata
@@ -208,8 +218,8 @@ export class HighPerformanceCachingService {
           tags: cacheStrategy.tags,
           size: this.calculateDataSize(result),
           compressionEnabled: cacheStrategy.enableCompression,
-          encryptionEnabled: cacheStrategy.enableEncryption
-        }
+          encryptionEnabled: cacheStrategy.enableEncryption,
+        },
       };
 
       // Store in appropriate cache tiers based on strategy
@@ -221,13 +231,13 @@ export class HighPerformanceCachingService {
           cacheKey,
           cacheEntry.data,
           cacheStrategy.ttl,
-          cacheEntry.metadata
+          cacheEntry.metadata,
         );
         storageResults.push({
-          tier: 'L1',
+          tier: "L1",
           success: l1Result.success,
           size: l1Result.size,
-          compressionRatio: l1Result.compressionRatio
+          compressionRatio: l1Result.compressionRatio,
         });
       }
 
@@ -237,13 +247,13 @@ export class HighPerformanceCachingService {
           cacheKey,
           cacheEntry.data,
           cacheStrategy.ttl,
-          cacheEntry.metadata
+          cacheEntry.metadata,
         );
         storageResults.push({
-          tier: 'L2',
+          tier: "L2",
           success: l2Result.success,
           size: l2Result.size,
-          compressionRatio: l2Result.compressionRatio
+          compressionRatio: l2Result.compressionRatio,
         });
       }
 
@@ -253,44 +263,57 @@ export class HighPerformanceCachingService {
           cacheKey,
           cacheEntry.data,
           cacheStrategy.ttl,
-          cacheEntry.metadata
+          cacheEntry.metadata,
         );
         storageResults.push({
-          tier: 'L3',
+          tier: "L3",
           success: l3Result.success,
           size: l3Result.size,
-          compressionRatio: l3Result.compressionRatio
+          compressionRatio: l3Result.compressionRatio,
         });
       }
 
       const storageTime = performance.now() - startTime;
 
       // Record cache analytics
-      this.cacheAnalytics.recordStorage(cacheKey, cacheStrategy, storageResults, storageTime);
+      this.cacheAnalytics.recordStorage(
+        cacheKey,
+        cacheStrategy,
+        storageResults,
+        storageTime,
+      );
 
       // Update cache intelligence with storage outcome
       await this.cacheIntelligence.updateStrategyEffectiveness(
         functionId,
         cacheStrategy,
-        storageResults
+        storageResults,
       );
 
       const storageResult: CacheStorageResult = {
-        success: storageResults.every(r => r.success),
+        success: storageResults.every((r) => r.success),
         cacheKey,
         strategy: cacheStrategy,
         tierResults: storageResults,
         storageTime,
-        totalSize: storageResults.reduce((sum, r) => sum + r.size, 0)
+        totalSize: storageResults.reduce((sum, r) => sum + r.size, 0),
       };
 
-      this.logger.debug(`Cached result for function: ${functionId}, key: ${cacheKey}`);
+      this.logger.debug(
+        `Cached result for function: ${functionId}, key: ${cacheKey}`,
+      );
 
       return storageResult;
-
     } catch (error) {
-      this.logger.error(`Cache storage error for function: ${functionId}`, error);
-      this.cacheAnalytics.recordError(cacheKey, 'storage', error instanceof Error ? error.message : String(error));
+      this.logger.error(
+        `Cache storage error for function: ${functionId}`,
+        error,
+      );
+      this.cacheAnalytics.recordError(
+        cacheKey,
+        "storage",
+        error instanceof Error ? error.message : String(error),
+      );
 
       return {
         success: false,
@@ -299,7 +322,7 @@ export class HighPerformanceCachingService {
         tierResults: [],
         storageTime: performance.now() - startTime,
         totalSize: 0,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       };
     }
   }
@@ -313,7 +336,7 @@ export class HighPerformanceCachingService {
    */
   public async invalidateCachedResults(
     functionId: string,
-    invalidationStrategy: CacheInvalidationStrategy = { scope: 'function' }
+    invalidationStrategy: CacheInvalidationStrategy = { scope: "function" },
   ): Promise<CacheInvalidationResult> {
     const startTime = performance.now();
 
@@ -321,34 +344,42 @@ export class HighPerformanceCachingService {
       let invalidatedKeys: string[] = [];
 
       switch (invalidationStrategy.scope) {
-        case 'function':
+        case "function":
           // Invalidate all cache entries for this function
           invalidatedKeys = await this.invalidateByFunction(functionId);
           break;
 
-        case 'pattern':
+        case "pattern":
           // Invalidate cache entries matching pattern
           if (invalidationStrategy.pattern) {
-            invalidatedKeys = await this.invalidateByPattern(invalidationStrategy.pattern);
+            invalidatedKeys = await this.invalidateByPattern(
+              invalidationStrategy.pattern,
+            );
           }
           break;
 
-        case 'tags':
+        case "tags":
           // Invalidate cache entries with specific tags
           if (invalidationStrategy.tags) {
-            invalidatedKeys = await this.invalidateByTags(invalidationStrategy.tags);
+            invalidatedKeys = await this.invalidateByTags(
+              invalidationStrategy.tags,
+            );
           }
           break;
 
-        case 'dependency':
+        case "dependency":
           // Invalidate cache entries dependent on specific data
           if (invalidationStrategy.dependencies) {
-            invalidatedKeys = await this.invalidateByDependencies(invalidationStrategy.dependencies);
+            invalidatedKeys = await this.invalidateByDependencies(
+              invalidationStrategy.dependencies,
+            );
           }
           break;
 
         default:
-          throw new Error(`Unsupported invalidation scope: ${invalidationStrategy.scope}`);
+          throw new Error(
+            `Unsupported invalidation scope: ${invalidationStrategy.scope}`,
+          );
       }
 
       const invalidationTime = performance.now() - startTime;
@@ -358,21 +389,25 @@ export class HighPerformanceCachingService {
         functionId,
         invalidationStrategy,
         invalidatedKeys,
-        invalidationTime
+        invalidationTime,
       );
 
-      this.logger.log(`Invalidated ${invalidatedKeys.length} cache entries for function: ${functionId}`);
+      this.logger.log(
+        `Invalidated ${invalidatedKeys.length} cache entries for function: ${functionId}`,
+      );
 
       return {
         success: true,
         functionId,
         strategy: invalidationStrategy,
         invalidatedKeys,
-        invalidationTime
+        invalidationTime,
       };
-
     } catch (error) {
-      this.logger.error(`Cache invalidation error for function: ${functionId}`, error);
+      this.logger.error(
+        `Cache invalidation error for function: ${functionId}`,
+        error,
+      );
 
       return {
         success: false,
@@ -380,7 +415,7 @@ export class HighPerformanceCachingService {
         strategy: invalidationStrategy,
         invalidatedKeys: [],
         invalidationTime: performance.now() - startTime,
-        error: getErrorMessage(error)
+        error: getErrorMessage(error),
       };
     }
   }
@@ -392,7 +427,7 @@ export class HighPerformanceCachingService {
    * @returns Cache performance metrics
    */
   public async getCachePerformanceMetrics(
-    timeRange?: TimeRange
+    timeRange?: TimeRange,
   ): Promise<CachePerformanceMetrics> {
     try {
       // Collect metrics from all cache tiers
@@ -422,11 +457,14 @@ export class HighPerformanceCachingService {
         l1Metrics,
         l2Metrics,
         l3Metrics,
-        analyticsMetrics
+        analyticsMetrics,
       );
 
       const metrics: CachePerformanceMetrics = {
-        timeRange: timeRange || { start: new Date(Date.now() - 3600000), end: new Date() },
+        timeRange: timeRange || {
+          start: new Date(Date.now() - 3600000),
+          end: new Date(),
+        },
         overallMetrics: {
           hitRate: overallHitRate,
           missRate: 1 - overallHitRate,
@@ -436,10 +474,10 @@ export class HighPerformanceCachingService {
           averageResponseTime: this.calculateWeightedAverageResponseTime(
             l1Metrics,
             l2Metrics,
-            l3Metrics
+            l3Metrics,
           ),
           throughput: totalRequests / 3600, // Requests per second (assuming 1 hour window)
-          efficiency: cacheEfficiency
+          efficiency: cacheEfficiency,
         },
         tierMetrics: {
           L1: {
@@ -450,7 +488,7 @@ export class HighPerformanceCachingService {
             memoryUsed: l1Metrics.memoryUsed,
             storageUsed: l1Metrics.storageUsed,
             evictions: l1Metrics.evictions,
-            compressionRatio: l1Metrics.compressionRatio
+            compressionRatio: l1Metrics.compressionRatio,
           },
           L2: {
             hitRate: l2Metrics.hitRate,
@@ -460,7 +498,7 @@ export class HighPerformanceCachingService {
             memoryUsed: l2Metrics.memoryUsed,
             storageUsed: l2Metrics.storageUsed,
             evictions: l2Metrics.evictions,
-            compressionRatio: l2Metrics.compressionRatio
+            compressionRatio: l2Metrics.compressionRatio,
           },
           L3: {
             hitRate: l3Metrics.hitRate,
@@ -470,29 +508,43 @@ export class HighPerformanceCachingService {
             memoryUsed: l3Metrics.memoryUsed,
             storageUsed: totalStorageUsed,
             evictions: l3Metrics.evictions,
-            compressionRatio: l3Metrics.compressionRatio
-          }
+            compressionRatio: l3Metrics.compressionRatio,
+          },
         },
         functionMetrics: analyticsMetrics.functionMetrics,
         optimizationMetrics: {
           preloadHitRate: analyticsMetrics.preloadHitRate,
           intelligentEvictionRate: analyticsMetrics.intelligentEvictionRate,
-          adaptiveStrategyEffectiveness: analyticsMetrics.adaptiveStrategyEffectiveness,
-          compressionEfficiency: analyticsMetrics.compressionEfficiency
+          adaptiveStrategyEffectiveness:
+            analyticsMetrics.adaptiveStrategyEffectiveness,
+          compressionEfficiency: analyticsMetrics.compressionEfficiency,
         },
         enterpriseCompliance: {
-          meetsHitRateTarget: overallHitRate >= this.cachingConfig.targetHitRate,
-          meetsResponseTimeTarget: this.meetsResponseTimeTargets(l1Metrics, l2Metrics, l3Metrics),
-          meetsCapacityTargets: this.meetsCapacityTargets(l1Metrics, l2Metrics, l3Metrics),
-          complianceScore: this.calculateComplianceScore(overallHitRate, cacheEfficiency)
-        }
+          meetsHitRateTarget:
+            overallHitRate >= this.cachingConfig.targetHitRate,
+          meetsResponseTimeTarget: this.meetsResponseTimeTargets(
+            l1Metrics,
+            l2Metrics,
+            l3Metrics,
+          ),
+          meetsCapacityTargets: this.meetsCapacityTargets(
+            l1Metrics,
+            l2Metrics,
+            l3Metrics,
+          ),
+          complianceScore: this.calculateComplianceScore(
+            overallHitRate,
+            cacheEfficiency,
+          ),
+        },
       };
 
       return metrics;
-
     } catch (error) {
-      this.logger.error('Failed to collect cache performance metrics', error);
-      throw new CachingError(`Failed to collect metrics: ${getErrorMessage(error)}`);
+      this.logger.error("Failed to collect cache performance metrics", error);
+      throw new CachingError(
+        `Failed to collect metrics: ${getErrorMessage(error)}`,
+      );
     }
   }
 
@@ -503,7 +555,7 @@ export class HighPerformanceCachingService {
    * @returns Optimization result
    */
   public async optimizeCacheConfiguration(
-    optimizationConfig: CacheOptimizationConfig
+    optimizationConfig: CacheOptimizationConfig,
   ): Promise<CacheOptimizationResult> {
     const optimizationId = this.generateOptimizationId();
     const startTime = performance.now();
@@ -516,23 +568,25 @@ export class HighPerformanceCachingService {
 
       // Analyze cache usage patterns
       const usagePatterns = await this.cacheAnalytics.analyzeUsagePatterns(
-        optimizationConfig.analysisTimeRange
+        optimizationConfig.analysisTimeRange,
       );
 
       // Generate optimization recommendations
-      const optimizationRecommendations = await this.cacheIntelligence.generateOptimizationRecommendations(
-        baselineMetrics,
-        usagePatterns,
-        optimizationConfig
-      );
+      const optimizationRecommendations =
+        await this.cacheIntelligence.generateOptimizationRecommendations(
+          baselineMetrics,
+          usagePatterns,
+          optimizationConfig,
+        );
 
       // Apply optimizations if auto-apply is enabled
       const appliedOptimizations: AppliedOptimization[] = [];
 
       if (optimizationConfig.autoApply) {
         for (const recommendation of optimizationRecommendations) {
-          if (recommendation.autoApplicable && recommendation.risk === 'low') {
-            const appliedOptimization = await this.applyOptimization(recommendation);
+          if (recommendation.autoApplicable && recommendation.risk === "low") {
+            const appliedOptimization =
+              await this.applyOptimization(recommendation);
             appliedOptimizations.push(appliedOptimization);
           }
         }
@@ -542,7 +596,9 @@ export class HighPerformanceCachingService {
       let postOptimizationMetrics: CachePerformanceMetrics | null = null;
       if (appliedOptimizations.length > 0) {
         // Wait for metrics to stabilize
-        await new Promise(resolve => setTimeout(resolve, optimizationConfig.stabilizationTimeMs || 30000));
+        await new Promise((resolve) =>
+          setTimeout(resolve, optimizationConfig.stabilizationTimeMs || 30000),
+        );
         postOptimizationMetrics = await this.getCachePerformanceMetrics();
       }
 
@@ -561,14 +617,13 @@ export class HighPerformanceCachingService {
           : null,
         nextOptimizationSchedule: this.calculateNextOptimizationSchedule(
           baselineMetrics,
-          optimizationRecommendations
-        )
+          optimizationRecommendations,
+        ),
       };
 
       this.logger.log(`Cache optimization completed: ${optimizationId}`);
 
       return result;
-
     } catch (error) {
       this.logger.error(`Cache optimization failed: ${optimizationId}`, error);
       throw new CachingError(`Optimization failed: ${getErrorMessage(error)}`);
@@ -582,7 +637,7 @@ export class HighPerformanceCachingService {
    * @returns Preload result
    */
   public async executeIntelligentPreloading(
-    preloadConfig: CachePreloadConfig
+    preloadConfig: CachePreloadConfig,
   ): Promise<CachePreloadResult> {
     const preloadId = this.generatePreloadId();
     const startTime = performance.now();
@@ -591,20 +646,21 @@ export class HighPerformanceCachingService {
 
     try {
       // Analyze usage patterns to identify preload candidates
-      const preloadCandidates = await this.preloadManager.identifyPreloadCandidates(preloadConfig);
+      const preloadCandidates =
+        await this.preloadManager.identifyPreloadCandidates(preloadConfig);
 
       // Execute preloading for identified candidates
       const preloadResults: PreloadExecutionResult[] = [];
 
       for (const candidate of preloadCandidates) {
-        const executionResult = await this.preloadManager.executePreload(candidate);
+        const executionResult =
+          await this.preloadManager.executePreload(candidate);
         preloadResults.push(executionResult);
       }
 
       // Analyze preload effectiveness
-      const effectivenessAnalysis = await this.preloadManager.analyzePreloadEffectiveness(
-        preloadResults
-      );
+      const effectivenessAnalysis =
+        await this.preloadManager.analyzePreloadEffectiveness(preloadResults);
 
       const preloadTime = performance.now() - startTime;
 
@@ -617,17 +673,20 @@ export class HighPerformanceCachingService {
         effectivenessAnalysis,
         metrics: {
           totalCandidates: preloadCandidates.length,
-          successfulPreloads: preloadResults.filter(r => r.success).length,
-          failedPreloads: preloadResults.filter(r => !r.success).length,
-          totalDataPreloaded: preloadResults.reduce((sum, r) => sum + r.dataSize, 0),
-          estimatedHitRateImprovement: effectivenessAnalysis.estimatedHitRateImprovement
-        }
+          successfulPreloads: preloadResults.filter((r) => r.success).length,
+          failedPreloads: preloadResults.filter((r) => !r.success).length,
+          totalDataPreloaded: preloadResults.reduce(
+            (sum, r) => sum + r.dataSize,
+            0,
+          ),
+          estimatedHitRateImprovement:
+            effectivenessAnalysis.estimatedHitRateImprovement,
+        },
       };
 
       this.logger.log(`Intelligent cache preloading completed: ${preloadId}`);
 
       return result;
-
     } catch (error) {
       this.logger.error(`Cache preloading failed: ${preloadId}`, error);
       throw new CachingError(`Preloading failed: ${getErrorMessage(error)}`);
@@ -641,7 +700,7 @@ export class HighPerformanceCachingService {
    * @returns Cache analytics report
    */
   public async generateCacheAnalyticsReport(
-    reportConfig: CacheReportConfig
+    reportConfig: CacheReportConfig,
   ): Promise<CacheAnalyticsReport> {
     const reportId = this.generateReportId();
 
@@ -649,32 +708,40 @@ export class HighPerformanceCachingService {
 
     try {
       // Collect comprehensive metrics
-      const performanceMetrics = await this.getCachePerformanceMetrics(reportConfig.timeRange);
+      const performanceMetrics = await this.getCachePerformanceMetrics(
+        reportConfig.timeRange,
+      );
 
       // Analyze usage patterns
-      const usagePatterns = await this.cacheAnalytics.analyzeUsagePatterns(reportConfig.timeRange);
+      const usagePatterns = await this.cacheAnalytics.analyzeUsagePatterns(
+        reportConfig.timeRange,
+      );
 
       // Generate efficiency analysis
-      const efficiencyAnalysis = await this.cacheAnalytics.analyzeEfficiency(reportConfig.timeRange);
+      const efficiencyAnalysis = await this.cacheAnalytics.analyzeEfficiency(
+        reportConfig.timeRange,
+      );
 
       // Identify optimization opportunities
-      const optimizationOpportunities = await this.cacheIntelligence.identifyOptimizationOpportunities(
-        performanceMetrics,
-        usagePatterns,
-        efficiencyAnalysis
-      );
+      const optimizationOpportunities =
+        await this.cacheIntelligence.identifyOptimizationOpportunities(
+          performanceMetrics,
+          usagePatterns,
+          efficiencyAnalysis,
+        );
 
       // Generate function-specific insights
-      const functionInsights = await this.cacheAnalytics.generateFunctionInsights(
-        reportConfig.timeRange,
-        reportConfig.includeFunctions
-      );
+      const functionInsights =
+        await this.cacheAnalytics.generateFunctionInsights(
+          reportConfig.timeRange,
+          reportConfig.includeFunctions,
+        );
 
       // Create executive summary
       const executiveSummary = this.generateExecutiveSummary(
         performanceMetrics,
         usagePatterns,
-        optimizationOpportunities
+        optimizationOpportunities,
       );
 
       const report: CacheAnalyticsReport = {
@@ -687,21 +754,26 @@ export class HighPerformanceCachingService {
         efficiencyAnalysis,
         functionInsights,
         optimizationOpportunities,
-        complianceAssessment: this.assessEnterpriseCompliance(performanceMetrics),
+        complianceAssessment:
+          this.assessEnterpriseCompliance(performanceMetrics),
         recommendations: this.generateComprehensiveRecommendations(
           performanceMetrics,
           optimizationOpportunities,
-          efficiencyAnalysis
-        )
+          efficiencyAnalysis,
+        ),
       };
 
       this.logger.log(`Cache analytics report generated: ${reportId}`);
 
       return report;
-
     } catch (error) {
-      this.logger.error(`Failed to generate cache analytics report: ${reportId}`, error);
-      throw new CachingError(`Report generation failed: ${getErrorMessage(error)}`);
+      this.logger.error(
+        `Failed to generate cache analytics report: ${reportId}`,
+        error,
+      );
+      throw new CachingError(
+        `Report generation failed: ${getErrorMessage(error)}`,
+      );
     }
   }
 
@@ -710,7 +782,7 @@ export class HighPerformanceCachingService {
   private generateCacheKey(
     functionId: string,
     parameters: any[],
-    context: CacheContext
+    context: CacheContext,
   ): string {
     const paramHash = this.hashParameters(parameters);
     const contextHash = this.hashContext(context);
@@ -720,7 +792,10 @@ export class HighPerformanceCachingService {
 
   private hashParameters(parameters: any[]): string {
     const paramString = JSON.stringify(parameters, this.createJsonReplacer());
-    return createHash('sha256').update(paramString).digest('hex').substring(0, 16);
+    return createHash("sha256")
+      .update(paramString)
+      .digest("hex")
+      .substring(0, 16);
   }
 
   private hashContext(context: CacheContext): string {
@@ -728,15 +803,18 @@ export class HighPerformanceCachingService {
       userId: context.userId,
       sessionId: context.sessionId,
       version: context.version,
-      environment: context.environment
+      environment: context.environment,
     });
-    return createHash('sha256').update(contextString).digest('hex').substring(0, 8);
+    return createHash("sha256")
+      .update(contextString)
+      .digest("hex")
+      .substring(0, 8);
   }
 
   private createJsonReplacer(): (key: string, value: any) => any {
     return (key: string, value: any) => {
-      if (typeof value === 'function') {
-        return '[Function]';
+      if (typeof value === "function") {
+        return "[Function]";
       }
       if (value instanceof Date) {
         return value.toISOString();
@@ -756,7 +834,7 @@ export class HighPerformanceCachingService {
   private enrichCacheResult<T>(
     result: CacheEntry<T>,
     tier: string,
-    retrievalTime: number
+    retrievalTime: number,
   ): CacheResult<T> {
     return {
       data: result.data,
@@ -764,33 +842,37 @@ export class HighPerformanceCachingService {
         ...result.metadata,
         tier,
         retrievalTime,
-        cacheAge: Date.now() - result.metadata.createdAt.getTime()
+        cacheAge: Date.now() - result.metadata.createdAt.getTime(),
       },
       cacheInfo: {
         hit: true,
         tier,
         retrievalTime,
-        size: result.metadata.size
-      }
+        size: result.metadata.size,
+      },
     };
   }
 
-  private recordCacheHit(tier: string, cacheKey: string, retrievalTime: number): void {
-    this.eventEmitter.emit('cache-hit', {
+  private recordCacheHit(
+    tier: string,
+    cacheKey: string,
+    retrievalTime: number,
+  ): void {
+    this.eventEmitter.emit("cache-hit", {
       tier,
       cacheKey,
       retrievalTime,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     this.performanceMonitor.recordHit(tier, retrievalTime);
   }
 
   private recordCacheMiss(cacheKey: string, missTime: number): void {
-    this.eventEmitter.emit('cache-miss', {
+    this.eventEmitter.emit("cache-miss", {
       cacheKey,
       missTime,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     this.performanceMonitor.recordMiss(missTime);
@@ -827,7 +909,9 @@ export class HighPerformanceCachingService {
     return Array.from(new Set(invalidatedKeys)); // Remove duplicates
   }
 
-  private async invalidateByDependencies(dependencies: string[]): Promise<string[]> {
+  private async invalidateByDependencies(
+    dependencies: string[],
+  ): Promise<string[]> {
     // Implementation would analyze dependency graph and invalidate related entries
     // For now, return empty array as placeholder
     return [];
@@ -837,24 +921,31 @@ export class HighPerformanceCachingService {
     l1Metrics: CacheTierMetrics,
     l2Metrics: CacheTierMetrics,
     l3Metrics: CacheTierMetrics,
-    analyticsMetrics: CacheAnalyticsMetrics
+    analyticsMetrics: CacheAnalyticsMetrics,
   ): number {
     // Calculate weighted efficiency based on hit rates and response times
     const l1Weight = 0.5;
     const l2Weight = 0.3;
     const l3Weight = 0.2;
 
-    const l1Efficiency = l1Metrics.hitRate * (1 / (l1Metrics.averageResponseTime + 1));
-    const l2Efficiency = l2Metrics.hitRate * (1 / (l2Metrics.averageResponseTime + 1));
-    const l3Efficiency = l3Metrics.hitRate * (1 / (l3Metrics.averageResponseTime + 1));
+    const l1Efficiency =
+      l1Metrics.hitRate * (1 / (l1Metrics.averageResponseTime + 1));
+    const l2Efficiency =
+      l2Metrics.hitRate * (1 / (l2Metrics.averageResponseTime + 1));
+    const l3Efficiency =
+      l3Metrics.hitRate * (1 / (l3Metrics.averageResponseTime + 1));
 
-    return (l1Efficiency * l1Weight + l2Efficiency * l2Weight + l3Efficiency * l3Weight);
+    return (
+      l1Efficiency * l1Weight +
+      l2Efficiency * l2Weight +
+      l3Efficiency * l3Weight
+    );
   }
 
   private calculateWeightedAverageResponseTime(
     l1Metrics: CacheTierMetrics,
     l2Metrics: CacheTierMetrics,
-    l3Metrics: CacheTierMetrics
+    l3Metrics: CacheTierMetrics,
   ): number {
     const totalHits = l1Metrics.hits + l2Metrics.hits + l3Metrics.hits;
 
@@ -862,43 +953,58 @@ export class HighPerformanceCachingService {
 
     return (
       (l1Metrics.hits * l1Metrics.averageResponseTime +
-       l2Metrics.hits * l2Metrics.averageResponseTime +
-       l3Metrics.hits * l3Metrics.averageResponseTime) / totalHits
+        l2Metrics.hits * l2Metrics.averageResponseTime +
+        l3Metrics.hits * l3Metrics.averageResponseTime) /
+      totalHits
     );
   }
 
   private meetsResponseTimeTargets(
     l1Metrics: CacheTierMetrics,
     l2Metrics: CacheTierMetrics,
-    l3Metrics: CacheTierMetrics
+    l3Metrics: CacheTierMetrics,
   ): boolean {
     return (
-      l1Metrics.averageResponseTime <= this.cachingConfig.l1Config.targetResponseTime &&
-      l2Metrics.averageResponseTime <= this.cachingConfig.l2Config.targetResponseTime &&
-      l3Metrics.averageResponseTime <= this.cachingConfig.l3Config.targetResponseTime
+      l1Metrics.averageResponseTime <=
+        this.cachingConfig.l1Config.targetResponseTime &&
+      l2Metrics.averageResponseTime <=
+        this.cachingConfig.l2Config.targetResponseTime &&
+      l3Metrics.averageResponseTime <=
+        this.cachingConfig.l3Config.targetResponseTime
     );
   }
 
   private meetsCapacityTargets(
     l1Metrics: CacheTierMetrics,
     l2Metrics: CacheTierMetrics,
-    l3Metrics: CacheTierMetrics
+    l3Metrics: CacheTierMetrics,
   ): boolean {
-    const l1Utilization = l1Metrics.memoryUsed / this.cachingConfig.l1Config.maxSize;
-    const l2Utilization = l2Metrics.memoryUsed / this.cachingConfig.l2Config.maxSize;
-    const l3Utilization = l3Metrics.storageUsed / this.cachingConfig.l3Config.maxSize;
+    const l1Utilization =
+      l1Metrics.memoryUsed / this.cachingConfig.l1Config.maxSize;
+    const l2Utilization =
+      l2Metrics.memoryUsed / this.cachingConfig.l2Config.maxSize;
+    const l3Utilization =
+      l3Metrics.storageUsed / this.cachingConfig.l3Config.maxSize;
 
     return l1Utilization <= 0.9 && l2Utilization <= 0.9 && l3Utilization <= 0.9;
   }
 
-  private calculateComplianceScore(hitRate: number, efficiency: number): number {
-    const hitRateScore = Math.min(hitRate / this.cachingConfig.targetHitRate, 1.0);
+  private calculateComplianceScore(
+    hitRate: number,
+    efficiency: number,
+  ): number {
+    const hitRateScore = Math.min(
+      hitRate / this.cachingConfig.targetHitRate,
+      1.0,
+    );
     const efficiencyScore = Math.min(efficiency / 0.8, 1.0); // Target efficiency of 0.8
 
-    return (hitRateScore * 0.7 + efficiencyScore * 0.3); // Weighted average
+    return hitRateScore * 0.7 + efficiencyScore * 0.3; // Weighted average
   }
 
-  private async applyOptimization(recommendation: CacheOptimizationRecommendation): Promise<AppliedOptimization> {
+  private async applyOptimization(
+    recommendation: CacheOptimizationRecommendation,
+  ): Promise<AppliedOptimization> {
     // Implementation would apply the specific optimization
     // For now, return mock result
     return {
@@ -909,35 +1015,48 @@ export class HighPerformanceCachingService {
       impact: {
         hitRateImprovement: 0.05,
         responseTimeImprovement: 50,
-        capacityImprovement: 0.1
-      }
+        capacityImprovement: 0.1,
+      },
     };
   }
 
   private analyzeImprovement(
     baseline: CachePerformanceMetrics,
-    postOptimization: CachePerformanceMetrics
+    postOptimization: CachePerformanceMetrics,
   ): CacheImprovementAnalysis {
-    const hitRateImprovement = postOptimization.overallMetrics.hitRate - baseline.overallMetrics.hitRate;
-    const responseTimeImprovement = baseline.overallMetrics.averageResponseTime - postOptimization.overallMetrics.averageResponseTime;
-    const efficiencyImprovement = postOptimization.overallMetrics.efficiency - baseline.overallMetrics.efficiency;
+    const hitRateImprovement =
+      postOptimization.overallMetrics.hitRate - baseline.overallMetrics.hitRate;
+    const responseTimeImprovement =
+      baseline.overallMetrics.averageResponseTime -
+      postOptimization.overallMetrics.averageResponseTime;
+    const efficiencyImprovement =
+      postOptimization.overallMetrics.efficiency -
+      baseline.overallMetrics.efficiency;
 
     return {
       hitRateImprovement,
       responseTimeImprovement,
       efficiencyImprovement,
-      overallImprovement: (hitRateImprovement * 0.5 + (responseTimeImprovement / 100) * 0.3 + efficiencyImprovement * 0.2)
+      overallImprovement:
+        hitRateImprovement * 0.5 +
+        (responseTimeImprovement / 100) * 0.3 +
+        efficiencyImprovement * 0.2,
     };
   }
 
   private calculateNextOptimizationSchedule(
     metrics: CachePerformanceMetrics,
-    recommendations: CacheOptimizationRecommendation[]
+    recommendations: CacheOptimizationRecommendation[],
   ): Date {
     // Calculate next optimization based on performance trends and recommendations
     const baseInterval = 24 * 60 * 60 * 1000; // 24 hours
-    const urgentRecommendations = recommendations.filter(r => r.priority === 'high').length;
-    const interval = Math.max(baseInterval / (urgentRecommendations + 1), 2 * 60 * 60 * 1000); // Minimum 2 hours
+    const urgentRecommendations = recommendations.filter(
+      (r) => r.priority === "high",
+    ).length;
+    const interval = Math.max(
+      baseInterval / (urgentRecommendations + 1),
+      2 * 60 * 60 * 1000,
+    ); // Minimum 2 hours
 
     return new Date(Date.now() + interval);
   }
@@ -945,80 +1064,93 @@ export class HighPerformanceCachingService {
   private generateExecutiveSummary(
     metrics: CachePerformanceMetrics,
     patterns: CacheUsagePatterns,
-    opportunities: CacheOptimizationOpportunity[]
+    opportunities: CacheOptimizationOpportunity[],
   ): CacheExecutiveSummary {
     return {
-      overallPerformance: metrics.overallMetrics.hitRate >= this.cachingConfig.targetHitRate ? 'excellent' : 'good',
+      overallPerformance:
+        metrics.overallMetrics.hitRate >= this.cachingConfig.targetHitRate
+          ? "excellent"
+          : "good",
       keyMetrics: {
         hitRate: metrics.overallMetrics.hitRate,
         averageResponseTime: metrics.overallMetrics.averageResponseTime,
         throughput: metrics.overallMetrics.throughput,
-        efficiency: metrics.overallMetrics.efficiency
+        efficiency: metrics.overallMetrics.efficiency,
       },
       achievements: [
         `Achieved ${(metrics.overallMetrics.hitRate * 100).toFixed(1)}% cache hit rate`,
         `Average response time: ${metrics.overallMetrics.averageResponseTime.toFixed(1)}ms`,
-        `Processing ${metrics.overallMetrics.throughput.toFixed(0)} requests per second`
+        `Processing ${metrics.overallMetrics.throughput.toFixed(0)} requests per second`,
       ],
-      concerns: opportunities.filter(o => o.priority === 'high').map(o => o.description),
-      recommendations: opportunities.slice(0, 3).map(o => o.recommendation)
+      concerns: opportunities
+        .filter((o) => o.priority === "high")
+        .map((o) => o.description),
+      recommendations: opportunities.slice(0, 3).map((o) => o.recommendation),
     };
   }
 
-  private assessEnterpriseCompliance(metrics: CachePerformanceMetrics): CacheComplianceAssessment {
+  private assessEnterpriseCompliance(
+    metrics: CachePerformanceMetrics,
+  ): CacheComplianceAssessment {
     return {
       overallCompliance: metrics.enterpriseCompliance.complianceScore,
       hitRateCompliance: {
         target: this.cachingConfig.targetHitRate,
         actual: metrics.overallMetrics.hitRate,
-        met: metrics.enterpriseCompliance.meetsHitRateTarget
+        met: metrics.enterpriseCompliance.meetsHitRateTarget,
       },
       responseTimeCompliance: {
         target: 100, // 100ms target
         actual: metrics.overallMetrics.averageResponseTime,
-        met: metrics.enterpriseCompliance.meetsResponseTimeTarget
+        met: metrics.enterpriseCompliance.meetsResponseTimeTarget,
       },
       capacityCompliance: {
         target: 0.8, // 80% utilization target
         actual: 0.75, // Mock current utilization
-        met: metrics.enterpriseCompliance.meetsCapacityTargets
+        met: metrics.enterpriseCompliance.meetsCapacityTargets,
       },
-      complianceGaps: []
+      complianceGaps: [],
     };
   }
 
   private generateComprehensiveRecommendations(
     metrics: CachePerformanceMetrics,
     opportunities: CacheOptimizationOpportunity[],
-    efficiency: CacheEfficiencyAnalysis
+    efficiency: CacheEfficiencyAnalysis,
   ): CacheRecommendation[] {
     // Generate prioritized recommendations based on analysis
-    return opportunities.slice(0, 10).map(opportunity => ({
+    return opportunities.slice(0, 10).map((opportunity) => ({
       id: this.generateRecommendationId(),
-      category: this.mapOpportunityToRecommendationCategory(opportunity.category),
+      category: this.mapOpportunityToRecommendationCategory(
+        opportunity.category,
+      ),
       priority: opportunity.priority,
       title: opportunity.title,
       description: opportunity.description,
       implementation: opportunity.implementation,
       expectedImpact: `Hit rate: +${(opportunity.expectedImpact.hitRateImprovement * 100).toFixed(1)}%, Response time: -${opportunity.expectedImpact.responseTimeImprovement}ms`,
       estimatedEffort: opportunity.estimatedEffort,
-      riskLevel: opportunity.riskLevel
+      riskLevel: opportunity.riskLevel,
     }));
   }
 
   private mapOpportunityToRecommendationCategory(
-    opportunityCategory: 'hit_rate' | 'response_time' | 'capacity' | 'efficiency'
-  ): 'performance' | 'efficiency' | 'capacity' | 'reliability' {
+    opportunityCategory:
+      | "hit_rate"
+      | "response_time"
+      | "capacity"
+      | "efficiency",
+  ): "performance" | "efficiency" | "capacity" | "reliability" {
     switch (opportunityCategory) {
-      case 'hit_rate':
-      case 'response_time':
-        return 'performance';
-      case 'efficiency':
-        return 'efficiency';
-      case 'capacity':
-        return 'capacity';
+      case "hit_rate":
+      case "response_time":
+        return "performance";
+      case "efficiency":
+        return "efficiency";
+      case "capacity":
+        return "capacity";
       default:
-        return 'reliability';
+        return "reliability";
     }
   }
 
@@ -1041,21 +1173,21 @@ export class HighPerformanceCachingService {
   }
 
   private setupEventListeners(): void {
-    this.eventEmitter.on('cache-hit', (event) => {
+    this.eventEmitter.on("cache-hit", (event) => {
       this.logger.debug(`Cache hit on ${event.tier}: ${event.cacheKey}`);
     });
 
-    this.eventEmitter.on('cache-miss', (event) => {
+    this.eventEmitter.on("cache-miss", (event) => {
       this.logger.debug(`Cache miss: ${event.cacheKey}`);
     });
 
-    this.eventEmitter.on('cache-optimization', (event) => {
+    this.eventEmitter.on("cache-optimization", (event) => {
       this.logger.log(`Cache optimization completed: ${event.optimizationId}`);
     });
   }
 
   private initializeCachingSystem(): void {
-    this.logger.log('Initializing high-performance caching system components');
+    this.logger.log("Initializing high-performance caching system components");
 
     // Start performance monitoring
     this.performanceMonitor.start();
@@ -1069,11 +1201,11 @@ export class HighPerformanceCachingService {
     // Initialize eviction optimizer
     this.evictionOptimizer.start();
 
-    this.logger.log('High-performance caching system initialization complete');
+    this.logger.log("High-performance caching system initialization complete");
   }
 
   private createDefaultCachingConfiguration(
-    overrides?: Partial<HighPerformanceCachingConfiguration>
+    overrides?: Partial<HighPerformanceCachingConfiguration>,
   ): HighPerformanceCachingConfiguration {
     return {
       targetHitRate: 0.85, // 85% target hit rate
@@ -1082,35 +1214,35 @@ export class HighPerformanceCachingService {
         defaultTtl: 300000, // 5 minutes
         targetResponseTime: 1, // 1ms
         enableCompression: true,
-        compressionAlgorithm: 'lz4',
-        evictionStrategy: 'lru'
+        compressionAlgorithm: "lz4",
+        evictionStrategy: "lru",
       },
       l2Config: {
         maxSize: 1 * 1024 * 1024 * 1024, // 1GB
         defaultTtl: 3600000, // 1 hour
         targetResponseTime: 10, // 10ms
         enableCompression: true,
-        compressionAlgorithm: 'gzip',
-        evictionStrategy: 'lru',
-        distributionStrategy: 'consistent_hash',
-        replicationFactor: 2
+        compressionAlgorithm: "gzip",
+        evictionStrategy: "lru",
+        distributionStrategy: "consistent_hash",
+        replicationFactor: 2,
       },
       l3Config: {
         maxSize: 10 * 1024 * 1024 * 1024, // 10GB
         defaultTtl: 86400000, // 24 hours
         targetResponseTime: 50, // 50ms
         enableCompression: true,
-        compressionAlgorithm: 'gzip',
-        evictionStrategy: 'lfu',
-        persistenceEngine: 'rocksdb',
-        enableEncryption: false
+        compressionAlgorithm: "gzip",
+        evictionStrategy: "lfu",
+        persistenceEngine: "rocksdb",
+        enableEncryption: false,
       },
       intelligence: {
         enableAdaptiveStrategies: true,
         enablePredictivePreloading: true,
         enableIntelligentEviction: true,
         learningWindow: 7 * 24 * 60 * 60 * 1000, // 7 days
-        optimizationInterval: 24 * 60 * 60 * 1000 // 24 hours
+        optimizationInterval: 24 * 60 * 60 * 1000, // 24 hours
       },
       monitoring: {
         enableRealTimeMetrics: true,
@@ -1118,10 +1250,10 @@ export class HighPerformanceCachingService {
         alertThresholds: {
           hitRate: 0.8, // Alert if hit rate drops below 80%
           responseTime: 100, // Alert if response time exceeds 100ms
-          errorRate: 0.05 // Alert if error rate exceeds 5%
-        }
+          errorRate: 0.05, // Alert if error rate exceeds 5%
+        },
       },
-      ...overrides
+      ...overrides,
     };
   }
 }
@@ -1143,7 +1275,7 @@ export class L1MemoryCache {
       ttl: config.defaultTtl,
       allowStale: false,
       updateAgeOnGet: true,
-      sizeCalculation: (value) => this.calculateEntrySize(value)
+      sizeCalculation: (value) => this.calculateEntrySize(value),
     });
 
     this.metrics = {
@@ -1154,7 +1286,7 @@ export class L1MemoryCache {
       memoryUsed: 0,
       storageUsed: 0,
       evictions: 0,
-      compressionRatio: 1.0
+      compressionRatio: 1.0,
     };
   }
 
@@ -1187,7 +1319,7 @@ export class L1MemoryCache {
     key: string,
     data: T,
     ttl: number,
-    metadata?: Partial<CacheEntryMetadata>
+    metadata?: Partial<CacheEntryMetadata>,
   ): Promise<CacheSetResult> {
     const startTime = performance.now();
 
@@ -1196,18 +1328,18 @@ export class L1MemoryCache {
         key,
         data,
         metadata: {
-          functionId: metadata?.functionId || '',
-          parameters: metadata?.parameters || '',
+          functionId: metadata?.functionId || "",
+          parameters: metadata?.parameters || "",
           createdAt: new Date(),
           accessCount: 0,
           lastAccessed: new Date(),
           ttl,
-          priority: metadata?.priority || 'normal',
+          priority: metadata?.priority || "normal",
           tags: metadata?.tags || [],
           size: metadata?.size || this.calculateDataSize(data),
           compressionEnabled: metadata?.compressionEnabled || false,
-          encryptionEnabled: metadata?.encryptionEnabled || false
-        }
+          encryptionEnabled: metadata?.encryptionEnabled || false,
+        },
       };
 
       this.cache.set(key, entry, { ttl });
@@ -1219,9 +1351,8 @@ export class L1MemoryCache {
         success: true,
         size: entry.metadata.size,
         compressionRatio: 1.0, // No compression in L1 by default
-        responseTime
+        responseTime,
       };
-
     } catch (error) {
       this.logger.error(`L1 cache set error for key: ${key}`, error);
       return {
@@ -1229,7 +1360,7 @@ export class L1MemoryCache {
         size: 0,
         compressionRatio: 1.0,
         responseTime: performance.now() - startTime,
-        error: getErrorMessage(error)
+        error: getErrorMessage(error),
       };
     }
   }
@@ -1252,7 +1383,7 @@ export class L1MemoryCache {
     const invalidatedKeys: string[] = [];
 
     for (const [key, entry] of Array.from(this.cache.entries())) {
-      if (entry.metadata.tags.some(tag => tags.includes(tag))) {
+      if (entry.metadata.tags.some((tag) => tags.includes(tag))) {
         this.cache.delete(key);
         invalidatedKeys.push(key);
       }
@@ -1277,10 +1408,12 @@ export class L1MemoryCache {
 
   private updateMetrics(responseTime: number, hit: boolean): void {
     const totalRequests = this.metrics.hits + this.metrics.misses;
-    this.metrics.hitRate = totalRequests > 0 ? this.metrics.hits / totalRequests : 0;
+    this.metrics.hitRate =
+      totalRequests > 0 ? this.metrics.hits / totalRequests : 0;
 
     // Update rolling average response time
-    this.metrics.averageResponseTime = (this.metrics.averageResponseTime * 0.9) + (responseTime * 0.1);
+    this.metrics.averageResponseTime =
+      this.metrics.averageResponseTime * 0.9 + responseTime * 0.1;
   }
 
   private updateMemoryUsage(): void {
@@ -1305,7 +1438,7 @@ export class L2DistributedCache {
       memoryUsed: 0,
       storageUsed: 0,
       evictions: 0,
-      compressionRatio: 0.7 // Mock compression ratio
+      compressionRatio: 0.7, // Mock compression ratio
     };
   }
 
@@ -1327,25 +1460,24 @@ export class L2DistributedCache {
           key,
           data: { mockData: true } as T,
           metadata: {
-            functionId: 'mock',
-            parameters: 'mock',
+            functionId: "mock",
+            parameters: "mock",
             createdAt: new Date(Date.now() - 300000),
             accessCount: 5,
             lastAccessed: new Date(),
             ttl: 3600000,
-            priority: 'normal',
+            priority: "normal",
             tags: [],
             size: 1024,
             compressionEnabled: true,
-            encryptionEnabled: false
-          }
+            encryptionEnabled: false,
+          },
         };
       } else {
         this.metrics.misses++;
         this.updateMetrics(responseTime, false);
         return null;
       }
-
     } catch (error) {
       this.logger.error(`L2 cache get error for key: ${key}`, error);
       this.metrics.misses++;
@@ -1357,7 +1489,7 @@ export class L2DistributedCache {
     key: string,
     data: T,
     ttl: number,
-    metadata?: Partial<CacheEntryMetadata>
+    metadata?: Partial<CacheEntryMetadata>,
   ): Promise<CacheSetResult> {
     const startTime = performance.now();
 
@@ -1369,9 +1501,8 @@ export class L2DistributedCache {
         success: true,
         size: metadata?.size || this.calculateDataSize(data),
         compressionRatio: 0.7, // Mock compression ratio
-        responseTime
+        responseTime,
       };
-
     } catch (error) {
       this.logger.error(`L2 cache set error for key: ${key}`, error);
       return {
@@ -1379,7 +1510,7 @@ export class L2DistributedCache {
         size: 0,
         compressionRatio: 1.0,
         responseTime: performance.now() - startTime,
-        error: getErrorMessage(error)
+        error: getErrorMessage(error),
       };
     }
   }
@@ -1405,8 +1536,10 @@ export class L2DistributedCache {
 
   private updateMetrics(responseTime: number, hit: boolean): void {
     const totalRequests = this.metrics.hits + this.metrics.misses;
-    this.metrics.hitRate = totalRequests > 0 ? this.metrics.hits / totalRequests : 0;
-    this.metrics.averageResponseTime = (this.metrics.averageResponseTime * 0.9) + (responseTime * 0.1);
+    this.metrics.hitRate =
+      totalRequests > 0 ? this.metrics.hits / totalRequests : 0;
+    this.metrics.averageResponseTime =
+      this.metrics.averageResponseTime * 0.9 + responseTime * 0.1;
   }
 }
 
@@ -1427,7 +1560,7 @@ export class L3PersistentCache {
       memoryUsed: 0,
       storageUsed: 0,
       evictions: 0,
-      compressionRatio: 0.5 // Mock compression ratio
+      compressionRatio: 0.5, // Mock compression ratio
     };
   }
 
@@ -1448,25 +1581,24 @@ export class L3PersistentCache {
           key,
           data: { persistentData: true } as T,
           metadata: {
-            functionId: 'persistent',
-            parameters: 'persistent',
+            functionId: "persistent",
+            parameters: "persistent",
             createdAt: new Date(Date.now() - 3600000),
             accessCount: 2,
             lastAccessed: new Date(),
             ttl: 86400000,
-            priority: 'low',
-            tags: ['persistent'],
+            priority: "low",
+            tags: ["persistent"],
             size: 2048,
             compressionEnabled: true,
-            encryptionEnabled: this.config.enableEncryption
-          }
+            encryptionEnabled: this.config.enableEncryption,
+          },
         };
       } else {
         this.metrics.misses++;
         this.updateMetrics(responseTime, false);
         return null;
       }
-
     } catch (error) {
       this.logger.error(`L3 cache get error for key: ${key}`, error);
       this.metrics.misses++;
@@ -1478,7 +1610,7 @@ export class L3PersistentCache {
     key: string,
     data: T,
     ttl: number,
-    metadata?: Partial<CacheEntryMetadata>
+    metadata?: Partial<CacheEntryMetadata>,
   ): Promise<CacheSetResult> {
     const startTime = performance.now();
 
@@ -1490,9 +1622,8 @@ export class L3PersistentCache {
         success: true,
         size: metadata?.size || this.calculateDataSize(data),
         compressionRatio: 0.5, // Mock compression ratio
-        responseTime
+        responseTime,
       };
-
     } catch (error) {
       this.logger.error(`L3 cache set error for key: ${key}`, error);
       return {
@@ -1500,7 +1631,7 @@ export class L3PersistentCache {
         size: 0,
         compressionRatio: 1.0,
         responseTime: performance.now() - startTime,
-        error: getErrorMessage(error)
+        error: getErrorMessage(error),
       };
     }
   }
@@ -1526,8 +1657,10 @@ export class L3PersistentCache {
 
   private updateMetrics(responseTime: number, hit: boolean): void {
     const totalRequests = this.metrics.hits + this.metrics.misses;
-    this.metrics.hitRate = totalRequests > 0 ? this.metrics.hits / totalRequests : 0;
-    this.metrics.averageResponseTime = (this.metrics.averageResponseTime * 0.9) + (responseTime * 0.1);
+    this.metrics.hitRate =
+      totalRequests > 0 ? this.metrics.hits / totalRequests : 0;
+    this.metrics.averageResponseTime =
+      this.metrics.averageResponseTime * 0.9 + responseTime * 0.1;
   }
 }
 
@@ -1543,7 +1676,7 @@ export class CacheIntelligenceEngine {
   constructor(private readonly config: HighPerformanceCachingConfiguration) {}
 
   async initialize(): Promise<void> {
-    this.logger.log('Initializing Cache Intelligence Engine');
+    this.logger.log("Initializing Cache Intelligence Engine");
   }
 
   async determineCacheStrategy(
@@ -1551,7 +1684,7 @@ export class CacheIntelligenceEngine {
     parameters: any[],
     result: any,
     wrapperInfo: WrapperInfo,
-    context: CacheContext
+    context: CacheContext,
   ): Promise<CacheStrategy> {
     // Mock intelligent strategy determination
     return {
@@ -1562,71 +1695,78 @@ export class CacheIntelligenceEngine {
       enableL3: wrapperInfo.config.cacheable || false,
       enableCompression: this.shouldEnableCompression(result),
       enableEncryption: this.shouldEnableEncryption(wrapperInfo, context),
-      tags: this.generateTags(functionId, wrapperInfo, context)
+      tags: this.generateTags(functionId, wrapperInfo, context),
     };
   }
 
   async updateStrategyEffectiveness(
     functionId: string,
     strategy: CacheStrategy,
-    results: TierStorageResult[]
+    results: TierStorageResult[],
   ): Promise<void> {
     // Implementation would update ML models based on strategy outcomes
-    this.logger.debug(`Updating strategy effectiveness for function: ${functionId}`);
+    this.logger.debug(
+      `Updating strategy effectiveness for function: ${functionId}`,
+    );
   }
 
   async generateOptimizationRecommendations(
     metrics: CachePerformanceMetrics,
     patterns: CacheUsagePatterns,
-    config: CacheOptimizationConfig
+    config: CacheOptimizationConfig,
   ): Promise<CacheOptimizationRecommendation[]> {
     // Mock optimization recommendations
     return [
       {
-        id: 'opt-1',
-        type: 'ttl_optimization',
-        priority: 'high',
-        title: 'Optimize TTL for frequently accessed functions',
-        description: 'Increase TTL for functions with high access frequency',
-        implementation: 'Adjust TTL based on access patterns',
+        id: "opt-1",
+        type: "ttl_optimization",
+        priority: "high",
+        title: "Optimize TTL for frequently accessed functions",
+        description: "Increase TTL for functions with high access frequency",
+        implementation: "Adjust TTL based on access patterns",
         expectedImpact: {
           hitRateImprovement: 0.05,
           responseTimeImprovement: 25,
-          capacityImprovement: 0.02
+          capacityImprovement: 0.02,
         },
         autoApplicable: true,
-        risk: 'low'
-      }
+        risk: "low",
+      },
     ];
   }
 
   async identifyOptimizationOpportunities(
     metrics: CachePerformanceMetrics,
     patterns: CacheUsagePatterns,
-    efficiency: CacheEfficiencyAnalysis
+    efficiency: CacheEfficiencyAnalysis,
   ): Promise<CacheOptimizationOpportunity[]> {
     // Mock optimization opportunities
     return [
       {
-        id: 'opp-1',
-        category: 'hit_rate',
-        priority: 'high',
-        title: 'Improve Cache Hit Rate',
-        description: 'Several functions show low cache hit rates',
-        recommendation: 'Implement intelligent preloading for predictable access patterns',
+        id: "opp-1",
+        category: "hit_rate",
+        priority: "high",
+        title: "Improve Cache Hit Rate",
+        description: "Several functions show low cache hit rates",
+        recommendation:
+          "Implement intelligent preloading for predictable access patterns",
         expectedImpact: {
           hitRateImprovement: 0.08,
           responseTimeImprovement: 30,
-          throughputImprovement: 0.15
+          throughputImprovement: 0.15,
         },
-        implementation: 'Configure predictive preloading based on usage patterns',
-        estimatedEffort: 'medium',
-        riskLevel: 'low'
-      }
+        implementation:
+          "Configure predictive preloading based on usage patterns",
+        estimatedEffort: "medium",
+        riskLevel: "low",
+      },
     ];
   }
 
-  private calculateOptimalTtl(functionId: string, wrapperInfo: WrapperInfo): number {
+  private calculateOptimalTtl(
+    functionId: string,
+    wrapperInfo: WrapperInfo,
+  ): number {
     // Mock TTL calculation based on function characteristics
     const baseTtl = 300000; // 5 minutes
 
@@ -1642,13 +1782,16 @@ export class CacheIntelligenceEngine {
     }
   }
 
-  private calculatePriority(wrapperInfo: WrapperInfo, context: CacheContext): CachePriority {
+  private calculatePriority(
+    wrapperInfo: WrapperInfo,
+    context: CacheContext,
+  ): CachePriority {
     if (wrapperInfo.config.validationLevel === ValidationLevel.CRITICAL) {
-      return 'high';
+      return "high";
     } else if (wrapperInfo.config.validationLevel === ValidationLevel.HIGH) {
-      return 'normal';
+      return "normal";
     } else {
-      return 'low';
+      return "low";
     }
   }
 
@@ -1657,11 +1800,21 @@ export class CacheIntelligenceEngine {
     return size > 1024; // Enable compression for data larger than 1KB
   }
 
-  private shouldEnableEncryption(wrapperInfo: WrapperInfo, context: CacheContext): boolean {
-    return wrapperInfo.config.metadata?.dataClassification === DataClassification.RESTRICTED;
+  private shouldEnableEncryption(
+    wrapperInfo: WrapperInfo,
+    context: CacheContext,
+  ): boolean {
+    return (
+      wrapperInfo.config.metadata?.dataClassification ===
+      DataClassification.RESTRICTED
+    );
   }
 
-  private generateTags(functionId: string, wrapperInfo: WrapperInfo, context: CacheContext): string[] {
+  private generateTags(
+    functionId: string,
+    wrapperInfo: WrapperInfo,
+    context: CacheContext,
+  ): string[] {
     const tags = [functionId];
 
     if (wrapperInfo.config.metadata?.category) {
@@ -1688,23 +1841,27 @@ export class CachePreloadManager {
   constructor(private readonly config: HighPerformanceCachingConfiguration) {}
 
   async start(): Promise<void> {
-    this.logger.log('Starting Cache Preload Manager');
+    this.logger.log("Starting Cache Preload Manager");
   }
 
-  async identifyPreloadCandidates(config: CachePreloadConfig): Promise<PreloadCandidate[]> {
+  async identifyPreloadCandidates(
+    config: CachePreloadConfig,
+  ): Promise<PreloadCandidate[]> {
     // Mock preload candidate identification
     return [
       {
-        functionId: 'frequently-accessed-function',
-        parameters: [['param1'], ['param2']],
-        priority: 'high',
+        functionId: "frequently-accessed-function",
+        parameters: [["param1"], ["param2"]],
+        priority: "high",
         expectedHitRate: 0.9,
-        estimatedBenefit: 0.15
-      }
+        estimatedBenefit: 0.15,
+      },
     ];
   }
 
-  async executePreload(candidate: PreloadCandidate): Promise<PreloadExecutionResult> {
+  async executePreload(
+    candidate: PreloadCandidate,
+  ): Promise<PreloadExecutionResult> {
     // Mock preload execution
     return {
       candidateId: candidate.functionId,
@@ -1712,18 +1869,21 @@ export class CachePreloadManager {
       executionTime: 150,
       dataSize: 2048,
       cacheHits: 0,
-      estimatedBenefit: candidate.estimatedBenefit
+      estimatedBenefit: candidate.estimatedBenefit,
     };
   }
 
-  async analyzePreloadEffectiveness(results: PreloadExecutionResult[]): Promise<PreloadEffectivenessAnalysis> {
+  async analyzePreloadEffectiveness(
+    results: PreloadExecutionResult[],
+  ): Promise<PreloadEffectivenessAnalysis> {
     // Mock effectiveness analysis
     return {
       overallEffectiveness: 0.85,
-      successRate: results.filter(r => r.success).length / results.length,
-      averageExecutionTime: results.reduce((sum, r) => sum + r.executionTime, 0) / results.length,
+      successRate: results.filter((r) => r.success).length / results.length,
+      averageExecutionTime:
+        results.reduce((sum, r) => sum + r.executionTime, 0) / results.length,
       totalDataPreloaded: results.reduce((sum, r) => sum + r.dataSize, 0),
-      estimatedHitRateImprovement: 0.12
+      estimatedHitRateImprovement: 0.12,
     };
   }
 }
@@ -1738,7 +1898,7 @@ export class EvictionOptimizer {
   constructor(private readonly config: HighPerformanceCachingConfiguration) {}
 
   async start(): Promise<void> {
-    this.logger.log('Starting Eviction Optimizer');
+    this.logger.log("Starting Eviction Optimizer");
   }
 }
 
@@ -1751,7 +1911,12 @@ export class CacheAnalyticsEngine {
 
   constructor(private readonly config: HighPerformanceCachingConfiguration) {}
 
-  recordAccess(key: string, tier: string, result: string, responseTime: number): void {
+  recordAccess(
+    key: string,
+    tier: string,
+    result: string,
+    responseTime: number,
+  ): void {
     // Implementation would record access patterns
   }
 
@@ -1759,7 +1924,7 @@ export class CacheAnalyticsEngine {
     key: string,
     strategy: CacheStrategy,
     results: TierStorageResult[],
-    storageTime: number
+    storageTime: number,
   ): void {
     // Implementation would record storage analytics
   }
@@ -1768,7 +1933,7 @@ export class CacheAnalyticsEngine {
     functionId: string,
     strategy: CacheInvalidationStrategy,
     keys: string[],
-    time: number
+    time: number,
   ): void {
     // Implementation would record invalidation analytics
   }
@@ -1784,33 +1949,37 @@ export class CacheAnalyticsEngine {
       preloadHitRate: 0.75,
       intelligentEvictionRate: 0.85,
       adaptiveStrategyEffectiveness: 0.9,
-      compressionEfficiency: 0.65
+      compressionEfficiency: 0.65,
     };
   }
 
-  async analyzeUsagePatterns(timeRange?: TimeRange): Promise<CacheUsagePatterns> {
+  async analyzeUsagePatterns(
+    timeRange?: TimeRange,
+  ): Promise<CacheUsagePatterns> {
     // Mock usage pattern analysis
     return {
       accessPatterns: {},
       temporalPatterns: {},
       functionPopularity: {},
-      userBehaviorPatterns: {}
+      userBehaviorPatterns: {},
     };
   }
 
-  async analyzeEfficiency(timeRange?: TimeRange): Promise<CacheEfficiencyAnalysis> {
+  async analyzeEfficiency(
+    timeRange?: TimeRange,
+  ): Promise<CacheEfficiencyAnalysis> {
     // Mock efficiency analysis
     return {
       overallEfficiency: 0.82,
       tierEfficiency: { L1: 0.9, L2: 0.8, L3: 0.7 },
       resourceUtilization: { cpu: 0.6, memory: 0.75, storage: 0.8 },
-      optimizationOpportunities: []
+      optimizationOpportunities: [],
     };
   }
 
   async generateFunctionInsights(
     timeRange?: TimeRange,
-    functions?: string[]
+    functions?: string[],
   ): Promise<FunctionCacheInsights> {
     // Mock function insights
     return {};
@@ -1827,7 +1996,7 @@ export class CachePerformanceMonitor {
   constructor(private readonly config: HighPerformanceCachingConfiguration) {}
 
   start(): void {
-    this.logger.log('Starting Cache Performance Monitor');
+    this.logger.log("Starting Cache Performance Monitor");
   }
 
   recordHit(tier: string, responseTime: number): void {
@@ -1848,7 +2017,7 @@ export class CachingError extends Error {
 
   constructor(message: string, metadata: Record<string, any> = {}) {
     super(message);
-    this.name = 'CachingError';
+    this.name = "CachingError";
     this.metadata = metadata;
   }
 }
@@ -1869,8 +2038,8 @@ export interface L1CacheConfiguration {
   defaultTtl: number;
   targetResponseTime: number;
   enableCompression: boolean;
-  compressionAlgorithm: 'lz4' | 'snappy' | 'gzip';
-  evictionStrategy: 'lru' | 'lfu' | 'fifo' | 'random';
+  compressionAlgorithm: "lz4" | "snappy" | "gzip";
+  evictionStrategy: "lru" | "lfu" | "fifo" | "random";
 }
 
 export interface L2CacheConfiguration {
@@ -1878,9 +2047,9 @@ export interface L2CacheConfiguration {
   defaultTtl: number;
   targetResponseTime: number;
   enableCompression: boolean;
-  compressionAlgorithm: 'lz4' | 'snappy' | 'gzip';
-  evictionStrategy: 'lru' | 'lfu' | 'fifo' | 'random';
-  distributionStrategy: 'consistent_hash' | 'round_robin' | 'random';
+  compressionAlgorithm: "lz4" | "snappy" | "gzip";
+  evictionStrategy: "lru" | "lfu" | "fifo" | "random";
+  distributionStrategy: "consistent_hash" | "round_robin" | "random";
   replicationFactor: number;
 }
 
@@ -1889,9 +2058,9 @@ export interface L3CacheConfiguration {
   defaultTtl: number;
   targetResponseTime: number;
   enableCompression: boolean;
-  compressionAlgorithm: 'lz4' | 'snappy' | 'gzip';
-  evictionStrategy: 'lru' | 'lfu' | 'fifo' | 'ttl';
-  persistenceEngine: 'rocksdb' | 'leveldb' | 'redis' | 'mongodb';
+  compressionAlgorithm: "lz4" | "snappy" | "gzip";
+  evictionStrategy: "lru" | "lfu" | "fifo" | "ttl";
+  persistenceEngine: "rocksdb" | "leveldb" | "redis" | "mongodb";
   enableEncryption: boolean;
 }
 
@@ -1941,7 +2110,7 @@ export interface CacheEntryMetadata {
   encryptionEnabled: boolean;
 }
 
-export type CachePriority = 'low' | 'normal' | 'high' | 'critical';
+export type CachePriority = "low" | "normal" | "high" | "critical";
 
 export interface CacheResult<T> {
   data: T;
@@ -1995,7 +2164,7 @@ export interface CacheStorageResult {
 }
 
 export interface CacheInvalidationStrategy {
-  scope: 'function' | 'pattern' | 'tags' | 'dependency';
+  scope: "function" | "pattern" | "tags" | "dependency";
   pattern?: RegExp;
   tags?: string[];
   dependencies?: string[];
@@ -2114,7 +2283,7 @@ export interface TemporalPattern {
 export interface PopularityMetrics {
   functionId: string;
   popularityScore: number;
-  trendDirection: 'increasing' | 'stable' | 'decreasing';
+  trendDirection: "increasing" | "stable" | "decreasing";
   userCount: number;
 }
 
@@ -2127,8 +2296,12 @@ export interface UserBehaviorPattern {
 
 export interface CacheOptimizationRecommendation {
   id: string;
-  type: 'ttl_optimization' | 'tier_rebalancing' | 'preload_strategy' | 'eviction_tuning';
-  priority: 'low' | 'medium' | 'high' | 'critical';
+  type:
+    | "ttl_optimization"
+    | "tier_rebalancing"
+    | "preload_strategy"
+    | "eviction_tuning";
+  priority: "low" | "medium" | "high" | "critical";
   title: string;
   description: string;
   implementation: string;
@@ -2138,7 +2311,7 @@ export interface CacheOptimizationRecommendation {
     capacityImprovement: number;
   };
   autoApplicable: boolean;
-  risk: 'low' | 'medium' | 'high';
+  risk: "low" | "medium" | "high";
 }
 
 export interface AppliedOptimization {
@@ -2165,7 +2338,7 @@ export interface CachePreloadConfig {
   analysisWindow: TimeRange;
   minConfidenceScore: number;
   maxPreloadItems: number;
-  preloadStrategy: 'popularity' | 'pattern' | 'hybrid';
+  preloadStrategy: "popularity" | "pattern" | "hybrid";
 }
 
 export interface CachePreloadResult {
@@ -2187,7 +2360,7 @@ export interface CachePreloadResult {
 export interface PreloadCandidate {
   functionId: string;
   parameters: any[][];
-  priority: 'low' | 'medium' | 'high';
+  priority: "low" | "medium" | "high";
   expectedHitRate: number;
   estimatedBenefit: number;
 }
@@ -2231,7 +2404,7 @@ export interface CacheAnalyticsReport {
 }
 
 export interface CacheExecutiveSummary {
-  overallPerformance: 'excellent' | 'good' | 'acceptable' | 'poor';
+  overallPerformance: "excellent" | "good" | "acceptable" | "poor";
   keyMetrics: {
     hitRate: number;
     averageResponseTime: number;
@@ -2264,8 +2437,8 @@ export interface FunctionCacheInsights {
 
 export interface CacheOptimizationOpportunity {
   id: string;
-  category: 'hit_rate' | 'response_time' | 'capacity' | 'efficiency';
-  priority: 'low' | 'medium' | 'high' | 'critical';
+  category: "hit_rate" | "response_time" | "capacity" | "efficiency";
+  priority: "low" | "medium" | "high" | "critical";
   title: string;
   description: string;
   recommendation: string;
@@ -2275,8 +2448,8 @@ export interface CacheOptimizationOpportunity {
     throughputImprovement: number;
   };
   implementation: string;
-  estimatedEffort: 'low' | 'medium' | 'high';
-  riskLevel: 'low' | 'medium' | 'high';
+  estimatedEffort: "low" | "medium" | "high";
+  riskLevel: "low" | "medium" | "high";
 }
 
 export interface CacheComplianceAssessment {
@@ -2304,19 +2477,19 @@ export interface ComplianceGap {
   currentValue: number;
   targetValue: number;
   gap: number;
-  priority: 'low' | 'medium' | 'high' | 'critical';
+  priority: "low" | "medium" | "high" | "critical";
 }
 
 export interface CacheRecommendation {
   id: string;
-  category: 'performance' | 'efficiency' | 'capacity' | 'reliability';
-  priority: 'low' | 'medium' | 'high' | 'critical';
+  category: "performance" | "efficiency" | "capacity" | "reliability";
+  priority: "low" | "medium" | "high" | "critical";
   title: string;
   description: string;
   implementation: string;
   expectedImpact: string;
   estimatedEffort: string;
-  riskLevel: 'low' | 'medium' | 'high';
+  riskLevel: "low" | "medium" | "high";
 }
 
 export interface CacheAnalyticsMetrics {

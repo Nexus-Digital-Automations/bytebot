@@ -883,7 +883,10 @@ export class ParlantWrapperRegistry {
     wrappedFunction: WrappedFunction<T>,
     config: FunctionWrapperConfig,
   ): void {
-    this.wrappedFunctions.set(functionId, wrappedFunction as (..._args: unknown[]) => Promise<unknown>);
+    this.wrappedFunctions.set(
+      functionId,
+      wrappedFunction as (..._args: unknown[]) => Promise<unknown>,
+    );
     this.wrapperMetadata.set(functionId, config);
 
     this.logger.log(`Registered wrapped function: ${functionId}`, {

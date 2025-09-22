@@ -27,20 +27,20 @@ import {
   OnModuleInit,
   OnModuleDestroy,
   Inject,
-} from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter } from 'events';
-import * as jwt from 'jsonwebtoken';
-import * as crypto from 'crypto';
-import { CryptoProtocolsService } from './crypto-protocols.service';
-import { BridgeJwtPayload } from './jwt-bridge.service';
+} from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { EventEmitter } from "events";
+import * as jwt from "jsonwebtoken";
+import * as crypto from "crypto";
+import { CryptoProtocolsService } from "./crypto-protocols.service";
+import { BridgeJwtPayload } from "./jwt-bridge.service";
 
 /**
  * Token refresh strategy configuration
  */
 export interface RefreshStrategy {
   /** Strategy type */
-  type: 'automatic' | 'on-demand' | 'predictive' | 'hybrid';
+  type: "automatic" | "on-demand" | "predictive" | "hybrid";
   /** Refresh threshold (percentage of lifetime remaining) */
   refreshThreshold: number;
   /** Maximum refresh attempts */
@@ -72,21 +72,21 @@ export interface SessionConfig {
   /** Session encryption enabled */
   encryptionEnabled: boolean;
   /** Session sharding strategy */
-  shardingStrategy: 'user' | 'time' | 'random' | 'geographic';
+  shardingStrategy: "user" | "time" | "random" | "geographic";
 }
 
 /**
  * Session state enumeration
  */
 export enum SessionState {
-  ACTIVE = 'active',
-  IDLE = 'idle',
-  EXPIRING = 'expiring',
-  EXPIRED = 'expired',
-  SUSPENDED = 'suspended',
-  TERMINATED = 'terminated',
-  REFRESHING = 'refreshing',
-  ERROR = 'error',
+  ACTIVE = "active",
+  IDLE = "idle",
+  EXPIRING = "expiring",
+  EXPIRED = "expired",
+  SUSPENDED = "suspended",
+  TERMINATED = "terminated",
+  REFRESHING = "refreshing",
+  ERROR = "error",
 }
 
 /**
@@ -94,7 +94,13 @@ export enum SessionState {
  */
 export interface SessionLifecycleEvent {
   /** Event type */
-  type: 'created' | 'activated' | 'refreshed' | 'expired' | 'terminated' | 'error';
+  type:
+    | "created"
+    | "activated"
+    | "refreshed"
+    | "expired"
+    | "terminated"
+    | "error";
   /** Session ID */
   sessionId: string;
   /** User ID */
@@ -227,7 +233,11 @@ export interface SessionAnalytics {
   /** Average refresh time */
   averageRefreshTime: number;
   /** Most active users */
-  topUsers: Array<{ userId: string; sessionCount: number; totalDuration: number }>;
+  topUsers: Array<{
+    userId: string;
+    sessionCount: number;
+    totalDuration: number;
+  }>;
   /** Device distribution */
   deviceDistribution: Record<string, number>;
   /** Geographic distribution */
@@ -246,7 +256,10 @@ export interface SessionAnalytics {
  * analytics for enterprise-grade authentication systems.
  */
 @Injectable()
-export class LifecycleManagementService extends EventEmitter implements OnModuleInit, OnModuleDestroy {
+export class LifecycleManagementService
+  extends EventEmitter
+  implements OnModuleInit, OnModuleDestroy
+{
   private readonly logger = new Logger(LifecycleManagementService.name);
 
   // Configuration
@@ -294,10 +307,11 @@ export class LifecycleManagementService extends EventEmitter implements OnModule
   constructor(
     private readonly configService: ConfigService,
     private readonly cryptoService: CryptoProtocolsService,
-    @Inject('LIFECYCLE_CONFIG') private readonly lifecycleConfig: Partial<SessionConfig>,
+    @Inject("LIFECYCLE_CONFIG")
+    private readonly lifecycleConfig: Partial<SessionConfig>,
   ) {
     super();
-    this.logger.log('🔄 Initializing Lifecycle Management Service');
+    this.logger.log("🔄 Initializing Lifecycle Management Service");
   }
 
   /**
@@ -305,7 +319,7 @@ export class LifecycleManagementService extends EventEmitter implements OnModule
    */
   async onModuleInit(): Promise<void> {
     const startTime = Date.now();
-    this.logger.log('🔄 Starting lifecycle management initialization...');
+    this.logger.log("🔄 Starting lifecycle management initialization...");
 
     try {
       await this.loadConfiguration();
@@ -314,16 +328,20 @@ export class LifecycleManagementService extends EventEmitter implements OnModule
       await this.loadPersistedSessions();
 
       const initTime = Date.now() - startTime;
-      this.logger.log(`✅ Lifecycle management initialized successfully (${initTime}ms)`);
+      this.logger.log(
+        `✅ Lifecycle management initialized successfully (${initTime}ms)`,
+      );
 
-      this.emit('lifecycle:initialized', {
+      this.emit("lifecycle:initialized", {
         timestamp: new Date(),
         initializationTime: initTime,
         configuration: this.sanitizeConfig(),
       });
     } catch (error) {
-      this.logger.error('❌ Failed to initialize lifecycle management', error);
-      throw new Error(`Lifecycle initialization failed: ${error instanceof Error ? error.message : String(error)}`);
+      this.logger.error("❌ Failed to initialize lifecycle management", error);
+      throw new Error(
+        `Lifecycle initialization failed: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 
@@ -331,31 +349,29 @@ export class LifecycleManagementService extends EventEmitter implements OnModule
    * Clean up resources on module destruction
    */
   async onModuleDestroy(): Promise<void> {
-    this.logger.log('🔄 Shutting down lifecycle management...');
+    this.logger.log("🔄 Shutting down lifecycle management...");
 
     await this.stopPeriodicTasks();
     await this.persistActiveSessions();
     await this.terminateAllSessions();
 
-    this.logger.log('✅ Lifecycle management shutdown complete');
+    this.logger.log("✅ Lifecycle management shutdown complete");
   }
 
   /**
    * Create new enhanced session
    */
-  async createSession(
-    sessionData: {
-      sessionId: string;
-      userId: string;
-      aigentToken: string;
-      parlantToken: string;
-      refreshToken?: string;
-      roles: string[];
-      permissions: string[];
-      deviceInfo: EnhancedSession['deviceInfo'];
-      securityMetadata: Partial<EnhancedSession['securityMetadata']>;
-    },
-  ): Promise<EnhancedSession> {
+  async createSession(sessionData: {
+    sessionId: string;
+    userId: string;
+    aigentToken: string;
+    parlantToken: string;
+    refreshToken?: string;
+    roles: string[];
+    permissions: string[];
+    deviceInfo: EnhancedSession["deviceInfo"];
+    securityMetadata: Partial<EnhancedSession["securityMetadata"]>;
+  }): Promise<EnhancedSession> {
     const now = new Date();
 
     // Check concurrent session limits
@@ -377,8 +393,8 @@ export class LifecycleManagementService extends EventEmitter implements OnModule
       permissions: sessionData.permissions,
       deviceInfo: sessionData.deviceInfo,
       securityMetadata: {
-        securityLevel: 'MEDIUM',
-        authenticationMethod: 'jwt-bridge',
+        securityLevel: "MEDIUM",
+        authenticationMethod: "jwt-bridge",
         mfaCompleted: false,
         threatScore: 0,
         lastSecurityCheck: now,
@@ -423,7 +439,7 @@ export class LifecycleManagementService extends EventEmitter implements OnModule
 
     // Emit lifecycle event
     this.emitLifecycleEvent({
-      type: 'created',
+      type: "created",
       sessionId: session.sessionId,
       userId: session.userId,
       timestamp: now,
@@ -434,7 +450,9 @@ export class LifecycleManagementService extends EventEmitter implements OnModule
       newState: SessionState.ACTIVE,
     });
 
-    this.logger.log(`✅ Session created: ${sessionData.sessionId} for user: ${sessionData.userId}`);
+    this.logger.log(
+      `✅ Session created: ${sessionData.sessionId} for user: ${sessionData.userId}`,
+    );
 
     return session;
   }
@@ -461,7 +479,9 @@ export class LifecycleManagementService extends EventEmitter implements OnModule
     session.lastActivityAt = now;
 
     // Update idle timeout
-    session.idleTimeoutAt = new Date(now.getTime() + this.sessionConfig.idleTimeout);
+    session.idleTimeoutAt = new Date(
+      now.getTime() + this.sessionConfig.idleTimeout,
+    );
 
     // Update performance metadata
     if (activityData) {
@@ -469,8 +489,12 @@ export class LifecycleManagementService extends EventEmitter implements OnModule
       session.performanceMetadata.lastRequestTime = now;
 
       if (activityData.requestTime) {
-        const totalTime = session.performanceMetadata.averageResponseTime * (session.performanceMetadata.totalRequests - 1) + activityData.requestTime;
-        session.performanceMetadata.averageResponseTime = totalTime / session.performanceMetadata.totalRequests;
+        const totalTime =
+          session.performanceMetadata.averageResponseTime *
+            (session.performanceMetadata.totalRequests - 1) +
+          activityData.requestTime;
+        session.performanceMetadata.averageResponseTime =
+          totalTime / session.performanceMetadata.totalRequests;
       }
 
       if (activityData.bandwidthUsed) {
@@ -504,12 +528,12 @@ export class LifecycleManagementService extends EventEmitter implements OnModule
           refreshTime: new Date(),
           refreshDuration: 0,
           refreshAttempt: 1,
-          refreshStrategy: 'manual',
+          refreshStrategy: "manual",
           previousExpiration: new Date(),
           newExpiration: new Date(),
         },
         error: {
-          code: 'SESSION_NOT_FOUND',
+          code: "SESSION_NOT_FOUND",
           message: `Session not found: ${sessionId}`,
           retryable: false,
         },
@@ -524,7 +548,7 @@ export class LifecycleManagementService extends EventEmitter implements OnModule
 
       // Verify current tokens are still valid for refresh
       if (!session.refreshToken) {
-        throw new Error('No refresh token available');
+        throw new Error("No refresh token available");
       }
 
       // Perform token refresh using crypto service
@@ -563,11 +587,13 @@ export class LifecycleManagementService extends EventEmitter implements OnModule
         },
       };
 
-      this.logger.log(`✅ Tokens refreshed for session: ${sessionId} (${refreshDuration}ms)`);
+      this.logger.log(
+        `✅ Tokens refreshed for session: ${sessionId} (${refreshDuration}ms)`,
+      );
 
       // Emit lifecycle event
       this.emitLifecycleEvent({
-        type: 'refreshed',
+        type: "refreshed",
         sessionId: session.sessionId,
         userId: session.userId,
         timestamp: new Date(),
@@ -588,7 +614,10 @@ export class LifecycleManagementService extends EventEmitter implements OnModule
 
       const refreshDuration = Date.now() - startTime;
 
-      this.logger.error(`❌ Token refresh failed for session: ${sessionId}`, error);
+      this.logger.error(
+        `❌ Token refresh failed for session: ${sessionId}`,
+        error,
+      );
 
       return {
         success: false,
@@ -601,7 +630,7 @@ export class LifecycleManagementService extends EventEmitter implements OnModule
           newExpiration: session.expiresAt,
         },
         error: {
-          code: 'REFRESH_FAILED',
+          code: "REFRESH_FAILED",
           message: error instanceof Error ? error.message : String(error),
           retryable: true,
           retryAfter: this.refreshStrategy.retryDelay,
@@ -613,7 +642,10 @@ export class LifecycleManagementService extends EventEmitter implements OnModule
   /**
    * Terminate session
    */
-  async terminateSession(sessionId: string, reason: string = 'manual'): Promise<void> {
+  async terminateSession(
+    sessionId: string,
+    reason: string = "manual",
+  ): Promise<void> {
     const session = this.sessions.get(sessionId);
     if (!session) {
       return;
@@ -642,7 +674,7 @@ export class LifecycleManagementService extends EventEmitter implements OnModule
 
     // Emit lifecycle event
     this.emitLifecycleEvent({
-      type: 'terminated',
+      type: "terminated",
       sessionId: session.sessionId,
       userId: session.userId,
       timestamp: new Date(),
@@ -671,7 +703,7 @@ export class LifecycleManagementService extends EventEmitter implements OnModule
     }
 
     return Array.from(sessionIds)
-      .map(id => this.sessions.get(id))
+      .map((id) => this.sessions.get(id))
       .filter((session): session is EnhancedSession => session !== undefined);
   }
 
@@ -695,14 +727,14 @@ export class LifecycleManagementService extends EventEmitter implements OnModule
 
   private async loadConfiguration(): Promise<void> {
     this.refreshStrategy = {
-      type: 'hybrid',
+      type: "hybrid",
       refreshThreshold: 0.75, // Refresh when 75% of lifetime remaining
       maxAttempts: 3,
       retryDelay: 5000, // 5 seconds
       predictiveRefresh: true,
       refreshWindow: 300000, // 5 minutes
       gracePeriod: 60000, // 1 minute
-      ...(this.configService.get('refresh') || {}),
+      ...(this.configService.get("refresh") || {}),
     };
 
     this.sessionConfig = {
@@ -712,18 +744,18 @@ export class LifecycleManagementService extends EventEmitter implements OnModule
       persistenceEnabled: true,
       compressionEnabled: true,
       encryptionEnabled: true,
-      shardingStrategy: 'user',
-      ...(this.configService.get('session') || {}),
+      shardingStrategy: "user",
+      ...(this.configService.get("session") || {}),
       ...this.lifecycleConfig,
     };
 
-    this.logger.log('⚙️ Lifecycle configuration loaded');
+    this.logger.log("⚙️ Lifecycle configuration loaded");
   }
 
   private async initializeStorage(): Promise<void> {
     // Initialize session storage
     // In production, this would connect to Redis, database, etc.
-    this.logger.log('💾 Session storage initialized');
+    this.logger.log("💾 Session storage initialized");
   }
 
   private async enforceSessionLimits(userId: string): Promise<void> {
@@ -746,7 +778,10 @@ export class LifecycleManagementService extends EventEmitter implements OnModule
       }
 
       if (oldestSession) {
-        await this.terminateSession(oldestSession.sessionId, 'session_limit_exceeded');
+        await this.terminateSession(
+          oldestSession.sessionId,
+          "session_limit_exceeded",
+        );
       }
     }
   }
@@ -760,17 +795,23 @@ export class LifecycleManagementService extends EventEmitter implements OnModule
 
     // Calculate refresh time based on strategy
     const tokenLifetime = session.expiresAt.getTime() - Date.now();
-    const refreshTime = tokenLifetime * (1 - this.refreshStrategy.refreshThreshold);
+    const refreshTime =
+      tokenLifetime * (1 - this.refreshStrategy.refreshThreshold);
 
     // Schedule refresh
-    const timer = setTimeout(async () => {
-      await this.refreshSessionTokens(session.sessionId);
-    }, Math.max(refreshTime, 1000)); // At least 1 second
+    const timer = setTimeout(
+      async () => {
+        await this.refreshSessionTokens(session.sessionId);
+      },
+      Math.max(refreshTime, 1000),
+    ); // At least 1 second
 
     this.refreshQueue.set(session.sessionId, timer);
   }
 
-  private async scheduleSessionExpiration(session: EnhancedSession): Promise<void> {
+  private async scheduleSessionExpiration(
+    session: EnhancedSession,
+  ): Promise<void> {
     // Cancel existing expiration timer
     const existingTimer = this.expirationQueue.get(session.sessionId);
     if (existingTimer) {
@@ -779,9 +820,12 @@ export class LifecycleManagementService extends EventEmitter implements OnModule
 
     // Schedule expiration
     const expirationTime = session.expiresAt.getTime() - Date.now();
-    const timer = setTimeout(async () => {
-      await this.expireSession(session.sessionId);
-    }, Math.max(expirationTime, 1000)); // At least 1 second
+    const timer = setTimeout(
+      async () => {
+        await this.expireSession(session.sessionId);
+      },
+      Math.max(expirationTime, 1000),
+    ); // At least 1 second
 
     this.expirationQueue.set(session.sessionId, timer);
   }
@@ -796,16 +840,21 @@ export class LifecycleManagementService extends EventEmitter implements OnModule
 
     // Grace period for cleanup
     setTimeout(async () => {
-      await this.terminateSession(sessionId, 'expired');
+      await this.terminateSession(sessionId, "expired");
     }, this.refreshStrategy.gracePeriod);
   }
 
-  private async transitionSessionState(session: EnhancedSession, newState: SessionState): Promise<void> {
+  private async transitionSessionState(
+    session: EnhancedSession,
+    newState: SessionState,
+  ): Promise<void> {
     const previousState = session.state;
     session.state = newState;
     session.lifecycleMetadata.stateTransitions++;
 
-    this.logger.debug(`🔄 Session state transition: ${session.sessionId} ${previousState} -> ${newState}`);
+    this.logger.debug(
+      `🔄 Session state transition: ${session.sessionId} ${previousState} -> ${newState}`,
+    );
 
     // Update analytics
     this.analytics.sessionsByState[previousState]--;
@@ -824,9 +873,9 @@ export class LifecycleManagementService extends EventEmitter implements OnModule
     const expiresAt = new Date(now.getTime() + this.sessionConfig.maxDuration);
 
     return {
-      aigentToken: `aigent_${Date.now()}_${crypto.randomBytes(16).toString('hex')}`,
-      parlantToken: `parlant_${Date.now()}_${crypto.randomBytes(16).toString('hex')}`,
-      refreshToken: `refresh_${Date.now()}_${crypto.randomBytes(16).toString('hex')}`,
+      aigentToken: `aigent_${Date.now()}_${crypto.randomBytes(16).toString("hex")}`,
+      parlantToken: `parlant_${Date.now()}_${crypto.randomBytes(16).toString("hex")}`,
+      refreshToken: `refresh_${Date.now()}_${crypto.randomBytes(16).toString("hex")}`,
       expiresAt,
     };
   }
@@ -846,15 +895,17 @@ export class LifecycleManagementService extends EventEmitter implements OnModule
   }
 
   private emitLifecycleEvent(event: SessionLifecycleEvent): void {
-    this.emit('session:lifecycle', event);
-    this.logger.debug(`📢 Session lifecycle event: ${event.type} for ${event.sessionId}`);
+    this.emit("session:lifecycle", event);
+    this.logger.debug(
+      `📢 Session lifecycle event: ${event.type} for ${event.sessionId}`,
+    );
   }
 
   private updateAnalytics(): void {
     this.analytics.activeSessions = this.sessions.size;
 
     // Reset state counts
-    Object.keys(this.analytics.sessionsByState).forEach(state => {
+    Object.keys(this.analytics.sessionsByState).forEach((state) => {
       this.analytics.sessionsByState[state as SessionState] = 0;
     });
 
@@ -870,10 +921,14 @@ export class LifecycleManagementService extends EventEmitter implements OnModule
 
     // Calculate average session duration
     if (this.sessions.size > 0) {
-      const totalDuration = Array.from(this.sessions.values()).reduce((sum, session) => {
-        return sum + (Date.now() - session.createdAt.getTime());
-      }, 0);
-      this.analytics.averageSessionDuration = totalDuration / this.sessions.size;
+      const totalDuration = Array.from(this.sessions.values()).reduce(
+        (sum, session) => {
+          return sum + (Date.now() - session.createdAt.getTime());
+        },
+        0,
+      );
+      this.analytics.averageSessionDuration =
+        totalDuration / this.sessions.size;
     }
 
     this.analytics.lastUpdated = new Date();
@@ -897,7 +952,7 @@ export class LifecycleManagementService extends EventEmitter implements OnModule
       }, 600000);
     }
 
-    this.logger.log('⏰ Periodic tasks started');
+    this.logger.log("⏰ Periodic tasks started");
   }
 
   private async stopPeriodicTasks(): Promise<void> {
@@ -939,7 +994,10 @@ export class LifecycleManagementService extends EventEmitter implements OnModule
 
     for (const [sessionId, session] of this.sessions.entries()) {
       // Check for idle timeout
-      if (session.idleTimeoutAt < now && session.state === SessionState.ACTIVE) {
+      if (
+        session.idleTimeoutAt < now &&
+        session.state === SessionState.ACTIVE
+      ) {
         await this.transitionSessionState(session, SessionState.IDLE);
       }
 
@@ -950,9 +1008,12 @@ export class LifecycleManagementService extends EventEmitter implements OnModule
       }
 
       // Check for sessions in error state for too long
-      if (session.state === SessionState.ERROR &&
-          session.lastActivityAt.getTime() + 600000 < now.getTime()) { // 10 minutes
-        await this.terminateSession(sessionId, 'error_timeout');
+      if (
+        session.state === SessionState.ERROR &&
+        session.lastActivityAt.getTime() + 600000 < now.getTime()
+      ) {
+        // 10 minutes
+        await this.terminateSession(sessionId, "error_timeout");
         cleanupCount++;
       }
     }
@@ -977,13 +1038,13 @@ export class LifecycleManagementService extends EventEmitter implements OnModule
     }
 
     // In production, this would load sessions from storage
-    this.logger.debug('📥 Loading persisted sessions');
+    this.logger.debug("📥 Loading persisted sessions");
   }
 
   private async terminateAllSessions(): Promise<void> {
     const sessionIds = Array.from(this.sessions.keys());
     for (const sessionId of sessionIds) {
-      await this.terminateSession(sessionId, 'shutdown');
+      await this.terminateSession(sessionId, "shutdown");
     }
   }
 

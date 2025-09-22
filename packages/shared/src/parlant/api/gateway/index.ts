@@ -55,10 +55,10 @@ export const PARLANT_GATEWAY_AUTHOR = "AIgent Enterprise Gateway Team";
  * Feature Compatibility Matrix
  */
 export const FEATURE_COMPATIBILITY = {
-  "nodejs": ">=18.0.0",
-  "nestjs": ">=10.0.0",
-  "typescript": ">=5.0.0",
-  "rxjs": ">=7.0.0",
+  nodejs: ">=18.0.0",
+  nestjs: ">=10.0.0",
+  typescript: ">=5.0.0",
+  rxjs: ">=7.0.0",
   "class-validator": ">=0.14.0",
   "class-transformer": ">=0.5.0",
 };
@@ -66,11 +66,7 @@ export const FEATURE_COMPATIBILITY = {
 /**
  * Supported Platforms
  */
-export const SUPPORTED_PLATFORMS = [
-  "linux",
-  "darwin",
-  "win32",
-] as const;
+export const SUPPORTED_PLATFORMS = ["linux", "darwin", "win32"] as const;
 
 /**
  * Supported Environments
@@ -85,13 +81,13 @@ export const SUPPORTED_ENVIRONMENTS = [
  * Performance Benchmarks
  */
 export const PERFORMANCE_BENCHMARKS = {
-  "targetThroughput": "10,000+ requests/second",
-  "maxLatencyP95": "<100ms",
-  "maxLatencyP99": "<250ms",
-  "maxErrorRate": "<1%",
-  "availabilityTarget": ">99.9%",
-  "securityScanTime": "<50ms",
-  "validationTime": "<200ms",
+  targetThroughput: "10,000+ requests/second",
+  maxLatencyP95: "<100ms",
+  maxLatencyP99: "<250ms",
+  maxErrorRate: "<1%",
+  availabilityTarget: ">99.9%",
+  securityScanTime: "<50ms",
+  validationTime: "<200ms",
 } as const;
 
 /**

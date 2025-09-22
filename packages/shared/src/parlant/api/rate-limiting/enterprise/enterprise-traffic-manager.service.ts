@@ -8,7 +8,7 @@
  * @since 2025-09-22
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from "@nestjs/common";
 import {
   RateLimitConfiguration,
   RateLimitContext,
@@ -21,9 +21,12 @@ import {
   GeographicConfig,
   ComplianceReportingConfig,
   RateLimitingMetrics,
-  DynamicRateLimitAdjustment
-} from '../types/rate-limiting.types';
-import { SecurityLevel, RiskLevel } from '../../interfaces/conversational-api.interface';
+  DynamicRateLimitAdjustment,
+} from "../types/rate-limiting.types";
+import {
+  SecurityLevel,
+  RiskLevel,
+} from "../../interfaces/conversational-api.interface";
 
 /**
  * Enterprise Traffic Management Service
@@ -52,20 +55,26 @@ export class EnterpriseTrafficManagerService {
   private readonly trafficOptimizer: TrafficOptimizationEngine;
   private readonly loadBalancer: IntelligentLoadBalancer;
 
-  constructor(
-    private readonly configuration: RateLimitConfiguration
-  ) {
+  constructor(private readonly configuration: RateLimitConfiguration) {
     const enterpriseConfig = configuration.enterprise;
 
     this.slaManager = new SLAComplianceManager(enterpriseConfig.slaCompliance);
     this.fairQueuing = new FairQueuingEngine(enterpriseConfig.fairQueuing);
-    this.priorityManager = new PriorityManagementEngine(enterpriseConfig.priorityManagement);
+    this.priorityManager = new PriorityManagementEngine(
+      enterpriseConfig.priorityManagement,
+    );
     this.capacityPlanner = new IntelligentCapacityPlanner(configuration);
 
-    this.multiTenantManager = new MultiTenantManager(enterpriseConfig.multiTenantSupport);
-    this.geographicDistributor = new GeographicDistributionManager(enterpriseConfig.geographicDistribution);
+    this.multiTenantManager = new MultiTenantManager(
+      enterpriseConfig.multiTenantSupport,
+    );
+    this.geographicDistributor = new GeographicDistributionManager(
+      enterpriseConfig.geographicDistribution,
+    );
 
-    this.complianceReporter = new ComplianceReportingEngine(enterpriseConfig.complianceReporting);
+    this.complianceReporter = new ComplianceReportingEngine(
+      enterpriseConfig.complianceReporting,
+    );
     this.performanceMonitor = new EnterprisePerformanceMonitor();
 
     this.trafficOptimizer = new TrafficOptimizationEngine();
@@ -79,47 +88,65 @@ export class EnterpriseTrafficManagerService {
    */
   async processEnterpriseRequest(
     context: RateLimitContext,
-    preliminaryDecision: RateLimitDecision
+    preliminaryDecision: RateLimitDecision,
   ): Promise<EnterpriseTrafficDecision> {
     const startTime = Date.now();
 
     try {
       // Step 1: Multi-tenant validation and context enrichment
-      const tenantContext = await this.multiTenantManager.enrichContext(context);
+      const tenantContext =
+        await this.multiTenantManager.enrichContext(context);
 
       // Step 2: Geographic routing and load distribution
-      const routingDecision = await this.geographicDistributor.determineOptimalRouting(tenantContext);
+      const routingDecision =
+        await this.geographicDistributor.determineOptimalRouting(tenantContext);
 
       // Step 3: SLA compliance evaluation
-      const slaEvaluation = await this.slaManager.evaluateCompliance(tenantContext, preliminaryDecision);
+      const slaEvaluation = await this.slaManager.evaluateCompliance(
+        tenantContext,
+        preliminaryDecision,
+      );
 
       // Step 4: Fair queuing and priority management
-      const queueingDecision = await this.fairQueuing.evaluateQueuing(tenantContext, slaEvaluation);
-      const priorityAssignment = await this.priorityManager.assignPriority(tenantContext, queueingDecision);
+      const queueingDecision = await this.fairQueuing.evaluateQueuing(
+        tenantContext,
+        slaEvaluation,
+      );
+      const priorityAssignment = await this.priorityManager.assignPriority(
+        tenantContext,
+        queueingDecision,
+      );
 
       // Step 5: Capacity planning and resource allocation
-      const capacityDecision = await this.capacityPlanner.evaluateCapacity(tenantContext, priorityAssignment);
+      const capacityDecision = await this.capacityPlanner.evaluateCapacity(
+        tenantContext,
+        priorityAssignment,
+      );
 
       // Step 6: Traffic optimization
       const optimizedDecision = await this.trafficOptimizer.optimizeTrafficFlow(
         tenantContext,
-        capacityDecision
+        capacityDecision,
       );
 
       // Step 7: Load balancing
       const finalDecision = await this.loadBalancer.applyLoadBalancing(
         tenantContext,
-        optimizedDecision
+        optimizedDecision,
       );
 
       // Step 8: Compliance logging and monitoring
       await this.complianceReporter.logDecision(tenantContext, finalDecision);
-      await this.performanceMonitor.recordMetrics(tenantContext, finalDecision, startTime);
+      await this.performanceMonitor.recordMetrics(
+        tenantContext,
+        finalDecision,
+        startTime,
+      );
 
       const processingTime = Date.now() - startTime;
 
       this.logger.debug(
-        `Enterprise traffic processing completed in ${processingTime}ms for tenant: ${tenantContext.tenantId}, user: ${context.userId}`
+        `Enterprise traffic processing completed in ${processingTime}ms for tenant: ${tenantContext.tenantId}, user: ${context.userId}`,
       );
 
       return {
@@ -131,13 +158,23 @@ export class EnterpriseTrafficManagerService {
         priorityAssignment,
         capacityDecision,
         processingTime,
-        complianceStatus: await this.generateComplianceStatus(tenantContext, finalDecision),
-        performanceMetrics: await this.generatePerformanceMetrics(processingTime)
+        complianceStatus: await this.generateComplianceStatus(
+          tenantContext,
+          finalDecision,
+        ),
+        performanceMetrics:
+          await this.generatePerformanceMetrics(processingTime),
       };
-
     } catch (error) {
-      this.logger.error(`Enterprise traffic processing failed for user: ${context.userId}`, error);
-      return this.createFailSafeEnterpriseDecision(context, preliminaryDecision, Date.now() - startTime);
+      this.logger.error(
+        `Enterprise traffic processing failed for user: ${context.userId}`,
+        error,
+      );
+      return this.createFailSafeEnterpriseDecision(
+        context,
+        preliminaryDecision,
+        Date.now() - startTime,
+      );
     }
   }
 
@@ -146,9 +183,11 @@ export class EnterpriseTrafficManagerService {
    */
   async monitorSLACompliance(): Promise<SLAComplianceReport> {
     try {
-      const complianceMetrics = await this.slaManager.generateComplianceReport();
+      const complianceMetrics =
+        await this.slaManager.generateComplianceReport();
       const violatingTenants = await this.slaManager.identifyViolations();
-      const remediationActions = await this.slaManager.generateRemediationActions(violatingTenants);
+      const remediationActions =
+        await this.slaManager.generateRemediationActions(violatingTenants);
 
       return {
         overallCompliance: complianceMetrics.overallCompliance,
@@ -157,11 +196,10 @@ export class EnterpriseTrafficManagerService {
         remediationActions,
         complianceScore: complianceMetrics.complianceScore,
         trendAnalysis: complianceMetrics.trendAnalysis,
-        recommendations: complianceMetrics.recommendations
+        recommendations: complianceMetrics.recommendations,
       };
-
     } catch (error) {
-      this.logger.error('Failed to monitor SLA compliance', error);
+      this.logger.error("Failed to monitor SLA compliance", error);
       throw error;
     }
   }
@@ -172,29 +210,35 @@ export class EnterpriseTrafficManagerService {
   async optimizeTrafficDistribution(): Promise<TrafficOptimizationResult> {
     try {
       // Analyze current traffic patterns
-      const trafficAnalysis = await this.trafficOptimizer.analyzeCurrentTraffic();
+      const trafficAnalysis =
+        await this.trafficOptimizer.analyzeCurrentTraffic();
 
       // Generate optimization recommendations
-      const optimizations = await this.trafficOptimizer.generateOptimizations(trafficAnalysis);
+      const optimizations =
+        await this.trafficOptimizer.generateOptimizations(trafficAnalysis);
 
       // Apply optimizations with rollback capability
-      const applicationResults = await this.trafficOptimizer.applyOptimizations(optimizations);
+      const applicationResults =
+        await this.trafficOptimizer.applyOptimizations(optimizations);
 
       // Monitor optimization effectiveness
-      const effectivenessMetrics = await this.trafficOptimizer.monitorOptimizationEffectiveness(
-        applicationResults
-      );
+      const effectivenessMetrics =
+        await this.trafficOptimizer.monitorOptimizationEffectiveness(
+          applicationResults,
+        );
 
       return {
         trafficAnalysis,
         optimizations,
         applicationResults,
         effectivenessMetrics,
-        recommendedActions: await this.trafficOptimizer.generateRecommendations(effectivenessMetrics)
+        recommendedActions:
+          await this.trafficOptimizer.generateRecommendations(
+            effectivenessMetrics,
+          ),
       };
-
     } catch (error) {
-      this.logger.error('Failed to optimize traffic distribution', error);
+      this.logger.error("Failed to optimize traffic distribution", error);
       throw error;
     }
   }
@@ -205,29 +249,36 @@ export class EnterpriseTrafficManagerService {
   async manageCapacityPlanning(): Promise<CapacityPlanningResult> {
     try {
       // Analyze current capacity utilization
-      const capacityAnalysis = await this.capacityPlanner.analyzeCurrentCapacity();
+      const capacityAnalysis =
+        await this.capacityPlanner.analyzeCurrentCapacity();
 
       // Predict future capacity needs
-      const capacityPrediction = await this.capacityPlanner.predictCapacityNeeds(capacityAnalysis);
+      const capacityPrediction =
+        await this.capacityPlanner.predictCapacityNeeds(capacityAnalysis);
 
       // Generate scaling recommendations
-      const scalingRecommendations = await this.capacityPlanner.generateScalingRecommendations(
-        capacityPrediction
-      );
+      const scalingRecommendations =
+        await this.capacityPlanner.generateScalingRecommendations(
+          capacityPrediction,
+        );
 
       // Apply auto-scaling if enabled
-      const autoScalingResults = await this.capacityPlanner.applyAutoScaling(scalingRecommendations);
+      const autoScalingResults = await this.capacityPlanner.applyAutoScaling(
+        scalingRecommendations,
+      );
 
       return {
         currentCapacity: capacityAnalysis,
         predictions: capacityPrediction,
         recommendations: scalingRecommendations,
         autoScalingResults,
-        costAnalysis: await this.capacityPlanner.analyzeCostImplications(autoScalingResults)
+        costAnalysis:
+          await this.capacityPlanner.analyzeCostImplications(
+            autoScalingResults,
+          ),
       };
-
     } catch (error) {
-      this.logger.error('Failed to manage capacity planning', error);
+      this.logger.error("Failed to manage capacity planning", error);
       throw error;
     }
   }
@@ -242,13 +293,13 @@ export class EnterpriseTrafficManagerService {
         slaMetrics,
         capacityMetrics,
         complianceMetrics,
-        performanceMetrics
+        performanceMetrics,
       ] = await Promise.all([
         this.trafficOptimizer.getTrafficMetrics(),
         this.slaManager.getSLAMetrics(),
         this.capacityPlanner.getCapacityMetrics(),
         this.complianceReporter.getComplianceMetrics(),
-        this.performanceMonitor.getPerformanceMetrics()
+        this.performanceMonitor.getPerformanceMetrics(),
       ]);
 
       return {
@@ -262,12 +313,11 @@ export class EnterpriseTrafficManagerService {
           slaMetrics,
           capacityMetrics,
           complianceMetrics,
-          performanceMetrics
-        )
+          performanceMetrics,
+        ),
       };
-
     } catch (error) {
-      this.logger.error('Failed to generate enterprise metrics', error);
+      this.logger.error("Failed to generate enterprise metrics", error);
       throw error;
     }
   }
@@ -277,29 +327,39 @@ export class EnterpriseTrafficManagerService {
    */
   async handleEmergencyScenario(
     scenario: EmergencyScenario,
-    severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'
+    severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL",
   ): Promise<EmergencyResponse> {
-    this.logger.warn(`Handling emergency scenario: ${scenario.type} (Severity: ${severity})`);
+    this.logger.warn(
+      `Handling emergency scenario: ${scenario.type} (Severity: ${severity})`,
+    );
 
     try {
       // Assess emergency impact
-      const impactAssessment = await this.assessEmergencyImpact(scenario, severity);
+      const impactAssessment = await this.assessEmergencyImpact(
+        scenario,
+        severity,
+      );
 
       // Generate emergency response plan
-      const responsePlan = await this.generateEmergencyResponsePlan(scenario, impactAssessment);
+      const responsePlan = await this.generateEmergencyResponsePlan(
+        scenario,
+        impactAssessment,
+      );
 
       // Execute emergency procedures
-      const executionResults = await this.executeEmergencyProcedures(responsePlan);
+      const executionResults =
+        await this.executeEmergencyProcedures(responsePlan);
 
       // Monitor emergency response effectiveness
-      const monitoringResults = await this.monitorEmergencyResponse(executionResults);
+      const monitoringResults =
+        await this.monitorEmergencyResponse(executionResults);
 
       // Generate post-emergency report
       const postEmergencyReport = await this.generatePostEmergencyReport(
         scenario,
         responsePlan,
         executionResults,
-        monitoringResults
+        monitoringResults,
       );
 
       return {
@@ -309,11 +369,13 @@ export class EnterpriseTrafficManagerService {
         executionResults,
         monitoringResults,
         postEmergencyReport,
-        lessonsLearned: await this.extractLessonsLearned(postEmergencyReport)
+        lessonsLearned: await this.extractLessonsLearned(postEmergencyReport),
       };
-
     } catch (error) {
-      this.logger.error(`Failed to handle emergency scenario: ${scenario.type}`, error);
+      this.logger.error(
+        `Failed to handle emergency scenario: ${scenario.type}`,
+        error,
+      );
       throw error;
     }
   }
@@ -322,7 +384,7 @@ export class EnterpriseTrafficManagerService {
    * Initialize enterprise traffic management system
    */
   private initializeEnterpriseTrafficManagement(): void {
-    this.logger.log('Initializing Enterprise Traffic Management System');
+    this.logger.log("Initializing Enterprise Traffic Management System");
 
     // Start real-time monitoring
     this.startRealTimeMonitoring();
@@ -339,7 +401,9 @@ export class EnterpriseTrafficManagerService {
     // Start performance optimization
     this.trafficOptimizer.startContinuousOptimization();
 
-    this.logger.log('Enterprise Traffic Management System initialized successfully');
+    this.logger.log(
+      "Enterprise Traffic Management System initialized successfully",
+    );
   }
 
   /**
@@ -373,94 +437,106 @@ export class EnterpriseTrafficManagerService {
   private createFailSafeEnterpriseDecision(
     context: RateLimitContext,
     preliminaryDecision: RateLimitDecision,
-    processingTime: number
+    processingTime: number,
   ): EnterpriseTrafficDecision {
     return {
       finalDecision: {
         ...preliminaryDecision,
-        reason: 'Enterprise processing failed - using fail-safe decision'
+        reason: "Enterprise processing failed - using fail-safe decision",
       },
       tenantContext: {
-        tenantId: 'default',
+        tenantId: "default",
         originalContext: context,
         tenantConfiguration: {},
         resourceAllocation: {},
-        isolationLevel: 'SHARED'
+        isolationLevel: "SHARED",
       },
       routingDecision: {
-        selectedRegion: 'default',
-        routingReason: 'fail-safe routing',
+        selectedRegion: "default",
+        routingReason: "fail-safe routing",
         latencyOptimized: false,
-        failoverApplied: false
+        failoverApplied: false,
       },
       slaEvaluation: {
         compliant: false,
-        violations: ['enterprise processing failure'],
+        violations: ["enterprise processing failure"],
         complianceScore: 0.5,
-        remediationRequired: true
+        remediationRequired: true,
       },
       queueingDecision: {
         shouldQueue: false,
-        queuePriority: 'NORMAL',
+        queuePriority: "NORMAL",
         estimatedWaitTime: 0,
-        queueClass: 'default'
+        queueClass: "default",
       },
       priorityAssignment: {
-        priority: 'NORMAL',
+        priority: "NORMAL",
         priorityScore: 0.5,
-        reasoning: 'fail-safe priority assignment'
+        reasoning: "fail-safe priority assignment",
       },
       capacityDecision: {
         hasCapacity: true,
         capacityUtilization: 0.5,
         scalingRequired: false,
-        resourceAllocation: 'default'
+        resourceAllocation: "default",
       },
       processingTime,
       complianceStatus: {
         compliant: false,
-        violations: ['enterprise processing failure'],
-        remediationActions: ['manual review required']
+        violations: ["enterprise processing failure"],
+        remediationActions: ["manual review required"],
       },
       performanceMetrics: {
         processingTime,
         throughput: 0,
         errorRate: 1.0,
-        resourceUtilization: 0.5
-      }
+        resourceUtilization: 0.5,
+      },
     };
   }
 
   private async generateComplianceStatus(
     tenantContext: EnhancedTenantContext,
-    decision: any
+    decision: any,
   ): Promise<ComplianceStatus> {
     return {
       compliant: true,
       violations: [],
-      remediationActions: []
+      remediationActions: [],
     };
   }
 
-  private async generatePerformanceMetrics(processingTime: number): Promise<PerformanceMetrics> {
+  private async generatePerformanceMetrics(
+    processingTime: number,
+  ): Promise<PerformanceMetrics> {
     return {
       processingTime,
       throughput: 9500,
       errorRate: 0.01,
-      resourceUtilization: 0.6
+      resourceUtilization: 0.6,
     };
   }
 
-  private calculateOverallEnterpriseHealth(...metrics: any[]): OverallEnterpriseHealth {
+  private calculateOverallEnterpriseHealth(
+    ...metrics: any[]
+  ): OverallEnterpriseHealth {
     // Calculate overall health score based on all metrics
-    const healthScores = metrics.map(m => m.healthScore || 0.8);
-    const averageHealth = healthScores.reduce((sum, score) => sum + score, 0) / healthScores.length;
+    const healthScores = metrics.map((m) => m.healthScore || 0.8);
+    const averageHealth =
+      healthScores.reduce((sum, score) => sum + score, 0) / healthScores.length;
 
     return {
       overallScore: averageHealth,
-      status: averageHealth > 0.9 ? 'EXCELLENT' : averageHealth > 0.7 ? 'GOOD' : averageHealth > 0.5 ? 'DEGRADED' : 'POOR',
+      status:
+        averageHealth > 0.9
+          ? "EXCELLENT"
+          : averageHealth > 0.7
+            ? "GOOD"
+            : averageHealth > 0.5
+              ? "DEGRADED"
+              : "POOR",
       recommendations: this.generateHealthRecommendations(averageHealth),
-      criticalIssues: this.identifyCriticalIssues(metrics)
+      criticalIssues: this.identifyCriticalIssues(metrics),
     };
   }
 
@@ -468,13 +544,15 @@ export class EnterpriseTrafficManagerService {
     const recommendations: string[] = [];
 
     if (healthScore < 0.9) {
-      recommendations.push('Consider increasing system capacity');
+      recommendations.push("Consider increasing system capacity");
     }
     if (healthScore < 0.7) {
-      recommendations.push('Review SLA compliance and take corrective action');
+      recommendations.push("Review SLA compliance and take corrective action");
     }
     if (healthScore < 0.5) {
-      recommendations.push('Immediate intervention required - activate emergency procedures');
+      recommendations.push(
+        "Immediate intervention required - activate emergency procedures",
+      );
     }
 
     return recommendations;
@@ -485,45 +563,52 @@ export class EnterpriseTrafficManagerService {
     return [];
   }
 
-  private async assessEmergencyImpact(scenario: EmergencyScenario, severity: string): Promise<EmergencyImpactAssessment> {
+  private async assessEmergencyImpact(
+    scenario: EmergencyScenario,
+    severity: string,
+  ): Promise<EmergencyImpactAssessment> {
     return {
-      impactScope: 'REGIONAL',
+      impactScope: "REGIONAL",
       affectedTenants: [],
       estimatedDowntime: 0,
-      businessImpact: 'LOW',
-      technicalImpact: 'MEDIUM',
-      userImpact: 'LOW'
+      businessImpact: "LOW",
+      technicalImpact: "MEDIUM",
+      userImpact: "LOW",
     };
   }
 
   private async generateEmergencyResponsePlan(
     scenario: EmergencyScenario,
-    impactAssessment: EmergencyImpactAssessment
+    impactAssessment: EmergencyImpactAssessment,
   ): Promise<EmergencyResponsePlan> {
     return {
       procedures: [],
       timeline: [],
       resources: [],
       communication: [],
-      rollbackPlan: []
+      rollbackPlan: [],
     };
   }
 
-  private async executeEmergencyProcedures(plan: EmergencyResponsePlan): Promise<EmergencyExecutionResults> {
+  private async executeEmergencyProcedures(
+    plan: EmergencyResponsePlan,
+  ): Promise<EmergencyExecutionResults> {
     return {
       executedProcedures: [],
       results: [],
       timeline: [],
-      issues: []
+      issues: [],
     };
   }
 
-  private async monitorEmergencyResponse(results: EmergencyExecutionResults): Promise<EmergencyMonitoringResults> {
+  private async monitorEmergencyResponse(
+    results: EmergencyExecutionResults,
+  ): Promise<EmergencyMonitoringResults> {
     return {
       effectiveness: 0.9,
       metrics: {},
       issues: [],
-      improvements: []
+      improvements: [],
     };
   }
 
@@ -531,23 +616,25 @@ export class EnterpriseTrafficManagerService {
     scenario: EmergencyScenario,
     plan: EmergencyResponsePlan,
     execution: EmergencyExecutionResults,
-    monitoring: EmergencyMonitoringResults
+    monitoring: EmergencyMonitoringResults,
   ): Promise<PostEmergencyReport> {
     return {
-      summary: 'Emergency handled successfully',
+      summary: "Emergency handled successfully",
       timeline: [],
       effectiveness: monitoring.effectiveness,
       improvements: monitoring.improvements,
-      preventionMeasures: []
+      preventionMeasures: [],
     };
   }
 
-  private async extractLessonsLearned(report: PostEmergencyReport): Promise<LessonsLearned> {
+  private async extractLessonsLearned(
+    report: PostEmergencyReport,
+  ): Promise<LessonsLearned> {
     return {
       keyLearnings: [],
       improvements: report.improvements,
       preventionMeasures: report.preventionMeasures,
-      processUpdates: []
+      processUpdates: [],
     };
   }
 }
@@ -562,7 +649,7 @@ class SLAComplianceManager {
 
   async evaluateCompliance(
     context: EnhancedTenantContext,
-    decision: RateLimitDecision
+    decision: RateLimitDecision,
   ): Promise<SLAEvaluation> {
     // Evaluate SLA compliance for the current request
     const violations: string[] = [];
@@ -570,21 +657,21 @@ class SLAComplianceManager {
 
     // Check latency SLA
     if (decision.processingTime > this.config.guaranteedLatency) {
-      violations.push('Latency SLA violation');
+      violations.push("Latency SLA violation");
       complianceScore -= 0.3;
     }
 
     // Check throughput SLA
     const currentThroughput = await this.getCurrentThroughput(context);
     if (currentThroughput < this.config.guaranteedThroughput) {
-      violations.push('Throughput SLA violation');
+      violations.push("Throughput SLA violation");
       complianceScore -= 0.4;
     }
 
     // Check availability SLA
     const currentAvailability = await this.getCurrentAvailability(context);
     if (currentAvailability < this.config.availabilityTarget) {
-      violations.push('Availability SLA violation');
+      violations.push("Availability SLA violation");
       complianceScore -= 0.5;
     }
 
@@ -592,7 +679,7 @@ class SLAComplianceManager {
       compliant: violations.length === 0,
       violations,
       complianceScore: Math.max(0, complianceScore),
-      remediationRequired: violations.length > 0
+      remediationRequired: violations.length > 0,
     };
   }
 
@@ -603,7 +690,7 @@ class SLAComplianceManager {
       tenantCompliance: {},
       complianceScore: 0.95,
       trendAnalysis: {},
-      recommendations: []
+      recommendations: [],
     };
   }
 
@@ -624,16 +711,20 @@ class SLAComplianceManager {
   async getSLAMetrics(): Promise<any> {
     return {
       complianceScore: 0.95,
-      healthScore: 0.95
+      healthScore: 0.95,
     };
   }
 
-  private async getCurrentThroughput(context: EnhancedTenantContext): Promise<number> {
+  private async getCurrentThroughput(
+    context: EnhancedTenantContext,
+  ): Promise<number> {
     // Get current throughput for tenant
     return 9500; // requests/second
   }
 
-  private async getCurrentAvailability(context: EnhancedTenantContext): Promise<number> {
+  private async getCurrentAvailability(
+    context: EnhancedTenantContext,
+  ): Promise<number> {
     // Get current availability for tenant
     return 99.9; // percentage
   }
@@ -649,14 +740,14 @@ class FairQueuingEngine {
 
   async evaluateQueuing(
     context: EnhancedTenantContext,
-    slaEvaluation: SLAEvaluation
+    slaEvaluation: SLAEvaluation,
   ): Promise<QueuingDecision> {
     if (!this.config.enabled) {
       return {
         shouldQueue: false,
-        queuePriority: 'NORMAL',
+        queuePriority: "NORMAL",
         estimatedWaitTime: 0,
-        queueClass: 'default'
+        queueClass: "default",
       };
     }
 
@@ -667,22 +758,25 @@ class FairQueuingEngine {
     if (!shouldQueue) {
       return {
         shouldQueue: false,
-        queuePriority: 'NORMAL',
+        queuePriority: "NORMAL",
         estimatedWaitTime: 0,
-        queueClass: 'default'
+        queueClass: "default",
       };
     }
 
     // Determine queue priority based on tenant and request characteristics
     const queuePriority = this.determineQueuePriority(context, slaEvaluation);
     const queueClass = this.determineQueueClass(context);
-    const estimatedWaitTime = await this.calculateEstimatedWaitTime(queueClass, queuePriority);
+    const estimatedWaitTime = await this.calculateEstimatedWaitTime(
+      queueClass,
+      queuePriority,
+    );
 
     return {
       shouldQueue: true,
       queuePriority,
       estimatedWaitTime,
-      queueClass
+      queueClass,
     };
   }
 
@@ -693,34 +787,49 @@ class FairQueuingEngine {
 
   private determineQueuePriority(
     context: EnhancedTenantContext,
-    slaEvaluation: SLAEvaluation
-  ): 'LOW' | 'NORMAL' | 'HIGH' | 'CRITICAL' {
+    slaEvaluation: SLAEvaluation,
+  ): "LOW" | "NORMAL" | "HIGH" | "CRITICAL" {
     // Determine priority based on tenant tier and SLA requirements
-    if (context.originalContext.userContext.roles.includes('enterprise')) {
-      return 'HIGH';
+    if (context.originalContext.userContext.roles.includes("enterprise")) {
+      return "HIGH";
     }
     if (slaEvaluation.complianceScore < 0.5) {
-      return 'CRITICAL';
+      return "CRITICAL";
     }
-    return 'NORMAL';
+    return "NORMAL";
   }
 
   private determineQueueClass(context: EnhancedTenantContext): string {
     // Determine queue class based on request characteristics
-    if (context.originalContext.securityLevel === 'CRITICAL') {
-      return 'security-critical';
+    if (context.originalContext.securityLevel === "CRITICAL") {
+      return "security-critical";
     }
-    if (context.originalContext.userContext.roles.includes('enterprise')) {
-      return 'enterprise';
+    if (context.originalContext.userContext.roles.includes("enterprise")) {
+      return "enterprise";
     }
-    return 'standard';
+    return "standard";
   }
 
-  private async calculateEstimatedWaitTime(queueClass: string, priority: string): Promise<number> {
+  private async calculateEstimatedWaitTime(
+    queueClass: string,
+    priority: string,
+  ): Promise<number> {
     // Calculate estimated wait time based on queue class and priority
     const baseWaitTime = 30; // seconds
-    const classMultiplier = queueClass === 'enterprise' ? 0.5 : queueClass === 'security-critical' ? 0.3 : 1.0;
-    const priorityMultiplier = priority === 'CRITICAL' ? 0.2 : priority === 'HIGH' ? 0.5 : priority === 'LOW' ? 2.0 : 1.0;
+    const classMultiplier =
+      queueClass === "enterprise"
+        ? 0.5
+        : queueClass === "security-critical"
+          ? 0.3
+          : 1.0;
+    const priorityMultiplier =
+      priority === "CRITICAL"
+        ? 0.2
+        : priority === "HIGH"
+          ? 0.5
+          : priority === "LOW"
+            ? 2.0
+            : 1.0;
 
     return Math.ceil(baseWaitTime * classMultiplier * priorityMultiplier);
   }
@@ -736,7 +845,7 @@ class PriorityManagementEngine {
 
   async assignPriority(
     context: EnhancedTenantContext,
-    queueingDecision: QueuingDecision
+    queueingDecision: QueuingDecision,
   ): Promise<PriorityAssignment> {
     // Calculate priority score based on multiple factors
     const priorityFactors = await this.calculatePriorityFactors(context);
@@ -746,18 +855,20 @@ class PriorityManagementEngine {
     return {
       priority,
       priorityScore,
-      reasoning: this.generatePriorityReasoning(priorityFactors, priority)
+      reasoning: this.generatePriorityReasoning(priorityFactors, priority),
     };
   }
 
-  private async calculatePriorityFactors(context: EnhancedTenantContext): Promise<PriorityFactors> {
+  private async calculatePriorityFactors(
+    context: EnhancedTenantContext,
+  ): Promise<PriorityFactors> {
     return {
       tenantTier: this.getTenantTierScore(context),
       userRole: this.getUserRoleScore(context),
       requestUrgency: this.getRequestUrgencyScore(context),
       historicalBehavior: await this.getHistoricalBehaviorScore(context),
       systemLoad: await this.getSystemLoadFactor(),
-      securityLevel: this.getSecurityLevelScore(context)
+      securityLevel: this.getSecurityLevelScore(context),
     };
   }
 
@@ -768,53 +879,60 @@ class PriorityManagementEngine {
       requestUrgency: 0.2,
       historicalBehavior: 0.1,
       systemLoad: 0.1,
-      securityLevel: 0.1
+      securityLevel: 0.1,
     };
 
     return Object.entries(factors).reduce((score, [factor, value]) => {
-      return score + (weights[factor as keyof typeof weights] * value);
+      return score + weights[factor as keyof typeof weights] * value;
     }, 0);
   }
 
-  private mapScoreToPriority(score: number): 'LOW' | 'NORMAL' | 'HIGH' | 'CRITICAL' {
-    if (score >= 0.9) return 'CRITICAL';
-    if (score >= 0.7) return 'HIGH';
-    if (score >= 0.3) return 'NORMAL';
-    return 'LOW';
+  private mapScoreToPriority(
+    score: number,
+  ): "LOW" | "NORMAL" | "HIGH" | "CRITICAL" {
+    if (score >= 0.9) return "CRITICAL";
+    if (score >= 0.7) return "HIGH";
+    if (score >= 0.3) return "NORMAL";
+    return "LOW";
   }
 
-  private generatePriorityReasoning(factors: PriorityFactors, priority: string): string {
+  private generatePriorityReasoning(
+    factors: PriorityFactors,
+    priority: string,
+  ): string {
     const highFactors = Object.entries(factors)
       .filter(([_, value]) => value > 0.7)
       .map(([factor]) => factor);
 
-    return `Priority assigned based on: ${highFactors.join(', ')}`;
+    return `Priority assigned based on: ${highFactors.join(", ")}`;
   }
 
   private getTenantTierScore(context: EnhancedTenantContext): number {
     const roles = context.originalContext.userContext.roles;
-    if (roles.includes('enterprise')) return 1.0;
-    if (roles.includes('premium')) return 0.7;
-    if (roles.includes('professional')) return 0.5;
+    if (roles.includes("enterprise")) return 1.0;
+    if (roles.includes("premium")) return 0.7;
+    if (roles.includes("professional")) return 0.5;
     return 0.3;
   }
 
   private getUserRoleScore(context: EnhancedTenantContext): number {
     const roles = context.originalContext.userContext.roles;
-    if (roles.includes('admin')) return 1.0;
-    if (roles.includes('manager')) return 0.7;
-    if (roles.includes('developer')) return 0.5;
+    if (roles.includes("admin")) return 1.0;
+    if (roles.includes("manager")) return 0.7;
+    if (roles.includes("developer")) return 0.5;
     return 0.3;
   }
 
   private getRequestUrgencyScore(context: EnhancedTenantContext): number {
-    if (context.originalContext.riskLevel === 'CRITICAL') return 1.0;
-    if (context.originalContext.riskLevel === 'HIGH') return 0.7;
-    if (context.originalContext.riskLevel === 'MEDIUM') return 0.5;
+    if (context.originalContext.riskLevel === "CRITICAL") return 1.0;
+    if (context.originalContext.riskLevel === "HIGH") return 0.7;
+    if (context.originalContext.riskLevel === "MEDIUM") return 0.5;
     return 0.3;
   }
 
-  private async getHistoricalBehaviorScore(context: EnhancedTenantContext): Promise<number> {
+  private async getHistoricalBehaviorScore(
+    context: EnhancedTenantContext,
+  ): Promise<number> {
     // Analyze historical behavior to determine user reliability
     return 0.8; // Simplified - would analyze actual history
   }
@@ -825,9 +943,9 @@ class PriorityManagementEngine {
   }
 
   private getSecurityLevelScore(context: EnhancedTenantContext): number {
-    if (context.originalContext.securityLevel === 'CRITICAL') return 1.0;
-    if (context.originalContext.securityLevel === 'HIGH') return 0.7;
-    if (context.originalContext.securityLevel === 'MEDIUM') return 0.5;
+    if (context.originalContext.securityLevel === "CRITICAL") return 1.0;
+    if (context.originalContext.securityLevel === "HIGH") return 0.7;
+    if (context.originalContext.securityLevel === "MEDIUM") return 0.5;
     return 0.3;
   }
 }
@@ -842,10 +960,13 @@ class IntelligentCapacityPlanner {
 
   async evaluateCapacity(
     context: EnhancedTenantContext,
-    priorityAssignment: PriorityAssignment
+    priorityAssignment: PriorityAssignment,
   ): Promise<CapacityDecision> {
     const currentCapacity = await this.getCurrentCapacityUtilization();
-    const requiredCapacity = this.calculateRequiredCapacity(context, priorityAssignment);
+    const requiredCapacity = this.calculateRequiredCapacity(
+      context,
+      priorityAssignment,
+    );
 
     const hasCapacity = currentCapacity.available >= requiredCapacity;
     const scalingRequired = currentCapacity.utilization > 0.8;
@@ -854,7 +975,11 @@ class IntelligentCapacityPlanner {
       hasCapacity,
       capacityUtilization: currentCapacity.utilization,
       scalingRequired,
-      resourceAllocation: this.determineResourceAllocation(context, priorityAssignment, hasCapacity)
+      resourceAllocation: this.determineResourceAllocation(
+        context,
+        priorityAssignment,
+        hasCapacity,
+      ),
     };
   }
 
@@ -862,7 +987,7 @@ class IntelligentCapacityPlanner {
     return {
       utilization: 0.65,
       available: 3500,
-      trends: []
+      trends: [],
     };
   }
 
@@ -870,7 +995,7 @@ class IntelligentCapacityPlanner {
     return {
       nextHour: 0.7,
       nextDay: 0.75,
-      nextWeek: 0.8
+      nextWeek: 0.8,
     };
   }
 
@@ -878,7 +1003,7 @@ class IntelligentCapacityPlanner {
     return {
       scaleUp: prediction.nextHour > 0.8,
       scaleDown: prediction.nextHour < 0.3,
-      targetCapacity: Math.ceil(prediction.nextHour * 10000)
+      targetCapacity: Math.ceil(prediction.nextHour * 10000),
     };
   }
 
@@ -886,7 +1011,7 @@ class IntelligentCapacityPlanner {
     return {
       applied: recommendations.scaleUp || recommendations.scaleDown,
       newCapacity: recommendations.targetCapacity,
-      timeToEffect: 300 // seconds
+      timeToEffect: 300, // seconds
     };
   }
 
@@ -894,12 +1019,12 @@ class IntelligentCapacityPlanner {
     return {
       hourlyDelta: scalingResults.applied ? 50 : 0, // $50/hour
       dailyDelta: scalingResults.applied ? 1200 : 0, // $1200/day
-      recommendations: []
+      recommendations: [],
     };
   }
 
   initialize(): void {
-    this.logger.log('Capacity planner initialized');
+    this.logger.log("Capacity planner initialized");
   }
 
   async performRealTimeCapacityCheck(): Promise<void> {
@@ -909,7 +1034,7 @@ class IntelligentCapacityPlanner {
   async getCapacityMetrics(): Promise<any> {
     return {
       utilization: 0.65,
-      healthScore: 0.9
+      healthScore: 0.9,
     };
   }
 
@@ -917,28 +1042,28 @@ class IntelligentCapacityPlanner {
     return {
       utilization: 0.65,
       available: 3500,
-      total: 10000
+      total: 10000,
     };
   }
 
   private calculateRequiredCapacity(
     context: EnhancedTenantContext,
-    priorityAssignment: PriorityAssignment
+    priorityAssignment: PriorityAssignment,
   ): number {
     let baseCapacity = 1; // Base capacity unit per request
 
     // Adjust based on priority
     const priorityMultiplier = {
-      'CRITICAL': 3,
-      'HIGH': 2,
-      'NORMAL': 1,
-      'LOW': 0.5
+      CRITICAL: 3,
+      HIGH: 2,
+      NORMAL: 1,
+      LOW: 0.5,
     };
 
     baseCapacity *= priorityMultiplier[priorityAssignment.priority];
 
     // Adjust based on security level
-    if (context.originalContext.securityLevel === 'CRITICAL') {
+    if (context.originalContext.securityLevel === "CRITICAL") {
       baseCapacity *= 2;
     }
 
@@ -948,13 +1073,13 @@ class IntelligentCapacityPlanner {
   private determineResourceAllocation(
     context: EnhancedTenantContext,
     priorityAssignment: PriorityAssignment,
-    hasCapacity: boolean
+    hasCapacity: boolean,
   ): string {
-    if (!hasCapacity) return 'insufficient';
+    if (!hasCapacity) return "insufficient";
 
-    if (priorityAssignment.priority === 'CRITICAL') return 'premium';
-    if (priorityAssignment.priority === 'HIGH') return 'enhanced';
-    return 'standard';
+    if (priorityAssignment.priority === "CRITICAL") return "premium";
+    if (priorityAssignment.priority === "HIGH") return "enhanced";
+    return "standard";
   }
 }
 
@@ -966,7 +1091,9 @@ class MultiTenantManager {
 
   constructor(private readonly config: MultiTenantConfig) {}
 
-  async enrichContext(context: RateLimitContext): Promise<EnhancedTenantContext> {
+  async enrichContext(
+    context: RateLimitContext,
+  ): Promise<EnhancedTenantContext> {
     const tenantId = this.extractTenantId(context);
     const tenantConfiguration = await this.getTenantConfiguration(tenantId);
     const resourceAllocation = await this.getTenantResourceAllocation(tenantId);
@@ -976,13 +1103,13 @@ class MultiTenantManager {
       originalContext: context,
       tenantConfiguration,
       resourceAllocation,
-      isolationLevel: this.config.tenantIsolation
+      isolationLevel: this.config.tenantIsolation,
     };
   }
 
   private extractTenantId(context: RateLimitContext): string {
     // Extract tenant ID from context - could be from headers, user context, etc.
-    return context.userContext.organizationId || 'default';
+    return context.userContext.organizationId || "default";
   }
 
   private async getTenantConfiguration(tenantId: string): Promise<any> {
@@ -990,7 +1117,7 @@ class MultiTenantManager {
     return {
       rateLimits: {},
       features: [],
-      customizations: {}
+      customizations: {},
     };
   }
 
@@ -1000,7 +1127,7 @@ class MultiTenantManager {
       cpuAllocation: 0.5,
       memoryAllocation: 0.5,
       storageAllocation: 0.5,
-      networkAllocation: 0.5
+      networkAllocation: 0.5,
     };
   }
 }
@@ -1013,21 +1140,26 @@ class GeographicDistributionManager {
 
   constructor(private readonly config: GeographicConfig) {}
 
-  async determineOptimalRouting(context: EnhancedTenantContext): Promise<RoutingDecision> {
+  async determineOptimalRouting(
+    context: EnhancedTenantContext,
+  ): Promise<RoutingDecision> {
     const userLocation = context.originalContext.userContext.timezone;
     const availableRegions = await this.getAvailableRegions();
-    const selectedRegion = this.selectOptimalRegion(userLocation, availableRegions);
+    const selectedRegion = this.selectOptimalRegion(
+      userLocation,
+      availableRegions,
+    );
 
     return {
       selectedRegion: selectedRegion.code,
-      routingReason: 'Latency optimization',
+      routingReason: "Latency optimization",
       latencyOptimized: true,
-      failoverApplied: false
+      failoverApplied: false,
     };
   }
 
   initialize(): void {
-    this.logger.log('Geographic distribution manager initialized');
+    this.logger.log("Geographic distribution manager initialized");
   }
 
   async performHealthChecks(): Promise<void> {
@@ -1036,13 +1168,16 @@ class GeographicDistributionManager {
 
   private async getAvailableRegions(): Promise<RegionInfo[]> {
     return [
-      { code: 'us-east-1', latency: 50, capacity: 0.6, healthy: true },
-      { code: 'us-west-1', latency: 80, capacity: 0.4, healthy: true },
-      { code: 'eu-west-1', latency: 120, capacity: 0.5, healthy: true }
+      { code: "us-east-1", latency: 50, capacity: 0.6, healthy: true },
+      { code: "us-west-1", latency: 80, capacity: 0.4, healthy: true },
+      { code: "eu-west-1", latency: 120, capacity: 0.5, healthy: true },
     ];
   }
 
-  private selectOptimalRegion(userLocation: string, regions: RegionInfo[]): RegionInfo {
+  private selectOptimalRegion(
+    userLocation: string,
+    regions: RegionInfo[],
+  ): RegionInfo {
     // Select region based on latency and capacity
     return regions.reduce((best, current) => {
       const bestScore = best.latency * (1 + best.capacity);
@@ -1060,7 +1195,10 @@ class ComplianceReportingEngine {
 
   constructor(private readonly config: ComplianceReportingConfig) {}
 
-  async logDecision(context: EnhancedTenantContext, decision: any): Promise<void> {
+  async logDecision(
+    context: EnhancedTenantContext,
+    decision: any,
+  ): Promise<void> {
     if (!this.config.enabled) return;
 
     // Log decision for compliance purposes
@@ -1070,7 +1208,7 @@ class ComplianceReportingEngine {
       userId: context.originalContext.userId,
       decision: decision.decision,
       reasoning: decision.reasoning || decision.finalDecision?.reason,
-      compliance: decision.complianceStatus
+      compliance: decision.complianceStatus,
     };
 
     // Store in compliance log
@@ -1078,19 +1216,19 @@ class ComplianceReportingEngine {
   }
 
   startContinuousMonitoring(): void {
-    this.logger.log('Started continuous compliance monitoring');
+    this.logger.log("Started continuous compliance monitoring");
   }
 
   async getComplianceMetrics(): Promise<any> {
     return {
       complianceScore: 0.98,
-      healthScore: 0.98
+      healthScore: 0.98,
     };
   }
 
   private async storeComplianceLog(logEntry: any): Promise<void> {
     // Store compliance log entry
-    this.logger.debug('Compliance log entry stored', logEntry);
+    this.logger.debug("Compliance log entry stored", logEntry);
   }
 }
 
@@ -1103,7 +1241,7 @@ class EnterprisePerformanceMonitor {
   async recordMetrics(
     context: EnhancedTenantContext,
     decision: any,
-    startTime: number
+    startTime: number,
   ): Promise<void> {
     const processingTime = Date.now() - startTime;
 
@@ -1112,7 +1250,7 @@ class EnterprisePerformanceMonitor {
       tenantId: context.tenantId,
       userId: context.originalContext.userId,
       decision: decision.finalDecision?.decision || decision.decision,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     // Record metrics for monitoring
@@ -1128,13 +1266,13 @@ class EnterprisePerformanceMonitor {
       averageProcessingTime: 25,
       throughput: 9500,
       errorRate: 0.01,
-      healthScore: 0.95
+      healthScore: 0.95,
     };
   }
 
   private async storeMetrics(metrics: any): Promise<void> {
     // Store performance metrics
-    this.logger.debug('Performance metrics recorded', metrics);
+    this.logger.debug("Performance metrics recorded", metrics);
   }
 }
 
@@ -1146,13 +1284,13 @@ class TrafficOptimizationEngine {
 
   async optimizeTrafficFlow(
     context: EnhancedTenantContext,
-    capacityDecision: CapacityDecision
+    capacityDecision: CapacityDecision,
   ): Promise<any> {
     // Optimize traffic flow based on current conditions
     return {
       ...capacityDecision,
       optimizationApplied: true,
-      optimizationReason: 'Traffic flow optimization'
+      optimizationReason: "Traffic flow optimization",
     };
   }
 
@@ -1160,28 +1298,28 @@ class TrafficOptimizationEngine {
     return {
       totalRequests: 9500,
       distribution: {},
-      patterns: []
+      patterns: [],
     };
   }
 
   async generateOptimizations(analysis: any): Promise<any> {
     return {
       recommendations: [],
-      estimatedImprovement: 0.1
+      estimatedImprovement: 0.1,
     };
   }
 
   async applyOptimizations(optimizations: any): Promise<any> {
     return {
       applied: true,
-      results: optimizations
+      results: optimizations,
     };
   }
 
   async monitorOptimizationEffectiveness(results: any): Promise<any> {
     return {
       effectiveness: 0.9,
-      metrics: {}
+      metrics: {},
     };
   }
 
@@ -1190,13 +1328,13 @@ class TrafficOptimizationEngine {
   }
 
   startContinuousOptimization(): void {
-    this.logger.log('Started continuous traffic optimization');
+    this.logger.log("Started continuous traffic optimization");
   }
 
   async getTrafficMetrics(): Promise<any> {
     return {
       throughput: 9500,
-      healthScore: 0.9
+      healthScore: 0.9,
     };
   }
 }
@@ -1209,13 +1347,13 @@ class IntelligentLoadBalancer {
 
   async applyLoadBalancing(
     context: EnhancedTenantContext,
-    optimizedDecision: any
+    optimizedDecision: any,
   ): Promise<any> {
     // Apply intelligent load balancing
     return {
       ...optimizedDecision,
       loadBalancingApplied: true,
-      selectedNode: 'node-1'
+      selectedNode: "node-1",
     };
   }
 }

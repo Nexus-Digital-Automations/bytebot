@@ -19,9 +19,8 @@ import {
   PipeTransform,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import { plainToClass, Transform, Type } from 'class-transformer';
+import { plainToClass } from 'class-transformer';
 import { validate, ValidationError, ValidatorOptions } from 'class-validator';
-import { sanitizeHtml } from 'sanitize-html';
 import * as DOMPurify from 'dompurify';
 import { JSDOM } from 'jsdom';
 
@@ -59,7 +58,13 @@ export interface EnhancedValidationOptions extends ValidatorOptions {
 interface SecurityValidationResult {
   passed: boolean;
   violations: Array<{
-    type: 'sql_injection' | 'xss' | 'csrf' | 'path_traversal' | 'command_injection' | 'code_injection';
+    type:
+      | 'sql_injection'
+      | 'xss'
+      | 'csrf'
+      | 'path_traversal'
+      | 'command_injection'
+      | 'code_injection';
     field: string;
     value: string;
     severity: 'low' | 'medium' | 'high' | 'critical';
@@ -109,22 +114,22 @@ export class EnhancedValidationPipe implements PipeTransform {
     sqlInjection: [
       /(\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|UNION)\b)/gi,
       /(UNION\s+SELECT|OR\s+1\s*=\s*1|AND\s+1\s*=\s*1)/gi,
-      /('|\").*(\b(OR|AND)\b).*('|\")/gi,
-      /(--|\#|\\/\*|\*\\/)/g,
+      /('|").*(\b(OR|AND)\b).*('|")/gi,
+      /(--|#|\/\*|\*\/)/g,
     ],
     xss: [
       /<script[^>]*>.*?<\/script>/gi,
       /<iframe[^>]*>.*?<\/iframe>/gi,
       /javascript\s*:/gi,
       /on\w+\s*=/gi,
-      /<img[^>]*src\s*=\s*["\']?javascript:/gi,
+      /<img[^>]*src\s*=\s*["']?javascript:/gi,
     ],
     pathTraversal: [
-      /\.\.\/|\.\.\\|\.\.\%2f|\.\.\%5c/gi,
+      /\.\.\/|\.\.\\|\.\.%2f|\.\.%5c/gi,
       /\/etc\/passwd|\/etc\/shadow|\/windows\/system32/gi,
     ],
     commandInjection: [
-      /(\||&|;|\$\(|\`)/g,
+      /(\||&|;|\$\(|`)/g,
       /(rm\s|del\s|format\s|shutdown\s)/gi,
     ],
     codeInjection: [
@@ -138,7 +143,7 @@ export class EnhancedValidationPipe implements PipeTransform {
     html: {
       allowedTags: ['b', 'i', 'em', 'strong', 'a'],
       allowedAttributes: {
-        'a': ['href'],
+        a: ['href'],
       },
       allowedSchemes: ['http', 'https', 'mailto'],
     },
@@ -182,7 +187,9 @@ export class EnhancedValidationPipe implements PipeTransform {
 
     try {
       if (this.options.enableDebugLogging) {
-        this.logger.debug(`Starting validation for ${metadata.type}:${metadata.metatype?.name}`);
+        this.logger.debug(
+          `Starting validation for ${metadata.type}:${metadata.metatype?.name}`,
+        );
       }
 
       // Skip validation for primitive types or if no metatype
@@ -238,12 +245,14 @@ export class EnhancedValidationPipe implements PipeTransform {
 
       // Performance logging
       if (this.options.enablePerformanceLogging) {
-        const metrics = this.calculatePerformanceMetrics(startTime, startMemory);
+        const metrics = this.calculatePerformanceMetrics(
+          startTime,
+          startMemory,
+        );
         this.logger.log(`Validation metrics: ${JSON.stringify(metrics)}`);
       }
 
       return transformedValue;
-
     } catch (error) {
       if (this.options.enableDebugLogging) {
         this.logger.error(`Validation failed: ${error.message}`, error.stack);
@@ -255,7 +264,9 @@ export class EnhancedValidationPipe implements PipeTransform {
   /**
    * Perform comprehensive security validation
    */
-  private async performSecurityValidation(value: any): Promise<SecurityValidationResult> {
+  private async performSecurityValidation(
+    value: any,
+  ): Promise<SecurityValidationResult> {
     const violations: SecurityValidationResult['violations'] = [];
     let sanitizedValue = value;
     let sanitized = false;
@@ -264,7 +275,10 @@ export class EnhancedValidationPipe implements PipeTransform {
       sanitizedValue = await this.deepSecurityCheck(value, '', violations);
       sanitized = violations.length > 0;
     } else if (typeof value === 'string') {
-      const stringViolations = this.checkStringForSecurityViolations(value, 'input');
+      const stringViolations = this.checkStringForSecurityViolations(
+        value,
+        'input',
+      );
       violations.push(...stringViolations);
       if (stringViolations.length > 0) {
         sanitizedValue = this.sanitizeString(value);
@@ -273,7 +287,10 @@ export class EnhancedValidationPipe implements PipeTransform {
     }
 
     return {
-      passed: violations.filter(v => v.severity === 'high' || v.severity === 'critical').length === 0,
+      passed:
+        violations.filter(
+          (v) => v.severity === 'high' || v.severity === 'critical',
+        ).length === 0,
       violations,
       sanitized,
       originalValue: sanitized ? value : undefined,
@@ -284,10 +301,17 @@ export class EnhancedValidationPipe implements PipeTransform {
   /**
    * Deep security check for objects
    */
-  private async deepSecurityCheck(obj: any, path: string, violations: SecurityValidationResult['violations']): Promise<any> {
+  private async deepSecurityCheck(
+    obj: any,
+    path: string,
+    violations: SecurityValidationResult['violations'],
+  ): Promise<any> {
     if (typeof obj !== 'object' || obj === null) {
       if (typeof obj === 'string') {
-        const stringViolations = this.checkStringForSecurityViolations(obj, path);
+        const stringViolations = this.checkStringForSecurityViolations(
+          obj,
+          path,
+        );
         violations.push(...stringViolations);
         if (stringViolations.length > 0) {
           return this.sanitizeString(obj);
@@ -303,12 +327,19 @@ export class EnhancedValidationPipe implements PipeTransform {
 
       // Check key for security violations
       if (typeof key === 'string') {
-        const keyViolations = this.checkStringForSecurityViolations(key, `${currentPath}[key]`);
+        const keyViolations = this.checkStringForSecurityViolations(
+          key,
+          `${currentPath}[key]`,
+        );
         violations.push(...keyViolations);
       }
 
       // Recursively check value
-      result[key] = await this.deepSecurityCheck(value, currentPath, violations);
+      result[key] = await this.deepSecurityCheck(
+        value,
+        currentPath,
+        violations,
+      );
     }
 
     return result;
@@ -319,7 +350,7 @@ export class EnhancedValidationPipe implements PipeTransform {
    */
   private checkStringForSecurityViolations(
     value: string,
-    field: string
+    field: string,
   ): SecurityValidationResult['violations'] {
     const violations: SecurityValidationResult['violations'] = [];
 
@@ -408,7 +439,9 @@ export class EnhancedValidationPipe implements PipeTransform {
     const purify = DOMPurify(this.window);
     let sanitized = purify.sanitize(value, {
       ALLOWED_TAGS: this.sanitizationRules.html.allowedTags,
-      ALLOWED_ATTR: Object.values(this.sanitizationRules.html.allowedAttributes).flat(),
+      ALLOWED_ATTR: Object.values(
+        this.sanitizationRules.html.allowedAttributes,
+      ).flat(),
     });
 
     // Remove potentially dangerous patterns
@@ -453,11 +486,15 @@ export class EnhancedValidationPipe implements PipeTransform {
   /**
    * Enhance validation errors with additional context
    */
-  private enhanceValidationErrors(errors: ValidationError[]): EnhancedValidationError[] {
+  private enhanceValidationErrors(
+    errors: ValidationError[],
+  ): EnhancedValidationError[] {
     const enhanced: EnhancedValidationError[] = [];
 
     const processError = (error: ValidationError, parentPath = ''): void => {
-      const fieldPath = parentPath ? `${parentPath}.${error.property}` : error.property;
+      const fieldPath = parentPath
+        ? `${parentPath}.${error.property}`
+        : error.property;
 
       if (error.constraints) {
         for (const [constraint, message] of Object.entries(error.constraints)) {
@@ -512,29 +549,37 @@ export class EnhancedValidationPipe implements PipeTransform {
   /**
    * Get error severity from constraint
    */
-  private getErrorSeverity(constraint: string): 'low' | 'medium' | 'high' | 'critical' {
-    const severityMap: Record<string, 'low' | 'medium' | 'high' | 'critical'> = {
-      isNotEmpty: 'high',
-      isString: 'medium',
-      isNumber: 'medium',
-      isBoolean: 'medium',
-      isEmail: 'medium',
-      isUrl: 'medium',
-      matches: 'high',
-      min: 'medium',
-      max: 'medium',
-      minLength: 'low',
-      maxLength: 'medium',
-      isEnum: 'medium',
-    };
+  private getErrorSeverity(
+    constraint: string,
+  ): 'low' | 'medium' | 'high' | 'critical' {
+    const severityMap: Record<string, 'low' | 'medium' | 'high' | 'critical'> =
+      {
+        isNotEmpty: 'high',
+        isString: 'medium',
+        isNumber: 'medium',
+        isBoolean: 'medium',
+        isEmail: 'medium',
+        isUrl: 'medium',
+        matches: 'high',
+        min: 'medium',
+        max: 'medium',
+        minLength: 'low',
+        maxLength: 'medium',
+        isEnum: 'medium',
+      };
     return severityMap[constraint] || 'medium';
   }
 
   /**
    * Get error category from constraint
    */
-  private getErrorCategory(constraint: string): 'format' | 'range' | 'security' | 'business' | 'compliance' {
-    const categoryMap: Record<string, 'format' | 'range' | 'security' | 'business' | 'compliance'> = {
+  private getErrorCategory(
+    constraint: string,
+  ): 'format' | 'range' | 'security' | 'business' | 'compliance' {
+    const categoryMap: Record<
+      string,
+      'format' | 'range' | 'security' | 'business' | 'compliance'
+    > = {
       isNotEmpty: 'format',
       isString: 'format',
       isNumber: 'format',
@@ -554,7 +599,10 @@ export class EnhancedValidationPipe implements PipeTransform {
   /**
    * Get error suggestion
    */
-  private getErrorSuggestion(constraint: string, value: any): string | undefined {
+  private getErrorSuggestion(
+    constraint: string,
+    _value: any,
+  ): string | undefined {
     const suggestions: Record<string, string> = {
       isNotEmpty: 'Please provide a value for this field',
       isString: 'Please provide a valid string value',
@@ -572,7 +620,10 @@ export class EnhancedValidationPipe implements PipeTransform {
   /**
    * Perform business rule validation
    */
-  private async performBusinessRuleValidation(value: any, metadata: ArgumentMetadata): Promise<void> {
+  private async performBusinessRuleValidation(
+    value: any,
+    _metadata: ArgumentMetadata,
+  ): Promise<void> {
     // Custom business rule validation logic can be implemented here
     // For example, checking business-specific constraints, quotas, permissions, etc.
 
@@ -591,7 +642,7 @@ export class EnhancedValidationPipe implements PipeTransform {
   /**
    * Get validation groups based on metadata
    */
-  private getValidationGroups(metadata: ArgumentMetadata): string[] {
+  private getValidationGroups(_metadata: ArgumentMetadata): string[] {
     const groups: string[] = [];
 
     // Add groups based on HTTP method or other context
@@ -604,7 +655,10 @@ export class EnhancedValidationPipe implements PipeTransform {
   /**
    * Calculate performance metrics
    */
-  private calculatePerformanceMetrics(startTime: number, startMemory: number): ValidationPerformanceMetrics {
+  private calculatePerformanceMetrics(
+    startTime: number,
+    startMemory: number,
+  ): ValidationPerformanceMetrics {
     const endTime = Date.now();
     const endMemory = process.memoryUsage().heapUsed;
 
@@ -631,7 +685,9 @@ export class EnhancedValidationPipe implements PipeTransform {
  * Validation pipe factory for different security levels
  */
 export class ValidationPipeFactory {
-  static createSecureValidationPipe(options?: Partial<EnhancedValidationOptions>): EnhancedValidationPipe {
+  static createSecureValidationPipe(
+    options?: Partial<EnhancedValidationOptions>,
+  ): EnhancedValidationPipe {
     return new EnhancedValidationPipe({
       enableSanitization: true,
       enableSecurityValidation: true,
@@ -644,7 +700,9 @@ export class ValidationPipeFactory {
     });
   }
 
-  static createDevelopmentValidationPipe(options?: Partial<EnhancedValidationOptions>): EnhancedValidationPipe {
+  static createDevelopmentValidationPipe(
+    options?: Partial<EnhancedValidationOptions>,
+  ): EnhancedValidationPipe {
     return new EnhancedValidationPipe({
       enableSanitization: true,
       enableSecurityValidation: true,
@@ -656,7 +714,9 @@ export class ValidationPipeFactory {
     });
   }
 
-  static createProductionValidationPipe(options?: Partial<EnhancedValidationOptions>): EnhancedValidationPipe {
+  static createProductionValidationPipe(
+    options?: Partial<EnhancedValidationOptions>,
+  ): EnhancedValidationPipe {
     return new EnhancedValidationPipe({
       enableSanitization: true,
       enableSecurityValidation: true,

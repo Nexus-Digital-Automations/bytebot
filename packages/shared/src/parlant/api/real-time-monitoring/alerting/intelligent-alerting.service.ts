@@ -8,10 +8,10 @@
  * @since 2025-09-22
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { EventEmitter } from 'events';
-import { v4 as uuidv4 } from 'uuid';
-import { performance } from 'perf_hooks';
+import { Injectable, Logger } from "@nestjs/common";
+import { EventEmitter } from "events";
+import { v4 as uuidv4 } from "uuid";
+import { performance } from "perf_hooks";
 import {
   IntelligentAlert,
   ConversationalExplanation,
@@ -34,8 +34,8 @@ import {
   AlertRule,
   AlertCondition,
   NotificationChannel,
-  AlertHistory
-} from '../interfaces/real-time-monitoring.interface';
+  AlertHistory,
+} from "../interfaces/real-time-monitoring.interface";
 
 /**
  * Intelligent Alerting Service
@@ -79,7 +79,7 @@ export class IntelligentAlertingService extends EventEmitter {
     falsePositives: 0,
     averageResolutionTime: 0,
     escalationRate: 0,
-    userSatisfaction: 0.0
+    userSatisfaction: 0.0,
   };
 
   // Configuration
@@ -89,35 +89,35 @@ export class IntelligentAlertingService extends EventEmitter {
       errorRatePercent: 5,
       throughputDropPercent: 20,
       resourceUtilizationPercent: 80,
-      businessImpactThreshold: 0.1
+      businessImpactThreshold: 0.1,
     },
     correlation: {
       timeWindowMs: 300000, // 5 minutes
       similarityThreshold: 0.8,
       maxCorrelatedAlerts: 10,
-      enableAutoCorrelation: true
+      enableAutoCorrelation: true,
     },
     resolution: {
       enableAutoResolution: true,
-      maxAutoResolutionRisk: 'medium',
-      approvalRequired: ['high', 'critical'],
-      rollbackEnabled: true
+      maxAutoResolutionRisk: "medium",
+      approvalRequired: ["high", "critical"],
+      rollbackEnabled: true,
     },
     notification: {
-      channels: ['email', 'sms', 'webhook', 'in_app'],
+      channels: ["email", "sms", "webhook", "in_app"],
       batchingEnabled: true,
       quietHours: {
         enabled: true,
-        start: '22:00',
-        end: '08:00'
-      }
+        start: "22:00",
+        end: "08:00",
+      },
     },
     ml: {
       enableLearning: true,
       trainingInterval: 86400000, // 24 hours
       confidenceThreshold: 0.7,
-      feedbackEnabled: true
-    }
+      feedbackEnabled: true,
+    },
   };
 
   constructor() {
@@ -132,7 +132,7 @@ export class IntelligentAlertingService extends EventEmitter {
   async evaluateAlertConditions(
     operationId: string,
     metrics: RealTimeMetrics,
-    context?: AlertEvaluationContext
+    context?: AlertEvaluationContext,
   ): Promise<IntelligentAlert[]> {
     const startTime = performance.now();
 
@@ -147,16 +147,27 @@ export class IntelligentAlertingService extends EventEmitter {
       const triggeredAlerts: IntelligentAlert[] = [];
 
       for (const rule of alertRules) {
-        const isTriggered = await this.evaluateAlertRule(rule, metrics, context);
+        const isTriggered = await this.evaluateAlertRule(
+          rule,
+          metrics,
+          context,
+        );
 
         if (isTriggered) {
-          const alert = await this.createIntelligentAlert(rule, metrics, operationId);
+          const alert = await this.createIntelligentAlert(
+            rule,
+            metrics,
+            operationId,
+          );
           triggeredAlerts.push(alert);
         }
       }
 
       // Correlate alerts to reduce noise
-      const correlatedAlerts = await this.correlateAlerts(triggeredAlerts, operationId);
+      const correlatedAlerts = await this.correlateAlerts(
+        triggeredAlerts,
+        operationId,
+      );
 
       // Apply ML-based filtering
       const filteredAlerts = await this.filterAlertsWithML(correlatedAlerts);
@@ -171,27 +182,33 @@ export class IntelligentAlertingService extends EventEmitter {
 
       const evaluationTime = performance.now() - startTime;
 
-      this.logger.log(`Alert evaluation completed in ${evaluationTime.toFixed(2)}ms`, {
-        operationId,
-        rulesEvaluated: alertRules.length,
-        alertsTriggered: triggeredAlerts.length,
-        alertsFiltered: filteredAlerts.length,
-        evaluationTime
-      });
+      this.logger.log(
+        `Alert evaluation completed in ${evaluationTime.toFixed(2)}ms`,
+        {
+          operationId,
+          rulesEvaluated: alertRules.length,
+          alertsTriggered: triggeredAlerts.length,
+          alertsFiltered: filteredAlerts.length,
+          evaluationTime,
+        },
+      );
 
       // Emit alerts for processing
       if (filteredAlerts.length > 0) {
-        this.emit('alerts_generated', { operationId, alerts: filteredAlerts });
+        this.emit("alerts_generated", { operationId, alerts: filteredAlerts });
       }
 
       return filteredAlerts;
     } catch (error) {
       const evaluationTime = performance.now() - startTime;
-      this.logger.error(`Alert evaluation failed after ${evaluationTime.toFixed(2)}ms`, {
-        operationId,
-        error: error instanceof Error ? error.message : String(error),
-        evaluationTime
-      });
+      this.logger.error(
+        `Alert evaluation failed after ${evaluationTime.toFixed(2)}ms`,
+        {
+          operationId,
+          error: error instanceof Error ? error.message : String(error),
+          evaluationTime,
+        },
+      );
       return [];
     }
   }
@@ -201,18 +218,19 @@ export class IntelligentAlertingService extends EventEmitter {
    */
   async generateConversationalAlert(
     alert: IntelligentAlert,
-    userPreferences: ConversationalPreferences
+    userPreferences: ConversationalPreferences,
   ): Promise<ConversationalAlert> {
     const startTime = performance.now();
 
     try {
       // Generate conversational explanation
-      const explanation = await this.conversationalExplainer.generateExplanation({
-        alert,
-        userPreferences,
-        context: alert.context,
-        technicalLevel: userPreferences.technicalDetailLevel
-      });
+      const explanation =
+        await this.conversationalExplainer.generateExplanation({
+          alert,
+          userPreferences,
+          context: alert.context,
+          technicalLevel: userPreferences.technicalDetailLevel,
+        });
 
       // Create visual aids if requested
       const visualAids = userPreferences.visualAidsEnabled
@@ -220,7 +238,10 @@ export class IntelligentAlertingService extends EventEmitter {
         : [];
 
       // Generate contextual follow-up questions
-      const followUpQuestions = await this.generateFollowUpQuestions(alert, userPreferences);
+      const followUpQuestions = await this.generateFollowUpQuestions(
+        alert,
+        userPreferences,
+      );
 
       // Create intervention options
       const interventionOptions = await this.createInterventionOptions(alert);
@@ -236,26 +257,32 @@ export class IntelligentAlertingService extends EventEmitter {
         confidenceScore: await this.calculateAlertConfidence(alert),
         urgencyLevel: this.mapSeverityToUrgency(alert.severity),
         estimatedResolutionTime: this.estimateResolutionTime(alert),
-        relatedDocumentation: explanation.relatedDocumentation || []
+        relatedDocumentation: explanation.relatedDocumentation || [],
       };
 
       const generationTime = performance.now() - startTime;
 
-      this.logger.debug(`Conversational alert generated in ${generationTime.toFixed(2)}ms`, {
-        alertId: alert.alertId,
-        urgencyLevel: conversationalAlert.urgencyLevel,
-        visualAidsCount: visualAids.length,
-        generationTime
-      });
+      this.logger.debug(
+        `Conversational alert generated in ${generationTime.toFixed(2)}ms`,
+        {
+          alertId: alert.alertId,
+          urgencyLevel: conversationalAlert.urgencyLevel,
+          visualAidsCount: visualAids.length,
+          generationTime,
+        },
+      );
 
       return conversationalAlert;
     } catch (error) {
       const generationTime = performance.now() - startTime;
-      this.logger.error(`Conversational alert generation failed after ${generationTime.toFixed(2)}ms`, {
-        alertId: alert.alertId,
-        error: error instanceof Error ? error.message : String(error),
-        generationTime
-      });
+      this.logger.error(
+        `Conversational alert generation failed after ${generationTime.toFixed(2)}ms`,
+        {
+          alertId: alert.alertId,
+          error: error instanceof Error ? error.message : String(error),
+          generationTime,
+        },
+      );
       throw error;
     }
   }
@@ -267,7 +294,7 @@ export class IntelligentAlertingService extends EventEmitter {
     alertId: string,
     interventionCommand: string,
     userId: string,
-    context?: InterventionContext
+    context?: InterventionContext,
   ): Promise<InterventionResult> {
     const startTime = performance.now();
 
@@ -281,14 +308,14 @@ export class IntelligentAlertingService extends EventEmitter {
       const parsedCommand = await this.parseInterventionCommand(
         interventionCommand,
         alert,
-        context
+        context,
       );
 
       // Validate intervention permissions and safety
       const validation = await this.validateIntervention(
         parsedCommand,
         alert,
-        userId
+        userId,
       );
 
       if (!validation.allowed) {
@@ -297,7 +324,7 @@ export class IntelligentAlertingService extends EventEmitter {
           alertId,
           action: parsedCommand.action,
           reason: validation.reason,
-          alternatives: validation.alternatives
+          alternatives: validation.alternatives,
         };
       }
 
@@ -305,23 +332,30 @@ export class IntelligentAlertingService extends EventEmitter {
       const executionResult = await this.executeIntervention(
         parsedCommand,
         alert,
-        userId
+        userId,
       );
 
       // Update alert status
       if (executionResult.success) {
-        await this.updateAlertStatus(alertId, parsedCommand.action, executionResult);
+        await this.updateAlertStatus(
+          alertId,
+          parsedCommand.action,
+          executionResult,
+        );
       }
 
       const interventionTime = performance.now() - startTime;
 
-      this.logger.log(`Alert intervention processed in ${interventionTime.toFixed(2)}ms`, {
-        alertId,
-        action: parsedCommand.action,
-        success: executionResult.success,
-        userId,
-        interventionTime
-      });
+      this.logger.log(
+        `Alert intervention processed in ${interventionTime.toFixed(2)}ms`,
+        {
+          alertId,
+          action: parsedCommand.action,
+          success: executionResult.success,
+          userId,
+          interventionTime,
+        },
+      );
 
       return {
         success: executionResult.success,
@@ -329,23 +363,26 @@ export class IntelligentAlertingService extends EventEmitter {
         action: parsedCommand.action,
         result: executionResult.result,
         followUpActions: executionResult.followUpActions,
-        interventionTime
+        interventionTime,
       };
     } catch (error) {
       const interventionTime = performance.now() - startTime;
-      this.logger.error(`Alert intervention failed after ${interventionTime.toFixed(2)}ms`, {
-        alertId,
-        userId,
-        command: interventionCommand.substring(0, 100),
-        error: error instanceof Error ? error.message : String(error),
-        interventionTime
-      });
+      this.logger.error(
+        `Alert intervention failed after ${interventionTime.toFixed(2)}ms`,
+        {
+          alertId,
+          userId,
+          command: interventionCommand.substring(0, 100),
+          error: error instanceof Error ? error.message : String(error),
+          interventionTime,
+        },
+      );
 
       return {
         success: false,
         alertId,
-        action: 'unknown',
-        reason: `Intervention failed: ${error instanceof Error ? error.message : String(error)}`
+        action: "unknown",
+        reason: `Intervention failed: ${error instanceof Error ? error.message : String(error)}`,
       };
     }
   }
@@ -355,7 +392,7 @@ export class IntelligentAlertingService extends EventEmitter {
    */
   async manageAlertEscalation(
     alertId: string,
-    escalationTrigger: EscalationTrigger
+    escalationTrigger: EscalationTrigger,
   ): Promise<EscalationResult> {
     const startTime = performance.now();
 
@@ -366,9 +403,10 @@ export class IntelligentAlertingService extends EventEmitter {
       }
 
       // Get escalation path
-      const escalationPath = this.escalationPaths.get(alert.operationId) ||
-                            alert.escalationPath ||
-                            await this.createDefaultEscalationPath(alert);
+      const escalationPath =
+        this.escalationPaths.get(alert.operationId) ||
+        alert.escalationPath ||
+        (await this.createDefaultEscalationPath(alert));
 
       // Determine current escalation level
       const currentLevel = await this.getCurrentEscalationLevel(alertId);
@@ -378,33 +416,43 @@ export class IntelligentAlertingService extends EventEmitter {
         return {
           success: false,
           alertId,
-          reason: 'No further escalation steps available',
-          escalationLevel: currentLevel
+          reason: "No further escalation steps available",
+          escalationLevel: currentLevel,
         };
       }
 
       // Prepare escalation context
-      const escalationContext = await this.prepareEscalationContext(alert, escalationTrigger);
+      const escalationContext = await this.prepareEscalationContext(
+        alert,
+        escalationTrigger,
+      );
 
       // Execute escalation step
       const escalationResult = await this.executeEscalationStep(
         nextStep,
         alert,
-        escalationContext
+        escalationContext,
       );
 
       // Update alert escalation status
-      await this.updateEscalationStatus(alertId, currentLevel + 1, escalationResult);
+      await this.updateEscalationStatus(
+        alertId,
+        currentLevel + 1,
+        escalationResult,
+      );
 
       const escalationTime = performance.now() - startTime;
 
-      this.logger.log(`Alert escalation managed in ${escalationTime.toFixed(2)}ms`, {
-        alertId,
-        escalationLevel: currentLevel + 1,
-        escalationType: nextStep.type,
-        success: escalationResult.success,
-        escalationTime
-      });
+      this.logger.log(
+        `Alert escalation managed in ${escalationTime.toFixed(2)}ms`,
+        {
+          alertId,
+          escalationLevel: currentLevel + 1,
+          escalationType: nextStep.type,
+          success: escalationResult.success,
+          escalationTime,
+        },
+      );
 
       return {
         success: escalationResult.success,
@@ -412,15 +460,18 @@ export class IntelligentAlertingService extends EventEmitter {
         escalationLevel: currentLevel + 1,
         escalatedTo: nextStep.assignedTo,
         estimatedResponseTime: nextStep.expectedResponseTime,
-        escalationTime
+        escalationTime,
       };
     } catch (error) {
       const escalationTime = performance.now() - startTime;
-      this.logger.error(`Alert escalation failed after ${escalationTime.toFixed(2)}ms`, {
-        alertId,
-        error: error instanceof Error ? error.message : String(error),
-        escalationTime
-      });
+      this.logger.error(
+        `Alert escalation failed after ${escalationTime.toFixed(2)}ms`,
+        {
+          alertId,
+          error: error instanceof Error ? error.message : String(error),
+          escalationTime,
+        },
+      );
       throw error;
     }
   }
@@ -431,7 +482,7 @@ export class IntelligentAlertingService extends EventEmitter {
   getAlertAnalytics(operationId?: string): AlertAnalytics {
     const timeRange = {
       start: new Date(Date.now() - 86400000), // Last 24 hours
-      end: new Date()
+      end: new Date(),
     };
 
     let relevantAlerts: IntelligentAlert[];
@@ -439,29 +490,35 @@ export class IntelligentAlertingService extends EventEmitter {
     if (operationId) {
       const history = this.alertHistory.get(operationId) || [];
       relevantAlerts = history
-        .filter(h => h.timestamp >= timeRange.start)
-        .map(h => h.alert);
+        .filter((h) => h.timestamp >= timeRange.start)
+        .map((h) => h.alert);
     } else {
-      relevantAlerts = Array.from(this.activeAlerts.values())
-        .filter(alert => alert.timestamp >= timeRange.start);
+      relevantAlerts = Array.from(this.activeAlerts.values()).filter(
+        (alert) => alert.timestamp >= timeRange.start,
+      );
     }
 
     // Calculate analytics
     const totalAlerts = relevantAlerts.length;
-    const criticalAlerts = relevantAlerts.filter(a => a.severity === 'critical').length;
-    const resolvedAlerts = relevantAlerts.filter(a => this.isAlertResolved(a.alertId)).length;
-    const averageResolutionTime = this.calculateAverageResolutionTime(relevantAlerts);
+    const criticalAlerts = relevantAlerts.filter(
+      (a) => a.severity === "critical",
+    ).length;
+    const resolvedAlerts = relevantAlerts.filter((a) =>
+      this.isAlertResolved(a.alertId),
+    ).length;
+    const averageResolutionTime =
+      this.calculateAverageResolutionTime(relevantAlerts);
 
     // Alert distribution by category
     const alertsByCategory = new Map<AlertCategory, number>();
-    relevantAlerts.forEach(alert => {
+    relevantAlerts.forEach((alert) => {
       const count = alertsByCategory.get(alert.category) || 0;
       alertsByCategory.set(alert.category, count + 1);
     });
 
     // Alert distribution by severity
     const alertsBySeverity = new Map<AlertSeverity, number>();
-    relevantAlerts.forEach(alert => {
+    relevantAlerts.forEach((alert) => {
       const count = alertsBySeverity.get(alert.severity) || 0;
       alertsBySeverity.set(alert.severity, count + 1);
     });
@@ -475,10 +532,11 @@ export class IntelligentAlertingService extends EventEmitter {
       alertsByCategory,
       alertsBySeverity,
       escalationRate: this.alertMetrics.escalationRate,
-      falsePositiveRate: totalAlerts > 0 ? this.alertMetrics.falsePositives / totalAlerts : 0,
+      falsePositiveRate:
+        totalAlerts > 0 ? this.alertMetrics.falsePositives / totalAlerts : 0,
       userSatisfactionScore: this.alertMetrics.userSatisfaction,
       topAlertSources: this.getTopAlertSources(relevantAlerts),
-      resolutionTrends: this.getResolutionTrends(relevantAlerts)
+      resolutionTrends: this.getResolutionTrends(relevantAlerts),
     };
   }
 
@@ -496,30 +554,39 @@ export class IntelligentAlertingService extends EventEmitter {
   }
 
   private setupEventHandlers(): void {
-    this.on('alerts_generated', this.handleAlertsGenerated.bind(this));
-    this.on('alert_resolved', this.handleAlertResolved.bind(this));
-    this.on('escalation_triggered', this.handleEscalationTriggered.bind(this));
+    this.on("alerts_generated", this.handleAlertsGenerated.bind(this));
+    this.on("alert_resolved", this.handleAlertResolved.bind(this));
+    this.on("escalation_triggered", this.handleEscalationTriggered.bind(this));
   }
 
-  private async handleAlertsGenerated(event: { operationId: string; alerts: IntelligentAlert[] }): Promise<void> {
+  private async handleAlertsGenerated(event: {
+    operationId: string;
+    alerts: IntelligentAlert[];
+  }): Promise<void> {
     // Process newly generated alerts
     for (const alert of event.alerts) {
       await this.processNewAlert(alert);
     }
   }
 
-  private async handleAlertResolved(event: { alertId: string; resolution: AlertResolution }): Promise<void> {
+  private async handleAlertResolved(event: {
+    alertId: string;
+    resolution: AlertResolution;
+  }): Promise<void> {
     // Handle alert resolution
     this.logger.log(`Alert resolved: ${event.alertId}`, {
       resolutionMethod: event.resolution.method,
-      resolutionTime: event.resolution.resolutionTime
+      resolutionTime: event.resolution.resolutionTime,
     });
   }
 
-  private async handleEscalationTriggered(event: { alertId: string; level: number }): Promise<void> {
+  private async handleEscalationTriggered(event: {
+    alertId: string;
+    level: number;
+  }): Promise<void> {
     // Handle escalation triggers
     this.logger.warn(`Alert escalated: ${event.alertId}`, {
-      escalationLevel: event.level
+      escalationLevel: event.level,
     });
   }
 
@@ -527,74 +594,89 @@ export class IntelligentAlertingService extends EventEmitter {
   private async evaluateAlertRule(
     rule: AlertRule,
     metrics: RealTimeMetrics,
-    context?: AlertEvaluationContext
+    context?: AlertEvaluationContext,
   ): Promise<boolean> {
     // Evaluate specific alert rule conditions
     for (const condition of rule.conditions) {
-      const isConditionMet = await this.evaluateCondition(condition, metrics, context);
+      const isConditionMet = await this.evaluateCondition(
+        condition,
+        metrics,
+        context,
+      );
 
-      if (rule.logicalOperator === 'AND' && !isConditionMet) {
+      if (rule.logicalOperator === "AND" && !isConditionMet) {
         return false;
       }
 
-      if (rule.logicalOperator === 'OR' && isConditionMet) {
+      if (rule.logicalOperator === "OR" && isConditionMet) {
         return true;
       }
     }
 
-    return rule.logicalOperator === 'AND';
+    return rule.logicalOperator === "AND";
   }
 
   private async evaluateCondition(
     condition: AlertCondition,
     metrics: RealTimeMetrics,
-    context?: AlertEvaluationContext
+    context?: AlertEvaluationContext,
   ): Promise<boolean> {
     // Extract metric value based on condition
     const metricValue = this.extractMetricValue(condition.metric, metrics);
 
     // Apply comparison operator
     switch (condition.operator) {
-      case 'greater_than':
+      case "greater_than":
         return metricValue > condition.threshold;
-      case 'less_than':
+      case "less_than":
         return metricValue < condition.threshold;
-      case 'equals':
+      case "equals":
         return metricValue === condition.threshold;
-      case 'not_equals':
+      case "not_equals":
         return metricValue !== condition.threshold;
       default:
         return false;
     }
   }
 
-  private extractMetricValue(metricPath: string, metrics: RealTimeMetrics): number {
+  private extractMetricValue(
+    metricPath: string,
+    metrics: RealTimeMetrics,
+  ): number {
     // Extract metric value using dot notation path
-    const pathParts = metricPath.split('.');
+    const pathParts = metricPath.split(".");
     let value: any = metrics;
 
     for (const part of pathParts) {
       value = value?.[part];
     }
 
-    return typeof value === 'number' ? value : 0;
+    return typeof value === "number" ? value : 0;
   }
 
   private async createIntelligentAlert(
     rule: AlertRule,
     metrics: RealTimeMetrics,
-    operationId: string
+    operationId: string,
   ): Promise<IntelligentAlert> {
     const alertId = uuidv4();
 
     // Generate conversational explanation
-    const explanation = await this.generateInitialExplanation(rule, metrics, operationId);
+    const explanation = await this.generateInitialExplanation(
+      rule,
+      metrics,
+      operationId,
+    );
 
     // Assess alert context
     const context = await this.buildAlertContext(rule, metrics, operationId);
 
     // Generate suggested actions
-    const suggestedActions = await this.generateSuggestedActions(rule, metrics, context);
+    const suggestedActions = await this.generateSuggestedActions(
+      rule,
+      metrics,
+      context,
+    );
 
     // Create escalation path
     const escalationPath = await this.createEscalationPath(rule, context);
@@ -611,63 +693,86 @@ export class IntelligentAlertingService extends EventEmitter {
       suggestedActions,
       escalationPath,
       userInterventionRequired: this.requiresUserIntervention(rule.severity),
-      automaticResolutionAttempted: false
+      automaticResolutionAttempted: false,
     };
   }
 
   // Placeholder implementations for complex methods
-  private async correlateAlerts(alerts: IntelligentAlert[], operationId: string): Promise<IntelligentAlert[]> {
+  private async correlateAlerts(
+    alerts: IntelligentAlert[],
+    operationId: string,
+  ): Promise<IntelligentAlert[]> {
     // Apply correlation logic to reduce noise
     return this.alertCorrelator.correlate(alerts);
   }
 
-  private async filterAlertsWithML(alerts: IntelligentAlert[]): Promise<IntelligentAlert[]> {
+  private async filterAlertsWithML(
+    alerts: IntelligentAlert[],
+  ): Promise<IntelligentAlert[]> {
     // Apply ML filtering to reduce false positives
     return this.noiseReducer.filter(alerts);
   }
 
-  private addToAlertHistory(operationId: string, alert: IntelligentAlert): void {
+  private addToAlertHistory(
+    operationId: string,
+    alert: IntelligentAlert,
+  ): void {
     const history = this.alertHistory.get(operationId) || [];
     history.push({
       alertId: alert.alertId,
       alert,
       timestamp: alert.timestamp,
       resolved: false,
-      resolutionTime: null
+      resolutionTime: null,
     });
     this.alertHistory.set(operationId, history);
   }
 
   // Additional placeholder methods for full implementation...
-  private async generateInitialExplanation(rule: AlertRule, metrics: RealTimeMetrics, operationId: string): Promise<ConversationalExplanation> {
+  private async generateInitialExplanation(
+    rule: AlertRule,
+    metrics: RealTimeMetrics,
+    operationId: string,
+  ): Promise<ConversationalExplanation> {
     return {
       summary: `Alert triggered for ${rule.title}`,
       technicalDetails: `Metric ${rule.conditions[0].metric} exceeded threshold`,
-      businessImpact: 'Potential impact on user experience',
-      userFriendlyExplanation: 'System performance issue detected'
+      businessImpact: "Potential impact on user experience",
+      userFriendlyExplanation: "System performance issue detected",
     };
   }
 
-  private async buildAlertContext(rule: AlertRule, metrics: RealTimeMetrics, operationId: string): Promise<AlertContext> {
+  private async buildAlertContext(
+    rule: AlertRule,
+    metrics: RealTimeMetrics,
+    operationId: string,
+  ): Promise<AlertContext> {
     return {
       operationId,
       triggeringMetrics: metrics,
       historicalContext: {},
       businessContext: {},
-      technicalContext: {}
+      technicalContext: {},
     };
   }
 
-  private async generateSuggestedActions(rule: AlertRule, metrics: RealTimeMetrics, context: AlertContext): Promise<SuggestedAction[]> {
+  private async generateSuggestedActions(
+    rule: AlertRule,
+    metrics: RealTimeMetrics,
+    context: AlertContext,
+  ): Promise<SuggestedAction[]> {
     return [];
   }
 
-  private async createEscalationPath(rule: AlertRule, context: AlertContext): Promise<EscalationStep[]> {
+  private async createEscalationPath(
+    rule: AlertRule,
+    context: AlertContext,
+  ): Promise<EscalationStep[]> {
     return [];
   }
 
   private requiresUserIntervention(severity: AlertSeverity): boolean {
-    return severity === 'high' || severity === 'critical';
+    return severity === "high" || severity === "critical";
   }
 
   // More placeholder methods would continue here...
@@ -677,10 +782,10 @@ export class IntelligentAlertingService extends EventEmitter {
 class ConversationalExplainer {
   async generateExplanation(params: any): Promise<ConversationalExplanation> {
     return {
-      summary: 'Alert explanation',
-      technicalDetails: 'Technical details',
-      businessImpact: 'Business impact',
-      userFriendlyExplanation: 'User-friendly explanation'
+      summary: "Alert explanation",
+      technicalDetails: "Technical details",
+      businessImpact: "Business impact",
+      userFriendlyExplanation: "User-friendly explanation",
     };
   }
 }
@@ -699,7 +804,7 @@ class ResolutionEngine {
 
 class AlertClassifier {
   classify(alert: IntelligentAlert): string {
-    return 'performance';
+    return "performance";
   }
 }
 
@@ -804,7 +909,7 @@ interface InterventionResult {
 }
 
 interface EscalationTrigger {
-  type: 'timeout' | 'severity_increase' | 'manual' | 'auto_resolution_failed';
+  type: "timeout" | "severity_increase" | "manual" | "auto_resolution_failed";
   timestamp: Date;
   context?: Record<string, unknown>;
 }
@@ -835,7 +940,7 @@ interface AlertAnalytics {
 }
 
 interface AlertResolution {
-  method: 'automatic' | 'manual' | 'escalated';
+  method: "automatic" | "manual" | "escalated";
   resolutionTime: number;
   resolvedBy?: string;
 }

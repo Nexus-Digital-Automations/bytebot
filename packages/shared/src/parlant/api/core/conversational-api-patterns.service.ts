@@ -118,7 +118,7 @@ export class ConversationalAPIPatternsService
       // Step 3: Parameter negotiation and validation
       const parameterNegotiation = await this.negotiateParameters(
         intentAnalysis,
-        apiMapping.selectedAPI.schema
+        apiMapping.selectedAPI.schema,
       );
 
       // Step 4: Risk assessment and user confirmation
@@ -344,7 +344,8 @@ export class ConversationalAPIPatternsService
         await this.clarifyAmbiguousParameters(ambiguousParameters);
 
       if (clarifications.parameter) {
-        providedParameters[clarifications.parameter] = clarifications.resolvedValue;
+        providedParameters[clarifications.parameter] =
+          clarifications.resolvedValue;
       }
     }
 
@@ -389,7 +390,7 @@ export class ConversationalAPIPatternsService
 
     return {
       resolvedParameters: providedParameters,
-      resolvedMethod: 'POST', // TODO: Determine method from API schema
+      resolvedMethod: "POST", // TODO: Determine method from API schema
       negotiationSteps: this.getNavigationHistory(),
       parameterConfidence: this.calculateParameterConfidence(
         providedParameters,
@@ -406,10 +407,10 @@ export class ConversationalAPIPatternsService
   ): Promise<ParameterClarification> {
     if (ambiguities.length === 0) {
       return {
-        parameter: '',
-        clarificationQuestion: '',
-        userResponse: '',
-        resolvedValue: '',
+        parameter: "",
+        clarificationQuestion: "",
+        userResponse: "",
+        resolvedValue: "",
         confidence: 1.0,
       };
     }

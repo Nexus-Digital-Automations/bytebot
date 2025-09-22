@@ -19,8 +19,8 @@ export {
   ConversationalGuidance,
   ErrorRecoveryRecommendation,
   ConversationalErrorResponse,
-  RecoveryStage
-} from './conversational-error-handler';
+  RecoveryStage,
+} from "./conversational-error-handler";
 
 // ===== ADVANCED RECOVERY FRAMEWORK =====
 export {
@@ -35,8 +35,8 @@ export {
   UserAction,
   StageUserGuidance,
   WorkflowTrigger,
-  RecoverySession
-} from './advanced-recovery-framework';
+  RecoverySession,
+} from "./advanced-recovery-framework";
 
 // ===== NATURAL LANGUAGE COMMUNICATION =====
 export {
@@ -49,8 +49,8 @@ export {
   ContextualHelpResource,
   TroubleshootingStep,
   ProgressiveDisclosureConfig,
-  CommunicationResult
-} from './natural-language-communication';
+  CommunicationResult,
+} from "./natural-language-communication";
 
 // ===== ENTERPRISE ERROR MANAGEMENT =====
 export {
@@ -60,18 +60,35 @@ export {
   ErrorAnalyticsDashboardEngine,
   EnterpriseErrorLogEntry,
   ErrorPattern,
-  ErrorAnalyticsDashboard
-} from './enterprise-error-management';
+  ErrorAnalyticsDashboard,
+} from "./enterprise-error-management";
 
 // ===== PARLANT ERROR HANDLING MODULE =====
 
-import { Module } from '@nestjs/common';
-import { EventEmitterModule } from '@nestjs/event-emitter';
+import { Module } from "@nestjs/common";
+import { EventEmitterModule } from "@nestjs/event-emitter";
 
-import { ConversationalErrorHandler, ErrorNaturalLanguageProcessor } from './conversational-error-handler';
-import { AdvancedRecoveryFramework, RecoveryWorkflowEngine, AutomatedRecoveryStrategies } from './advanced-recovery-framework';
-import { NaturalLanguageCommunicationSystem, MessageGenerationEngine, ContextualHelpEngine, ProgressiveDisclosureEngine } from './natural-language-communication';
-import { EnterpriseErrorManagementSystem, EnterpriseErrorLogger, ErrorPatternRecognitionEngine, ErrorAnalyticsDashboardEngine } from './enterprise-error-management';
+import {
+  ConversationalErrorHandler,
+  ErrorNaturalLanguageProcessor,
+} from "./conversational-error-handler";
+import {
+  AdvancedRecoveryFramework,
+  RecoveryWorkflowEngine,
+  AutomatedRecoveryStrategies,
+} from "./advanced-recovery-framework";
+import {
+  NaturalLanguageCommunicationSystem,
+  MessageGenerationEngine,
+  ContextualHelpEngine,
+  ProgressiveDisclosureEngine,
+} from "./natural-language-communication";
+import {
+  EnterpriseErrorManagementSystem,
+  EnterpriseErrorLogger,
+  ErrorPatternRecognitionEngine,
+  ErrorAnalyticsDashboardEngine,
+} from "./enterprise-error-management";
 
 /**
  * PARLANT Error Handling Module
@@ -87,13 +104,13 @@ import { EnterpriseErrorManagementSystem, EnterpriseErrorLogger, ErrorPatternRec
     EventEmitterModule.forRoot({
       // Configure event emitter for error handling events
       wildcard: false,
-      delimiter: '.',
+      delimiter: ".",
       newListener: false,
       removeListener: false,
       maxListeners: 20,
       verboseMemoryLeak: false,
-      ignoreErrors: false
-    })
+      ignoreErrors: false,
+    }),
   ],
   providers: [
     // Core Conversational Error Handling
@@ -115,7 +132,7 @@ import { EnterpriseErrorManagementSystem, EnterpriseErrorLogger, ErrorPatternRec
     EnterpriseErrorManagementSystem,
     EnterpriseErrorLogger,
     ErrorPatternRecognitionEngine,
-    ErrorAnalyticsDashboardEngine
+    ErrorAnalyticsDashboardEngine,
   ],
   exports: [
     // Export main orchestrators for external use
@@ -133,8 +150,8 @@ import { EnterpriseErrorManagementSystem, EnterpriseErrorLogger, ErrorPatternRec
     ProgressiveDisclosureEngine,
     EnterpriseErrorLogger,
     ErrorPatternRecognitionEngine,
-    ErrorAnalyticsDashboardEngine
-  ]
+    ErrorAnalyticsDashboardEngine,
+  ],
 })
 export class ParlantErrorHandlingModule {}
 
@@ -148,7 +165,7 @@ export function createParlantErrorHandlingSystem() {
     ConversationalErrorHandler,
     AdvancedRecoveryFramework,
     NaturalLanguageCommunicationSystem,
-    EnterpriseErrorManagementSystem
+    EnterpriseErrorManagementSystem,
   };
 }
 
@@ -158,7 +175,7 @@ export function createParlantErrorHandlingSystem() {
 export function createBasicErrorHandling() {
   return {
     ConversationalErrorHandler,
-    ErrorNaturalLanguageProcessor
+    ErrorNaturalLanguageProcessor,
   };
 }
 
@@ -170,7 +187,7 @@ export function createEnterpriseErrorManagement() {
     EnterpriseErrorManagementSystem,
     EnterpriseErrorLogger,
     ErrorPatternRecognitionEngine,
-    ErrorAnalyticsDashboardEngine
+    ErrorAnalyticsDashboardEngine,
   };
 }
 
@@ -181,7 +198,7 @@ export function createRecoveryFramework() {
   return {
     AdvancedRecoveryFramework,
     RecoveryWorkflowEngine,
-    AutomatedRecoveryStrategies
+    AutomatedRecoveryStrategies,
   };
 }
 
@@ -193,7 +210,7 @@ export function createCommunicationSystem() {
     NaturalLanguageCommunicationSystem,
     MessageGenerationEngine,
     ContextualHelpEngine,
-    ProgressiveDisclosureEngine
+    ProgressiveDisclosureEngine,
   };
 }
 
@@ -266,23 +283,23 @@ export const DEFAULT_PARLANT_CONFIG: ParlantErrorHandlingConfig = {
     conversationalHandler: true,
     recoveryFramework: true,
     communicationSystem: true,
-    enterpriseManagement: true
+    enterpriseManagement: true,
   },
   performance: {
     maxProcessingTime: 100, // milliseconds
     maxRecoveryAttempts: 5,
-    cacheSize: 1000
+    cacheSize: 1000,
   },
   analytics: {
     enablePatternRecognition: true,
     retentionPeriod: 365, // days
-    enablePredictions: true
+    enablePredictions: true,
   },
   communication: {
-    defaultLocale: 'en-US', // Simplified from object structure
+    defaultLocale: "en-US", // Simplified from object structure
     enableProgressiveDisclosure: true,
-    maxResourcesPerCategory: 5
-  }
+    maxResourcesPerCategory: 5,
+  },
 };
 
 // ===== VERSION INFORMATION =====
@@ -294,15 +311,15 @@ export const PARLANT_VERSION = {
   major: 1,
   minor: 0,
   patch: 0,
-  phase: 'PHASE_1',
-  buildDate: new Date('2024-01-01'),
+  phase: "PHASE_1",
+  buildDate: new Date("2024-01-01"),
   features: [
-    'CONVERSATIONAL_ERROR_HANDLING',
-    'NATURAL_LANGUAGE_PROCESSING',
-    'MULTI_STAGE_RECOVERY',
-    'ENTERPRISE_ANALYTICS',
-    'PATTERN_RECOGNITION',
-    'PROGRESSIVE_DISCLOSURE',
-    'AUTOMATED_RECOVERY_STRATEGIES'
-  ]
+    "CONVERSATIONAL_ERROR_HANDLING",
+    "NATURAL_LANGUAGE_PROCESSING",
+    "MULTI_STAGE_RECOVERY",
+    "ENTERPRISE_ANALYTICS",
+    "PATTERN_RECOGNITION",
+    "PROGRESSIVE_DISCLOSURE",
+    "AUTOMATED_RECOVERY_STRATEGIES",
+  ],
 } as const;

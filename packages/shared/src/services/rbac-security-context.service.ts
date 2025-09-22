@@ -506,7 +506,11 @@ export class RbacSecurityContextService
           userRoles: context.user.roles,
         },
         security: {
-          riskLevel: (enhancedContext.riskAssessment?.overall || "medium") as "low" | "medium" | "high" | "critical",
+          riskLevel: (enhancedContext.riskAssessment?.overall || "medium") as
+            | "low"
+            | "medium"
+            | "high"
+            | "critical",
           flags: this.generateSecurityFlags(enhancedContext),
           auditRequired: this.isAuditRequired(enhancedContext, granted),
           requiresMonitoring: this.requiresMonitoring(enhancedContext, granted),

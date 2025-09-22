@@ -746,19 +746,28 @@ export class ConversationalDatabaseService {
       let parlantResponse: ValidateOperationResult;
       try {
         // Direct method call with fallback to unknown type handling
-        const rawResult: unknown = await (this.parlantService as unknown as {
-          validateOperation: (req: ParlantValidationRequest) => Promise<unknown>;
-        }).validateOperation(parlantRequest);
+        const rawResult: unknown = await (
+          this.parlantService as unknown as {
+            validateOperation: (
+              req: ParlantValidationRequest,
+            ) => Promise<unknown>;
+          }
+        ).validateOperation(parlantRequest);
 
         // Validate and type-cast the result
-        if (rawResult && typeof rawResult === 'object' &&
-            'approved' in rawResult && 'conversationId' in rawResult) {
+        if (
+          rawResult &&
+          typeof rawResult === 'object' &&
+          'approved' in rawResult &&
+          'conversationId' in rawResult
+        ) {
           parlantResponse = rawResult as ValidateOperationResult;
         } else {
           throw new Error('Invalid validation response format');
         }
       } catch (error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
         throw new Error(`ParlantService validation failed: ${errorMessage}`);
       }
 
@@ -1096,9 +1105,7 @@ export class ConversationalDatabaseService {
       operationContext?: DatabaseOperationContext;
       [key: string]: unknown;
     };
-    if (
-      evidenceContext.operationContext?.userId !== context.userId
-    ) {
+    if (evidenceContext.operationContext?.userId !== context.userId) {
       return false;
     }
 

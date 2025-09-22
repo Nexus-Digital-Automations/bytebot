@@ -19,15 +19,27 @@ export type { FunctionPerformanceMetrics } from "./parlant-function-monitor.serv
 
 // Alerting and notification system
 export { AlertingService } from "./alerting.service";
-export type { Alert, NotificationChannel, EscalationPolicy } from "./alerting.service";
+export type {
+  Alert,
+  NotificationChannel,
+  EscalationPolicy,
+} from "./alerting.service";
 
 // Dashboard and reporting system
 export { DashboardService } from "./dashboard.service";
-export type { DashboardData, DashboardLayout, ReportConfig } from "./dashboard.service";
+export type {
+  DashboardData,
+  DashboardLayout,
+  ReportConfig,
+} from "./dashboard.service";
 
 // Incident response system
 export { IncidentResponseService } from "./incident-response.service";
-export type { Incident, IncidentStatus, IncidentPriority } from "./incident-response.service";
+export type {
+  Incident,
+  IncidentStatus,
+  IncidentPriority,
+} from "./incident-response.service";
 
 // Enterprise monitoring controller
 export { EnterpriseMonitoringController } from "./enterprise-monitoring.controller";

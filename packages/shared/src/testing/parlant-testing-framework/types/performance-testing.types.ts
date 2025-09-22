@@ -26,13 +26,13 @@ export interface PerformanceTestConfig {
  * Performance thresholds for validation
  */
 export interface PerformanceThresholds {
-  readonly responseTime: number;        // milliseconds
-  readonly throughput: number;          // requests per second
-  readonly errorRate: number;           // percentage
-  readonly cpuUsage: number;           // percentage
-  readonly memoryUsage: number;        // bytes
-  readonly networkLatency: number;     // milliseconds
-  readonly diskIO: number;             // operations per second
+  readonly responseTime: number; // milliseconds
+  readonly throughput: number; // requests per second
+  readonly errorRate: number; // percentage
+  readonly cpuUsage: number; // percentage
+  readonly memoryUsage: number; // bytes
+  readonly networkLatency: number; // milliseconds
+  readonly diskIO: number; // operations per second
 }
 
 /**
@@ -40,7 +40,7 @@ export interface PerformanceThresholds {
  */
 export interface ResourceMonitoringConfig {
   readonly enabled: boolean;
-  readonly interval: number;           // milliseconds
+  readonly interval: number; // milliseconds
   readonly metrics: ResourceMetric[];
   readonly alerts: ResourceAlert[];
 }
@@ -49,14 +49,14 @@ export interface ResourceMonitoringConfig {
  * Resource metrics to monitor
  */
 export enum ResourceMetric {
-  CPU_USAGE = 'CPU_USAGE',
-  MEMORY_USAGE = 'MEMORY_USAGE',
-  DISK_IO = 'DISK_IO',
-  NETWORK_IO = 'NETWORK_IO',
-  DATABASE_CONNECTIONS = 'DATABASE_CONNECTIONS',
-  THREAD_COUNT = 'THREAD_COUNT',
-  HEAP_SIZE = 'HEAP_SIZE',
-  GC_TIME = 'GC_TIME'
+  CPU_USAGE = "CPU_USAGE",
+  MEMORY_USAGE = "MEMORY_USAGE",
+  DISK_IO = "DISK_IO",
+  NETWORK_IO = "NETWORK_IO",
+  DATABASE_CONNECTIONS = "DATABASE_CONNECTIONS",
+  THREAD_COUNT = "THREAD_COUNT",
+  HEAP_SIZE = "HEAP_SIZE",
+  GC_TIME = "GC_TIME",
 }
 
 /**
@@ -65,8 +65,8 @@ export enum ResourceMetric {
 export interface ResourceAlert {
   readonly metric: ResourceMetric;
   readonly threshold: number;
-  readonly action: 'LOG' | 'STOP_TEST' | 'SCALE_DOWN';
-  readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  readonly action: "LOG" | "STOP_TEST" | "SCALE_DOWN";
+  readonly severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
 }
 
 /**
@@ -74,7 +74,7 @@ export interface ResourceAlert {
  */
 export interface BenchmarkStorageConfig {
   readonly enabled: boolean;
-  readonly storage: 'MEMORY' | 'FILE' | 'DATABASE';
+  readonly storage: "MEMORY" | "FILE" | "DATABASE";
   readonly retentionDays: number;
   readonly compressionEnabled: boolean;
 }
@@ -106,7 +106,7 @@ export interface PerformanceTestResult {
  * Response time percentiles
  */
 export interface ResponseTimePercentiles {
-  readonly p50: number;  // median
+  readonly p50: number; // median
   readonly p75: number;
   readonly p90: number;
   readonly p95: number;
@@ -118,12 +118,12 @@ export interface ResponseTimePercentiles {
  * Resource usage metrics
  */
 export interface ResourceUsageMetrics {
-  readonly cpuUsage: number;      // percentage
-  readonly memoryUsage: number;   // bytes
-  readonly networkUsage: number;  // bytes per second
-  readonly diskUsage: number;     // bytes per second
-  readonly heapSize?: number;     // bytes
-  readonly gcTime?: number;       // milliseconds
+  readonly cpuUsage: number; // percentage
+  readonly memoryUsage: number; // bytes
+  readonly networkUsage: number; // bytes per second
+  readonly diskUsage: number; // bytes per second
+  readonly heapSize?: number; // bytes
+  readonly gcTime?: number; // milliseconds
   readonly threadCount?: number;
 }
 
@@ -261,22 +261,22 @@ export interface PerformanceRegression {
  * Regression analysis
  */
 export interface RegressionAnalysis {
-  readonly responseTimeRegression: number;    // percentage change
-  readonly throughputRegression: number;      // percentage change
-  readonly errorRateIncrease: number;         // percentage increase
+  readonly responseTimeRegression: number; // percentage change
+  readonly throughputRegression: number; // percentage change
+  readonly errorRateIncrease: number; // percentage increase
   readonly isSignificantRegression: boolean;
-  readonly confidence: number;                // 0-1
+  readonly confidence: number; // 0-1
 }
 
 /**
  * Regression severity levels
  */
 export enum RegressionSeverity {
-  NONE = 'NONE',
-  MINOR = 'MINOR',
-  MODERATE = 'MODERATE',
-  MAJOR = 'MAJOR',
-  CRITICAL = 'CRITICAL'
+  NONE = "NONE",
+  MINOR = "MINOR",
+  MODERATE = "MODERATE",
+  MAJOR = "MAJOR",
+  CRITICAL = "CRITICAL",
 }
 
 /**
@@ -287,7 +287,7 @@ export interface PerformanceTrend {
   readonly timeRange: DateRange;
   readonly dataPoints: PerformanceDataPoint[];
   readonly trend: TrendDirection;
-  readonly correlation: number;           // -1 to 1
+  readonly correlation: number; // -1 to 1
   readonly prediction: PerformancePrediction;
 }
 
@@ -314,10 +314,10 @@ export interface PerformanceDataPoint {
  * Trend direction
  */
 export enum TrendDirection {
-  IMPROVING = 'IMPROVING',
-  STABLE = 'STABLE',
-  DEGRADING = 'DEGRADING',
-  VOLATILE = 'VOLATILE'
+  IMPROVING = "IMPROVING",
+  STABLE = "STABLE",
+  DEGRADING = "DEGRADING",
+  VOLATILE = "VOLATILE",
 }
 
 /**
@@ -327,7 +327,7 @@ export interface PerformancePrediction {
   readonly predictedResponseTime: number;
   readonly predictedThroughput: number;
   readonly confidence: number;
-  readonly timeHorizon: number;           // days
+  readonly timeHorizon: number; // days
   readonly assumptions: string[];
 }
 
@@ -345,20 +345,20 @@ export interface PerformanceComparison {
  * Comparison metrics
  */
 export interface ComparisonMetrics {
-  readonly responseTimeChange: number;    // percentage
-  readonly throughputChange: number;      // percentage
-  readonly errorRateChange: number;       // percentage
-  readonly stabilityChange: number;       // coefficient of variation change
+  readonly responseTimeChange: number; // percentage
+  readonly throughputChange: number; // percentage
+  readonly errorRateChange: number; // percentage
+  readonly stabilityChange: number; // coefficient of variation change
 }
 
 /**
  * Comparison verdict
  */
 export enum ComparisonVerdict {
-  BETTER = 'BETTER',
-  SIMILAR = 'SIMILAR',
-  WORSE = 'WORSE',
-  INCONCLUSIVE = 'INCONCLUSIVE'
+  BETTER = "BETTER",
+  SIMILAR = "SIMILAR",
+  WORSE = "WORSE",
+  INCONCLUSIVE = "INCONCLUSIVE",
 }
 
 /**
@@ -369,7 +369,7 @@ export interface PerformanceOptimization {
   readonly priority: OptimizationPriority;
   readonly description: string;
   readonly implementation: string;
-  readonly expectedImprovement: number;   // percentage
+  readonly expectedImprovement: number; // percentage
   readonly effort: OptimizationEffort;
   readonly risks: string[];
 }
@@ -378,33 +378,33 @@ export interface PerformanceOptimization {
  * Optimization categories
  */
 export enum OptimizationCategory {
-  DATABASE = 'DATABASE',
-  CACHING = 'CACHING',
-  ALGORITHM = 'ALGORITHM',
-  CONCURRENCY = 'CONCURRENCY',
-  MEMORY = 'MEMORY',
-  NETWORK = 'NETWORK',
-  CONFIGURATION = 'CONFIGURATION'
+  DATABASE = "DATABASE",
+  CACHING = "CACHING",
+  ALGORITHM = "ALGORITHM",
+  CONCURRENCY = "CONCURRENCY",
+  MEMORY = "MEMORY",
+  NETWORK = "NETWORK",
+  CONFIGURATION = "CONFIGURATION",
 }
 
 /**
  * Optimization priority levels
  */
 export enum OptimizationPriority {
-  LOW = 'LOW',
-  MEDIUM = 'MEDIUM',
-  HIGH = 'HIGH',
-  CRITICAL = 'CRITICAL'
+  LOW = "LOW",
+  MEDIUM = "MEDIUM",
+  HIGH = "HIGH",
+  CRITICAL = "CRITICAL",
 }
 
 /**
  * Optimization effort levels
  */
 export enum OptimizationEffort {
-  LOW = 'LOW',       // < 1 day
-  MEDIUM = 'MEDIUM', // 1-5 days
-  HIGH = 'HIGH',     // 1-2 weeks
-  VERY_HIGH = 'VERY_HIGH' // > 2 weeks
+  LOW = "LOW", // < 1 day
+  MEDIUM = "MEDIUM", // 1-5 days
+  HIGH = "HIGH", // 1-2 weeks
+  VERY_HIGH = "VERY_HIGH", // > 2 weeks
 }
 
 /**
@@ -427,22 +427,22 @@ export interface PerformanceAlert {
  * Alert types
  */
 export enum AlertType {
-  RESPONSE_TIME_THRESHOLD = 'RESPONSE_TIME_THRESHOLD',
-  THROUGHPUT_DEGRADATION = 'THROUGHPUT_DEGRADATION',
-  ERROR_RATE_SPIKE = 'ERROR_RATE_SPIKE',
-  RESOURCE_EXHAUSTION = 'RESOURCE_EXHAUSTION',
-  REGRESSION_DETECTED = 'REGRESSION_DETECTED',
-  ANOMALY_DETECTED = 'ANOMALY_DETECTED'
+  RESPONSE_TIME_THRESHOLD = "RESPONSE_TIME_THRESHOLD",
+  THROUGHPUT_DEGRADATION = "THROUGHPUT_DEGRADATION",
+  ERROR_RATE_SPIKE = "ERROR_RATE_SPIKE",
+  RESOURCE_EXHAUSTION = "RESOURCE_EXHAUSTION",
+  REGRESSION_DETECTED = "REGRESSION_DETECTED",
+  ANOMALY_DETECTED = "ANOMALY_DETECTED",
 }
 
 /**
  * Alert severity levels
  */
 export enum AlertSeverity {
-  INFO = 'INFO',
-  WARNING = 'WARNING',
-  ERROR = 'ERROR',
-  CRITICAL = 'CRITICAL'
+  INFO = "INFO",
+  WARNING = "WARNING",
+  ERROR = "ERROR",
+  CRITICAL = "CRITICAL",
 }
 
 /**
@@ -473,13 +473,13 @@ export interface PerformanceTestScenario {
  * Performance test types
  */
 export enum PerformanceTestType {
-  RESPONSE_TIME = 'RESPONSE_TIME',
-  LOAD = 'LOAD',
-  STRESS = 'STRESS',
-  THROUGHPUT = 'THROUGHPUT',
-  ENDURANCE = 'ENDURANCE',
-  SPIKE = 'SPIKE',
-  VOLUME = 'VOLUME'
+  RESPONSE_TIME = "RESPONSE_TIME",
+  LOAD = "LOAD",
+  STRESS = "STRESS",
+  THROUGHPUT = "THROUGHPUT",
+  ENDURANCE = "ENDURANCE",
+  SPIKE = "SPIKE",
+  VOLUME = "VOLUME",
 }
 
 /**
@@ -500,10 +500,10 @@ export interface ScenarioConfig {
  * Data volume levels
  */
 export enum DataVolumeLevel {
-  SMALL = 'SMALL',     // < 1K records
-  MEDIUM = 'MEDIUM',   // 1K - 10K records
-  LARGE = 'LARGE',     // 10K - 100K records
-  XLARGE = 'XLARGE'    // > 100K records
+  SMALL = "SMALL", // < 1K records
+  MEDIUM = "MEDIUM", // 1K - 10K records
+  LARGE = "LARGE", // 10K - 100K records
+  XLARGE = "XLARGE", // > 100K records
 }
 
 /**
@@ -520,10 +520,10 @@ export interface ExpectedResults {
  * Resource limits
  */
 export interface ResourceLimits {
-  readonly maxCpuUsage: number;      // percentage
-  readonly maxMemoryUsage: number;   // bytes
-  readonly maxDiskIO: number;        // operations per second
-  readonly maxNetworkIO: number;     // bytes per second
+  readonly maxCpuUsage: number; // percentage
+  readonly maxMemoryUsage: number; // bytes
+  readonly maxDiskIO: number; // operations per second
+  readonly maxNetworkIO: number; // bytes per second
 }
 
 /**
@@ -532,7 +532,7 @@ export interface ResourceLimits {
 export interface TestSchedule {
   readonly enabled: boolean;
   readonly frequency: ScheduleFrequency;
-  readonly time?: string;            // HH:MM format
+  readonly time?: string; // HH:MM format
   readonly timezone?: string;
   readonly conditions?: ScheduleCondition[];
 }
@@ -541,12 +541,12 @@ export interface TestSchedule {
  * Schedule frequency
  */
 export enum ScheduleFrequency {
-  CONTINUOUS = 'CONTINUOUS',
-  HOURLY = 'HOURLY',
-  DAILY = 'DAILY',
-  WEEKLY = 'WEEKLY',
-  MONTHLY = 'MONTHLY',
-  ON_DEMAND = 'ON_DEMAND'
+  CONTINUOUS = "CONTINUOUS",
+  HOURLY = "HOURLY",
+  DAILY = "DAILY",
+  WEEKLY = "WEEKLY",
+  MONTHLY = "MONTHLY",
+  ON_DEMAND = "ON_DEMAND",
 }
 
 /**
@@ -562,21 +562,21 @@ export interface ScheduleCondition {
  * Condition types
  */
 export enum ConditionType {
-  CODE_CHANGE = 'CODE_CHANGE',
-  DEPLOYMENT = 'DEPLOYMENT',
-  TIME_BASED = 'TIME_BASED',
-  METRIC_THRESHOLD = 'METRIC_THRESHOLD'
+  CODE_CHANGE = "CODE_CHANGE",
+  DEPLOYMENT = "DEPLOYMENT",
+  TIME_BASED = "TIME_BASED",
+  METRIC_THRESHOLD = "METRIC_THRESHOLD",
 }
 
 /**
  * Condition operators
  */
 export enum ConditionOperator {
-  EQUALS = 'EQUALS',
-  NOT_EQUALS = 'NOT_EQUALS',
-  GREATER_THAN = 'GREATER_THAN',
-  LESS_THAN = 'LESS_THAN',
-  CONTAINS = 'CONTAINS'
+  EQUALS = "EQUALS",
+  NOT_EQUALS = "NOT_EQUALS",
+  GREATER_THAN = "GREATER_THAN",
+  LESS_THAN = "LESS_THAN",
+  CONTAINS = "CONTAINS",
 }
 
 /**
@@ -602,11 +602,11 @@ export interface NotificationChannel {
  * Channel types
  */
 export enum ChannelType {
-  EMAIL = 'EMAIL',
-  SLACK = 'SLACK',
-  WEBHOOK = 'WEBHOOK',
-  SMS = 'SMS',
-  PAGER_DUTY = 'PAGER_DUTY'
+  EMAIL = "EMAIL",
+  SLACK = "SLACK",
+  WEBHOOK = "WEBHOOK",
+  SMS = "SMS",
+  PAGER_DUTY = "PAGER_DUTY",
 }
 
 /**
@@ -623,12 +623,12 @@ export interface NotificationTrigger {
  * Trigger events
  */
 export enum TriggerEvent {
-  TEST_STARTED = 'TEST_STARTED',
-  TEST_COMPLETED = 'TEST_COMPLETED',
-  TEST_FAILED = 'TEST_FAILED',
-  THRESHOLD_EXCEEDED = 'THRESHOLD_EXCEEDED',
-  REGRESSION_DETECTED = 'REGRESSION_DETECTED',
-  PERFORMANCE_IMPROVED = 'PERFORMANCE_IMPROVED'
+  TEST_STARTED = "TEST_STARTED",
+  TEST_COMPLETED = "TEST_COMPLETED",
+  TEST_FAILED = "TEST_FAILED",
+  THRESHOLD_EXCEEDED = "THRESHOLD_EXCEEDED",
+  REGRESSION_DETECTED = "REGRESSION_DETECTED",
+  PERFORMANCE_IMPROVED = "PERFORMANCE_IMPROVED",
 }
 
 /**
@@ -654,10 +654,10 @@ export interface NotificationTemplate {
  * Template formats
  */
 export enum TemplateFormat {
-  TEXT = 'TEXT',
-  HTML = 'HTML',
-  MARKDOWN = 'MARKDOWN',
-  JSON = 'JSON'
+  TEXT = "TEXT",
+  HTML = "HTML",
+  MARKDOWN = "MARKDOWN",
+  JSON = "JSON",
 }
 
 /**
@@ -686,13 +686,13 @@ export interface DashboardWidget {
  * Widget types
  */
 export enum WidgetType {
-  LINE_CHART = 'LINE_CHART',
-  BAR_CHART = 'BAR_CHART',
-  PIE_CHART = 'PIE_CHART',
-  TABLE = 'TABLE',
-  METRIC = 'METRIC',
-  GAUGE = 'GAUGE',
-  HEATMAP = 'HEATMAP'
+  LINE_CHART = "LINE_CHART",
+  BAR_CHART = "BAR_CHART",
+  PIE_CHART = "PIE_CHART",
+  TABLE = "TABLE",
+  METRIC = "METRIC",
+  GAUGE = "GAUGE",
+  HEATMAP = "HEATMAP",
 }
 
 /**
@@ -710,12 +710,12 @@ export interface WidgetConfig {
  * Aggregation types
  */
 export enum AggregationType {
-  AVERAGE = 'AVERAGE',
-  SUM = 'SUM',
-  MIN = 'MIN',
-  MAX = 'MAX',
-  COUNT = 'COUNT',
-  PERCENTILE = 'PERCENTILE'
+  AVERAGE = "AVERAGE",
+  SUM = "SUM",
+  MIN = "MIN",
+  MAX = "MAX",
+  COUNT = "COUNT",
+  PERCENTILE = "PERCENTILE",
 }
 
 /**
@@ -742,11 +742,11 @@ export interface DashboardFilter {
  * Filter types
  */
 export enum FilterType {
-  DROPDOWN = 'DROPDOWN',
-  MULTI_SELECT = 'MULTI_SELECT',
-  DATE_RANGE = 'DATE_RANGE',
-  TEXT_INPUT = 'TEXT_INPUT',
-  SLIDER = 'SLIDER'
+  DROPDOWN = "DROPDOWN",
+  MULTI_SELECT = "MULTI_SELECT",
+  DATE_RANGE = "DATE_RANGE",
+  TEXT_INPUT = "TEXT_INPUT",
+  SLIDER = "SLIDER",
 }
 
 /**
@@ -754,7 +754,7 @@ export enum FilterType {
  */
 export interface RefreshConfig {
   readonly enabled: boolean;
-  readonly interval: number;        // seconds
+  readonly interval: number; // seconds
   readonly autoRefresh: boolean;
 }
 
@@ -774,11 +774,11 @@ export interface PerformanceExport {
  * Export formats
  */
 export enum ExportFormat {
-  JSON = 'JSON',
-  CSV = 'CSV',
-  XLSX = 'XLSX',
-  PDF = 'PDF',
-  HTML = 'HTML'
+  JSON = "JSON",
+  CSV = "CSV",
+  XLSX = "XLSX",
+  PDF = "PDF",
+  HTML = "HTML",
 }
 
 /**
@@ -805,8 +805,8 @@ export interface PerformanceSummary {
   readonly averageErrorRate: number;
   readonly bestPerformance: PerformanceTestResult;
   readonly worstPerformance: PerformanceTestResult;
-  readonly reliability: number;           // 0-1
-  readonly stability: number;             // coefficient of variation
+  readonly reliability: number; // 0-1
+  readonly stability: number; // coefficient of variation
 }
 
 /**
@@ -816,7 +816,7 @@ export interface PerformanceTestExecutionState {
   readonly testId: string;
   readonly functionName: string;
   readonly status: ExecutionStatus;
-  readonly progress: number;              // 0-100
+  readonly progress: number; // 0-100
   readonly currentPhase: string;
   readonly startTime: number;
   readonly estimatedEndTime: number;
@@ -827,12 +827,12 @@ export interface PerformanceTestExecutionState {
  * Execution status
  */
 export enum ExecutionStatus {
-  PENDING = 'PENDING',
-  INITIALIZING = 'INITIALIZING',
-  WARMING_UP = 'WARMING_UP',
-  RUNNING = 'RUNNING',
-  COMPLETING = 'COMPLETING',
-  COMPLETED = 'COMPLETED',
-  FAILED = 'FAILED',
-  CANCELLED = 'CANCELLED'
+  PENDING = "PENDING",
+  INITIALIZING = "INITIALIZING",
+  WARMING_UP = "WARMING_UP",
+  RUNNING = "RUNNING",
+  COMPLETING = "COMPLETING",
+  COMPLETED = "COMPLETED",
+  FAILED = "FAILED",
+  CANCELLED = "CANCELLED",
 }

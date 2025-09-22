@@ -6,8 +6,8 @@
  */
 
 // Import existing types from other modules
-import { ConversationContext } from '../../../types/conversation-context.types';
-import { UserContext } from '../../../types/rbac.types';
+import { ConversationContext } from "../../../types/conversation-context.types";
+import { UserContext } from "../../../types/rbac.types";
 
 // Additional type definitions for missing interfaces
 export interface EntityType {
@@ -33,7 +33,7 @@ export interface EntityExtractionResult {
 }
 
 export interface SentimentAnalysisResult {
-  sentiment: 'positive' | 'negative' | 'neutral';
+  sentiment: "positive" | "negative" | "neutral";
   confidence: number;
   emotions: Array<{
     emotion: string;
@@ -52,7 +52,7 @@ export interface OperationMetadata {
   operationType: string;
   operationId: string;
   timestamp: Date;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
   context: Record<string, unknown>;
 }
 
@@ -60,7 +60,7 @@ export interface EnvironmentalFactors {
   timeOfDay: string;
   location?: string;
   deviceType: string;
-  networkSecurity: 'secure' | 'unsecure' | 'unknown';
+  networkSecurity: "secure" | "unsecure" | "unknown";
   previousActivity: string[];
 }
 
@@ -96,7 +96,7 @@ export interface ConversationHistory {
   messageId: string;
   timestamp: Date;
   content: string;
-  type: 'user' | 'system' | 'assistant';
+  type: "user" | "system" | "assistant";
   metadata?: Record<string, unknown>;
 }
 
@@ -108,47 +108,47 @@ export interface BehavioralProfile {
 }
 
 export enum ConversationAnalysisResult {
-  APPROVE = 'approve',
-  DENY = 'deny',
-  ESCALATE = 'escalate',
-  REQUIRE_CLARIFICATION = 'require_clarification',
-  CONDITIONAL_APPROVE = 'conditional_approve',
-  MONITOR_AND_APPROVE = 'monitor_and_approve'
+  APPROVE = "approve",
+  DENY = "deny",
+  ESCALATE = "escalate",
+  REQUIRE_CLARIFICATION = "require_clarification",
+  CONDITIONAL_APPROVE = "conditional_approve",
+  MONITOR_AND_APPROVE = "monitor_and_approve",
 }
 
 export enum RiskAssessmentLevel {
-  MINIMAL = 'minimal',
-  LOW = 'low',
-  MODERATE = 'moderate',
-  HIGH = 'high',
-  CRITICAL = 'critical',
-  EMERGENCY = 'emergency'
+  MINIMAL = "minimal",
+  LOW = "low",
+  MODERATE = "moderate",
+  HIGH = "high",
+  CRITICAL = "critical",
+  EMERGENCY = "emergency",
 }
 
 export enum InteractionModality {
-  TEXT = 'text',
-  VOICE = 'voice',
-  UI_FORM = 'ui_form',
-  BIOMETRIC = 'biometric',
-  MULTI_FACTOR = 'multi_factor'
+  TEXT = "text",
+  VOICE = "voice",
+  UI_FORM = "ui_form",
+  BIOMETRIC = "biometric",
+  MULTI_FACTOR = "multi_factor",
 }
 
 export enum ValidationContext {
-  OPERATION_EXECUTION = 'operation_execution',
-  DATA_ACCESS = 'data_access',
-  SYSTEM_CONFIGURATION = 'system_configuration',
-  SECURITY_POLICY = 'security_policy',
-  EMERGENCY_OVERRIDE = 'emergency_override',
-  COMPLIANCE_VERIFICATION = 'compliance_verification'
+  OPERATION_EXECUTION = "operation_execution",
+  DATA_ACCESS = "data_access",
+  SYSTEM_CONFIGURATION = "system_configuration",
+  SECURITY_POLICY = "security_policy",
+  EMERGENCY_OVERRIDE = "emergency_override",
+  COMPLIANCE_VERIFICATION = "compliance_verification",
 }
 
 export enum UserIntentClassification {
-  LEGITIMATE_BUSINESS = 'legitimate_business',
-  ROUTINE_OPERATION = 'routine_operation',
-  SECURITY_TESTING = 'security_testing',
-  SUSPICIOUS_ACTIVITY = 'suspicious_activity',
-  POLICY_VIOLATION = 'policy_violation',
-  MALICIOUS_INTENT = 'malicious_intent'
+  LEGITIMATE_BUSINESS = "legitimate_business",
+  ROUTINE_OPERATION = "routine_operation",
+  SECURITY_TESTING = "security_testing",
+  SUSPICIOUS_ACTIVITY = "suspicious_activity",
+  POLICY_VIOLATION = "policy_violation",
+  MALICIOUS_INTENT = "malicious_intent",
 }
 
 export interface ConversationalValidationRequest {
@@ -281,33 +281,33 @@ export interface NLPAnalysisEngine {
   analyzeUserIntent(
     input: string,
     context: ConversationContext,
-    userHistory: ConversationHistory[]
+    userHistory: ConversationHistory[],
   ): Promise<IntentAnalysisResult>;
 
   /** Extract entities and relationships from conversation */
   extractEntities(
     input: string,
-    entityTypes: EntityType[]
+    entityTypes: EntityType[],
   ): Promise<EntityExtractionResult>;
 
   /** Analyze sentiment and emotional context */
   analyzeSentiment(
     input: string,
-    conversationHistory: ConversationHistory[]
+    conversationHistory: ConversationHistory[],
   ): Promise<SentimentAnalysisResult>;
 
   /** Detect deception or manipulation attempts */
   detectDeception(
     input: string,
     userProfile: BehavioralProfile,
-    context: ValidationContext
+    context: ValidationContext,
   ): Promise<DeceptionAnalysisResult>;
 
   /** Generate natural language explanations */
   generateExplanation(
     decision: ConversationAnalysisResult,
     reasoning: string,
-    userContext: UserContext
+    userContext: UserContext,
   ): Promise<string>;
 }
 
@@ -316,26 +316,26 @@ export interface ContextAwareValidator {
   assessRisk(
     operation: OperationMetadata,
     userContext: UserContext,
-    environmentalFactors: EnvironmentalFactors
+    environmentalFactors: EnvironmentalFactors,
   ): Promise<RiskAssessmentResult>;
 
   /** Validate operation against business rules */
   validateBusinessRules(
     operation: OperationMetadata,
-    businessContext: BusinessContext
+    businessContext: BusinessContext,
   ): Promise<BusinessRuleValidationResult>;
 
   /** Check compliance requirements */
   validateCompliance(
     operation: OperationMetadata,
-    complianceFrameworks: ComplianceFramework[]
+    complianceFrameworks: ComplianceFramework[],
   ): Promise<ComplianceValidationResult>;
 
   /** Analyze temporal context and timing */
   analyzeTemporalContext(
     operation: OperationMetadata,
     userContext: UserContext,
-    systemState: SystemState
+    systemState: SystemState,
   ): Promise<TemporalAnalysisResult>;
 }
 
@@ -343,56 +343,56 @@ export interface MultiModalInteractionHandler {
   /** Process text-based interaction */
   processTextInput(
     input: string,
-    context: InteractionContext
+    context: InteractionContext,
   ): Promise<TextInteractionResult>;
 
   /** Process voice-based interaction */
   processVoiceInput(
     audioData: AudioData,
-    context: InteractionContext
+    context: InteractionContext,
   ): Promise<VoiceInteractionResult>;
 
   /** Process UI form interaction */
   processUIForm(
     formData: FormData,
-    context: InteractionContext
+    context: InteractionContext,
   ): Promise<UIInteractionResult>;
 
   /** Process biometric validation */
   processBiometricInput(
     biometricData: BiometricData,
-    context: InteractionContext
+    context: InteractionContext,
   ): Promise<BiometricInteractionResult>;
 
   /** Orchestrate multi-factor interactions */
   orchestrateMultiModal(
     interactions: ModalityInteraction[],
-    validationRequirements: ValidationRequirements
+    validationRequirements: ValidationRequirements,
   ): Promise<MultiModalResult>;
 }
 
 export interface PerformanceOptimizer {
   /** Optimize processing pipeline for sub-500ms response */
   optimizeProcessingPipeline(
-    request: ConversationalValidationRequest
+    request: ConversationalValidationRequest,
   ): Promise<OptimizedProcessingPlan>;
 
   /** Manage intelligent caching strategies */
   optimizeCaching(
     request: ConversationalValidationRequest,
-    historicalPatterns: CachePatterns[]
+    historicalPatterns: CachePatterns[],
   ): Promise<CacheOptimizationResult>;
 
   /** Load balance across processing resources */
   balanceProcessingLoad(
     requests: ConversationalValidationRequest[],
-    resourceAvailability: ResourcePool
+    resourceAvailability: ResourcePool,
   ): Promise<LoadBalancingResult>;
 
   /** Monitor and adjust performance in real-time */
   monitorPerformance(
     metrics: PerformanceMetrics,
-    thresholds: PerformanceThresholds
+    thresholds: PerformanceThresholds,
   ): Promise<PerformanceAdjustment>;
 }
 
@@ -400,26 +400,26 @@ export interface ZeroTrustSecurityValidator {
   /** Validate all interactions with zero-trust principles */
   validateZeroTrust(
     request: ConversationalValidationRequest,
-    securityPolicy: ZeroTrustPolicy
+    securityPolicy: ZeroTrustPolicy,
   ): Promise<ZeroTrustValidationResult>;
 
   /** Continuously verify user identity and intent */
   continuousVerification(
     userContext: UserContext,
-    behavioralBaseline: BehavioralBaseline
+    behavioralBaseline: BehavioralBaseline,
   ): Promise<ContinuousVerificationResult>;
 
   /** Detect and respond to security threats */
   detectThreats(
     interactionData: InteractionData,
-    threatIntelligence: ThreatIntelligence
+    threatIntelligence: ThreatIntelligence,
   ): Promise<ThreatDetectionResult>;
 
   /** Enforce least-privilege access principles */
   enforceLeastPrivilege(
     requestedPermissions: Permission[],
     userContext: UserContext,
-    operationContext: OperationContext
+    operationContext: OperationContext,
   ): Promise<PrivilegeValidationResult>;
 }
 
@@ -636,25 +636,25 @@ export interface ComplianceMarker {
 }
 
 export enum SecuritySeverity {
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  CRITICAL = 'critical'
+  LOW = "low",
+  MEDIUM = "medium",
+  HIGH = "high",
+  CRITICAL = "critical",
 }
 
 export enum ComplianceStatus {
-  COMPLIANT = 'compliant',
-  NON_COMPLIANT = 'non_compliant',
-  PARTIALLY_COMPLIANT = 'partially_compliant',
-  UNDER_REVIEW = 'under_review'
+  COMPLIANT = "compliant",
+  NON_COMPLIANT = "non_compliant",
+  PARTIALLY_COMPLIANT = "partially_compliant",
+  UNDER_REVIEW = "under_review",
 }
 
 export enum ThreatLevel {
-  NONE = 'none',
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  CRITICAL = 'critical'
+  NONE = "none",
+  LOW = "low",
+  MEDIUM = "medium",
+  HIGH = "high",
+  CRITICAL = "critical",
 }
 
 // Additional supporting types for completeness

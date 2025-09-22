@@ -102,9 +102,7 @@ export class HealthController {
    */
   @Get()
   @Authenticated()
-  async getHealth(
-    @CurrentUser() user: ByteBotdUser,
-  ): Promise<
+  async getHealth(@CurrentUser() user: ByteBotdUser): Promise<
     | BasicHealthResponse
     | {
         status: string;
@@ -526,9 +524,7 @@ export class HealthController {
    */
   @Get('status')
   @Authenticated()
-  async getDetailedStatus(
-    @CurrentUser() user: ByteBotdUser,
-  ): Promise<
+  async getDetailedStatus(@CurrentUser() user: ByteBotdUser): Promise<
     | DetailedStatusResponse
     | {
         status: string;

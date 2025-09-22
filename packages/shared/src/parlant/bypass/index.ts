@@ -13,20 +13,20 @@
 // CORE TYPES AND INTERFACES
 // =============================================================================
 
-export * from './types/bypass-core.types';
+export * from "./types/bypass-core.types";
 
 // =============================================================================
 // SERVICES
 // =============================================================================
 
 // Import services for internal use
-import { EmergencyTokenManagerService } from './tokens/emergency-token-manager.service';
-import { BypassAuthorizationEngineService } from './authorization/bypass-authorization-engine.service';
-import { AutomaticBypassTriggersService } from './monitoring/automatic-bypass-triggers.service';
-import { BypassAbuseDetectionService } from './prevention/bypass-abuse-detection.service';
-import { BypassAuditForensicsService } from './audit/bypass-audit-forensics.service';
-import { BypassMonitoringHealthService } from './monitoring/bypass-monitoring-health.service';
-import { ParlantBypassIntegrationService } from './integration/parlant-bypass-integration.service';
+import { EmergencyTokenManagerService } from "./tokens/emergency-token-manager.service";
+import { BypassAuthorizationEngineService } from "./authorization/bypass-authorization-engine.service";
+import { AutomaticBypassTriggersService } from "./monitoring/automatic-bypass-triggers.service";
+import { BypassAbuseDetectionService } from "./prevention/bypass-abuse-detection.service";
+import { BypassAuditForensicsService } from "./audit/bypass-audit-forensics.service";
+import { BypassMonitoringHealthService } from "./monitoring/bypass-monitoring-health.service";
+import { ParlantBypassIntegrationService } from "./integration/parlant-bypass-integration.service";
 
 // Import types for internal use
 import type {
@@ -34,36 +34,34 @@ import type {
   EmergencyBypassToken,
   ViolationSeverity,
   WorkflowStatus,
-} from './types/bypass-core.types';
+} from "./types/bypass-core.types";
 
 // Import service-specific types
-import type {
-  HealthCheckResult,
-} from './monitoring/bypass-monitoring-health.service';
+import type { HealthCheckResult } from "./monitoring/bypass-monitoring-health.service";
 import type {
   OperationExecutionResult,
   IntegrationStatus,
   BypassOperationRequest,
   UserOperationContext,
-} from './integration/parlant-bypass-integration.service';
+} from "./integration/parlant-bypass-integration.service";
 import type {
   ComplianceReport,
   ComplianceTag,
-} from './audit/bypass-audit-forensics.service';
+} from "./audit/bypass-audit-forensics.service";
 
 // Token Management
-export { EmergencyTokenManagerService } from './tokens/emergency-token-manager.service';
+export { EmergencyTokenManagerService } from "./tokens/emergency-token-manager.service";
 export type {
   CreateEmergencyTokenRequest,
   TokenRequestContext,
   ValidateTokenRequest,
   TokenValidationContext,
   TokenValidationResult,
-  TokenStatistics
-} from './tokens/emergency-token-manager.service';
+  TokenStatistics,
+} from "./tokens/emergency-token-manager.service";
 
 // Authorization Engine
-export { BypassAuthorizationEngineService } from './authorization/bypass-authorization-engine.service';
+export { BypassAuthorizationEngineService } from "./authorization/bypass-authorization-engine.service";
 export type {
   BypassAuthorizationRequest,
   AuthorizationContext,
@@ -72,11 +70,11 @@ export type {
   ConditionType,
   AuthorizationDecisionMetadata,
   RiskFactor,
-  AuthorizationPerformanceMetrics
-} from './authorization/bypass-authorization-engine.service';
+  AuthorizationPerformanceMetrics,
+} from "./authorization/bypass-authorization-engine.service";
 
 // Automatic Triggers
-export { AutomaticBypassTriggersService } from './monitoring/automatic-bypass-triggers.service';
+export { AutomaticBypassTriggersService } from "./monitoring/automatic-bypass-triggers.service";
 export type {
   SystemHealthMetrics,
   ServiceHealthInfo,
@@ -86,11 +84,11 @@ export type {
   ComparisonOperator,
   BypassTriggerEvent,
   EventSeverity,
-  TriggerStatistics
-} from './monitoring/automatic-bypass-triggers.service';
+  TriggerStatistics,
+} from "./monitoring/automatic-bypass-triggers.service";
 
 // Abuse Detection
-export { BypassAbuseDetectionService } from './prevention/bypass-abuse-detection.service';
+export { BypassAbuseDetectionService } from "./prevention/bypass-abuse-detection.service";
 export type {
   AbusePattern,
   DetectionAlgorithm,
@@ -103,11 +101,11 @@ export type {
   AbuseDetectionEvent,
   DetectionEvidence,
   PreventionAction,
-  DetectionStatistics
-} from './prevention/bypass-abuse-detection.service';
+  DetectionStatistics,
+} from "./prevention/bypass-abuse-detection.service";
 
 // Audit and Forensics
-export { BypassAuditForensicsService } from './audit/bypass-audit-forensics.service';
+export { BypassAuditForensicsService } from "./audit/bypass-audit-forensics.service";
 export type {
   BypassAuditEntry,
   AuditEntryType,
@@ -132,11 +130,11 @@ export type {
   FindingType,
   AuditQueryCriteria,
   IntegrityVerificationResult,
-  ComplianceReport
-} from './audit/bypass-audit-forensics.service';
+  ComplianceReport,
+} from "./audit/bypass-audit-forensics.service";
 
 // Monitoring and Health
-export { BypassMonitoringHealthService } from './monitoring/bypass-monitoring-health.service';
+export { BypassMonitoringHealthService } from "./monitoring/bypass-monitoring-health.service";
 export type {
   HealthCheckConfig,
   HealthCheckResult,
@@ -157,11 +155,11 @@ export type {
   RealTimeMetrics,
   HistoricalTrend,
   SecuritySummary,
-  PerformanceSummary
-} from './monitoring/bypass-monitoring-health.service';
+  PerformanceSummary,
+} from "./monitoring/bypass-monitoring-health.service";
 
 // Integration Service
-export { ParlantBypassIntegrationService } from './integration/parlant-bypass-integration.service';
+export { ParlantBypassIntegrationService } from "./integration/parlant-bypass-integration.service";
 export type {
   ParlantServiceContext,
   ParlantCapability,
@@ -183,8 +181,8 @@ export type {
   BypassExecutionInfo,
   BypassReason,
   IntegrationStatus,
-  IntegrationPerformanceMetrics
-} from './integration/parlant-bypass-integration.service';
+  IntegrationPerformanceMetrics,
+} from "./integration/parlant-bypass-integration.service";
 
 // =============================================================================
 // BYPASS SYSTEM FACTORY
@@ -215,7 +213,7 @@ export class ParlantBypassSystemFactory {
       automaticTriggers,
       abuseDetection,
       auditForensics,
-      monitoringHealth
+      monitoringHealth,
     );
 
     return new ParlantBypassSystem(
@@ -225,7 +223,7 @@ export class ParlantBypassSystemFactory {
       abuseDetection,
       auditForensics,
       monitoringHealth,
-      integration
+      integration,
     );
   }
 }
@@ -243,7 +241,7 @@ export class ParlantBypassSystem {
     public readonly abuseDetection: BypassAbuseDetectionService,
     public readonly auditForensics: BypassAuditForensicsService,
     public readonly monitoringHealth: BypassMonitoringHealthService,
-    public readonly integration: ParlantBypassIntegrationService
+    public readonly integration: ParlantBypassIntegrationService,
   ) {
     this.setupEventHandlers();
   }
@@ -254,63 +252,61 @@ export class ParlantBypassSystem {
   async initialize(): Promise<void> {
     // Register default health checks
     await this.monitoringHealth.registerHealthCheck({
-      name: 'bypass_system_health',
-      description: 'Overall bypass system health',
+      name: "bypass_system_health",
+      description: "Overall bypass system health",
       intervalMs: 60000,
       timeoutMs: 5000,
       retries: 2,
       critical: true,
       checkFunction: async () => this.performSystemHealthCheck(),
-      enabled: true
+      enabled: true,
     });
 
     // Register PARLANT service monitoring
-    this.automaticTriggers.on('bypass-triggered', async (event) => {
+    this.automaticTriggers.on("bypass-triggered", async (event) => {
       await this.handleAutomaticBypass(event);
     });
 
     // Register abuse detection alerts
-    this.abuseDetection.on('abuse-detected', async (event) => {
+    this.abuseDetection.on("abuse-detected", async (event) => {
       await this.handleAbuseDetection(event);
     });
 
     // Register monitoring alerts
-    this.monitoringHealth.on('alert-triggered', async (event) => {
+    this.monitoringHealth.on("alert-triggered", async (event) => {
       await this.handleSystemAlert(event);
     });
 
-    console.log('PARLANT Emergency Bypass System initialized successfully');
+    console.log("PARLANT Emergency Bypass System initialized successfully");
   }
 
   /**
    * Get system status
    */
   async getSystemStatus(): Promise<BypassSystemStatus> {
-    const [
-      health,
-      tokenStats,
-      integrationStatus,
-      detectionStats
-    ] = await Promise.all([
-      this.monitoringHealth.getOverallHealth(),
-      this.tokenManager.getTokenStatistics(),
-      this.integration.getIntegrationStatus(),
-      this.abuseDetection.getDetectionStatistics()
-    ]);
+    const [health, tokenStats, integrationStatus, detectionStats] =
+      await Promise.all([
+        this.monitoringHealth.getOverallHealth(),
+        this.tokenManager.getTokenStatistics(),
+        this.integration.getIntegrationStatus(),
+        this.abuseDetection.getDetectionStatistics(),
+      ]);
 
     return {
       systemHealth: health,
       tokenStatistics: tokenStats,
       integrationStatus,
       detectionStatistics: detectionStats,
-      lastUpdate: new Date()
+      lastUpdate: new Date(),
     };
   }
 
   /**
    * Execute emergency bypass operation
    */
-  async executeEmergencyBypass(request: BypassOperationRequest): Promise<OperationExecutionResult> {
+  async executeEmergencyBypass(
+    request: BypassOperationRequest,
+  ): Promise<OperationExecutionResult> {
     return this.integration.executeOperation(request);
   }
 
@@ -321,13 +317,13 @@ export class ParlantBypassSystem {
     operationType: BypassOperationType,
     functionName: string,
     userContext: UserOperationContext,
-    reason: string
+    reason: string,
   ): Promise<EmergencyBypassToken> {
     return this.integration.requestEmergencyBypass(
       operationType,
       functionName,
       userContext,
-      reason
+      reason,
     );
   }
 
@@ -337,12 +333,13 @@ export class ParlantBypassSystem {
   async generateComplianceReport(
     framework: ComplianceTag,
     startDate: Date,
-    endDate: Date
+    endDate: Date,
   ): Promise<ComplianceReport> {
-    return this.auditForensics.generateComplianceReport(
-      framework,
-      { startTime: startDate, endTime: endDate, timezone: 'UTC' }
-    );
+    return this.auditForensics.generateComplianceReport(framework, {
+      startTime: startDate,
+      endTime: endDate,
+      timezone: "UTC",
+    });
   }
 
   // =============================================================================
@@ -354,20 +351,22 @@ export class ParlantBypassSystem {
    */
   private setupEventHandlers(): void {
     // Forward integration events to audit system
-    this.integration.on('operation-executed', async (event) => {
+    this.integration.on("operation-executed", async (event) => {
       if (event.result.bypassInfo) {
         // Already logged in integration service
       }
     });
 
     // Handle emergency bypass requests
-    this.integration.on('emergency-bypass-requested', async (event) => {
+    this.integration.on("emergency-bypass-requested", async (event) => {
       console.log(`Emergency bypass token created: ${event.token.tokenId}`);
     });
 
     // Handle mode changes
-    this.integration.on('integration-mode-changed', async (event) => {
-      console.log(`Integration mode changed to ${event.newMode}: ${event.reason}`);
+    this.integration.on("integration-mode-changed", async (event) => {
+      console.log(
+        `Integration mode changed to ${event.newMode}: ${event.reason}`,
+      );
     });
   }
 
@@ -379,7 +378,7 @@ export class ParlantBypassSystem {
       const [tokenHealth, authHealth, integrationHealth] = await Promise.all([
         this.checkTokenManagerHealth(),
         this.checkAuthorizationHealth(),
-        this.checkIntegrationHealth()
+        this.checkIntegrationHealth(),
       ]);
 
       const allHealthy = tokenHealth && authHealth && integrationHealth;
@@ -388,23 +387,22 @@ export class ParlantBypassSystem {
         healthy: allHealthy,
         responseTime: 0,
         details: allHealthy
-          ? 'All bypass system components operational'
-          : 'Some bypass system components experiencing issues',
+          ? "All bypass system components operational"
+          : "Some bypass system components experiencing issues",
         metrics: {
           tokenManager: tokenHealth ? 1 : 0,
           authorizationEngine: authHealth ? 1 : 0,
-          integration: integrationHealth ? 1 : 0
+          integration: integrationHealth ? 1 : 0,
         },
-        timestamp: new Date()
+        timestamp: new Date(),
       };
-
     } catch (error) {
       return {
         healthy: false,
         responseTime: 0,
-        details: 'Bypass system health check failed',
-        error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date()
+        details: "Bypass system health check failed",
+        error: error instanceof Error ? error.message : "Unknown error",
+        timestamp: new Date(),
       };
     }
   }

@@ -10,9 +10,9 @@
  * @author Health Monitoring Agent #8
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { Cron, CronExpression } from '@nestjs/schedule';
+import { Injectable, Logger } from "@nestjs/common";
+import { EventEmitter2 } from "@nestjs/event-emitter";
+import { Cron, CronExpression } from "@nestjs/schedule";
 import {
   IHealthMonitor,
   HealthCheckResults,
@@ -40,26 +40,26 @@ import {
   HealthEventType,
   HealthHistorySummary,
   HealthTrend as InterfaceHealthTrend,
-  TrendDirection
-} from '../core/registry.interface';
+  TrendDirection,
+} from "../core/registry.interface";
 import {
   FunctionHealthStatus,
   HealthStatus,
   HealthTrend,
   HealthIndicator,
-  HealthCheckResult
-} from '../core/registry.types';
+  HealthCheckResult,
+} from "../core/registry.types";
 
 /**
  * Health check types
  */
 export enum HealthCheckType {
-  _BASIC = 'basic',
-  _COMPREHENSIVE = 'comprehensive',
-  _PERFORMANCE = 'performance',
-  _SECURITY = 'security',
-  _DEPENDENCY = 'dependency',
-  _INTEGRATION = 'integration'
+  _BASIC = "basic",
+  _COMPREHENSIVE = "comprehensive",
+  _PERFORMANCE = "performance",
+  _SECURITY = "security",
+  _DEPENDENCY = "dependency",
+  _INTEGRATION = "integration",
 }
 
 /**
@@ -81,15 +81,30 @@ export interface HealthMonitoringConfig {
  */
 export interface IHealthStorage {
   getHealthStatus(functionId: string): Promise<FunctionHealthStatus | null>;
-  setHealthStatus(functionId: string, status: FunctionHealthStatus): Promise<void>;
-  getHealthHistory(functionId: string, timeRange: TimeRange): Promise<HealthHistory>;
-  addHealthDataPoint(functionId: string, dataPoint: HealthDataPoint): Promise<void>;
-  getHealthMetrics(functionId: string, metrics: string[]): Promise<HealthMetrics>;
+  setHealthStatus(
+    functionId: string,
+    status: FunctionHealthStatus,
+  ): Promise<void>;
+  getHealthHistory(
+    functionId: string,
+    timeRange: TimeRange,
+  ): Promise<HealthHistory>;
+  addHealthDataPoint(
+    functionId: string,
+    dataPoint: HealthDataPoint,
+  ): Promise<void>;
+  getHealthMetrics(
+    functionId: string,
+    metrics: string[],
+  ): Promise<HealthMetrics>;
   getMonitoringSessions(): Promise<MonitoringSession[]>;
   saveMonitoringSession(session: MonitoringSession): Promise<void>;
   removeMonitoringSession(sessionId: string): Promise<void>;
   getThresholds(functionId: string): Promise<HealthThreshold[]>;
-  setThresholds(functionId: string, thresholds: HealthThreshold[]): Promise<void>;
+  setThresholds(
+    functionId: string,
+    thresholds: HealthThreshold[],
+  ): Promise<void>;
 }
 
 /**
@@ -109,14 +124,21 @@ export interface IHealthChecker {
 export interface IAlertingService {
   sendAlert(alert: HealthAlert): Promise<void>;
   sendHealthReport(report: ComprehensiveHealthReport): Promise<void>;
-  sendThresholdViolation(functionId: string, threshold: HealthThreshold, value: number): Promise<void>;
+  sendThresholdViolation(
+    functionId: string,
+    threshold: HealthThreshold,
+    value: number,
+  ): Promise<void>;
 }
 
 /**
  * Health remediation service interface
  */
 export interface IRemediationService {
-  attemptRemediation(functionId: string, issue: HealthIndicator): Promise<RemediationResult>;
+  attemptRemediation(
+    functionId: string,
+    issue: HealthIndicator,
+  ): Promise<RemediationResult>;
   getRemediationStrategies(issueType: string): Promise<RemediationStrategy[]>;
 }
 
@@ -143,7 +165,10 @@ export class HealthMonitorService implements IHealthMonitor {
   private readonly logger = new Logger(HealthMonitorService.name);
   private readonly monitoringSessions = new Map<string, MonitoringSession>();
   private readonly healthCache = new Map<string, FunctionHealthStatus>();
-  private readonly performanceBaselines = new Map<string, PerformanceBaseline>();
+  private readonly performanceBaselines = new Map<
+    string,
+    PerformanceBaseline
+  >();
 
   constructor(
     private readonly eventEmitter: EventEmitter2,
@@ -151,7 +176,7 @@ export class HealthMonitorService implements IHealthMonitor {
     private readonly healthChecker: IHealthChecker,
     private readonly alertingService: IAlertingService,
     private readonly remediationService: IRemediationService,
-    private readonly config: HealthMonitoringConfig
+    private readonly config: HealthMonitoringConfig,
   ) {
     this.initializeService();
   }
@@ -188,7 +213,7 @@ export class HealthMonitorService implements IHealthMonitor {
         score: healthScore,
         status,
         duration: Date.now() - startTime,
-        details: { indicators: allIndicators }
+        details: { indicators: allIndicators },
       };
 
       // Create updated health status
@@ -197,7 +222,9 @@ export class HealthMonitorService implements IHealthMonitor {
         indicators: allIndicators,
         lastCheck: new Date(),
         trend: trend,
-        history: previousStatus ? [...previousStatus.history.slice(-99), healthCheckResult] : [healthCheckResult]
+        history: previousStatus
+          ? [...previousStatus.history.slice(-99), healthCheckResult]
+          : [healthCheckResult],
       };
 
       // Store health status
@@ -213,19 +240,23 @@ export class HealthMonitorService implements IHealthMonitor {
       }
 
       // Emit health check event
-      this.eventEmitter.emit('health.checked', {
+      this.eventEmitter.emit("health.checked", {
         functionId,
         score: healthScore,
         status,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
-      this.logger.debug(`Health check completed for function ${functionId}: score=${healthScore}, status=${status}`);
+      this.logger.debug(
+        `Health check completed for function ${functionId}: score=${healthScore}, status=${status}`,
+      );
 
       return healthStatus;
-
     } catch (error) {
-      this.logger.error(`Health check failed for function ${functionId}: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
+      this.logger.error(
+        `Health check failed for function ${functionId}: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
       throw error;
     }
   }
@@ -233,7 +264,9 @@ export class HealthMonitorService implements IHealthMonitor {
   /**
    * Check health of multiple functions
    */
-  async checkMultipleHealth(functionIds: string[]): Promise<HealthCheckResults> {
+  async checkMultipleHealth(
+    functionIds: string[],
+  ): Promise<HealthCheckResults> {
     this.logger.log(`Checking health for ${functionIds.length} functions`);
 
     try {
@@ -243,7 +276,9 @@ export class HealthMonitorService implements IHealthMonitor {
           const health = await this.checkHealth(functionId);
           results.set(functionId, health);
         } catch (error) {
-          this.logger.warn(`Health check failed for function ${functionId}: ${error instanceof Error ? error.message : String(error)}`);
+          this.logger.warn(
+            `Health check failed for function ${functionId}: ${error instanceof Error ? error.message : String(error)}`,
+          );
         }
       });
 
@@ -255,15 +290,17 @@ export class HealthMonitorService implements IHealthMonitor {
       const healthCheckResults: HealthCheckResults = {
         results,
         summary,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
 
       this.logger.log(`Health check completed for ${results.size} functions`);
 
       return healthCheckResults;
-
     } catch (error) {
-      this.logger.error(`Multiple health check failed: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
+      this.logger.error(
+        `Multiple health check failed: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
       throw error;
     }
   }
@@ -272,7 +309,7 @@ export class HealthMonitorService implements IHealthMonitor {
    * Check health of all registered functions
    */
   async checkAllHealth(): Promise<ComprehensiveHealthReport> {
-    this.logger.log('Performing comprehensive health check for all functions');
+    this.logger.log("Performing comprehensive health check for all functions");
 
     try {
       // Get all function IDs (would come from registry in real implementation)
@@ -285,7 +322,8 @@ export class HealthMonitorService implements IHealthMonitor {
       const trends = await this.analyzeHealthTrends(functionIds);
 
       // Generate recommendations
-      const recommendations = await this.generateHealthRecommendations(healthCheckResults);
+      const recommendations =
+        await this.generateHealthRecommendations(healthCheckResults);
 
       // Generate alerts
       const alerts = await this.generateHealthAlerts(healthCheckResults);
@@ -295,7 +333,7 @@ export class HealthMonitorService implements IHealthMonitor {
         functionDetails: healthCheckResults.results,
         trends,
         recommendations,
-        alerts
+        alerts,
       };
 
       // Send report via alerting service
@@ -304,20 +342,22 @@ export class HealthMonitorService implements IHealthMonitor {
       }
 
       // Emit comprehensive health check event
-      this.eventEmitter.emit('health.comprehensive-check', {
+      this.eventEmitter.emit("health.comprehensive-check", {
         totalFunctions: functionIds.length,
         healthyFunctions: report.summary.healthyFunctions,
         unhealthyFunctions: report.summary.unhealthyFunctions,
         averageScore: report.summary.averageHealthScore,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
-      this.logger.log('Comprehensive health check completed');
+      this.logger.log("Comprehensive health check completed");
 
       return report;
-
     } catch (error) {
-      this.logger.error(`Comprehensive health check failed: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
+      this.logger.error(
+        `Comprehensive health check failed: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
       throw error;
     }
   }
@@ -325,14 +365,19 @@ export class HealthMonitorService implements IHealthMonitor {
   /**
    * Get health history
    */
-  async getHealthHistory(functionId: string, timeRange: TimeRange): Promise<HealthHistory> {
+  async getHealthHistory(
+    functionId: string,
+    timeRange: TimeRange,
+  ): Promise<HealthHistory> {
     this.logger.debug(`Getting health history for function ${functionId}`);
 
     try {
       return await this.storage.getHealthHistory(functionId, timeRange);
-
     } catch (error) {
-      this.logger.error(`Failed to get health history for function ${functionId}: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
+      this.logger.error(
+        `Failed to get health history for function ${functionId}: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
       throw error;
     }
   }
@@ -342,7 +387,7 @@ export class HealthMonitorService implements IHealthMonitor {
    */
   async setAlertThresholds(
     functionId: string,
-    thresholds: HealthThreshold[]
+    thresholds: HealthThreshold[],
   ): Promise<ThresholdSettingResult> {
     this.logger.log(`Setting alert thresholds for function: ${functionId}`);
 
@@ -350,35 +395,42 @@ export class HealthMonitorService implements IHealthMonitor {
       // Validate thresholds
       const validationResult = this.validateThresholds(thresholds);
       if (!validationResult.valid) {
-        throw new Error(`Invalid thresholds: ${validationResult.errors.join(', ')}`);
+        throw new Error(
+          `Invalid thresholds: ${validationResult.errors.join(", ")}`,
+        );
       }
 
       // Get existing thresholds
       const existingThresholds = await this.storage.getThresholds(functionId);
 
       // Detect conflicts
-      const conflicts = this.detectThresholdConflicts(existingThresholds, thresholds);
+      const conflicts = this.detectThresholdConflicts(
+        existingThresholds,
+        thresholds,
+      );
 
       // Apply thresholds
       await this.storage.setThresholds(functionId, thresholds);
 
       // Emit threshold update event
-      this.eventEmitter.emit('health.thresholds-updated', {
+      this.eventEmitter.emit("health.thresholds-updated", {
         functionId,
-        thresholds: thresholds.map(t => t.metric),
-        timestamp: new Date()
+        thresholds: thresholds.map((t) => t.metric),
+        timestamp: new Date(),
       });
 
       this.logger.log(`Alert thresholds set for function: ${functionId}`);
 
       return {
         success: true,
-        appliedThresholds: thresholds.map(t => t.metric),
-        conflicts
+        appliedThresholds: thresholds.map((t) => t.metric),
+        conflicts,
       };
-
     } catch (error) {
-      this.logger.error(`Failed to set alert thresholds for function ${functionId}: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
+      this.logger.error(
+        `Failed to set alert thresholds for function ${functionId}: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
       throw error;
     }
   }
@@ -386,14 +438,21 @@ export class HealthMonitorService implements IHealthMonitor {
   /**
    * Get health metrics
    */
-  async getHealthMetrics(functionId: string, metrics: string[]): Promise<HealthMetrics> {
-    this.logger.debug(`Getting health metrics for function ${functionId}: ${metrics.join(', ')}`);
+  async getHealthMetrics(
+    functionId: string,
+    metrics: string[],
+  ): Promise<HealthMetrics> {
+    this.logger.debug(
+      `Getting health metrics for function ${functionId}: ${metrics.join(", ")}`,
+    );
 
     try {
       return await this.storage.getHealthMetrics(functionId, metrics);
-
     } catch (error) {
-      this.logger.error(`Failed to get health metrics for function ${functionId}: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
+      this.logger.error(
+        `Failed to get health metrics for function ${functionId}: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
       throw error;
     }
   }
@@ -401,8 +460,13 @@ export class HealthMonitorService implements IHealthMonitor {
   /**
    * Start health monitoring
    */
-  async startMonitoring(functionId: string, interval: number): Promise<MonitoringSession> {
-    this.logger.log(`Starting health monitoring for function ${functionId} with interval ${interval}ms`);
+  async startMonitoring(
+    functionId: string,
+    interval: number,
+  ): Promise<MonitoringSession> {
+    this.logger.log(
+      `Starting health monitoring for function ${functionId} with interval ${interval}ms`,
+    );
 
     try {
       const sessionId = this.generateSessionId();
@@ -412,7 +476,7 @@ export class HealthMonitorService implements IHealthMonitor {
         functionId,
         interval,
         startTime: new Date(),
-        configuration: this.createMonitoringConfiguration()
+        configuration: this.createMonitoringConfiguration(),
       };
 
       // Store session
@@ -423,19 +487,23 @@ export class HealthMonitorService implements IHealthMonitor {
       this.startMonitoringLoop(session);
 
       // Emit monitoring started event
-      this.eventEmitter.emit('health.monitoring-started', {
+      this.eventEmitter.emit("health.monitoring-started", {
         sessionId,
         functionId,
         interval,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
-      this.logger.log(`Health monitoring started for function ${functionId}: session ${sessionId}`);
+      this.logger.log(
+        `Health monitoring started for function ${functionId}: session ${sessionId}`,
+      );
 
       return session;
-
     } catch (error) {
-      this.logger.error(`Failed to start monitoring for function ${functionId}: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
+      this.logger.error(
+        `Failed to start monitoring for function ${functionId}: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
       throw error;
     }
   }
@@ -461,27 +529,29 @@ export class HealthMonitorService implements IHealthMonitor {
       await this.storage.removeMonitoringSession(sessionId);
 
       // Emit monitoring stopped event
-      this.eventEmitter.emit('health.monitoring-stopped', {
+      this.eventEmitter.emit("health.monitoring-stopped", {
         sessionId,
         functionId: session.functionId,
         duration,
         dataPointsCollected,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       const result: MonitoringStopResult = {
         success: true,
         sessionId,
         duration,
-        dataPointsCollected
+        dataPointsCollected,
       };
 
       this.logger.log(`Health monitoring stopped for session ${sessionId}`);
 
       return result;
-
     } catch (error) {
-      this.logger.error(`Failed to stop monitoring session ${sessionId}: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
+      this.logger.error(
+        `Failed to stop monitoring session ${sessionId}: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
       throw error;
     }
   }
@@ -494,7 +564,7 @@ export class HealthMonitorService implements IHealthMonitor {
   private async performScheduledHealthChecks(): Promise<void> {
     if (!this.config.enabled) return;
 
-    this.logger.debug('Performing scheduled health checks');
+    this.logger.debug("Performing scheduled health checks");
 
     try {
       // Get all function IDs that need periodic health checks
@@ -507,10 +577,14 @@ export class HealthMonitorService implements IHealthMonitor {
         await this.checkMultipleHealth(batch);
       }
 
-      this.logger.debug(`Scheduled health checks completed for ${functionIds.length} functions`);
-
+      this.logger.debug(
+        `Scheduled health checks completed for ${functionIds.length} functions`,
+      );
     } catch (error) {
-      this.logger.error(`Scheduled health checks failed: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
+      this.logger.error(
+        `Scheduled health checks failed: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
     }
   }
 
@@ -520,18 +594,22 @@ export class HealthMonitorService implements IHealthMonitor {
   // @ts-ignore
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   private async cleanupOldHealthData(): Promise<void> {
-    this.logger.log('Starting health data cleanup');
+    this.logger.log("Starting health data cleanup");
 
     try {
-      const cutoffDate = new Date(Date.now() - this.config.retentionPeriod * 24 * 60 * 60 * 1000);
+      const cutoffDate = new Date(
+        Date.now() - this.config.retentionPeriod * 24 * 60 * 60 * 1000,
+      );
 
       // Cleanup would be implemented here
       // For now, just log the activity
 
-      this.logger.log('Health data cleanup completed');
-
+      this.logger.log("Health data cleanup completed");
     } catch (error) {
-      this.logger.error(`Health data cleanup failed: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
+      this.logger.error(
+        `Health data cleanup failed: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
     }
   }
 
@@ -543,27 +621,34 @@ export class HealthMonitorService implements IHealthMonitor {
    * Initialize the service
    */
   private async initializeService(): Promise<void> {
-    this.logger.log('Initializing Health Monitor Service');
+    this.logger.log("Initializing Health Monitor Service");
 
     try {
       // Load existing monitoring sessions
       const sessions = await this.storage.getMonitoringSessions();
-      sessions.forEach(session => {
+      sessions.forEach((session) => {
         this.monitoringSessions.set(session.sessionId, session);
         this.startMonitoringLoop(session);
       });
 
-      this.logger.log(`Health Monitor Service initialized with ${sessions.length} active monitoring sessions`);
-
+      this.logger.log(
+        `Health Monitor Service initialized with ${sessions.length} active monitoring sessions`,
+      );
     } catch (error) {
-      this.logger.error(`Failed to initialize Health Monitor Service: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
+      this.logger.error(
+        `Failed to initialize Health Monitor Service: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
     }
   }
 
   /**
    * Execute health check by type
    */
-  private async executeHealthCheck(functionId: string, checkType: HealthCheckType): Promise<HealthIndicator[]> {
+  private async executeHealthCheck(
+    functionId: string,
+    checkType: HealthCheckType,
+  ): Promise<HealthIndicator[]> {
     switch (checkType) {
       case HealthCheckType._BASIC:
         return await this.healthChecker.checkBasicHealth(functionId);
@@ -578,11 +663,21 @@ export class HealthMonitorService implements IHealthMonitor {
       case HealthCheckType._COMPREHENSIVE:
         // Run all checks
         const allIndicators: HealthIndicator[] = [];
-        allIndicators.push(...await this.healthChecker.checkBasicHealth(functionId));
-        allIndicators.push(...await this.healthChecker.checkPerformanceHealth(functionId));
-        allIndicators.push(...await this.healthChecker.checkSecurityHealth(functionId));
-        allIndicators.push(...await this.healthChecker.checkDependencyHealth(functionId));
-        allIndicators.push(...await this.healthChecker.checkIntegrationHealth(functionId));
+        allIndicators.push(
+          ...(await this.healthChecker.checkBasicHealth(functionId)),
+        );
+        allIndicators.push(
+          ...(await this.healthChecker.checkPerformanceHealth(functionId)),
+        );
+        allIndicators.push(
+          ...(await this.healthChecker.checkSecurityHealth(functionId)),
+        );
+        allIndicators.push(
+          ...(await this.healthChecker.checkDependencyHealth(functionId)),
+        );
+        allIndicators.push(
+          ...(await this.healthChecker.checkIntegrationHealth(functionId)),
+        );
         return allIndicators;
       default:
         return [];
@@ -595,7 +690,10 @@ export class HealthMonitorService implements IHealthMonitor {
   private calculateHealthScore(indicators: HealthIndicator[]): number {
     if (indicators.length === 0) return 0.5; // Default neutral score
 
-    const totalValue = indicators.reduce((sum, indicator) => sum + indicator.value, 0);
+    const totalValue = indicators.reduce(
+      (sum, indicator) => sum + indicator.value,
+      0,
+    );
     return Math.max(0, Math.min(1, totalValue / indicators.length));
   }
 
@@ -615,14 +713,15 @@ export class HealthMonitorService implements IHealthMonitor {
    */
   private calculateHealthTrend(
     previousStatus: FunctionHealthStatus | null,
-    currentScore: number
+    currentScore: number,
   ): HealthTrend {
     if (!previousStatus || previousStatus.history.length === 0) {
       return HealthTrend._STABLE;
     }
 
-    const recentScores = previousStatus.history.slice(-5).map(h => h.score);
-    const averagePreviousScore = recentScores.reduce((sum, score) => sum + score, 0) / recentScores.length;
+    const recentScores = previousStatus.history.slice(-5).map((h) => h.score);
+    const averagePreviousScore =
+      recentScores.reduce((sum, score) => sum + score, 0) / recentScores.length;
 
     const difference = currentScore - averagePreviousScore;
 
@@ -633,37 +732,54 @@ export class HealthMonitorService implements IHealthMonitor {
   /**
    * Check thresholds and trigger alerts
    */
-  private async checkThresholds(functionId: string, healthStatus: FunctionHealthStatus): Promise<void> {
+  private async checkThresholds(
+    functionId: string,
+    healthStatus: FunctionHealthStatus,
+  ): Promise<void> {
     try {
       const thresholds = await this.storage.getThresholds(functionId);
 
       for (const threshold of thresholds) {
-        const indicator = healthStatus.indicators.find(i => i.name === threshold.metric);
+        const indicator = healthStatus.indicators.find(
+          (i) => i.name === threshold.metric,
+        );
         if (!indicator) continue;
 
-        const violatesThreshold = this.evaluateThreshold(indicator.value, threshold);
+        const violatesThreshold = this.evaluateThreshold(
+          indicator.value,
+          threshold,
+        );
 
         if (violatesThreshold) {
-          await this.alertingService.sendThresholdViolation(functionId, threshold, indicator.value);
+          await this.alertingService.sendThresholdViolation(
+            functionId,
+            threshold,
+            indicator.value,
+          );
 
-          this.eventEmitter.emit('health.threshold-violated', {
+          this.eventEmitter.emit("health.threshold-violated", {
             functionId,
             metric: threshold.metric,
             value: indicator.value,
             threshold: threshold.warningThreshold,
-            timestamp: new Date()
+            timestamp: new Date(),
           });
         }
       }
     } catch (error) {
-      this.logger.warn(`Failed to check thresholds for function ${functionId}: ${error instanceof Error ? error.message : String(error)}`);
+      this.logger.warn(
+        `Failed to check thresholds for function ${functionId}: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 
   /**
    * Evaluate threshold violation
    */
-  private evaluateThreshold(value: number, threshold: HealthThreshold): boolean {
+  private evaluateThreshold(
+    value: number,
+    threshold: HealthThreshold,
+  ): boolean {
     switch (threshold.operator) {
       case ComparisonOperator._GREATER_THAN:
         return value > threshold.criticalThreshold;
@@ -679,26 +795,38 @@ export class HealthMonitorService implements IHealthMonitor {
   /**
    * Attempt auto-remediation
    */
-  private async attemptAutoRemediation(functionId: string, indicators: HealthIndicator[]): Promise<void> {
-    const unhealthyIndicators = indicators.filter(i => i.status !== HealthStatus._HEALTHY);
+  private async attemptAutoRemediation(
+    functionId: string,
+    indicators: HealthIndicator[],
+  ): Promise<void> {
+    const unhealthyIndicators = indicators.filter(
+      (i) => i.status !== HealthStatus._HEALTHY,
+    );
 
     for (const indicator of unhealthyIndicators) {
       try {
-        const result = await this.remediationService.attemptRemediation(functionId, indicator);
+        const result = await this.remediationService.attemptRemediation(
+          functionId,
+          indicator,
+        );
 
         if (result.success) {
-          this.logger.log(`Auto-remediation successful for ${functionId}: ${result.description}`);
+          this.logger.log(
+            `Auto-remediation successful for ${functionId}: ${result.description}`,
+          );
 
-          this.eventEmitter.emit('health.auto-remediation', {
+          this.eventEmitter.emit("health.auto-remediation", {
             functionId,
             indicator: indicator.name,
             action: result.action,
             success: true,
-            timestamp: new Date()
+            timestamp: new Date(),
           });
         }
       } catch (error) {
-        this.logger.warn(`Auto-remediation failed for ${functionId}.${indicator.name}: ${error instanceof Error ? error.message : String(error)}`);
+        this.logger.warn(
+          `Auto-remediation failed for ${functionId}.${indicator.name}: ${error instanceof Error ? error.message : String(error)}`,
+        );
       }
     }
   }
@@ -706,22 +834,31 @@ export class HealthMonitorService implements IHealthMonitor {
   /**
    * Calculate health summary
    */
-  private calculateHealthSummary(healthStatuses: FunctionHealthStatus[]): HealthSummary {
+  private calculateHealthSummary(
+    healthStatuses: FunctionHealthStatus[],
+  ): HealthSummary {
     const totalFunctions = healthStatuses.length;
-    const healthyFunctions = healthStatuses.filter(h => h.indicators.every(i => i.status === HealthStatus._HEALTHY)).length;
+    const healthyFunctions = healthStatuses.filter((h) =>
+      h.indicators.every((i) => i.status === HealthStatus._HEALTHY),
+    ).length;
     const unhealthyFunctions = totalFunctions - healthyFunctions;
-    const averageHealthScore = totalFunctions > 0
-      ? healthStatuses.reduce((sum, h) => sum + h.score, 0) / totalFunctions
-      : 0;
-    const criticalIssues = healthStatuses.reduce((count, h) =>
-      count + h.indicators.filter(i => i.status === HealthStatus._CRITICAL).length, 0);
+    const averageHealthScore =
+      totalFunctions > 0
+        ? healthStatuses.reduce((sum, h) => sum + h.score, 0) / totalFunctions
+        : 0;
+    const criticalIssues = healthStatuses.reduce(
+      (count, h) =>
+        count +
+        h.indicators.filter((i) => i.status === HealthStatus._CRITICAL).length,
+      0,
+    );
 
     return {
       totalFunctions,
       healthyFunctions,
       unhealthyFunctions,
       averageHealthScore,
-      criticalIssues
+      criticalIssues,
     };
   }
 
@@ -737,10 +874,10 @@ export class HealthMonitorService implements IHealthMonitor {
    */
   private createMonitoringConfiguration(): MonitoringConfiguration {
     return {
-      metrics: ['execution_time', 'error_rate', 'memory_usage', 'cpu_usage'],
+      metrics: ["execution_time", "error_rate", "memory_usage", "cpu_usage"],
       alertingEnabled: this.config.alertingEnabled,
       historicalData: true,
-      realTimeUpdates: true
+      realTimeUpdates: true,
     };
   }
 
@@ -752,7 +889,9 @@ export class HealthMonitorService implements IHealthMonitor {
       try {
         await this.checkHealth(session.functionId);
       } catch (error) {
-        this.logger.warn(`Monitoring loop failed for session ${session.sessionId}: ${error instanceof Error ? error.message : String(error)}`);
+        this.logger.warn(
+          `Monitoring loop failed for session ${session.sessionId}: ${error instanceof Error ? error.message : String(error)}`,
+        );
       }
     }, session.interval);
 
@@ -763,26 +902,33 @@ export class HealthMonitorService implements IHealthMonitor {
   /**
    * Validate thresholds
    */
-  private validateThresholds(thresholds: HealthThreshold[]): { valid: boolean; errors: string[] } {
+  private validateThresholds(thresholds: HealthThreshold[]): {
+    valid: boolean;
+    errors: string[];
+  } {
     const errors: string[] = [];
 
     thresholds.forEach((threshold, index) => {
-      if (!threshold.metric || threshold.metric.trim() === '') {
+      if (!threshold.metric || threshold.metric.trim() === "") {
         errors.push(`Threshold ${index}: metric name is required`);
       }
 
       if (threshold.warningThreshold < 0 || threshold.criticalThreshold < 0) {
-        errors.push(`Threshold ${index}: threshold values must be non-negative`);
+        errors.push(
+          `Threshold ${index}: threshold values must be non-negative`,
+        );
       }
 
       if (threshold.warningThreshold >= threshold.criticalThreshold) {
-        errors.push(`Threshold ${index}: warning threshold must be less than critical threshold`);
+        errors.push(
+          `Threshold ${index}: warning threshold must be less than critical threshold`,
+        );
       }
     });
 
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
@@ -791,18 +937,23 @@ export class HealthMonitorService implements IHealthMonitor {
    */
   private detectThresholdConflicts(
     existingThresholds: HealthThreshold[],
-    newThresholds: HealthThreshold[]
+    newThresholds: HealthThreshold[],
   ): ThresholdConflict[] {
     const conflicts: ThresholdConflict[] = [];
 
-    newThresholds.forEach(newThreshold => {
-      const existing = existingThresholds.find(t => t.metric === newThreshold.metric);
-      if (existing && existing.criticalThreshold !== newThreshold.criticalThreshold) {
+    newThresholds.forEach((newThreshold) => {
+      const existing = existingThresholds.find(
+        (t) => t.metric === newThreshold.metric,
+      );
+      if (
+        existing &&
+        existing.criticalThreshold !== newThreshold.criticalThreshold
+      ) {
         conflicts.push({
           metric: newThreshold.metric,
           existingThreshold: existing.criticalThreshold,
           newThreshold: newThreshold.criticalThreshold,
-          resolution: ConflictResolution._USE_TEMPLATE // Default resolution
+          resolution: ConflictResolution._USE_TEMPLATE, // Default resolution
         });
       }
     });
@@ -815,7 +966,7 @@ export class HealthMonitorService implements IHealthMonitor {
    */
   private async getAllFunctionIds(): Promise<string[]> {
     // This would query the registry for all function IDs
-    return ['func1', 'func2', 'func3']; // Placeholder
+    return ["func1", "func2", "func3"]; // Placeholder
   }
 
   /**
@@ -829,17 +980,19 @@ export class HealthMonitorService implements IHealthMonitor {
   /**
    * Analyze health trends
    */
-  private async analyzeHealthTrends(functionIds: string[]): Promise<InterfaceHealthTrend[]> {
+  private async analyzeHealthTrends(
+    functionIds: string[],
+  ): Promise<InterfaceHealthTrend[]> {
     const trends: InterfaceHealthTrend[] = [];
 
     // This would analyze historical data to identify trends
     // For now, return placeholder trends
 
     trends.push({
-      metric: 'overall_health',
+      metric: "overall_health",
       trend: TrendDirection._STABLE,
       change: 0.02,
-      timeframe: '24h'
+      timeframe: "24h",
     });
 
     return trends;
@@ -848,19 +1001,23 @@ export class HealthMonitorService implements IHealthMonitor {
   /**
    * Generate health recommendations
    */
-  private async generateHealthRecommendations(results: HealthCheckResults): Promise<HealthRecommendation[]> {
+  private async generateHealthRecommendations(
+    results: HealthCheckResults,
+  ): Promise<HealthRecommendation[]> {
     const recommendations: HealthRecommendation[] = [];
 
     // Analyze results and generate recommendations
     for (const [functionId, health] of Array.from(results.results.entries())) {
-      const unhealthyIndicators = health.indicators.filter(i => i.status !== HealthStatus._HEALTHY);
+      const unhealthyIndicators = health.indicators.filter(
+        (i) => i.status !== HealthStatus._HEALTHY,
+      );
 
       for (const indicator of unhealthyIndicators) {
         recommendations.push({
           functionId,
           recommendation: `Address ${indicator.name} issue: ${indicator.description}`,
           priority: this.mapHealthStatusToPriority(indicator.status),
-          estimatedImpact: `Improve ${indicator.name} performance`
+          estimatedImpact: `Improve ${indicator.name} performance`,
         });
       }
     }
@@ -871,7 +1028,9 @@ export class HealthMonitorService implements IHealthMonitor {
   /**
    * Map health status to recommendation priority
    */
-  private mapHealthStatusToPriority(status: HealthStatus): RecommendationPriority {
+  private mapHealthStatusToPriority(
+    status: HealthStatus,
+  ): RecommendationPriority {
     switch (status) {
       case HealthStatus._CRITICAL:
         return RecommendationPriority._URGENT;
@@ -887,12 +1046,16 @@ export class HealthMonitorService implements IHealthMonitor {
   /**
    * Generate health alerts
    */
-  private async generateHealthAlerts(results: HealthCheckResults): Promise<HealthAlert[]> {
+  private async generateHealthAlerts(
+    results: HealthCheckResults,
+  ): Promise<HealthAlert[]> {
     const alerts: HealthAlert[] = [];
 
     // Generate alerts based on health check results
     for (const [functionId, health] of Array.from(results.results.entries())) {
-      const criticalIndicators = health.indicators.filter(i => i.status === HealthStatus._CRITICAL);
+      const criticalIndicators = health.indicators.filter(
+        (i) => i.status === HealthStatus._CRITICAL,
+      );
 
       for (const indicator of criticalIndicators) {
         alerts.push({
@@ -900,7 +1063,7 @@ export class HealthMonitorService implements IHealthMonitor {
           alertType: this.mapIndicatorToAlertType(indicator.name),
           severity: AlertSeverity._CRITICAL,
           message: `Critical health issue in ${functionId}: ${indicator.description}`,
-          timestamp: new Date()
+          timestamp: new Date(),
         });
       }
     }
@@ -912,16 +1075,22 @@ export class HealthMonitorService implements IHealthMonitor {
    * Map indicator name to alert type
    */
   private mapIndicatorToAlertType(indicatorName: string): AlertType {
-    if (indicatorName.includes('performance') || indicatorName.includes('execution_time')) {
+    if (
+      indicatorName.includes("performance") ||
+      indicatorName.includes("execution_time")
+    ) {
       return AlertType._PERFORMANCE_DEGRADATION;
     }
-    if (indicatorName.includes('error') || indicatorName.includes('failure')) {
+    if (indicatorName.includes("error") || indicatorName.includes("failure")) {
       return AlertType._ERROR_RATE_SPIKE;
     }
-    if (indicatorName.includes('availability') || indicatorName.includes('uptime')) {
+    if (
+      indicatorName.includes("availability") ||
+      indicatorName.includes("uptime")
+    ) {
       return AlertType._AVAILABILITY_ISSUE;
     }
-    if (indicatorName.includes('security') || indicatorName.includes('auth')) {
+    if (indicatorName.includes("security") || indicatorName.includes("auth")) {
       return AlertType._SECURITY_CONCERN;
     }
     return AlertType._PERFORMANCE_DEGRADATION; // Default

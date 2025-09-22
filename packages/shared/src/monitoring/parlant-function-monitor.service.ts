@@ -28,14 +28,14 @@ import {
   ParlantWrapperRegistry,
   ParlantExecutionResult,
   FunctionWrapperConfig,
-  WrapperContext
+  WrapperContext,
 } from "../utils/parlant-wrapper.utils";
 import {
   HealthCheckResult,
   MonitoringEvent,
   AlertSeverity,
   PerformanceMetrics,
-  SecurityMetrics
+  SecurityMetrics,
 } from "./types";
 
 /**
@@ -149,7 +149,10 @@ interface IncidentResponse {
 export class ParlantFunctionMonitorService implements OnModuleInit {
   private readonly logger = new Logger(ParlantFunctionMonitorService.name);
 
-  private readonly functionMetrics = new Map<string, FunctionPerformanceMetrics>();
+  private readonly functionMetrics = new Map<
+    string,
+    FunctionPerformanceMetrics
+  >();
   private readonly executionHistory: FunctionExecutionData[] = [];
   private readonly alertingRules: AlertingRule[] = [];
   private readonly activeIncidents = new Map<string, IncidentResponse>();
@@ -197,7 +200,10 @@ export class ParlantFunctionMonitorService implements OnModuleInit {
     this.logger.log("PARLANT Function Monitoring Service initialized", {
       maxHistorySize: this.maxHistorySize,
       alertingRulesCount: this.alertingRules.length,
-      monitoringEnabled: this.config.get<boolean>("PARLANT_MONITORING_ENABLED", true),
+      monitoringEnabled: this.config.get<boolean>(
+        "PARLANT_MONITORING_ENABLED",
+        true,
+      ),
     });
   }
 
@@ -250,11 +256,13 @@ export class ParlantFunctionMonitorService implements OnModuleInit {
 
     // Find execution data by operation ID
     const executionIndex = this.executionHistory.findIndex(
-      (data) => data.operationId === operationId
+      (data) => data.operationId === operationId,
     );
 
     if (executionIndex === -1) {
-      this.logger.warn(`Execution data not found for operation: ${operationId}`);
+      this.logger.warn(
+        `Execution data not found for operation: ${operationId}`,
+      );
       return;
     }
 
@@ -276,7 +284,10 @@ export class ParlantFunctionMonitorService implements OnModuleInit {
 
     // Maintain history size
     if (this.executionHistory.length > this.maxHistorySize) {
-      this.executionHistory.splice(0, this.executionHistory.length - this.maxHistorySize);
+      this.executionHistory.splice(
+        0,
+        this.executionHistory.length - this.maxHistorySize,
+      );
     }
 
     this.logger.debug(`[${operationId}] Function execution completed`, {
@@ -412,16 +423,25 @@ export class ParlantFunctionMonitorService implements OnModuleInit {
     today.setHours(0, 0, 0, 0);
 
     const todayExecutions = this.executionHistory.filter(
-      (exec) => new Date(exec.startTime) >= today
+      (exec) => new Date(exec.startTime) >= today,
     );
 
     const totalExecutions = todayExecutions.length;
-    const successfulExecutions = todayExecutions.filter((exec) => exec.success).length;
-    const averageResponseTime = todayExecutions.length > 0
-      ? todayExecutions.reduce((sum, exec) => sum + (exec.executionTime || 0), 0) / todayExecutions.length
-      : 0;
+    const successfulExecutions = todayExecutions.filter(
+      (exec) => exec.success,
+    ).length;
+    const averageResponseTime =
+      todayExecutions.length > 0
+        ? todayExecutions.reduce(
+            (sum, exec) => sum + (exec.executionTime || 0),
+            0,
+          ) / todayExecutions.length
+        : 0;
 
-    const errorRate = totalExecutions > 0 ? ((totalExecutions - successfulExecutions) / totalExecutions) * 100 : 0;
+    const errorRate =
+      totalExecutions > 0
+        ? ((totalExecutions - successfulExecutions) / totalExecutions) * 100
+        : 0;
     const uptimePercentage = this.calculateUptimePercentage();
 
     const alertStatus = this.alertingRules.map((rule) => ({
@@ -469,7 +489,6 @@ export class ParlantFunctionMonitorService implements OnModuleInit {
 
       // Check for anomalies
       await this.detectAnomalies();
-
     } catch (error) {
       this.logger.error("Performance monitoring cycle failed", {
         error: error instanceof Error ? error.message : String(error),
@@ -521,7 +540,7 @@ export class ParlantFunctionMonitorService implements OnModuleInit {
         data.operationId,
         data.success,
         data.validationApproved,
-        data.errorMessage
+        data.errorMessage,
       );
     });
 
@@ -587,7 +606,7 @@ export class ParlantFunctionMonitorService implements OnModuleInit {
         severity: "high",
         enabled: true,
         cooldownMinutes: 30,
-      }
+      },
     );
 
     this.logger.log(`Initialized ${this.alertingRules.length} alerting rules`);
@@ -628,11 +647,11 @@ export class ParlantFunctionMonitorService implements OnModuleInit {
     this.metricsService.registerCounter(
       `parlant_function_executions_total`,
       "Total function executions",
-      { function_id: functionId }
+      { function_id: functionId },
     );
     this.metricsService.registerHistogram(
       `parlant_function_duration_seconds`,
-      "Function execution duration"
+      "Function execution duration",
     );
   }
 
@@ -648,7 +667,8 @@ export class ParlantFunctionMonitorService implements OnModuleInit {
     metrics.lastExecuted = new Date();
 
     // Update execution times
-    const executionTimes = this.executionTimes.get(executionData.functionId) || [];
+    const executionTimes =
+      this.executionTimes.get(executionData.functionId) || [];
     executionTimes.push(executionData.executionTime);
 
     // Maintain history size
@@ -664,8 +684,14 @@ export class ParlantFunctionMonitorService implements OnModuleInit {
     metrics.p99ExecutionTime = this.calculatePercentile(sortedTimes, 99);
 
     // Update min/max
-    metrics.minExecutionTime = Math.min(metrics.minExecutionTime, executionData.executionTime);
-    metrics.maxExecutionTime = Math.max(metrics.maxExecutionTime, executionData.executionTime);
+    metrics.minExecutionTime = Math.min(
+      metrics.minExecutionTime,
+      executionData.executionTime,
+    );
+    metrics.maxExecutionTime = Math.max(
+      metrics.maxExecutionTime,
+      executionData.executionTime,
+    );
 
     // Update average
     const sum = executionTimes.reduce((a, b) => a + b, 0);
@@ -681,13 +707,18 @@ export class ParlantFunctionMonitorService implements OnModuleInit {
 
     metrics.errorRate = (metrics.totalErrors / metrics.executionCount) * 100;
     metrics.successRate = 100 - metrics.errorRate;
-    metrics.validationApprovalRate = ((metrics.executionCount - metrics.totalValidationRejections) / metrics.executionCount) * 100;
+    metrics.validationApprovalRate =
+      ((metrics.executionCount - metrics.totalValidationRejections) /
+        metrics.executionCount) *
+      100;
   }
 
   /**
    * Check performance thresholds
    */
-  private checkPerformanceThresholds(executionData: FunctionExecutionData): void {
+  private checkPerformanceThresholds(
+    executionData: FunctionExecutionData,
+  ): void {
     if (!executionData.executionTime) return;
 
     // Check sub-1000ms requirement
@@ -701,7 +732,11 @@ export class ParlantFunctionMonitorService implements OnModuleInit {
 
     // Check if function is consistently slow
     const metrics = this.functionMetrics.get(executionData.functionId);
-    if (metrics && metrics.averageExecutionTime > 500 && metrics.executionCount > 10) {
+    if (
+      metrics &&
+      metrics.averageExecutionTime > 500 &&
+      metrics.executionCount > 10
+    ) {
       this.triggerAlert("consistently_slow_function", {
         functionId: executionData.functionId,
         averageExecutionTime: metrics.averageExecutionTime,
@@ -720,15 +755,15 @@ export class ParlantFunctionMonitorService implements OnModuleInit {
       {
         function_id: executionData.functionId,
         success: executionData.success.toString(),
-        security_level: executionData.securityLevel
-      }
+        security_level: executionData.securityLevel,
+      },
     );
 
     // Record execution duration
     if (executionData.executionTime) {
       this.metricsService.observeHistogram(
         "parlant_function_duration_seconds",
-        executionData.executionTime / 1000
+        executionData.executionTime / 1000,
       );
     }
   }
@@ -781,13 +816,20 @@ export class ParlantFunctionMonitorService implements OnModuleInit {
   private isAlertTriggered(rule: AlertingRule): boolean {
     const value = this.getMetricValue(rule.metric);
     switch (rule.operator) {
-      case ">": return value > rule.threshold;
-      case "<": return value < rule.threshold;
-      case ">=": return value >= rule.threshold;
-      case "<=": return value <= rule.threshold;
-      case "==": return value === rule.threshold;
-      case "!=": return value !== rule.threshold;
-      default: return false;
+      case ">":
+        return value > rule.threshold;
+      case "<":
+        return value < rule.threshold;
+      case ">=":
+        return value >= rule.threshold;
+      case "<=":
+        return value <= rule.threshold;
+      case "==":
+        return value === rule.threshold;
+      case "!=":
+        return value !== rule.threshold;
+      default:
+        return false;
     }
   }
 
@@ -796,7 +838,10 @@ export class ParlantFunctionMonitorService implements OnModuleInit {
     return 0;
   }
 
-  private calculatePercentile(sortedArray: number[], percentile: number): number {
+  private calculatePercentile(
+    sortedArray: number[],
+    percentile: number,
+  ): number {
     const index = (percentile / 100) * (sortedArray.length - 1);
     const lower = Math.floor(index);
     const upper = Math.ceil(index);
@@ -825,7 +870,11 @@ export class ParlantFunctionMonitorService implements OnModuleInit {
     this.logger.warn(`Incident response triggered for: ${incident.incidentId}`);
   }
 
-  private recordSecurityEvent(eventType: string, severity: string, data: any): void {
+  private recordSecurityEvent(
+    eventType: string,
+    severity: string,
+    data: any,
+  ): void {
     this.logger.warn(`Security event: ${eventType}`, { severity, data });
   }
 

@@ -37,7 +37,6 @@ import {
   ApiBody,
   ApiBearerAuth,
   ApiHeader,
-  ApiQuery,
 } from '@nestjs/swagger';
 import {
   RateLimitGuard,

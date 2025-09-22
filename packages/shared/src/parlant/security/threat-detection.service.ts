@@ -171,7 +171,16 @@ export interface PatternCondition {
   /** Condition field */
   field: string;
   /** Condition operator */
-  operator: "equals" | "not_equals" | "contains" | "not_contains" | "greater_than" | "less_than" | "regex" | "in" | "not_in";
+  operator:
+    | "equals"
+    | "not_equals"
+    | "contains"
+    | "not_contains"
+    | "greater_than"
+    | "less_than"
+    | "regex"
+    | "in"
+    | "not_in";
   /** Condition value */
   value: unknown;
   /** Condition weight */
@@ -662,10 +671,15 @@ export class ParlantThreatDetectionService
       await this.startPeriodicTasks();
       await this.validateDetectionConfig();
 
-      this.logger.log("✅ Advanced Threat Detection Service initialized successfully");
+      this.logger.log(
+        "✅ Advanced Threat Detection Service initialized successfully",
+      );
       this.emit("threat:service:initialized");
     } catch (error) {
-      this.logger.error("❌ Failed to initialize Threat Detection Service", error);
+      this.logger.error(
+        "❌ Failed to initialize Threat Detection Service",
+        error,
+      );
       throw new ParlantIntegrationError(
         "Threat Detection Service initialization failed",
         "THREAT_SERVICE_INIT_ERROR",
@@ -690,7 +704,9 @@ export class ParlantThreatDetectionService
   /**
    * Analyze security event for threats
    */
-  async analyzeSecurityEvent(event: SecurityEvent): Promise<ThreatDetectionResult> {
+  async analyzeSecurityEvent(
+    event: SecurityEvent,
+  ): Promise<ThreatDetectionResult> {
     const startTime = performance.now();
 
     try {
@@ -727,7 +743,10 @@ export class ParlantThreatDetectionService
       const overallRiskScore = this.calculateOverallRiskScore(threats);
 
       // Determine recommended actions
-      const recommendedActions = await this.determineRecommendedActions(threats, overallRiskScore);
+      const recommendedActions = await this.determineRecommendedActions(
+        threats,
+        overallRiskScore,
+      );
 
       // Build detection result
       const result: ThreatDetectionResult = {
@@ -748,7 +767,10 @@ export class ParlantThreatDetectionService
       this.detectionCache.set(cacheKey, result);
 
       // Execute automated response if enabled
-      if (this.detectionConfig.enableAutomatedResponse && overallRiskScore > this.detectionConfig.threatScoreThreshold) {
+      if (
+        this.detectionConfig.enableAutomatedResponse &&
+        overallRiskScore > this.detectionConfig.threatScoreThreshold
+      ) {
         await this.executeAutomatedResponse(result, event);
       }
 
@@ -764,7 +786,7 @@ export class ParlantThreatDetectionService
       });
 
       this.logger.debug(
-        `🚨 Threat analysis completed: ${event.eventId} - ${threats.length} threats, risk: ${overallRiskScore.toFixed(2)} (${(performance.now() - startTime).toFixed(2)}ms)`
+        `🚨 Threat analysis completed: ${event.eventId} - ${threats.length} threats, risk: ${overallRiskScore.toFixed(2)} (${(performance.now() - startTime).toFixed(2)}ms)`,
       );
 
       return result;
@@ -784,7 +806,10 @@ export class ParlantThreatDetectionService
   /**
    * Update behavioral profile for user
    */
-  async updateBehavioralProfile(userId: string, activity: ActivityPattern): Promise<void> {
+  async updateBehavioralProfile(
+    userId: string,
+    activity: ActivityPattern,
+  ): Promise<void> {
     try {
       let profile = this.behavioralProfiles.get(userId);
 
@@ -848,7 +873,9 @@ export class ParlantThreatDetectionService
         metadata: {
           automated,
           confidence: 0.9,
-          humanReviewRequired: executedActions.some(a => a.status === "failure"),
+          humanReviewRequired: executedActions.some(
+            (a) => a.status === "failure",
+          ),
           escalationLevel: "tier1",
           context: {
             responseTime: performance.now() - startTime,
@@ -883,7 +910,7 @@ export class ParlantThreatDetectionService
       });
 
       this.logger.debug(
-        `🚨 Incident response executed: ${responseId} for threat ${threatId} - ${actions.length} actions (${(performance.now() - startTime).toFixed(2)}ms)`
+        `🚨 Incident response executed: ${responseId} for threat ${threatId} - ${actions.length} actions (${(performance.now() - startTime).toFixed(2)}ms)`,
       );
 
       return response;
@@ -932,7 +959,9 @@ export class ParlantThreatDetectionService
 
     // Maintain event window
     const cutoffTime = Date.now() - this.eventWindow;
-    const filteredEvents = userEvents.filter(e => e.timestamp.getTime() > cutoffTime);
+    const filteredEvents = userEvents.filter(
+      (e) => e.timestamp.getTime() > cutoffTime,
+    );
 
     // Limit events per user
     if (filteredEvents.length > this.maxEventsPerUser) {
@@ -952,14 +981,19 @@ export class ParlantThreatDetectionService
       timestamp: Math.floor(event.timestamp.getTime() / 60000), // 1-minute buckets
     };
 
-    return crypto.createHash("sha256").update(JSON.stringify(keyData)).digest("hex");
+    return crypto
+      .createHash("sha256")
+      .update(JSON.stringify(keyData))
+      .digest("hex");
   }
 
   private isCacheValid(result: ThreatDetectionResult): boolean {
     return Date.now() - result.timestamp.getTime() < this.cacheTTL;
   }
 
-  private async matchThreatPatterns(event: SecurityEvent): Promise<DetectedThreat[]> {
+  private async matchThreatPatterns(
+    event: SecurityEvent,
+  ): Promise<DetectedThreat[]> {
     const detectedThreats: DetectedThreat[] = [];
 
     for (const pattern of this.threatPatterns.values()) {
@@ -1004,13 +1038,21 @@ export class ParlantThreatDetectionService
   private async evaluatePattern(
     pattern: ThreatPattern,
     event: SecurityEvent,
-  ): Promise<{ matched: boolean; confidence: number; score: number; evidence: Record<string, unknown> }> {
+  ): Promise<{
+    matched: boolean;
+    confidence: number;
+    score: number;
+    evidence: Record<string, unknown>;
+  }> {
     let totalScore = 0;
     let maxScore = 0;
     const evidence: Record<string, unknown> = {};
 
     for (const condition of pattern.conditions) {
-      const conditionResult = await this.evaluatePatternCondition(condition, event);
+      const conditionResult = await this.evaluatePatternCondition(
+        condition,
+        event,
+      );
       const weightedScore = conditionResult.score * condition.weight;
 
       totalScore += weightedScore;
@@ -1022,7 +1064,10 @@ export class ParlantThreatDetectionService
     }
 
     const normalizedScore = maxScore > 0 ? totalScore / maxScore : 0;
-    const finalScore = Math.min(normalizedScore * pattern.scoring.baseScore, pattern.scoring.maxScore);
+    const finalScore = Math.min(
+      normalizedScore * pattern.scoring.baseScore,
+      pattern.scoring.maxScore,
+    );
     const matched = finalScore >= pattern.scoring.threshold;
     const confidence = matched ? Math.min(normalizedScore, 1.0) : 0;
 
@@ -1039,7 +1084,11 @@ export class ParlantThreatDetectionService
       return { matched: false, score: 0, value: null };
     }
 
-    const matched = this.evaluateConditionOperator(condition.operator, fieldValue, condition.value);
+    const matched = this.evaluateConditionOperator(
+      condition.operator,
+      fieldValue,
+      condition.value,
+    );
     const score = matched ? 1.0 : 0.0;
 
     return { matched, score, value: fieldValue };
@@ -1060,7 +1109,11 @@ export class ParlantThreatDetectionService
     return value;
   }
 
-  private evaluateConditionOperator(operator: string, fieldValue: unknown, conditionValue: unknown): boolean {
+  private evaluateConditionOperator(
+    operator: string,
+    fieldValue: unknown,
+    conditionValue: unknown,
+  ): boolean {
     switch (operator) {
       case "equals":
         return fieldValue === conditionValue;
@@ -1078,15 +1131,22 @@ export class ParlantThreatDetectionService
         const regex = new RegExp(String(conditionValue));
         return regex.test(String(fieldValue));
       case "in":
-        return Array.isArray(conditionValue) && conditionValue.includes(fieldValue);
+        return (
+          Array.isArray(conditionValue) && conditionValue.includes(fieldValue)
+        );
       case "not_in":
-        return Array.isArray(conditionValue) && !conditionValue.includes(fieldValue);
+        return (
+          Array.isArray(conditionValue) && !conditionValue.includes(fieldValue)
+        );
       default:
         return false;
     }
   }
 
-  private extractIndicators(event: SecurityEvent, pattern: ThreatPattern): ThreatIndicator[] {
+  private extractIndicators(
+    event: SecurityEvent,
+    pattern: ThreatPattern,
+  ): ThreatIndicator[] {
     const indicators: ThreatIndicator[] = [];
 
     // Extract relevant indicators based on the pattern
@@ -1115,7 +1175,10 @@ export class ParlantThreatDetectionService
     return indicators;
   }
 
-  private extractEvidence(event: SecurityEvent, matchResult: any): ThreatEvidence[] {
+  private extractEvidence(
+    event: SecurityEvent,
+    matchResult: any,
+  ): ThreatEvidence[] {
     const evidence: ThreatEvidence[] = [];
 
     for (const [field, value] of Object.entries(matchResult.evidence)) {
@@ -1131,7 +1194,9 @@ export class ParlantThreatDetectionService
     return evidence;
   }
 
-  private async performBehavioralAnalysis(event: SecurityEvent): Promise<DetectedThreat[]> {
+  private async performBehavioralAnalysis(
+    event: SecurityEvent,
+  ): Promise<DetectedThreat[]> {
     const threats: DetectedThreat[] = [];
 
     if (!event.userContext?.userId) {
@@ -1173,8 +1238,20 @@ export class ParlantThreatDetectionService
   private async analyzeBehavioralDeviations(
     profile: BehavioralProfile,
     event: SecurityEvent,
-  ): Promise<Array<{ score: number; confidence: number; description: string; evidence: ThreatEvidence[] }>> {
-    const deviations: Array<{ score: number; confidence: number; description: string; evidence: ThreatEvidence[] }> = [];
+  ): Promise<
+    Array<{
+      score: number;
+      confidence: number;
+      description: string;
+      evidence: ThreatEvidence[];
+    }>
+  > {
+    const deviations: Array<{
+      score: number;
+      confidence: number;
+      description: string;
+      evidence: ThreatEvidence[];
+    }> = [];
 
     // Time-based deviation analysis
     const timeDeviation = this.analyzeTimeDeviation(profile, event);
@@ -1204,14 +1281,21 @@ export class ParlantThreatDetectionService
   private analyzeTimeDeviation(
     profile: BehavioralProfile,
     event: SecurityEvent,
-  ): { score: number; confidence: number; description: string; evidence: ThreatEvidence[] } {
+  ): {
+    score: number;
+    confidence: number;
+    description: string;
+    evidence: ThreatEvidence[];
+  } {
     const eventTime = event.timestamp;
     const dayOfWeek = eventTime.getDay();
     const hourOfDay = eventTime.getHours();
 
     // Find matching time patterns
     const matchingPatterns = profile.baseline.loginTimes.filter(
-      pattern => pattern.dayOfWeek === dayOfWeek && Math.abs(pattern.hourOfDay - hourOfDay) <= 1
+      (pattern) =>
+        pattern.dayOfWeek === dayOfWeek &&
+        Math.abs(pattern.hourOfDay - hourOfDay) <= 1,
     );
 
     if (matchingPatterns.length === 0) {
@@ -1219,13 +1303,15 @@ export class ParlantThreatDetectionService
         score: 0.7,
         confidence: 0.8,
         description: "Unusual login time detected",
-        evidence: [{
-          type: "time_deviation",
-          value: { dayOfWeek, hourOfDay },
-          source: "behavioral_analysis",
-          timestamp: eventTime,
-          confidence: 0.8,
-        }],
+        evidence: [
+          {
+            type: "time_deviation",
+            value: { dayOfWeek, hourOfDay },
+            source: "behavioral_analysis",
+            timestamp: eventTime,
+            confidence: 0.8,
+          },
+        ],
       };
     }
 
@@ -1235,12 +1321,19 @@ export class ParlantThreatDetectionService
   private analyzeLocationDeviation(
     profile: BehavioralProfile,
     event: SecurityEvent,
-  ): { score: number; confidence: number; description: string; evidence: ThreatEvidence[] } {
+  ): {
+    score: number;
+    confidence: number;
+    description: string;
+    evidence: ThreatEvidence[];
+  } {
     const eventLocation = event.metadata.geolocation!;
 
     // Check against known locations
     const knownLocation = profile.baseline.locations.some(
-      loc => loc.country === eventLocation.country && loc.region === eventLocation.region
+      (loc) =>
+        loc.country === eventLocation.country &&
+        loc.region === eventLocation.region,
     );
 
     if (!knownLocation) {
@@ -1248,13 +1341,15 @@ export class ParlantThreatDetectionService
         score: 0.8,
         confidence: 0.9,
         description: "Login from unusual location",
-        evidence: [{
-          type: "location_deviation",
-          value: eventLocation,
-          source: "behavioral_analysis",
-          timestamp: event.timestamp,
-          confidence: 0.9,
-        }],
+        evidence: [
+          {
+            type: "location_deviation",
+            value: eventLocation,
+            source: "behavioral_analysis",
+            timestamp: event.timestamp,
+            confidence: 0.9,
+          },
+        ],
       };
     }
 
@@ -1264,12 +1359,17 @@ export class ParlantThreatDetectionService
   private analyzeDeviceDeviation(
     profile: BehavioralProfile,
     event: SecurityEvent,
-  ): { score: number; confidence: number; description: string; evidence: ThreatEvidence[] } {
+  ): {
+    score: number;
+    confidence: number;
+    description: string;
+    evidence: ThreatEvidence[];
+  } {
     const deviceFingerprint = event.metadata.deviceFingerprint!;
 
     // Check against known devices
     const knownDevice = profile.baseline.devices.some(
-      device => device.fingerprint === deviceFingerprint
+      (device) => device.fingerprint === deviceFingerprint,
     );
 
     if (!knownDevice) {
@@ -1277,20 +1377,24 @@ export class ParlantThreatDetectionService
         score: 0.6,
         confidence: 0.7,
         description: "Login from unknown device",
-        evidence: [{
-          type: "device_deviation",
-          value: { fingerprint: deviceFingerprint },
-          source: "behavioral_analysis",
-          timestamp: event.timestamp,
-          confidence: 0.7,
-        }],
+        evidence: [
+          {
+            type: "device_deviation",
+            value: { fingerprint: deviceFingerprint },
+            source: "behavioral_analysis",
+            timestamp: event.timestamp,
+            confidence: 0.7,
+          },
+        ],
       };
     }
 
     return { score: 0, confidence: 0, description: "", evidence: [] };
   }
 
-  private async performAnomalyDetection(event: SecurityEvent): Promise<DetectedThreat[]> {
+  private async performAnomalyDetection(
+    event: SecurityEvent,
+  ): Promise<DetectedThreat[]> {
     // Placeholder for advanced ML-based anomaly detection
     // This would integrate with machine learning models
     return [];
@@ -1313,15 +1417,17 @@ export class ParlantThreatDetectionService
     // Calculate weighted average of threat scores
     const totalWeightedScore = threats.reduce((sum, threat) => {
       const severityWeight = this.getSeverityWeight(threat.severity);
-      return sum + (threat.score * threat.confidence * severityWeight);
+      return sum + threat.score * threat.confidence * severityWeight;
     }, 0);
 
     const totalWeight = threats.reduce((sum, threat) => {
       const severityWeight = this.getSeverityWeight(threat.severity);
-      return sum + (threat.confidence * severityWeight);
+      return sum + threat.confidence * severityWeight;
     }, 0);
 
-    return totalWeight > 0 ? Math.min(totalWeightedScore / totalWeight, 1.0) : 0;
+    return totalWeight > 0
+      ? Math.min(totalWeightedScore / totalWeight, 1.0)
+      : 0;
   }
 
   private getSeverityWeight(severity: ThreatSeverity): number {
@@ -1347,7 +1453,7 @@ export class ParlantThreatDetectionService
 
     // Add actions based on threat severity
     for (const threat of threats) {
-      threat.recommendedResponse.forEach(action => actions.add(action));
+      threat.recommendedResponse.forEach((action) => actions.add(action));
     }
 
     // Add risk-based actions
@@ -1361,7 +1467,10 @@ export class ParlantThreatDetectionService
       actions.add("notify_admin");
     }
 
-    return Array.from(actions).slice(0, this.detectionConfig.maxResponseActions);
+    return Array.from(actions).slice(
+      0,
+      this.detectionConfig.maxResponseActions,
+    );
   }
 
   private mapScoreToSeverity(score: number): ThreatSeverity {
@@ -1381,11 +1490,14 @@ export class ParlantThreatDetectionService
     }
   }
 
-  private async executeAutomatedResponse(result: ThreatDetectionResult, event: SecurityEvent): Promise<void> {
+  private async executeAutomatedResponse(
+    result: ThreatDetectionResult,
+    event: SecurityEvent,
+  ): Promise<void> {
     try {
       if (result.recommendedActions.length > 0) {
         const highestThreat = result.threats.reduce((max, threat) =>
-          threat.score > max.score ? threat : max
+          threat.score > max.score ? threat : max,
         );
 
         await this.executeIncidentResponse(
@@ -1430,7 +1542,10 @@ export class ParlantThreatDetectionService
     }
   }
 
-  private async performResponseAction(action: ResponseAction, threatId: string): Promise<void> {
+  private async performResponseAction(
+    action: ResponseAction,
+    threatId: string,
+  ): Promise<void> {
     switch (action) {
       case "block_user":
         // Implement user blocking logic
@@ -1457,9 +1572,11 @@ export class ParlantThreatDetectionService
     }
   }
 
-  private determineResponseStatus(actions: ExecutedAction[]): "initiated" | "in_progress" | "completed" | "failed" {
-    const successCount = actions.filter(a => a.status === "success").length;
-    const failureCount = actions.filter(a => a.status === "failure").length;
+  private determineResponseStatus(
+    actions: ExecutedAction[],
+  ): "initiated" | "in_progress" | "completed" | "failed" {
+    const successCount = actions.filter((a) => a.status === "success").length;
+    const failureCount = actions.filter((a) => a.status === "failure").length;
 
     if (failureCount === actions.length) {
       return "failed";
@@ -1470,7 +1587,9 @@ export class ParlantThreatDetectionService
     }
   }
 
-  private async createNewBehavioralProfile(userId: string): Promise<BehavioralProfile> {
+  private async createNewBehavioralProfile(
+    userId: string,
+  ): Promise<BehavioralProfile> {
     return {
       userId,
       createdAt: new Date(),
@@ -1489,7 +1608,10 @@ export class ParlantThreatDetectionService
     };
   }
 
-  private async updateProfileWithActivity(profile: BehavioralProfile, activity: ActivityPattern): Promise<void> {
+  private async updateProfileWithActivity(
+    profile: BehavioralProfile,
+    activity: ActivityPattern,
+  ): Promise<void> {
     // Add to recent activities
     profile.recentActivities.push(activity);
 
@@ -1499,7 +1621,9 @@ export class ParlantThreatDetectionService
     }
 
     // Update baseline patterns (simplified)
-    const existingActivity = profile.baseline.activities.find(a => a.activityType === activity.activityType);
+    const existingActivity = profile.baseline.activities.find(
+      (a) => a.activityType === activity.activityType,
+    );
     if (existingActivity) {
       existingActivity.frequency++;
       existingActivity.lastOccurrence = activity.lastOccurrence;
@@ -1515,7 +1639,10 @@ export class ParlantThreatDetectionService
     const anomalies: AnomalyIndicator[] = [];
 
     // Check for unusual activity frequency
-    const expectedFrequency = this.calculateExpectedFrequency(profile, activity);
+    const expectedFrequency = this.calculateExpectedFrequency(
+      profile,
+      activity,
+    );
     if (activity.frequency > expectedFrequency * 3) {
       anomalies.push({
         type: "high_frequency_activity",
@@ -1529,16 +1656,27 @@ export class ParlantThreatDetectionService
     return anomalies;
   }
 
-  private calculateExpectedFrequency(profile: BehavioralProfile, activity: ActivityPattern): number {
-    const baselineActivity = profile.baseline.activities.find(a => a.activityType === activity.activityType);
+  private calculateExpectedFrequency(
+    profile: BehavioralProfile,
+    activity: ActivityPattern,
+  ): number {
+    const baselineActivity = profile.baseline.activities.find(
+      (a) => a.activityType === activity.activityType,
+    );
     return baselineActivity ? baselineActivity.frequency : 1;
   }
 
   private calculateTotalEvents(): number {
-    return Array.from(this.recentEvents.values()).reduce((total, events) => total + events.length, 0);
+    return Array.from(this.recentEvents.values()).reduce(
+      (total, events) => total + events.length,
+      0,
+    );
   }
 
-  private updateDetectionMetrics(result: ThreatDetectionResult, detectionTime: number): void {
+  private updateDetectionMetrics(
+    result: ThreatDetectionResult,
+    detectionTime: number,
+  ): void {
     this.metrics.threatsDetected += result.threats.length;
     this.metrics.averageDetectionTime = this.updateAverage(
       this.metrics.averageDetectionTime,
@@ -1547,7 +1685,11 @@ export class ParlantThreatDetectionService
     );
   }
 
-  private updateAverage(currentAverage: number, newValue: number, count: number): number {
+  private updateAverage(
+    currentAverage: number,
+    newValue: number,
+    count: number,
+  ): number {
     return (currentAverage * (count - 1) + newValue) / count;
   }
 
@@ -1631,19 +1773,28 @@ export class ParlantThreatDetectionService
 
   private async startPeriodicTasks(): Promise<void> {
     // Event cleanup every 10 minutes
-    this.eventCleanupTimer = setInterval(() => {
-      this.performEventCleanup();
-    }, 10 * 60 * 1000);
+    this.eventCleanupTimer = setInterval(
+      () => {
+        this.performEventCleanup();
+      },
+      10 * 60 * 1000,
+    );
 
     // Cache cleanup every 5 minutes
-    this.cacheCleanupTimer = setInterval(() => {
-      this.performCacheCleanup();
-    }, 5 * 60 * 1000);
+    this.cacheCleanupTimer = setInterval(
+      () => {
+        this.performCacheCleanup();
+      },
+      5 * 60 * 1000,
+    );
 
     // Profile update every hour
-    this.profileUpdateTimer = setInterval(() => {
-      this.performProfileMaintenance();
-    }, 60 * 60 * 1000);
+    this.profileUpdateTimer = setInterval(
+      () => {
+        this.performProfileMaintenance();
+      },
+      60 * 60 * 1000,
+    );
 
     // Metrics update every minute
     this.metricsTimer = setInterval(() => {
@@ -1678,7 +1829,9 @@ export class ParlantThreatDetectionService
     let cleanedCount = 0;
 
     for (const [userId, events] of this.recentEvents.entries()) {
-      const filteredEvents = events.filter(e => e.timestamp.getTime() > cutoffTime);
+      const filteredEvents = events.filter(
+        (e) => e.timestamp.getTime() > cutoffTime,
+      );
 
       if (filteredEvents.length !== events.length) {
         cleanedCount += events.length - filteredEvents.length;
@@ -1707,7 +1860,9 @@ export class ParlantThreatDetectionService
     }
 
     if (cleanedCount > 0) {
-      this.logger.debug(`🧹 Cleaned up ${cleanedCount} expired detection cache entries`);
+      this.logger.debug(
+        `🧹 Cleaned up ${cleanedCount} expired detection cache entries`,
+      );
     }
   }
 
@@ -1718,7 +1873,7 @@ export class ParlantThreatDetectionService
     for (const profile of this.behavioralProfiles.values()) {
       const originalAnomalies = profile.anomalyIndicators.length;
       profile.anomalyIndicators = profile.anomalyIndicators.filter(
-        indicator => indicator.detectedAt > cutoffTime
+        (indicator) => indicator.detectedAt > cutoffTime,
       );
 
       if (profile.anomalyIndicators.length !== originalAnomalies) {

@@ -109,7 +109,7 @@ export class CircuitBreakerGuard implements CanActivate {
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest();
+    const _request = context.switchToHttp().getRequest();
     const handler = context.getHandler();
     const controller = context.getClass();
 

@@ -39,7 +39,7 @@ export enum IncidentStatus {
   MONITORING = "MONITORING",
   RESOLVED = "RESOLVED",
   CLOSED = "CLOSED",
-  CANCELLED = "CANCELLED"
+  CANCELLED = "CANCELLED",
 }
 
 /**
@@ -56,7 +56,12 @@ export enum IncidentPriority {
  * Incident classification
  */
 export interface IncidentClassification {
-  category: "performance" | "availability" | "security" | "capacity" | "functional";
+  category:
+    | "performance"
+    | "availability"
+    | "security"
+    | "capacity"
+    | "functional";
   subcategory: string;
   component: string;
   service: string;
@@ -72,7 +77,13 @@ export interface RemediationAction {
   id: string;
   name: string;
   description: string;
-  type: "restart" | "scale" | "failover" | "rollback" | "config_change" | "custom";
+  type:
+    | "restart"
+    | "scale"
+    | "failover"
+    | "rollback"
+    | "config_change"
+    | "custom";
   enabled: boolean;
   autoExecute: boolean;
   conditions: {
@@ -120,7 +131,12 @@ export interface IncidentWorkflow {
 export interface WorkflowStep {
   stepNumber: number;
   name: string;
-  type: "notification" | "remediation" | "investigation" | "escalation" | "approval";
+  type:
+    | "notification"
+    | "remediation"
+    | "investigation"
+    | "escalation"
+    | "approval";
   enabled: boolean;
   parallel: boolean;
   timeout: number;
@@ -192,7 +208,14 @@ export interface Incident {
  */
 export interface IncidentTimelineEntry {
   timestamp: Date;
-  type: "created" | "updated" | "assigned" | "escalated" | "action_executed" | "status_changed" | "note_added";
+  type:
+    | "created"
+    | "updated"
+    | "assigned"
+    | "escalated"
+    | "action_executed"
+    | "status_changed"
+    | "note_added";
   actor: string;
   action: string;
   details: string;
@@ -282,8 +305,14 @@ export class IncidentResponseService implements OnModuleInit {
     await this.startAutomatedRemediation();
 
     // Set up alert listeners
-    this.eventEmitter.on("alerting.alert_triggered", this.handleAlertTriggered.bind(this));
-    this.eventEmitter.on("alerting.alert_resolved", this.handleAlertResolved.bind(this));
+    this.eventEmitter.on(
+      "alerting.alert_triggered",
+      this.handleAlertTriggered.bind(this),
+    );
+    this.eventEmitter.on(
+      "alerting.alert_resolved",
+      this.handleAlertResolved.bind(this),
+    );
 
     this.logger.log("Automated Incident Response Service initialized", {
       remediationActions: this.remediationActions.size,
@@ -315,7 +344,10 @@ export class IncidentResponseService implements OnModuleInit {
     );
 
     // Determine priority from severity and impact
-    const priority = this.determinePriority(severity, finalClassification.impactLevel);
+    const priority = this.determinePriority(
+      severity,
+      finalClassification.impactLevel,
+    );
 
     const incident: Incident = {
       id: incidentId,
@@ -497,23 +529,26 @@ export class IncidentResponseService implements OnModuleInit {
 
     if (filters) {
       if (filters.priority) {
-        incidents = incidents.filter(i => i.priority === filters.priority);
+        incidents = incidents.filter((i) => i.priority === filters.priority);
       }
       if (filters.severity) {
-        incidents = incidents.filter(i => i.severity === filters.severity);
+        incidents = incidents.filter((i) => i.severity === filters.severity);
       }
       if (filters.status) {
-        incidents = incidents.filter(i => i.status === filters.status);
+        incidents = incidents.filter((i) => i.status === filters.status);
       }
       if (filters.assignedTo) {
-        incidents = incidents.filter(i => i.assignedTo === filters.assignedTo);
+        incidents = incidents.filter(
+          (i) => i.assignedTo === filters.assignedTo,
+        );
       }
     }
 
     return incidents.sort((a, b) => {
       // Sort by priority first, then by creation time
       const priorityOrder = { P1: 4, P2: 3, P3: 2, P4: 1 };
-      const priorityDiff = priorityOrder[b.priority] - priorityOrder[a.priority];
+      const priorityDiff =
+        priorityOrder[b.priority] - priorityOrder[a.priority];
       if (priorityDiff !== 0) return priorityDiff;
       return b.createdAt.getTime() - a.createdAt.getTime();
     });
@@ -535,15 +570,23 @@ export class IncidentResponseService implements OnModuleInit {
     const recentIncidents = [
       ...Array.from(this.activeIncidents.values()),
       ...this.incidentHistory,
-    ].filter(incident => incident.createdAt >= cutoffTime);
+    ].filter((incident) => incident.createdAt >= cutoffTime);
 
     const incidentsByPriority: Record<IncidentPriority, number> = {
-      P1: 0, P2: 0, P3: 0, P4: 0,
+      P1: 0,
+      P2: 0,
+      P3: 0,
+      P4: 0,
     };
 
     const incidentsByStatus: Record<IncidentStatus, number> = {
-      OPEN: 0, INVESTIGATING: 0, IDENTIFIED: 0, MONITORING: 0,
-      RESOLVED: 0, CLOSED: 0, CANCELLED: 0,
+      OPEN: 0,
+      INVESTIGATING: 0,
+      IDENTIFIED: 0,
+      MONITORING: 0,
+      RESOLVED: 0,
+      CLOSED: 0,
+      CANCELLED: 0,
     };
 
     let totalResolutionTime = 0;
@@ -559,7 +602,8 @@ export class IncidentResponseService implements OnModuleInit {
 
       if (incident.resolvedAt) {
         resolvedIncidents++;
-        totalResolutionTime += incident.resolvedAt.getTime() - incident.createdAt.getTime();
+        totalResolutionTime +=
+          incident.resolvedAt.getTime() - incident.createdAt.getTime();
       }
 
       if (incident.metrics.escalationCount > 0) {
@@ -567,9 +611,13 @@ export class IncidentResponseService implements OnModuleInit {
       }
 
       // Check automation effectiveness
-      const automated = incident.remediationActions.filter(a => a.executor === "system");
+      const automated = incident.remediationActions.filter(
+        (a) => a.executor === "system",
+      );
       automatedActions += automated.length;
-      successfulAutomation += automated.filter(a => a.status === "success").length;
+      successfulAutomation += automated.filter(
+        (a) => a.status === "success",
+      ).length;
 
       // Check SLA compliance
       if (!incident.sla.breached) {
@@ -577,10 +625,20 @@ export class IncidentResponseService implements OnModuleInit {
       }
     }
 
-    const meanTimeToResolution = resolvedIncidents > 0 ? totalResolutionTime / resolvedIncidents : 0;
-    const escalationRate = recentIncidents.length > 0 ? (escalatedIncidents / recentIncidents.length) * 100 : 0;
-    const automationEffectiveness = automatedActions > 0 ? (successfulAutomation / automatedActions) * 100 : 0;
-    const slaCompliance = recentIncidents.length > 0 ? (slaCompliant / recentIncidents.length) * 100 : 100;
+    const meanTimeToResolution =
+      resolvedIncidents > 0 ? totalResolutionTime / resolvedIncidents : 0;
+    const escalationRate =
+      recentIncidents.length > 0
+        ? (escalatedIncidents / recentIncidents.length) * 100
+        : 0;
+    const automationEffectiveness =
+      automatedActions > 0
+        ? (successfulAutomation / automatedActions) * 100
+        : 0;
+    const slaCompliance =
+      recentIncidents.length > 0
+        ? (slaCompliant / recentIncidents.length) * 100
+        : 100;
 
     return {
       totalIncidents: recentIncidents.length,
@@ -647,10 +705,13 @@ export class IncidentResponseService implements OnModuleInit {
         metadata: { alertId: alert.id },
       });
 
-      this.logger.debug(`Alert added to existing incident: ${relatedIncident.id}`, {
-        alertId: alert.id,
-        incidentId: relatedIncident.id,
-      });
+      this.logger.debug(
+        `Alert added to existing incident: ${relatedIncident.id}`,
+        {
+          alertId: alert.id,
+          incidentId: relatedIncident.id,
+        },
+      );
       return;
     }
 
@@ -682,14 +743,23 @@ export class IncidentResponseService implements OnModuleInit {
         });
 
         // Check if all alerts are resolved
-        const remainingAlerts = incident.alertIds.filter(id => {
-          const alertData = this.alertingService.getActiveAlerts().find(a => a.id === id);
+        const remainingAlerts = incident.alertIds.filter((id) => {
+          const alertData = this.alertingService
+            .getActiveAlerts()
+            .find((a) => a.id === id);
           return alertData && alertData.status !== "RESOLVED";
         });
 
-        if (remainingAlerts.length === 0 && incident.status !== IncidentStatus.RESOLVED) {
-          await this.updateIncidentStatus(incident.id, IncidentStatus.MONITORING, "system",
-            "All related alerts resolved, monitoring for stability");
+        if (
+          remainingAlerts.length === 0 &&
+          incident.status !== IncidentStatus.RESOLVED
+        ) {
+          await this.updateIncidentStatus(
+            incident.id,
+            IncidentStatus.MONITORING,
+            "system",
+            "All related alerts resolved, monitoring for stability",
+          );
         }
       }
     }
@@ -703,7 +773,8 @@ export class IncidentResponseService implements OnModuleInit {
       {
         id: "restart-function",
         name: "Restart Function",
-        description: "Restart a problematic function to resolve temporary issues",
+        description:
+          "Restart a problematic function to resolve temporary issues",
         type: "restart",
         enabled: true,
         autoExecute: true,
@@ -857,8 +928,14 @@ export class IncidentResponseService implements OnModuleInit {
             title: "Check Function Health",
             description: "Verify function health and error rates",
             type: "automated",
-            commands: ["curl /health", "kubectl logs -l app=functions --tail=100"],
-            checkpoints: ["Health check returns 200", "No error spikes in logs"],
+            commands: [
+              "curl /health",
+              "kubectl logs -l app=functions --tail=100",
+            ],
+            checkpoints: [
+              "Health check returns 200",
+              "No error spikes in logs",
+            ],
           },
           {
             stepNumber: 3,
@@ -866,7 +943,8 @@ export class IncidentResponseService implements OnModuleInit {
             description: "Execute appropriate remediation based on findings",
             type: "decision",
             checkpoints: ["Choose appropriate action based on analysis"],
-            notes: "If high load, scale up. If errors, restart. If database issue, check connections.",
+            notes:
+              "If high load, scale up. If errors, restart. If database issue, check connections.",
           },
         ],
         estimatedDuration: 10,
@@ -905,17 +983,27 @@ export class IncidentResponseService implements OnModuleInit {
     };
   }
 
-  private determinePriority(severity: AlertSeverity, impactLevel: string): IncidentPriority {
-    if (severity === "critical" || impactLevel === "critical") return IncidentPriority.P1;
-    if (severity === "high" || impactLevel === "high") return IncidentPriority.P2;
-    if (severity === "medium" || impactLevel === "medium") return IncidentPriority.P3;
+  private determinePriority(
+    severity: AlertSeverity,
+    impactLevel: string,
+  ): IncidentPriority {
+    if (severity === "critical" || impactLevel === "critical")
+      return IncidentPriority.P1;
+    if (severity === "high" || impactLevel === "high")
+      return IncidentPriority.P2;
+    if (severity === "medium" || impactLevel === "medium")
+      return IncidentPriority.P3;
     return IncidentPriority.P4;
   }
 
-  private async identifyImpactedServices(alertIds: string[]): Promise<string[]> {
+  private async identifyImpactedServices(
+    alertIds: string[],
+  ): Promise<string[]> {
     const services = new Set<string>();
     for (const alertId of alertIds) {
-      const alert = this.alertingService.getActiveAlerts().find(a => a.id === alertId);
+      const alert = this.alertingService
+        .getActiveAlerts()
+        .find((a) => a.id === alertId);
       if (alert) {
         services.add(alert.source);
       }
@@ -923,15 +1011,24 @@ export class IncidentResponseService implements OnModuleInit {
     return Array.from(services);
   }
 
-  private async identifyImpactedFunctions(alertIds: string[]): Promise<string[]> {
+  private async identifyImpactedFunctions(
+    alertIds: string[],
+  ): Promise<string[]> {
     // Logic to identify impacted functions from alerts
     return [];
   }
 
-  private async estimateCustomerImpact(classification: IncidentClassification): Promise<{ estimated: number; description: string }> {
-    const baseImpact = classification.impactLevel === "critical" ? 1000 :
-                      classification.impactLevel === "high" ? 500 :
-                      classification.impactLevel === "medium" ? 100 : 10;
+  private async estimateCustomerImpact(
+    classification: IncidentClassification,
+  ): Promise<{ estimated: number; description: string }> {
+    const baseImpact =
+      classification.impactLevel === "critical"
+        ? 1000
+        : classification.impactLevel === "high"
+          ? 500
+          : classification.impactLevel === "medium"
+            ? 100
+            : 10;
 
     return {
       estimated: baseImpact,
@@ -939,7 +1036,7 @@ export class IncidentResponseService implements OnModuleInit {
     };
   }
 
-  private calculateSLATargets(priority: IncidentPriority): Incident['sla'] {
+  private calculateSLATargets(priority: IncidentPriority): Incident["sla"] {
     const targets = {
       P1: { ack: 5, respond: 15, resolve: 60 },
       P2: { ack: 10, respond: 30, resolve: 240 },
@@ -969,9 +1066,13 @@ export class IncidentResponseService implements OnModuleInit {
     this.logger.debug(`Triggering workflow for incident: ${incident.id}`);
   }
 
-  private async evaluateAutomatedRemediation(incident: Incident): Promise<void> {
+  private async evaluateAutomatedRemediation(
+    incident: Incident,
+  ): Promise<void> {
     // Automated remediation evaluation logic
-    this.logger.debug(`Evaluating automated remediation for incident: ${incident.id}`);
+    this.logger.debug(
+      `Evaluating automated remediation for incident: ${incident.id}`,
+    );
   }
 
   private async handleIncidentResolved(incident: Incident): Promise<void> {
@@ -985,7 +1086,10 @@ export class IncidentResponseService implements OnModuleInit {
 
     // Maintain history size
     if (this.incidentHistory.length > this.maxIncidentHistory) {
-      this.incidentHistory.splice(0, this.incidentHistory.length - this.maxIncidentHistory);
+      this.incidentHistory.splice(
+        0,
+        this.incidentHistory.length - this.maxIncidentHistory,
+      );
     }
 
     this.logger.log(`Incident closed: ${incident.id}`);
@@ -1004,13 +1108,17 @@ export class IncidentResponseService implements OnModuleInit {
       execution.status = "success";
       execution.completedAt = new Date();
 
-      this.logger.log(`Remediation action completed successfully: ${action.name}`, {
-        incidentId: incident.id,
-        actionId: action.id,
-      });
+      this.logger.log(
+        `Remediation action completed successfully: ${action.name}`,
+        {
+          incidentId: incident.id,
+          actionId: action.id,
+        },
+      );
     } catch (error) {
       execution.status = "failed";
-      execution.errorMessage = error instanceof Error ? error.message : String(error);
+      execution.errorMessage =
+        error instanceof Error ? error.message : String(error);
       execution.completedAt = new Date();
 
       this.logger.error(`Remediation action failed: ${action.name}`, {
@@ -1029,9 +1137,11 @@ export class IncidentResponseService implements OnModuleInit {
   private async findRelatedIncident(alert: Alert): Promise<Incident | null> {
     // Find related incidents based on alert correlation
     for (const incident of this.activeIncidents.values()) {
-      if (incident.classification.component === "function" &&
-          incident.classification.category === "performance" &&
-          alert.source === "parlant_function_monitor") {
+      if (
+        incident.classification.component === "function" &&
+        incident.classification.category === "performance" &&
+        alert.source === "parlant_function_monitor"
+      ) {
         return incident;
       }
     }

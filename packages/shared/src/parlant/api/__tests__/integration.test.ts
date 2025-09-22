@@ -9,15 +9,23 @@
  * @date 2025-09-22
  */
 
-import { describe, test, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/testing-library';
-import { ConversationalAPIController } from '../conversational-patterns/controller';
-import { ConversationalValidator } from '../validation/conversational-validator';
-import { RealtimeMonitor } from '../monitoring/realtime-monitor';
-import { EnterpriseIntegration } from '../enterprise/integration';
-import { PerformanceOptimizer } from '../monitoring/performance-optimizer';
-import { UniversalAPIMiddleware } from '../middleware/universal-middleware';
+import {
+  describe,
+  test,
+  expect,
+  beforeEach,
+  afterEach,
+  beforeAll,
+  afterAll,
+} from "@jest/testing-library";
+import { ConversationalAPIController } from "../conversational-patterns/controller";
+import { ConversationalValidator } from "../validation/conversational-validator";
+import { RealtimeMonitor } from "../monitoring/realtime-monitor";
+import { EnterpriseIntegration } from "../enterprise/integration";
+import { PerformanceOptimizer } from "../monitoring/performance-optimizer";
+import { UniversalAPIMiddleware } from "../middleware/universal-middleware";
 
-describe('PARLANT Conversational API Patterns - Integration Tests', () => {
+describe("PARLANT Conversational API Patterns - Integration Tests", () => {
   let conversationalController: ConversationalAPIController;
   let validator: ConversationalValidator;
   let monitor: RealtimeMonitor;
@@ -26,24 +34,24 @@ describe('PARLANT Conversational API Patterns - Integration Tests', () => {
   let middleware: UniversalAPIMiddleware;
 
   const mockUserContext = {
-    userId: 'test_user_001',
-    sessionId: 'session_001',
+    userId: "test_user_001",
+    sessionId: "session_001",
     profile: {
-      technicalLevel: 'INTERMEDIATE' as const,
-      role: 'developer',
-      capabilities: ['API_ACCESS', 'READ_DATA'],
-      experienceLevel: 3
+      technicalLevel: "INTERMEDIATE" as const,
+      role: "developer",
+      capabilities: ["API_ACCESS", "READ_DATA"],
+      experienceLevel: 3,
     },
-    permissions: ['API_ACCESS', 'READ_DATA', 'CREATE_DATA'],
+    permissions: ["API_ACCESS", "READ_DATA", "CREATE_DATA"],
     preferences: {
-      explanationStyle: 'DETAILED' as const,
+      explanationStyle: "DETAILED" as const,
       includeExamples: true,
       includeVisualAids: false,
-      notificationMethod: 'IMMEDIATE' as const,
-      monitoringLevel: 'STANDARD' as const
+      notificationMethod: "IMMEDIATE" as const,
+      monitoringLevel: "STANDARD" as const,
     },
-    timezone: 'UTC',
-    locale: 'en-US'
+    timezone: "UTC",
+    locale: "en-US",
   };
 
   beforeAll(async () => {
@@ -56,7 +64,7 @@ describe('PARLANT Conversational API Patterns - Integration Tests', () => {
       validator,
       monitor,
       enterprise,
-      optimizer
+      optimizer,
     );
     middleware = new UniversalAPIMiddleware(conversationalController);
   });
@@ -65,75 +73,96 @@ describe('PARLANT Conversational API Patterns - Integration Tests', () => {
     // Cleanup resources
   });
 
-  describe('End-to-End Conversational API Processing', () => {
-    test('should process natural language request with complete workflow', async () => {
+  describe("End-to-End Conversational API Processing", () => {
+    test("should process natural language request with complete workflow", async () => {
       const apiRequest = {
-        id: 'test_request_001',
-        userRequest: 'Get user data for user ID 12345',
+        id: "test_request_001",
+        userRequest: "Get user data for user ID 12345",
         context: mockUserContext,
         timestamp: new Date(),
-        metadata: { source: 'test' }
+        metadata: { source: "test" },
       };
 
-      const response = await conversationalController.processNaturalLanguageRequest(apiRequest);
+      const response =
+        await conversationalController.processNaturalLanguageRequest(
+          apiRequest,
+        );
 
       expect(response.success).toBe(true);
-      expect(response.conversation.status).toBe('COMPLETED');
+      expect(response.conversation.status).toBe("COMPLETED");
       expect(response.conversation.steps.length).toBeGreaterThan(0);
       expect(response.performance.totalDuration).toBeGreaterThan(0);
       expect(response.auditTrail.length).toBeGreaterThan(0);
     });
 
-    test('should handle complex multi-parameter request', async () => {
+    test("should handle complex multi-parameter request", async () => {
       const apiRequest = {
-        id: 'test_request_002',
-        userRequest: 'Create a new user with name John Doe, email john@example.com, and age 30',
+        id: "test_request_002",
+        userRequest:
+          "Create a new user with name John Doe, email john@example.com, and age 30",
         context: mockUserContext,
         timestamp: new Date(),
-        metadata: { complexity: 'high' }
+        metadata: { complexity: "high" },
       };
 
-      const response = await conversationalController.processNaturalLanguageRequest(apiRequest);
+      const response =
+        await conversationalController.processNaturalLanguageRequest(
+          apiRequest,
+        );
 
       expect(response.success).toBe(true);
       expect(response.result).toBeDefined();
-      expect(response.conversation.steps.some(step => step.type === 'PARAMETER_VALIDATION')).toBe(true);
+      expect(
+        response.conversation.steps.some(
+          (step) => step.type === "PARAMETER_VALIDATION",
+        ),
+      ).toBe(true);
     });
 
-    test('should enforce security and authorization', async () => {
+    test("should enforce security and authorization", async () => {
       const unauthorizedUserContext = {
         ...mockUserContext,
-        permissions: [] // No permissions
+        permissions: [], // No permissions
       };
 
       const apiRequest = {
-        id: 'test_request_003',
-        userRequest: 'Delete all user data',
+        id: "test_request_003",
+        userRequest: "Delete all user data",
         context: unauthorizedUserContext,
         timestamp: new Date(),
-        metadata: { security: 'test' }
+        metadata: { security: "test" },
       };
 
-      const response = await conversationalController.processNaturalLanguageRequest(apiRequest);
+      const response =
+        await conversationalController.processNaturalLanguageRequest(
+          apiRequest,
+        );
 
       expect(response.success).toBe(false);
-      expect(response.auditTrail.some(event => event.type === 'AUTHORIZATION_FAILED')).toBe(true);
+      expect(
+        response.auditTrail.some(
+          (event) => event.type === "AUTHORIZATION_FAILED",
+        ),
+      ).toBe(true);
     });
   });
 
-  describe('Performance Validation', () => {
-    test('should meet sub-100ms processing target for simple requests', async () => {
+  describe("Performance Validation", () => {
+    test("should meet sub-100ms processing target for simple requests", async () => {
       const startTime = Date.now();
 
       const apiRequest = {
-        id: 'perf_test_001',
-        userRequest: 'Get status',
+        id: "perf_test_001",
+        userRequest: "Get status",
         context: mockUserContext,
         timestamp: new Date(),
-        metadata: { performance: 'test' }
+        metadata: { performance: "test" },
       };
 
-      const response = await conversationalController.processNaturalLanguageRequest(apiRequest);
+      const response =
+        await conversationalController.processNaturalLanguageRequest(
+          apiRequest,
+        );
       const totalTime = Date.now() - startTime;
 
       expect(response.success).toBe(true);
@@ -141,7 +170,7 @@ describe('PARLANT Conversational API Patterns - Integration Tests', () => {
       expect(response.performance.totalDuration).toBeLessThan(150);
     });
 
-    test('should handle high concurrency without degradation', async () => {
+    test("should handle high concurrency without degradation", async () => {
       const concurrentRequests = 50;
       const promises = [];
 
@@ -151,29 +180,33 @@ describe('PARLANT Conversational API Patterns - Integration Tests', () => {
           userRequest: `Get data item ${i}`,
           context: mockUserContext,
           timestamp: new Date(),
-          metadata: { concurrency: 'test' }
+          metadata: { concurrency: "test" },
         };
 
-        promises.push(conversationalController.processNaturalLanguageRequest(apiRequest));
+        promises.push(
+          conversationalController.processNaturalLanguageRequest(apiRequest),
+        );
       }
 
       const results = await Promise.all(promises);
 
       // All requests should succeed
-      expect(results.every(r => r.success)).toBe(true);
+      expect(results.every((r) => r.success)).toBe(true);
 
       // Average response time should be reasonable
-      const avgResponseTime = results.reduce((sum, r) => sum + r.performance.totalDuration, 0) / results.length;
+      const avgResponseTime =
+        results.reduce((sum, r) => sum + r.performance.totalDuration, 0) /
+        results.length;
       expect(avgResponseTime).toBeLessThan(300);
     });
 
-    test('should optimize performance over time', async () => {
+    test("should optimize performance over time", async () => {
       const metrics = await optimizer.calculateMetrics({
         totalDuration: 150,
         validationDuration: 50,
         executionDuration: 80,
         explanationDuration: 20,
-        baselineExecutionTime: 80
+        baselineExecutionTime: 80,
       });
 
       expect(metrics.responseTime.mean).toBeGreaterThan(0);
@@ -183,43 +216,45 @@ describe('PARLANT Conversational API Patterns - Integration Tests', () => {
     });
   });
 
-  describe('Real-time Monitoring and Intervention', () => {
-    test('should enable real-time monitoring for operations', async () => {
+  describe("Real-time Monitoring and Intervention", () => {
+    test("should enable real-time monitoring for operations", async () => {
       const monitoringSession = await monitor.initializeOperationMonitoring(
-        'test_operation_001',
-        mockUserContext
+        "test_operation_001",
+        mockUserContext,
       );
 
       expect(monitoringSession.id).toBeDefined();
-      expect(monitoringSession.operationId).toBe('test_operation_001');
-      expect(monitoringSession.interventionCapabilities.length).toBeGreaterThan(0);
-      expect(monitoringSession.status).toBe('ACTIVE');
+      expect(monitoringSession.operationId).toBe("test_operation_001");
+      expect(monitoringSession.interventionCapabilities.length).toBeGreaterThan(
+        0,
+      );
+      expect(monitoringSession.status).toBe("ACTIVE");
     });
 
-    test('should process user intervention commands', async () => {
+    test("should process user intervention commands", async () => {
       // First initialize monitoring
       const monitoringSession = await monitor.initializeOperationMonitoring(
-        'test_operation_002',
-        mockUserContext
+        "test_operation_002",
+        mockUserContext,
       );
 
       await monitor.startOperationMonitoring(monitoringSession.id);
 
       // Process intervention command
       const interventionResult = await monitor.processUserIntervention(
-        'test_operation_002',
-        { type: 'REQUEST_STATUS', parameters: {} },
-        mockUserContext
+        "test_operation_002",
+        { type: "REQUEST_STATUS", parameters: {} },
+        mockUserContext,
       );
 
       expect(interventionResult.success).toBe(true);
       expect(interventionResult.applied).toBe(true);
     });
 
-    test('should handle monitoring session lifecycle', async () => {
+    test("should handle monitoring session lifecycle", async () => {
       const monitoringSession = await monitor.initializeOperationMonitoring(
-        'test_operation_003',
-        mockUserContext
+        "test_operation_003",
+        mockUserContext,
       );
 
       await monitor.startOperationMonitoring(monitoringSession.id);
@@ -230,37 +265,39 @@ describe('PARLANT Conversational API Patterns - Integration Tests', () => {
     });
   });
 
-  describe('Enterprise Integration and Security', () => {
-    test('should validate user authorization with RBAC', async () => {
+  describe("Enterprise Integration and Security", () => {
+    test("should validate user authorization with RBAC", async () => {
       const authResult = await enterprise.validateUserAuthorization(
         mockUserContext,
-        'Get sensitive user data'
+        "Get sensitive user data",
       );
 
       expect(authResult.authorized).toBeDefined();
-      expect(authResult.grantedPermissions).toEqual(expect.arrayContaining(['API_ACCESS']));
+      expect(authResult.grantedPermissions).toEqual(
+        expect.arrayContaining(["API_ACCESS"]),
+      );
       expect(authResult.availableAPIs).toBeDefined();
     });
 
-    test('should generate comprehensive audit trails', async () => {
+    test("should generate comprehensive audit trails", async () => {
       const auditId = await enterprise.generateAuditTrail(
         {
-          action: 'API_ACCESS',
-          resource: 'USER_DATA',
-          outcome: 'SUCCESS',
-          details: { operation: 'read', recordCount: 1 }
+          action: "API_ACCESS",
+          resource: "USER_DATA",
+          outcome: "SUCCESS",
+          details: { operation: "read", recordCount: 1 },
         },
-        mockUserContext
+        mockUserContext,
       );
 
       expect(auditId).toBeDefined();
-      expect(auditId.startsWith('audit_')).toBe(true);
+      expect(auditId.startsWith("audit_")).toBe(true);
     });
 
-    test('should enforce intervention permissions', async () => {
+    test("should enforce intervention permissions", async () => {
       const interventionAuth = await enterprise.validateInterventionPermission(
         mockUserContext,
-        'test_operation_004'
+        "test_operation_004",
       );
 
       expect(interventionAuth.authorized).toBeDefined();
@@ -268,13 +305,13 @@ describe('PARLANT Conversational API Patterns - Integration Tests', () => {
     });
   });
 
-  describe('Middleware Integration', () => {
-    test('should process Express.js requests through conversational middleware', async () => {
+  describe("Middleware Integration", () => {
+    test("should process Express.js requests through conversational middleware", async () => {
       const middlewareConfig = {
         enabled: true,
-        framework: 'EXPRESS' as const,
-        conversationalRoutes: ['/api/conversational'],
-        bypassRoutes: ['/health'],
+        framework: "EXPRESS" as const,
+        conversationalRoutes: ["/api/conversational"],
+        bypassRoutes: ["/health"],
         performanceConfig: {
           enableCaching: true,
           cacheTTL: 300,
@@ -282,52 +319,52 @@ describe('PARLANT Conversational API Patterns - Integration Tests', () => {
           timeoutMs: 30000,
           compressionEnabled: true,
           rateLimitingEnabled: false,
-          rateLimitRpm: 1000
+          rateLimitRpm: 1000,
         },
         securityConfig: {
           enforceAuthentication: false, // Disabled for testing
           requireHttps: false,
           enableCors: true,
-          corsOrigins: ['*'],
+          corsOrigins: ["*"],
           maxRequestSize: 10485760,
-          enableRequestSanitization: true
+          enableRequestSanitization: true,
         },
         monitoringConfig: {
           enableMetrics: true,
           enableTracing: true,
           enableLogging: true,
-          logLevel: 'INFO' as const,
-          metricsEndpoint: '/metrics'
-        }
+          logLevel: "INFO" as const,
+          metricsEndpoint: "/metrics",
+        },
       };
 
       await middleware.initialize(middlewareConfig);
 
       const mockExpressRequest = {
-        path: '/api/conversational',
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
+        path: "/api/conversational",
+        method: "POST",
+        headers: { "content-type": "application/json" },
         query: {},
         body: {
-          request: 'Get user information',
-          user: mockUserContext
+          request: "Get user information",
+          user: mockUserContext,
         },
-        user: mockUserContext
+        user: mockUserContext,
       };
 
       const expressMiddleware = middleware.createExpressMiddleware();
       expect(expressMiddleware).toBeDefined();
-      expect(typeof expressMiddleware).toBe('function');
+      expect(typeof expressMiddleware).toBe("function");
     });
 
-    test('should provide performance metrics for monitoring', async () => {
+    test("should provide performance metrics for monitoring", async () => {
       const metrics = middleware.getPerformanceMetrics();
 
       expect(metrics).toBeDefined();
-      expect(typeof metrics).toBe('object');
+      expect(typeof metrics).toBe("object");
     });
 
-    test('should support multiple framework integrations', async () => {
+    test("should support multiple framework integrations", async () => {
       const fastAPIMiddleware = middleware.createFastAPIMiddleware();
       const nextJSMiddleware = middleware.createNextJSMiddleware();
       const koaMiddleware = middleware.createKoaMiddleware();
@@ -338,32 +375,38 @@ describe('PARLANT Conversational API Patterns - Integration Tests', () => {
     });
   });
 
-  describe('Error Handling and Recovery', () => {
-    test('should handle validation errors gracefully', async () => {
+  describe("Error Handling and Recovery", () => {
+    test("should handle validation errors gracefully", async () => {
       const apiRequest = {
-        id: 'error_test_001',
-        userRequest: '', // Empty request to trigger validation error
+        id: "error_test_001",
+        userRequest: "", // Empty request to trigger validation error
         context: mockUserContext,
         timestamp: new Date(),
-        metadata: { error: 'test' }
+        metadata: { error: "test" },
       };
 
-      const response = await conversationalController.processNaturalLanguageRequest(apiRequest);
+      const response =
+        await conversationalController.processNaturalLanguageRequest(
+          apiRequest,
+        );
 
       expect(response.success).toBe(false);
-      expect(response.conversation.status).toBe('FAILED');
+      expect(response.conversation.status).toBe("FAILED");
     });
 
-    test('should provide helpful error recovery suggestions', async () => {
+    test("should provide helpful error recovery suggestions", async () => {
       const apiRequest = {
-        id: 'error_test_002',
-        userRequest: 'Do something undefined',
+        id: "error_test_002",
+        userRequest: "Do something undefined",
         context: mockUserContext,
         timestamp: new Date(),
-        metadata: { error: 'recovery_test' }
+        metadata: { error: "recovery_test" },
       };
 
-      const response = await conversationalController.processNaturalLanguageRequest(apiRequest);
+      const response =
+        await conversationalController.processNaturalLanguageRequest(
+          apiRequest,
+        );
 
       if (!response.success) {
         expect(response.conversation.steps.length).toBeGreaterThan(0);
@@ -371,45 +414,50 @@ describe('PARLANT Conversational API Patterns - Integration Tests', () => {
       }
     });
 
-    test('should maintain system stability under error conditions', async () => {
+    test("should maintain system stability under error conditions", async () => {
       const errorRequests = Array.from({ length: 10 }, (_, i) => ({
         id: `error_stability_${i}`,
         userRequest: `Invalid request ${i}`,
         context: mockUserContext,
         timestamp: new Date(),
-        metadata: { stability: 'test' }
+        metadata: { stability: "test" },
       }));
 
       const responses = await Promise.all(
-        errorRequests.map(req => conversationalController.processNaturalLanguageRequest(req))
+        errorRequests.map((req) =>
+          conversationalController.processNaturalLanguageRequest(req),
+        ),
       );
 
       // System should handle all errors without crashing
       expect(responses.length).toBe(10);
-      responses.forEach(response => {
+      responses.forEach((response) => {
         expect(response).toBeDefined();
         expect(response.conversation).toBeDefined();
       });
     });
   });
 
-  describe('Compliance and Audit Requirements', () => {
-    test('should maintain comprehensive audit logs', async () => {
+  describe("Compliance and Audit Requirements", () => {
+    test("should maintain comprehensive audit logs", async () => {
       const apiRequest = {
-        id: 'audit_test_001',
-        userRequest: 'Access sensitive data',
+        id: "audit_test_001",
+        userRequest: "Access sensitive data",
         context: mockUserContext,
         timestamp: new Date(),
-        metadata: { audit: 'required' }
+        metadata: { audit: "required" },
       };
 
-      const response = await conversationalController.processNaturalLanguageRequest(apiRequest);
+      const response =
+        await conversationalController.processNaturalLanguageRequest(
+          apiRequest,
+        );
 
       expect(response.auditTrail).toBeDefined();
       expect(response.auditTrail.length).toBeGreaterThan(0);
 
       // Verify audit events have required fields
-      response.auditTrail.forEach(event => {
+      response.auditTrail.forEach((event) => {
         expect(event.id).toBeDefined();
         expect(event.timestamp).toBeDefined();
         expect(event.actor).toBeDefined();
@@ -418,10 +466,10 @@ describe('PARLANT Conversational API Patterns - Integration Tests', () => {
       });
     });
 
-    test('should track user consent and permissions', async () => {
+    test("should track user consent and permissions", async () => {
       const authResult = await enterprise.validateUserAuthorization(
         mockUserContext,
-        'Process personal data'
+        "Process personal data",
       );
 
       expect(authResult).toBeDefined();
@@ -429,25 +477,25 @@ describe('PARLANT Conversational API Patterns - Integration Tests', () => {
       expect(authResult.restrictions).toBeDefined();
     });
 
-    test('should support data retention and deletion policies', async () => {
+    test("should support data retention and deletion policies", async () => {
       // This would typically integrate with data retention systems
       // For now, we verify the audit trail includes appropriate metadata
       const auditId = await enterprise.generateAuditTrail(
         {
-          action: 'DATA_RETENTION_CHECK',
-          resource: 'USER_DATA',
-          outcome: 'SUCCESS',
-          details: { retentionPolicy: 'standard', dataAge: '30days' }
+          action: "DATA_RETENTION_CHECK",
+          resource: "USER_DATA",
+          outcome: "SUCCESS",
+          details: { retentionPolicy: "standard", dataAge: "30days" },
         },
-        mockUserContext
+        mockUserContext,
       );
 
       expect(auditId).toBeDefined();
     });
   });
 
-  describe('Scalability and Load Testing', () => {
-    test('should handle burst traffic scenarios', async () => {
+  describe("Scalability and Load Testing", () => {
+    test("should handle burst traffic scenarios", async () => {
       const burstSize = 100;
       const startTime = Date.now();
 
@@ -456,22 +504,24 @@ describe('PARLANT Conversational API Patterns - Integration Tests', () => {
         userRequest: `Get data ${i}`,
         context: mockUserContext,
         timestamp: new Date(),
-        metadata: { burst: 'test' }
+        metadata: { burst: "test" },
       }));
 
       const responses = await Promise.all(
-        burstRequests.map(req => conversationalController.processNaturalLanguageRequest(req))
+        burstRequests.map((req) =>
+          conversationalController.processNaturalLanguageRequest(req),
+        ),
       );
 
       const totalTime = Date.now() - startTime;
       const avgResponseTime = totalTime / burstSize;
 
       expect(responses.length).toBe(burstSize);
-      expect(responses.every(r => r.success || !r.success)).toBe(true); // All should have defined success state
+      expect(responses.every((r) => r.success || !r.success)).toBe(true); // All should have defined success state
       expect(avgResponseTime).toBeLessThan(1000); // Average under 1 second per request
     });
 
-    test('should maintain consistent performance under sustained load', async () => {
+    test("should maintain consistent performance under sustained load", async () => {
       const sustainedRequests = 25;
       const requests = [];
 
@@ -481,66 +531,88 @@ describe('PARLANT Conversational API Patterns - Integration Tests', () => {
           userRequest: `Process request ${i}`,
           context: mockUserContext,
           timestamp: new Date(),
-          metadata: { sustained: 'load' }
+          metadata: { sustained: "load" },
         };
 
-        requests.push(conversationalController.processNaturalLanguageRequest(apiRequest));
+        requests.push(
+          conversationalController.processNaturalLanguageRequest(apiRequest),
+        );
 
         // Small delay between requests to simulate sustained load
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await new Promise((resolve) => setTimeout(resolve, 10));
       }
 
       const responses = await Promise.all(requests);
-      const responseTimes = responses.map(r => r.performance?.totalDuration || 0);
-      const avgResponseTime = responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length;
+      const responseTimes = responses.map(
+        (r) => r.performance?.totalDuration || 0,
+      );
+      const avgResponseTime =
+        responseTimes.reduce((sum, time) => sum + time, 0) /
+        responseTimes.length;
 
       expect(responses.length).toBe(sustainedRequests);
       expect(avgResponseTime).toBeLessThan(500); // Maintain reasonable average
     });
   });
 
-  describe('Feature Completeness Validation', () => {
-    test('should support all required conversational patterns', async () => {
+  describe("Feature Completeness Validation", () => {
+    test("should support all required conversational patterns", async () => {
       // Test intent analysis
       const intentRequest = {
-        id: 'feature_test_001',
-        userRequest: 'I want to create a new user account',
+        id: "feature_test_001",
+        userRequest: "I want to create a new user account",
         context: mockUserContext,
         timestamp: new Date(),
-        metadata: { feature: 'intent_analysis' }
+        metadata: { feature: "intent_analysis" },
       };
 
-      const intentResponse = await conversationalController.processNaturalLanguageRequest(intentRequest);
-      expect(intentResponse.conversation.steps.some(s => s.type === 'INTENT_ANALYSIS')).toBe(true);
+      const intentResponse =
+        await conversationalController.processNaturalLanguageRequest(
+          intentRequest,
+        );
+      expect(
+        intentResponse.conversation.steps.some(
+          (s) => s.type === "INTENT_ANALYSIS",
+        ),
+      ).toBe(true);
 
       // Test parameter validation
       const paramRequest = {
-        id: 'feature_test_002',
-        userRequest: 'Update user with invalid email format',
+        id: "feature_test_002",
+        userRequest: "Update user with invalid email format",
         context: mockUserContext,
         timestamp: new Date(),
-        metadata: { feature: 'parameter_validation' }
+        metadata: { feature: "parameter_validation" },
       };
 
-      const paramResponse = await conversationalController.processNaturalLanguageRequest(paramRequest);
-      expect(paramResponse.conversation.steps.some(s => s.type === 'PARAMETER_VALIDATION')).toBe(true);
+      const paramResponse =
+        await conversationalController.processNaturalLanguageRequest(
+          paramRequest,
+        );
+      expect(
+        paramResponse.conversation.steps.some(
+          (s) => s.type === "PARAMETER_VALIDATION",
+        ),
+      ).toBe(true);
     });
 
-    test('should provide comprehensive monitoring capabilities', async () => {
+    test("should provide comprehensive monitoring capabilities", async () => {
       const monitoringSession = await monitor.initializeOperationMonitoring(
-        'feature_test_monitoring',
-        mockUserContext
+        "feature_test_monitoring",
+        mockUserContext,
       );
 
       expect(monitoringSession.interventionCapabilities).toBeDefined();
-      expect(monitoringSession.interventionCapabilities.length).toBeGreaterThan(0);
+      expect(monitoringSession.interventionCapabilities.length).toBeGreaterThan(
+        0,
+      );
       expect(monitoringSession.realTimeUpdates).toBeDefined();
     });
 
-    test('should support enterprise security requirements', async () => {
+    test("should support enterprise security requirements", async () => {
       const authResult = await enterprise.validateUserAuthorization(
         mockUserContext,
-        'Access enterprise features'
+        "Access enterprise features",
       );
 
       expect(authResult.grantedPermissions).toBeDefined();
@@ -554,10 +626,10 @@ describe('PARLANT Conversational API Patterns - Integration Tests', () => {
 function createMockAPIRegistry() {
   return {
     apis: [],
-    getCapabilitiesSummary: () => ['read', 'write', 'admin'],
+    getCapabilitiesSummary: () => ["read", "write", "admin"],
     findByCapability: (capability: string) => [],
     findByName: (name: string) => undefined,
-    validateAPIAccess: async (apiId: string, userContext: any) => true
+    validateAPIAccess: async (apiId: string, userContext: any) => true,
   };
 }
 
@@ -568,6 +640,6 @@ function createMockRequest(userRequest: string, overrides: any = {}) {
     context: mockUserContext,
     timestamp: new Date(),
     metadata: {},
-    ...overrides
+    ...overrides,
   };
 }

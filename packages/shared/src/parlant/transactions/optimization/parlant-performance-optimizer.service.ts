@@ -23,49 +23,49 @@
  * @version 1.0.0 - SOPHISTICATED PERFORMANCE OPTIMIZATION WITH PARLANT INTEGRATION
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { EventEmitter } from 'events';
+import { Injectable, Logger } from "@nestjs/common";
+import { EventEmitter } from "events";
 import {
   TransactionMetadata,
   TransactionPerformanceMetrics,
   TransactionBatchConfiguration,
   TransactionConfiguration,
-} from '../types';
+} from "../types";
 import {
   ParlantUserContext,
   SecurityLevel,
-} from '../../../types/parlant-integration.types';
+} from "../../../types/parlant-integration.types";
 
 /**
  * Performance optimization strategy
  */
 export enum OptimizationStrategy {
   /** Optimize for throughput */
-  THROUGHPUT = 'THROUGHPUT',
+  THROUGHPUT = "THROUGHPUT",
   /** Optimize for latency */
-  LATENCY = 'LATENCY',
+  LATENCY = "LATENCY",
   /** Optimize for resource efficiency */
-  RESOURCE_EFFICIENCY = 'RESOURCE_EFFICIENCY',
+  RESOURCE_EFFICIENCY = "RESOURCE_EFFICIENCY",
   /** Balanced optimization */
-  BALANCED = 'BALANCED',
+  BALANCED = "BALANCED",
   /** Custom optimization based on workload */
-  ADAPTIVE = 'ADAPTIVE',
+  ADAPTIVE = "ADAPTIVE",
 }
 
 /**
  * Performance metric type
  */
 export enum PerformanceMetricType {
-  LATENCY = 'LATENCY',
-  THROUGHPUT = 'THROUGHPUT',
-  CPU_USAGE = 'CPU_USAGE',
-  MEMORY_USAGE = 'MEMORY_USAGE',
-  DISK_IO = 'DISK_IO',
-  NETWORK_IO = 'NETWORK_IO',
-  DATABASE_CONNECTIONS = 'DATABASE_CONNECTIONS',
-  CACHE_HIT_RATE = 'CACHE_HIT_RATE',
-  LOCK_CONTENTION = 'LOCK_CONTENTION',
-  DEADLOCK_RATE = 'DEADLOCK_RATE',
+  LATENCY = "LATENCY",
+  THROUGHPUT = "THROUGHPUT",
+  CPU_USAGE = "CPU_USAGE",
+  MEMORY_USAGE = "MEMORY_USAGE",
+  DISK_IO = "DISK_IO",
+  NETWORK_IO = "NETWORK_IO",
+  DATABASE_CONNECTIONS = "DATABASE_CONNECTIONS",
+  CACHE_HIT_RATE = "CACHE_HIT_RATE",
+  LOCK_CONTENTION = "LOCK_CONTENTION",
+  DEADLOCK_RATE = "DEADLOCK_RATE",
 }
 
 /**
@@ -73,21 +73,21 @@ export enum PerformanceMetricType {
  */
 export enum OptimizationType {
   /** Configuration parameter adjustment */
-  CONFIGURATION = 'CONFIGURATION',
+  CONFIGURATION = "CONFIGURATION",
   /** Query optimization */
-  QUERY_OPTIMIZATION = 'QUERY_OPTIMIZATION',
+  QUERY_OPTIMIZATION = "QUERY_OPTIMIZATION",
   /** Index creation/modification */
-  INDEX_OPTIMIZATION = 'INDEX_OPTIMIZATION',
+  INDEX_OPTIMIZATION = "INDEX_OPTIMIZATION",
   /** Connection pool tuning */
-  CONNECTION_POOL = 'CONNECTION_POOL',
+  CONNECTION_POOL = "CONNECTION_POOL",
   /** Cache configuration */
-  CACHE_OPTIMIZATION = 'CACHE_OPTIMIZATION',
+  CACHE_OPTIMIZATION = "CACHE_OPTIMIZATION",
   /** Batch processing tuning */
-  BATCH_OPTIMIZATION = 'BATCH_OPTIMIZATION',
+  BATCH_OPTIMIZATION = "BATCH_OPTIMIZATION",
   /** Resource allocation */
-  RESOURCE_ALLOCATION = 'RESOURCE_ALLOCATION',
+  RESOURCE_ALLOCATION = "RESOURCE_ALLOCATION",
   /** Architecture change */
-  ARCHITECTURE = 'ARCHITECTURE',
+  ARCHITECTURE = "ARCHITECTURE",
 }
 
 /**
@@ -150,7 +150,7 @@ export interface PerformanceTrend {
   readonly metricType: PerformanceMetricType;
 
   /** Trend direction */
-  readonly direction: 'IMPROVING' | 'DEGRADING' | 'STABLE';
+  readonly direction: "IMPROVING" | "DEGRADING" | "STABLE";
 
   /** Trend strength (0-1) */
   readonly strength: number;
@@ -190,7 +190,7 @@ export interface OptimizationRecommendation {
   readonly type: OptimizationType;
 
   /** Priority level */
-  readonly priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  readonly priority: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
 
   /** Target metric */
   readonly targetMetric: PerformanceMetricType;
@@ -204,7 +204,7 @@ export interface OptimizationRecommendation {
   };
 
   /** Implementation complexity */
-  readonly complexity: 'LOW' | 'MEDIUM' | 'HIGH';
+  readonly complexity: "LOW" | "MEDIUM" | "HIGH";
 
   /** Estimated implementation time */
   readonly estimatedImplementationTime: number;
@@ -225,7 +225,7 @@ export interface OptimizationRecommendation {
   readonly createdAt: Date;
 
   /** Status */
-  status: 'PENDING' | 'APPROVED' | 'IMPLEMENTING' | 'COMPLETED' | 'REJECTED';
+  status: "PENDING" | "APPROVED" | "IMPLEMENTING" | "COMPLETED" | "REJECTED";
 }
 
 /**
@@ -248,7 +248,7 @@ export interface WorkloadPattern {
     avgLatency: number;
     readWriteRatio: number;
     concurrencyLevel: number;
-    temporalDistribution: 'UNIFORM' | 'PEAK_HOURS' | 'BURST' | 'SEASONAL';
+    temporalDistribution: "UNIFORM" | "PEAK_HOURS" | "BURST" | "SEASONAL";
   };
 
   /** Optimal configuration for this pattern */
@@ -272,7 +272,7 @@ export interface ResourceAllocationConfig {
   /** CPU allocation */
   cpu: {
     coreCount: number;
-    priority: 'LOW' | 'NORMAL' | 'HIGH';
+    priority: "LOW" | "NORMAL" | "HIGH";
     affinity?: number[];
   };
 
@@ -345,10 +345,15 @@ export interface OptimizationPerformanceMonitor {
   getCurrentMetrics(): Map<PerformanceMetricType, number>;
 
   /** Get performance trend */
-  getTrend(metricType: PerformanceMetricType, windowSize: number): PerformanceTrend;
+  getTrend(
+    metricType: PerformanceMetricType,
+    windowSize: number,
+  ): PerformanceTrend;
 
   /** Check threshold violations */
-  checkThresholds(thresholds: PerformanceThresholds): Map<PerformanceMetricType, boolean>;
+  checkThresholds(
+    thresholds: PerformanceThresholds,
+  ): Map<PerformanceMetricType, boolean>;
 
   /** Generate performance report */
   generateReport(timeRange: { start: Date; end: Date }): PerformanceReport;
@@ -362,13 +367,24 @@ export interface OptimizationAuditLogger {
   logRecommendation(recommendation: OptimizationRecommendation): void;
 
   /** Log optimization implementation */
-  logImplementation(recommendationId: string, success: boolean, details: Record<string, unknown>): void;
+  logImplementation(
+    recommendationId: string,
+    success: boolean,
+    details: Record<string, unknown>,
+  ): void;
 
   /** Log performance threshold violation */
-  logThresholdViolation(metricType: PerformanceMetricType, threshold: number, actual: number): void;
+  logThresholdViolation(
+    metricType: PerformanceMetricType,
+    threshold: number,
+    actual: number,
+  ): void;
 
   /** Log configuration change */
-  logConfigurationChange(oldConfig: Record<string, unknown>, newConfig: Record<string, unknown>): void;
+  logConfigurationChange(
+    oldConfig: Record<string, unknown>,
+    newConfig: Record<string, unknown>,
+  ): void;
 
   /** Get optimization audit trail */
   getAuditTrail(): OptimizationAuditEntry[];
@@ -448,7 +464,7 @@ export interface ThresholdViolation {
   readonly actualValue: number;
 
   /** Violation severity */
-  readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  readonly severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
 
   /** Duration of violation */
   readonly duration: number;
@@ -462,7 +478,11 @@ export interface OptimizationAuditEntry {
   readonly auditId: string;
 
   /** Entry type */
-  readonly type: 'RECOMMENDATION' | 'IMPLEMENTATION' | 'THRESHOLD_VIOLATION' | 'CONFIGURATION_CHANGE';
+  readonly type:
+    | "RECOMMENDATION"
+    | "IMPLEMENTATION"
+    | "THRESHOLD_VIOLATION"
+    | "CONFIGURATION_CHANGE";
 
   /** Timestamp */
   readonly timestamp: Date;
@@ -485,10 +505,16 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
   private readonly logger = new Logger(ParlantPerformanceOptimizerService.name);
 
   // Active optimization contexts
-  private readonly optimizationContexts = new Map<string, OptimizationContext>();
+  private readonly optimizationContexts = new Map<
+    string,
+    OptimizationContext
+  >();
 
   // Performance monitors
-  private readonly performanceMonitors = new Map<string, OptimizationPerformanceMonitor>();
+  private readonly performanceMonitors = new Map<
+    string,
+    OptimizationPerformanceMonitor
+  >();
 
   // Audit loggers
   private readonly auditLoggers = new Map<string, OptimizationAuditLogger>();
@@ -501,7 +527,10 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
   private readonly maxMeasurementHistory = 10000;
 
   // Optimization recommendations cache
-  private readonly recommendationsCache = new Map<string, OptimizationRecommendation[]>();
+  private readonly recommendationsCache = new Map<
+    string,
+    OptimizationRecommendation[]
+  >();
 
   // Performance monitoring timer
   private monitoringTimer?: NodeJS.Timeout;
@@ -527,7 +556,7 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
   private readonly defaultResourceAllocation: ResourceAllocationConfig = {
     cpu: {
       coreCount: 4,
-      priority: 'NORMAL',
+      priority: "NORMAL",
     },
     memory: {
       heapSize: 2048,
@@ -549,7 +578,7 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
 
   constructor() {
     super();
-    this.logger.log('PARLANT Performance Optimizer Service initialized');
+    this.logger.log("PARLANT Performance Optimizer Service initialized");
 
     // Start performance monitoring
     this.startPerformanceMonitoring();
@@ -576,25 +605,35 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
       thresholds?: Partial<PerformanceThresholds>;
       resourceAllocation?: Partial<ResourceAllocationConfig>;
       workloadPatternId?: string;
-    } = {}
+    } = {},
   ): Promise<string> {
     const startTime = Date.now();
     const contextId = this.generateContextId();
 
-    this.logger.log(`Creating optimization context ${contextId} with strategy ${strategy}`);
+    this.logger.log(
+      `Creating optimization context ${contextId} with strategy ${strategy}`,
+    );
 
     try {
       // Merge configuration with defaults
       const thresholds = { ...this.defaultThresholds, ...options.thresholds };
-      const resourceAllocation = this.mergeResourceAllocation(this.defaultResourceAllocation, options.resourceAllocation);
+      const resourceAllocation = this.mergeResourceAllocation(
+        this.defaultResourceAllocation,
+        options.resourceAllocation,
+      );
 
       // Get workload pattern
-      const workloadPattern = options.workloadPatternId ?
-        this.workloadPatterns.get(options.workloadPatternId) : undefined;
+      const workloadPattern = options.workloadPatternId
+        ? this.workloadPatterns.get(options.workloadPatternId)
+        : undefined;
 
       // Create performance monitor and audit logger
-      const performanceMonitor = this.createOptimizationPerformanceMonitor(contextId);
-      const auditLogger = this.createOptimizationAuditLogger(contextId, userContext);
+      const performanceMonitor =
+        this.createOptimizationPerformanceMonitor(contextId);
+      const auditLogger = this.createOptimizationAuditLogger(
+        contextId,
+        userContext,
+      );
 
       // Create optimization context
       const context: OptimizationContext = {
@@ -619,14 +658,18 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
       await this.generateInitialRecommendations(context);
 
       // Emit context created event
-      this.emit('optimizationContextCreated', { contextId, strategy, context });
+      this.emit("optimizationContextCreated", { contextId, strategy, context });
 
-      this.logger.log(`Optimization context ${contextId} created in ${Date.now() - startTime}ms`);
+      this.logger.log(
+        `Optimization context ${contextId} created in ${Date.now() - startTime}ms`,
+      );
 
       return contextId;
-
     } catch (error) {
-      this.logger.error(`Failed to create optimization context: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to create optimization context: ${error.message}`,
+        error.stack,
+      );
       throw new Error(`Optimization context creation failed: ${error.message}`);
     }
   }
@@ -634,8 +677,13 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
   /**
    * Update optimization strategy
    */
-  async updateOptimizationStrategy(contextId: string, newStrategy: OptimizationStrategy): Promise<void> {
-    this.logger.log(`Updating optimization strategy for context ${contextId} to ${newStrategy}`);
+  async updateOptimizationStrategy(
+    contextId: string,
+    newStrategy: OptimizationStrategy,
+  ): Promise<void> {
+    this.logger.log(
+      `Updating optimization strategy for context ${contextId} to ${newStrategy}`,
+    );
 
     try {
       const context = this.getOptimizationContext(contextId);
@@ -650,14 +698,20 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
       // Log strategy change
       context.auditLogger.logConfigurationChange(
         { strategy: oldStrategy },
-        { strategy: newStrategy }
+        { strategy: newStrategy },
       );
 
       // Emit strategy updated event
-      this.emit('optimizationStrategyUpdated', { contextId, oldStrategy, newStrategy });
-
+      this.emit("optimizationStrategyUpdated", {
+        contextId,
+        oldStrategy,
+        newStrategy,
+      });
     } catch (error) {
-      this.logger.error(`Failed to update optimization strategy: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to update optimization strategy: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -671,9 +725,9 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
     contextId: string,
     metricType: PerformanceMetricType,
     value: number,
-    unit: string = 'ms',
+    unit: string = "ms",
     context: Record<string, unknown> = {},
-    source: string = 'system'
+    source: string = "system",
   ): void {
     const measurement: PerformanceMeasurement = {
       timestamp: new Date(),
@@ -700,13 +754,15 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
     this.checkThresholdViolations(contextId, measurement);
 
     // Emit measurement recorded event
-    this.emit('performanceMeasurementRecorded', { contextId, measurement });
+    this.emit("performanceMeasurementRecorded", { contextId, measurement });
   }
 
   /**
    * Get current performance metrics
    */
-  getCurrentPerformanceMetrics(contextId: string): Map<PerformanceMetricType, number> {
+  getCurrentPerformanceMetrics(
+    contextId: string,
+  ): Map<PerformanceMetricType, number> {
     const performanceMonitor = this.performanceMonitors.get(contextId);
     if (!performanceMonitor) {
       throw new Error(`Performance monitor not found for context ${contextId}`);
@@ -721,7 +777,7 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
   getPerformanceTrend(
     contextId: string,
     metricType: PerformanceMetricType,
-    windowSize: number = 100
+    windowSize: number = 100,
   ): PerformanceTrend {
     const performanceMonitor = this.performanceMonitors.get(contextId);
     if (!performanceMonitor) {
@@ -736,9 +792,13 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
   /**
    * Generate optimization recommendations
    */
-  async generateOptimizationRecommendations(contextId: string): Promise<OptimizationRecommendation[]> {
+  async generateOptimizationRecommendations(
+    contextId: string,
+  ): Promise<OptimizationRecommendation[]> {
     const startTime = Date.now();
-    this.logger.log(`Generating optimization recommendations for context ${contextId}`);
+    this.logger.log(
+      `Generating optimization recommendations for context ${contextId}`,
+    );
 
     try {
       const context = this.getOptimizationContext(contextId);
@@ -746,38 +806,74 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
 
       // Analyze current performance
       const currentMetrics = context.performanceMonitor.getCurrentMetrics();
-      const thresholdViolations = context.performanceMonitor.checkThresholds(context.thresholds);
+      const thresholdViolations = context.performanceMonitor.checkThresholds(
+        context.thresholds,
+      );
 
       // Generate recommendations based on strategy
       switch (context.strategy) {
         case OptimizationStrategy.THROUGHPUT:
-          recommendations.push(...await this.generateThroughputOptimizations(context, currentMetrics, thresholdViolations));
+          recommendations.push(
+            ...(await this.generateThroughputOptimizations(
+              context,
+              currentMetrics,
+              thresholdViolations,
+            )),
+          );
           break;
 
         case OptimizationStrategy.LATENCY:
-          recommendations.push(...await this.generateLatencyOptimizations(context, currentMetrics, thresholdViolations));
+          recommendations.push(
+            ...(await this.generateLatencyOptimizations(
+              context,
+              currentMetrics,
+              thresholdViolations,
+            )),
+          );
           break;
 
         case OptimizationStrategy.RESOURCE_EFFICIENCY:
-          recommendations.push(...await this.generateResourceOptimizations(context, currentMetrics, thresholdViolations));
+          recommendations.push(
+            ...(await this.generateResourceOptimizations(
+              context,
+              currentMetrics,
+              thresholdViolations,
+            )),
+          );
           break;
 
         case OptimizationStrategy.BALANCED:
-          recommendations.push(...await this.generateBalancedOptimizations(context, currentMetrics, thresholdViolations));
+          recommendations.push(
+            ...(await this.generateBalancedOptimizations(
+              context,
+              currentMetrics,
+              thresholdViolations,
+            )),
+          );
           break;
 
         case OptimizationStrategy.ADAPTIVE:
-          recommendations.push(...await this.generateAdaptiveOptimizations(context, currentMetrics, thresholdViolations));
+          recommendations.push(
+            ...(await this.generateAdaptiveOptimizations(
+              context,
+              currentMetrics,
+              thresholdViolations,
+            )),
+          );
           break;
       }
 
       // Sort recommendations by priority and expected improvement
       recommendations.sort((a, b) => {
         const priorityWeight = { CRITICAL: 4, HIGH: 3, MEDIUM: 2, LOW: 1 };
-        const priorityDiff = priorityWeight[b.priority] - priorityWeight[a.priority];
+        const priorityDiff =
+          priorityWeight[b.priority] - priorityWeight[a.priority];
         if (priorityDiff !== 0) return priorityDiff;
 
-        return b.expectedImprovement.improvementPercentage - a.expectedImprovement.improvementPercentage;
+        return (
+          b.expectedImprovement.improvementPercentage -
+          a.expectedImprovement.improvementPercentage
+        );
       });
 
       // Cache recommendations
@@ -789,14 +885,21 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
       }
 
       // Emit recommendations generated event
-      this.emit('optimizationRecommendationsGenerated', { contextId, recommendations });
+      this.emit("optimizationRecommendationsGenerated", {
+        contextId,
+        recommendations,
+      });
 
-      this.logger.log(`Generated ${recommendations.length} optimization recommendations for context ${contextId} in ${Date.now() - startTime}ms`);
+      this.logger.log(
+        `Generated ${recommendations.length} optimization recommendations for context ${contextId} in ${Date.now() - startTime}ms`,
+      );
 
       return recommendations;
-
     } catch (error) {
-      this.logger.error(`Failed to generate optimization recommendations: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to generate optimization recommendations: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -806,64 +909,93 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
    */
   async implementOptimizationRecommendation(
     contextId: string,
-    recommendationId: string
+    recommendationId: string,
   ): Promise<boolean> {
     const startTime = Date.now();
-    this.logger.log(`Implementing optimization recommendation ${recommendationId} for context ${contextId}`);
+    this.logger.log(
+      `Implementing optimization recommendation ${recommendationId} for context ${contextId}`,
+    );
 
     try {
       const context = this.getOptimizationContext(contextId);
       const recommendation = context.activeOptimizations.get(recommendationId);
 
       if (!recommendation) {
-        throw new Error(`Recommendation ${recommendationId} not found in active optimizations`);
+        throw new Error(
+          `Recommendation ${recommendationId} not found in active optimizations`,
+        );
       }
 
-      if (recommendation.status !== 'APPROVED') {
-        throw new Error(`Recommendation ${recommendationId} is not approved for implementation`);
+      if (recommendation.status !== "APPROVED") {
+        throw new Error(
+          `Recommendation ${recommendationId} is not approved for implementation`,
+        );
       }
 
       // Update status
-      recommendation.status = 'IMPLEMENTING';
+      recommendation.status = "IMPLEMENTING";
 
       let success = false;
 
       // Implement based on optimization type
       switch (recommendation.type) {
         case OptimizationType.CONFIGURATION:
-          success = await this.implementConfigurationOptimization(context, recommendation);
+          success = await this.implementConfigurationOptimization(
+            context,
+            recommendation,
+          );
           break;
 
         case OptimizationType.QUERY_OPTIMIZATION:
-          success = await this.implementQueryOptimization(context, recommendation);
+          success = await this.implementQueryOptimization(
+            context,
+            recommendation,
+          );
           break;
 
         case OptimizationType.INDEX_OPTIMIZATION:
-          success = await this.implementIndexOptimization(context, recommendation);
+          success = await this.implementIndexOptimization(
+            context,
+            recommendation,
+          );
           break;
 
         case OptimizationType.CONNECTION_POOL:
-          success = await this.implementConnectionPoolOptimization(context, recommendation);
+          success = await this.implementConnectionPoolOptimization(
+            context,
+            recommendation,
+          );
           break;
 
         case OptimizationType.CACHE_OPTIMIZATION:
-          success = await this.implementCacheOptimization(context, recommendation);
+          success = await this.implementCacheOptimization(
+            context,
+            recommendation,
+          );
           break;
 
         case OptimizationType.BATCH_OPTIMIZATION:
-          success = await this.implementBatchOptimization(context, recommendation);
+          success = await this.implementBatchOptimization(
+            context,
+            recommendation,
+          );
           break;
 
         case OptimizationType.RESOURCE_ALLOCATION:
-          success = await this.implementResourceAllocationOptimization(context, recommendation);
+          success = await this.implementResourceAllocationOptimization(
+            context,
+            recommendation,
+          );
           break;
 
         default:
-          throw new Error(`Unsupported optimization type: ${recommendation.type}`);
+          throw new Error(
+            `Unsupported optimization type: ${recommendation.type}`,
+          );
       }
 
       // Update status based on result
-      recommendation.status = success ? 'COMPLETED' : 'REJECTED';
+      recommendation.status = success ? "COMPLETED" : "REJECTED";
 
       // Log implementation result
       context.auditLogger.logImplementation(recommendationId, success, {
@@ -873,14 +1005,23 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
       });
 
       // Emit implementation completed event
-      this.emit('optimizationImplementationCompleted', { contextId, recommendationId, success, recommendation });
+      this.emit("optimizationImplementationCompleted", {
+        contextId,
+        recommendationId,
+        success,
+        recommendation,
+      });
 
-      this.logger.log(`Optimization recommendation ${recommendationId} implementation ${success ? 'succeeded' : 'failed'} in ${Date.now() - startTime}ms`);
+      this.logger.log(
+        `Optimization recommendation ${recommendationId} implementation ${success ? "succeeded" : "failed"} in ${Date.now() - startTime}ms`,
+      );
 
       return success;
-
     } catch (error) {
-      this.logger.error(`Failed to implement optimization recommendation: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to implement optimization recommendation: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -893,19 +1034,20 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
   private async generateThroughputOptimizations(
     context: OptimizationContext,
     currentMetrics: Map<PerformanceMetricType, number>,
-    thresholdViolations: Map<PerformanceMetricType, boolean>
+    thresholdViolations: Map<PerformanceMetricType, boolean>,
   ): Promise<OptimizationRecommendation[]> {
     const recommendations: OptimizationRecommendation[] = [];
 
     // Check throughput metrics
-    const currentThroughput = currentMetrics.get(PerformanceMetricType.THROUGHPUT) || 0;
+    const currentThroughput =
+      currentMetrics.get(PerformanceMetricType.THROUGHPUT) || 0;
 
     if (currentThroughput < context.thresholds.minThroughput) {
       // Batch processing optimization
       recommendations.push({
         recommendationId: `batch_opt_${Date.now()}`,
         type: OptimizationType.BATCH_OPTIMIZATION,
-        priority: 'HIGH',
+        priority: "HIGH",
         targetMetric: PerformanceMetricType.THROUGHPUT,
         expectedImprovement: {
           metric: PerformanceMetricType.THROUGHPUT,
@@ -913,26 +1055,26 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
           expectedValue: currentThroughput * 1.5,
           improvementPercentage: 50,
         },
-        complexity: 'MEDIUM',
+        complexity: "MEDIUM",
         estimatedImplementationTime: 3600000, // 1 hour
-        description: 'Optimize batch processing to increase throughput',
+        description: "Optimize batch processing to increase throughput",
         implementationSteps: [
-          'Analyze current batch sizes',
-          'Increase batch size for bulk operations',
-          'Implement parallel batch processing',
-          'Monitor throughput improvements',
+          "Analyze current batch sizes",
+          "Increase batch size for bulk operations",
+          "Implement parallel batch processing",
+          "Monitor throughput improvements",
         ],
-        risks: ['Increased memory usage', 'Potential latency increase'],
+        risks: ["Increased memory usage", "Potential latency increase"],
         dependencies: [],
         createdAt: new Date(),
-        status: 'PENDING',
+        status: "PENDING",
       });
 
       // Connection pool optimization
       recommendations.push({
         recommendationId: `conn_pool_opt_${Date.now()}`,
         type: OptimizationType.CONNECTION_POOL,
-        priority: 'MEDIUM',
+        priority: "MEDIUM",
         targetMetric: PerformanceMetricType.THROUGHPUT,
         expectedImprovement: {
           metric: PerformanceMetricType.THROUGHPUT,
@@ -940,18 +1082,18 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
           expectedValue: currentThroughput * 1.3,
           improvementPercentage: 30,
         },
-        complexity: 'LOW',
+        complexity: "LOW",
         estimatedImplementationTime: 1800000, // 30 minutes
-        description: 'Optimize database connection pool for higher throughput',
+        description: "Optimize database connection pool for higher throughput",
         implementationSteps: [
-          'Increase maximum connection pool size',
-          'Optimize connection timeout settings',
-          'Enable connection pooling optimizations',
+          "Increase maximum connection pool size",
+          "Optimize connection timeout settings",
+          "Enable connection pooling optimizations",
         ],
-        risks: ['Increased resource usage'],
+        risks: ["Increased resource usage"],
         dependencies: [],
         createdAt: new Date(),
-        status: 'PENDING',
+        status: "PENDING",
       });
     }
 
@@ -964,19 +1106,20 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
   private async generateLatencyOptimizations(
     context: OptimizationContext,
     currentMetrics: Map<PerformanceMetricType, number>,
-    thresholdViolations: Map<PerformanceMetricType, boolean>
+    thresholdViolations: Map<PerformanceMetricType, boolean>,
   ): Promise<OptimizationRecommendation[]> {
     const recommendations: OptimizationRecommendation[] = [];
 
     // Check latency metrics
-    const currentLatency = currentMetrics.get(PerformanceMetricType.LATENCY) || 0;
+    const currentLatency =
+      currentMetrics.get(PerformanceMetricType.LATENCY) || 0;
 
     if (currentLatency > context.thresholds.maxLatency) {
       // Query optimization
       recommendations.push({
         recommendationId: `query_opt_${Date.now()}`,
         type: OptimizationType.QUERY_OPTIMIZATION,
-        priority: 'HIGH',
+        priority: "HIGH",
         targetMetric: PerformanceMetricType.LATENCY,
         expectedImprovement: {
           metric: PerformanceMetricType.LATENCY,
@@ -984,26 +1127,26 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
           expectedValue: currentLatency * 0.6,
           improvementPercentage: 40,
         },
-        complexity: 'HIGH',
+        complexity: "HIGH",
         estimatedImplementationTime: 7200000, // 2 hours
-        description: 'Optimize database queries to reduce latency',
+        description: "Optimize database queries to reduce latency",
         implementationSteps: [
-          'Analyze slow queries',
-          'Optimize query execution plans',
-          'Add appropriate indexes',
-          'Refactor complex queries',
+          "Analyze slow queries",
+          "Optimize query execution plans",
+          "Add appropriate indexes",
+          "Refactor complex queries",
         ],
-        risks: ['Query behavior changes', 'Increased complexity'],
-        dependencies: ['INDEX_OPTIMIZATION'],
+        risks: ["Query behavior changes", "Increased complexity"],
+        dependencies: ["INDEX_OPTIMIZATION"],
         createdAt: new Date(),
-        status: 'PENDING',
+        status: "PENDING",
       });
 
       // Cache optimization
       recommendations.push({
         recommendationId: `cache_opt_${Date.now()}`,
         type: OptimizationType.CACHE_OPTIMIZATION,
-        priority: 'MEDIUM',
+        priority: "MEDIUM",
         targetMetric: PerformanceMetricType.LATENCY,
         expectedImprovement: {
           metric: PerformanceMetricType.LATENCY,
@@ -1011,19 +1154,19 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
           expectedValue: currentLatency * 0.7,
           improvementPercentage: 30,
         },
-        complexity: 'MEDIUM',
+        complexity: "MEDIUM",
         estimatedImplementationTime: 3600000, // 1 hour
-        description: 'Implement intelligent caching to reduce latency',
+        description: "Implement intelligent caching to reduce latency",
         implementationSteps: [
-          'Analyze cache hit rates',
-          'Implement query result caching',
-          'Optimize cache eviction policies',
-          'Add cache warming strategies',
+          "Analyze cache hit rates",
+          "Implement query result caching",
+          "Optimize cache eviction policies",
+          "Add cache warming strategies",
         ],
-        risks: ['Data consistency issues', 'Memory usage increase'],
+        risks: ["Data consistency issues", "Memory usage increase"],
         dependencies: [],
         createdAt: new Date(),
-        status: 'PENDING',
+        status: "PENDING",
       });
     }
 
@@ -1036,18 +1179,19 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
   private async generateResourceOptimizations(
     context: OptimizationContext,
     currentMetrics: Map<PerformanceMetricType, number>,
-    thresholdViolations: Map<PerformanceMetricType, boolean>
+    thresholdViolations: Map<PerformanceMetricType, boolean>,
   ): Promise<OptimizationRecommendation[]> {
     const recommendations: OptimizationRecommendation[] = [];
 
     // Check CPU usage
-    const currentCpuUsage = currentMetrics.get(PerformanceMetricType.CPU_USAGE) || 0;
+    const currentCpuUsage =
+      currentMetrics.get(PerformanceMetricType.CPU_USAGE) || 0;
 
     if (currentCpuUsage > context.thresholds.maxCpuUsage) {
       recommendations.push({
         recommendationId: `cpu_opt_${Date.now()}`,
         type: OptimizationType.RESOURCE_ALLOCATION,
-        priority: 'HIGH',
+        priority: "HIGH",
         targetMetric: PerformanceMetricType.CPU_USAGE,
         expectedImprovement: {
           metric: PerformanceMetricType.CPU_USAGE,
@@ -1055,30 +1199,31 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
           expectedValue: currentCpuUsage * 0.8,
           improvementPercentage: 20,
         },
-        complexity: 'MEDIUM',
+        complexity: "MEDIUM",
         estimatedImplementationTime: 1800000, // 30 minutes
-        description: 'Optimize CPU resource allocation and usage',
+        description: "Optimize CPU resource allocation and usage",
         implementationSteps: [
-          'Analyze CPU-intensive operations',
-          'Implement CPU affinity settings',
-          'Optimize algorithm complexity',
-          'Enable CPU usage monitoring',
+          "Analyze CPU-intensive operations",
+          "Implement CPU affinity settings",
+          "Optimize algorithm complexity",
+          "Enable CPU usage monitoring",
         ],
-        risks: ['Performance impact during optimization'],
+        risks: ["Performance impact during optimization"],
         dependencies: [],
         createdAt: new Date(),
-        status: 'PENDING',
+        status: "PENDING",
       });
     }
 
     // Check memory usage
-    const currentMemoryUsage = currentMetrics.get(PerformanceMetricType.MEMORY_USAGE) || 0;
+    const currentMemoryUsage =
+      currentMetrics.get(PerformanceMetricType.MEMORY_USAGE) || 0;
 
     if (currentMemoryUsage > context.thresholds.maxMemoryUsage) {
       recommendations.push({
         recommendationId: `memory_opt_${Date.now()}`,
         type: OptimizationType.RESOURCE_ALLOCATION,
-        priority: 'MEDIUM',
+        priority: "MEDIUM",
         targetMetric: PerformanceMetricType.MEMORY_USAGE,
         expectedImprovement: {
           metric: PerformanceMetricType.MEMORY_USAGE,
@@ -1086,19 +1231,19 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
           expectedValue: currentMemoryUsage * 0.75,
           improvementPercentage: 25,
         },
-        complexity: 'HIGH',
+        complexity: "HIGH",
         estimatedImplementationTime: 5400000, // 1.5 hours
-        description: 'Optimize memory allocation and garbage collection',
+        description: "Optimize memory allocation and garbage collection",
         implementationSteps: [
-          'Analyze memory usage patterns',
-          'Optimize object lifecycle management',
-          'Tune garbage collection settings',
-          'Implement memory pooling',
+          "Analyze memory usage patterns",
+          "Optimize object lifecycle management",
+          "Tune garbage collection settings",
+          "Implement memory pooling",
         ],
-        risks: ['Application stability', 'Performance regression'],
+        risks: ["Application stability", "Performance regression"],
         dependencies: [],
         createdAt: new Date(),
-        status: 'PENDING',
+        status: "PENDING",
       });
     }
 
@@ -1111,21 +1256,37 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
   private async generateBalancedOptimizations(
     context: OptimizationContext,
     currentMetrics: Map<PerformanceMetricType, number>,
-    thresholdViolations: Map<PerformanceMetricType, boolean>
+    thresholdViolations: Map<PerformanceMetricType, boolean>,
   ): Promise<OptimizationRecommendation[]> {
     // Combine recommendations from all strategies with balanced priorities
-    const throughputRecs = await this.generateThroughputOptimizations(context, currentMetrics, thresholdViolations);
-    const latencyRecs = await this.generateLatencyOptimizations(context, currentMetrics, thresholdViolations);
-    const resourceRecs = await this.generateResourceOptimizations(context, currentMetrics, thresholdViolations);
+    const throughputRecs = await this.generateThroughputOptimizations(
+      context,
+      currentMetrics,
+      thresholdViolations,
+    );
+    const latencyRecs = await this.generateLatencyOptimizations(
+      context,
+      currentMetrics,
+      thresholdViolations,
+    );
+    const resourceRecs = await this.generateResourceOptimizations(
+      context,
+      currentMetrics,
+      thresholdViolations,
+    );
 
     // Adjust priorities for balanced approach
-    const allRecommendations = [...throughputRecs, ...latencyRecs, ...resourceRecs];
+    const allRecommendations = [
+      ...throughputRecs,
+      ...latencyRecs,
+      ...resourceRecs,
+    ];
 
-    const adjustedRecommendations = allRecommendations.map(rec => {
-      if (rec.priority === 'CRITICAL') {
-        return { ...rec, priority: 'HIGH' as const };
-      } else if (rec.priority === 'LOW') {
-        return { ...rec, priority: 'MEDIUM' as const };
+    const adjustedRecommendations = allRecommendations.map((rec) => {
+      if (rec.priority === "CRITICAL") {
+        return { ...rec, priority: "HIGH" as const };
+      } else if (rec.priority === "LOW") {
+        return { ...rec, priority: "MEDIUM" as const };
       }
       return rec;
     });
@@ -1139,21 +1300,38 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
   private async generateAdaptiveOptimizations(
     context: OptimizationContext,
     currentMetrics: Map<PerformanceMetricType, number>,
-    thresholdViolations: Map<PerformanceMetricType, boolean>
+    thresholdViolations: Map<PerformanceMetricType, boolean>,
   ): Promise<OptimizationRecommendation[]> {
     // Analyze workload pattern and generate adaptive recommendations
     if (context.workloadPattern) {
-      return this.generatePatternBasedOptimizations(context, context.workloadPattern, currentMetrics, thresholdViolations);
+      return this.generatePatternBasedOptimizations(
+        context,
+        context.workloadPattern,
+        currentMetrics,
+        thresholdViolations,
+      );
     }
 
     // Detect current workload pattern
-    const detectedPattern = await this.detectWorkloadPattern(context, currentMetrics);
+    const detectedPattern = await this.detectWorkloadPattern(
+      context,
+      currentMetrics,
+    );
     if (detectedPattern) {
-      return this.generatePatternBasedOptimizations(context, detectedPattern, currentMetrics, thresholdViolations);
+      return this.generatePatternBasedOptimizations(
+        context,
+        detectedPattern,
+        currentMetrics,
+        thresholdViolations,
+      );
     }
 
     // Fallback to balanced optimizations
-    return this.generateBalancedOptimizations(context, currentMetrics, thresholdViolations);
+    return this.generateBalancedOptimizations(
+      context,
+      currentMetrics,
+      thresholdViolations,
+    );
   }
 
   // ===== OPTIMIZATION IMPLEMENTATIONS =====
@@ -1163,22 +1341,26 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
    */
   private async implementConfigurationOptimization(
     context: OptimizationContext,
-    recommendation: OptimizationRecommendation
+    recommendation: OptimizationRecommendation,
   ): Promise<boolean> {
-    this.logger.log(`Implementing configuration optimization: ${recommendation.description}`);
+    this.logger.log(
+      `Implementing configuration optimization: ${recommendation.description}`,
+    );
 
     try {
       // Simulate configuration changes
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       // Log configuration change
       context.auditLogger.logConfigurationChange(
-        { type: 'before_optimization' },
-        { type: 'after_optimization', recommendationId: recommendation.recommendationId }
+        { type: "before_optimization" },
+        {
+          type: "after_optimization",
+          recommendationId: recommendation.recommendationId,
+        },
       );
 
       return true;
-
     } catch (error) {
       this.logger.error(`Configuration optimization failed: ${error.message}`);
       return false;
@@ -1190,16 +1372,17 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
    */
   private async implementQueryOptimization(
     context: OptimizationContext,
-    recommendation: OptimizationRecommendation
+    recommendation: OptimizationRecommendation,
   ): Promise<boolean> {
-    this.logger.log(`Implementing query optimization: ${recommendation.description}`);
+    this.logger.log(
+      `Implementing query optimization: ${recommendation.description}`,
+    );
 
     try {
       // Simulate query optimization
-      await new Promise(resolve => setTimeout(resolve, 200));
+      await new Promise((resolve) => setTimeout(resolve, 200));
 
       return true;
-
     } catch (error) {
       this.logger.error(`Query optimization failed: ${error.message}`);
       return false;
@@ -1211,16 +1394,17 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
    */
   private async implementIndexOptimization(
     context: OptimizationContext,
-    recommendation: OptimizationRecommendation
+    recommendation: OptimizationRecommendation,
   ): Promise<boolean> {
-    this.logger.log(`Implementing index optimization: ${recommendation.description}`);
+    this.logger.log(
+      `Implementing index optimization: ${recommendation.description}`,
+    );
 
     try {
       // Simulate index optimization
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
       return true;
-
     } catch (error) {
       this.logger.error(`Index optimization failed: ${error.message}`);
       return false;
@@ -1232,25 +1416,34 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
    */
   private async implementConnectionPoolOptimization(
     context: OptimizationContext,
-    recommendation: OptimizationRecommendation
+    recommendation: OptimizationRecommendation,
   ): Promise<boolean> {
-    this.logger.log(`Implementing connection pool optimization: ${recommendation.description}`);
+    this.logger.log(
+      `Implementing connection pool optimization: ${recommendation.description}`,
+    );
 
     try {
       // Update connection pool settings
       const oldConfig = { ...context.resourceAllocation.database };
-      context.resourceAllocation.database.maxConnections = Math.min(50, context.resourceAllocation.database.maxConnections * 1.5);
-      context.resourceAllocation.database.connectionTimeout = Math.max(10000, context.resourceAllocation.database.connectionTimeout * 0.8);
+      context.resourceAllocation.database.maxConnections = Math.min(
+        50,
+        context.resourceAllocation.database.maxConnections * 1.5,
+      );
+      context.resourceAllocation.database.connectionTimeout = Math.max(
+        10000,
+        context.resourceAllocation.database.connectionTimeout * 0.8,
+      );
 
       context.auditLogger.logConfigurationChange(
         { connectionPool: oldConfig },
-        { connectionPool: context.resourceAllocation.database }
+        { connectionPool: context.resourceAllocation.database },
       );
 
       return true;
-
     } catch (error) {
-      this.logger.error(`Connection pool optimization failed: ${error.message}`);
+      this.logger.error(
+        `Connection pool optimization failed: ${error.message}`,
+      );
       return false;
     }
   }
@@ -1260,22 +1453,26 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
    */
   private async implementCacheOptimization(
     context: OptimizationContext,
-    recommendation: OptimizationRecommendation
+    recommendation: OptimizationRecommendation,
   ): Promise<boolean> {
-    this.logger.log(`Implementing cache optimization: ${recommendation.description}`);
+    this.logger.log(
+      `Implementing cache optimization: ${recommendation.description}`,
+    );
 
     try {
       // Update cache settings
       const oldConfig = { ...context.resourceAllocation.memory };
-      context.resourceAllocation.memory.cacheSize = Math.min(4096, context.resourceAllocation.memory.cacheSize * 1.5);
+      context.resourceAllocation.memory.cacheSize = Math.min(
+        4096,
+        context.resourceAllocation.memory.cacheSize * 1.5,
+      );
 
       context.auditLogger.logConfigurationChange(
         { cache: oldConfig },
-        { cache: context.resourceAllocation.memory }
+        { cache: context.resourceAllocation.memory },
       );
 
       return true;
-
     } catch (error) {
       this.logger.error(`Cache optimization failed: ${error.message}`);
       return false;
@@ -1287,16 +1484,17 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
    */
   private async implementBatchOptimization(
     context: OptimizationContext,
-    recommendation: OptimizationRecommendation
+    recommendation: OptimizationRecommendation,
   ): Promise<boolean> {
-    this.logger.log(`Implementing batch optimization: ${recommendation.description}`);
+    this.logger.log(
+      `Implementing batch optimization: ${recommendation.description}`,
+    );
 
     try {
       // Simulate batch optimization
-      await new Promise(resolve => setTimeout(resolve, 300));
+      await new Promise((resolve) => setTimeout(resolve, 300));
 
       return true;
-
     } catch (error) {
       this.logger.error(`Batch optimization failed: ${error.message}`);
       return false;
@@ -1308,29 +1506,37 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
    */
   private async implementResourceAllocationOptimization(
     context: OptimizationContext,
-    recommendation: OptimizationRecommendation
+    recommendation: OptimizationRecommendation,
   ): Promise<boolean> {
-    this.logger.log(`Implementing resource allocation optimization: ${recommendation.description}`);
+    this.logger.log(
+      `Implementing resource allocation optimization: ${recommendation.description}`,
+    );
 
     try {
       // Update resource allocation based on recommendation
       const oldConfig = { ...context.resourceAllocation };
 
       if (recommendation.targetMetric === PerformanceMetricType.CPU_USAGE) {
-        context.resourceAllocation.cpu.priority = 'HIGH';
-      } else if (recommendation.targetMetric === PerformanceMetricType.MEMORY_USAGE) {
-        context.resourceAllocation.memory.heapSize = Math.max(1024, context.resourceAllocation.memory.heapSize * 0.9);
+        context.resourceAllocation.cpu.priority = "HIGH";
+      } else if (
+        recommendation.targetMetric === PerformanceMetricType.MEMORY_USAGE
+      ) {
+        context.resourceAllocation.memory.heapSize = Math.max(
+          1024,
+          context.resourceAllocation.memory.heapSize * 0.9,
+        );
       }
 
       context.auditLogger.logConfigurationChange(
         { resourceAllocation: oldConfig },
-        { resourceAllocation: context.resourceAllocation }
+        { resourceAllocation: context.resourceAllocation },
       );
 
       return true;
-
     } catch (error) {
-      this.logger.error(`Resource allocation optimization failed: ${error.message}`);
+      this.logger.error(
+        `Resource allocation optimization failed: ${error.message}`,
+      );
       return false;
     }
   }
@@ -1351,7 +1557,7 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
    */
   private mergeResourceAllocation(
     base: ResourceAllocationConfig,
-    override?: Partial<ResourceAllocationConfig>
+    override?: Partial<ResourceAllocationConfig>,
   ): ResourceAllocationConfig {
     if (!override) return { ...base };
 
@@ -1366,48 +1572,65 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
   /**
    * Check threshold violations
    */
-  private checkThresholdViolations(contextId: string, measurement: PerformanceMeasurement): void {
+  private checkThresholdViolations(
+    contextId: string,
+    measurement: PerformanceMeasurement,
+  ): void {
     const context = this.optimizationContexts.get(contextId);
     if (!context) return;
 
     const thresholds = context.thresholds;
     let violated = false;
-    let severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' = 'LOW';
+    let severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL" = "LOW";
 
     switch (measurement.metricType) {
       case PerformanceMetricType.LATENCY:
         if (measurement.value > thresholds.maxLatency) {
           violated = true;
-          severity = measurement.value > thresholds.maxLatency * 2 ? 'CRITICAL' : 'HIGH';
+          severity =
+            measurement.value > thresholds.maxLatency * 2 ? "CRITICAL" : "HIGH";
         }
         break;
 
       case PerformanceMetricType.THROUGHPUT:
         if (measurement.value < thresholds.minThroughput) {
           violated = true;
-          severity = measurement.value < thresholds.minThroughput * 0.5 ? 'CRITICAL' : 'MEDIUM';
+          severity =
+            measurement.value < thresholds.minThroughput * 0.5
+              ? "CRITICAL"
+              : "MEDIUM";
         }
         break;
 
       case PerformanceMetricType.CPU_USAGE:
         if (measurement.value > thresholds.maxCpuUsage) {
           violated = true;
-          severity = measurement.value > thresholds.maxCpuUsage * 1.2 ? 'CRITICAL' : 'HIGH';
+          severity =
+            measurement.value > thresholds.maxCpuUsage * 1.2
+              ? "CRITICAL"
+              : "HIGH";
         }
         break;
 
       case PerformanceMetricType.MEMORY_USAGE:
         if (measurement.value > thresholds.maxMemoryUsage) {
           violated = true;
-          severity = measurement.value > thresholds.maxMemoryUsage * 1.1 ? 'CRITICAL' : 'HIGH';
+          severity =
+            measurement.value > thresholds.maxMemoryUsage * 1.1
+              ? "CRITICAL"
+              : "HIGH";
         }
         break;
     }
 
     if (violated) {
-      context.auditLogger.logThresholdViolation(measurement.metricType, this.getThresholdValue(thresholds, measurement.metricType), measurement.value);
+      context.auditLogger.logThresholdViolation(
+        measurement.metricType,
+        this.getThresholdValue(thresholds, measurement.metricType),
+        measurement.value,
+      );
 
-      this.emit('thresholdViolated', {
+      this.emit("thresholdViolated", {
         contextId,
         metricType: measurement.metricType,
         threshold: this.getThresholdValue(thresholds, measurement.metricType),
@@ -1420,7 +1643,10 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
   /**
    * Get threshold value for metric type
    */
-  private getThresholdValue(thresholds: PerformanceThresholds, metricType: PerformanceMetricType): number {
+  private getThresholdValue(
+    thresholds: PerformanceThresholds,
+    metricType: PerformanceMetricType,
+  ): number {
     switch (metricType) {
       case PerformanceMetricType.LATENCY:
         return thresholds.maxLatency;
@@ -1446,13 +1672,20 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
   /**
    * Generate initial recommendations
    */
-  private async generateInitialRecommendations(context: OptimizationContext): Promise<void> {
+  private async generateInitialRecommendations(
+    context: OptimizationContext,
+  ): Promise<void> {
     // Generate baseline recommendations
-    const recommendations = await this.generateOptimizationRecommendations(context.contextId);
+    const recommendations = await this.generateOptimizationRecommendations(
+      context.contextId,
+    );
 
     // Add to active optimizations
     for (const recommendation of recommendations) {
-      context.activeOptimizations.set(recommendation.recommendationId, recommendation);
+      context.activeOptimizations.set(
+        recommendation.recommendationId,
+        recommendation,
+      );
     }
   }
 
@@ -1461,17 +1694,22 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
    */
   private async generateRecommendationsForStrategy(
     context: OptimizationContext,
-    strategy: OptimizationStrategy
+    strategy: OptimizationStrategy,
   ): Promise<void> {
     // Clear existing recommendations
     context.activeOptimizations.clear();
 
     // Generate new recommendations
-    const recommendations = await this.generateOptimizationRecommendations(context.contextId);
+    const recommendations = await this.generateOptimizationRecommendations(
+      context.contextId,
+    );
 
     // Add to active optimizations
     for (const recommendation of recommendations) {
-      context.activeOptimizations.set(recommendation.recommendationId, recommendation);
+      context.activeOptimizations.set(
+        recommendation.recommendationId,
+        recommendation,
+      );
     }
   }
 
@@ -1480,24 +1718,25 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
    */
   private async detectWorkloadPattern(
     context: OptimizationContext,
-    currentMetrics: Map<PerformanceMetricType, number>
+    currentMetrics: Map<PerformanceMetricType, number>,
   ): Promise<WorkloadPattern | null> {
     // Simplified workload pattern detection
-    const throughput = currentMetrics.get(PerformanceMetricType.THROUGHPUT) || 0;
+    const throughput =
+      currentMetrics.get(PerformanceMetricType.THROUGHPUT) || 0;
     const latency = currentMetrics.get(PerformanceMetricType.LATENCY) || 0;
 
     // High throughput, low latency - OLTP pattern
     if (throughput > 1000 && latency < 100) {
-      return this.workloadPatterns.get('oltp_high_throughput') || null;
+      return this.workloadPatterns.get("oltp_high_throughput") || null;
     }
 
     // Low throughput, variable latency - OLAP pattern
     if (throughput < 100 && latency > 500) {
-      return this.workloadPatterns.get('olap_analytical') || null;
+      return this.workloadPatterns.get("olap_analytical") || null;
     }
 
     // Medium throughput, medium latency - Mixed pattern
-    return this.workloadPatterns.get('mixed_workload') || null;
+    return this.workloadPatterns.get("mixed_workload") || null;
   }
 
   /**
@@ -1507,7 +1746,7 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
     context: OptimizationContext,
     pattern: WorkloadPattern,
     currentMetrics: Map<PerformanceMetricType, number>,
-    thresholdViolations: Map<PerformanceMetricType, boolean>
+    thresholdViolations: Map<PerformanceMetricType, boolean>,
   ): Promise<OptimizationRecommendation[]> {
     // Generate optimizations based on workload pattern characteristics
     const recommendations: OptimizationRecommendation[] = [];
@@ -1517,26 +1756,27 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
       recommendations.push({
         recommendationId: `read_heavy_opt_${Date.now()}`,
         type: OptimizationType.CACHE_OPTIMIZATION,
-        priority: 'HIGH',
+        priority: "HIGH",
         targetMetric: PerformanceMetricType.LATENCY,
         expectedImprovement: {
           metric: PerformanceMetricType.LATENCY,
           currentValue: currentMetrics.get(PerformanceMetricType.LATENCY) || 0,
-          expectedValue: (currentMetrics.get(PerformanceMetricType.LATENCY) || 0) * 0.6,
+          expectedValue:
+            (currentMetrics.get(PerformanceMetricType.LATENCY) || 0) * 0.6,
           improvementPercentage: 40,
         },
-        complexity: 'MEDIUM',
+        complexity: "MEDIUM",
         estimatedImplementationTime: 3600000,
-        description: 'Optimize for read-heavy workload with enhanced caching',
+        description: "Optimize for read-heavy workload with enhanced caching",
         implementationSteps: [
-          'Implement read replicas',
-          'Enhance query result caching',
-          'Optimize read-only transactions',
+          "Implement read replicas",
+          "Enhance query result caching",
+          "Optimize read-only transactions",
         ],
-        risks: ['Cache consistency'],
+        risks: ["Cache consistency"],
         dependencies: [],
         createdAt: new Date(),
-        status: 'PENDING',
+        status: "PENDING",
       });
     }
 
@@ -1548,17 +1788,18 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
    */
   private initializeDefaultWorkloadPatterns(): void {
     // OLTP High Throughput Pattern
-    this.workloadPatterns.set('oltp_high_throughput', {
-      patternId: 'oltp_high_throughput',
-      name: 'OLTP High Throughput',
-      description: 'High-frequency transaction processing with low latency requirements',
+    this.workloadPatterns.set("oltp_high_throughput", {
+      patternId: "oltp_high_throughput",
+      name: "OLTP High Throughput",
+      description:
+        "High-frequency transaction processing with low latency requirements",
       characteristics: {
         avgTransactionSize: 10,
         peakThroughput: 2000,
         avgLatency: 50,
         readWriteRatio: 0.6,
         concurrencyLevel: 100,
-        temporalDistribution: 'PEAK_HOURS',
+        temporalDistribution: "PEAK_HOURS",
       },
       optimalConfiguration: {
         transactionConfiguration: {
@@ -1571,10 +1812,19 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
           enableParallelExecution: true,
         },
         resourceAllocation: {
-          cpu: { coreCount: 8, priority: 'HIGH' },
+          cpu: { coreCount: 8, priority: "HIGH" },
           memory: { heapSize: 4096, cacheSize: 2048, bufferPoolSize: 1024 },
-          database: { maxConnections: 100, minConnections: 20, connectionTimeout: 5000, idleTimeout: 300000 },
-          network: { maxBandwidth: 10000, connectionLimit: 5000, timeout: 5000 },
+          database: {
+            maxConnections: 100,
+            minConnections: 20,
+            connectionTimeout: 5000,
+            idleTimeout: 300000,
+          },
+          network: {
+            maxBandwidth: 10000,
+            connectionLimit: 5000,
+            timeout: 5000,
+          },
         },
       },
       frequency: 0.4,
@@ -1582,17 +1832,17 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
     });
 
     // OLAP Analytical Pattern
-    this.workloadPatterns.set('olap_analytical', {
-      patternId: 'olap_analytical',
-      name: 'OLAP Analytical',
-      description: 'Complex analytical queries with higher latency tolerance',
+    this.workloadPatterns.set("olap_analytical", {
+      patternId: "olap_analytical",
+      name: "OLAP Analytical",
+      description: "Complex analytical queries with higher latency tolerance",
       characteristics: {
         avgTransactionSize: 1000,
         peakThroughput: 50,
         avgLatency: 2000,
         readWriteRatio: 0.95,
         concurrencyLevel: 10,
-        temporalDistribution: 'UNIFORM',
+        temporalDistribution: "UNIFORM",
       },
       optimalConfiguration: {
         transactionConfiguration: {
@@ -1605,9 +1855,14 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
           enableParallelExecution: false,
         },
         resourceAllocation: {
-          cpu: { coreCount: 16, priority: 'NORMAL' },
+          cpu: { coreCount: 16, priority: "NORMAL" },
           memory: { heapSize: 8192, cacheSize: 4096, bufferPoolSize: 2048 },
-          database: { maxConnections: 20, minConnections: 5, connectionTimeout: 60000, idleTimeout: 1800000 },
+          database: {
+            maxConnections: 20,
+            minConnections: 5,
+            connectionTimeout: 60000,
+            idleTimeout: 1800000,
+          },
           network: { maxBandwidth: 1000, connectionLimit: 100, timeout: 60000 },
         },
       },
@@ -1616,17 +1871,17 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
     });
 
     // Mixed Workload Pattern
-    this.workloadPatterns.set('mixed_workload', {
-      patternId: 'mixed_workload',
-      name: 'Mixed Workload',
-      description: 'Balanced mix of OLTP and OLAP operations',
+    this.workloadPatterns.set("mixed_workload", {
+      patternId: "mixed_workload",
+      name: "Mixed Workload",
+      description: "Balanced mix of OLTP and OLAP operations",
       characteristics: {
         avgTransactionSize: 100,
         peakThroughput: 500,
         avgLatency: 200,
         readWriteRatio: 0.75,
         concurrencyLevel: 50,
-        temporalDistribution: 'PEAK_HOURS',
+        temporalDistribution: "PEAK_HOURS",
       },
       optimalConfiguration: {
         transactionConfiguration: {
@@ -1639,10 +1894,19 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
           enableParallelExecution: true,
         },
         resourceAllocation: {
-          cpu: { coreCount: 8, priority: 'NORMAL' },
+          cpu: { coreCount: 8, priority: "NORMAL" },
           memory: { heapSize: 4096, cacheSize: 2048, bufferPoolSize: 1024 },
-          database: { maxConnections: 50, minConnections: 10, connectionTimeout: 30000, idleTimeout: 600000 },
-          network: { maxBandwidth: 5000, connectionLimit: 1000, timeout: 30000 },
+          database: {
+            maxConnections: 50,
+            minConnections: 10,
+            connectionTimeout: 30000,
+            idleTimeout: 600000,
+          },
+          network: {
+            maxBandwidth: 5000,
+            connectionLimit: 1000,
+            timeout: 30000,
+          },
         },
       },
       frequency: 0.3,
@@ -1657,19 +1921,43 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
     this.monitoringTimer = setInterval(() => {
       try {
         // Simulate performance measurements for all contexts
-        for (const [contextId, context] of this.optimizationContexts.entries()) {
+        for (const [
+          contextId,
+          context,
+        ] of this.optimizationContexts.entries()) {
           // Generate simulated metrics
-          this.recordPerformanceMeasurement(contextId, PerformanceMetricType.LATENCY, Math.random() * 2000 + 100);
-          this.recordPerformanceMeasurement(contextId, PerformanceMetricType.THROUGHPUT, Math.random() * 1000 + 50);
-          this.recordPerformanceMeasurement(contextId, PerformanceMetricType.CPU_USAGE, Math.random() * 100);
-          this.recordPerformanceMeasurement(contextId, PerformanceMetricType.MEMORY_USAGE, Math.random() * 8192);
+          this.recordPerformanceMeasurement(
+            contextId,
+            PerformanceMetricType.LATENCY,
+            Math.random() * 2000 + 100,
+          );
+          this.recordPerformanceMeasurement(
+            contextId,
+            PerformanceMetricType.THROUGHPUT,
+            Math.random() * 1000 + 50,
+          );
+          this.recordPerformanceMeasurement(
+            contextId,
+            PerformanceMetricType.CPU_USAGE,
+            Math.random() * 100,
+          );
+          this.recordPerformanceMeasurement(
+            contextId,
+            PerformanceMetricType.MEMORY_USAGE,
+            Math.random() * 8192,
+          );
         }
       } catch (error) {
-        this.logger.error(`Performance monitoring error: ${error.message}`, error.stack);
+        this.logger.error(
+          `Performance monitoring error: ${error.message}`,
+          error.stack,
+        );
       }
     }, this.monitoringInterval);
 
-    this.logger.log(`Started performance monitoring with ${this.monitoringInterval}ms interval`);
+    this.logger.log(
+      `Started performance monitoring with ${this.monitoringInterval}ms interval`,
+    );
   }
 
   /**
@@ -1683,11 +1971,16 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
           await this.analyzePerformanceTrends(contextId);
         }
       } catch (error) {
-        this.logger.error(`Performance analysis error: ${error.message}`, error.stack);
+        this.logger.error(
+          `Performance analysis error: ${error.message}`,
+          error.stack,
+        );
       }
     }, this.analysisInterval);
 
-    this.logger.log(`Started performance analysis with ${this.analysisInterval}ms interval`);
+    this.logger.log(
+      `Started performance analysis with ${this.analysisInterval}ms interval`,
+    );
   }
 
   /**
@@ -1704,8 +1997,10 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
         context.trendAnalysis.set(metricType, trend);
 
         // Generate recommendations based on degrading trends
-        if (trend.direction === 'DEGRADING' && trend.strength > 0.7) {
-          this.logger.log(`Detected degrading trend for ${metricType} in context ${contextId}`);
+        if (trend.direction === "DEGRADING" && trend.strength > 0.7) {
+          this.logger.log(
+            `Detected degrading trend for ${metricType} in context ${contextId}`,
+          );
           // Could trigger additional optimization recommendations here
         }
       } catch (error) {
@@ -1719,7 +2014,9 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
   /**
    * Create optimization performance monitor
    */
-  private createOptimizationPerformanceMonitor(contextId: string): OptimizationPerformanceMonitor {
+  private createOptimizationPerformanceMonitor(
+    contextId: string,
+  ): OptimizationPerformanceMonitor {
     const measurements: PerformanceMeasurement[] = [];
     const maxMeasurements = 1000;
 
@@ -1738,11 +2035,15 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
 
         for (const metricType of Object.values(PerformanceMetricType)) {
           const recentMeasurements = measurements.filter(
-            m => m.metricType === metricType && (now - m.timestamp.getTime()) < recentWindow
+            (m) =>
+              m.metricType === metricType &&
+              now - m.timestamp.getTime() < recentWindow,
           );
 
           if (recentMeasurements.length > 0) {
-            const avg = recentMeasurements.reduce((sum, m) => sum + m.value, 0) / recentMeasurements.length;
+            const avg =
+              recentMeasurements.reduce((sum, m) => sum + m.value, 0) /
+              recentMeasurements.length;
             current.set(metricType, avg);
           }
         }
@@ -1752,34 +2053,44 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
 
       getTrend: (metricType: PerformanceMetricType, windowSize: number) => {
         const relevantMeasurements = measurements
-          .filter(m => m.metricType === metricType)
+          .filter((m) => m.metricType === metricType)
           .slice(-windowSize)
           .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
 
         if (relevantMeasurements.length < 10) {
-          throw new Error('Insufficient data for trend analysis');
+          throw new Error("Insufficient data for trend analysis");
         }
 
-        const values = relevantMeasurements.map(m => m.value);
+        const values = relevantMeasurements.map((m) => m.value);
         const mean = values.reduce((sum, v) => sum + v, 0) / values.length;
         const median = values.sort()[Math.floor(values.length / 2)];
-        const variance = values.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / values.length;
+        const variance =
+          values.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) /
+          values.length;
         const standardDeviation = Math.sqrt(variance);
 
         // Simple trend detection
         const firstHalf = values.slice(0, Math.floor(values.length / 2));
         const secondHalf = values.slice(Math.floor(values.length / 2));
-        const firstAvg = firstHalf.reduce((sum, v) => sum + v, 0) / firstHalf.length;
-        const secondAvg = secondHalf.reduce((sum, v) => sum + v, 0) / secondHalf.length;
+        const firstAvg =
+          firstHalf.reduce((sum, v) => sum + v, 0) / firstHalf.length;
+        const secondAvg =
+          secondHalf.reduce((sum, v) => sum + v, 0) / secondHalf.length;
 
-        let direction: 'IMPROVING' | 'DEGRADING' | 'STABLE' = 'STABLE';
+        let direction: "IMPROVING" | "DEGRADING" | "STABLE" = "STABLE";
         let strength = 0;
 
         if (secondAvg > firstAvg * 1.1) {
-          direction = metricType === PerformanceMetricType.THROUGHPUT ? 'IMPROVING' : 'DEGRADING';
+          direction =
+            metricType === PerformanceMetricType.THROUGHPUT
+              ? "IMPROVING"
+              : "DEGRADING";
           strength = Math.min(1, Math.abs(secondAvg - firstAvg) / firstAvg);
         } else if (secondAvg < firstAvg * 0.9) {
-          direction = metricType === PerformanceMetricType.THROUGHPUT ? 'DEGRADING' : 'IMPROVING';
+          direction =
+            metricType === PerformanceMetricType.THROUGHPUT
+              ? "DEGRADING"
+              : "IMPROVING";
           strength = Math.min(1, Math.abs(firstAvg - secondAvg) / firstAvg);
         }
 
@@ -1789,7 +2100,8 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
           strength,
           analysisWindow: {
             startTime: relevantMeasurements[0].timestamp,
-            endTime: relevantMeasurements[relevantMeasurements.length - 1].timestamp,
+            endTime:
+              relevantMeasurements[relevantMeasurements.length - 1].timestamp,
             sampleCount: relevantMeasurements.length,
           },
           statistics: {
@@ -1833,20 +2145,30 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
 
       generateReport: (timeRange: { start: Date; end: Date }) => {
         const relevantMeasurements = measurements.filter(
-          m => m.timestamp >= timeRange.start && m.timestamp <= timeRange.end
+          (m) => m.timestamp >= timeRange.start && m.timestamp <= timeRange.end,
         );
 
         const reportId = `perf_report_${Date.now()}`;
 
         // Calculate summary metrics
-        const latencyMeasurements = relevantMeasurements.filter(m => m.metricType === PerformanceMetricType.LATENCY);
-        const throughputMeasurements = relevantMeasurements.filter(m => m.metricType === PerformanceMetricType.THROUGHPUT);
+        const latencyMeasurements = relevantMeasurements.filter(
+          (m) => m.metricType === PerformanceMetricType.LATENCY,
+        );
+        const throughputMeasurements = relevantMeasurements.filter(
+          (m) => m.metricType === PerformanceMetricType.THROUGHPUT,
+        );
 
-        const avgLatency = latencyMeasurements.length > 0 ?
-          latencyMeasurements.reduce((sum, m) => sum + m.value, 0) / latencyMeasurements.length : 0;
+        const avgLatency =
+          latencyMeasurements.length > 0
+            ? latencyMeasurements.reduce((sum, m) => sum + m.value, 0) /
+              latencyMeasurements.length
+            : 0;
 
-        const throughput = throughputMeasurements.length > 0 ?
-          throughputMeasurements.reduce((sum, m) => sum + m.value, 0) / throughputMeasurements.length : 0;
+        const throughput =
+          throughputMeasurements.length > 0
+            ? throughputMeasurements.reduce((sum, m) => sum + m.value, 0) /
+              throughputMeasurements.length
+            : 0;
 
         return {
           reportId,
@@ -1876,14 +2198,17 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
   /**
    * Create optimization audit logger
    */
-  private createOptimizationAuditLogger(contextId: string, userContext: ParlantUserContext): OptimizationAuditLogger {
+  private createOptimizationAuditLogger(
+    contextId: string,
+    userContext: ParlantUserContext,
+  ): OptimizationAuditLogger {
     const auditTrail: OptimizationAuditEntry[] = [];
 
     return {
       logRecommendation: (recommendation: OptimizationRecommendation) => {
         auditTrail.push({
           auditId: `${contextId}_rec_${recommendation.recommendationId}`,
-          type: 'RECOMMENDATION',
+          type: "RECOMMENDATION",
           timestamp: new Date(),
           userContext,
           details: {
@@ -1896,10 +2221,14 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
         });
       },
 
-      logImplementation: (recommendationId: string, success: boolean, details: Record<string, unknown>) => {
+      logImplementation: (
+        recommendationId: string,
+        success: boolean,
+        details: Record<string, unknown>,
+      ) => {
         auditTrail.push({
           auditId: `${contextId}_impl_${recommendationId}_${Date.now()}`,
-          type: 'IMPLEMENTATION',
+          type: "IMPLEMENTATION",
           timestamp: new Date(),
           userContext,
           details: { recommendationId, success, ...details },
@@ -1907,10 +2236,14 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
         });
       },
 
-      logThresholdViolation: (metricType: PerformanceMetricType, threshold: number, actual: number) => {
+      logThresholdViolation: (
+        metricType: PerformanceMetricType,
+        threshold: number,
+        actual: number,
+      ) => {
         auditTrail.push({
           auditId: `${contextId}_violation_${Date.now()}`,
-          type: 'THRESHOLD_VIOLATION',
+          type: "THRESHOLD_VIOLATION",
           timestamp: new Date(),
           userContext,
           details: { metricType, threshold, actual },
@@ -1918,10 +2251,13 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
         });
       },
 
-      logConfigurationChange: (oldConfig: Record<string, unknown>, newConfig: Record<string, unknown>) => {
+      logConfigurationChange: (
+        oldConfig: Record<string, unknown>,
+        newConfig: Record<string, unknown>,
+      ) => {
         auditTrail.push({
           auditId: `${contextId}_config_${Date.now()}`,
-          type: 'CONFIGURATION_CHANGE',
+          type: "CONFIGURATION_CHANGE",
           timestamp: new Date(),
           userContext,
           details: { oldConfig, newConfig },
@@ -1937,21 +2273,35 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
    * Set up event listeners
    */
   private setupEventListeners(): void {
-    this.on('optimizationContextCreated', ({ contextId, strategy }) => {
-      this.logger.log(`Optimization context ${contextId} created with strategy ${strategy}`);
+    this.on("optimizationContextCreated", ({ contextId, strategy }) => {
+      this.logger.log(
+        `Optimization context ${contextId} created with strategy ${strategy}`,
+      );
     });
 
-    this.on('optimizationRecommendationsGenerated', ({ contextId, recommendations }) => {
-      this.logger.log(`Generated ${recommendations.length} optimization recommendations for context ${contextId}`);
+    this.on(
+      "optimizationRecommendationsGenerated",
+      ({ contextId, recommendations }) => {
+        this.logger.log(
+          `Generated ${recommendations.length} optimization recommendations for context ${contextId}`,
+        );
+      },
+    );
+
+    this.on("thresholdViolated", ({ contextId, metricType, severity }) => {
+      this.logger.warn(
+        `Threshold violated for ${metricType} in context ${contextId} (severity: ${severity})`,
+      );
     });
 
-    this.on('thresholdViolated', ({ contextId, metricType, severity }) => {
-      this.logger.warn(`Threshold violated for ${metricType} in context ${contextId} (severity: ${severity})`);
-    });
-
-    this.on('optimizationImplementationCompleted', ({ contextId, recommendationId, success }) => {
-      this.logger.log(`Optimization ${recommendationId} implementation ${success ? 'succeeded' : 'failed'} for context ${contextId}`);
-    });
+    this.on(
+      "optimizationImplementationCompleted",
+      ({ contextId, recommendationId, success }) => {
+        this.logger.log(
+          `Optimization ${recommendationId} implementation ${success ? "succeeded" : "failed"} for context ${contextId}`,
+        );
+      },
+    );
   }
 
   // ===== GETTER METHODS =====
@@ -1972,7 +2322,10 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
   /**
    * Get optimization context status
    */
-  getOptimizationContextStatus(contextId: string): { strategy: OptimizationStrategy; context?: OptimizationContext } {
+  getOptimizationContextStatus(contextId: string): {
+    strategy: OptimizationStrategy;
+    context?: OptimizationContext;
+  } {
     const context = this.optimizationContexts.get(contextId);
     return {
       strategy: context ? context.strategy : OptimizationStrategy.BALANCED,
@@ -1983,7 +2336,9 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
   /**
    * Get optimization recommendations
    */
-  getOptimizationRecommendations(contextId: string): OptimizationRecommendation[] {
+  getOptimizationRecommendations(
+    contextId: string,
+  ): OptimizationRecommendation[] {
     const recommendations = this.recommendationsCache.get(contextId);
     return recommendations ? [...recommendations] : [];
   }
@@ -1991,7 +2346,10 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
   /**
    * Get performance report
    */
-  getPerformanceReport(contextId: string, timeRange?: { start: Date; end: Date }): PerformanceReport | null {
+  getPerformanceReport(
+    contextId: string,
+    timeRange?: { start: Date; end: Date },
+  ): PerformanceReport | null {
     const monitor = this.performanceMonitors.get(contextId);
     if (!monitor) return null;
 
@@ -2014,7 +2372,10 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
   /**
    * Approve optimization recommendation
    */
-  async approveOptimizationRecommendation(contextId: string, recommendationId: string): Promise<void> {
+  async approveOptimizationRecommendation(
+    contextId: string,
+    recommendationId: string,
+  ): Promise<void> {
     const context = this.getOptimizationContext(contextId);
     const recommendation = context.activeOptimizations.get(recommendationId);
 
@@ -2022,10 +2383,14 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
       throw new Error(`Recommendation ${recommendationId} not found`);
     }
 
-    recommendation.status = 'APPROVED';
+    recommendation.status = "APPROVED";
 
     // Emit approval event
-    this.emit('optimizationRecommendationApproved', { contextId, recommendationId, recommendation });
+    this.emit("optimizationRecommendationApproved", {
+      contextId,
+      recommendationId,
+      recommendation,
+    });
   }
 
   /**
@@ -2043,13 +2408,13 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
     if (this.monitoringTimer) {
       clearInterval(this.monitoringTimer);
       this.monitoringTimer = undefined;
-      this.logger.log('Stopped performance monitoring');
+      this.logger.log("Stopped performance monitoring");
     }
 
     if (this.analysisTimer) {
       clearInterval(this.analysisTimer);
       this.analysisTimer = undefined;
-      this.logger.log('Stopped performance analysis');
+      this.logger.log("Stopped performance analysis");
     }
   }
 
@@ -2065,6 +2430,6 @@ export class ParlantPerformanceOptimizerService extends EventEmitter {
     this.recommendationsCache.clear();
     this.globalMeasurements.length = 0;
 
-    this.logger.log('Performance optimizer cleanup completed');
+    this.logger.log("Performance optimizer cleanup completed");
   }
 }

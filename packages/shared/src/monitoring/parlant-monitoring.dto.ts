@@ -5,8 +5,18 @@
  * providing proper type safety for all API responses.
  */
 
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsOptional, IsArray, IsBoolean, IsDateString, IsNumber, IsObject, Min, Max } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import {
+  IsString,
+  IsOptional,
+  IsArray,
+  IsBoolean,
+  IsDateString,
+  IsNumber,
+  IsObject,
+  Min,
+  Max,
+} from "class-validator";
 
 // ===== INTERFACES =====
 
@@ -41,7 +51,7 @@ export interface ConversationalDashboardData {
 
 export interface PeriodicInsightsTrend {
   metric: string;
-  direction: 'improving' | 'stable' | 'declining';
+  direction: "improving" | "stable" | "declining";
   change: string;
   explanation: string;
 }
@@ -67,31 +77,31 @@ export interface PeriodicInsightsData {
 
 export class MonitoringQueryDto {
   @ApiProperty({
-    description: 'Natural language query about monitoring data',
-    example: 'How is the API performance over the last hour?',
+    description: "Natural language query about monitoring data",
+    example: "How is the API performance over the last hour?",
   })
   @IsString()
   query!: string;
 
   @ApiPropertyOptional({
-    description: 'Start time for query range',
-    example: '2024-01-15T10:00:00Z',
+    description: "Start time for query range",
+    example: "2024-01-15T10:00:00Z",
   })
   @IsOptional()
   @IsDateString()
   startTime?: string;
 
   @ApiPropertyOptional({
-    description: 'End time for query range',
-    example: '2024-01-15T11:00:00Z',
+    description: "End time for query range",
+    example: "2024-01-15T11:00:00Z",
   })
   @IsOptional()
   @IsDateString()
   endTime?: string;
 
   @ApiPropertyOptional({
-    description: 'Specific services to focus on',
-    example: ['auth-service', 'task-service'],
+    description: "Specific services to focus on",
+    example: ["auth-service", "task-service"],
   })
   @IsOptional()
   @IsArray()
@@ -99,8 +109,8 @@ export class MonitoringQueryDto {
   services?: string[];
 
   @ApiPropertyOptional({
-    description: 'Security levels to include in analysis',
-    example: ['HIGH', 'CRITICAL'],
+    description: "Security levels to include in analysis",
+    example: ["HIGH", "CRITICAL"],
   })
   @IsOptional()
   @IsArray()
@@ -108,7 +118,7 @@ export class MonitoringQueryDto {
   securityLevels?: string[];
 
   @ApiPropertyOptional({
-    description: 'Include performance metrics in response',
+    description: "Include performance metrics in response",
     default: true,
   })
   @IsOptional()
@@ -116,7 +126,7 @@ export class MonitoringQueryDto {
   includePerformance?: boolean;
 
   @ApiPropertyOptional({
-    description: 'Include validation metrics in response',
+    description: "Include validation metrics in response",
     default: true,
   })
   @IsOptional()
@@ -126,21 +136,21 @@ export class MonitoringQueryDto {
 
 export class FollowUpQueryDto {
   @ApiProperty({
-    description: 'Follow-up natural language query',
-    example: 'What about the security metrics from earlier?',
+    description: "Follow-up natural language query",
+    example: "What about the security metrics from earlier?",
   })
   @IsString()
   query!: string;
 
   @ApiProperty({
-    description: 'Conversation context ID from previous query',
-    example: 'parlant_monitor_1234567890_abc123',
+    description: "Conversation context ID from previous query",
+    example: "parlant_monitor_1234567890_abc123",
   })
   @IsString()
   conversationContext!: string;
 
   @ApiPropertyOptional({
-    description: 'Include additional context for follow-up',
+    description: "Include additional context for follow-up",
     default: false,
   })
   @IsOptional()
@@ -151,24 +161,26 @@ export class FollowUpQueryDto {
 // ===== RESPONSE DTOs =====
 
 export class ConversationalDashboardResponseDto {
-  @ApiProperty({ description: 'Overall system status' })
+  @ApiProperty({ description: "Overall system status" })
   overallStatus!: string;
 
-  @ApiProperty({ description: 'Human-readable summary of current system state' })
+  @ApiProperty({
+    description: "Human-readable summary of current system state",
+  })
   conversationalSummary!: string;
 
   @ApiProperty({
-    description: 'Key metrics with conversational explanations',
-    type: 'array',
+    description: "Key metrics with conversational explanations",
+    type: "array",
     items: {
-      type: 'object',
+      type: "object",
       properties: {
-        name: { type: 'string' },
-        value: { oneOf: [{ type: 'number' }, { type: 'string' }] },
-        status: { type: 'string' },
-        trend: { type: 'string', enum: ['UP', 'DOWN', 'STABLE'] },
-        conversationalExplanation: { type: 'string' },
-        suggestedActions: { type: 'array', items: { type: 'string' } },
+        name: { type: "string" },
+        value: { oneOf: [{ type: "number" }, { type: "string" }] },
+        status: { type: "string" },
+        trend: { type: "string", enum: ["UP", "DOWN", "STABLE"] },
+        conversationalExplanation: { type: "string" },
+        suggestedActions: { type: "array", items: { type: "string" } },
       },
     },
   })
@@ -182,17 +194,20 @@ export class ConversationalDashboardResponseDto {
   }>;
 
   @ApiProperty({
-    description: 'Current alerts with explanations',
-    type: 'array',
+    description: "Current alerts with explanations",
+    type: "array",
     items: {
-      type: 'object',
+      type: "object",
       properties: {
-        id: { type: 'string' },
-        severity: { type: 'string', enum: ['INFO', 'WARNING', 'ERROR', 'CRITICAL'] },
-        message: { type: 'string' },
-        timestamp: { type: 'string', format: 'date-time' },
-        conversationalExplanation: { type: 'string' },
-        suggestedActions: { type: 'array', items: { type: 'string' } },
+        id: { type: "string" },
+        severity: {
+          type: "string",
+          enum: ["INFO", "WARNING", "ERROR", "CRITICAL"],
+        },
+        message: { type: "string" },
+        timestamp: { type: "string", format: "date-time" },
+        conversationalExplanation: { type: "string" },
+        suggestedActions: { type: "array", items: { type: "string" } },
       },
     },
   })
@@ -206,16 +221,16 @@ export class ConversationalDashboardResponseDto {
   }>;
 
   @ApiProperty({
-    description: 'Recent monitoring events with conversational summaries',
-    type: 'array',
+    description: "Recent monitoring events with conversational summaries",
+    type: "array",
     items: {
-      type: 'object',
+      type: "object",
       properties: {
-        id: { type: 'string' },
-        type: { type: 'string' },
-        description: { type: 'string' },
-        timestamp: { type: 'string', format: 'date-time' },
-        metadata: { type: 'object' },
+        id: { type: "string" },
+        type: { type: "string" },
+        description: { type: "string" },
+        timestamp: { type: "string", format: "date-time" },
+        metadata: { type: "object" },
       },
     },
   })
@@ -227,57 +242,60 @@ export class ConversationalDashboardResponseDto {
     metadata: Record<string, unknown>;
   }>;
 
-  @ApiProperty({ description: 'Dashboard generation timestamp' })
+  @ApiProperty({ description: "Dashboard generation timestamp" })
   timestamp!: Date;
 }
 
 export class PeriodicInsightsResponseDto {
-  @ApiProperty({ description: 'Time period analyzed' })
+  @ApiProperty({ description: "Time period analyzed" })
   period!: string;
 
-  @ApiProperty({ description: 'Focus area for analysis' })
+  @ApiProperty({ description: "Focus area for analysis" })
   focus!: string;
 
-  @ApiProperty({ description: 'Summary of findings' })
+  @ApiProperty({ description: "Summary of findings" })
   summary!: string;
 
   @ApiProperty({
-    description: 'Trend analysis results',
-    type: 'array',
+    description: "Trend analysis results",
+    type: "array",
     items: {
-      type: 'object',
+      type: "object",
       properties: {
-        metric: { type: 'string' },
-        direction: { type: 'string', enum: ['improving', 'stable', 'declining'] },
-        change: { type: 'string' },
-        explanation: { type: 'string' },
+        metric: { type: "string" },
+        direction: {
+          type: "string",
+          enum: ["improving", "stable", "declining"],
+        },
+        change: { type: "string" },
+        explanation: { type: "string" },
       },
     },
   })
   trends!: PeriodicInsightsTrend[];
 
   @ApiProperty({
-    description: 'Pattern recognition results',
-    type: 'array',
+    description: "Pattern recognition results",
+    type: "array",
     items: {
-      type: 'object',
+      type: "object",
       properties: {
-        type: { type: 'string' },
-        description: { type: 'string' },
-        significance: { type: 'number', minimum: 0, maximum: 1 },
-        recommendations: { type: 'array', items: { type: 'string' } },
+        type: { type: "string" },
+        description: { type: "string" },
+        significance: { type: "number", minimum: 0, maximum: 1 },
+        recommendations: { type: "array", items: { type: "string" } },
       },
     },
   })
   patterns!: PeriodicInsightsPattern[];
 
   @ApiProperty({
-    description: 'Actionable recommendations',
-    type: 'array',
-    items: { type: 'string' },
+    description: "Actionable recommendations",
+    type: "array",
+    items: { type: "string" },
   })
   recommendations!: string[];
 
-  @ApiProperty({ description: 'Analysis timestamp' })
+  @ApiProperty({ description: "Analysis timestamp" })
   timestamp!: Date;
 }

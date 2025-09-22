@@ -140,7 +140,12 @@ export interface BehavioralPattern {
  */
 export interface SecurityEvent {
   /** Event type */
-  type: "login" | "logout" | "role_change" | "permission_escalation" | "security_violation";
+  type:
+    | "login"
+    | "logout"
+    | "role_change"
+    | "permission_escalation"
+    | "security_violation";
   /** Event description */
   description: string;
   /** Event severity */
@@ -281,7 +286,10 @@ export class ParlantContextPreservationService
 
   // Role and permission mappings
   private readonly roleMappings = new Map<string, RoleMapping[]>();
-  private readonly permissionInheritance = new Map<string, PermissionInheritance[]>();
+  private readonly permissionInheritance = new Map<
+    string,
+    PermissionInheritance[]
+  >();
 
   // Configuration
   private readonly preservationConfig: ContextPreservationConfig = {
@@ -326,10 +334,15 @@ export class ParlantContextPreservationService
       await this.initializePermissionInheritance();
       await this.startPeriodicTasks();
 
-      this.logger.log("✅ Context Preservation Service initialized successfully");
+      this.logger.log(
+        "✅ Context Preservation Service initialized successfully",
+      );
       this.emit("preservation:service:initialized");
     } catch (error) {
-      this.logger.error("❌ Failed to initialize Context Preservation Service", error);
+      this.logger.error(
+        "❌ Failed to initialize Context Preservation Service",
+        error,
+      );
       throw new ParlantIntegrationError(
         "Context Preservation initialization failed",
         "PRESERVATION_INIT_ERROR",
@@ -378,7 +391,9 @@ export class ParlantContextPreservationService
         authLevel,
         verificationStatus: await this.verifyUserIdentity(userContext),
         createdAt: now,
-        expiresAt: new Date(now.getTime() + this.preservationConfig.retentionPeriod),
+        expiresAt: new Date(
+          now.getTime() + this.preservationConfig.retentionPeriod,
+        ),
         identityHash: "",
         metadata: {
           originalContext: { ...userContext.metadata, ...additionalMetadata },
@@ -437,7 +452,10 @@ export class ParlantContextPreservationService
       throw new ParlantIntegrationError(
         "Identity snapshot creation failed",
         "SNAPSHOT_CREATE_ERROR",
-        { userId: userContext.userId, error: error instanceof Error ? error.message : String(error) },
+        {
+          userId: userContext.userId,
+          error: error instanceof Error ? error.message : String(error),
+        },
       );
     }
   }
@@ -459,7 +477,11 @@ export class ParlantContextPreservationService
       if (!snapshot) {
         snapshot = await this.createIdentitySnapshot(userContext);
       } else {
-        snapshot = await this.updateIdentitySnapshot(snapshot, userContext, "preservation");
+        snapshot = await this.updateIdentitySnapshot(
+          snapshot,
+          userContext,
+          "preservation",
+        );
       }
 
       // Add preservation chain entry
@@ -482,7 +504,10 @@ export class ParlantContextPreservationService
       snapshot.metadata.originalContext.lastPreserved = new Date();
 
       // Update performance stats
-      this.updatePreservationStats("preservation", performance.now() - startTime);
+      this.updatePreservationStats(
+        "preservation",
+        performance.now() - startTime,
+      );
 
       // Emit preservation event
       this.emit("preservation:context:preserved", {
@@ -502,7 +527,11 @@ export class ParlantContextPreservationService
       throw new ParlantIntegrationError(
         "User context preservation failed",
         "CONTEXT_PRESERVE_ERROR",
-        { userId: userContext.userId, operationId, error: error instanceof Error ? error.message : String(error) },
+        {
+          userId: userContext.userId,
+          operationId,
+          error: error instanceof Error ? error.message : String(error),
+        },
       );
     }
   }
@@ -530,16 +559,27 @@ export class ParlantContextPreservationService
       // Validate identity if required
       if (restorationOptions.validateIdentity) {
         const validationResult = await this.validateIdentitySnapshot(snapshot);
-        if (!validationResult.valid && !restorationOptions.allowPartialRestoration) {
-          throw new Error(`Identity validation failed: ${validationResult.errors.join(", ")}`);
+        if (
+          !validationResult.valid &&
+          !restorationOptions.allowPartialRestoration
+        ) {
+          throw new Error(
+            `Identity validation failed: ${validationResult.errors.join(", ")}`,
+          );
         }
       }
 
       // Validate permissions if required
       if (restorationOptions.validatePermissions) {
-        const permissionValidation = await this.validatePreservedPermissions(snapshot);
-        if (!permissionValidation.valid && !restorationOptions.allowPartialRestoration) {
-          throw new Error(`Permission validation failed: ${permissionValidation.errors.join(", ")}`);
+        const permissionValidation =
+          await this.validatePreservedPermissions(snapshot);
+        if (
+          !permissionValidation.valid &&
+          !restorationOptions.allowPartialRestoration
+        ) {
+          throw new Error(
+            `Permission validation failed: ${permissionValidation.errors.join(", ")}`,
+          );
         }
       }
 
@@ -548,7 +588,10 @@ export class ParlantContextPreservationService
         userId: snapshot.userId,
         roles: [...snapshot.roles],
         sessionId: snapshot.sessionId,
-        ipAddress: snapshot.metadata.ipAddressHistory[snapshot.metadata.ipAddressHistory.length - 1] || "127.0.0.1",
+        ipAddress:
+          snapshot.metadata.ipAddressHistory[
+            snapshot.metadata.ipAddressHistory.length - 1
+          ] || "127.0.0.1",
         metadata: {
           ...snapshot.metadata.originalContext,
           restoredFrom: snapshotId,
@@ -559,7 +602,8 @@ export class ParlantContextPreservationService
 
       // Restore behavioral patterns if requested
       if (restorationOptions.restoreBehavioralPatterns) {
-        restoredContext.metadata.behavioralPatterns = snapshot.metadata.behavioralPatterns;
+        restoredContext.metadata.behavioralPatterns =
+          snapshot.metadata.behavioralPatterns;
       }
 
       // Add restoration chain entry
@@ -571,14 +615,19 @@ export class ParlantContextPreservationService
         result: "success",
         metadata: {
           restorationOptions,
-          validationPerformed: restorationOptions.validateIdentity || restorationOptions.validatePermissions,
+          validationPerformed:
+            restorationOptions.validateIdentity ||
+            restorationOptions.validatePermissions,
         },
       };
 
       snapshot.metadata.preservationChain.push(chainEntry);
 
       // Update performance stats
-      this.updatePreservationStats("restoration", performance.now() - startTime);
+      this.updatePreservationStats(
+        "restoration",
+        performance.now() - startTime,
+      );
 
       // Emit restoration event
       this.emit("preservation:context:restored", {
@@ -597,7 +646,10 @@ export class ParlantContextPreservationService
       throw new ParlantIntegrationError(
         "User context restoration failed",
         "CONTEXT_RESTORE_ERROR",
-        { snapshotId, error: error instanceof Error ? error.message : String(error) },
+        {
+          snapshotId,
+          error: error instanceof Error ? error.message : String(error),
+        },
       );
     }
   }
@@ -675,7 +727,9 @@ export class ParlantContextPreservationService
       this.logger.error("❌ Failed to validate identity snapshot", error);
       return {
         valid: false,
-        errors: [`Validation error: ${error instanceof Error ? error.message : String(error)}`],
+        errors: [
+          `Validation error: ${error instanceof Error ? error.message : String(error)}`,
+        ],
         warnings: [],
       };
     }
@@ -684,7 +738,9 @@ export class ParlantContextPreservationService
   /**
    * Get snapshot by session ID
    */
-  async getSnapshotBySession(sessionId: string): Promise<UserIdentitySnapshot | null> {
+  async getSnapshotBySession(
+    sessionId: string,
+  ): Promise<UserIdentitySnapshot | null> {
     try {
       const snapshotId = this.sessionSnapshotIndex.get(sessionId);
       if (!snapshotId) {
@@ -726,7 +782,9 @@ export class ParlantContextPreservationService
         }
       }
 
-      return snapshots.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+      return snapshots.sort(
+        (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+      );
     } catch (error) {
       this.logger.error("❌ Failed to get snapshots by user", error);
       return [];
@@ -752,7 +810,8 @@ export class ParlantContextPreservationService
 
         // Limit IP history to last 10 entries
         if (snapshot.metadata.ipAddressHistory.length > 10) {
-          snapshot.metadata.ipAddressHistory = snapshot.metadata.ipAddressHistory.slice(-10);
+          snapshot.metadata.ipAddressHistory =
+            snapshot.metadata.ipAddressHistory.slice(-10);
         }
       }
 
@@ -786,7 +845,9 @@ export class ParlantContextPreservationService
 
       snapshot.metadata.preservationChain.push(chainEntry);
 
-      this.logger.debug(`✅ Identity snapshot updated: ${snapshot.snapshotId} - Reason: ${updateReason}`);
+      this.logger.debug(
+        `✅ Identity snapshot updated: ${snapshot.snapshotId} - Reason: ${updateReason}`,
+      );
 
       return snapshot;
     } catch (error) {
@@ -794,7 +855,10 @@ export class ParlantContextPreservationService
       throw new ParlantIntegrationError(
         "Identity snapshot update failed",
         "SNAPSHOT_UPDATE_ERROR",
-        { snapshotId: snapshot.snapshotId, error: error instanceof Error ? error.message : String(error) },
+        {
+          snapshotId: snapshot.snapshotId,
+          error: error instanceof Error ? error.message : String(error),
+        },
       );
     }
   }
@@ -821,7 +885,9 @@ export class ParlantContextPreservationService
     return `snap_${Date.now()}_${crypto.randomBytes(16).toString("hex")}`;
   }
 
-  private async generateIdentityHash(snapshot: UserIdentitySnapshot): Promise<string> {
+  private async generateIdentityHash(
+    snapshot: UserIdentitySnapshot,
+  ): Promise<string> {
     const identityData = {
       snapshotId: snapshot.snapshotId,
       userId: snapshot.userId,
@@ -836,7 +902,9 @@ export class ParlantContextPreservationService
     return crypto.createHash("sha256").update(data).digest("hex");
   }
 
-  private async generateDeviceFingerprint(userContext: ParlantUserContext): Promise<string> {
+  private async generateDeviceFingerprint(
+    userContext: ParlantUserContext,
+  ): Promise<string> {
     const fingerprintData = {
       ipAddress: userContext.ipAddress,
       userAgent: userContext.metadata.userAgent || "unknown",
@@ -848,7 +916,9 @@ export class ParlantContextPreservationService
     return crypto.createHash("md5").update(data).digest("hex");
   }
 
-  private async verifyUserIdentity(userContext: ParlantUserContext): Promise<IdentityVerificationStatus> {
+  private async verifyUserIdentity(
+    userContext: ParlantUserContext,
+  ): Promise<IdentityVerificationStatus> {
     // Basic identity verification
     return {
       verified: !!userContext.userId && !!userContext.sessionId,
@@ -863,19 +933,22 @@ export class ParlantContextPreservationService
     };
   }
 
-  private async resolveUserPermissions(userContext: ParlantUserContext): Promise<string[]> {
+  private async resolveUserPermissions(
+    userContext: ParlantUserContext,
+  ): Promise<string[]> {
     const permissions = new Set<string>();
 
     // Resolve permissions from roles
     for (const role of userContext.roles) {
       const rolePermissions = await this.getPermissionsForRole(role);
-      rolePermissions.forEach(permission => permissions.add(permission));
+      rolePermissions.forEach((permission) => permissions.add(permission));
     }
 
     // Apply permission inheritance
     for (const permission of permissions) {
-      const inheritedPermissions = await this.getInheritedPermissions(permission);
-      inheritedPermissions.forEach(inherited => permissions.add(inherited));
+      const inheritedPermissions =
+        await this.getInheritedPermissions(permission);
+      inheritedPermissions.forEach((inherited) => permissions.add(inherited));
     }
 
     return Array.from(permissions);
@@ -884,11 +957,11 @@ export class ParlantContextPreservationService
   private async getPermissionsForRole(role: string): Promise<string[]> {
     // Basic role-to-permission mapping
     const rolePermissions: Record<string, string[]> = {
-      "admin": ["*"],
-      "user": ["read", "write"],
-      "guest": ["read"],
-      "system": ["system:*"],
-      "developer": ["dev:*", "read", "write"],
+      admin: ["*"],
+      user: ["read", "write"],
+      guest: ["read"],
+      system: ["system:*"],
+      developer: ["dev:*", "read", "write"],
     };
 
     return rolePermissions[role] || [];
@@ -900,7 +973,9 @@ export class ParlantContextPreservationService
 
     for (const inheritance of inheritanceMap) {
       // Apply inheritance rules
-      const applicable = await this.evaluateInheritanceRules(inheritance.inheritanceRules);
+      const applicable = await this.evaluateInheritanceRules(
+        inheritance.inheritanceRules,
+      );
       if (applicable) {
         inheritedPermissions.push(...inheritance.childPermissions);
       }
@@ -909,7 +984,9 @@ export class ParlantContextPreservationService
     return inheritedPermissions;
   }
 
-  private async evaluateInheritanceRules(rules: InheritanceRule[]): Promise<boolean> {
+  private async evaluateInheritanceRules(
+    rules: InheritanceRule[],
+  ): Promise<boolean> {
     // Basic rule evaluation - all rules must pass
     for (const rule of rules) {
       // Check rule expiration
@@ -924,7 +1001,9 @@ export class ParlantContextPreservationService
     return true;
   }
 
-  private async captureBehavioralPatterns(userContext: ParlantUserContext): Promise<BehavioralPattern[]> {
+  private async captureBehavioralPatterns(
+    userContext: ParlantUserContext,
+  ): Promise<BehavioralPattern[]> {
     if (!this.preservationConfig.enableBehavioralTracking) {
       return [];
     }
@@ -963,13 +1042,16 @@ export class ParlantContextPreservationService
     return patterns;
   }
 
-  private async validateBehavioralPatterns(patterns: BehavioralPattern[]): Promise<{ valid: boolean; anomalies: string[] }> {
+  private async validateBehavioralPatterns(
+    patterns: BehavioralPattern[],
+  ): Promise<{ valid: boolean; anomalies: string[] }> {
     const anomalies: string[] = [];
 
     for (const pattern of patterns) {
       // Check pattern age
       const patternAge = Date.now() - pattern.timestamp.getTime();
-      if (patternAge > 3600000) { // 1 hour
+      if (patternAge > 3600000) {
+        // 1 hour
         anomalies.push(`Stale pattern: ${pattern.type}`);
       }
 
@@ -1007,11 +1089,13 @@ export class ParlantContextPreservationService
     });
 
     const missingPermissions = expectedPermissions.filter(
-      permission => !snapshot.permissions.includes(permission)
+      (permission) => !snapshot.permissions.includes(permission),
     );
 
     if (missingPermissions.length > 0) {
-      errors.push(`Missing expected permissions: ${missingPermissions.join(", ")}`);
+      errors.push(
+        `Missing expected permissions: ${missingPermissions.join(", ")}`,
+      );
     }
 
     return {
@@ -1073,16 +1157,21 @@ export class ParlantContextPreservationService
     }
   }
 
-  private updateAverage(currentAverage: number, newValue: number, count: number): number {
+  private updateAverage(
+    currentAverage: number,
+    newValue: number,
+    count: number,
+  ): number {
     return (currentAverage * (count - 1) + newValue) / count;
   }
 
   private calculateMemoryUsage(): number {
     return (
-      this.identitySnapshots.size +
-      this.userSnapshotIndex.size +
-      this.sessionSnapshotIndex.size
-    ) * 2048; // Rough estimate
+      (this.identitySnapshots.size +
+        this.userSnapshotIndex.size +
+        this.sessionSnapshotIndex.size) *
+      2048
+    ); // Rough estimate
   }
 
   private async expireSnapshot(snapshotId: string): Promise<void> {

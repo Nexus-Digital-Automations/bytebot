@@ -24,21 +24,26 @@ import {
   ApproverType,
   ApprovalConditionType,
   QualityGatePriority,
-  ThresholdOperator
-} from '../core/quality-gate-types';
+  ThresholdOperator,
+} from "../core/quality-gate-types";
 
-import { PerformanceGateConfig } from '../gates/performance-gate';
-import { SecurityGateConfig, ComplianceFramework, AuthMethodType, AuthStrengthLevel } from '../gates/security-gate';
+import { PerformanceGateConfig } from "../gates/performance-gate";
+import {
+  SecurityGateConfig,
+  ComplianceFramework,
+  AuthMethodType,
+  AuthStrengthLevel,
+} from "../gates/security-gate";
 
 /**
  * Environment Type Enumeration
  * Supported deployment environments
  */
 export enum Environment {
-  DEVELOPMENT = 'development',
-  STAGING = 'staging',
-  PRODUCTION = 'production',
-  TEST = 'test'
+  DEVELOPMENT = "development",
+  STAGING = "staging",
+  PRODUCTION = "production",
+  TEST = "test",
 }
 
 /**
@@ -193,12 +198,12 @@ export interface CoverageTool {
  * Types of coverage analysis tools
  */
 export enum CoverageToolType {
-  JEST = 'jest',
-  NYC = 'nyc',
-  ISTANBUL = 'istanbul',
-  COVERALLS = 'coveralls',
-  CODECOV = 'codecov',
-  SONARQUBE = 'sonarqube'
+  JEST = "jest",
+  NYC = "nyc",
+  ISTANBUL = "istanbul",
+  COVERALLS = "coveralls",
+  CODECOV = "codecov",
+  SONARQUBE = "sonarqube",
 }
 
 /**
@@ -206,11 +211,11 @@ export enum CoverageToolType {
  * Supported coverage report formats
  */
 export enum CoverageReportFormat {
-  LCOV = 'lcov',
-  JSON = 'json',
-  HTML = 'html',
-  XML = 'xml',
-  TEXT = 'text'
+  LCOV = "lcov",
+  JSON = "json",
+  HTML = "html",
+  XML = "xml",
+  TEXT = "text",
 }
 
 /**
@@ -296,11 +301,11 @@ export interface IntegrityTool {
  * Types of integrity validation tools
  */
 export enum IntegrityToolType {
-  SIGNATURE_VALIDATOR = 'signature_validator',
-  TYPE_CHECKER = 'type_checker',
-  BEHAVIOR_TESTER = 'behavior_tester',
-  PERFORMANCE_MONITOR = 'performance_monitor',
-  CUSTOM_VALIDATOR = 'custom_validator'
+  SIGNATURE_VALIDATOR = "signature_validator",
+  TYPE_CHECKER = "type_checker",
+  BEHAVIOR_TESTER = "behavior_tester",
+  PERFORMANCE_MONITOR = "performance_monitor",
+  CUSTOM_VALIDATOR = "custom_validator",
 }
 
 /**
@@ -308,10 +313,10 @@ export enum IntegrityToolType {
  * Levels of integrity validation strictness
  */
 export enum IntegrityStrictnessLevel {
-  LENIENT = 'lenient',
-  STANDARD = 'standard',
-  STRICT = 'strict',
-  PARANOID = 'paranoid'
+  LENIENT = "lenient",
+  STANDARD = "standard",
+  STRICT = "strict",
+  PARANOID = "paranoid",
 }
 
 /**
@@ -354,50 +359,50 @@ export class DefaultQualityGatesConfigFactory {
         [Environment.DEVELOPMENT]: this.createDevelopmentPipelineConfig(),
         [Environment.STAGING]: this.createStagingPipelineConfig(),
         [Environment.PRODUCTION]: this.createProductionPipelineConfig(),
-        [Environment.TEST]: this.createTestPipelineConfig()
+        [Environment.TEST]: this.createTestPipelineConfig(),
       },
       performanceGates: {
         [Environment.DEVELOPMENT]: this.createDevelopmentPerformanceConfig(),
         [Environment.STAGING]: this.createStagingPerformanceConfig(),
         [Environment.PRODUCTION]: this.createProductionPerformanceConfig(),
-        [Environment.TEST]: this.createTestPerformanceConfig()
+        [Environment.TEST]: this.createTestPerformanceConfig(),
       },
       securityGates: {
         [Environment.DEVELOPMENT]: this.createDevelopmentSecurityConfig(),
         [Environment.STAGING]: this.createStagingSecurityConfig(),
         [Environment.PRODUCTION]: this.createProductionSecurityConfig(),
-        [Environment.TEST]: this.createTestSecurityConfig()
+        [Environment.TEST]: this.createTestSecurityConfig(),
       },
       coverageGates: {
         [Environment.DEVELOPMENT]: this.createDevelopmentCoverageConfig(),
         [Environment.STAGING]: this.createStagingCoverageConfig(),
         [Environment.PRODUCTION]: this.createProductionCoverageConfig(),
-        [Environment.TEST]: this.createTestCoverageConfig()
+        [Environment.TEST]: this.createTestCoverageConfig(),
       },
       integrityGates: {
         [Environment.DEVELOPMENT]: this.createDevelopmentIntegrityConfig(),
         [Environment.STAGING]: this.createStagingIntegrityConfig(),
         [Environment.PRODUCTION]: this.createProductionIntegrityConfig(),
-        [Environment.TEST]: this.createTestIntegrityConfig()
+        [Environment.TEST]: this.createTestIntegrityConfig(),
       },
       thresholds: {
         [Environment.DEVELOPMENT]: this.createDevelopmentThresholds(),
         [Environment.STAGING]: this.createStagingThresholds(),
         [Environment.PRODUCTION]: this.createProductionThresholds(),
-        [Environment.TEST]: this.createTestThresholds()
+        [Environment.TEST]: this.createTestThresholds(),
       },
       rollback: {
         [Environment.DEVELOPMENT]: this.createDevelopmentRollbackConfig(),
         [Environment.STAGING]: this.createStagingRollbackConfig(),
         [Environment.PRODUCTION]: this.createProductionRollbackConfig(),
-        [Environment.TEST]: this.createTestRollbackConfig()
+        [Environment.TEST]: this.createTestRollbackConfig(),
       },
       approval: {
         [Environment.DEVELOPMENT]: this.createDevelopmentApprovalConfig(),
         [Environment.STAGING]: this.createStagingApprovalConfig(),
         [Environment.PRODUCTION]: this.createProductionApprovalConfig(),
-        [Environment.TEST]: this.createTestApprovalConfig()
-      }
+        [Environment.TEST]: this.createTestApprovalConfig(),
+      },
     };
   }
 
@@ -407,7 +412,7 @@ export class DefaultQualityGatesConfigFactory {
    */
   private static createFrameworkConfig(): FrameworkConfig {
     return {
-      version: '1.0.0',
+      version: "1.0.0",
       defaultTimeout: 300000, // 5 minutes
       maxConcurrentGates: 10,
       enableLogging: true,
@@ -418,10 +423,10 @@ export class DefaultQualityGatesConfigFactory {
         baseDelay: 1000,
         maxDelay: 30000,
         backoffMultiplier: 2,
-        exponentialBackoff: true
+        exponentialBackoff: true,
       },
       healthCheckInterval: 60000, // 1 minute
-      cleanupInterval: 3600000 // 1 hour
+      cleanupInterval: 3600000, // 1 hour
     };
   }
 
@@ -440,7 +445,7 @@ export class DefaultQualityGatesConfigFactory {
       parallelExecution: true,
       maxParallelGates: 5,
       rollbackConfig: this.createDevelopmentRollbackConfig(),
-      approvalConfig: this.createDevelopmentApprovalConfig()
+      approvalConfig: this.createDevelopmentApprovalConfig(),
     };
   }
 
@@ -457,7 +462,7 @@ export class DefaultQualityGatesConfigFactory {
       parallelExecution: true,
       maxParallelGates: 8,
       rollbackConfig: this.createStagingRollbackConfig(),
-      approvalConfig: this.createStagingApprovalConfig()
+      approvalConfig: this.createStagingApprovalConfig(),
     };
   }
 
@@ -474,7 +479,7 @@ export class DefaultQualityGatesConfigFactory {
       parallelExecution: true,
       maxParallelGates: 10,
       rollbackConfig: this.createProductionRollbackConfig(),
-      approvalConfig: this.createProductionApprovalConfig()
+      approvalConfig: this.createProductionApprovalConfig(),
     };
   }
 
@@ -491,7 +496,7 @@ export class DefaultQualityGatesConfigFactory {
       parallelExecution: true,
       maxParallelGates: 3,
       rollbackConfig: this.createTestRollbackConfig(),
-      approvalConfig: this.createTestApprovalConfig()
+      approvalConfig: this.createTestApprovalConfig(),
     };
   }
 
@@ -519,11 +524,11 @@ export class DefaultQualityGatesConfigFactory {
         dbConnectionPoolThreshold: 70,
         networkBandwidthThreshold: 100 * 1024 * 1024, // 100MB/s
         diskIoThreshold: 1000,
-        cacheHitRateThreshold: 70
+        cacheHitRateThreshold: 70,
       },
       enableProfiling: true,
       profilingSampleRate: 0.1,
-      monitoringWindow: 30000 // 30 seconds
+      monitoringWindow: 30000, // 30 seconds
     };
   }
 
@@ -543,10 +548,10 @@ export class DefaultQualityGatesConfigFactory {
         dbConnectionPoolThreshold: 60,
         networkBandwidthThreshold: 150 * 1024 * 1024, // 150MB/s
         diskIoThreshold: 800,
-        cacheHitRateThreshold: 80
+        cacheHitRateThreshold: 80,
       },
       profilingSampleRate: 0.2,
-      monitoringWindow: 60000 // 1 minute
+      monitoringWindow: 60000, // 1 minute
     };
   }
 
@@ -566,10 +571,10 @@ export class DefaultQualityGatesConfigFactory {
         dbConnectionPoolThreshold: 50,
         networkBandwidthThreshold: 200 * 1024 * 1024, // 200MB/s
         diskIoThreshold: 500,
-        cacheHitRateThreshold: 90
+        cacheHitRateThreshold: 90,
       },
       profilingSampleRate: 0.5,
-      monitoringWindow: 120000 // 2 minutes
+      monitoringWindow: 120000, // 2 minutes
     };
   }
 
@@ -587,7 +592,7 @@ export class DefaultQualityGatesConfigFactory {
       errorRateThreshold: 10, // 10%
       enableProfiling: false,
       profilingSampleRate: 0.01,
-      monitoringWindow: 15000 // 15 seconds
+      monitoringWindow: 15000, // 15 seconds
     };
   }
 
@@ -619,26 +624,26 @@ export class DefaultQualityGatesConfigFactory {
       maxThreatAlerts: 20,
       scanningTools: [
         {
-          id: 'eslint-security',
-          name: 'ESLint Security Rules',
-          type: 'static_analysis' as any,
-          config: { rules: 'security' },
+          id: "eslint-security",
+          name: "ESLint Security Rules",
+          type: "static_analysis" as any,
+          config: { rules: "security" },
           enabled: true,
-          timeout: 60000
-        }
+          timeout: 60000,
+        },
       ],
       complianceFrameworks: [],
       authMethods: [
         {
-          id: 'jwt-auth',
+          id: "jwt-auth",
           type: AuthMethodType.JWT,
-          config: { algorithm: 'HS256' },
+          config: { algorithm: "HS256" },
           strengthLevel: AuthStrengthLevel.MEDIUM,
-          enabled: true
-        }
+          enabled: true,
+        },
       ],
       authzPolicies: [],
-      threatRules: []
+      threatRules: [],
     };
   }
 
@@ -659,13 +664,13 @@ export class DefaultQualityGatesConfigFactory {
       complianceFrameworks: [ComplianceFramework.SOC2],
       authMethods: [
         {
-          id: 'jwt-auth',
+          id: "jwt-auth",
           type: AuthMethodType.JWT,
-          config: { algorithm: 'RS256' },
+          config: { algorithm: "RS256" },
           strengthLevel: AuthStrengthLevel.HIGH,
-          enabled: true
-        }
-      ]
+          enabled: true,
+        },
+      ],
     };
   }
 
@@ -686,24 +691,24 @@ export class DefaultQualityGatesConfigFactory {
       complianceFrameworks: [
         ComplianceFramework.SOC2,
         ComplianceFramework.ISO_27001,
-        ComplianceFramework.GDPR
+        ComplianceFramework.GDPR,
       ],
       authMethods: [
         {
-          id: 'jwt-auth',
+          id: "jwt-auth",
           type: AuthMethodType.JWT,
-          config: { algorithm: 'RS256' },
+          config: { algorithm: "RS256" },
           strengthLevel: AuthStrengthLevel.CRITICAL,
-          enabled: true
+          enabled: true,
         },
         {
-          id: 'oauth2-auth',
+          id: "oauth2-auth",
           type: AuthMethodType.OAUTH2,
-          config: { provider: 'enterprise' },
+          config: { provider: "enterprise" },
           strengthLevel: AuthStrengthLevel.CRITICAL,
-          enabled: true
-        }
-      ]
+          enabled: true,
+        },
+      ],
     };
   }
 
@@ -722,7 +727,7 @@ export class DefaultQualityGatesConfigFactory {
       minAuthSuccessRate: 50,
       maxAuthzViolations: 100,
       maxThreatAlerts: 100,
-      scanningTools: []
+      scanningTools: [],
     };
   }
 
@@ -741,17 +746,17 @@ export class DefaultQualityGatesConfigFactory {
       minIntegrationCoverage: 50,
       coverageTools: [
         {
-          id: 'jest-coverage',
-          name: 'Jest Coverage',
+          id: "jest-coverage",
+          name: "Jest Coverage",
           type: CoverageToolType.JEST,
           config: { collectCoverage: true },
           enabled: true,
-          timeout: 120000
-        }
+          timeout: 120000,
+        },
       ],
-      excludePatterns: ['**/node_modules/**', '**/dist/**', '**/*.test.ts'],
+      excludePatterns: ["**/node_modules/**", "**/dist/**", "**/*.test.ts"],
       reportFormats: [CoverageReportFormat.LCOV, CoverageReportFormat.HTML],
-      enableTrendAnalysis: true
+      enableTrendAnalysis: true,
     };
   }
 
@@ -766,7 +771,7 @@ export class DefaultQualityGatesConfigFactory {
       minCodeCoverage: 85,
       minFunctionCoverage: 85,
       minBranchCoverage: 75,
-      minIntegrationCoverage: 70
+      minIntegrationCoverage: 70,
     };
   }
 
@@ -784,22 +789,22 @@ export class DefaultQualityGatesConfigFactory {
       minIntegrationCoverage: 85,
       coverageTools: [
         {
-          id: 'jest-coverage',
-          name: 'Jest Coverage',
+          id: "jest-coverage",
+          name: "Jest Coverage",
           type: CoverageToolType.JEST,
           config: { collectCoverage: true },
           enabled: true,
-          timeout: 180000
+          timeout: 180000,
         },
         {
-          id: 'sonarqube',
-          name: 'SonarQube Analysis',
+          id: "sonarqube",
+          name: "SonarQube Analysis",
           type: CoverageToolType.SONARQUBE,
-          config: { projectKey: 'parlant-quality-gates' },
+          config: { projectKey: "parlant-quality-gates" },
           enabled: true,
-          timeout: 300000
-        }
-      ]
+          timeout: 300000,
+        },
+      ],
     };
   }
 
@@ -815,7 +820,7 @@ export class DefaultQualityGatesConfigFactory {
       minFunctionCoverage: 50,
       minBranchCoverage: 40,
       minIntegrationCoverage: 30,
-      enableTrendAnalysis: false
+      enableTrendAnalysis: false,
     };
   }
 
@@ -833,16 +838,16 @@ export class DefaultQualityGatesConfigFactory {
       enablePerformanceValidation: false,
       integrityTools: [
         {
-          id: 'typescript-checker',
-          name: 'TypeScript Type Checker',
+          id: "typescript-checker",
+          name: "TypeScript Type Checker",
           type: IntegrityToolType.TYPE_CHECKER,
           config: { strict: true },
           enabled: true,
-          timeout: 60000
-        }
+          timeout: 60000,
+        },
       ],
       strictnessLevel: IntegrityStrictnessLevel.STANDARD,
-      maxDeviationPercentage: 10
+      maxDeviationPercentage: 10,
     };
   }
 
@@ -855,7 +860,7 @@ export class DefaultQualityGatesConfigFactory {
       ...this.createDevelopmentIntegrityConfig(),
       enablePerformanceValidation: true,
       strictnessLevel: IntegrityStrictnessLevel.STRICT,
-      maxDeviationPercentage: 5
+      maxDeviationPercentage: 5,
     };
   }
 
@@ -869,24 +874,24 @@ export class DefaultQualityGatesConfigFactory {
       enablePerformanceValidation: true,
       integrityTools: [
         {
-          id: 'typescript-checker',
-          name: 'TypeScript Type Checker',
+          id: "typescript-checker",
+          name: "TypeScript Type Checker",
           type: IntegrityToolType.TYPE_CHECKER,
           config: { strict: true },
           enabled: true,
-          timeout: 120000
+          timeout: 120000,
         },
         {
-          id: 'signature-validator',
-          name: 'Function Signature Validator',
+          id: "signature-validator",
+          name: "Function Signature Validator",
           type: IntegrityToolType.SIGNATURE_VALIDATOR,
           config: { enforceStrict: true },
           enabled: true,
-          timeout: 60000
-        }
+          timeout: 60000,
+        },
       ],
       strictnessLevel: IntegrityStrictnessLevel.PARANOID,
-      maxDeviationPercentage: 2
+      maxDeviationPercentage: 2,
     };
   }
 
@@ -899,7 +904,7 @@ export class DefaultQualityGatesConfigFactory {
       ...this.createDevelopmentIntegrityConfig(),
       enableBehaviorValidation: false,
       strictnessLevel: IntegrityStrictnessLevel.LENIENT,
-      maxDeviationPercentage: 25
+      maxDeviationPercentage: 25,
     };
   }
 
@@ -912,27 +917,27 @@ export class DefaultQualityGatesConfigFactory {
   private static createDevelopmentThresholds(): QualityGateThresholds {
     return {
       critical: {
-        metric: 'overallScore',
+        metric: "overallScore",
         value: 70,
         operator: ThresholdOperator.GREATER_THAN_OR_EQUAL,
-        unit: 'percentage',
-        description: 'Minimum overall quality score'
+        unit: "percentage",
+        description: "Minimum overall quality score",
       },
       warning: {
-        metric: 'warningCount',
+        metric: "warningCount",
         value: 10,
         operator: ThresholdOperator.LESS_THAN_OR_EQUAL,
-        unit: 'count',
-        description: 'Maximum warnings allowed'
+        unit: "count",
+        description: "Maximum warnings allowed",
       },
       success: {
-        metric: 'overallScore',
+        metric: "overallScore",
         value: 90,
         operator: ThresholdOperator.GREATER_THAN_OR_EQUAL,
-        unit: 'percentage',
-        description: 'Target quality score'
+        unit: "percentage",
+        description: "Target quality score",
       },
-      custom: {}
+      custom: {},
     };
   }
 
@@ -943,27 +948,27 @@ export class DefaultQualityGatesConfigFactory {
   private static createStagingThresholds(): QualityGateThresholds {
     return {
       critical: {
-        metric: 'overallScore',
+        metric: "overallScore",
         value: 85,
         operator: ThresholdOperator.GREATER_THAN_OR_EQUAL,
-        unit: 'percentage',
-        description: 'Minimum overall quality score'
+        unit: "percentage",
+        description: "Minimum overall quality score",
       },
       warning: {
-        metric: 'warningCount',
+        metric: "warningCount",
         value: 5,
         operator: ThresholdOperator.LESS_THAN_OR_EQUAL,
-        unit: 'count',
-        description: 'Maximum warnings allowed'
+        unit: "count",
+        description: "Maximum warnings allowed",
       },
       success: {
-        metric: 'overallScore',
+        metric: "overallScore",
         value: 95,
         operator: ThresholdOperator.GREATER_THAN_OR_EQUAL,
-        unit: 'percentage',
-        description: 'Target quality score'
+        unit: "percentage",
+        description: "Target quality score",
       },
-      custom: {}
+      custom: {},
     };
   }
 
@@ -974,35 +979,35 @@ export class DefaultQualityGatesConfigFactory {
   private static createProductionThresholds(): QualityGateThresholds {
     return {
       critical: {
-        metric: 'overallScore',
+        metric: "overallScore",
         value: 95,
         operator: ThresholdOperator.GREATER_THAN_OR_EQUAL,
-        unit: 'percentage',
-        description: 'Minimum overall quality score'
+        unit: "percentage",
+        description: "Minimum overall quality score",
       },
       warning: {
-        metric: 'warningCount',
+        metric: "warningCount",
         value: 0,
         operator: ThresholdOperator.EQUALS,
-        unit: 'count',
-        description: 'Zero warnings required'
+        unit: "count",
+        description: "Zero warnings required",
       },
       success: {
-        metric: 'overallScore',
+        metric: "overallScore",
         value: 99,
         operator: ThresholdOperator.GREATER_THAN_OR_EQUAL,
-        unit: 'percentage',
-        description: 'Target quality score'
+        unit: "percentage",
+        description: "Target quality score",
       },
       custom: {
         responseTime: {
-          metric: 'responseTime',
+          metric: "responseTime",
           value: 1000,
           operator: ThresholdOperator.LESS_THAN_OR_EQUAL,
-          unit: 'milliseconds',
-          description: 'Sub-1000ms response time requirement'
-        }
-      }
+          unit: "milliseconds",
+          description: "Sub-1000ms response time requirement",
+        },
+      },
     };
   }
 
@@ -1013,27 +1018,27 @@ export class DefaultQualityGatesConfigFactory {
   private static createTestThresholds(): QualityGateThresholds {
     return {
       critical: {
-        metric: 'overallScore',
+        metric: "overallScore",
         value: 50,
         operator: ThresholdOperator.GREATER_THAN_OR_EQUAL,
-        unit: 'percentage',
-        description: 'Minimum overall quality score'
+        unit: "percentage",
+        description: "Minimum overall quality score",
       },
       warning: {
-        metric: 'warningCount',
+        metric: "warningCount",
         value: 50,
         operator: ThresholdOperator.LESS_THAN_OR_EQUAL,
-        unit: 'count',
-        description: 'Maximum warnings allowed'
+        unit: "count",
+        description: "Maximum warnings allowed",
       },
       success: {
-        metric: 'overallScore',
+        metric: "overallScore",
         value: 80,
         operator: ThresholdOperator.GREATER_THAN_OR_EQUAL,
-        unit: 'percentage',
-        description: 'Target quality score'
+        unit: "percentage",
+        description: "Target quality score",
       },
-      custom: {}
+      custom: {},
     };
   }
 
@@ -1054,8 +1059,8 @@ export class DefaultQualityGatesConfigFactory {
         enabled: false,
         channels: [],
         recipients: [],
-        templates: {}
-      }
+        templates: {},
+      },
     };
   }
 
@@ -1069,53 +1074,53 @@ export class DefaultQualityGatesConfigFactory {
       strategy: RollbackStrategy.GRADUAL,
       triggers: [
         {
-          id: 'critical-failure',
+          id: "critical-failure",
           condition: RollbackCondition.CRITICAL_GATE_FAILURE,
           threshold: 0,
           evaluationWindow: 60000,
-          enabled: true
-        }
+          enabled: true,
+        },
       ],
       timeout: 600000,
       recoveryProcedures: [
         {
-          id: 'restart-service',
-          name: 'Restart Application Service',
+          id: "restart-service",
+          name: "Restart Application Service",
           steps: [
             {
-              id: 'stop-service',
-              name: 'Stop Service',
+              id: "stop-service",
+              name: "Stop Service",
               type: RecoveryStepType.SERVICE_RESTART,
-              config: { service: 'app', action: 'stop' },
+              config: { service: "app", action: "stop" },
               timeout: 30000,
-              continueOnFailure: false
+              continueOnFailure: false,
             },
             {
-              id: 'start-service',
-              name: 'Start Service',
+              id: "start-service",
+              name: "Start Service",
               type: RecoveryStepType.SERVICE_RESTART,
-              config: { service: 'app', action: 'start' },
+              config: { service: "app", action: "start" },
               timeout: 60000,
-              continueOnFailure: false
-            }
+              continueOnFailure: false,
+            },
           ],
           timeout: 120000,
           retryConfig: {
             maxAttempts: 2,
             delay: 5000,
-            backoffStrategy: 'exponential',
-            maxDelay: 30000
-          }
-        }
+            backoffStrategy: "exponential",
+            maxDelay: 30000,
+          },
+        },
       ],
       notifications: {
         enabled: true,
         channels: [NotificationChannel.EMAIL, NotificationChannel.SLACK],
-        recipients: ['devops@company.com'],
+        recipients: ["devops@company.com"],
         templates: {
-          rollback: 'Rollback executed in staging environment'
-        }
-      }
+          rollback: "Rollback executed in staging environment",
+        },
+      },
     };
   }
 
@@ -1129,80 +1134,77 @@ export class DefaultQualityGatesConfigFactory {
       strategy: RollbackStrategy.BLUE_GREEN,
       triggers: [
         {
-          id: 'critical-failure',
+          id: "critical-failure",
           condition: RollbackCondition.CRITICAL_GATE_FAILURE,
           threshold: 0,
           evaluationWindow: 30000,
-          enabled: true
+          enabled: true,
         },
         {
-          id: 'error-rate-spike',
+          id: "error-rate-spike",
           condition: RollbackCondition.ERROR_RATE_THRESHOLD,
           threshold: 1,
           evaluationWindow: 60000,
-          enabled: true
+          enabled: true,
         },
         {
-          id: 'response-time-spike',
+          id: "response-time-spike",
           condition: RollbackCondition.RESPONSE_TIME_THRESHOLD,
           threshold: 1000,
           evaluationWindow: 60000,
-          enabled: true
-        }
+          enabled: true,
+        },
       ],
       timeout: 1800000, // 30 minutes
       recoveryProcedures: [
         {
-          id: 'blue-green-rollback',
-          name: 'Blue-Green Deployment Rollback',
+          id: "blue-green-rollback",
+          name: "Blue-Green Deployment Rollback",
           steps: [
             {
-              id: 'switch-traffic',
-              name: 'Switch Traffic to Blue Environment',
+              id: "switch-traffic",
+              name: "Switch Traffic to Blue Environment",
               type: RecoveryStepType.CONFIG_CHANGE,
               config: {
-                configFile: 'load-balancer.conf',
-                changes: { target: 'blue' }
+                configFile: "load-balancer.conf",
+                changes: { target: "blue" },
               },
               timeout: 30000,
-              continueOnFailure: false
+              continueOnFailure: false,
             },
             {
-              id: 'health-check',
-              name: 'Validate Blue Environment Health',
+              id: "health-check",
+              name: "Validate Blue Environment Health",
               type: RecoveryStepType.API_CALL,
               config: {
-                url: 'http://blue.internal/health',
-                method: 'GET'
+                url: "http://blue.internal/health",
+                method: "GET",
               },
               timeout: 60000,
-              continueOnFailure: false
-            }
+              continueOnFailure: false,
+            },
           ],
           timeout: 300000,
           retryConfig: {
             maxAttempts: 3,
             delay: 10000,
-            backoffStrategy: 'fixed',
-            maxDelay: 10000
-          }
-        }
+            backoffStrategy: "fixed",
+            maxDelay: 10000,
+          },
+        },
       ],
       notifications: {
         enabled: true,
         channels: [
           NotificationChannel.EMAIL,
           NotificationChannel.SLACK,
-          NotificationChannel.PAGER_DUTY
+          NotificationChannel.PAGER_DUTY,
         ],
-        recipients: [
-          'sre@company.com',
-          'engineering-leads@company.com'
-        ],
+        recipients: ["sre@company.com", "engineering-leads@company.com"],
         templates: {
-          rollback: 'CRITICAL: Production rollback executed'
-        }
-      }
+          rollback: "CRITICAL: Production rollback executed",
+        },
+      },
     };
   }
 
@@ -1221,8 +1223,8 @@ export class DefaultQualityGatesConfigFactory {
         enabled: false,
         channels: [],
         recipients: [],
-        templates: {}
-      }
+        templates: {},
+      },
     };
   }
 
@@ -1239,17 +1241,17 @@ export class DefaultQualityGatesConfigFactory {
       timeout: 3600000, // 1 hour
       autoApprovalConditions: [
         {
-          id: 'auto-approve-dev',
+          id: "auto-approve-dev",
           criteria: {
-            environments: ['development'],
+            environments: ["development"],
             users: [],
             qualityScoreThreshold: 80,
             noCriticalFailures: true,
-            additionalCriteria: {}
+            additionalCriteria: {},
           },
           enabled: true,
-          description: 'Auto-approve development deployments'
-        }
+          description: "Auto-approve development deployments",
+        },
       ],
       notifications: {
         enabled: false,
@@ -1258,9 +1260,9 @@ export class DefaultQualityGatesConfigFactory {
         escalation: {
           enabled: false,
           delay: 0,
-          levels: []
-        }
-      }
+          levels: [],
+        },
+      },
     };
   }
 
@@ -1273,62 +1275,62 @@ export class DefaultQualityGatesConfigFactory {
       enabled: true,
       requirements: [
         {
-          id: 'tech-lead-approval',
-          name: 'Technical Lead Approval',
+          id: "tech-lead-approval",
+          name: "Technical Lead Approval",
           approvers: [
             {
               type: ApproverType.ROLE,
-              identifier: 'tech-lead',
-              permissions: ['approve-staging']
-            }
+              identifier: "tech-lead",
+              permissions: ["approve-staging"],
+            },
           ],
           minApprovals: 1,
           conditions: [
             {
-              id: 'staging-deployment',
+              id: "staging-deployment",
               type: ApprovalConditionType.HIGH_RISK_CHANGE,
-              parameters: { environment: 'staging' },
-              description: 'Staging deployment requires approval'
-            }
+              parameters: { environment: "staging" },
+              description: "Staging deployment requires approval",
+            },
           ],
-          priority: 1
-        }
+          priority: 1,
+        },
       ],
       timeout: 7200000, // 2 hours
       autoApprovalConditions: [
         {
-          id: 'auto-approve-low-risk',
+          id: "auto-approve-low-risk",
           criteria: {
-            environments: ['staging'],
+            environments: ["staging"],
             users: [],
             qualityScoreThreshold: 95,
             noCriticalFailures: true,
             additionalCriteria: {
               maxChangedFiles: 5,
-              testCoverage: 90
-            }
+              testCoverage: 90,
+            },
           },
           enabled: true,
-          description: 'Auto-approve low-risk staging changes'
-        }
+          description: "Auto-approve low-risk staging changes",
+        },
       ],
       notifications: {
         enabled: true,
         channels: [NotificationChannel.EMAIL, NotificationChannel.SLACK],
-        recipients: ['tech-leads@company.com'],
+        recipients: ["tech-leads@company.com"],
         escalation: {
           enabled: true,
           delay: 3600000, // 1 hour
           levels: [
             {
               level: 1,
-              recipients: ['engineering-manager@company.com'],
-              messageTemplate: 'Approval needed: {title}',
-              channels: [NotificationChannel.EMAIL]
-            }
-          ]
-        }
-      }
+              recipients: ["engineering-manager@company.com"],
+              messageTemplate: "Approval needed: {title}",
+              channels: [NotificationChannel.EMAIL],
+            },
+          ],
+        },
+      },
     };
   }
 
@@ -1341,31 +1343,31 @@ export class DefaultQualityGatesConfigFactory {
       enabled: true,
       requirements: [
         {
-          id: 'dual-approval',
-          name: 'Dual Approval Required',
+          id: "dual-approval",
+          name: "Dual Approval Required",
           approvers: [
             {
               type: ApproverType.ROLE,
-              identifier: 'tech-lead',
-              permissions: ['approve-production']
+              identifier: "tech-lead",
+              permissions: ["approve-production"],
             },
             {
               type: ApproverType.ROLE,
-              identifier: 'sre-lead',
-              permissions: ['approve-production']
-            }
+              identifier: "sre-lead",
+              permissions: ["approve-production"],
+            },
           ],
           minApprovals: 2,
           conditions: [
             {
-              id: 'production-deployment',
+              id: "production-deployment",
               type: ApprovalConditionType.PRODUCTION_DEPLOYMENT,
-              parameters: { environment: 'production' },
-              description: 'Production deployment requires dual approval'
-            }
+              parameters: { environment: "production" },
+              description: "Production deployment requires dual approval",
+            },
           ],
-          priority: 1
-        }
+          priority: 1,
+        },
       ],
       timeout: 14400000, // 4 hours
       autoApprovalConditions: [], // No auto-approval for production
@@ -1374,12 +1376,12 @@ export class DefaultQualityGatesConfigFactory {
         channels: [
           NotificationChannel.EMAIL,
           NotificationChannel.SLACK,
-          NotificationChannel.PAGER_DUTY
+          NotificationChannel.PAGER_DUTY,
         ],
         recipients: [
-          'tech-leads@company.com',
-          'sre-team@company.com',
-          'engineering-director@company.com'
+          "tech-leads@company.com",
+          "sre-team@company.com",
+          "engineering-director@company.com",
         ],
         escalation: {
           enabled: true,
@@ -1387,19 +1389,25 @@ export class DefaultQualityGatesConfigFactory {
           levels: [
             {
               level: 1,
-              recipients: ['engineering-director@company.com'],
-              messageTemplate: 'URGENT: Production approval needed: {title}',
-              channels: [NotificationChannel.EMAIL, NotificationChannel.PAGER_DUTY]
+              recipients: ["engineering-director@company.com"],
+              messageTemplate: "URGENT: Production approval needed: {title}",
+              channels: [
+                NotificationChannel.EMAIL,
+                NotificationChannel.PAGER_DUTY,
+              ],
             },
             {
               level: 2,
-              recipients: ['cto@company.com'],
-              messageTemplate: 'ESCALATED: Production approval needed: {title}',
-              channels: [NotificationChannel.EMAIL, NotificationChannel.PAGER_DUTY]
-            }
-          ]
-        }
-      }
+              recipients: ["cto@company.com"],
+              messageTemplate: "ESCALATED: Production approval needed: {title}",
+              channels: [
+                NotificationChannel.EMAIL,
+                NotificationChannel.PAGER_DUTY,
+              ],
+            },
+          ],
+        },
+      },
     };
   }
 
@@ -1414,17 +1422,17 @@ export class DefaultQualityGatesConfigFactory {
       timeout: 300000, // 5 minutes
       autoApprovalConditions: [
         {
-          id: 'auto-approve-all-test',
+          id: "auto-approve-all-test",
           criteria: {
-            environments: ['test'],
+            environments: ["test"],
             users: [],
             qualityScoreThreshold: 0,
             noCriticalFailures: false,
-            additionalCriteria: {}
+            additionalCriteria: {},
           },
           enabled: true,
-          description: 'Auto-approve all test deployments'
-        }
+          description: "Auto-approve all test deployments",
+        },
       ],
       notifications: {
         enabled: false,
@@ -1433,9 +1441,9 @@ export class DefaultQualityGatesConfigFactory {
         escalation: {
           enabled: false,
           delay: 0,
-          levels: []
-        }
-      }
+          levels: [],
+        },
+      },
     };
   }
 }
@@ -1450,17 +1458,19 @@ export class ConfigurationValidator {
    * @param config - Framework configuration to validate
    * @returns Validation result
    */
-  static validateFrameworkConfig(config: QualityGatesFrameworkConfig): ConfigValidationResult {
+  static validateFrameworkConfig(
+    config: QualityGatesFrameworkConfig,
+  ): ConfigValidationResult {
     const errors: string[] = [];
     const warnings: string[] = [];
 
     // Validate framework settings
     if (config.framework.defaultTimeout <= 0) {
-      errors.push('Default timeout must be greater than 0');
+      errors.push("Default timeout must be greater than 0");
     }
 
     if (config.framework.maxConcurrentGates <= 0) {
-      errors.push('Max concurrent gates must be greater than 0');
+      errors.push("Max concurrent gates must be greater than 0");
     }
 
     // Validate environment configurations
@@ -1477,23 +1487,25 @@ export class ConfigurationValidator {
     // Validate production-specific requirements
     const prodConfig = config.performanceGates[Environment.PRODUCTION];
     if (prodConfig && prodConfig.responseTimeThreshold > 1000) {
-      errors.push('Production response time threshold must be ≤ 1000ms');
+      errors.push("Production response time threshold must be ≤ 1000ms");
     }
 
     const prodSecurity = config.securityGates[Environment.PRODUCTION];
     if (prodSecurity && prodSecurity.maxCriticalVulnerabilities > 0) {
-      errors.push('Production must have zero tolerance for critical vulnerabilities');
+      errors.push(
+        "Production must have zero tolerance for critical vulnerabilities",
+      );
     }
 
     const prodCoverage = config.coverageGates[Environment.PRODUCTION];
     if (prodCoverage && prodCoverage.minTestCoverage < 95) {
-      warnings.push('Production test coverage should be ≥ 95%');
+      warnings.push("Production test coverage should be ≥ 95%");
     }
 
     return {
       valid: errors.length === 0,
       errors,
-      warnings
+      warnings,
     };
   }
 }

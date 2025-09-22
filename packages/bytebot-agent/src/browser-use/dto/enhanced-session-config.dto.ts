@@ -53,10 +53,10 @@ export enum BrowserType {
  * Browser session security levels
  */
 export enum SessionSecurityLevel {
-  MINIMAL = 'minimal',       // Basic security, maximum performance
-  STANDARD = 'standard',     // Balanced security and performance
-  ENHANCED = 'enhanced',     // Higher security with some performance cost
-  MAXIMUM = 'maximum',       // Maximum security, may impact performance
+  MINIMAL = 'minimal', // Basic security, maximum performance
+  STANDARD = 'standard', // Balanced security and performance
+  ENHANCED = 'enhanced', // Higher security with some performance cost
+  MAXIMUM = 'maximum', // Maximum security, may impact performance
   COMPLIANCE = 'compliance', // Compliance-focused security settings
 }
 
@@ -64,9 +64,9 @@ export enum SessionSecurityLevel {
  * Session isolation levels
  */
 export enum SessionIsolationLevel {
-  SHARED = 'shared',           // Shared browser instance
-  PROCESS = 'process',         // Separate process per session
-  CONTAINER = 'container',     // Containerized isolation
+  SHARED = 'shared', // Shared browser instance
+  PROCESS = 'process', // Separate process per session
+  CONTAINER = 'container', // Containerized isolation
   VIRTUAL_MACHINE = 'virtual_machine', // VM-level isolation
 }
 
@@ -74,11 +74,11 @@ export enum SessionIsolationLevel {
  * Performance optimization profiles
  */
 export enum PerformanceProfile {
-  SPEED = 'speed',             // Maximum speed, minimal features
-  BALANCED = 'balanced',       // Balanced speed and features
-  QUALITY = 'quality',         // Quality over speed
+  SPEED = 'speed', // Maximum speed, minimal features
+  BALANCED = 'balanced', // Balanced speed and features
+  QUALITY = 'quality', // Quality over speed
   COMPATIBILITY = 'compatibility', // Maximum compatibility
-  CUSTOM = 'custom',           // Custom configuration
+  CUSTOM = 'custom', // Custom configuration
 }
 
 /**
@@ -131,7 +131,10 @@ export class BrowserArguments {
 
   @ApiPropertyOptional({
     description: 'Privacy and tracking arguments',
-    example: ['--disable-background-timer-throttling', '--disable-renderer-backgrounding'],
+    example: [
+      '--disable-background-timer-throttling',
+      '--disable-renderer-backgrounding',
+    ],
     type: [String],
   })
   @IsOptional()
@@ -153,7 +156,7 @@ export class BrowserArguments {
 
   @ApiPropertyOptional({
     description: 'Feature flags to enable/disable',
-    example: { 'WebRTC': false, 'WebGL': true },
+    example: { WebRTC: false, WebGL: true },
   })
   @IsOptional()
   @IsObject({ message: 'Feature flags must be an object' })
@@ -570,9 +573,9 @@ export class SessionConfigDto {
   @MinLength(3, { message: 'Session name too short' })
   @MaxLength(200, { message: 'Session name too long' })
   @Matches(/^[a-zA-Z0-9\s\-_.()]+$/, {
-    message: 'Session name contains invalid characters'
+    message: 'Session name contains invalid characters',
   })
-  @Transform(({ value }) => typeof value === 'string' ? value.trim() : value)
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   name!: string;
 
   @ApiPropertyOptional({
@@ -582,7 +585,7 @@ export class SessionConfigDto {
   @IsOptional()
   @IsString({ message: 'Description must be a string' })
   @MaxLength(1000, { message: 'Description too long' })
-  @Transform(({ value }) => typeof value === 'string' ? value.trim() : value)
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   description?: string;
 
   @ApiPropertyOptional({
@@ -761,7 +764,15 @@ export class SessionStatusDto {
   name!: string;
 
   @ApiProperty({ description: 'Current session status' })
-  @IsEnum(['initializing', 'active', 'idle', 'suspended', 'closing', 'closed', 'error'])
+  @IsEnum([
+    'initializing',
+    'active',
+    'idle',
+    'suspended',
+    'closing',
+    'closed',
+    'error',
+  ])
   status!: string;
 
   @ApiProperty({ description: 'Session creation timestamp' })
@@ -826,7 +837,12 @@ export class SessionStatusDto {
   error?: {
     code: string;
     message: string;
-    category: 'initialization' | 'runtime' | 'resource' | 'security' | 'network';
+    category:
+      | 'initialization'
+      | 'runtime'
+      | 'resource'
+      | 'security'
+      | 'network';
     severity: 'low' | 'medium' | 'high' | 'critical';
     timestamp: Date;
     recoverable: boolean;

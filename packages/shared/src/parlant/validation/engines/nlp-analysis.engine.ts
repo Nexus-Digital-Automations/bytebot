@@ -5,7 +5,7 @@
  * with real-time intent analysis, sentiment detection, and deception recognition
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from "@nestjs/common";
 import {
   NLPAnalysisEngine,
   IntentAnalysisResult,
@@ -22,8 +22,8 @@ import {
   EntityType,
   IntentCandidate,
   ContextualFactor,
-  AnomalyIndicator
-} from '../types/conversational-validation.types';
+  AnomalyIndicator,
+} from "../types/conversational-validation.types";
 
 @Injectable()
 export class NLPConversationAnalysisEngine implements NLPAnalysisEngine {
@@ -46,7 +46,7 @@ export class NLPConversationAnalysisEngine implements NLPAnalysisEngine {
   async analyzeUserIntent(
     input: string,
     context: ConversationContext,
-    userHistory: ConversationHistory[]
+    userHistory: ConversationHistory[],
   ): Promise<IntentAnalysisResult> {
     const startTime = Date.now();
 
@@ -58,34 +58,34 @@ export class NLPConversationAnalysisEngine implements NLPAnalysisEngine {
       const features = await this.extractIntentFeatures(
         normalizedInput,
         context,
-        userHistory
+        userHistory,
       );
 
       // Step 3: Primary intent classification using transformer models
       const primaryIntent = await this.intentClassificationModel.classify(
         features,
-        context
+        context,
       );
 
       // Step 4: Generate alternative intent candidates
       const alternativeIntents = await this.generateAlternativeIntents(
         features,
         primaryIntent,
-        context
+        context,
       );
 
       // Step 5: Analyze contextual factors
       const contextualFactors = await this.analyzeContextualFactors(
         input,
         context,
-        userHistory
+        userHistory,
       );
 
       // Step 6: Detect intent anomalies
       const anomalyIndicators = await this.detectIntentAnomalies(
         primaryIntent,
         features,
-        userHistory
+        userHistory,
       );
 
       // Step 7: Calculate confidence score
@@ -93,13 +93,13 @@ export class NLPConversationAnalysisEngine implements NLPAnalysisEngine {
         primaryIntent,
         alternativeIntents,
         contextualFactors,
-        anomalyIndicators
+        anomalyIndicators,
       );
 
       const processingTime = Date.now() - startTime;
 
       this.logger.log(
-        `Intent analysis completed in ${processingTime}ms with confidence: ${confidence}`
+        `Intent analysis completed in ${processingTime}ms with confidence: ${confidence}`,
       );
 
       return {
@@ -111,12 +111,14 @@ export class NLPConversationAnalysisEngine implements NLPAnalysisEngine {
         processingMetrics: {
           processingTime,
           modelVersion: this.intentClassificationModel.getVersion(),
-          featureCount: features.length
-        }
+          featureCount: features.length,
+        },
       };
-
     } catch (error) {
-      this.logger.error(`Intent analysis failed: ${error.message}`, error.stack);
+      this.logger.error(
+        `Intent analysis failed: ${error.message}`,
+        error.stack,
+      );
       throw new Error(`Intent analysis failed: ${error.message}`);
     }
   }
@@ -126,27 +128,29 @@ export class NLPConversationAnalysisEngine implements NLPAnalysisEngine {
    */
   async extractEntities(
     input: string,
-    entityTypes: EntityType[]
+    entityTypes: EntityType[],
   ): Promise<EntityExtractionResult> {
     const startTime = Date.now();
 
     try {
       // Step 1: Named Entity Recognition (NER)
-      const namedEntities = await this.entityExtractionModel.extractNamedEntities(
-        input,
-        entityTypes
-      );
+      const namedEntities =
+        await this.entityExtractionModel.extractNamedEntities(
+          input,
+          entityTypes,
+        );
 
       // Step 2: Relationship extraction
-      const relationships = await this.entityExtractionModel.extractRelationships(
-        input,
-        namedEntities
-      );
+      const relationships =
+        await this.entityExtractionModel.extractRelationships(
+          input,
+          namedEntities,
+        );
 
       // Step 3: Entity linking and disambiguation
       const linkedEntities = await this.entityExtractionModel.linkEntities(
         namedEntities,
-        this.getKnowledgeBase()
+        this.getKnowledgeBase(),
       );
 
       // Step 4: Extract temporal and numerical entities
@@ -158,7 +162,7 @@ export class NLPConversationAnalysisEngine implements NLPAnalysisEngine {
         linkedEntities,
         relationships,
         temporalEntities,
-        numericalEntities
+        numericalEntities,
       );
 
       const processingTime = Date.now() - startTime;
@@ -169,12 +173,17 @@ export class NLPConversationAnalysisEngine implements NLPAnalysisEngine {
         temporalEntities,
         numericalEntities,
         entityGraph,
-        confidence: this.calculateEntityConfidence(linkedEntities, relationships),
-        processingTime
+        confidence: this.calculateEntityConfidence(
+          linkedEntities,
+          relationships,
+        ),
+        processingTime,
       };
-
     } catch (error) {
-      this.logger.error(`Entity extraction failed: ${error.message}`, error.stack);
+      this.logger.error(
+        `Entity extraction failed: ${error.message}`,
+        error.stack,
+      );
       throw new Error(`Entity extraction failed: ${error.message}`);
     }
   }
@@ -184,46 +193,45 @@ export class NLPConversationAnalysisEngine implements NLPAnalysisEngine {
    */
   async analyzeSentiment(
     input: string,
-    conversationHistory: ConversationHistory[]
+    conversationHistory: ConversationHistory[],
   ): Promise<SentimentAnalysisResult> {
     const startTime = Date.now();
 
     try {
       // Step 1: Multi-dimensional sentiment analysis
-      const sentimentScores = await this.sentimentAnalysisModel.analyzeSentiment(
-        input,
-        {
-          dimensions: ['valence', 'arousal', 'dominance'],
+      const sentimentScores =
+        await this.sentimentAnalysisModel.analyzeSentiment(input, {
+          dimensions: ["valence", "arousal", "dominance"],
           contextWindow: 5,
-          emotionalStates: true
-        }
-      );
+          emotionalStates: true,
+        });
 
       // Step 2: Emotional state detection
       const emotionalState = await this.detectEmotionalState(
         input,
         sentimentScores,
-        conversationHistory
+        conversationHistory,
       );
 
       // Step 3: Sentiment trajectory analysis
       const sentimentTrajectory = await this.analyzeSentimentTrajectory(
         conversationHistory,
-        sentimentScores
+        sentimentScores,
       );
 
       // Step 4: Stress and urgency detection
       const stressIndicators = await this.detectStressIndicators(
         input,
         sentimentScores,
-        conversationHistory
+        conversationHistory,
       );
 
       // Step 5: Deception indicators from sentiment
-      const deceptionIndicators = await this.extractSentimentDeceptionIndicators(
-        sentimentScores,
-        conversationHistory
-      );
+      const deceptionIndicators =
+        await this.extractSentimentDeceptionIndicators(
+          sentimentScores,
+          conversationHistory,
+        );
 
       const processingTime = Date.now() - startTime;
 
@@ -234,11 +242,13 @@ export class NLPConversationAnalysisEngine implements NLPAnalysisEngine {
         stressIndicators,
         deceptionIndicators,
         confidence: sentimentScores.confidence,
-        processingTime
+        processingTime,
       };
-
     } catch (error) {
-      this.logger.error(`Sentiment analysis failed: ${error.message}`, error.stack);
+      this.logger.error(
+        `Sentiment analysis failed: ${error.message}`,
+        error.stack,
+      );
       throw new Error(`Sentiment analysis failed: ${error.message}`);
     }
   }
@@ -249,46 +259,49 @@ export class NLPConversationAnalysisEngine implements NLPAnalysisEngine {
   async detectDeception(
     input: string,
     userProfile: BehavioralProfile,
-    context: ValidationContext
+    context: ValidationContext,
   ): Promise<DeceptionAnalysisResult> {
     const startTime = Date.now();
 
     try {
       // Step 1: Linguistic deception indicators
-      const linguisticIndicators = await this.deceptionDetectionModel.analyzeLinguistic(
-        input,
-        {
-          markers: ['hedging', 'qualifiers', 'temporal_distancing', 'cognitive_load'],
+      const linguisticIndicators =
+        await this.deceptionDetectionModel.analyzeLinguistic(input, {
+          markers: [
+            "hedging",
+            "qualifiers",
+            "temporal_distancing",
+            "cognitive_load",
+          ],
           baseline: userProfile.typingPattern,
-          context
-        }
-      );
+          context,
+        });
 
       // Step 2: Behavioral deception indicators
       const behavioralIndicators = await this.analyzeBehavioralDeception(
         input,
         userProfile,
-        context
+        context,
       );
 
       // Step 3: Cognitive load analysis
       const cognitiveLoadAnalysis = await this.analyzeCognitiveLoad(
         input,
-        userProfile.typingPattern
+        userProfile.typingPattern,
       );
 
       // Step 4: Consistency checking
       const consistencyAnalysis = await this.analyzeConsistency(
         input,
         userProfile.interactionHistory,
-        context
+        context,
       );
 
       // Step 5: Advanced pattern recognition
       const patternAnalysis = await this.analyzeDeceptionPatterns(
         input,
         userProfile,
-        context
+        context,
       );
 
       // Step 6: Calculate overall deception probability
@@ -297,7 +310,7 @@ export class NLPConversationAnalysisEngine implements NLPAnalysisEngine {
         behavioralIndicators,
         cognitiveLoadAnalysis,
         consistencyAnalysis,
-        patternAnalysis
+        patternAnalysis,
       );
 
       const processingTime = Date.now() - startTime;
@@ -311,11 +324,13 @@ export class NLPConversationAnalysisEngine implements NLPAnalysisEngine {
         patternAnalysis,
         confidence: this.calculateDeceptionConfidence(deceptionProbability),
         processingTime,
-        riskAssessment: this.assessDeceptionRisk(deceptionProbability, context)
+        riskAssessment: this.assessDeceptionRisk(deceptionProbability, context),
       };
-
     } catch (error) {
-      this.logger.error(`Deception detection failed: ${error.message}`, error.stack);
+      this.logger.error(
+        `Deception detection failed: ${error.message}`,
+        error.stack,
+      );
       throw new Error(`Deception detection failed: ${error.message}`);
     }
   }
@@ -326,53 +341,57 @@ export class NLPConversationAnalysisEngine implements NLPAnalysisEngine {
   async generateExplanation(
     decision: ConversationAnalysisResult,
     reasoning: string,
-    userContext: UserContext
+    userContext: UserContext,
   ): Promise<string> {
     const startTime = Date.now();
 
     try {
       // Step 1: Analyze user communication preferences
-      const communicationStyle = await this.analyzeCommunicationStyle(userContext);
+      const communicationStyle =
+        await this.analyzeCommunicationStyle(userContext);
 
       // Step 2: Generate explanation template
       const explanationTemplate = await this.selectExplanationTemplate(
         decision,
-        communicationStyle
+        communicationStyle,
       );
 
       // Step 3: Personalize explanation
-      const personalizedExplanation = await this.languageGenerationModel.generate({
-        template: explanationTemplate,
-        reasoning,
-        userContext,
-        tone: communicationStyle.preferredTone,
-        complexity: communicationStyle.complexityLevel,
-        language: userContext.languagePreference
-      });
+      const personalizedExplanation =
+        await this.languageGenerationModel.generate({
+          template: explanationTemplate,
+          reasoning,
+          userContext,
+          tone: communicationStyle.preferredTone,
+          complexity: communicationStyle.complexityLevel,
+          language: userContext.languagePreference,
+        });
 
       // Step 4: Add accessibility enhancements
       const accessibleExplanation = await this.enhanceForAccessibility(
         personalizedExplanation,
-        userContext.accessibilityRequirements
+        userContext.accessibilityRequirements,
       );
 
       // Step 5: Validate explanation quality
       const qualityScore = await this.validateExplanationQuality(
         accessibleExplanation,
         decision,
-        reasoning
+        reasoning,
       );
 
       const processingTime = Date.now() - startTime;
 
       this.logger.log(
-        `Explanation generated in ${processingTime}ms with quality score: ${qualityScore}`
+        `Explanation generated in ${processingTime}ms with quality score: ${qualityScore}`,
       );
 
       return accessibleExplanation;
-
     } catch (error) {
-      this.logger.error(`Explanation generation failed: ${error.message}`, error.stack);
+      this.logger.error(
+        `Explanation generation failed: ${error.message}`,
+        error.stack,
+      );
       throw new Error(`Explanation generation failed: ${error.message}`);
     }
   }
@@ -382,39 +401,39 @@ export class NLPConversationAnalysisEngine implements NLPAnalysisEngine {
   private async initializeNLPModels(): Promise<void> {
     // Initialize transformer models for intent classification
     this.intentClassificationModel = new IntentClassifier({
-      model: 'distilbert-base-uncased-finetuned-intent',
+      model: "distilbert-base-uncased-finetuned-intent",
       maxSequenceLength: 512,
       vocabularySize: 30000,
-      numLabels: Object.keys(UserIntentClassification).length
+      numLabels: Object.keys(UserIntentClassification).length,
     });
 
     // Initialize entity extraction models
     this.entityExtractionModel = new EntityExtractor({
-      nerModel: 'dbmdz/bert-large-cased-finetuned-conll03-english',
-      relationshipModel: 'stanford-nlp/relationship-extraction',
-      entityLinkingModel: 'facebook/entity-linking-wikidata'
+      nerModel: "dbmdz/bert-large-cased-finetuned-conll03-english",
+      relationshipModel: "stanford-nlp/relationship-extraction",
+      entityLinkingModel: "facebook/entity-linking-wikidata",
     });
 
     // Initialize sentiment analysis models
     this.sentimentAnalysisModel = new SentimentAnalyzer({
-      model: 'cardiffnlp/twitter-roberta-base-sentiment-latest',
-      emotionModel: 'j-hartmann/emotion-english-distilroberta-base',
-      dimensions: ['valence', 'arousal', 'dominance']
+      model: "cardiffnlp/twitter-roberta-base-sentiment-latest",
+      emotionModel: "j-hartmann/emotion-english-distilroberta-base",
+      dimensions: ["valence", "arousal", "dominance"],
     });
 
     // Initialize deception detection models
     this.deceptionDetectionModel = new DeceptionDetector({
-      linguisticModel: 'custom-deception-bert',
-      behavioralModel: 'lstm-behavioral-analysis',
-      ensembleMethod: 'weighted-voting'
+      linguisticModel: "custom-deception-bert",
+      behavioralModel: "lstm-behavioral-analysis",
+      ensembleMethod: "weighted-voting",
     });
 
     // Initialize language generation models
     this.languageGenerationModel = new LanguageGenerator({
-      model: 'microsoft/DialoGPT-large',
+      model: "microsoft/DialoGPT-large",
       maxLength: 512,
       temperature: 0.7,
-      topP: 0.9
+      topP: 0.9,
     });
 
     await Promise.all([
@@ -422,15 +441,15 @@ export class NLPConversationAnalysisEngine implements NLPAnalysisEngine {
       this.entityExtractionModel.initialize(),
       this.sentimentAnalysisModel.initialize(),
       this.deceptionDetectionModel.initialize(),
-      this.languageGenerationModel.initialize()
+      this.languageGenerationModel.initialize(),
     ]);
 
-    this.logger.log('NLP models initialized successfully');
+    this.logger.log("NLP models initialized successfully");
   }
 
   private async preprocessInput(
     input: string,
-    context: ConversationContext
+    context: ConversationContext,
   ): Promise<string> {
     // Text normalization, cleaning, and tokenization
     let normalized = input.toLowerCase().trim();
@@ -439,8 +458,11 @@ export class NLPConversationAnalysisEngine implements NLPAnalysisEngine {
     normalized = await this.removePII(normalized);
 
     // Handle multiple languages if needed
-    if (context.languagePreference !== 'en') {
-      normalized = await this.translateToEnglish(normalized, context.languagePreference);
+    if (context.languagePreference !== "en") {
+      normalized = await this.translateToEnglish(
+        normalized,
+        context.languagePreference,
+      );
     }
 
     return normalized;
@@ -449,48 +471,47 @@ export class NLPConversationAnalysisEngine implements NLPAnalysisEngine {
   private async extractIntentFeatures(
     input: string,
     context: ConversationContext,
-    userHistory: ConversationHistory[]
+    userHistory: ConversationHistory[],
   ): Promise<FeatureVector> {
     // Extract linguistic features, contextual features, and historical patterns
     const linguisticFeatures = await this.extractLinguisticFeatures(input);
     const contextualFeatures = await this.extractContextualFeatures(context);
-    const historicalFeatures = await this.extractHistoricalFeatures(userHistory);
+    const historicalFeatures =
+      await this.extractHistoricalFeatures(userHistory);
 
     return {
       linguistic: linguisticFeatures,
       contextual: contextualFeatures,
-      historical: historicalFeatures
+      historical: historicalFeatures,
     };
   }
 
   private async generateAlternativeIntents(
     features: FeatureVector,
     primaryIntent: IntentClassification,
-    context: ConversationContext
+    context: ConversationContext,
   ): Promise<IntentCandidate[]> {
     // Generate alternative intent hypotheses using beam search
-    const alternatives = await this.intentClassificationModel.generateAlternatives(
-      features,
-      {
+    const alternatives =
+      await this.intentClassificationModel.generateAlternatives(features, {
         beamSize: 5,
         confidenceThreshold: 0.1,
-        diversityPenalty: 0.5
-      }
-    );
+        diversityPenalty: 0.5,
+      });
 
     return alternatives
-      .filter(alt => alt.classification !== primaryIntent.classification)
-      .map(alt => ({
+      .filter((alt) => alt.classification !== primaryIntent.classification)
+      .map((alt) => ({
         intent: alt.classification,
         confidence: alt.confidence,
-        evidence: alt.evidence
+        evidence: alt.evidence,
       }));
   }
 
   private async analyzeContextualFactors(
     input: string,
     context: ConversationContext,
-    userHistory: ConversationHistory[]
+    userHistory: ConversationHistory[],
   ): Promise<ContextualFactor[]> {
     const factors: ContextualFactor[] = [];
 
@@ -512,28 +533,28 @@ export class NLPConversationAnalysisEngine implements NLPAnalysisEngine {
   private async detectIntentAnomalies(
     primaryIntent: IntentClassification,
     features: FeatureVector,
-    userHistory: ConversationHistory[]
+    userHistory: ConversationHistory[],
   ): Promise<AnomalyIndicator[]> {
     const anomalies: AnomalyIndicator[] = [];
 
     // Detect unusual patterns in user behavior
     const behavioralAnomalies = await this.detectBehavioralAnomalies(
       primaryIntent,
-      userHistory
+      userHistory,
     );
     anomalies.push(...behavioralAnomalies);
 
     // Detect linguistic anomalies
     const linguisticAnomalies = await this.detectLinguisticAnomalies(
       features.linguistic,
-      userHistory
+      userHistory,
     );
     anomalies.push(...linguisticAnomalies);
 
     // Detect temporal anomalies
     const temporalAnomalies = await this.detectTemporalAnomalies(
       primaryIntent,
-      features.contextual
+      features.contextual,
     );
     anomalies.push(...temporalAnomalies);
 
@@ -544,30 +565,30 @@ export class NLPConversationAnalysisEngine implements NLPAnalysisEngine {
     primaryIntent: IntentClassification,
     alternativeIntents: IntentCandidate[],
     contextualFactors: ContextualFactor[],
-    anomalyIndicators: AnomalyIndicator[]
+    anomalyIndicators: AnomalyIndicator[],
   ): Promise<number> {
     // Base confidence from the primary classification
     let confidence = primaryIntent.confidence;
 
     // Adjust based on alternative intent probabilities
     const maxAlternativeConfidence = Math.max(
-      ...alternativeIntents.map(alt => alt.confidence),
-      0
+      ...alternativeIntents.map((alt) => alt.confidence),
+      0,
     );
     confidence = confidence * (1 - 0.5 * maxAlternativeConfidence);
 
     // Adjust based on contextual factors
-    const contextualBoost = contextualFactors.reduce(
-      (boost, factor) => boost + factor.influence,
-      0
-    ) / contextualFactors.length;
+    const contextualBoost =
+      contextualFactors.reduce((boost, factor) => boost + factor.influence, 0) /
+      contextualFactors.length;
     confidence = confidence * (1 + 0.2 * contextualBoost);
 
     // Penalize for anomalies
-    const anomalyPenalty = anomalyIndicators.reduce(
-      (penalty, anomaly) => penalty + anomaly.severity * anomaly.confidence,
-      0
-    ) / anomalyIndicators.length;
+    const anomalyPenalty =
+      anomalyIndicators.reduce(
+        (penalty, anomaly) => penalty + anomaly.severity * anomaly.confidence,
+        0,
+      ) / anomalyIndicators.length;
     confidence = confidence * (1 - 0.3 * anomalyPenalty);
 
     return Math.max(0, Math.min(1, confidence));
@@ -580,26 +601,47 @@ export class NLPConversationAnalysisEngine implements NLPAnalysisEngine {
 // Supporting classes and interfaces
 
 interface IntentClassifier {
-  classify(features: FeatureVector, context: ConversationContext): Promise<IntentClassification>;
-  generateAlternatives(features: FeatureVector, options: AlternativeOptions): Promise<IntentClassification[]>;
+  classify(
+    features: FeatureVector,
+    context: ConversationContext,
+  ): Promise<IntentClassification>;
+  generateAlternatives(
+    features: FeatureVector,
+    options: AlternativeOptions,
+  ): Promise<IntentClassification[]>;
   getVersion(): string;
   initialize(): Promise<void>;
 }
 
 interface EntityExtractor {
-  extractNamedEntities(input: string, types: EntityType[]): Promise<NamedEntity[]>;
-  extractRelationships(input: string, entities: NamedEntity[]): Promise<EntityRelationship[]>;
-  linkEntities(entities: NamedEntity[], knowledgeBase: KnowledgeBase): Promise<LinkedEntity[]>;
+  extractNamedEntities(
+    input: string,
+    types: EntityType[],
+  ): Promise<NamedEntity[]>;
+  extractRelationships(
+    input: string,
+    entities: NamedEntity[],
+  ): Promise<EntityRelationship[]>;
+  linkEntities(
+    entities: NamedEntity[],
+    knowledgeBase: KnowledgeBase,
+  ): Promise<LinkedEntity[]>;
   initialize(): Promise<void>;
 }
 
 interface SentimentAnalyzer {
-  analyzeSentiment(input: string, options: SentimentOptions): Promise<SentimentScores>;
+  analyzeSentiment(
+    input: string,
+    options: SentimentOptions,
+  ): Promise<SentimentScores>;
   initialize(): Promise<void>;
 }
 
 interface DeceptionDetector {
-  analyzeLinguistic(input: string, options: LinguisticOptions): Promise<LinguisticIndicators>;
+  analyzeLinguistic(
+    input: string,
+    options: LinguisticOptions,
+  ): Promise<LinguisticIndicators>;
   initialize(): Promise<void>;
 }
 

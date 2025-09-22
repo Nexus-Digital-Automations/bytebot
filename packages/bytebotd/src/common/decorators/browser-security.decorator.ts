@@ -375,7 +375,11 @@ export const AuditLogging = (
  * ```
  */
 export const AdminOnlyBrowserOperation = () => {
-  return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+  return (
+    target: Record<string, unknown>,
+    propertyKey: string,
+    descriptor: PropertyDescriptor,
+  ) => {
     // Apply role restriction
     SetMetadata('roles', [UserRole._ADMIN])(target, propertyKey, descriptor);
 
@@ -404,7 +408,11 @@ export const AdminOnlyBrowserOperation = () => {
  * ```
  */
 export const OperatorBrowserOperation = () => {
-  return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+  return (
+    target: Record<string, unknown>,
+    propertyKey: string,
+    descriptor: PropertyDescriptor,
+  ) => {
     // Apply role restriction
     SetMetadata('roles', [UserRole._ADMIN, UserRole._OPERATOR])(
       target,
@@ -444,12 +452,14 @@ export const OperatorBrowserOperation = () => {
  * ```
  */
 export const BrowserSession = createParamDecorator(
-  (property: string | undefined, ctx: ExecutionContext) => {
-    const request = ctx.switchToHttp().getRequest();
+  (property: string | undefined, ctx: ExecutionContext): unknown => {
+    const request = ctx.switchToHttp().getRequest() as {
+      browserSession?: Record<string, unknown>;
+    };
     const browserSession = request.browserSession;
 
-    if (property && browserSession) {
-      return browserSession[property];
+    if (property && browserSession && typeof browserSession === 'object') {
+      return (browserSession as Record<string, unknown>)[property];
     }
 
     return browserSession;
@@ -478,12 +488,14 @@ export const BrowserSession = createParamDecorator(
  * ```
  */
 export const BrowserSecurityContext = createParamDecorator(
-  (property: string | undefined, ctx: ExecutionContext) => {
-    const request = ctx.switchToHttp().getRequest();
+  (property: string | undefined, ctx: ExecutionContext): unknown => {
+    const request = ctx.switchToHttp().getRequest() as {
+      browserSecurityContext?: Record<string, unknown>;
+    };
     const securityContext = request.browserSecurityContext;
 
-    if (property && securityContext) {
-      return securityContext[property];
+    if (property && securityContext && typeof securityContext === 'object') {
+      return (securityContext as Record<string, unknown>)[property];
     }
 
     return securityContext;
@@ -510,12 +522,14 @@ export const BrowserSecurityContext = createParamDecorator(
  * ```
  */
 export const SanitizedInput = createParamDecorator(
-  (property: string | undefined, ctx: ExecutionContext) => {
-    const request = ctx.switchToHttp().getRequest();
+  (property: string | undefined, ctx: ExecutionContext): unknown => {
+    const request = ctx.switchToHttp().getRequest() as {
+      sanitizedData?: Record<string, unknown>;
+    };
     const sanitizedData = request.sanitizedData;
 
-    if (property && sanitizedData) {
-      return sanitizedData[property];
+    if (property && sanitizedData && typeof sanitizedData === 'object') {
+      return (sanitizedData as Record<string, unknown>)[property];
     }
 
     return sanitizedData;
@@ -530,7 +544,11 @@ export const SanitizedInput = createParamDecorator(
  * Secure browser navigation with comprehensive protection
  */
 export const SecureNavigation = () => {
-  return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+  return (
+    target: Record<string, unknown>,
+    propertyKey: string,
+    descriptor: PropertyDescriptor,
+  ) => {
     SecureBrowserNavigation()(target, propertyKey, descriptor);
     XSSProtection({
       enableInputSanitization: true,
@@ -546,7 +564,11 @@ export const SecureNavigation = () => {
  * Safe browser interaction with standard protection
  */
 export const SafeInteraction = () => {
-  return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+  return (
+    target: Record<string, unknown>,
+    propertyKey: string,
+    descriptor: PropertyDescriptor,
+  ) => {
     BrowserInteraction(BrowserSecurityLevel.MEDIUM)(
       target,
       propertyKey,
@@ -566,7 +588,11 @@ export const SafeInteraction = () => {
  * Critical browser operation with maximum security
  */
 export const CriticalBrowserOperation = () => {
-  return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+  return (
+    target: Record<string, unknown>,
+    propertyKey: string,
+    descriptor: PropertyDescriptor,
+  ) => {
     SetMetadata('roles', [UserRole._ADMIN])(target, propertyKey, descriptor);
     BrowserOperation({
       operationType: BrowserOperationType.SCRIPT_EXECUTION,
@@ -605,7 +631,7 @@ export interface BrowserSessionContext {
 
 export interface BrowserSecurityContext {
   riskScore: number;
-  violations: any[];
+  violations: Record<string, unknown>[];
   sanitized: boolean;
   operationType: BrowserOperationType;
   securityLevel: BrowserSecurityLevel;
@@ -613,7 +639,7 @@ export interface BrowserSecurityContext {
 }
 
 export interface SanitizedInputData {
-  [key: string]: any;
+  [key: string]: unknown;
   _sanitizationReport?: {
     sanitized: boolean;
     removedTags: string[];

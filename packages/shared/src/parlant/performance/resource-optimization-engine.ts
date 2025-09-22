@@ -17,12 +17,12 @@
  * @created 2025-09-21
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { EventEmitter } from 'events';
-import { performance, PerformanceObserver } from 'perf_hooks';
-import { cpus } from 'os';
-import { Worker, isMainThread, parentPort, workerData } from 'worker_threads';
-import * as v8 from 'v8';
+import { Injectable, Logger } from "@nestjs/common";
+import { EventEmitter } from "events";
+import { performance, PerformanceObserver } from "perf_hooks";
+import { cpus } from "os";
+import { Worker, isMainThread, parentPort, workerData } from "worker_threads";
+import * as v8 from "v8";
 
 // Type guards
 function isError(error: unknown): error is Error {
@@ -31,8 +31,8 @@ function isError(error: unknown): error is Error {
 
 function getErrorMessage(error: unknown): string {
   if (isError(error)) return error.message;
-  if (typeof error === 'string') return error;
-  return 'An unknown error occurred';
+  if (typeof error === "string") return error;
+  return "An unknown error occurred";
 }
 
 /**
@@ -61,7 +61,7 @@ interface MemoryOptimizationConfig {
   targetHeapUtilization: number;
   maxHeapSize: number;
   minHeapSize: number;
-  gcStrategy: 'aggressive' | 'balanced' | 'conservative';
+  gcStrategy: "aggressive" | "balanced" | "conservative";
 }
 
 /**
@@ -205,7 +205,7 @@ interface MemoryLeakInfo {
   size: number;
   location: string;
   timestamp: Date;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
   stackTrace?: string;
 }
 
@@ -316,7 +316,7 @@ class ObjectPool<T> {
     private readonly name: string,
     factory: () => T,
     reset?: (obj: T) => void,
-    initialSize = 10
+    initialSize = 10,
   ) {
     this.factory = factory;
     this.reset = reset;
@@ -327,7 +327,7 @@ class ObjectPool<T> {
       availableObjects: 0,
       hitRate: 0,
       creationRate: 0,
-      destructionRate: 0
+      destructionRate: 0,
     };
 
     // Pre-populate pool
@@ -372,8 +372,13 @@ class ObjectPool<T> {
   }
 
   private updateHitRate(hit: boolean): void {
-    const totalRequests = this.metrics.creationRate + this.metrics.availableObjects + this.metrics.activeObjects;
-    const hits = hit ? this.metrics.availableObjects + this.metrics.activeObjects : this.metrics.availableObjects;
+    const totalRequests =
+      this.metrics.creationRate +
+      this.metrics.availableObjects +
+      this.metrics.activeObjects;
+    const hits = hit
+      ? this.metrics.availableObjects + this.metrics.activeObjects
+      : this.metrics.availableObjects;
     this.metrics.hitRate = totalRequests > 0 ? hits / totalRequests : 0;
   }
 }
@@ -395,9 +400,10 @@ class MemoryLeakDetector {
       this.analyzeHeapGrowth(currentSnapshot, leaks);
       this.analyzeObjectGrowth(leaks);
       this.analyzeEventListenerLeaks(leaks);
-
     } catch (error) {
-      this.logger.error(`Memory leak detection failed: ${getErrorMessage(error)}`);
+      this.logger.error(
+        `Memory leak detection failed: ${getErrorMessage(error)}`,
+      );
     }
 
     return leaks;
@@ -409,29 +415,29 @@ class MemoryLeakDetector {
       timestamp: Date.now(),
       heapUsed: process.memoryUsage().heapUsed,
       heapTotal: process.memoryUsage().heapTotal,
-      external: process.memoryUsage().external
+      external: process.memoryUsage().external,
     };
   }
 
   private analyzeHeapGrowth(snapshot: any, leaks: MemoryLeakInfo[]): void {
-    const growth = this.growthTracking.get('heap') || [];
+    const growth = this.growthTracking.get("heap") || [];
     growth.push(snapshot.heapUsed);
 
     if (growth.length > 10) {
       growth.shift();
     }
 
-    this.growthTracking.set('heap', growth);
+    this.growthTracking.set("heap", growth);
 
     if (growth.length >= 5) {
       const avgGrowth = this.calculateGrowthRate(growth);
       if (avgGrowth > this.leakThreshold) {
         leaks.push({
-          type: 'heap-growth',
+          type: "heap-growth",
           size: snapshot.heapUsed,
-          location: 'global-heap',
+          location: "global-heap",
           timestamp: new Date(),
-          severity: avgGrowth > 2 ? 'critical' : 'high'
+          severity: avgGrowth > 2 ? "critical" : "high",
         });
       }
     }
@@ -439,7 +445,7 @@ class MemoryLeakDetector {
 
   private analyzeObjectGrowth(leaks: MemoryLeakInfo[]): void {
     // Analyze specific object types that commonly leak
-    const commonLeakTypes = ['EventEmitter', 'Timer', 'Promise', 'Closure'];
+    const commonLeakTypes = ["EventEmitter", "Timer", "Promise", "Closure"];
 
     for (const type of commonLeakTypes) {
       // Simplified object counting - in production, use heap profiling
@@ -461,7 +467,7 @@ class MemoryLeakDetector {
             size: currentCount,
             location: `global-${type}`,
             timestamp: new Date(),
-            severity: avgGrowth > 3 ? 'critical' : 'medium'
+            severity: avgGrowth > 3 ? "critical" : "medium",
           });
         }
       }
@@ -470,17 +476,18 @@ class MemoryLeakDetector {
 
   private analyzeEventListenerLeaks(leaks: MemoryLeakInfo[]): void {
     // Check for EventEmitter memory leaks
-    const processListeners = process.listenerCount('uncaughtException') +
-                           process.listenerCount('unhandledRejection') +
-                           process.listenerCount('exit');
+    const processListeners =
+      process.listenerCount("uncaughtException") +
+      process.listenerCount("unhandledRejection") +
+      process.listenerCount("exit");
 
     if (processListeners > 50) {
       leaks.push({
-        type: 'event-listener-leak',
+        type: "event-listener-leak",
         size: processListeners,
-        location: 'process-events',
+        location: "process-events",
         timestamp: new Date(),
-        severity: processListeners > 100 ? 'critical' : 'medium'
+        severity: processListeners > 100 ? "critical" : "medium",
       });
     }
   }
@@ -514,7 +521,6 @@ class V8Optimizer {
       this.optimizeCompilation(config);
       this.optimizeInlineCache(config);
       this.optimizeTurbofan(config);
-
     } catch (error) {
       this.logger.error(`V8 optimization failed: ${getErrorMessage(error)}`);
     }
@@ -523,30 +529,30 @@ class V8Optimizer {
   private optimizeHeap(config: V8TuningConfig): void {
     if (config.heapSnapshotProfiling) {
       // Enable heap profiling optimizations
-      v8.setFlagsFromString('--expose-gc');
-      v8.setFlagsFromString('--optimize-for-size');
+      v8.setFlagsFromString("--expose-gc");
+      v8.setFlagsFromString("--optimize-for-size");
     }
   }
 
   private optimizeCompilation(config: V8TuningConfig): void {
     if (config.compilationCache) {
-      v8.setFlagsFromString('--compilation-cache');
-      v8.setFlagsFromString('--cache-prototype-transitions');
+      v8.setFlagsFromString("--compilation-cache");
+      v8.setFlagsFromString("--cache-prototype-transitions");
     }
   }
 
   private optimizeInlineCache(config: V8TuningConfig): void {
     if (config.inlineCache) {
-      v8.setFlagsFromString('--use-ic');
-      v8.setFlagsFromString('--optimize-for-speed');
+      v8.setFlagsFromString("--use-ic");
+      v8.setFlagsFromString("--optimize-for-speed");
     }
   }
 
   private optimizeTurbofan(config: V8TuningConfig): void {
     if (config.turbofanOptimization) {
-      v8.setFlagsFromString('--turbo');
-      v8.setFlagsFromString('--turbo-inlining');
-      v8.setFlagsFromString('--turbo-splitting');
+      v8.setFlagsFromString("--turbo");
+      v8.setFlagsFromString("--turbo-inlining");
+      v8.setFlagsFromString("--turbo-splitting");
     }
   }
 
@@ -559,20 +565,20 @@ class V8Optimizer {
         cacheHits: 0,
         cacheMisses: 0,
         cacheSize: 0,
-        hitRate: 0
+        hitRate: 0,
       },
       optimizationMetrics: {
         optimizedFunctions: 0,
         deoptimizedFunctions: 0,
         optimizationTime: 0,
-        optimizationEfficiency: 0
+        optimizationEfficiency: 0,
       },
       stringStatistics: {
         totalStrings: 0,
         deduplicatedStrings: 0,
         stringMemoryUsage: 0,
-        deduplicationSavings: 0
-      }
+        deduplicationSavings: 0,
+      },
     };
   }
 }
@@ -607,7 +613,7 @@ export class ResourceOptimizationEngine {
   private metricsInterval?: NodeJS.Timeout;
 
   constructor(config: Partial<ResourceOptimizationConfig> = {}) {
-    this.logger.log('Initializing Resource Optimization Engine');
+    this.logger.log("Initializing Resource Optimization Engine");
 
     this.config = {
       memoryOptimization: {
@@ -621,7 +627,7 @@ export class ResourceOptimizationEngine {
         targetHeapUtilization: 0.7,
         maxHeapSize: 4 * 1024 * 1024 * 1024, // 4GB
         minHeapSize: 512 * 1024 * 1024, // 512MB
-        gcStrategy: 'balanced'
+        gcStrategy: "balanced",
       },
       cpuOptimization: {
         enabled: true,
@@ -632,7 +638,7 @@ export class ResourceOptimizationEngine {
         taskScheduling: true,
         targetCpuUtilization: 0.8,
         maxCpuUsage: 0.95,
-        minCpuReserve: 0.1
+        minCpuReserve: 0.1,
       },
       v8Tuning: {
         enabled: true,
@@ -643,7 +649,7 @@ export class ResourceOptimizationEngine {
         turbofanOptimization: true,
         stringOptimization: true,
         arrayOptimization: true,
-        functionOptimization: true
+        functionOptimization: true,
       },
       monitoring: {
         enabled: true,
@@ -652,23 +658,23 @@ export class ResourceOptimizationEngine {
         performanceTracing: true,
         resourceAlerting: true,
         historicalTracking: true,
-        exportMetrics: true
+        exportMetrics: true,
       },
       alerting: {
         enabled: true,
         memoryThresholds: {
           warning: 0.8,
-          critical: 0.9
+          critical: 0.9,
         },
         cpuThresholds: {
           warning: 0.8,
-          critical: 0.9
+          critical: 0.9,
         },
         gcThresholds: {
           pauseTimeWarning: 10,
           pauseTimeCritical: 50,
-          frequencyWarning: 100
-        }
+          frequencyWarning: 100,
+        },
       },
       autoOptimization: {
         enabled: true,
@@ -676,9 +682,9 @@ export class ResourceOptimizationEngine {
         dynamicGcTuning: true,
         workloadBasedOptimization: true,
         mlBasedOptimization: false,
-        optimizationInterval: 60000
+        optimizationInterval: 60000,
       },
-      ...config
+      ...config,
     };
 
     this.memoryLeakDetector = new MemoryLeakDetector();
@@ -697,7 +703,7 @@ export class ResourceOptimizationEngine {
    * Start resource optimization
    */
   start(): void {
-    this.logger.log('Starting resource optimization engine');
+    this.logger.log("Starting resource optimization engine");
 
     // Apply initial optimizations
     this.applyInitialOptimizations();
@@ -706,14 +712,14 @@ export class ResourceOptimizationEngine {
     this.startMonitoring();
     this.startAutoOptimization();
 
-    this.eventEmitter.emit('optimization-started');
+    this.eventEmitter.emit("optimization-started");
   }
 
   /**
    * Stop resource optimization
    */
   stop(): void {
-    this.logger.log('Stopping resource optimization engine');
+    this.logger.log("Stopping resource optimization engine");
 
     if (this.optimizationInterval) {
       clearInterval(this.optimizationInterval);
@@ -727,7 +733,7 @@ export class ResourceOptimizationEngine {
       this.gcObserver.disconnect();
     }
 
-    this.eventEmitter.emit('optimization-stopped');
+    this.eventEmitter.emit("optimization-stopped");
   }
 
   /**
@@ -750,7 +756,6 @@ export class ResourceOptimizationEngine {
       const afterMetrics = this.getCurrentMetrics();
 
       return this.calculateOptimizationResult(beforeMetrics, afterMetrics);
-
     } catch (error) {
       this.logger.error(`Optimization failed: ${getErrorMessage(error)}`);
       throw error;
@@ -764,7 +769,7 @@ export class ResourceOptimizationEngine {
     name: string,
     factory: () => T,
     reset?: (obj: T) => void,
-    initialSize = 10
+    initialSize = 10,
   ): ObjectPool<T> {
     const pool = new ObjectPool(name, factory, reset, initialSize);
     this.objectPools.set(name, pool);
@@ -783,7 +788,7 @@ export class ResourceOptimizationEngine {
     return {
       memory: this.memoryMetrics,
       cpu: this.cpuMetrics,
-      v8: this.v8Metrics
+      v8: this.v8Metrics,
     };
   }
 
@@ -798,11 +803,11 @@ export class ResourceOptimizationEngine {
     memoryLeakDetection: boolean;
   } {
     return {
-      memoryEfficiency: this.calculateMemoryEfficiencyImprovement() >= 0.40, // 40%+
+      memoryEfficiency: this.calculateMemoryEfficiencyImprovement() >= 0.4, // 40%+
       cpuUtilization: this.cpuMetrics.cpuUtilization >= 0.95, // >95%
       gcPauseTime: this.gcMetrics.averageMajorGcTime <= 50, // <50ms
       heapOptimization: this.memoryMetrics.heapUtilization <= 0.8, // <80%
-      memoryLeakDetection: this.memoryMetrics.memoryLeaks.length === 0 // No leaks
+      memoryLeakDetection: this.memoryMetrics.memoryLeaks.length === 0, // No leaks
     };
   }
 
@@ -825,23 +830,25 @@ export class ResourceOptimizationEngine {
     const strategy = this.config.memoryOptimization.gcStrategy;
 
     switch (strategy) {
-      case 'aggressive':
-        v8.setFlagsFromString('--gc-interval=50');
-        v8.setFlagsFromString('--optimize-for-size');
+      case "aggressive":
+        v8.setFlagsFromString("--gc-interval=50");
+        v8.setFlagsFromString("--optimize-for-size");
         break;
 
-      case 'balanced':
-        v8.setFlagsFromString('--gc-interval=100');
+      case "balanced":
+        v8.setFlagsFromString("--gc-interval=100");
         break;
 
-      case 'conservative':
-        v8.setFlagsFromString('--gc-interval=200');
-        v8.setFlagsFromString('--optimize-for-speed');
+      case "conservative":
+        v8.setFlagsFromString("--gc-interval=200");
+        v8.setFlagsFromString("--optimize-for-speed");
         break;
     }
 
     // Configure heap limits
-    const maxHeapSize = Math.floor(this.config.memoryOptimization.maxHeapSize / (1024 * 1024));
+    const maxHeapSize = Math.floor(
+      this.config.memoryOptimization.maxHeapSize / (1024 * 1024),
+    );
     v8.setFlagsFromString(`--max-old-space-size=${maxHeapSize}`);
   }
 
@@ -874,17 +881,22 @@ export class ResourceOptimizationEngine {
     }
 
     // Apply CPU throttling if needed
-    if (this.config.cpuOptimization.cpuThrottling && this.cpuMetrics.cpuUsage > this.config.cpuOptimization.maxCpuUsage) {
+    if (
+      this.config.cpuOptimization.cpuThrottling &&
+      this.cpuMetrics.cpuUsage > this.config.cpuOptimization.maxCpuUsage
+    ) {
       this.applyCpuThrottling();
     }
   }
 
   private handleMemoryLeaks(leaks: MemoryLeakInfo[]): void {
     for (const leak of leaks) {
-      this.logger.warn(`Memory leak detected: ${leak.type} (${leak.size} bytes) at ${leak.location}`);
+      this.logger.warn(
+        `Memory leak detected: ${leak.type} (${leak.size} bytes) at ${leak.location}`,
+      );
 
-      if (leak.severity === 'critical') {
-        this.eventEmitter.emit('critical-memory-leak', leak);
+      if (leak.severity === "critical") {
+        this.eventEmitter.emit("critical-memory-leak", leak);
       }
 
       // Attempt automatic leak mitigation
@@ -897,25 +909,29 @@ export class ResourceOptimizationEngine {
   private mitigateMemoryLeak(leak: MemoryLeakInfo): void {
     try {
       switch (leak.type) {
-        case 'event-listener-leak':
+        case "event-listener-leak":
           this.cleanupEventListeners();
           break;
 
-        case 'heap-growth':
+        case "heap-growth":
           this.forceGarbageCollection();
           break;
 
         default:
-          this.logger.warn(`No automatic mitigation available for leak type: ${leak.type}`);
+          this.logger.warn(
+            `No automatic mitigation available for leak type: ${leak.type}`,
+          );
       }
     } catch (error) {
-      this.logger.error(`Failed to mitigate memory leak: ${getErrorMessage(error)}`);
+      this.logger.error(
+        `Failed to mitigate memory leak: ${getErrorMessage(error)}`,
+      );
     }
   }
 
   private cleanupEventListeners(): void {
     // Remove excessive event listeners
-    const events = ['uncaughtException', 'unhandledRejection', 'exit'];
+    const events = ["uncaughtException", "unhandledRejection", "exit"];
 
     for (const event of events) {
       const listeners = process.listeners(event);
@@ -931,9 +947,12 @@ export class ResourceOptimizationEngine {
 
   private optimizeHeapUsage(): void {
     const heapStats = v8.getHeapStatistics();
-    const utilizationRatio = heapStats.used_heap_size / heapStats.heap_size_limit;
+    const utilizationRatio =
+      heapStats.used_heap_size / heapStats.heap_size_limit;
 
-    if (utilizationRatio > this.config.memoryOptimization.targetHeapUtilization) {
+    if (
+      utilizationRatio > this.config.memoryOptimization.targetHeapUtilization
+    ) {
       // Heap is overutilized, force GC
       this.forceGarbageCollection();
 
@@ -981,49 +1000,58 @@ export class ResourceOptimizationEngine {
 
   private applyCpuThrottling(): void {
     // Implement CPU throttling logic
-    this.logger.warn('CPU usage high, applying throttling');
+    this.logger.warn("CPU usage high, applying throttling");
   }
 
   private calculateOptimizationResult(
     beforeMetrics: any,
-    afterMetrics: any
+    afterMetrics: any,
   ): OptimizationResult {
-    const memoryImprovement = (beforeMetrics.memory.heapUsed - afterMetrics.memory.heapUsed) / beforeMetrics.memory.heapUsed;
-    const cpuImprovement = (beforeMetrics.cpu.cpuUsage - afterMetrics.cpu.cpuUsage) / beforeMetrics.cpu.cpuUsage;
+    const memoryImprovement =
+      (beforeMetrics.memory.heapUsed - afterMetrics.memory.heapUsed) /
+      beforeMetrics.memory.heapUsed;
+    const cpuImprovement =
+      (beforeMetrics.cpu.cpuUsage - afterMetrics.cpu.cpuUsage) /
+      beforeMetrics.cpu.cpuUsage;
 
     return {
       memoryOptimization: {
         beforeMemoryUsage: beforeMetrics.memory.heapUsed,
         afterMemoryUsage: afterMetrics.memory.heapUsed,
-        memorySavings: beforeMetrics.memory.heapUsed - afterMetrics.memory.heapUsed,
-        improvementPercentage: memoryImprovement * 100
+        memorySavings:
+          beforeMetrics.memory.heapUsed - afterMetrics.memory.heapUsed,
+        improvementPercentage: memoryImprovement * 100,
       },
       cpuOptimization: {
         beforeCpuUsage: beforeMetrics.cpu.cpuUsage,
         afterCpuUsage: afterMetrics.cpu.cpuUsage,
         cpuEfficiencyGain: cpuImprovement,
-        improvementPercentage: cpuImprovement * 100
+        improvementPercentage: cpuImprovement * 100,
       },
       v8Optimization: {
         gcImprovements: {
           pauseTimeReduction: 10,
-          frequencyOptimization: 15
+          frequencyOptimization: 15,
         },
         compilationImprovements: {
           cacheHitRateImprovement: 20,
-          optimizationSpeedUp: 25
-        }
+          optimizationSpeedUp: 25,
+        },
       },
-      overallImprovement: (memoryImprovement + cpuImprovement) * 50 // Average percentage
+      overallImprovement: (memoryImprovement + cpuImprovement) * 50, // Average percentage
     };
   }
 
   private calculateMemoryEfficiencyImprovement(): number {
     // Calculate based on heap utilization improvement
-    const targetUtilization = this.config.memoryOptimization.targetHeapUtilization;
+    const targetUtilization =
+      this.config.memoryOptimization.targetHeapUtilization;
     const currentUtilization = this.memoryMetrics.heapUtilization;
 
-    return Math.max(0, (targetUtilization - currentUtilization) / targetUtilization);
+    return Math.max(
+      0,
+      (targetUtilization - currentUtilization) / targetUtilization,
+    );
   }
 
   private setupGarbageCollectionMonitoring(): void {
@@ -1033,13 +1061,13 @@ export class ResourceOptimizationEngine {
       const entries = list.getEntries();
 
       for (const entry of entries) {
-        if (entry.entryType === 'gc') {
+        if (entry.entryType === "gc") {
           this.updateGcMetrics(entry as any);
         }
       }
     });
 
-    this.gcObserver.observe({ entryTypes: ['gc'] });
+    this.gcObserver.observe({ entryTypes: ["gc"] });
   }
 
   private updateGcMetrics(entry: any): void {
@@ -1048,12 +1076,14 @@ export class ResourceOptimizationEngine {
     switch (entry.detail?.kind) {
       case 1: // Minor GC
         this.gcMetrics.minorGcCount++;
-        this.gcMetrics.averageMinorGcTime = (this.gcMetrics.averageMinorGcTime + duration) / 2;
+        this.gcMetrics.averageMinorGcTime =
+          (this.gcMetrics.averageMinorGcTime + duration) / 2;
         break;
 
       case 2: // Major GC
         this.gcMetrics.majorGcCount++;
-        this.gcMetrics.averageMajorGcTime = (this.gcMetrics.averageMajorGcTime + duration) / 2;
+        this.gcMetrics.averageMajorGcTime =
+          (this.gcMetrics.averageMajorGcTime + duration) / 2;
         break;
 
       case 4: // Incremental GC
@@ -1062,7 +1092,7 @@ export class ResourceOptimizationEngine {
     }
 
     this.gcMetrics.totalGcTime += duration;
-    this.gcMetrics.lastGcType = entry.detail?.kind === 1 ? 'minor' : 'major';
+    this.gcMetrics.lastGcType = entry.detail?.kind === 1 ? "minor" : "major";
     this.gcMetrics.lastGcDuration = duration;
 
     // Calculate GC overhead
@@ -1084,9 +1114,15 @@ export class ResourceOptimizationEngine {
     const heapUtilization = memUsage.heapUsed / memUsage.heapTotal;
 
     if (heapUtilization > this.config.alerting.memoryThresholds.critical) {
-      this.eventEmitter.emit('memory-critical', { utilization: heapUtilization });
-    } else if (heapUtilization > this.config.alerting.memoryThresholds.warning) {
-      this.eventEmitter.emit('memory-warning', { utilization: heapUtilization });
+      this.eventEmitter.emit("memory-critical", {
+        utilization: heapUtilization,
+      });
+    } else if (
+      heapUtilization > this.config.alerting.memoryThresholds.warning
+    ) {
+      this.eventEmitter.emit("memory-warning", {
+        utilization: heapUtilization,
+      });
     }
   }
 
@@ -1102,7 +1138,7 @@ export class ResourceOptimizationEngine {
       rss: memUsage.rss,
       arrayBuffers: memUsage.arrayBuffers,
       gcMetrics: this.gcMetrics,
-      objectPoolMetrics: this.getObjectPoolMetrics()
+      objectPoolMetrics: this.getObjectPoolMetrics(),
     };
 
     // Update CPU metrics
@@ -1111,7 +1147,7 @@ export class ResourceOptimizationEngine {
       ...this.cpuMetrics,
       processCpuTime: cpuUsage.user + cpuUsage.system,
       userCpuTime: cpuUsage.user,
-      kernelCpuTime: cpuUsage.system
+      kernelCpuTime: cpuUsage.system,
     };
 
     // Update V8 metrics
@@ -1120,22 +1156,25 @@ export class ResourceOptimizationEngine {
 
   private getObjectPoolMetrics(): ObjectPoolMetrics {
     const pools = Array.from(this.objectPools.values());
-    const totalMetrics = pools.reduce((acc, pool) => {
-      const metrics = pool.getMetrics();
-      acc.totalObjects += metrics.totalObjects;
-      acc.activeObjects += metrics.activeObjects;
-      acc.availableObjects += metrics.availableObjects;
-      acc.hitRate += metrics.hitRate;
-      return acc;
-    }, {
-      poolName: 'combined',
-      totalObjects: 0,
-      activeObjects: 0,
-      availableObjects: 0,
-      hitRate: 0,
-      creationRate: 0,
-      destructionRate: 0
-    });
+    const totalMetrics = pools.reduce(
+      (acc, pool) => {
+        const metrics = pool.getMetrics();
+        acc.totalObjects += metrics.totalObjects;
+        acc.activeObjects += metrics.activeObjects;
+        acc.availableObjects += metrics.availableObjects;
+        acc.hitRate += metrics.hitRate;
+        return acc;
+      },
+      {
+        poolName: "combined",
+        totalObjects: 0,
+        activeObjects: 0,
+        availableObjects: 0,
+        hitRate: 0,
+        creationRate: 0,
+        destructionRate: 0,
+      },
+    );
 
     if (pools.length > 0) {
       totalMetrics.hitRate /= pools.length;
@@ -1150,7 +1189,7 @@ export class ResourceOptimizationEngine {
     this.metricsInterval = setInterval(() => {
       this.updateMetrics();
       const targets = this.validatePerformanceTargets();
-      this.logger.debug('Resource Optimization Status:', targets);
+      this.logger.debug("Resource Optimization Status:", targets);
     }, this.config.monitoring.samplingInterval);
   }
 
@@ -1161,18 +1200,24 @@ export class ResourceOptimizationEngine {
       try {
         await this.optimize();
       } catch (error) {
-        this.logger.error(`Auto-optimization failed: ${getErrorMessage(error)}`);
+        this.logger.error(
+          `Auto-optimization failed: ${getErrorMessage(error)}`,
+        );
       }
     }, this.config.autoOptimization.optimizationInterval);
   }
 
   private setupEventListeners(): void {
-    this.eventEmitter.on('memory-critical', (data) => {
-      this.logger.error(`Critical memory usage: ${(data.utilization * 100).toFixed(1)}%`);
+    this.eventEmitter.on("memory-critical", (data) => {
+      this.logger.error(
+        `Critical memory usage: ${(data.utilization * 100).toFixed(1)}%`,
+      );
     });
 
-    this.eventEmitter.on('memory-warning', (data) => {
-      this.logger.warn(`High memory usage: ${(data.utilization * 100).toFixed(1)}%`);
+    this.eventEmitter.on("memory-warning", (data) => {
+      this.logger.warn(
+        `High memory usage: ${(data.utilization * 100).toFixed(1)}%`,
+      );
     });
   }
 
@@ -1190,14 +1235,14 @@ export class ResourceOptimizationEngine {
       gcMetrics: this.gcMetrics,
       memoryLeaks: [],
       objectPoolMetrics: {
-        poolName: 'initial',
+        poolName: "initial",
         totalObjects: 0,
         activeObjects: 0,
         availableObjects: 0,
         hitRate: 0,
         creationRate: 0,
-        destructionRate: 0
-      }
+        destructionRate: 0,
+      },
     };
   }
 
@@ -1214,8 +1259,8 @@ export class ResourceOptimizationEngine {
         totalTasks: 0,
         tasksPerWorker: new Map(),
         loadBalance: 1.0,
-        utilizationEfficiency: 1.0
-      }
+        utilizationEfficiency: 1.0,
+      },
     };
   }
 
@@ -1228,8 +1273,8 @@ export class ResourceOptimizationEngine {
       averageMajorGcTime: 0,
       totalGcTime: 0,
       gcOverhead: 0,
-      lastGcType: '',
-      lastGcDuration: 0
+      lastGcType: "",
+      lastGcDuration: 0,
     };
   }
 }
@@ -1241,5 +1286,5 @@ export {
   CpuMetrics,
   V8Metrics,
   OptimizationResult,
-  ObjectPool
+  ObjectPool,
 };

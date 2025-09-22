@@ -18,53 +18,53 @@
  */
 
 // Core Framework Components
-export * from './core/error-classifier';
-export * from './core/error-registry';
-export * from './core/error-context';
-export * from './core/error-patterns';
+export * from "./core/error-classifier";
+export * from "./core/error-registry";
+export * from "./core/error-context";
+export * from "./core/error-patterns";
 
 // Recovery System
-export * from './recovery/recovery-engine';
-export * from './recovery/recovery-strategies';
-export * from './recovery/fallback-manager';
-export * from './recovery/circuit-breaker';
+export * from "./recovery/recovery-engine";
+export * from "./recovery/recovery-strategies";
+export * from "./recovery/fallback-manager";
+export * from "./recovery/circuit-breaker";
 
 // Communication System
-export * from './communication/conversational-error-communicator';
-export * from './communication/natural-language-generator';
-export * from './communication/guidance-engine';
-export * from './communication/help-system';
+export * from "./communication/conversational-error-communicator";
+export * from "./communication/natural-language-generator";
+export * from "./communication/guidance-engine";
+export * from "./communication/help-system";
 
 // Monitoring & Analytics
-export * from './monitoring/performance-monitor';
-export * from './monitoring/pattern-analyzer';
-export * from './monitoring/metrics-collector';
-export * from './monitoring/alerting-system';
+export * from "./monitoring/performance-monitor";
+export * from "./monitoring/pattern-analyzer";
+export * from "./monitoring/metrics-collector";
+export * from "./monitoring/alerting-system";
 
 // Audit & Forensics
-export * from './audit/audit-trail-manager';
-export * from './audit/forensic-analyzer';
-export * from './audit/compliance-reporter';
-export * from './audit/evidence-collector';
+export * from "./audit/audit-trail-manager";
+export * from "./audit/forensic-analyzer";
+export * from "./audit/compliance-reporter";
+export * from "./audit/evidence-collector";
 
 // Dashboards & Visualization
-export * from './dashboard/error-dashboard';
-export * from './dashboard/metrics-visualizer';
-export * from './dashboard/real-time-monitor';
-export * from './dashboard/executive-summary';
+export * from "./dashboard/error-dashboard";
+export * from "./dashboard/metrics-visualizer";
+export * from "./dashboard/real-time-monitor";
+export * from "./dashboard/executive-summary";
 
 // Integration Components
-export * from './integration/bytebot-integration';
-export * from './integration/parlant-bridge';
-export * from './integration/api-error-handler';
-export * from './integration/middleware-connector';
+export * from "./integration/bytebot-integration";
+export * from "./integration/parlant-bridge";
+export * from "./integration/api-error-handler";
+export * from "./integration/middleware-connector";
 
 // Configuration & Types
-export * from './config/error-config';
-export * from './types/error-types';
-export * from './types/recovery-types';
-export * from './types/monitoring-types';
-export * from './types/dashboard-types';
+export * from "./config/error-config";
+export * from "./types/error-types";
+export * from "./types/recovery-types";
+export * from "./types/monitoring-types";
+export * from "./types/dashboard-types";
 
 // Enhanced Error Filter (extends existing)
-export * from './enhanced-error-filter';
+export * from "./enhanced-error-filter";

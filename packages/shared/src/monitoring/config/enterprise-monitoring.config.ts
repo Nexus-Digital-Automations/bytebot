@@ -309,7 +309,7 @@ export const defaultEnterpriseMonitoringConfig: EnterpriseMonitoringConfig = {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              "Authorization": `Bearer ${process.env.WEBHOOK_TOKEN || ""}`,
+              Authorization: `Bearer ${process.env.WEBHOOK_TOKEN || ""}`,
             },
             severityFilter: ["high", "critical"],
           },
@@ -552,7 +552,9 @@ export function getEnterpriseMonitoringConfig(): EnterpriseMonitoringConfig {
   }
 
   if (process.env.PERFORMANCE_THRESHOLD) {
-    config.monitoring.performanceThreshold = Number(process.env.PERFORMANCE_THRESHOLD);
+    config.monitoring.performanceThreshold = Number(
+      process.env.PERFORMANCE_THRESHOLD,
+    );
   }
 
   if (process.env.UPTIME_TARGET) {
@@ -564,7 +566,8 @@ export function getEnterpriseMonitoringConfig(): EnterpriseMonitoringConfig {
   }
 
   if (process.env.INCIDENT_RESPONSE_ENABLED !== undefined) {
-    config.incidentResponse.enabled = process.env.INCIDENT_RESPONSE_ENABLED === "true";
+    config.incidentResponse.enabled =
+      process.env.INCIDENT_RESPONSE_ENABLED === "true";
   }
 
   return config;
@@ -591,7 +594,10 @@ export function validateMonitoringConfig(config: EnterpriseMonitoringConfig): {
   }
 
   // Validate uptime target
-  if (config.monitoring.uptimeTarget < 0 || config.monitoring.uptimeTarget > 100) {
+  if (
+    config.monitoring.uptimeTarget < 0 ||
+    config.monitoring.uptimeTarget > 100
+  ) {
     errors.push("Uptime target must be between 0 and 100");
   }
 
@@ -601,7 +607,9 @@ export function validateMonitoringConfig(config: EnterpriseMonitoringConfig): {
 
   // Validate alerting configuration
   if (config.alerting.enabled) {
-    const hasEnabledChannel = Object.values(config.alerting.channels).some(channel => channel.enabled);
+    const hasEnabledChannel = Object.values(config.alerting.channels).some(
+      (channel) => channel.enabled,
+    );
     if (!hasEnabledChannel) {
       errors.push("At least one alerting channel must be enabled");
     }
@@ -617,19 +625,30 @@ export function validateMonitoringConfig(config: EnterpriseMonitoringConfig): {
     }
 
     // Validate Slack configuration
-    if (config.alerting.channels.slack.enabled && !config.alerting.channels.slack.webhookUrl) {
+    if (
+      config.alerting.channels.slack.enabled &&
+      !config.alerting.channels.slack.webhookUrl
+    ) {
       errors.push("Slack webhook URL is required for Slack alerts");
     }
   }
 
   // Validate incident response SLA targets
   const slaTargets = config.incidentResponse.sla;
-  Object.keys(slaTargets.acknowledgmentMinutes).forEach(priority => {
-    const ackTime = slaTargets.acknowledgmentMinutes[priority as keyof typeof slaTargets.acknowledgmentMinutes];
-    const responseTime = slaTargets.responseMinutes[priority as keyof typeof slaTargets.responseMinutes];
+  Object.keys(slaTargets.acknowledgmentMinutes).forEach((priority) => {
+    const ackTime =
+      slaTargets.acknowledgmentMinutes[
+        priority as keyof typeof slaTargets.acknowledgmentMinutes
+      ];
+    const responseTime =
+      slaTargets.responseMinutes[
+        priority as keyof typeof slaTargets.responseMinutes
+      ];
 
     if (ackTime >= responseTime) {
-      errors.push(`Acknowledgment time must be less than response time for priority ${priority}`);
+      errors.push(
+        `Acknowledgment time must be less than response time for priority ${priority}`,
+      );
     }
   });
 
@@ -664,14 +683,18 @@ export function isMonitoringFeatureEnabled(
   config: EnterpriseMonitoringConfig = getEnterpriseMonitoringConfig(),
 ): boolean {
   const featureMap = {
-    PERFORMANCE_TRACKING: config.functionMonitoring.enabled && config.functionMonitoring.trackingEnabled,
+    PERFORMANCE_TRACKING:
+      config.functionMonitoring.enabled &&
+      config.functionMonitoring.trackingEnabled,
     REAL_TIME_ALERTING: config.alerting.enabled,
     INCIDENT_RESPONSE: config.incidentResponse.enabled,
     DASHBOARD_ANALYTICS: config.dashboard.enabled,
-    CAPACITY_PLANNING: config.functionMonitoring.capacityMonitoring.cpuThreshold > 0,
+    CAPACITY_PLANNING:
+      config.functionMonitoring.capacityMonitoring.cpuThreshold > 0,
     SECURITY_MONITORING: config.security.enabled,
     UPTIME_MONITORING: config.monitoring.uptimeTarget > 0,
-    ERROR_TRACKING: config.functionMonitoring.performanceTracking.errorRateThreshold > 0,
+    ERROR_TRACKING:
+      config.functionMonitoring.performanceTracking.errorRateThreshold > 0,
     METRICS_COLLECTION: config.integrations.prometheus.enabled,
     PRODUCTION_INFRASTRUCTURE: config.monitoring.enabled,
   };

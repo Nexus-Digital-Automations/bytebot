@@ -79,7 +79,11 @@ export interface ParlantEnterpriseGatewayConfig {
   // Traffic Management Configuration
   trafficManagement: {
     loadBalancingEnabled: boolean;
-    loadBalancingAlgorithm: "ROUND_ROBIN" | "LEAST_CONNECTIONS" | "WEIGHTED" | "GEOGRAPHIC";
+    loadBalancingAlgorithm:
+      | "ROUND_ROBIN"
+      | "LEAST_CONNECTIONS"
+      | "WEIGHTED"
+      | "GEOGRAPHIC";
     healthCheckEnabled: boolean;
     healthCheckInterval: number; // milliseconds
     failoverEnabled: boolean;
@@ -167,7 +171,11 @@ export interface RetryConfig {
 
 export interface FallbackConfig {
   enabled: boolean;
-  strategy: "CACHED_RESPONSE" | "DEFAULT_VALUE" | "SKIP_OPERATION" | "ALTERNATIVE_SERVICE";
+  strategy:
+    | "CACHED_RESPONSE"
+    | "DEFAULT_VALUE"
+    | "SKIP_OPERATION"
+    | "ALTERNATIVE_SERVICE";
   timeout: number;
   qualityLevel: "FULL" | "DEGRADED" | "MINIMAL";
 }
@@ -364,7 +372,11 @@ export interface ParlantEnterpriseGatewayModuleOptions {
  */
 export interface ParlantEnterpriseGatewayModuleAsyncOptions {
   imports?: any[];
-  useFactory?: (...args: any[]) => Promise<ParlantEnterpriseGatewayModuleOptions> | ParlantEnterpriseGatewayModuleOptions;
+  useFactory?: (
+    ...args: any[]
+  ) =>
+    | Promise<ParlantEnterpriseGatewayModuleOptions>
+    | ParlantEnterpriseGatewayModuleOptions;
   inject?: any[];
   isGlobal?: boolean;
 }
@@ -374,7 +386,7 @@ export interface ParlantEnterpriseGatewayModuleAsyncOptions {
  */
 function createCoreProviders(
   config: ParlantEnterpriseGatewayConfig,
-  featureFlags: ParlantGatewayFeatureFlags
+  featureFlags: ParlantGatewayFeatureFlags,
 ): Provider[] {
   const providers: Provider[] = [
     // Configuration providers
@@ -440,7 +452,10 @@ const HealthCheckProvider: Provider = {
     return {
       async checkHealth(): Promise<{
         status: "healthy" | "unhealthy" | "degraded";
-        services: Record<string, { status: string; lastCheck: Date; details?: any }>;
+        services: Record<
+          string,
+          { status: string; lastCheck: Date; details?: any }
+        >;
         timestamp: Date;
       }> {
         const healthChecks = await Promise.allSettled([
@@ -450,11 +465,19 @@ const HealthCheckProvider: Provider = {
           Promise.resolve({ service: "orchestrator", status: "healthy" }),
         ]);
 
-        const services: Record<string, { status: string; lastCheck: Date; details?: any }> = {};
+        const services: Record<
+          string,
+          { status: string; lastCheck: Date; details?: any }
+        > = {};
         let overallStatus: "healthy" | "unhealthy" | "degraded" = "healthy";
 
         healthChecks.forEach((result, index) => {
-          const serviceNames = ["middleware", "security", "analytics", "orchestrator"];
+          const serviceNames = [
+            "middleware",
+            "security",
+            "analytics",
+            "orchestrator",
+          ];
           const serviceName = serviceNames[index];
 
           if (result.status === "fulfilled") {
@@ -554,7 +577,9 @@ export class ParlantEnterpriseGatewayModule {
   /**
    * Register the module with synchronous configuration
    */
-  static forRoot(options: ParlantEnterpriseGatewayModuleOptions = {}): DynamicModule {
+  static forRoot(
+    options: ParlantEnterpriseGatewayModuleOptions = {},
+  ): DynamicModule {
     const config = {
       ...DEFAULT_PARLANT_GATEWAY_CONFIG,
       ...options.config,
@@ -575,10 +600,7 @@ export class ParlantEnterpriseGatewayModule {
 
     return {
       module: ParlantEnterpriseGatewayModule,
-      imports: [
-        ConfigModule,
-        ...(options.imports || []),
-      ],
+      imports: [ConfigModule, ...(options.imports || [])],
       providers: allProviders,
       exports: [
         ...coreProviders,
@@ -593,7 +615,9 @@ export class ParlantEnterpriseGatewayModule {
   /**
    * Register the module with asynchronous configuration
    */
-  static forRootAsync(options: ParlantEnterpriseGatewayModuleAsyncOptions): DynamicModule {
+  static forRootAsync(
+    options: ParlantEnterpriseGatewayModuleAsyncOptions,
+  ): DynamicModule {
     const asyncProviders: Provider[] = [];
 
     if (options.useFactory) {
@@ -640,10 +664,7 @@ export class ParlantEnterpriseGatewayModule {
 
     return {
       module: ParlantEnterpriseGatewayModule,
-      imports: [
-        ConfigModule,
-        ...(options.imports || []),
-      ],
+      imports: [ConfigModule, ...(options.imports || [])],
       providers: dynamicProviders,
       exports: [
         PARLANT_GATEWAY_CONFIG,
@@ -662,7 +683,9 @@ export class ParlantEnterpriseGatewayModule {
   /**
    * Create a testing module with minimal configuration
    */
-  static forTesting(overrides: Partial<ParlantEnterpriseGatewayModuleOptions> = {}): DynamicModule {
+  static forTesting(
+    overrides: Partial<ParlantEnterpriseGatewayModuleOptions> = {},
+  ): DynamicModule {
     const testConfig: ParlantEnterpriseGatewayConfig = {
       ...DEFAULT_PARLANT_GATEWAY_CONFIG,
       gateway: {
@@ -704,7 +727,9 @@ export class ParlantEnterpriseGatewayModule {
 /**
  * Utility function to validate configuration
  */
-export function validateParlantGatewayConfig(config: ParlantEnterpriseGatewayConfig): {
+export function validateParlantGatewayConfig(
+  config: ParlantEnterpriseGatewayConfig,
+): {
   valid: boolean;
   errors: string[];
   warnings: string[];
@@ -721,7 +746,10 @@ export function validateParlantGatewayConfig(config: ParlantEnterpriseGatewayCon
     errors.push("Performance max latency P95 must be greater than 0");
   }
 
-  if (config.performance.maxErrorRate < 0 || config.performance.maxErrorRate > 1) {
+  if (
+    config.performance.maxErrorRate < 0 ||
+    config.performance.maxErrorRate > 1
+  ) {
     errors.push("Performance max error rate must be between 0 and 1");
   }
 
@@ -731,13 +759,18 @@ export function validateParlantGatewayConfig(config: ParlantEnterpriseGatewayCon
   }
 
   // Validate rate limiting configuration
-  if (config.rateLimiting.enabled && config.rateLimiting.defaultRateLimit <= 0) {
+  if (
+    config.rateLimiting.enabled &&
+    config.rateLimiting.defaultRateLimit <= 0
+  ) {
     errors.push("Rate limiting default rate limit must be greater than 0");
   }
 
   // Validate orchestration configuration
   if (config.orchestration.maxConcurrentOrchestrations <= 0) {
-    errors.push("Orchestration max concurrent orchestrations must be greater than 0");
+    errors.push(
+      "Orchestration max concurrent orchestrations must be greater than 0",
+    );
   }
 
   if (config.orchestration.pipelineTimeout <= 0) {
@@ -746,7 +779,9 @@ export function validateParlantGatewayConfig(config: ParlantEnterpriseGatewayCon
 
   // Performance warnings
   if (config.performance.targetThroughput > 50000) {
-    warnings.push("Very high target throughput may require additional infrastructure");
+    warnings.push(
+      "Very high target throughput may require additional infrastructure",
+    );
   }
 
   if (config.orchestration.maxConcurrency > 20) {
@@ -765,7 +800,7 @@ export function validateParlantGatewayConfig(config: ParlantEnterpriseGatewayCon
  */
 export function mergeParlantGatewayConfigs(
   base: ParlantEnterpriseGatewayConfig,
-  override: Partial<ParlantEnterpriseGatewayConfig>
+  override: Partial<ParlantEnterpriseGatewayConfig>,
 ): ParlantEnterpriseGatewayConfig {
   return {
     gateway: { ...base.gateway, ...override.gateway },
@@ -773,7 +808,10 @@ export function mergeParlantGatewayConfigs(
     security: { ...base.security, ...override.security },
     conversational: { ...base.conversational, ...override.conversational },
     rateLimiting: { ...base.rateLimiting, ...override.rateLimiting },
-    trafficManagement: { ...base.trafficManagement, ...override.trafficManagement },
+    trafficManagement: {
+      ...base.trafficManagement,
+      ...override.trafficManagement,
+    },
     analytics: { ...base.analytics, ...override.analytics },
     integration: { ...base.integration, ...override.integration },
     orchestration: { ...base.orchestration, ...override.orchestration },

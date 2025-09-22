@@ -11,8 +11,8 @@
  * @created 2025-09-20
  */
 
-import { Logger } from '@nestjs/common';
-import { Injectable } from '@nestjs/common';
+import { Logger } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import {
   QualityGate,
   QualityGatePipeline,
@@ -32,9 +32,12 @@ import {
   QualityGrade,
   RollbackInfo,
   ApprovalInfo,
-  QualityGateConfigValidation
-} from './quality-gate-types';
-import { WrapperError, ErrorCategory } from '../../function-wrapper/interfaces/wrapper-types';
+  QualityGateConfigValidation,
+} from "./quality-gate-types";
+import {
+  WrapperError,
+  ErrorCategory,
+} from "../../function-wrapper/interfaces/wrapper-types";
 
 /**
  * Quality Gate Framework Service
@@ -45,7 +48,10 @@ export class QualityGateFrameworkService {
   private readonly logger = new Logger(QualityGateFrameworkService.name);
   private readonly pipelines = new Map<string, QualityGatePipeline>();
   private readonly gatesMap = new Map<string, QualityGate>();
-  private readonly executionHistory = new Map<string, QualityGatePipelineResult[]>();
+  private readonly executionHistory = new Map<
+    string,
+    QualityGatePipelineResult[]
+  >();
 
   /**
    * Register a quality gate with the framework
@@ -57,7 +63,9 @@ export class QualityGateFrameworkService {
     // Validate gate configuration
     const validation = gate.validateConfig();
     if (!validation.valid) {
-      throw new Error(`Invalid gate configuration: ${validation.errors.join(', ')}`);
+      throw new Error(
+        `Invalid gate configuration: ${validation.errors.join(", ")}`,
+      );
     }
 
     this.gatesMap.set(gate.id, gate);
@@ -91,7 +99,11 @@ export class QualityGateFrameworkService {
    * @param config - Pipeline configuration
    * @returns Created pipeline
    */
-  createPipeline(id: string, name: string, config: QualityGatePipelineConfig): QualityGatePipeline {
+  createPipeline(
+    id: string,
+    name: string,
+    config: QualityGatePipelineConfig,
+  ): QualityGatePipeline {
     this.logger.log(`Creating quality gate pipeline: ${id}`);
 
     if (this.pipelines.has(id)) {
@@ -120,7 +132,10 @@ export class QualityGateFrameworkService {
    * @param context - Execution context
    * @returns Promise resolving to pipeline result
    */
-  async executePipeline(pipelineId: string, context: QualityGateContext): Promise<QualityGatePipelineResult> {
+  async executePipeline(
+    pipelineId: string,
+    context: QualityGateContext,
+  ): Promise<QualityGatePipelineResult> {
     this.logger.log(`Executing quality gate pipeline: ${pipelineId}`);
 
     const pipeline = this.pipelines.get(pipelineId);
@@ -142,7 +157,9 @@ export class QualityGateFrameworkService {
 
       this.executionHistory.set(pipelineId, history);
 
-      this.logger.log(`Pipeline execution completed: ${pipelineId}, Status: ${result.status}`);
+      this.logger.log(
+        `Pipeline execution completed: ${pipelineId}, Status: ${result.status}`,
+      );
       return result;
     } catch (error) {
       this.logger.error(`Pipeline execution failed: ${pipelineId}`, error);
@@ -156,7 +173,10 @@ export class QualityGateFrameworkService {
    * @param limit - Maximum number of results to return
    * @returns Execution history
    */
-  getExecutionHistory(pipelineId: string, limit: number = 10): QualityGatePipelineResult[] {
+  getExecutionHistory(
+    pipelineId: string,
+    limit: number = 10,
+  ): QualityGatePipelineResult[] {
     const history = this.executionHistory.get(pipelineId) || [];
     return history.slice(-limit);
   }
@@ -175,7 +195,9 @@ export class QualityGateFrameworkService {
    * @returns Array of gates matching type
    */
   getGatesByType(type: QualityGateType): QualityGate[] {
-    return Array.from(this.gatesMap.values()).filter(gate => gate.type === type);
+    return Array.from(this.gatesMap.values()).filter(
+      (gate) => gate.type === type,
+    );
   }
 
   /**
@@ -184,7 +206,9 @@ export class QualityGateFrameworkService {
    * @returns Array of gates matching priority
    */
   getGatesByPriority(priority: QualityGatePriority): QualityGate[] {
-    return Array.from(this.gatesMap.values()).filter(gate => gate.priority === priority);
+    return Array.from(this.gatesMap.values()).filter(
+      (gate) => gate.priority === priority,
+    );
   }
 
   /**
@@ -213,11 +237,16 @@ export class QualityGateFrameworkService {
 
     for (const gate of this.gatesMap.values()) {
       gatesByType.set(gate.type, (gatesByType.get(gate.type) || 0) + 1);
-      gatesByPriority.set(gate.priority, (gatesByPriority.get(gate.priority) || 0) + 1);
+      gatesByPriority.set(
+        gate.priority,
+        (gatesByPriority.get(gate.priority) || 0) + 1,
+      );
     }
 
-    const totalExecutions = Array.from(this.executionHistory.values())
-      .reduce((total, history) => total + history.length, 0);
+    const totalExecutions = Array.from(this.executionHistory.values()).reduce(
+      (total, history) => total + history.length,
+      0,
+    );
 
     return {
       totalGates,
@@ -226,7 +255,7 @@ export class QualityGateFrameworkService {
       gatesByType: Object.fromEntries(gatesByType),
       gatesByPriority: Object.fromEntries(gatesByPriority),
       averageExecutionTime: this.calculateAverageExecutionTime(),
-      successRate: this.calculateSuccessRate()
+      successRate: this.calculateSuccessRate(),
     };
   }
 
@@ -238,7 +267,10 @@ export class QualityGateFrameworkService {
     const allResults = Array.from(this.executionHistory.values()).flat();
     if (allResults.length === 0) return 0;
 
-    const totalTime = allResults.reduce((sum, result) => sum + result.metrics.totalExecutionTime, 0);
+    const totalTime = allResults.reduce(
+      (sum, result) => sum + result.metrics.totalExecutionTime,
+      0,
+    );
     return totalTime / allResults.length;
   }
 
@@ -250,7 +282,9 @@ export class QualityGateFrameworkService {
     const allResults = Array.from(this.executionHistory.values()).flat();
     if (allResults.length === 0) return 0;
 
-    const successfulResults = allResults.filter(result => result.status === QualityGateStatus.PASSED);
+    const successfulResults = allResults.filter(
+      (result) => result.status === QualityGateStatus.PASSED,
+    );
     return (successfulResults.length / allResults.length) * 100;
   }
 }
@@ -266,7 +300,7 @@ class QualityGatePipelineImpl implements QualityGatePipeline {
     public readonly id: string,
     public readonly name: string,
     public readonly config: QualityGatePipelineConfig,
-    private readonly logger: Logger
+    private readonly logger: Logger,
   ) {}
 
   /**
@@ -274,7 +308,9 @@ class QualityGatePipelineImpl implements QualityGatePipeline {
    * @param context - Pipeline execution context
    * @returns Promise resolving to pipeline result
    */
-  async execute(context: QualityGateContext): Promise<QualityGatePipelineResult> {
+  async execute(
+    context: QualityGateContext,
+  ): Promise<QualityGatePipelineResult> {
     const startTime = Date.now();
     this.logger.log(`Starting pipeline execution: ${this.id}`);
 
@@ -287,17 +323,27 @@ class QualityGatePipelineImpl implements QualityGatePipeline {
 
     try {
       // Execute gates based on configuration
-      if (this.config.parallelExecution && this.config.executionMode !== PipelineExecutionMode.PRIORITY_BASED) {
-        gateResults.push(...await this.executeGatesInParallel(orderedGates, context));
+      if (
+        this.config.parallelExecution &&
+        this.config.executionMode !== PipelineExecutionMode.PRIORITY_BASED
+      ) {
+        gateResults.push(
+          ...(await this.executeGatesInParallel(orderedGates, context)),
+        );
       } else {
-        gateResults.push(...await this.executeGatesSequentially(orderedGates, context));
+        gateResults.push(
+          ...(await this.executeGatesSequentially(orderedGates, context)),
+        );
       }
 
       // Determine overall status
       overallStatus = this.determineOverallStatus(gateResults);
 
       // Handle failures and rollback if needed
-      if (overallStatus === QualityGateStatus.FAILED && this.config.rollbackConfig.enabled) {
+      if (
+        overallStatus === QualityGateStatus.FAILED &&
+        this.config.rollbackConfig.enabled
+      ) {
         rollbackInfo = await this.executeRollback(gateResults, context);
       }
 
@@ -305,7 +351,6 @@ class QualityGatePipelineImpl implements QualityGatePipeline {
       if (this.config.approvalConfig.enabled) {
         approvalInfo = await this.executeApprovalWorkflow(gateResults, context);
       }
-
     } catch (error) {
       this.logger.error(`Pipeline execution error: ${this.id}`, error);
       overallStatus = QualityGateStatus.ERROR;
@@ -315,7 +360,10 @@ class QualityGatePipelineImpl implements QualityGatePipeline {
     const totalExecutionTime = endTime - startTime;
 
     // Calculate metrics and summary
-    const metrics = this.calculatePipelineMetrics(gateResults, totalExecutionTime);
+    const metrics = this.calculatePipelineMetrics(
+      gateResults,
+      totalExecutionTime,
+    );
     const summary = this.createPipelineSummary(gateResults, overallStatus);
 
     const result: QualityGatePipelineResult = {
@@ -325,10 +373,12 @@ class QualityGatePipelineImpl implements QualityGatePipeline {
       metrics,
       summary,
       rollbackInfo,
-      approvalInfo
+      approvalInfo,
     };
 
-    this.logger.log(`Pipeline execution completed: ${this.id}, Status: ${overallStatus}, Time: ${totalExecutionTime}ms`);
+    this.logger.log(
+      `Pipeline execution completed: ${this.id}, Status: ${overallStatus}, Time: ${totalExecutionTime}ms`,
+    );
     return result;
   }
 
@@ -379,18 +429,21 @@ class QualityGatePipelineImpl implements QualityGatePipeline {
    * @returns Ordered array of gates
    */
   private getOrderedGates(): QualityGate[] {
-    const gates = Array.from(this.gatesMap.values()).filter(gate => gate.enabled);
+    const gates = Array.from(this.gatesMap.values()).filter(
+      (gate) => gate.enabled,
+    );
 
     // Sort by priority (CRITICAL first, then HIGH, MEDIUM, LOW)
     const priorityOrder = {
       [QualityGatePriority.CRITICAL]: 0,
       [QualityGatePriority.HIGH]: 1,
       [QualityGatePriority.MEDIUM]: 2,
-      [QualityGatePriority.LOW]: 3
+      [QualityGatePriority.LOW]: 3,
     };
 
     gates.sort((a, b) => {
-      const priorityDiff = priorityOrder[a.priority] - priorityOrder[b.priority];
+      const priorityDiff =
+        priorityOrder[a.priority] - priorityOrder[b.priority];
       if (priorityDiff !== 0) return priorityDiff;
 
       // Secondary sort by name for consistency
@@ -409,7 +462,10 @@ class QualityGatePipelineImpl implements QualityGatePipeline {
    * @param context - Execution context
    * @returns Promise resolving to gate results
    */
-  private async executeGatesSequentially(gates: QualityGate[], context: QualityGateContext): Promise<QualityGateResult[]> {
+  private async executeGatesSequentially(
+    gates: QualityGate[],
+    context: QualityGateContext,
+  ): Promise<QualityGateResult[]> {
     const results: QualityGateResult[] = [];
 
     for (const gate of gates) {
@@ -420,7 +476,9 @@ class QualityGatePipelineImpl implements QualityGatePipeline {
 
         // Check if we should stop execution
         if (this.shouldStopExecution(result)) {
-          this.logger.log(`Stopping pipeline execution due to gate failure: ${gate.id}`);
+          this.logger.log(
+            `Stopping pipeline execution due to gate failure: ${gate.id}`,
+          );
           break;
         }
       } catch (error) {
@@ -436,26 +494,26 @@ class QualityGatePipelineImpl implements QualityGatePipeline {
             validationSteps: [],
             warnings: [],
             info: [],
-            logs: []
+            logs: [],
           },
           metadata: {
             executionId: `${context.sessionId}-${gate.id}`,
-            gateVersion: '1.0.0',
+            gateVersion: "1.0.0",
             environment: context.environment,
-            host: 'unknown',
+            host: "unknown",
             retryAttempt: 0,
             correlationId: context.sessionId,
-            additionalMetadata: {}
+            additionalMetadata: {},
           },
           error: {
-            code: 'GATE_EXECUTION_ERROR',
+            code: "GATE_EXECUTION_ERROR",
             message: error instanceof Error ? error.message : String(error),
             originalError: error instanceof Error ? error : undefined,
             category: ErrorCategory.SYSTEM_ERROR,
             metadata: { gateId: gate.id },
-            stackTrace: error instanceof Error ? error.stack : undefined
+            stackTrace: error instanceof Error ? error.stack : undefined,
           },
-          recommendations: ['Check gate configuration and dependencies']
+          recommendations: ["Check gate configuration and dependencies"],
         };
 
         results.push(errorResult);
@@ -475,7 +533,10 @@ class QualityGatePipelineImpl implements QualityGatePipeline {
    * @param context - Execution context
    * @returns Promise resolving to gate results
    */
-  private async executeGatesInParallel(gates: QualityGate[], context: QualityGateContext): Promise<QualityGateResult[]> {
+  private async executeGatesInParallel(
+    gates: QualityGate[],
+    context: QualityGateContext,
+  ): Promise<QualityGateResult[]> {
     const maxParallel = this.config.maxParallelGates || gates.length;
     const batches: QualityGate[][] = [];
 
@@ -487,7 +548,9 @@ class QualityGatePipelineImpl implements QualityGatePipeline {
     const results: QualityGateResult[] = [];
 
     for (const batch of batches) {
-      const batchPromises = batch.map(gate => this.executeGateWithTimeout(gate, context));
+      const batchPromises = batch.map((gate) =>
+        this.executeGateWithTimeout(gate, context),
+      );
 
       try {
         const batchResults = await Promise.allSettled(batchPromises);
@@ -496,10 +559,13 @@ class QualityGatePipelineImpl implements QualityGatePipeline {
           const result = batchResults[i];
           const gate = batch[i];
 
-          if (result.status === 'fulfilled') {
+          if (result.status === "fulfilled") {
             results.push(result.value);
           } else {
-            this.logger.error(`Parallel gate execution failed: ${gate.id}`, result.reason);
+            this.logger.error(
+              `Parallel gate execution failed: ${gate.id}`,
+              result.reason,
+            );
 
             const errorResult: QualityGateResult = {
               gateId: gate.id,
@@ -511,26 +577,28 @@ class QualityGatePipelineImpl implements QualityGatePipeline {
                 validationSteps: [],
                 warnings: [],
                 info: [],
-                logs: []
+                logs: [],
               },
               metadata: {
                 executionId: `${context.sessionId}-${gate.id}`,
-                gateVersion: '1.0.0',
+                gateVersion: "1.0.0",
                 environment: context.environment,
-                host: 'unknown',
+                host: "unknown",
                 retryAttempt: 0,
                 correlationId: context.sessionId,
-                additionalMetadata: {}
+                additionalMetadata: {},
               },
               error: {
-                code: 'PARALLEL_GATE_EXECUTION_ERROR',
-                message: result.reason?.message || 'Unknown error',
+                code: "PARALLEL_GATE_EXECUTION_ERROR",
+                message: result.reason?.message || "Unknown error",
                 originalError: result.reason,
                 category: ErrorCategory.SYSTEM_ERROR,
                 metadata: { gateId: gate.id },
-                stackTrace: result.reason?.stack
+                stackTrace: result.reason?.stack,
               },
-              recommendations: ['Check gate configuration and system resources']
+              recommendations: [
+                "Check gate configuration and system resources",
+              ],
             };
 
             results.push(errorResult);
@@ -538,12 +606,17 @@ class QualityGatePipelineImpl implements QualityGatePipeline {
         }
 
         // Check if we should stop execution after each batch
-        if (this.config.failFast && results.some(r => r.status === QualityGateStatus.FAILED)) {
-          this.logger.log('Stopping parallel execution due to fail-fast configuration');
+        if (
+          this.config.failFast &&
+          results.some((r) => r.status === QualityGateStatus.FAILED)
+        ) {
+          this.logger.log(
+            "Stopping parallel execution due to fail-fast configuration",
+          );
           break;
         }
       } catch (error) {
-        this.logger.error('Batch execution error', error);
+        this.logger.error("Batch execution error", error);
         break;
       }
     }
@@ -557,7 +630,10 @@ class QualityGatePipelineImpl implements QualityGatePipeline {
    * @param context - Execution context
    * @returns Promise resolving to gate result
    */
-  private async executeGateWithTimeout(gate: QualityGate, context: QualityGateContext): Promise<QualityGateResult> {
+  private async executeGateWithTimeout(
+    gate: QualityGate,
+    context: QualityGateContext,
+  ): Promise<QualityGateResult> {
     const timeout = gate.config.timeout || this.config.timeout;
 
     return new Promise((resolve, reject) => {
@@ -565,12 +641,13 @@ class QualityGatePipelineImpl implements QualityGatePipeline {
         reject(new Error(`Gate execution timeout: ${gate.id} (${timeout}ms)`));
       }, timeout);
 
-      gate.execute(context)
-        .then(result => {
+      gate
+        .execute(context)
+        .then((result) => {
           clearTimeout(timer);
           resolve(result);
         })
-        .catch(error => {
+        .catch((error) => {
           clearTimeout(timer);
           reject(error);
         });
@@ -588,18 +665,27 @@ class QualityGatePipelineImpl implements QualityGatePipeline {
     }
 
     if (this.config.executionMode === PipelineExecutionMode.STOP_ON_FAILURE) {
-      return result.status === QualityGateStatus.FAILED || result.status === QualityGateStatus.ERROR;
+      return (
+        result.status === QualityGateStatus.FAILED ||
+        result.status === QualityGateStatus.ERROR
+      );
     }
 
     if (this.config.executionMode === PipelineExecutionMode.FAIL_FAST) {
-      return result.status === QualityGateStatus.FAILED || result.status === QualityGateStatus.ERROR;
+      return (
+        result.status === QualityGateStatus.FAILED ||
+        result.status === QualityGateStatus.ERROR
+      );
     }
 
     // For priority-based execution, only stop on critical failures
     if (this.config.executionMode === PipelineExecutionMode.PRIORITY_BASED) {
       const gate = this.gatesMap.get(result.gateId);
-      return gate?.priority === QualityGatePriority.CRITICAL &&
-             (result.status === QualityGateStatus.FAILED || result.status === QualityGateStatus.ERROR);
+      return (
+        gate?.priority === QualityGatePriority.CRITICAL &&
+        (result.status === QualityGateStatus.FAILED ||
+          result.status === QualityGateStatus.ERROR)
+      );
     }
 
     return false;
@@ -610,31 +696,40 @@ class QualityGatePipelineImpl implements QualityGatePipeline {
    * @param results - Gate results
    * @returns Overall status
    */
-  private determineOverallStatus(results: QualityGateResult[]): QualityGateStatus {
+  private determineOverallStatus(
+    results: QualityGateResult[],
+  ): QualityGateStatus {
     if (results.length === 0) {
       return QualityGateStatus.SKIPPED;
     }
 
-    const hasError = results.some(r => r.status === QualityGateStatus.ERROR);
+    const hasError = results.some((r) => r.status === QualityGateStatus.ERROR);
     if (hasError) {
       return QualityGateStatus.ERROR;
     }
 
-    const hasCriticalFailure = results.some(r => {
+    const hasCriticalFailure = results.some((r) => {
       const gate = this.gatesMap.get(r.gateId);
-      return gate?.priority === QualityGatePriority.CRITICAL && r.status === QualityGateStatus.FAILED;
+      return (
+        gate?.priority === QualityGatePriority.CRITICAL &&
+        r.status === QualityGateStatus.FAILED
+      );
     });
 
     if (hasCriticalFailure) {
       return QualityGateStatus.FAILED;
     }
 
-    const hasFailure = results.some(r => r.status === QualityGateStatus.FAILED);
+    const hasFailure = results.some(
+      (r) => r.status === QualityGateStatus.FAILED,
+    );
     if (hasFailure) {
       return QualityGateStatus.WARNING;
     }
 
-    const hasWarning = results.some(r => r.status === QualityGateStatus.WARNING);
+    const hasWarning = results.some(
+      (r) => r.status === QualityGateStatus.WARNING,
+    );
     if (hasWarning) {
       return QualityGateStatus.WARNING;
     }
@@ -648,11 +743,22 @@ class QualityGatePipelineImpl implements QualityGatePipeline {
    * @param totalExecutionTime - Total execution time
    * @returns Pipeline metrics
    */
-  private calculatePipelineMetrics(results: QualityGateResult[], totalExecutionTime: number): QualityGatePipelineMetrics {
+  private calculatePipelineMetrics(
+    results: QualityGateResult[],
+    totalExecutionTime: number,
+  ): QualityGatePipelineMetrics {
     const gatesExecuted = results.length;
-    const gatesPassed = results.filter(r => r.status === QualityGateStatus.PASSED).length;
-    const gatesFailed = results.filter(r => r.status === QualityGateStatus.FAILED || r.status === QualityGateStatus.ERROR).length;
-    const gatesWithWarnings = results.filter(r => r.status === QualityGateStatus.WARNING).length;
+    const gatesPassed = results.filter(
+      (r) => r.status === QualityGateStatus.PASSED,
+    ).length;
+    const gatesFailed = results.filter(
+      (r) =>
+        r.status === QualityGateStatus.FAILED ||
+        r.status === QualityGateStatus.ERROR,
+    ).length;
+    const gatesWithWarnings = results.filter(
+      (r) => r.status === QualityGateStatus.WARNING,
+    ).length;
 
     // Calculate overall score
     const totalScore = results.reduce((sum, r) => sum + r.score, 0);
@@ -672,7 +778,7 @@ class QualityGatePipelineImpl implements QualityGatePipeline {
       overallScore,
       performanceSummary,
       securitySummary,
-      coverageSummary
+      coverageSummary,
     };
   }
 
@@ -693,8 +799,8 @@ class QualityGatePipelineImpl implements QualityGatePipeline {
         dbConnectionPool: 0,
         networkBandwidth: 0,
         diskIo: 0,
-        cacheHitRate: 0
-      }
+        cacheHitRate: 0,
+      },
     };
   }
 
@@ -711,12 +817,12 @@ class QualityGatePipelineImpl implements QualityGatePipeline {
         high: 0,
         medium: 0,
         low: 0,
-        info: 0
+        info: 0,
       },
       authSuccessRate: 100,
       authzViolations: 0,
       complianceScore: 100,
-      threatAlerts: 0
+      threatAlerts: 0,
     };
   }
 
@@ -732,7 +838,7 @@ class QualityGatePipelineImpl implements QualityGatePipeline {
       codeCoverage: 0,
       functionCoverage: 0,
       branchCoverage: 0,
-      integrationCoverage: 0
+      integrationCoverage: 0,
     };
   }
 
@@ -742,21 +848,26 @@ class QualityGatePipelineImpl implements QualityGatePipeline {
    * @param status - Overall status
    * @returns Pipeline summary
    */
-  private createPipelineSummary(results: QualityGateResult[], status: QualityGateStatus): QualityGatePipelineSummary {
+  private createPipelineSummary(
+    results: QualityGateResult[],
+    status: QualityGateStatus,
+  ): QualityGatePipelineSummary {
     const success = status === QualityGateStatus.PASSED;
     const criticalFailures = results
-      .filter(r => {
+      .filter((r) => {
         const gate = this.gatesMap.get(r.gateId);
-        return gate?.priority === QualityGatePriority.CRITICAL && r.status === QualityGateStatus.FAILED;
+        return (
+          gate?.priority === QualityGatePriority.CRITICAL &&
+          r.status === QualityGateStatus.FAILED
+        );
       })
-      .map(r => `${r.gateId}: ${r.error?.message || 'Critical failure'}`);
+      .map((r) => `${r.gateId}: ${r.error?.message || "Critical failure"}`);
 
     const warnings = results
-      .filter(r => r.status === QualityGateStatus.WARNING)
-      .map(r => `${r.gateId}: Warning detected`);
+      .filter((r) => r.status === QualityGateStatus.WARNING)
+      .map((r) => `${r.gateId}: Warning detected`);
 
-    const recommendations = results
-      .flatMap(r => r.recommendations);
+    const recommendations = results.flatMap((r) => r.recommendations);
 
     const nextSteps = this.generateNextSteps(results, status);
     const qualityAssessment = this.createQualityAssessment(results);
@@ -767,7 +878,7 @@ class QualityGatePipelineImpl implements QualityGatePipeline {
       warnings,
       recommendations,
       nextSteps,
-      qualityAssessment
+      qualityAssessment,
     };
   }
 
@@ -777,22 +888,25 @@ class QualityGatePipelineImpl implements QualityGatePipeline {
    * @param status - Overall status
    * @returns Array of next steps
    */
-  private generateNextSteps(results: QualityGateResult[], status: QualityGateStatus): string[] {
+  private generateNextSteps(
+    results: QualityGateResult[],
+    status: QualityGateStatus,
+  ): string[] {
     const steps: string[] = [];
 
     if (status === QualityGateStatus.FAILED) {
-      steps.push('Address critical failures before proceeding');
-      steps.push('Review gate configurations and thresholds');
+      steps.push("Address critical failures before proceeding");
+      steps.push("Review gate configurations and thresholds");
     }
 
     if (status === QualityGateStatus.WARNING) {
-      steps.push('Review warnings and consider improvements');
-      steps.push('Monitor performance metrics closely');
+      steps.push("Review warnings and consider improvements");
+      steps.push("Monitor performance metrics closely");
     }
 
     if (status === QualityGateStatus.PASSED) {
-      steps.push('Proceed with deployment');
-      steps.push('Continue monitoring post-deployment');
+      steps.push("Proceed with deployment");
+      steps.push("Continue monitoring post-deployment");
     }
 
     return steps;
@@ -803,7 +917,9 @@ class QualityGatePipelineImpl implements QualityGatePipeline {
    * @param results - Gate results
    * @returns Quality assessment
    */
-  private createQualityAssessment(results: QualityGateResult[]): QualityAssessment {
+  private createQualityAssessment(
+    results: QualityGateResult[],
+  ): QualityAssessment {
     const totalScore = results.reduce((sum, r) => sum + r.score, 0);
     const score = results.length > 0 ? totalScore / results.length : 0;
 
@@ -824,19 +940,19 @@ class QualityGatePipelineImpl implements QualityGatePipeline {
       grade,
       score,
       trends: {
-        scoreDirection: 'stable' as any,
-        performanceTrend: 'stable' as any,
-        securityTrend: 'stable' as any,
-        coverageTrend: 'stable' as any,
-        historicalData: []
+        scoreDirection: "stable" as any,
+        performanceTrend: "stable" as any,
+        securityTrend: "stable" as any,
+        coverageTrend: "stable" as any,
+        historicalData: [],
       },
       improvementAreas: this.identifyImprovementAreas(results),
       complianceStatus: {
-        status: 'compliant',
+        status: "compliant",
         frameworks: [],
         gaps: [],
-        remediationTimeline: new Date()
-      }
+        remediationTimeline: new Date(),
+      },
     };
   }
 
@@ -848,25 +964,29 @@ class QualityGatePipelineImpl implements QualityGatePipeline {
   private identifyImprovementAreas(results: QualityGateResult[]): string[] {
     const areas: string[] = [];
 
-    const failedResults = results.filter(r => r.status === QualityGateStatus.FAILED);
-    const warningResults = results.filter(r => r.status === QualityGateStatus.WARNING);
+    const failedResults = results.filter(
+      (r) => r.status === QualityGateStatus.FAILED,
+    );
+    const warningResults = results.filter(
+      (r) => r.status === QualityGateStatus.WARNING,
+    );
 
     if (failedResults.length > 0) {
-      areas.push('Address failed quality gates');
+      areas.push("Address failed quality gates");
     }
 
     if (warningResults.length > 0) {
-      areas.push('Improve gates with warnings');
+      areas.push("Improve gates with warnings");
     }
 
     // Add specific improvement areas based on gate types
-    const performanceIssues = results.filter(r => {
+    const performanceIssues = results.filter((r) => {
       const gate = this.gatesMap.get(r.gateId);
       return gate?.type === QualityGateType.PERFORMANCE && r.score < 80;
     });
 
     if (performanceIssues.length > 0) {
-      areas.push('Optimize performance metrics');
+      areas.push("Optimize performance metrics");
     }
 
     return areas;
@@ -878,7 +998,10 @@ class QualityGatePipelineImpl implements QualityGatePipeline {
    * @param context - Execution context
    * @returns Rollback information
    */
-  private async executeRollback(results: QualityGateResult[], context: QualityGateContext): Promise<RollbackInfo> {
+  private async executeRollback(
+    results: QualityGateResult[],
+    context: QualityGateContext,
+  ): Promise<RollbackInfo> {
     this.logger.log(`Executing rollback for pipeline: ${this.id}`);
 
     // TODO: Implement actual rollback execution
@@ -887,11 +1010,11 @@ class QualityGatePipelineImpl implements QualityGatePipeline {
     return {
       rollbackId: `rollback-${context.sessionId}`,
       trigger: {
-        id: 'critical-failure',
-        condition: 'critical_gate_failure' as any,
+        id: "critical-failure",
+        condition: "critical_gate_failure" as any,
         threshold: 0,
         evaluationWindow: 0,
-        enabled: true
+        enabled: true,
       },
       strategy: this.config.rollbackConfig.strategy,
       executionTime: 0,
@@ -906,7 +1029,10 @@ class QualityGatePipelineImpl implements QualityGatePipeline {
    * @param context - Execution context
    * @returns Approval information
    */
-  private async executeApprovalWorkflow(results: QualityGateResult[], context: QualityGateContext): Promise<ApprovalInfo> {
+  private async executeApprovalWorkflow(
+    results: QualityGateResult[],
+    context: QualityGateContext,
+  ): Promise<ApprovalInfo> {
     this.logger.log(`Executing approval workflow for pipeline: ${this.id}`);
 
     // TODO: Implement actual approval workflow
@@ -914,15 +1040,15 @@ class QualityGatePipelineImpl implements QualityGatePipeline {
 
     return {
       approvalId: `approval-${context.sessionId}`,
-      state: 'pending' as any,
+      state: "pending" as any,
       requiredApprovals: [],
       receivedApprovals: [],
       timeline: {
         requested: new Date(),
         expiration: new Date(Date.now() + this.config.approvalConfig.timeout),
-        events: []
+        events: [],
       },
-      metadata: {}
+      metadata: {},
     };
   }
 
@@ -943,24 +1069,24 @@ class QualityGatePipelineImpl implements QualityGatePipeline {
           dbConnectionPool: 0,
           networkBandwidth: 0,
           diskIo: 0,
-          cacheHitRate: 0
-        }
+          cacheHitRate: 0,
+        },
       },
       security: {
         vulnerabilities: { critical: 0, high: 0, medium: 0, low: 0, info: 0 },
         authSuccessRate: 0,
         authzViolations: 0,
         complianceScore: 0,
-        threatAlerts: 0
+        threatAlerts: 0,
       },
       coverage: {
         testCoverage: 0,
         codeCoverage: 0,
         functionCoverage: 0,
         branchCoverage: 0,
-        integrationCoverage: 0
+        integrationCoverage: 0,
       },
-      custom: {}
+      custom: {},
     };
   }
 }

@@ -727,7 +727,8 @@ export class ParlantIntegrationService
     }
 
     const cacheKey = this.generateCacheKey(request);
-    const ttl = this.config!.wrapper.cacheTtl || this.config!.connection.cacheTtl;
+    const ttl =
+      this.config!.wrapper.cacheTtl || this.config!.connection.cacheTtl;
 
     const cacheEntry: ParlantCacheEntry = {
       response,

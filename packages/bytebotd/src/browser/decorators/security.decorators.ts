@@ -435,10 +435,7 @@ export const BrowserExtractionSecurity = () => {
 export const BrowserAdminSecurity = () => {
   return applyDecorators(
     BrowserMaximumSecurity(),
-    BrowserPermissions(
-      Permission._COMPUTER_ADMIN,
-      Permission._SYSTEM_ADMIN,
-    ),
+    BrowserPermissions(Permission._COMPUTER_ADMIN, Permission._SYSTEM_ADMIN),
     ApiResponse({
       status: 403,
       description: 'Forbidden - Administrator privileges required',
@@ -536,4 +533,3 @@ export const BrowserNavigationSecurity = () => {
     }),
   );
 };
-

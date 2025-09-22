@@ -9,8 +9,8 @@
  * @author PARLANT Testing Framework Agent
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { TestExecutionResult } from './test-executor';
+import { Injectable, Logger } from "@nestjs/common";
+import { TestExecutionResult } from "./test-executor";
 
 /**
  * Aggregated test results summary
@@ -88,7 +88,7 @@ export class TestResultAggregator {
   private readonly maxHistorySize = 100;
 
   constructor() {
-    this.logger.log('PARLANT Test Result Aggregator initialized');
+    this.logger.log("PARLANT Test Result Aggregator initialized");
   }
 
   /**
@@ -97,14 +97,14 @@ export class TestResultAggregator {
   aggregateResults(results: TestExecutionResult[]): TestResultSummary {
     const summary: TestResultSummary = {
       totalTests: results.length,
-      passedTests: results.filter(r => r.status === 'passed').length,
-      failedTests: results.filter(r => r.status === 'failed').length,
-      errorTests: results.filter(r => r.status === 'error').length,
-      skippedTests: results.filter(r => r.status === 'skipped').length,
+      passedTests: results.filter((r) => r.status === "passed").length,
+      failedTests: results.filter((r) => r.status === "failed").length,
+      errorTests: results.filter((r) => r.status === "error").length,
+      skippedTests: results.filter((r) => r.status === "skipped").length,
       passRate: 0,
       totalDuration: results.reduce((sum, r) => sum + r.duration, 0),
       averageDuration: 0,
-      executionDate: new Date()
+      executionDate: new Date(),
     };
 
     // Calculate pass rate
@@ -116,7 +116,9 @@ export class TestResultAggregator {
     // Add to history
     this.addToHistory(summary);
 
-    this.logger.debug(`Aggregated results: ${summary.passedTests}/${summary.totalTests} passed (${summary.passRate.toFixed(1)}%)`);
+    this.logger.debug(
+      `Aggregated results: ${summary.passedTests}/${summary.totalTests} passed (${summary.passRate.toFixed(1)}%)`,
+    );
 
     return summary;
   }
@@ -126,8 +128,8 @@ export class TestResultAggregator {
    */
   generateComprehensiveReport(
     results: TestExecutionResult[],
-    environment: string = 'test',
-    version: string = '1.0.0'
+    environment: string = "test",
+    version: string = "1.0.0",
   ): ComprehensiveTestReport {
     const summary = this.aggregateResults(results);
     const categoryBreakdown = this.analyzeCategoryBreakdown(results);
@@ -141,11 +143,13 @@ export class TestResultAggregator {
       metadata: {
         environment,
         timestamp: new Date(),
-        version
-      }
+        version,
+      },
     };
 
-    this.logger.log(`Generated comprehensive test report: ${summary.totalTests} tests`);
+    this.logger.log(
+      `Generated comprehensive test report: ${summary.totalTests} tests`,
+    );
     return report;
   }
 
@@ -166,13 +170,14 @@ export class TestResultAggregator {
       trends: {
         improving: false,
         stable: true,
-        degrading: false
-      }
+        degrading: false,
+      },
     };
 
     if (previousRun) {
       analysis.passRateChange = currentRun.passRate - previousRun.passRate;
-      analysis.durationChange = currentRun.averageDuration - previousRun.averageDuration;
+      analysis.durationChange =
+        currentRun.averageDuration - previousRun.averageDuration;
 
       // Determine trend
       if (analysis.passRateChange > 5) {
@@ -184,7 +189,9 @@ export class TestResultAggregator {
       }
     }
 
-    this.logger.debug(`Trend analysis: ${analysis.trends.improving ? 'improving' : analysis.trends.degrading ? 'degrading' : 'stable'}`);
+    this.logger.debug(
+      `Trend analysis: ${analysis.trends.improving ? "improving" : analysis.trends.degrading ? "degrading" : "stable"}`,
+    );
     return analysis;
   }
 
@@ -200,7 +207,7 @@ export class TestResultAggregator {
    */
   clearHistory(): void {
     this.resultHistory.length = 0;
-    this.logger.debug('Test result history cleared');
+    this.logger.debug("Test result history cleared");
   }
 
   // ===== PRIVATE HELPER METHODS =====
@@ -229,11 +236,13 @@ export class TestResultAggregator {
   /**
    * Analyze category breakdown
    */
-  private analyzeCategoryBreakdown(results: TestExecutionResult[]): TestCategoryBreakdown[] {
+  private analyzeCategoryBreakdown(
+    results: TestExecutionResult[],
+  ): TestCategoryBreakdown[] {
     const categories = new Map<string, TestExecutionResult[]>();
 
     // Group results by category (extracted from test name)
-    results.forEach(result => {
+    results.forEach((result) => {
       const category = this.extractCategory(result.testName);
       if (!categories.has(category)) {
         categories.set(category, []);
@@ -242,21 +251,26 @@ export class TestResultAggregator {
     });
 
     // Convert to breakdown format
-    return Array.from(categories.entries()).map(([category, categoryResults]) => {
-      const passed = categoryResults.filter(r => r.status === 'passed').length;
-      const total = categoryResults.length;
+    return Array.from(categories.entries()).map(
+      ([category, categoryResults]) => {
+        const passed = categoryResults.filter(
+          (r) => r.status === "passed",
+        ).length;
+        const total = categoryResults.length;
 
-      return {
-        category,
-        total,
-        passed,
-        failed: total - passed,
-        passRate: total > 0 ? (passed / total) * 100 : 0,
-        averageDuration: total > 0
-          ? categoryResults.reduce((sum, r) => sum + r.duration, 0) / total
-          : 0
-      };
-    });
+        return {
+          category,
+          total,
+          passed,
+          failed: total - passed,
+          passRate: total > 0 ? (passed / total) * 100 : 0,
+          averageDuration:
+            total > 0
+              ? categoryResults.reduce((sum, r) => sum + r.duration, 0) / total
+              : 0,
+        };
+      },
+    );
   }
 
   /**
@@ -264,25 +278,30 @@ export class TestResultAggregator {
    */
   private extractCategory(testName: string): string {
     // Simple category extraction logic
-    if (testName.includes('unit')) return 'Unit Tests';
-    if (testName.includes('integration')) return 'Integration Tests';
-    if (testName.includes('performance')) return 'Performance Tests';
-    if (testName.includes('security')) return 'Security Tests';
-    if (testName.includes('e2e') || testName.includes('end-to-end')) return 'E2E Tests';
-    return 'Other';
+    if (testName.includes("unit")) return "Unit Tests";
+    if (testName.includes("integration")) return "Integration Tests";
+    if (testName.includes("performance")) return "Performance Tests";
+    if (testName.includes("security")) return "Security Tests";
+    if (testName.includes("e2e") || testName.includes("end-to-end"))
+      return "E2E Tests";
+    return "Other";
   }
 
   /**
    * Analyze test failures
    */
-  private analyzeFailures(results: TestExecutionResult[]): ComprehensiveTestReport['failureAnalysis'] {
-    const failures = results.filter(r => r.status === 'failed' || r.status === 'error');
+  private analyzeFailures(
+    results: TestExecutionResult[],
+  ): ComprehensiveTestReport["failureAnalysis"] {
+    const failures = results.filter(
+      (r) => r.status === "failed" || r.status === "error",
+    );
 
     // Count error frequencies
     const errorCounts = new Map<string, number>();
-    failures.forEach(failure => {
+    failures.forEach((failure) => {
       if (failure.error) {
-        const errorKey = failure.error.split('\n')[0].trim(); // First line of error
+        const errorKey = failure.error.split("\n")[0].trim(); // First line of error
         errorCounts.set(errorKey, (errorCounts.get(errorKey) || 0) + 1);
       }
     });
@@ -301,7 +320,7 @@ export class TestResultAggregator {
     return {
       mostCommonErrors,
       slowestTests,
-      flakyTests: [] // Would need historical data to identify flaky tests
+      flakyTests: [], // Would need historical data to identify flaky tests
     };
   }
 
@@ -310,33 +329,43 @@ export class TestResultAggregator {
    */
   private generateRecommendations(
     summary: TestResultSummary,
-    failureAnalysis: ComprehensiveTestReport['failureAnalysis']
+    failureAnalysis: ComprehensiveTestReport["failureAnalysis"],
   ): string[] {
     const recommendations: string[] = [];
 
     // Pass rate recommendations
     if (summary.passRate < 90) {
-      recommendations.push('Focus on improving test stability - pass rate below 90%');
+      recommendations.push(
+        "Focus on improving test stability - pass rate below 90%",
+      );
     }
 
     // Performance recommendations
     if (summary.averageDuration > 5000) {
-      recommendations.push('Consider optimizing test performance - average duration over 5 seconds');
+      recommendations.push(
+        "Consider optimizing test performance - average duration over 5 seconds",
+      );
     }
 
     // Failure pattern recommendations
     if (failureAnalysis.mostCommonErrors.length > 0) {
       const topError = failureAnalysis.mostCommonErrors[0];
-      recommendations.push(`Address common error pattern: "${topError.error}" (${topError.count} occurrences)`);
+      recommendations.push(
+        `Address common error pattern: "${topError.error}" (${topError.count} occurrences)`,
+      );
     }
 
     // General recommendations
     if (summary.failedTests > 0) {
-      recommendations.push('Investigate and fix failing tests to improve overall stability');
+      recommendations.push(
+        "Investigate and fix failing tests to improve overall stability",
+      );
     }
 
     if (recommendations.length === 0) {
-      recommendations.push('Test suite is performing well - continue current practices');
+      recommendations.push(
+        "Test suite is performing well - continue current practices",
+      );
     }
 
     return recommendations;

@@ -34,16 +34,16 @@ import {
   HttpException,
   HttpStatus,
   Inject,
-} from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Request, Response, NextFunction } from 'express';
-import { Cache } from 'cache-manager';
-import { performance } from 'perf_hooks';
-import * as crypto from 'crypto';
+} from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { CACHE_MANAGER } from "@nestjs/cache-manager";
+import { Request, Response, NextFunction } from "express";
+import { Cache } from "cache-manager";
+import { performance } from "perf_hooks";
+import * as crypto from "crypto";
 
 // Import existing services and types
-import { ParlantIntegrationService } from '../../services/parlant-integration.service';
+import { ParlantIntegrationService } from "../../services/parlant-integration.service";
 import {
   SecurityLevel,
   ValidationMode,
@@ -52,11 +52,11 @@ import {
   FunctionSecurityLevel,
   RiskLevel,
   ParticipantRole,
-} from '../../types/parlant.types';
+} from "../../types/parlant.types";
 import {
   ParlantValidationRequest,
   ParlantValidationResponse,
-} from '../../types/parlant-integration.types';
+} from "../../types/parlant-integration.types";
 
 // Enhanced types for the universal framework
 export interface EnhancedParlantRequest extends Request {
@@ -128,7 +128,7 @@ export interface ConversationalErrorContext {
   userFriendlyMessage: string;
   conversationalExplanation: string;
   suggestedActions: string[];
-  escalationLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  escalationLevel: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
   requiresHumanIntervention: boolean;
   recoveryStrategies: string[];
   supportContext: Record<string, unknown>;
@@ -157,14 +157,14 @@ export interface EndpointConfiguration {
 export interface CacheStrategy {
   enabled: boolean;
   ttl: number;
-  scope: 'global' | 'user' | 'session' | 'request';
+  scope: "global" | "user" | "session" | "request";
   invalidationTriggers: string[];
   compressionEnabled: boolean;
 }
 
 export interface RetryPolicy {
   maxAttempts: number;
-  backoffStrategy: 'exponential' | 'linear' | 'fixed';
+  backoffStrategy: "exponential" | "linear" | "fixed";
   baseDelay: number;
   maxDelay: number;
   retryConditions: string[];
@@ -189,7 +189,10 @@ export class EnhancedUniversalParlantMiddleware implements NestMiddleware {
   private readonly logger = new Logger(EnhancedUniversalParlantMiddleware.name);
 
   // Performance and caching
-  private readonly endpointConfigCache = new Map<string, EndpointConfiguration>();
+  private readonly endpointConfigCache = new Map<
+    string,
+    EndpointConfiguration
+  >();
   private readonly performanceCache = new Map<string, PerformanceMetrics[]>();
   private readonly requestTracker = new Map<string, number>();
 
@@ -218,42 +221,42 @@ export class EnhancedUniversalParlantMiddleware implements NestMiddleware {
     // Enhanced endpoint patterns with risk classification
     endpointPatterns: {
       critical: [
-        '/computer-use/**',
-        '/admin/**',
-        '/config/**',
-        '/system/**',
-        '/auth/**',
-        '/**/batch/**',
-        '/**/critical/**',
-        '/**/execute/**',
-        '/**/deploy/**',
+        "/computer-use/**",
+        "/admin/**",
+        "/config/**",
+        "/system/**",
+        "/auth/**",
+        "/**/batch/**",
+        "/**/critical/**",
+        "/**/execute/**",
+        "/**/deploy/**",
       ],
       high: [
-        '/data-extraction/**',
-        '/file-management/**',
-        '/workflow-automation/**',
-        '/browser/**',
-        '/**/delete/**',
-        '/**/modify/**',
-        '/**/update/**',
-        '/**/create/**',
+        "/data-extraction/**",
+        "/file-management/**",
+        "/workflow-automation/**",
+        "/browser/**",
+        "/**/delete/**",
+        "/**/modify/**",
+        "/**/update/**",
+        "/**/create/**",
       ],
       medium: [
-        '/metrics/**',
-        '/monitoring/**',
-        '/analytics/**',
-        '/**/search/**',
-        '/**/status/**',
-        '/**/query/**',
-        '/**/list/**',
+        "/metrics/**",
+        "/monitoring/**",
+        "/analytics/**",
+        "/**/search/**",
+        "/**/status/**",
+        "/**/query/**",
+        "/**/list/**",
       ],
       low: [
-        '/health/**',
-        '/version/**',
-        '/ping/**',
-        '/**/info/**',
-        '/**/docs/**',
-        '/**/swagger/**',
+        "/health/**",
+        "/version/**",
+        "/ping/**",
+        "/**/info/**",
+        "/**/docs/**",
+        "/**/swagger/**",
       ],
     },
 
@@ -297,27 +300,39 @@ export class EnhancedUniversalParlantMiddleware implements NestMiddleware {
    * Initialize the enhanced middleware with performance monitoring
    */
   private initializeMiddleware(): void {
-    this.logger.log('Enhanced Universal PARLANT Middleware v2.0.0 initializing...', {
-      version: '2.0.0',
-      performanceTargets: this.enterpriseConfig.performance,
-      endpointPatterns: Object.keys(this.enterpriseConfig.endpointPatterns).length,
-      cacheStrategies: Object.keys(this.enterpriseConfig.cache.strategies).length,
-    });
+    this.logger.log(
+      "Enhanced Universal PARLANT Middleware v2.0.0 initializing...",
+      {
+        version: "2.0.0",
+        performanceTargets: this.enterpriseConfig.performance,
+        endpointPatterns: Object.keys(this.enterpriseConfig.endpointPatterns)
+          .length,
+        cacheStrategies: Object.keys(this.enterpriseConfig.cache.strategies)
+          .length,
+      },
+    );
 
     // Start performance monitoring
     this.startPerformanceMonitoring();
 
-    this.logger.log('Enhanced Universal PARLANT Middleware initialized successfully', {
-      timestamp: new Date().toISOString(),
-      nodeVersion: process.version,
-      memory: process.memoryUsage(),
-    });
+    this.logger.log(
+      "Enhanced Universal PARLANT Middleware initialized successfully",
+      {
+        timestamp: new Date().toISOString(),
+        nodeVersion: process.version,
+        memory: process.memoryUsage(),
+      },
+    );
   }
 
   /**
    * Main middleware execution function
    */
-  async use(req: EnhancedParlantRequest, res: Response, next: NextFunction): Promise<void> {
+  async use(
+    req: EnhancedParlantRequest,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
     const startTime = performance.now();
     const operationId = this.generateOperationId();
 
@@ -333,13 +348,17 @@ export class EnhancedUniversalParlantMiddleware implements NestMiddleware {
       // Performance check - reject if overloaded
       if (this.isSystemOverloaded()) {
         throw new HttpException(
-          'System temporarily overloaded. Please retry in a few moments.',
-          HttpStatus.SERVICE_UNAVAILABLE
+          "System temporarily overloaded. Please retry in a few moments.",
+          HttpStatus.SERVICE_UNAVAILABLE,
         );
       }
 
       // Initialize PARLANT context
-      req.parlant = await this.initializeParlantContext(req, operationId, startTime);
+      req.parlant = await this.initializeParlantContext(
+        req,
+        operationId,
+        startTime,
+      );
 
       // Log request start
       this.logRequestStart(req, operationId);
@@ -349,7 +368,9 @@ export class EnhancedUniversalParlantMiddleware implements NestMiddleware {
         req.parlant.validated = true;
         req.parlant.cacheHit = false;
         req.parlant.metrics.validationCompleted = performance.now();
-        this.addAuditEvent(req.parlant, 'validation_skipped', { reason: 'low_risk_endpoint' });
+        this.addAuditEvent(req.parlant, "validation_skipped", {
+          reason: "low_risk_endpoint",
+        });
         return this.completeRequest(req, res, next);
       }
 
@@ -364,7 +385,9 @@ export class EnhancedUniversalParlantMiddleware implements NestMiddleware {
         req.parlant.cacheHit = true;
         req.parlant.metrics.cacheAccess = performance.now();
         this.globalMetrics.cachedRequests++;
-        this.addAuditEvent(req.parlant, 'cache_hit', { cacheKey: req.parlant.cacheKey });
+        this.addAuditEvent(req.parlant, "cache_hit", {
+          cacheKey: req.parlant.cacheKey,
+        });
         return this.completeRequest(req, res, next);
       }
 
@@ -378,7 +401,6 @@ export class EnhancedUniversalParlantMiddleware implements NestMiddleware {
 
       this.globalMetrics.validatedRequests++;
       this.completeRequest(req, res, next);
-
     } catch (error) {
       await this.handleValidationError(req, res, error, operationId);
       this.globalMetrics.failedRequests++;
@@ -399,7 +421,7 @@ export class EnhancedUniversalParlantMiddleware implements NestMiddleware {
   private async initializeParlantContext(
     req: EnhancedParlantRequest,
     operationId: string,
-    startTime: number
+    startTime: number,
   ): Promise<ParlantRequestContext> {
     const context: ParlantRequestContext = {
       validated: false,
@@ -417,16 +439,16 @@ export class EnhancedUniversalParlantMiddleware implements NestMiddleware {
         cpuUsage: process.cpuUsage(),
       },
       retryCount: 0,
-      businessCategory: 'UNKNOWN',
+      businessCategory: "UNKNOWN",
       complianceFlags: [],
       auditTrail: [],
     };
 
     // Add initial audit event
-    this.addAuditEvent(context, 'request_initialized', {
+    this.addAuditEvent(context, "request_initialized", {
       method: req.method,
       url: req.url,
-      userAgent: req.get('User-Agent'),
+      userAgent: req.get("User-Agent"),
       ip: this.getClientIp(req),
     });
 
@@ -436,7 +458,9 @@ export class EnhancedUniversalParlantMiddleware implements NestMiddleware {
   /**
    * Enhanced endpoint analysis with machine learning-based classification
    */
-  private async analyzeEndpointConfiguration(req: EnhancedParlantRequest): Promise<EndpointConfiguration> {
+  private async analyzeEndpointConfiguration(
+    req: EnhancedParlantRequest,
+  ): Promise<EndpointConfiguration> {
     const cacheKey = `endpoint-config:${req.method}:${req.route?.path || req.url}`;
     const cached = this.endpointConfigCache.get(cacheKey);
 
@@ -461,7 +485,7 @@ export class EnhancedUniversalParlantMiddleware implements NestMiddleware {
     this.endpointConfigCache.set(cacheKey, config);
 
     // Add to audit trail
-    this.addAuditEvent(req.parlant!, 'endpoint_analyzed', {
+    this.addAuditEvent(req.parlant!, "endpoint_analyzed", {
       securityLevel: config.securityLevel,
       riskLevel: config.riskLevel,
       businessCategory: config.businessCategory,
@@ -476,7 +500,7 @@ export class EnhancedUniversalParlantMiddleware implements NestMiddleware {
    */
   private async performEnhancedValidation(
     req: EnhancedParlantRequest,
-    config: EndpointConfiguration
+    config: EndpointConfiguration,
   ): Promise<void> {
     const validationStartTime = performance.now();
     req.parlant!.metrics.validationStarted = validationStartTime;
@@ -486,7 +510,7 @@ export class EnhancedUniversalParlantMiddleware implements NestMiddleware {
       const validationRequest: ParlantValidationRequest = {
         operationId: req.parlant!.operationId,
         functionName: `${req.method} ${config.path}`,
-        packageName: '@bytebot/enhanced-universal-middleware',
+        packageName: "@bytebot/enhanced-universal-middleware",
         description: this.generateFunctionDescription(req, config),
         parameters: this.sanitizeRequestParameters(req),
         userContext: this.buildUserContext(req),
@@ -504,7 +528,7 @@ export class EnhancedUniversalParlantMiddleware implements NestMiddleware {
       if (response.approved) {
         req.parlant!.validated = true;
         req.parlant!.conversationId = response.conversationId;
-        this.addAuditEvent(req.parlant!, 'validation_approved', {
+        this.addAuditEvent(req.parlant!, "validation_approved", {
           confidence: response.confidence,
           reason: response.reason,
           processingTime: performance.now() - validationStartTime,
@@ -512,13 +536,12 @@ export class EnhancedUniversalParlantMiddleware implements NestMiddleware {
       } else {
         throw new HttpException(
           this.createUserFriendlyErrorMessage(response),
-          HttpStatus.FORBIDDEN
+          HttpStatus.FORBIDDEN,
         );
       }
-
     } catch (error) {
       req.parlant!.metrics.validationCompleted = performance.now();
-      this.addAuditEvent(req.parlant!, 'validation_failed', {
+      this.addAuditEvent(req.parlant!, "validation_failed", {
         error: error instanceof Error ? error.message : String(error),
         duration: performance.now() - validationStartTime,
       });
@@ -533,7 +556,7 @@ export class EnhancedUniversalParlantMiddleware implements NestMiddleware {
    */
   private async checkValidationCache(
     req: EnhancedParlantRequest,
-    config: EndpointConfiguration
+    config: EndpointConfiguration,
   ): Promise<{ validated: boolean; conversationId?: string } | null> {
     if (!config.cacheStrategy.enabled) {
       return null;
@@ -545,11 +568,13 @@ export class EnhancedUniversalParlantMiddleware implements NestMiddleware {
     try {
       const cached = await this.cacheManager.get(cacheKey);
       if (cached && this.isCacheValid(cached, config)) {
-        this.addAuditEvent(req.parlant!, 'cache_hit', { cacheKey });
+        this.addAuditEvent(req.parlant!, "cache_hit", { cacheKey });
         return cached as { validated: boolean; conversationId?: string };
       }
     } catch (error) {
-      this.logger.warn('Cache access failed', { error: error instanceof Error ? error.message : String(error) });
+      this.logger.warn("Cache access failed", {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
 
     return null;
@@ -558,7 +583,11 @@ export class EnhancedUniversalParlantMiddleware implements NestMiddleware {
   /**
    * Complete request processing with performance metrics
    */
-  private completeRequest(req: EnhancedParlantRequest, res: Response, next: NextFunction): void {
+  private completeRequest(
+    req: EnhancedParlantRequest,
+    res: Response,
+    next: NextFunction,
+  ): void {
     const endTime = performance.now();
     req.parlant!.endTime = endTime;
     req.parlant!.processingTime = endTime - req.parlant!.startTime;
@@ -569,7 +598,7 @@ export class EnhancedUniversalParlantMiddleware implements NestMiddleware {
     this.setEnhancedResponseHeaders(req, res);
 
     // Final audit event
-    this.addAuditEvent(req.parlant!, 'request_completed', {
+    this.addAuditEvent(req.parlant!, "request_completed", {
       validated: req.parlant!.validated,
       processingTime: req.parlant!.processingTime,
       cacheHit: req.parlant!.cacheHit,
@@ -594,9 +623,13 @@ export class EnhancedUniversalParlantMiddleware implements NestMiddleware {
     req: EnhancedParlantRequest,
     res: Response,
     error: unknown,
-    operationId: string
+    operationId: string,
   ): Promise<void> {
-    const errorContext = await this.createEnhancedErrorContext(error, req, operationId);
+    const errorContext = await this.createEnhancedErrorContext(
+      error,
+      req,
+      operationId,
+    );
 
     if (req.parlant) {
       req.parlant.errorContext = errorContext;
@@ -612,7 +645,7 @@ export class EnhancedUniversalParlantMiddleware implements NestMiddleware {
       stack: error instanceof Error ? error.stack : undefined,
       url: req.url,
       method: req.method,
-      userAgent: req.get('User-Agent'),
+      userAgent: req.get("User-Agent"),
     });
   }
 
@@ -624,7 +657,7 @@ export class EnhancedUniversalParlantMiddleware implements NestMiddleware {
   private generateOperationId(): string {
     const timestamp = Date.now().toString(36);
     const random = Math.random().toString(36).substring(2);
-    const entropy = crypto.randomBytes(4).toString('hex');
+    const entropy = crypto.randomBytes(4).toString("hex");
     return `parlant-${timestamp}-${random}-${entropy}`;
   }
 
@@ -632,7 +665,8 @@ export class EnhancedUniversalParlantMiddleware implements NestMiddleware {
    * Check if system is overloaded based on metrics
    */
   private isSystemOverloaded(): boolean {
-    const { currentConcurrentRequests, maxConcurrentRequests } = this.enterpriseConfig.performance;
+    const { currentConcurrentRequests, maxConcurrentRequests } =
+      this.enterpriseConfig.performance;
     const memoryUsage = process.memoryUsage().heapUsed;
 
     return (
@@ -644,7 +678,11 @@ export class EnhancedUniversalParlantMiddleware implements NestMiddleware {
   /**
    * Add audit event to request context
    */
-  private addAuditEvent(context: ParlantRequestContext, event: string, details: Record<string, unknown>): void {
+  private addAuditEvent(
+    context: ParlantRequestContext,
+    event: string,
+    details: Record<string, unknown>,
+  ): void {
     context.auditTrail.push({
       timestamp: performance.now(),
       event,
@@ -657,40 +695,46 @@ export class EnhancedUniversalParlantMiddleware implements NestMiddleware {
    */
   private getClientIp(req: Request): string {
     return (
-      req.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-      req.get('x-real-ip') ||
-      req.get('x-client-ip') ||
+      req.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      req.get("x-real-ip") ||
+      req.get("x-client-ip") ||
       req.socket?.remoteAddress ||
-      'unknown'
+      "unknown"
     );
   }
 
   /**
    * Set enhanced response headers for monitoring and debugging
    */
-  private setEnhancedResponseHeaders(req: EnhancedParlantRequest, res: Response): void {
+  private setEnhancedResponseHeaders(
+    req: EnhancedParlantRequest,
+    res: Response,
+  ): void {
     const headers: Record<string, string> = {
-      'X-Parlant-Version': '2.0.0',
-      'X-Parlant-Operation-Id': req.parlant!.operationId,
-      'X-Parlant-Validated': req.parlant!.validated.toString(),
-      'X-Parlant-Security-Level': req.parlant!.securityLevel,
-      'X-Parlant-Processing-Time': req.parlant!.processingTime!.toFixed(2),
-      'X-Parlant-Cache-Hit': req.parlant!.cacheHit.toString(),
-      'X-Parlant-Risk-Score': req.parlant!.riskScore.toString(),
-      'X-Parlant-Business-Category': req.parlant!.businessCategory,
+      "X-Parlant-Version": "2.0.0",
+      "X-Parlant-Operation-Id": req.parlant!.operationId,
+      "X-Parlant-Validated": req.parlant!.validated.toString(),
+      "X-Parlant-Security-Level": req.parlant!.securityLevel,
+      "X-Parlant-Processing-Time": req.parlant!.processingTime!.toFixed(2),
+      "X-Parlant-Cache-Hit": req.parlant!.cacheHit.toString(),
+      "X-Parlant-Risk-Score": req.parlant!.riskScore.toString(),
+      "X-Parlant-Business-Category": req.parlant!.businessCategory,
     };
 
     if (req.parlant!.conversationId) {
-      headers['X-Parlant-Conversation-Id'] = req.parlant!.conversationId;
+      headers["X-Parlant-Conversation-Id"] = req.parlant!.conversationId;
     }
 
     if (req.parlant!.cacheKey) {
-      headers['X-Parlant-Cache-Key'] = req.parlant!.cacheKey;
+      headers["X-Parlant-Cache-Key"] = req.parlant!.cacheKey;
     }
 
     // Performance headers
-    headers['X-Parlant-Memory-Usage'] = (req.parlant!.metrics.memoryUsage?.heapUsed || 0).toString();
-    headers['X-Parlant-Audit-Events'] = req.parlant!.auditTrail.length.toString();
+    headers["X-Parlant-Memory-Usage"] = (
+      req.parlant!.metrics.memoryUsage?.heapUsed || 0
+    ).toString();
+    headers["X-Parlant-Audit-Events"] =
+      req.parlant!.auditTrail.length.toString();
 
     res.set(headers);
   }
@@ -741,7 +785,7 @@ export class EnhancedUniversalParlantMiddleware implements NestMiddleware {
     const cutoffTime = performance.now() - 3600000; // 1 hour ago
 
     for (const [key, metrics] of this.performanceCache.entries()) {
-      const filtered = metrics.filter(m => m.requestReceived > cutoffTime);
+      const filtered = metrics.filter((m) => m.requestReceived > cutoffTime);
       if (filtered.length === 0) {
         this.performanceCache.delete(key);
       } else {
@@ -756,16 +800,21 @@ export class EnhancedUniversalParlantMiddleware implements NestMiddleware {
   private checkPerformanceAlerts(): void {
     const { performance } = this.enterpriseConfig;
 
-    if (this.globalMetrics.averageProcessingTime > performance.maxProcessingTime) {
-      this.logger.warn('Performance alert: Average processing time exceeds target', {
-        current: this.globalMetrics.averageProcessingTime,
-        target: performance.maxProcessingTime,
-        metrics: this.globalMetrics,
-      });
+    if (
+      this.globalMetrics.averageProcessingTime > performance.maxProcessingTime
+    ) {
+      this.logger.warn(
+        "Performance alert: Average processing time exceeds target",
+        {
+          current: this.globalMetrics.averageProcessingTime,
+          target: performance.maxProcessingTime,
+          metrics: this.globalMetrics,
+        },
+      );
     }
 
     if (this.globalMetrics.memoryPeakUsage > performance.maxMemoryUsage) {
-      this.logger.warn('Performance alert: Memory usage exceeds target', {
+      this.logger.warn("Performance alert: Memory usage exceeds target", {
         current: this.globalMetrics.memoryPeakUsage,
         target: performance.maxMemoryUsage,
         metrics: this.globalMetrics,
@@ -776,7 +825,11 @@ export class EnhancedUniversalParlantMiddleware implements NestMiddleware {
   /**
    * Record performance metrics for analysis
    */
-  private recordPerformanceMetrics(operationId: string, totalTime: number, context?: ParlantRequestContext): void {
+  private recordPerformanceMetrics(
+    operationId: string,
+    totalTime: number,
+    context?: ParlantRequestContext,
+  ): void {
     const metrics: PerformanceMetrics = {
       requestReceived: performance.now(),
       totalProcessingTime: totalTime,
@@ -807,10 +860,16 @@ export class EnhancedUniversalParlantMiddleware implements NestMiddleware {
   // ===== PLACEHOLDER METHODS FOR IMPLEMENTATION =====
   // These methods would be implemented based on the existing Bytebot patterns
 
-  private async shouldSkipValidation(req: EnhancedParlantRequest): Promise<boolean> {
+  private async shouldSkipValidation(
+    req: EnhancedParlantRequest,
+  ): Promise<boolean> {
     // Implementation would check for health endpoints, static assets, etc.
     const url = req.url.toLowerCase();
-    return url.includes('/health') || url.includes('/ping') || url.includes('/version');
+    return (
+      url.includes("/health") ||
+      url.includes("/ping") ||
+      url.includes("/version")
+    );
   }
 
   private classifySecurityLevel(req: EnhancedParlantRequest): SecurityLevel {
@@ -825,7 +884,7 @@ export class EnhancedUniversalParlantMiddleware implements NestMiddleware {
 
   private determineBusinessCategory(req: EnhancedParlantRequest): string {
     // Implementation would categorize based on URL patterns
-    return 'GENERAL_API';
+    return "GENERAL_API";
   }
 
   private shouldRequireValidation(req: EnhancedParlantRequest): boolean {
@@ -838,13 +897,15 @@ export class EnhancedUniversalParlantMiddleware implements NestMiddleware {
     return {
       enabled: true,
       ttl: 300000,
-      scope: 'user',
+      scope: "user",
       invalidationTriggers: [],
       compressionEnabled: false,
     };
   }
 
-  private determineComplianceRequirements(req: EnhancedParlantRequest): string[] {
+  private determineComplianceRequirements(
+    req: EnhancedParlantRequest,
+  ): string[] {
     // Implementation would return compliance flags
     return [];
   }
@@ -858,16 +919,19 @@ export class EnhancedUniversalParlantMiddleware implements NestMiddleware {
     // Implementation would return retry policy
     return {
       maxAttempts: 3,
-      backoffStrategy: 'exponential',
+      backoffStrategy: "exponential",
       baseDelay: 1000,
       maxDelay: 5000,
-      retryConditions: ['timeout', 'service_unavailable'],
+      retryConditions: ["timeout", "service_unavailable"],
     };
   }
 
-  private generateCacheKey(req: EnhancedParlantRequest, config: EndpointConfiguration): string {
+  private generateCacheKey(
+    req: EnhancedParlantRequest,
+    config: EndpointConfiguration,
+  ): string {
     // Implementation would generate cache key
-    return `cache:${req.method}:${config.path}:${req.user?.id || 'anon'}`;
+    return `cache:${req.method}:${config.path}:${req.user?.id || "anon"}`;
   }
 
   private isCacheValid(cached: any, config: EndpointConfiguration): boolean {
@@ -875,16 +939,24 @@ export class EnhancedUniversalParlantMiddleware implements NestMiddleware {
     return true;
   }
 
-  private async cacheValidationResult(req: EnhancedParlantRequest, config: EndpointConfiguration): Promise<void> {
+  private async cacheValidationResult(
+    req: EnhancedParlantRequest,
+    config: EndpointConfiguration,
+  ): Promise<void> {
     // Implementation would cache the result
   }
 
-  private generateFunctionDescription(req: EnhancedParlantRequest, config: EndpointConfiguration): string {
+  private generateFunctionDescription(
+    req: EnhancedParlantRequest,
+    config: EndpointConfiguration,
+  ): string {
     // Implementation would generate description
     return `${req.method} request to ${config.path} in ${config.businessCategory} category`;
   }
 
-  private sanitizeRequestParameters(req: EnhancedParlantRequest): Record<string, any> {
+  private sanitizeRequestParameters(
+    req: EnhancedParlantRequest,
+  ): Record<string, any> {
     // Implementation would sanitize parameters
     return {
       method: req.method,
@@ -896,7 +968,7 @@ export class EnhancedUniversalParlantMiddleware implements NestMiddleware {
   private buildUserContext(req: EnhancedParlantRequest): any {
     // Implementation would build user context
     return {
-      userId: req.user?.id || 'anonymous',
+      userId: req.user?.id || "anonymous",
       roles: req.user?.roles || [],
       sessionId: req.parlant!.operationId,
       ipAddress: this.getClientIp(req),
@@ -905,32 +977,36 @@ export class EnhancedUniversalParlantMiddleware implements NestMiddleware {
 
   private async createTimeoutPromise(timeout: number): Promise<never> {
     return new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('Validation timeout')), timeout);
+      setTimeout(() => reject(new Error("Validation timeout")), timeout);
     });
   }
 
   private createUserFriendlyErrorMessage(response: any): string {
     // Implementation would create user-friendly error
-    return `Access denied: ${response.reason || 'Validation failed'}`;
+    return `Access denied: ${response.reason || "Validation failed"}`;
   }
 
   private async createEnhancedErrorContext(
     error: unknown,
     req: EnhancedParlantRequest,
-    operationId: string
+    operationId: string,
   ): Promise<ConversationalErrorContext> {
     // Implementation would create enhanced error context
     const errorMessage = error instanceof Error ? error.message : String(error);
 
     return {
       originalError: error instanceof Error ? error : new Error(String(error)),
-      errorCode: 'VALIDATION_FAILED',
-      userFriendlyMessage: 'Unable to validate this request. Please try again or contact support.',
+      errorCode: "VALIDATION_FAILED",
+      userFriendlyMessage:
+        "Unable to validate this request. Please try again or contact support.",
       conversationalExplanation: `The system encountered an issue while validating your request: ${errorMessage}`,
-      suggestedActions: ['Try again in a moment', 'Contact support if the issue persists'],
-      escalationLevel: 'MEDIUM',
+      suggestedActions: [
+        "Try again in a moment",
+        "Contact support if the issue persists",
+      ],
+      escalationLevel: "MEDIUM",
       requiresHumanIntervention: false,
-      recoveryStrategies: ['retry', 'contact_support'],
+      recoveryStrategies: ["retry", "contact_support"],
       supportContext: {
         operationId,
         timestamp: new Date().toISOString(),
@@ -940,12 +1016,15 @@ export class EnhancedUniversalParlantMiddleware implements NestMiddleware {
     };
   }
 
-  private logRequestStart(req: EnhancedParlantRequest, operationId: string): void {
+  private logRequestStart(
+    req: EnhancedParlantRequest,
+    operationId: string,
+  ): void {
     this.logger.debug(`Request started: ${operationId}`, {
       operationId,
       method: req.method,
       url: req.url,
-      userAgent: req.get('User-Agent'),
+      userAgent: req.get("User-Agent"),
       ip: this.getClientIp(req),
       startTime: req.startTime,
     });

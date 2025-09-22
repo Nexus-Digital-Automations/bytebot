@@ -17,11 +17,11 @@
  * @created 2025-09-21
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { EventEmitter } from 'events';
-import { performance } from 'perf_hooks';
-import { Worker, isMainThread, parentPort, workerData } from 'worker_threads';
-import { promisify } from 'util';
+import { Injectable, Logger } from "@nestjs/common";
+import { EventEmitter } from "events";
+import { performance } from "perf_hooks";
+import { Worker, isMainThread, parentPort, workerData } from "worker_threads";
+import { promisify } from "util";
 
 // Type guards
 function isError(error: unknown): error is Error {
@@ -30,8 +30,8 @@ function isError(error: unknown): error is Error {
 
 function getErrorMessage(error: unknown): string {
   if (isError(error)) return error.message;
-  if (typeof error === 'string') return error;
-  return 'An unknown error occurred';
+  if (typeof error === "string") return error;
+  return "An unknown error occurred";
 }
 
 /**
@@ -163,7 +163,7 @@ class PriorityQueue<T> {
   }
 
   toArray(): T[] {
-    return this.items.map(item => item.item);
+    return this.items.map((item) => item.item);
   }
 }
 
@@ -172,21 +172,28 @@ class PriorityQueue<T> {
  */
 class AdaptiveBatchSizer {
   private readonly logger = new Logger(AdaptiveBatchSizer.name);
-  private performanceHistory: Array<{ batchSize: number; processingTime: number; throughput: number }> = [];
+  private performanceHistory: Array<{
+    batchSize: number;
+    processingTime: number;
+    throughput: number;
+  }> = [];
   private readonly maxHistory = 100;
 
   calculateOptimalBatchSize(
     queueDepth: number,
     currentThroughput: number,
     memoryUsage: number,
-    config: BatchConfig
+    config: BatchConfig,
   ): number {
     if (!config.adaptiveSizing) {
       return config.maxBatchSize;
     }
 
     // Base calculation on queue depth
-    let optimalSize = Math.min(Math.ceil(queueDepth * 0.1), config.maxBatchSize);
+    let optimalSize = Math.min(
+      Math.ceil(queueDepth * 0.1),
+      config.maxBatchSize,
+    );
 
     // Adjust based on performance history
     if (this.performanceHistory.length > 10) {
@@ -210,7 +217,11 @@ class AdaptiveBatchSizer {
     return Math.floor(Math.max(optimalSize, config.minBatchSize));
   }
 
-  recordPerformance(batchSize: number, processingTime: number, throughput: number): void {
+  recordPerformance(
+    batchSize: number,
+    processingTime: number,
+    throughput: number,
+  ): void {
     this.performanceHistory.push({ batchSize, processingTime, throughput });
 
     if (this.performanceHistory.length > this.maxHistory) {
@@ -221,7 +232,10 @@ class AdaptiveBatchSizer {
   private calculateAveragePerformance(): number {
     if (this.performanceHistory.length === 0) return 0;
 
-    const totalThroughput = this.performanceHistory.reduce((sum, entry) => sum + entry.throughput, 0);
+    const totalThroughput = this.performanceHistory.reduce(
+      (sum, entry) => sum + entry.throughput,
+      0,
+    );
     return totalThroughput / this.performanceHistory.length;
   }
 }
@@ -236,7 +250,7 @@ class BatchWorker<T, R> {
 
   constructor(
     private readonly workerId: string,
-    private readonly processor: BatchProcessor<T, R>
+    private readonly processor: BatchProcessor<T, R>,
   ) {}
 
   async processBatch(items: BatchItem<T>[]): Promise<BatchResult<T>> {
@@ -248,7 +262,9 @@ class BatchWorker<T, R> {
     this.lastActivity = Date.now();
 
     try {
-      this.logger.debug(`Processing batch ${batchId} with ${items.length} items`);
+      this.logger.debug(
+        `Processing batch ${batchId} with ${items.length} items`,
+      );
 
       // Process items
       const results = await this.processor(items);
@@ -259,11 +275,11 @@ class BatchWorker<T, R> {
       const itemResults = items.map((item, index) => ({
         id: item.id,
         result: results[index],
-        error: undefined
+        error: undefined,
       }));
 
-      const successful = itemResults.filter(r => !r.error).length;
-      const failed = itemResults.filter(r => r.error).length;
+      const successful = itemResults.filter((r) => !r.error).length;
+      const failed = itemResults.filter((r) => r.error).length;
 
       return {
         batchId,
@@ -277,18 +293,17 @@ class BatchWorker<T, R> {
           batchSize: items.length,
           memoryUsed: memoryAfter - memoryBefore,
           cpuTime: processingTime,
-          queueTime: 0
-        }
+          queueTime: 0,
+        },
       };
-
     } catch (error) {
       const processingTime = performance.now() - startTime;
 
       // Create error results for all items
-      const itemResults = items.map(item => ({
+      const itemResults = items.map((item) => ({
         id: item.id,
         result: undefined,
-        error: isError(error) ? error : new Error(getErrorMessage(error))
+        error: isError(error) ? error : new Error(getErrorMessage(error)),
       }));
 
       return {
@@ -303,10 +318,9 @@ class BatchWorker<T, R> {
           batchSize: items.length,
           memoryUsed: 0,
           cpuTime: processingTime,
-          queueTime: 0
-        }
+          queueTime: 0,
+        },
       };
-
     } finally {
       this.isProcessing = false;
       this.lastActivity = Date.now();
@@ -349,9 +363,9 @@ export class BatchProcessingEngine<T = any, R = any> {
 
   constructor(
     config: Partial<BatchConfig> = {},
-    private readonly processor: BatchProcessor<T, R>
+    private readonly processor: BatchProcessor<T, R>,
   ) {
-    this.logger.log('Initializing High-Performance Batch Processing Engine');
+    this.logger.log("Initializing High-Performance Batch Processing Engine");
 
     this.config = {
       maxBatchSize: 1000,
@@ -363,14 +377,14 @@ export class BatchProcessingEngine<T = any, R = any> {
         retryDelay: 1000,
         exponentialBackoff: true,
         partialRetry: true,
-        deadLetterQueue: true
+        deadLetterQueue: true,
       },
       priorityLevels: 5,
       concurrentBatches: 4,
       memoryThreshold: 1024 * 1024 * 1024, // 1GB
       compressionEnabled: true,
       adaptiveSizing: true,
-      ...config
+      ...config,
     };
 
     this.metrics = this.initializeMetrics();
@@ -384,13 +398,16 @@ export class BatchProcessingEngine<T = any, R = any> {
   /**
    * Add item to batch queue
    */
-  async addItem(data: T, options: {
-    priority?: number;
-    timeout?: number;
-    metadata?: Record<string, any>;
-    dependencies?: string[];
-    callback?: (result: any, error?: Error) => void;
-  } = {}): Promise<string> {
+  async addItem(
+    data: T,
+    options: {
+      priority?: number;
+      timeout?: number;
+      metadata?: Record<string, any>;
+      dependencies?: string[];
+      callback?: (result: any, error?: Error) => void;
+    } = {},
+  ): Promise<string> {
     const item: BatchItem<T> = {
       id: `item-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       data,
@@ -400,16 +417,19 @@ export class BatchProcessingEngine<T = any, R = any> {
       timeout: options.timeout || this.config.processingTimeout,
       metadata: options.metadata || {},
       dependencies: options.dependencies,
-      callback: options.callback
+      callback: options.callback,
     };
 
     // Add to appropriate priority queue
-    const priority = Math.min(options.priority || 0, this.config.priorityLevels - 1);
+    const priority = Math.min(
+      options.priority || 0,
+      this.config.priorityLevels - 1,
+    );
     const queue = this.queues.get(priority)!;
     queue.enqueue(item, item.priority);
 
     this.logger.debug(`Added item ${item.id} to priority ${priority} queue`);
-    this.eventEmitter.emit('item-queued', item);
+    this.eventEmitter.emit("item-queued", item);
 
     return item.id;
   }
@@ -417,13 +437,19 @@ export class BatchProcessingEngine<T = any, R = any> {
   /**
    * Add multiple items as batch
    */
-  async addBatch(items: Array<{ data: T; priority?: number; metadata?: Record<string, any> }>): Promise<string[]> {
+  async addBatch(
+    items: Array<{
+      data: T;
+      priority?: number;
+      metadata?: Record<string, any>;
+    }>,
+  ): Promise<string[]> {
     const itemIds: string[] = [];
 
     for (const item of items) {
       const id = await this.addItem(item.data, {
         priority: item.priority,
-        metadata: item.metadata
+        metadata: item.metadata,
       });
       itemIds.push(id);
     }
@@ -436,24 +462,28 @@ export class BatchProcessingEngine<T = any, R = any> {
    */
   start(): void {
     if (this.isRunning) {
-      this.logger.warn('Batch processing engine is already running');
+      this.logger.warn("Batch processing engine is already running");
       return;
     }
 
     this.isRunning = true;
-    this.logger.log('Starting batch processing engine');
+    this.logger.log("Starting batch processing engine");
 
     // Start processing loops for each priority level
-    for (let priority = this.config.priorityLevels - 1; priority >= 0; priority--) {
+    for (
+      let priority = this.config.priorityLevels - 1;
+      priority >= 0;
+      priority--
+    ) {
       const interval = setInterval(
         () => this.processPriorityQueue(priority),
-        this.calculateProcessingInterval(priority)
+        this.calculateProcessingInterval(priority),
       );
       this.processingIntervals.push(interval);
     }
 
     this.startMetricsCollection();
-    this.eventEmitter.emit('engine-started');
+    this.eventEmitter.emit("engine-started");
   }
 
   /**
@@ -461,12 +491,12 @@ export class BatchProcessingEngine<T = any, R = any> {
    */
   stop(): void {
     if (!this.isRunning) {
-      this.logger.warn('Batch processing engine is not running');
+      this.logger.warn("Batch processing engine is not running");
       return;
     }
 
     this.isRunning = false;
-    this.logger.log('Stopping batch processing engine');
+    this.logger.log("Stopping batch processing engine");
 
     // Clear processing intervals
     for (const interval of this.processingIntervals) {
@@ -474,7 +504,7 @@ export class BatchProcessingEngine<T = any, R = any> {
     }
     this.processingIntervals = [];
 
-    this.eventEmitter.emit('engine-stopped');
+    this.eventEmitter.emit("engine-stopped");
   }
 
   /**
@@ -488,7 +518,7 @@ export class BatchProcessingEngine<T = any, R = any> {
     }
 
     // Find available worker
-    const worker = this.workers.find(w => w.isAvailable());
+    const worker = this.workers.find((w) => w.isAvailable());
     if (!worker) {
       return;
     }
@@ -502,7 +532,7 @@ export class BatchProcessingEngine<T = any, R = any> {
       queueDepth,
       currentThroughput,
       memoryUsage,
-      this.config
+      this.config,
     );
 
     // Collect batch items
@@ -529,14 +559,13 @@ export class BatchProcessingEngine<T = any, R = any> {
       this.adaptiveSizer.recordPerformance(
         result.metadata.batchSize,
         result.processingTime,
-        result.metadata.batchSize / (result.processingTime / 1000)
+        result.metadata.batchSize / (result.processingTime / 1000),
       );
 
       // Handle results
       await this.handleBatchResult(result);
 
-      this.eventEmitter.emit('batch-processed', result);
-
+      this.eventEmitter.emit("batch-processed", result);
     } catch (error) {
       this.logger.error(`Batch processing failed: ${getErrorMessage(error)}`);
       this.handleBatchError(batchItems, error);
@@ -548,13 +577,17 @@ export class BatchProcessingEngine<T = any, R = any> {
    */
   private async handleBatchResult(result: BatchResult<T>): Promise<void> {
     for (const itemResult of result.results) {
-      const originalItem = result.items.find(item => item.id === itemResult.id);
+      const originalItem = result.items.find(
+        (item) => item.id === itemResult.id,
+      );
 
       if (originalItem?.callback) {
         try {
           originalItem.callback(itemResult.result, itemResult.error);
         } catch (error) {
-          this.logger.error(`Callback error for item ${itemResult.id}: ${getErrorMessage(error)}`);
+          this.logger.error(
+            `Callback error for item ${itemResult.id}: ${getErrorMessage(error)}`,
+          );
         }
       }
 
@@ -574,7 +607,10 @@ export class BatchProcessingEngine<T = any, R = any> {
       } else {
         // Send to dead letter queue or call error callback
         if (item.callback) {
-          item.callback(undefined, isError(error) ? error : new Error(getErrorMessage(error)));
+          item.callback(
+            undefined,
+            isError(error) ? error : new Error(getErrorMessage(error)),
+          );
         }
       }
     }
@@ -645,7 +681,7 @@ export class BatchProcessingEngine<T = any, R = any> {
       batchEfficiency: this.metrics.batchEfficiency >= 0.95, // >95%
       processingLatency: this.metrics.averageProcessingTime <= 100, // <100ms
       queueUtilization: true, // Implement queue utilization calculation
-      memoryEfficiency: this.metrics.memoryUsage <= this.config.memoryThreshold // <1GB
+      memoryEfficiency: this.metrics.memoryUsage <= this.config.memoryThreshold, // <1GB
     };
   }
 
@@ -688,11 +724,14 @@ export class BatchProcessingEngine<T = any, R = any> {
     }
 
     // Update averages
-    this.metrics.averageBatchSize = (this.metrics.averageBatchSize + result.metadata.batchSize) / 2;
-    this.metrics.averageProcessingTime = (this.metrics.averageProcessingTime + result.processingTime) / 2;
+    this.metrics.averageBatchSize =
+      (this.metrics.averageBatchSize + result.metadata.batchSize) / 2;
+    this.metrics.averageProcessingTime =
+      (this.metrics.averageProcessingTime + result.processingTime) / 2;
 
     // Calculate throughput (items per second)
-    this.metrics.throughput = result.metadata.batchSize / (result.processingTime / 1000);
+    this.metrics.throughput =
+      result.metadata.batchSize / (result.processingTime / 1000);
 
     // Update queue depth
     this.metrics.queueDepth = this.getTotalQueueDepth();
@@ -701,10 +740,12 @@ export class BatchProcessingEngine<T = any, R = any> {
     this.metrics.memoryUsage = process.memoryUsage().heapUsed;
 
     // Calculate error rate
-    this.metrics.errorRate = this.metrics.failedBatches / this.metrics.totalBatches;
+    this.metrics.errorRate =
+      this.metrics.failedBatches / this.metrics.totalBatches;
 
     // Calculate batch efficiency
-    this.metrics.batchEfficiency = this.metrics.averageBatchSize / this.config.maxBatchSize;
+    this.metrics.batchEfficiency =
+      this.metrics.averageBatchSize / this.config.maxBatchSize;
   }
 
   private initializeMetrics(): BatchMetrics {
@@ -720,24 +761,26 @@ export class BatchProcessingEngine<T = any, R = any> {
       memoryUsage: 0,
       cpuUtilization: 0,
       errorRate: 0,
-      batchEfficiency: 0
+      batchEfficiency: 0,
     };
   }
 
   private setupEventListeners(): void {
-    this.eventEmitter.on('item-queued', (item: BatchItem<T>) => {
+    this.eventEmitter.on("item-queued", (item: BatchItem<T>) => {
       this.logger.debug(`Item queued: ${item.id}`);
     });
 
-    this.eventEmitter.on('batch-processed', (result: BatchResult<T>) => {
-      this.logger.debug(`Batch processed: ${result.batchId} (${result.successful}/${result.items.length} successful)`);
+    this.eventEmitter.on("batch-processed", (result: BatchResult<T>) => {
+      this.logger.debug(
+        `Batch processed: ${result.batchId} (${result.successful}/${result.items.length} successful)`,
+      );
     });
   }
 
   private startMetricsCollection(): void {
     setInterval(() => {
       const targets = this.validatePerformanceTargets();
-      this.logger.log('Batch Processing Performance:', targets);
+      this.logger.log("Batch Processing Performance:", targets);
     }, 15000); // Every 15 seconds
   }
 }
@@ -748,5 +791,5 @@ export {
   BatchItem,
   BatchResult,
   BatchMetrics,
-  BatchProcessor
+  BatchProcessor,
 };

@@ -70,15 +70,16 @@ function isValidJwtPayload(payload: unknown): payload is EnhancedJwtPayload {
 
   const obj = payload as Record<string, unknown>;
   return (
-    'sub' in obj &&
-    (typeof obj.sub === 'string' || typeof obj.sub === 'number')
+    'sub' in obj && (typeof obj.sub === 'string' || typeof obj.sub === 'number')
   );
 }
 
 /**
  * Type guard to check if payload has permissions property
  */
-function hasPermissions(payload: any): payload is EnhancedJwtPayload & { permissions: string[] } {
+function hasPermissions(
+  payload: any,
+): payload is EnhancedJwtPayload & { permissions: string[] } {
   return (
     isValidJwtPayload(payload) &&
     'permissions' in payload &&
@@ -105,7 +106,11 @@ class SafeJwtAccess {
   }
 
   static getEmail(payload: unknown): string | null {
-    if (isValidJwtPayload(payload) && 'email' in payload && typeof payload.email === 'string') {
+    if (
+      isValidJwtPayload(payload) &&
+      'email' in payload &&
+      typeof payload.email === 'string'
+    ) {
       return payload.email;
     }
     return null;
@@ -122,7 +127,9 @@ class SafeJwtAccess {
 /**
  * Type guard to validate security context structure
  */
-function hasValidSecurityContext(request: unknown): request is EnhancedAuthenticatedRequest {
+function hasValidSecurityContext(
+  request: unknown,
+): request is EnhancedAuthenticatedRequest {
   if (typeof request !== 'object' || request === null) {
     return false;
   }
@@ -141,7 +148,10 @@ function hasValidSecurityContext(request: unknown): request is EnhancedAuthentic
 class SafeSecurityContextAccess {
   static getTokenRefreshed(request: unknown): boolean {
     if (hasValidSecurityContext(request)) {
-      const securityContext = request.securityContext as Record<string, unknown>;
+      const securityContext = request.securityContext as Record<
+        string,
+        unknown
+      >;
       if ('tokenRefreshed' in securityContext) {
         return Boolean(securityContext.tokenRefreshed);
       }
@@ -151,7 +161,10 @@ class SafeSecurityContextAccess {
 
   static getServiceAuthentication(request: unknown): boolean {
     if (hasValidSecurityContext(request)) {
-      const securityContext = request.securityContext as Record<string, unknown>;
+      const securityContext = request.securityContext as Record<
+        string,
+        unknown
+      >;
       if ('serviceAuthentication' in securityContext) {
         return Boolean(securityContext.serviceAuthentication);
       }
@@ -161,7 +174,10 @@ class SafeSecurityContextAccess {
 
   static getVncSessionValid(request: unknown): boolean {
     if (hasValidSecurityContext(request)) {
-      const securityContext = request.securityContext as Record<string, unknown>;
+      const securityContext = request.securityContext as Record<
+        string,
+        unknown
+      >;
       if ('vncSessionValid' in securityContext) {
         return Boolean(securityContext.vncSessionValid);
       }
@@ -171,7 +187,10 @@ class SafeSecurityContextAccess {
 
   static getScreenAccessGranted(request: unknown): boolean {
     if (hasValidSecurityContext(request)) {
-      const securityContext = request.securityContext as Record<string, unknown>;
+      const securityContext = request.securityContext as Record<
+        string,
+        unknown
+      >;
       if ('screenAccessGranted' in securityContext) {
         return Boolean(securityContext.screenAccessGranted);
       }
@@ -181,8 +200,14 @@ class SafeSecurityContextAccess {
 
   static getRiskScore(request: unknown): number {
     if (hasValidSecurityContext(request)) {
-      const securityContext = request.securityContext as Record<string, unknown>;
-      if ('riskScore' in securityContext && typeof securityContext.riskScore === 'number') {
+      const securityContext = request.securityContext as Record<
+        string,
+        unknown
+      >;
+      if (
+        'riskScore' in securityContext &&
+        typeof securityContext.riskScore === 'number'
+      ) {
         return securityContext.riskScore;
       }
     }
@@ -191,7 +216,8 @@ class SafeSecurityContextAccess {
 
   static setTokenRefreshed(request: unknown, value: boolean): void {
     if (hasValidSecurityContext(request)) {
-      (request.securityContext as Record<string, unknown>).tokenRefreshed = value;
+      (request.securityContext as Record<string, unknown>).tokenRefreshed =
+        value;
     }
   }
 
@@ -203,13 +229,15 @@ class SafeSecurityContextAccess {
 
   static setScreenAccessGranted(request: unknown, value: boolean): void {
     if (hasValidSecurityContext(request)) {
-      (request.securityContext as Record<string, unknown>).screenAccessGranted = value;
+      (request.securityContext as Record<string, unknown>).screenAccessGranted =
+        value;
     }
   }
 
   static setVncSessionValid(request: unknown, value: boolean): void {
     if (hasValidSecurityContext(request)) {
-      (request.securityContext as Record<string, unknown>).vncSessionValid = value;
+      (request.securityContext as Record<string, unknown>).vncSessionValid =
+        value;
     }
   }
 }
@@ -406,7 +434,10 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
         await this.validateVncSession(request, operationId);
 
         // Update security context with safe access
-        SafeSecurityContextAccess.setRiskScore(request, this.calculateRiskScore(request));
+        SafeSecurityContextAccess.setRiskScore(
+          request,
+          this.calculateRiskScore(request),
+        );
 
         this.logger.log(
           `[${operationId}] Enhanced JWT authentication successful`,
@@ -416,10 +447,13 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
             username: request.user.username,
             role: request.user.role,
             authTimeMs: authTime,
-            tokenRefreshed: SafeSecurityContextAccess.getTokenRefreshed(request),
-            serviceAuth: SafeSecurityContextAccess.getServiceAuthentication(request),
+            tokenRefreshed:
+              SafeSecurityContextAccess.getTokenRefreshed(request),
+            serviceAuth:
+              SafeSecurityContextAccess.getServiceAuthentication(request),
             vncSession: SafeSecurityContextAccess.getVncSessionValid(request),
-            screenAccess: SafeSecurityContextAccess.getScreenAccessGranted(request),
+            screenAccess:
+              SafeSecurityContextAccess.getScreenAccessGranted(request),
             riskScore: SafeSecurityContextAccess.getRiskScore(request),
             securityEvent: 'enhanced_jwt_auth_success',
           },
@@ -505,8 +539,10 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
 
       // Create user object for request context
       // Ensure email and id exist, provide fallbacks if not available
-      const userId = SafeJwtAccess.getSub(refreshPayload) ?? `user-${Date.now()}`;
-      const email = SafeJwtAccess.getEmail(refreshPayload) ?? `${userId}@unknown.local`;
+      const userId =
+        SafeJwtAccess.getSub(refreshPayload) ?? `user-${Date.now()}`;
+      const email =
+        SafeJwtAccess.getEmail(refreshPayload) ?? `${userId}@unknown.local`;
       const user: ByteBotdUser = {
         sub: userId, // Required by interface compatibility
         id: userId,
@@ -578,10 +614,24 @@ export class EnhancedJwtAuthGuard extends AuthGuard('jwt') {
       role: SafeJwtAccess.getRole(refreshPayload) ?? undefined,
       permissions: SafeJwtAccess.getPermissions(refreshPayload),
       tokenType: 'access',
-      vncSessionId: isValidJwtPayload(refreshPayload) && 'vncSessionId' in refreshPayload ? refreshPayload.vncSessionId : undefined,
-      clientIp: isValidJwtPayload(refreshPayload) && 'clientIp' in refreshPayload ? refreshPayload.clientIp : undefined,
-      computerUsePermissions: isValidJwtPayload(refreshPayload) && 'computerUsePermissions' in refreshPayload ? refreshPayload.computerUsePermissions : undefined,
-      screenAccessLevel: isValidJwtPayload(refreshPayload) && 'screenAccessLevel' in refreshPayload ? refreshPayload.screenAccessLevel : undefined,
+      vncSessionId:
+        isValidJwtPayload(refreshPayload) && 'vncSessionId' in refreshPayload
+          ? refreshPayload.vncSessionId
+          : undefined,
+      clientIp:
+        isValidJwtPayload(refreshPayload) && 'clientIp' in refreshPayload
+          ? refreshPayload.clientIp
+          : undefined,
+      computerUsePermissions:
+        isValidJwtPayload(refreshPayload) &&
+        'computerUsePermissions' in refreshPayload
+          ? refreshPayload.computerUsePermissions
+          : undefined,
+      screenAccessLevel:
+        isValidJwtPayload(refreshPayload) &&
+        'screenAccessLevel' in refreshPayload
+          ? refreshPayload.screenAccessLevel
+          : undefined,
     };
 
     return this.jwtService.signAsync(accessPayload, {

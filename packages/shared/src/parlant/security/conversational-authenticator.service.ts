@@ -52,7 +52,13 @@ export type ConversationalChallengeType =
 /**
  * Authentication risk levels
  */
-export type RiskLevel = "minimal" | "low" | "moderate" | "high" | "critical" | "extreme";
+export type RiskLevel =
+  | "minimal"
+  | "low"
+  | "moderate"
+  | "high"
+  | "critical"
+  | "extreme";
 
 /**
  * Conversational authentication request
@@ -286,11 +292,19 @@ export interface ParlantContext {
  * Main Conversational Authenticator Service
  */
 @Injectable()
-export class ConversationalAuthenticatorService implements OnModuleInit, OnModuleDestroy {
+export class ConversationalAuthenticatorService
+  implements OnModuleInit, OnModuleDestroy
+{
   private readonly logger = new Logger(ConversationalAuthenticatorService.name);
   private readonly eventEmitter = new EventEmitter();
-  private readonly activeAuthentications = new Map<string, ConversationalAuthSession>();
-  private readonly challengeGenerators = new Map<ConversationalChallengeType, ChallengeGenerator>();
+  private readonly activeAuthentications = new Map<
+    string,
+    ConversationalAuthSession
+  >();
+  private readonly challengeGenerators = new Map<
+    ConversationalChallengeType,
+    ChallengeGenerator
+  >();
   private readonly behaviorAnalyzer = new BehaviorAnalyzer();
   private readonly riskAssessor = new RiskAssessor();
   private readonly evidenceCollector = new EvidenceCollector();
@@ -317,13 +331,18 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
       // Set up event listeners
       this.setupEventListeners();
 
-      this.logger.log("Conversational Authenticator Service initialized successfully");
+      this.logger.log(
+        "Conversational Authenticator Service initialized successfully",
+      );
     } catch (error) {
-      this.logger.error("Failed to initialize Conversational Authenticator Service", error);
+      this.logger.error(
+        "Failed to initialize Conversational Authenticator Service",
+        error,
+      );
       throw new ParlantIntegrationError(
         "Conversational authenticator initialization failed",
         "CONV_AUTH_INIT_ERROR",
-        { error: error.message }
+        { error: error.message },
       );
     }
   }
@@ -345,7 +364,10 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
 
       this.logger.log("Conversational Authenticator Service shutdown complete");
     } catch (error) {
-      this.logger.error("Error during Conversational Authenticator Service shutdown", error);
+      this.logger.error(
+        "Error during Conversational Authenticator Service shutdown",
+        error,
+      );
     }
   }
 
@@ -354,7 +376,7 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
    */
   async authenticateUser(
     authRequest: ConversationalAuthRequest,
-    parlantContext: ParlantContext
+    parlantContext: ParlantContext,
   ): Promise<ConversationalAuthResult> {
     const startTime = performance.now();
     const correlationId = uuidv4();
@@ -364,15 +386,16 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
       userId: authRequest.userProfile?.userId,
       authenticationLevel: authRequest.authenticationLevel,
       riskLevel: authRequest.riskLevel,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
 
     try {
       // Step 1: Input validation and sanitization
-      const requestValidation = await this.validateAuthenticationRequest(authRequest);
+      const requestValidation =
+        await this.validateAuthenticationRequest(authRequest);
       if (!requestValidation.valid) {
         throw new UnauthorizedException(
-          `Authentication request validation failed: ${requestValidation.errors.join(", ")}`
+          `Authentication request validation failed: ${requestValidation.errors.join(", ")}`,
         );
       }
 
@@ -383,45 +406,47 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
       const challenges = await this.generateAuthenticationChallenges(
         authRequest.userProfile,
         riskAssessment,
-        authRequest.authenticationContext
+        authRequest.authenticationContext,
       );
 
       // Step 4: Create conversational authentication session
       const authSession = await this.createAuthenticationSession(
         authRequest,
         challenges,
-        correlationId
+        correlationId,
       );
 
       // Step 5: Execute conversational authentication flow
       const conversationResult = await this.executeConversationalAuthentication(
         authSession,
-        parlantContext
+        parlantContext,
       );
 
       // Step 6: Validate authentication results
-      const validationResult: AuthenticationValidationResult = await this.validateAuthenticationResult(
-        conversationResult,
-        authRequest.userProfile
-      );
+      const validationResult: AuthenticationValidationResult =
+        await this.validateAuthenticationResult(
+          conversationResult,
+          authRequest.userProfile,
+        );
 
       // Step 7: Establish continuous authentication if successful
       let continuousAuthToken = "";
       if (validationResult.success) {
         continuousAuthToken = await this.establishContinuousAuthentication(
           authRequest.userProfile,
-          validationResult.evidence
+          validationResult.evidence,
         );
       }
 
       // Step 8: Collect comprehensive evidence
-      const evidence = await this.evidenceCollector.collectAuthenticationEvidence({
-        authRequest,
-        challenges,
-        conversationResult,
-        validationResult,
-        riskAssessment
-      });
+      const evidence =
+        await this.evidenceCollector.collectAuthenticationEvidence({
+          authRequest,
+          challenges,
+          conversationResult,
+          validationResult,
+          riskAssessment,
+        });
 
       const totalDuration = performance.now() - startTime;
 
@@ -433,7 +458,7 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
         conversationResult,
         validationResult,
         evidence,
-        duration: totalDuration
+        duration: totalDuration,
       });
 
       this.logger.log("Conversational authentication completed", {
@@ -441,7 +466,7 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
         success: validationResult.success,
         duration: totalDuration,
         authenticationLevel: validationResult.achievedLevel,
-        confidenceScore: validationResult.confidenceScore
+        confidenceScore: validationResult.confidenceScore,
       });
 
       return {
@@ -457,15 +482,14 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
           riskAssessmentTime: riskAssessment.processingTime,
           challengeGenerationTime: challenges.generationTime,
           conversationTime: conversationResult.duration,
-          validationTime: validationResult.processingTime
+          validationTime: validationResult.processingTime,
         },
         auditTrail,
         continuousMonitoring: await this.determineContinuousMonitoring(
           validationResult,
-          riskAssessment
-        )
+          riskAssessment,
+        ),
       };
-
     } catch (error) {
       const duration = performance.now() - startTime;
 
@@ -474,7 +498,7 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
         error: error.message,
         stack: error.stack,
         duration,
-        userId: authRequest.userProfile?.userId
+        userId: authRequest.userProfile?.userId,
       });
 
       // Security incident detection and response
@@ -484,15 +508,16 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
           error,
           authRequest,
           parlantContext,
-          duration
+          duration,
         });
       }
 
       throw error;
     } finally {
       // Cleanup authentication session
-      const authSession = Array.from(this.activeAuthentications.values())
-        .find(session => session.correlationId === correlationId);
+      const authSession = Array.from(this.activeAuthentications.values()).find(
+        (session) => session.correlationId === correlationId,
+      );
 
       if (authSession) {
         await this.cleanupAuthenticationSession(authSession.sessionId);
@@ -504,7 +529,7 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
    * Validate authentication request
    */
   private async validateAuthenticationRequest(
-    authRequest: ConversationalAuthRequest
+    authRequest: ConversationalAuthRequest,
   ): Promise<ValidationResult> {
     const errors: string[] = [];
 
@@ -528,13 +553,18 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
     }
 
     // Additional security validations
-    if (authRequest.authenticationLevel === "critical" && !authRequest.businessJustification) {
-      errors.push("Business justification required for critical authentication level");
+    if (
+      authRequest.authenticationLevel === "critical" &&
+      !authRequest.businessJustification
+    ) {
+      errors.push(
+        "Business justification required for critical authentication level",
+      );
     }
 
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
@@ -542,7 +572,7 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
    * Assess authentication risk
    */
   private async assessAuthenticationRisk(
-    authRequest: ConversationalAuthRequest
+    authRequest: ConversationalAuthRequest,
   ): Promise<RiskAssessmentResult> {
     const startTime = performance.now();
 
@@ -550,30 +580,30 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
       // Behavioral risk analysis
       const behavioralRisk = await this.behaviorAnalyzer.analyzeBehavioralRisk(
         authRequest.userProfile.behavioralProfile,
-        authRequest.authenticationContext
+        authRequest.authenticationContext,
       );
 
       // Device risk analysis
       const deviceRisk = await this.riskAssessor.assessDeviceRisk(
         authRequest.authenticationContext.deviceFingerprint,
-        authRequest.userProfile.devicePreferences
+        authRequest.userProfile.devicePreferences,
       );
 
       // Network risk analysis
       const networkRisk = await this.riskAssessor.assessNetworkRisk(
-        authRequest.authenticationContext.networkContext
+        authRequest.authenticationContext.networkContext,
       );
 
       // Temporal risk analysis
       const temporalRisk = await this.riskAssessor.assessTemporalRisk(
         authRequest.authenticationContext.timestamp,
-        authRequest.userProfile.authenticationHistory
+        authRequest.userProfile.authenticationHistory,
       );
 
       // Geospatial risk analysis
       const geospatialRisk = await this.riskAssessor.assessGeospatialRisk(
         authRequest.authenticationContext.geolocation,
-        authRequest.userProfile.behavioralProfile.geospatialPatterns
+        authRequest.userProfile.behavioralProfile.geospatialPatterns,
       );
 
       // Aggregate risk scores
@@ -582,7 +612,7 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
         deviceRisk,
         networkRisk,
         temporalRisk,
-        geospatialRisk
+        geospatialRisk,
       ]);
 
       const processingTime = performance.now() - startTime;
@@ -592,10 +622,11 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
         riskLevel: this.determineRiskLevel(overallRisk.score),
         riskFactors: overallRisk.factors,
         threatIndicators: overallRisk.threatIndicators,
-        recommendedAuthLevel: this.recommendAuthenticationLevel(overallRisk.score),
-        processingTime
+        recommendedAuthLevel: this.recommendAuthenticationLevel(
+          overallRisk.score,
+        ),
+        processingTime,
       };
-
     } catch (error) {
       this.logger.error("Risk assessment failed", error);
 
@@ -603,10 +634,16 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
       return {
         overallRiskScore: 0.9,
         riskLevel: "high",
-        riskFactors: [{ type: "assessment_failure", severity: "high", description: "Risk assessment failed" }],
+        riskFactors: [
+          {
+            type: "assessment_failure",
+            severity: "high",
+            description: "Risk assessment failed",
+          },
+        ],
         threatIndicators: [],
         recommendedAuthLevel: "critical",
-        processingTime: performance.now() - startTime
+        processingTime: performance.now() - startTime,
       };
     }
   }
@@ -617,7 +654,7 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
   private async generateAuthenticationChallenges(
     userProfile: UserProfile,
     riskAssessment: RiskAssessmentResult,
-    authContext: AuthenticationContext
+    authContext: AuthenticationContext,
   ): Promise<ConversationalChallenge[]> {
     const startTime = performance.now();
 
@@ -627,7 +664,7 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
       // Determine challenge types based on risk level
       const challengeTypes = this.determineChallengeTypes(
         riskAssessment.riskLevel,
-        userProfile.securityClearance
+        userProfile.securityClearance,
       );
 
       // Generate challenges for each type
@@ -638,7 +675,7 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
             userProfile,
             riskAssessment,
             authContext,
-            challengeType
+            challengeType,
           });
           challenges.push(challenge);
         }
@@ -650,20 +687,19 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
         challengeCount: challenges.length,
         challengeTypes: challengeTypes,
         riskLevel: riskAssessment.riskLevel,
-        generationTime
+        generationTime,
       });
 
-      return challenges.map(challenge => ({
+      return challenges.map((challenge) => ({
         ...challenge,
-        generationTime
+        generationTime,
       }));
-
     } catch (error) {
       this.logger.error("Challenge generation failed", error);
       throw new ParlantIntegrationError(
         "Failed to generate authentication challenges",
         "CHALLENGE_GENERATION_ERROR",
-        { error: error.message }
+        { error: error.message },
       );
     }
   }
@@ -674,7 +710,7 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
   private async createAuthenticationSession(
     authRequest: ConversationalAuthRequest,
     challenges: ConversationalChallenge[],
-    correlationId: string
+    correlationId: string,
   ): Promise<ConversationalAuthSession> {
     const sessionId = uuidv4();
     const session: ConversationalAuthSession = {
@@ -687,7 +723,9 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
       lastActivity: new Date(),
       attempts: 0,
       maxAttempts: this.getMaxAttempts(authRequest.authenticationLevel),
-      timeoutAt: new Date(Date.now() + this.getSessionTimeout(authRequest.authenticationLevel))
+      timeoutAt: new Date(
+        Date.now() + this.getSessionTimeout(authRequest.authenticationLevel),
+      ),
     };
 
     this.activeAuthentications.set(sessionId, session);
@@ -696,7 +734,7 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
       sessionId,
       correlationId,
       challengeCount: challenges.length,
-      maxAttempts: session.maxAttempts
+      maxAttempts: session.maxAttempts,
     });
 
     return session;
@@ -707,7 +745,7 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
    */
   private async executeConversationalAuthentication(
     authSession: ConversationalAuthSession,
-    parlantContext: ParlantContext
+    parlantContext: ParlantContext,
   ): Promise<ConversationAuthResult> {
     const startTime = performance.now();
 
@@ -718,7 +756,7 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
       // Initialize conversation context
       const conversationContext = await this.initializeConversationContext(
         authSession,
-        parlantContext
+        parlantContext,
       );
 
       // Execute challenge sequence
@@ -729,24 +767,26 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
           const result = await this.executeSingleChallenge(
             challenge,
             conversationContext,
-            authSession
+            authSession,
           );
           challengeResults.push(result);
 
           // Early termination on critical failure
           if (!result.success && challenge.type === "behavioral_pattern") {
-            this.logger.warn("Critical challenge failed, terminating authentication", {
-              sessionId: authSession.sessionId,
-              challengeType: challenge.type
-            });
+            this.logger.warn(
+              "Critical challenge failed, terminating authentication",
+              {
+                sessionId: authSession.sessionId,
+                challengeType: challenge.type,
+              },
+            );
             break;
           }
-
         } catch (error) {
           this.logger.error("Challenge execution failed", {
             sessionId: authSession.sessionId,
             challengeId: challenge.challengeId,
-            error: error.message
+            error: error.message,
           });
 
           challengeResults.push({
@@ -755,7 +795,7 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
             score: 0,
             error: error.message,
             evidence: {},
-            duration: 0
+            duration: 0,
           });
         }
       }
@@ -769,14 +809,14 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
         overallSuccess: this.evaluateOverallSuccess(challengeResults),
         confidenceScore: this.calculateConfidenceScore(challengeResults),
         duration,
-        conversationMetrics: await this.calculateConversationMetrics(challengeResults)
+        conversationMetrics:
+          await this.calculateConversationMetrics(challengeResults),
       };
-
     } catch (error) {
       authSession.status = "failed";
       this.logger.error("Conversational authentication execution failed", {
         sessionId: authSession.sessionId,
-        error: error.message
+        error: error.message,
       });
       throw error;
     }
@@ -787,32 +827,37 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
    */
   private async validateAuthenticationResult(
     conversationResult: ConversationAuthResult,
-    userProfile: UserProfile
+    userProfile: UserProfile,
   ): Promise<AuthenticationValidationResult> {
     const startTime = performance.now();
 
     try {
       // Validate minimum success threshold
-      const minSuccessThreshold = this.getMinSuccessThreshold(userProfile.securityClearance);
-      const meetsThreshold = conversationResult.confidenceScore >= minSuccessThreshold;
+      const minSuccessThreshold = this.getMinSuccessThreshold(
+        userProfile.securityClearance,
+      );
+      const meetsThreshold =
+        conversationResult.confidenceScore >= minSuccessThreshold;
 
       // Validate challenge completion
       const requiredChallenges = conversationResult.challengeResults.filter(
-        result => result.success
+        (result) => result.success,
       ).length;
-      const minRequiredChallenges = Math.ceil(conversationResult.challengeResults.length * 0.7);
+      const minRequiredChallenges = Math.ceil(
+        conversationResult.challengeResults.length * 0.7,
+      );
       const meetsRequirements = requiredChallenges >= minRequiredChallenges;
 
       // Determine achieved authentication level
       const achievedLevel = this.determineAchievedAuthLevel(
         conversationResult.confidenceScore,
-        conversationResult.challengeResults
+        conversationResult.challengeResults,
       );
 
       // Collect evidence
       const evidence = await this.evidenceCollector.collectValidationEvidence(
         conversationResult,
-        userProfile
+        userProfile,
       );
 
       const processingTime = performance.now() - startTime;
@@ -824,7 +869,7 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
         achievedLevel,
         requiredChallenges,
         minRequiredChallenges,
-        processingTime
+        processingTime,
       });
 
       return {
@@ -836,17 +881,16 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
           meetsThreshold,
           meetsRequirements,
           minSuccessThreshold,
-          minRequiredChallenges
+          minRequiredChallenges,
         },
-        processingTime
+        processingTime,
       };
-
     } catch (error) {
       this.logger.error("Authentication validation failed", error);
       throw new ParlantIntegrationError(
         "Authentication validation failed",
         "AUTH_VALIDATION_ERROR",
-        { error: error.message }
+        { error: error.message },
       );
     }
   }
@@ -856,7 +900,7 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
    */
   private async establishContinuousAuthentication(
     userProfile: UserProfile,
-    evidence: AuthenticationEvidence
+    evidence: AuthenticationEvidence,
   ): Promise<string> {
     try {
       // Generate continuous authentication token
@@ -868,22 +912,21 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
         evidence,
         createdAt: new Date(),
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
-        securityLevel: userProfile.securityClearance
+        securityLevel: userProfile.securityClearance,
       });
 
       this.logger.debug("Continuous authentication established", {
         userId: userProfile.userId,
-        tokenHash: crypto.createHash("sha256").update(token).digest("hex")
+        tokenHash: crypto.createHash("sha256").update(token).digest("hex"),
       });
 
       return token;
-
     } catch (error) {
       this.logger.error("Failed to establish continuous authentication", error);
       throw new ParlantIntegrationError(
         "Continuous authentication setup failed",
         "CONTINUOUS_AUTH_ERROR",
-        { error: error.message }
+        { error: error.message },
       );
     }
   }
@@ -893,22 +936,40 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
    */
   private async initializeChallengeGenerators(): Promise<void> {
     // Knowledge-based challenge generator
-    this.challengeGenerators.set("knowledge_based", new KnowledgeBasedChallengeGenerator());
+    this.challengeGenerators.set(
+      "knowledge_based",
+      new KnowledgeBasedChallengeGenerator(),
+    );
 
     // Behavioral pattern challenge generator
-    this.challengeGenerators.set("behavioral_pattern", new BehavioralPatternChallengeGenerator());
+    this.challengeGenerators.set(
+      "behavioral_pattern",
+      new BehavioralPatternChallengeGenerator(),
+    );
 
     // Voice recognition challenge generator
-    this.challengeGenerators.set("voice_recognition", new VoiceRecognitionChallengeGenerator());
+    this.challengeGenerators.set(
+      "voice_recognition",
+      new VoiceRecognitionChallengeGenerator(),
+    );
 
     // Typing pattern challenge generator
-    this.challengeGenerators.set("typing_pattern", new TypingPatternChallengeGenerator());
+    this.challengeGenerators.set(
+      "typing_pattern",
+      new TypingPatternChallengeGenerator(),
+    );
 
     // Temporal pattern challenge generator
-    this.challengeGenerators.set("temporal_pattern", new TemporalPatternChallengeGenerator());
+    this.challengeGenerators.set(
+      "temporal_pattern",
+      new TemporalPatternChallengeGenerator(),
+    );
 
     // Contextual validation challenge generator
-    this.challengeGenerators.set("contextual_validation", new ContextualValidationChallengeGenerator());
+    this.challengeGenerators.set(
+      "contextual_validation",
+      new ContextualValidationChallengeGenerator(),
+    );
 
     // Initialize all generators
     for (const [type, generator] of this.challengeGenerators) {
@@ -916,7 +977,10 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
         await generator.initialize();
         this.logger.debug(`Initialized ${type} challenge generator`);
       } catch (error) {
-        this.logger.error(`Failed to initialize ${type} challenge generator`, error);
+        this.logger.error(
+          `Failed to initialize ${type} challenge generator`,
+          error,
+        );
         throw error;
       }
     }
@@ -926,20 +990,34 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
    * Setup event listeners
    */
   private setupEventListeners(): void {
-    this.eventEmitter.on("authentication_success", this.handleAuthenticationSuccess.bind(this));
-    this.eventEmitter.on("authentication_failure", this.handleAuthenticationFailure.bind(this));
-    this.eventEmitter.on("security_incident", this.handleSecurityIncident.bind(this));
-    this.eventEmitter.on("challenge_completed", this.handleChallengeCompleted.bind(this));
+    this.eventEmitter.on(
+      "authentication_success",
+      this.handleAuthenticationSuccess.bind(this),
+    );
+    this.eventEmitter.on(
+      "authentication_failure",
+      this.handleAuthenticationFailure.bind(this),
+    );
+    this.eventEmitter.on(
+      "security_incident",
+      this.handleSecurityIncident.bind(this),
+    );
+    this.eventEmitter.on(
+      "challenge_completed",
+      this.handleChallengeCompleted.bind(this),
+    );
   }
 
   /**
    * Handle authentication success event
    */
-  private async handleAuthenticationSuccess(event: AuthenticationSuccessEvent): Promise<void> {
+  private async handleAuthenticationSuccess(
+    event: AuthenticationSuccessEvent,
+  ): Promise<void> {
     this.logger.info("Authentication success event", {
       userId: event.userId,
       sessionId: event.sessionId,
-      authLevel: event.authenticationLevel
+      authLevel: event.authenticationLevel,
     });
 
     // Update user behavioral profile
@@ -952,11 +1030,13 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
   /**
    * Handle authentication failure event
    */
-  private async handleAuthenticationFailure(event: AuthenticationFailureEvent): Promise<void> {
+  private async handleAuthenticationFailure(
+    event: AuthenticationFailureEvent,
+  ): Promise<void> {
     this.logger.warn("Authentication failure event", {
       userId: event.userId,
       sessionId: event.sessionId,
-      reason: event.reason
+      reason: event.reason,
     });
 
     // Check for brute force patterns
@@ -969,11 +1049,13 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
   /**
    * Handle security incident event
    */
-  private async handleSecurityIncident(event: SecurityIncidentEvent): Promise<void> {
+  private async handleSecurityIncident(
+    event: SecurityIncidentEvent,
+  ): Promise<void> {
     this.logger.error("Security incident detected", {
       incidentType: event.incidentType,
       severity: event.severity,
-      details: event.details
+      details: event.details,
     });
 
     // Trigger automated response
@@ -986,12 +1068,14 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
   /**
    * Handle challenge completed event
    */
-  private async handleChallengeCompleted(event: ChallengeCompletedEvent): Promise<void> {
+  private async handleChallengeCompleted(
+    event: ChallengeCompletedEvent,
+  ): Promise<void> {
     this.logger.debug("Challenge completed", {
       challengeId: event.challengeId,
       challengeType: event.challengeType,
       success: event.success,
-      score: event.score
+      score: event.score,
     });
 
     // Update challenge statistics
@@ -1034,11 +1118,18 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
 
   private determineChallengeTypes(
     riskLevel: RiskLevel,
-    securityClearance: SecurityLevel
+    securityClearance: SecurityLevel,
   ): ConversationalChallengeType[] {
-    const baseTypes: ConversationalChallengeType[] = ["behavioral_pattern", "contextual_validation"];
+    const baseTypes: ConversationalChallengeType[] = [
+      "behavioral_pattern",
+      "contextual_validation",
+    ];
 
-    if (riskLevel === "high" || riskLevel === "critical" || riskLevel === "extreme") {
+    if (
+      riskLevel === "high" ||
+      riskLevel === "critical" ||
+      riskLevel === "extreme"
+    ) {
       baseTypes.push("knowledge_based", "typing_pattern");
     }
 
@@ -1055,7 +1146,12 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
   }
 
   private getSessionTimeout(authLevel: SecurityLevel): number {
-    const timeouts = { low: 600000, moderate: 300000, high: 180000, critical: 120000 }; // milliseconds
+    const timeouts = {
+      low: 600000,
+      moderate: 300000,
+      high: 180000,
+      critical: 120000,
+    }; // milliseconds
     return timeouts[authLevel] || 300000;
   }
 
@@ -1070,16 +1166,18 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
       /injection.*attack/i,
       /brute.*force/i,
       /credential.*stuffing/i,
-      /session.*hijack/i
+      /session.*hijack/i,
     ];
 
-    return incidentPatterns.some(pattern => pattern.test(error.message));
+    return incidentPatterns.some((pattern) => pattern.test(error.message));
   }
 
   /**
    * Create authentication audit trail
    */
-  private async createAuthenticationAuditTrail(auditData: any): Promise<AuthenticationAuditTrail> {
+  private async createAuthenticationAuditTrail(
+    auditData: any,
+  ): Promise<AuthenticationAuditTrail> {
     return {
       auditId: uuidv4(),
       correlationId: auditData.correlationId,
@@ -1089,7 +1187,7 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
       evidence: auditData.evidence,
       duration: auditData.duration,
       result: auditData.validationResult.success ? "success" : "failure",
-      auditEvents: []
+      auditEvents: [],
     };
   }
 
@@ -1098,11 +1196,12 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
    */
   private async establishContinuousAuthentication(
     userProfile: UserProfile,
-    evidence: AuthenticationEvidence
+    evidence: AuthenticationEvidence,
   ): Promise<string> {
-    const token = crypto.createHash('sha256')
+    const token = crypto
+      .createHash("sha256")
       .update(userProfile.userId + Date.now().toString())
-      .digest('hex');
+      .digest("hex");
 
     await this.storeContinuousAuthToken(userProfile.userId, token);
     return token;
@@ -1111,7 +1210,10 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
   /**
    * Store continuous authentication token
    */
-  private async storeContinuousAuthToken(userId: string, token: string): Promise<void> {
+  private async storeContinuousAuthToken(
+    userId: string,
+    token: string,
+  ): Promise<void> {
     this.logger.debug(`Storing continuous auth token for user: ${userId}`);
     // Implementation for storing continuous auth token
   }
@@ -1119,7 +1221,9 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
   /**
    * Validate authentication request
    */
-  private async validateAuthenticationRequest(authRequest: ConversationalAuthRequest): Promise<ValidationResult> {
+  private async validateAuthenticationRequest(
+    authRequest: ConversationalAuthRequest,
+  ): Promise<ValidationResult> {
     const errors: string[] = [];
 
     if (!authRequest.userProfile?.userId) {
@@ -1132,14 +1236,16 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
 
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
   /**
    * Assess authentication risk
    */
-  private async assessAuthenticationRisk(authRequest: ConversationalAuthRequest): Promise<RiskAssessmentResult> {
+  private async assessAuthenticationRisk(
+    authRequest: ConversationalAuthRequest,
+  ): Promise<RiskAssessmentResult> {
     const startTime = performance.now();
 
     const riskScore = Math.random() * 0.5; // Basic implementation
@@ -1151,7 +1257,7 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
       riskFactors: [],
       threatIndicators: [],
       recommendedAuthLevel: this.recommendAuthenticationLevel(riskLevel),
-      processingTime: performance.now() - startTime
+      processingTime: performance.now() - startTime,
     };
   }
 
@@ -1178,27 +1284,31 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
   private async generateAuthenticationChallenges(
     userProfile: UserProfile,
     riskAssessment: RiskAssessmentResult,
-    authContext: AuthenticationContext
+    authContext: AuthenticationContext,
   ): Promise<ConversationalChallenge[] & { generationTime: number }> {
     const startTime = performance.now();
 
     const challengeTypes = this.determineChallengeTypes(
       riskAssessment.riskLevel,
-      userProfile.securityClearance
+      userProfile.securityClearance,
     );
 
-    const challenges: ConversationalChallenge[] = challengeTypes.map(type => ({
-      challengeId: uuidv4(),
-      type,
-      content: `Challenge for ${type}`,
-      expectedPattern: { type: "text", pattern: ".*" },
-      difficultyLevel: 1,
-      timeLimit: 60000,
-      scoringCriteria: { threshold: 0.8, weight: 1.0 },
-      metadata: { generated: new Date() }
-    }));
+    const challenges: ConversationalChallenge[] = challengeTypes.map(
+      (type) => ({
+        challengeId: uuidv4(),
+        type,
+        content: `Challenge for ${type}`,
+        expectedPattern: { type: "text", pattern: ".*" },
+        difficultyLevel: 1,
+        timeLimit: 60000,
+        scoringCriteria: { threshold: 0.8, weight: 1.0 },
+        metadata: { generated: new Date() },
+      }),
+    );
 
-    const result = challenges as ConversationalChallenge[] & { generationTime: number };
+    const result = challenges as ConversationalChallenge[] & {
+      generationTime: number;
+    };
     result.generationTime = performance.now() - startTime;
 
     return result;
@@ -1210,7 +1320,7 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
   private async createAuthenticationSession(
     authRequest: ConversationalAuthRequest,
     challenges: ConversationalChallenge[],
-    correlationId: string
+    correlationId: string,
   ): Promise<ConversationalAuthSession> {
     const sessionId = uuidv4();
     const now = new Date();
@@ -1225,7 +1335,7 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
       lastActivity: now,
       attempts: 0,
       maxAttempts: 3,
-      timeoutAt: new Date(now.getTime() + 300000) // 5 minutes
+      timeoutAt: new Date(now.getTime() + 300000), // 5 minutes
     };
 
     this.activeAuthentications.set(sessionId, session);
@@ -1237,20 +1347,24 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
    */
   private async executeConversationalAuthentication(
     authSession: ConversationalAuthSession,
-    parlantContext: ParlantContext
+    parlantContext: ParlantContext,
   ): Promise<ConversationAuthResult> {
     const startTime = performance.now();
 
     const challengeResults: ChallengeResult[] = [];
 
     for (const challenge of authSession.challenges) {
-      const result = await this.executeSingleChallenge(challenge, parlantContext);
+      const result = await this.executeSingleChallenge(
+        challenge,
+        parlantContext,
+      );
       challengeResults.push(result);
     }
 
     const overallSuccess = this.evaluateOverallSuccess(challengeResults);
     const confidenceScore = this.calculateConfidenceScore(challengeResults);
-    const conversationMetrics = this.calculateConversationMetrics(challengeResults);
+    const conversationMetrics =
+      this.calculateConversationMetrics(challengeResults);
 
     return {
       sessionId: authSession.sessionId,
@@ -1258,7 +1372,7 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
       overallSuccess,
       confidenceScore,
       duration: performance.now() - startTime,
-      conversationMetrics
+      conversationMetrics,
     };
   }
 
@@ -1267,7 +1381,7 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
    */
   private async executeSingleChallenge(
     challenge: ConversationalChallenge,
-    parlantContext: ParlantContext
+    parlantContext: ParlantContext,
   ): Promise<ChallengeResult> {
     const startTime = performance.now();
 
@@ -1280,7 +1394,7 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
       success,
       score,
       evidence: { challenge: challenge.type, timestamp: new Date() },
-      duration: performance.now() - startTime
+      duration: performance.now() - startTime,
     };
   }
 
@@ -1288,31 +1402,43 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
    * Evaluate overall success
    */
   private evaluateOverallSuccess(challengeResults: ChallengeResult[]): boolean {
-    const successRate = challengeResults.filter(r => r.success).length / challengeResults.length;
+    const successRate =
+      challengeResults.filter((r) => r.success).length /
+      challengeResults.length;
     return successRate >= 0.7; // 70% success threshold
   }
 
   /**
    * Calculate confidence score
    */
-  private calculateConfidenceScore(challengeResults: ChallengeResult[]): number {
+  private calculateConfidenceScore(
+    challengeResults: ChallengeResult[],
+  ): number {
     if (challengeResults.length === 0) return 0;
 
-    const totalScore = challengeResults.reduce((sum, result) => sum + result.score, 0);
+    const totalScore = challengeResults.reduce(
+      (sum, result) => sum + result.score,
+      0,
+    );
     return totalScore / challengeResults.length;
   }
 
   /**
    * Calculate conversation metrics
    */
-  private calculateConversationMetrics(challengeResults: ChallengeResult[]): ConversationMetrics {
-    const totalDuration = challengeResults.reduce((sum, result) => sum + result.duration, 0);
+  private calculateConversationMetrics(
+    challengeResults: ChallengeResult[],
+  ): ConversationMetrics {
+    const totalDuration = challengeResults.reduce(
+      (sum, result) => sum + result.duration,
+      0,
+    );
 
     return {
       totalChallenges: challengeResults.length,
-      successfulChallenges: challengeResults.filter(r => r.success).length,
+      successfulChallenges: challengeResults.filter((r) => r.success).length,
       averageResponseTime: totalDuration / challengeResults.length,
-      totalDuration
+      totalDuration,
     };
   }
 
@@ -1337,7 +1463,7 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
    */
   private determineAchievedAuthLevel(
     confidenceScore: number,
-    requestedLevel: SecurityLevel
+    requestedLevel: SecurityLevel,
   ): SecurityLevel {
     if (confidenceScore >= 0.9) return "critical";
     if (confidenceScore >= 0.8) return "high";
@@ -1350,13 +1476,13 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
    */
   private determineContinuousMonitoring(
     achievedLevel: SecurityLevel,
-    riskLevel: RiskLevel
+    riskLevel: RiskLevel,
   ): ContinuousMonitoringRequirements {
     return {
       enabled: achievedLevel === "critical" || riskLevel === "high",
       interval: 300000, // 5 minutes
       challenges: ["behavioral_pattern"],
-      thresholds: { confidence: 0.7 }
+      thresholds: { confidence: 0.7 },
     };
   }
 
@@ -1365,9 +1491,11 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
    */
   private async storeSuccessfulAuthPattern(
     userProfile: UserProfile,
-    evidence: AuthenticationEvidence
+    evidence: AuthenticationEvidence,
   ): Promise<void> {
-    this.logger.debug(`Storing successful auth pattern for user: ${userProfile.userId}`);
+    this.logger.debug(
+      `Storing successful auth pattern for user: ${userProfile.userId}`,
+    );
     // Implementation for storing successful patterns
   }
 
@@ -1376,17 +1504,23 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
    */
   private async updateUserBehavioralProfile(
     userProfile: UserProfile,
-    evidence: AuthenticationEvidence
+    evidence: AuthenticationEvidence,
   ): Promise<void> {
-    this.logger.debug(`Updating behavioral profile for user: ${userProfile.userId}`);
+    this.logger.debug(
+      `Updating behavioral profile for user: ${userProfile.userId}`,
+    );
     // Implementation for updating behavioral profile
   }
 
   /**
    * Update challenge statistics
    */
-  private async updateChallengeStatistics(challengeResults: ChallengeResult[]): Promise<void> {
-    this.logger.debug(`Updating challenge statistics for ${challengeResults.length} challenges`);
+  private async updateChallengeStatistics(
+    challengeResults: ChallengeResult[],
+  ): Promise<void> {
+    this.logger.debug(
+      `Updating challenge statistics for ${challengeResults.length} challenges`,
+    );
     // Implementation for updating challenge statistics
   }
 
@@ -1395,7 +1529,7 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
    */
   private async updateThreatIndicators(
     riskAssessment: RiskAssessmentResult,
-    validationResult: AuthenticationValidationResult
+    validationResult: AuthenticationValidationResult,
   ): Promise<void> {
     this.logger.debug("Updating threat indicators");
     // Implementation for updating threat indicators
@@ -1404,8 +1538,12 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
   /**
    * Check brute force patterns
    */
-  private async checkBruteForcePatterns(userProfile: UserProfile): Promise<void> {
-    this.logger.debug(`Checking brute force patterns for user: ${userProfile.userId}`);
+  private async checkBruteForcePatterns(
+    userProfile: UserProfile,
+  ): Promise<void> {
+    this.logger.debug(
+      `Checking brute force patterns for user: ${userProfile.userId}`,
+    );
     // Implementation for checking brute force patterns
   }
 
@@ -1428,7 +1566,9 @@ export class ConversationalAuthenticatorService implements OnModuleInit, OnModul
   /**
    * Initialize conversation context
    */
-  private async initializeConversationContext(authRequest: ConversationalAuthRequest): Promise<void> {
+  private async initializeConversationContext(
+    authRequest: ConversationalAuthRequest,
+  ): Promise<void> {
     this.logger.debug("Initializing conversation context");
     // Implementation for initializing conversation context
   }
@@ -1650,7 +1790,13 @@ interface ConversationMetrics {
   totalDuration: number;
 }
 
-type RiskLevel = "minimal" | "low" | "moderate" | "high" | "critical" | "extreme";
+type RiskLevel =
+  | "minimal"
+  | "low"
+  | "moderate"
+  | "high"
+  | "critical"
+  | "extreme";
 
 // Supporting service classes
 class ChallengeGenerator {
@@ -1676,14 +1822,16 @@ class EvidenceCollector {
     // Implementation for evidence collection initialization
   }
 
-  async collectAuthenticationEvidence(data: any): Promise<AuthenticationEvidence> {
+  async collectAuthenticationEvidence(
+    data: any,
+  ): Promise<AuthenticationEvidence> {
     return {
       biometricEvidence: [],
       behavioralEvidence: [],
       knowledgeEvidence: [],
       deviceEvidence: [],
       networkEvidence: [],
-      temporalEvidence: []
+      temporalEvidence: [],
     };
   }
 }

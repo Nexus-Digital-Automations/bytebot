@@ -11,7 +11,7 @@
  * @created 2025-09-19
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from "@nestjs/common";
 import {
   ValidationContext,
   ValidationResult,
@@ -20,8 +20,8 @@ import {
   ValidationLevel,
   DataClassification,
   ErrorCategory,
-  WrapperError
-} from '../interfaces/wrapper-types';
+  WrapperError,
+} from "../interfaces/wrapper-types";
 
 /**
  * Advanced Parameter Capture and Validation Service
@@ -50,7 +50,7 @@ export class ParameterCaptureValidationService {
     parameters: readonly any[],
     userContext: UserContext,
     validationLevel: ValidationLevel,
-    customRules: readonly ValidationRule[] = []
+    customRules: readonly ValidationRule[] = [],
   ): Promise<ParameterValidationResult> {
     const startTime = Date.now();
     const captureId = this.generateCaptureId();
@@ -58,7 +58,7 @@ export class ParameterCaptureValidationService {
     this.logger.debug(`Starting parameter capture for ${functionName}`, {
       captureId,
       parameterCount: parameters.length,
-      validationLevel
+      validationLevel,
     });
 
     try {
@@ -66,30 +66,33 @@ export class ParameterCaptureValidationService {
       const capturedParameters = await this.captureParametersWithMetadata(
         parameters,
         functionName,
-        captureId
+        captureId,
       );
 
       // Step 2: Perform type analysis
       const typeAnalysis = await this.typeAnalyzer.analyzeParameterTypes(
         capturedParameters,
-        functionName
+        functionName,
       );
 
       // Step 3: Security validation and sanitization
-      const securityValidation = await this.securityValidator.validateParameterSecurity(
-        capturedParameters,
-        userContext,
-        validationLevel
-      );
+      const securityValidation =
+        await this.securityValidator.validateParameterSecurity(
+          capturedParameters,
+          userContext,
+          validationLevel,
+        );
 
       if (!securityValidation.passed) {
-        const error = new Error(`Parameter security validation failed: ${securityValidation.violations.join(', ')}`);
-        (error as any).code = 'PARAMETER_SECURITY_VIOLATION';
+        const error = new Error(
+          `Parameter security validation failed: ${securityValidation.violations.join(", ")}`,
+        );
+        (error as any).code = "PARAMETER_SECURITY_VIOLATION";
         (error as any).category = ErrorCategory.VALIDATION_ERROR;
         (error as any).metadata = {
           captureId,
           functionName,
-          violations: securityValidation.violations
+          violations: securityValidation.violations,
         };
         throw error;
       }
@@ -97,7 +100,7 @@ export class ParameterCaptureValidationService {
       // Step 4: Sanitize parameters for PARLANT context
       const sanitizedParameters = await this.sanitizer.sanitizeParameters(
         capturedParameters,
-        securityValidation.sensitiveParameterIndices
+        securityValidation.sensitiveParameterIndices,
       );
 
       // Step 5: Apply custom validation rules
@@ -105,14 +108,15 @@ export class ParameterCaptureValidationService {
         capturedParameters,
         customRules,
         userContext,
-        functionName
+        functionName,
       );
 
       // Step 6: Performance optimization analysis
-      const performanceAnalysis = await this.performanceOptimizer.analyzeParameterPerformance(
-        capturedParameters,
-        typeAnalysis
-      );
+      const performanceAnalysis =
+        await this.performanceOptimizer.analyzeParameterPerformance(
+          capturedParameters,
+          typeAnalysis,
+        );
 
       // Step 7: Create PARLANT-ready validation context
       const parlantContext = await this.createParlantValidationContext(
@@ -121,7 +125,7 @@ export class ParameterCaptureValidationService {
         userContext,
         typeAnalysis,
         performanceAnalysis,
-        captureId
+        captureId,
       );
 
       const executionTime = Date.now() - startTime;
@@ -130,7 +134,7 @@ export class ParameterCaptureValidationService {
         captureId,
         executionTime,
         securityPassed: securityValidation.passed,
-        customRulesPassed: customValidationResults.every(r => r.passed)
+        customRulesPassed: customValidationResults.every((r) => r.passed),
       });
 
       return {
@@ -149,17 +153,16 @@ export class ParameterCaptureValidationService {
         metadata: {
           validationLevel,
           userPermissions: userContext.permissions,
-          parameterCount: parameters.length
-        }
+          parameterCount: parameters.length,
+        },
       };
-
     } catch (error) {
       const executionTime = Date.now() - startTime;
 
       this.logger.error(`Parameter capture failed for ${functionName}`, {
         captureId,
         error: error instanceof Error ? error.message : String(error),
-        executionTime
+        executionTime,
       });
 
       return {
@@ -168,10 +171,22 @@ export class ParameterCaptureValidationService {
         originalParameters: parameters,
         capturedParameters: [],
         sanitizedParameters: [],
-        typeAnalysis: { parameterTypes: [], complexityScore: 0, riskFactors: [] },
-        securityValidation: { passed: false, violations: [error instanceof Error ? error.message : String(error)], sensitiveParameterIndices: [] },
+        typeAnalysis: {
+          parameterTypes: [],
+          complexityScore: 0,
+          riskFactors: [],
+        },
+        securityValidation: {
+          passed: false,
+          violations: [error instanceof Error ? error.message : String(error)],
+          sensitiveParameterIndices: [],
+        },
         customValidationResults: [],
-        performanceAnalysis: { estimatedProcessingTime: 0, memoryFootprint: 0, optimizationRecommendations: [] },
+        performanceAnalysis: {
+          estimatedProcessingTime: 0,
+          memoryFootprint: 0,
+          optimizationRecommendations: [],
+        },
         parlantContext: null,
         validationPassed: false,
         executionTime,
@@ -179,8 +194,8 @@ export class ParameterCaptureValidationService {
         metadata: {
           validationLevel,
           userPermissions: userContext.permissions,
-          parameterCount: parameters.length
-        }
+          parameterCount: parameters.length,
+        },
       };
     }
   }
@@ -196,18 +211,31 @@ export class ParameterCaptureValidationService {
   public createParameterSummaryForConversation(
     parameters: readonly CapturedParameter[],
     functionName: string,
-    userContext: UserContext
+    userContext: UserContext,
   ): ParameterConversationSummary {
     const summary: ParameterConversationSummary = {
       functionName,
       parameterCount: parameters.length,
-      humanReadableDescription: this.generateHumanReadableDescription(parameters, functionName),
+      humanReadableDescription: this.generateHumanReadableDescription(
+        parameters,
+        functionName,
+      ),
       keyParameters: this.identifyKeyParameters(parameters),
-      securityRelevantParameters: this.identifySecurityRelevantParameters(parameters),
-      dataClassificationLevel: this.determineOverallDataClassification(parameters),
-      conversationPrompts: this.generateConversationPrompts(parameters, functionName, userContext),
+      securityRelevantParameters:
+        this.identifySecurityRelevantParameters(parameters),
+      dataClassificationLevel:
+        this.determineOverallDataClassification(parameters),
+      conversationPrompts: this.generateConversationPrompts(
+        parameters,
+        functionName,
+        userContext,
+      ),
       riskAssessment: this.assessParameterRisks(parameters, functionName),
-      recommendedActions: this.generateRecommendations(parameters, functionName, userContext)
+      recommendedActions: this.generateRecommendations(
+        parameters,
+        functionName,
+        userContext,
+      ),
     };
 
     return summary;
@@ -224,21 +252,25 @@ export class ParameterCaptureValidationService {
   public async validateParameterChanges(
     originalParameters: readonly CapturedParameter[],
     modifiedParameters: readonly any[],
-    userContext: UserContext
+    userContext: UserContext,
   ): Promise<ParameterChangeValidationResult> {
-    const changeAnalysis = await this.analyzeParameterChanges(originalParameters, modifiedParameters);
+    const changeAnalysis = await this.analyzeParameterChanges(
+      originalParameters,
+      modifiedParameters,
+    );
 
     const securityImpact = await this.assessSecurityImpactOfChanges(
       changeAnalysis,
-      userContext
+      userContext,
     );
 
     const businessImpact = await this.assessBusinessImpactOfChanges(
       changeAnalysis,
-      originalParameters
+      originalParameters,
     );
 
-    const validationPassed = securityImpact.acceptableRisk && businessImpact.acceptableImpact;
+    const validationPassed =
+      securityImpact.acceptableRisk && businessImpact.acceptableImpact;
 
     return {
       changeAnalysis,
@@ -246,8 +278,14 @@ export class ParameterCaptureValidationService {
       businessImpact,
       validationPassed,
       approvalRequired: !validationPassed || securityImpact.requiresApproval,
-      rejectionReason: validationPassed ? null : this.generateRejectionReason(securityImpact, businessImpact),
-      recommendations: this.generateChangeRecommendations(changeAnalysis, securityImpact, businessImpact)
+      rejectionReason: validationPassed
+        ? null
+        : this.generateRejectionReason(securityImpact, businessImpact),
+      recommendations: this.generateChangeRecommendations(
+        changeAnalysis,
+        securityImpact,
+        businessImpact,
+      ),
     };
   }
 
@@ -273,7 +311,7 @@ export class ParameterCaptureValidationService {
   private async captureParametersWithMetadata(
     parameters: readonly any[],
     functionName: string,
-    captureId: string
+    captureId: string,
   ): Promise<CapturedParameter[]> {
     const capturedParameters: CapturedParameter[] = [];
 
@@ -294,8 +332,8 @@ export class ParameterCaptureValidationService {
           containsPII: await this.detectPII(param),
           containsCredentials: await this.detectCredentials(param),
           dataClassification: await this.classifyParameterData(param),
-          securityRisk: await this.assessParameterSecurityRisk(param)
-        }
+          securityRisk: await this.assessParameterSecurityRisk(param),
+        },
       };
 
       capturedParameters.push(capturedParam);
@@ -313,9 +351,9 @@ export class ParameterCaptureValidationService {
   private async serializeParameter(param: any): Promise<string> {
     try {
       // Handle special cases
-      if (param === null) return 'null';
-      if (param === undefined) return 'undefined';
-      if (typeof param === 'function') return '[Function]';
+      if (param === null) return "null";
+      if (param === undefined) return "undefined";
+      if (typeof param === "function") return "[Function]";
       if (param instanceof Date) return param.toISOString();
       if (param instanceof Error) return `[Error: ${param.message}]`;
       if (param instanceof Buffer) return `[Buffer: ${param.length} bytes]`;
@@ -323,9 +361,9 @@ export class ParameterCaptureValidationService {
       // Handle circular references
       const seen = new WeakSet();
       const serialized = JSON.stringify(param, (key, value) => {
-        if (typeof value === 'object' && value !== null) {
+        if (typeof value === "object" && value !== null) {
           if (seen.has(value)) {
-            return '[Circular Reference]';
+            return "[Circular Reference]";
           }
           seen.add(value);
         }
@@ -334,11 +372,10 @@ export class ParameterCaptureValidationService {
 
       // Truncate very large serialized values
       if (serialized.length > 10000) {
-        return serialized.substring(0, 10000) + '... [Truncated]';
+        return serialized.substring(0, 10000) + "... [Truncated]";
       }
 
       return serialized;
-
     } catch (error) {
       return `[Serialization Error: ${error instanceof Error ? error.message : String(error)}]`;
     }
@@ -353,15 +390,14 @@ export class ParameterCaptureValidationService {
   private calculateParameterSize(param: any): number {
     try {
       if (param === null || param === undefined) return 0;
-      if (typeof param === 'string') return Buffer.byteLength(param, 'utf8');
-      if (typeof param === 'number') return 8;
-      if (typeof param === 'boolean') return 1;
+      if (typeof param === "string") return Buffer.byteLength(param, "utf8");
+      if (typeof param === "number") return 8;
+      if (typeof param === "boolean") return 1;
       if (param instanceof Buffer) return param.length;
 
       // Approximate size for objects
       const serialized = JSON.stringify(param);
-      return Buffer.byteLength(serialized, 'utf8');
-
+      return Buffer.byteLength(serialized, "utf8");
     } catch (error) {
       return 0;
     }
@@ -375,19 +411,35 @@ export class ParameterCaptureValidationService {
    */
   private calculateParameterComplexity(param: any): number {
     if (param === null || param === undefined) return 0;
-    if (typeof param === 'string' || typeof param === 'number' || typeof param === 'boolean') return 10;
+    if (
+      typeof param === "string" ||
+      typeof param === "number" ||
+      typeof param === "boolean"
+    )
+      return 10;
 
     if (Array.isArray(param)) {
       const baseComplexity = 20;
       const lengthComplexity = Math.min(param.length * 2, 30);
-      const nestedComplexity = Math.max(...param.map(item => this.calculateParameterComplexity(item))) * 0.5;
-      return Math.min(baseComplexity + lengthComplexity + nestedComplexity, 100);
+      const nestedComplexity =
+        Math.max(
+          ...param.map((item) => this.calculateParameterComplexity(item)),
+        ) * 0.5;
+      return Math.min(
+        baseComplexity + lengthComplexity + nestedComplexity,
+        100,
+      );
     }
 
-    if (typeof param === 'object') {
+    if (typeof param === "object") {
       const baseComplexity = 30;
       const keyComplexity = Math.min(Object.keys(param).length * 3, 40);
-      const nestedComplexity = Math.max(...Object.values(param).map(value => this.calculateParameterComplexity(value))) * 0.5;
+      const nestedComplexity =
+        Math.max(
+          ...Object.values(param).map((value) =>
+            this.calculateParameterComplexity(value),
+          ),
+        ) * 0.5;
       return Math.min(baseComplexity + keyComplexity + nestedComplexity, 100);
     }
 
@@ -409,10 +461,10 @@ export class ParameterCaptureValidationService {
       /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/, // Email
       /\b\d{4}\s?\d{4}\s?\d{4}\s?\d{4}\b/, // Credit card
       /\b\d{3}-\d{3}-\d{4}\b/, // Phone number
-      /\b\d{1,5}\s\w+\s(St|Street|Ave|Avenue|Rd|Road|Blvd|Boulevard|Dr|Drive|Ln|Lane|Ct|Court|Pl|Place)\b/i // Address
+      /\b\d{1,5}\s\w+\s(St|Street|Ave|Avenue|Rd|Road|Blvd|Boulevard|Dr|Drive|Ln|Lane|Ct|Court|Pl|Place)\b/i, // Address
     ];
 
-    return piiPatterns.some(pattern => pattern.test(serialized));
+    return piiPatterns.some((pattern) => pattern.test(serialized));
   }
 
   /**
@@ -434,14 +486,16 @@ export class ParameterCaptureValidationService {
       /bearer/i,
       /api[_-]?key/i,
       /access[_-]?token/i,
-      /private[_-]?key/i
+      /private[_-]?key/i,
     ];
 
     // Check for JWT tokens
     const jwtPattern = /^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*$/;
 
-    return credentialPatterns.some(pattern => pattern.test(serialized)) ||
-           jwtPattern.test(serialized);
+    return (
+      credentialPatterns.some((pattern) => pattern.test(serialized)) ||
+      jwtPattern.test(serialized)
+    );
   }
 
   /**
@@ -473,7 +527,9 @@ export class ParameterCaptureValidationService {
    * @param param - Parameter to assess
    * @returns Security risk level
    */
-  private async assessParameterSecurityRisk(param: any): Promise<SecurityRiskLevel> {
+  private async assessParameterSecurityRisk(
+    param: any,
+  ): Promise<SecurityRiskLevel> {
     const hasCredentials = await this.detectCredentials(param);
     const hasPII = await this.detectPII(param);
     const complexity = this.calculateParameterComplexity(param);
@@ -499,31 +555,33 @@ export class ParameterCaptureValidationService {
     parameters: readonly CapturedParameter[],
     rules: readonly ValidationRule[],
     userContext: UserContext,
-    functionName: string
+    functionName: string,
   ): Promise<CustomValidationResult[]> {
     const results: CustomValidationResult[] = [];
 
     // Sort rules by priority
-    const sortedRules = [...rules].sort((a, b) => (b.priority || 0) - (a.priority || 0));
+    const sortedRules = [...rules].sort(
+      (a, b) => (b.priority || 0) - (a.priority || 0),
+    );
 
     for (const rule of sortedRules) {
       try {
         const validationContext: ValidationContext = {
           functionName,
-          parameters: parameters.map(p => p.originalValue),
+          parameters: parameters.map((p) => p.originalValue),
           userContext,
           conversationId: `val_${this.generateCaptureId()}`,
           previousValidations: [],
           timestamp: new Date(),
           metadata: {
             ruleId: rule.id,
-            parameterCount: parameters.length
-          }
+            parameterCount: parameters.length,
+          },
         };
 
         const ruleResult = await rule.validator(
-          parameters.map(p => p.originalValue),
-          validationContext
+          parameters.map((p) => p.originalValue),
+          validationContext,
         );
 
         results.push({
@@ -534,14 +592,13 @@ export class ParameterCaptureValidationService {
           priority: rule.priority || 0,
           continueOnFailure: rule.continueOnFailure || false,
           executionTime: ruleResult.executionTime || 0,
-          metadata: ruleResult.metadata || {}
+          metadata: ruleResult.metadata || {},
         });
 
         // Stop processing if rule failed and continueOnFailure is false
         if (!ruleResult.approved && !rule.continueOnFailure) {
           break;
         }
-
       } catch (error) {
         results.push({
           ruleId: rule.id,
@@ -551,7 +608,9 @@ export class ParameterCaptureValidationService {
           priority: rule.priority || 0,
           continueOnFailure: rule.continueOnFailure || false,
           executionTime: 0,
-          metadata: { error: error instanceof Error ? error.message : String(error) }
+          metadata: {
+            error: error instanceof Error ? error.message : String(error),
+          },
         });
 
         if (!rule.continueOnFailure) {
@@ -580,11 +639,11 @@ export class ParameterCaptureValidationService {
     userContext: UserContext,
     typeAnalysis: ParameterTypeAnalysis,
     performanceAnalysis: ParameterPerformanceAnalysis,
-    captureId: string
+    captureId: string,
   ): Promise<ValidationContext> {
     return {
       functionName,
-      parameters: parameters.map(p => p.originalValue),
+      parameters: parameters.map((p) => p.originalValue),
       userContext,
       conversationId: `conv_${captureId}`,
       previousValidations: [],
@@ -596,8 +655,10 @@ export class ParameterCaptureValidationService {
         riskFactors: typeAnalysis.riskFactors,
         estimatedProcessingTime: performanceAnalysis.estimatedProcessingTime,
         memoryFootprint: performanceAnalysis.memoryFootprint,
-        sanitizedParameterCount: parameters.filter(p => p.metadata.containsPII || p.metadata.containsCredentials).length
-      }
+        sanitizedParameterCount: parameters.filter(
+          (p) => p.metadata.containsPII || p.metadata.containsCredentials,
+        ).length,
+      },
     };
   }
 
@@ -610,7 +671,7 @@ export class ParameterCaptureValidationService {
    */
   private generateHumanReadableDescription(
     parameters: readonly CapturedParameter[],
-    functionName: string
+    functionName: string,
   ): string {
     if (parameters.length === 0) {
       return `Function ${functionName} will be called with no parameters.`;
@@ -618,13 +679,14 @@ export class ParameterCaptureValidationService {
 
     const descriptions = parameters.map((param, index) => {
       const type = param.type;
-      const hasData = param.metadata.containsPII || param.metadata.containsCredentials;
+      const hasData =
+        param.metadata.containsPII || param.metadata.containsCredentials;
       const sizeMB = (param.metadata.size / 1024 / 1024).toFixed(2);
 
       let description = `Parameter ${index + 1}: ${type}`;
 
       if (hasData) {
-        description += ' (contains sensitive data)';
+        description += " (contains sensitive data)";
       }
 
       if (param.metadata.size > 1024) {
@@ -634,7 +696,7 @@ export class ParameterCaptureValidationService {
       return description;
     });
 
-    return `Function ${functionName} will be called with ${parameters.length} parameter(s): ${descriptions.join(', ')}.`;
+    return `Function ${functionName} will be called with ${parameters.length} parameter(s): ${descriptions.join(", ")}.`;
   }
 
   /**
@@ -643,16 +705,18 @@ export class ParameterCaptureValidationService {
    * @param parameters - Parameters to analyze
    * @returns Key parameter indices
    */
-  private identifyKeyParameters(parameters: readonly CapturedParameter[]): number[] {
+  private identifyKeyParameters(
+    parameters: readonly CapturedParameter[],
+  ): number[] {
     return parameters
       .map((param, index) => ({
         index,
-        importance: this.calculateParameterImportance(param)
+        importance: this.calculateParameterImportance(param),
       }))
-      .filter(item => item.importance > 70)
+      .filter((item) => item.importance > 70)
       .sort((a, b) => b.importance - a.importance)
       .slice(0, 3) // Top 3 most important
-      .map(item => item.index);
+      .map((item) => item.index);
   }
 
   /**
@@ -665,9 +729,9 @@ export class ParameterCaptureValidationService {
     let score = 0;
 
     // Base score by type
-    if (param.type === 'object') score += 40;
-    else if (param.type === 'string') score += 30;
-    else if (param.type === 'number') score += 20;
+    if (param.type === "object") score += 40;
+    else if (param.type === "string") score += 30;
+    else if (param.type === "number") score += 20;
     else score += 10;
 
     // Security relevance
@@ -689,16 +753,19 @@ export class ParameterCaptureValidationService {
    * @param parameters - Parameters to analyze
    * @returns Security-relevant parameter indices
    */
-  private identifySecurityRelevantParameters(parameters: readonly CapturedParameter[]): number[] {
+  private identifySecurityRelevantParameters(
+    parameters: readonly CapturedParameter[],
+  ): number[] {
     return parameters
       .map((param, index) => ({ index, param }))
-      .filter(item =>
-        item.param.metadata.containsPII ||
-        item.param.metadata.containsCredentials ||
-        item.param.metadata.securityRisk === SecurityRiskLevel.HIGH ||
-        item.param.metadata.securityRisk === SecurityRiskLevel.CRITICAL
+      .filter(
+        (item) =>
+          item.param.metadata.containsPII ||
+          item.param.metadata.containsCredentials ||
+          item.param.metadata.securityRisk === SecurityRiskLevel.HIGH ||
+          item.param.metadata.securityRisk === SecurityRiskLevel.CRITICAL,
       )
-      .map(item => item.index);
+      .map((item) => item.index);
   }
 
   /**
@@ -707,12 +774,19 @@ export class ParameterCaptureValidationService {
    * @param parameters - Parameters to classify
    * @returns Highest classification level
    */
-  private determineOverallDataClassification(parameters: readonly CapturedParameter[]): DataClassification {
-    const classifications = parameters.map(p => p.metadata.dataClassification);
+  private determineOverallDataClassification(
+    parameters: readonly CapturedParameter[],
+  ): DataClassification {
+    const classifications = parameters.map(
+      (p) => p.metadata.dataClassification,
+    );
 
-    if (classifications.includes(DataClassification.RESTRICTED)) return DataClassification.RESTRICTED;
-    if (classifications.includes(DataClassification.CONFIDENTIAL)) return DataClassification.CONFIDENTIAL;
-    if (classifications.includes(DataClassification.INTERNAL)) return DataClassification.INTERNAL;
+    if (classifications.includes(DataClassification.RESTRICTED))
+      return DataClassification.RESTRICTED;
+    if (classifications.includes(DataClassification.CONFIDENTIAL))
+      return DataClassification.CONFIDENTIAL;
+    if (classifications.includes(DataClassification.INTERNAL))
+      return DataClassification.INTERNAL;
 
     return DataClassification.PUBLIC;
   }
@@ -728,37 +802,37 @@ export class ParameterCaptureValidationService {
   private generateConversationPrompts(
     parameters: readonly CapturedParameter[],
     functionName: string,
-    userContext: UserContext
+    userContext: UserContext,
   ): ConversationPrompt[] {
     const prompts: ConversationPrompt[] = [];
 
     // General confirmation prompt
     prompts.push({
-      type: 'confirmation',
+      type: "confirmation",
       message: `Do you want to execute ${functionName} with the provided parameters?`,
       priority: 1,
-      requiresResponse: true
+      requiresResponse: true,
     });
 
     // Security-specific prompts
     const securityParams = this.identifySecurityRelevantParameters(parameters);
     if (securityParams.length > 0) {
       prompts.push({
-        type: 'security_warning',
+        type: "security_warning",
         message: `This function will process ${securityParams.length} parameter(s) containing sensitive data. Are you sure you want to proceed?`,
         priority: 10,
-        requiresResponse: true
+        requiresResponse: true,
       });
     }
 
     // Performance warning prompts
-    const largeParams = parameters.filter(p => p.metadata.size > 100000);
+    const largeParams = parameters.filter((p) => p.metadata.size > 100000);
     if (largeParams.length > 0) {
       prompts.push({
-        type: 'performance_warning',
+        type: "performance_warning",
         message: `This function has ${largeParams.length} large parameter(s). Processing may take longer than usual. Continue?`,
         priority: 5,
-        requiresResponse: false
+        requiresResponse: false,
       });
     }
 
@@ -774,7 +848,7 @@ export class ParameterCaptureValidationService {
    */
   private assessParameterRisks(
     parameters: readonly CapturedParameter[],
-    functionName: string
+    functionName: string,
   ): ParameterRiskAssessment {
     const riskFactors: string[] = [];
     let overallRiskLevel: SecurityRiskLevel = SecurityRiskLevel.LOW;
@@ -783,24 +857,36 @@ export class ParameterCaptureValidationService {
     parameters.forEach((param, index) => {
       if (param.metadata.securityRisk === SecurityRiskLevel.CRITICAL) {
         overallRiskLevel = SecurityRiskLevel.CRITICAL;
-        riskFactors.push(`Parameter ${index + 1} contains critical security data`);
-      } else if (param.metadata.securityRisk === SecurityRiskLevel.HIGH && overallRiskLevel !== SecurityRiskLevel.CRITICAL) {
+        riskFactors.push(
+          `Parameter ${index + 1} contains critical security data`,
+        );
+      } else if (
+        param.metadata.securityRisk === SecurityRiskLevel.HIGH &&
+        overallRiskLevel !== SecurityRiskLevel.CRITICAL
+      ) {
         overallRiskLevel = SecurityRiskLevel.HIGH;
         riskFactors.push(`Parameter ${index + 1} contains high-risk data`);
       }
 
       if (param.metadata.complexity > 80) {
-        riskFactors.push(`Parameter ${index + 1} has high complexity (${param.metadata.complexity})`);
+        riskFactors.push(
+          `Parameter ${index + 1} has high complexity (${param.metadata.complexity})`,
+        );
       }
 
       if (param.metadata.size > 1000000) {
-        riskFactors.push(`Parameter ${index + 1} is very large (${(param.metadata.size / 1024 / 1024).toFixed(2)} MB)`);
+        riskFactors.push(
+          `Parameter ${index + 1} is very large (${(param.metadata.size / 1024 / 1024).toFixed(2)} MB)`,
+        );
       }
     });
 
     // Function-specific risk assessment
-    if (functionName.toLowerCase().includes('delete') || functionName.toLowerCase().includes('remove')) {
-      riskFactors.push('Function performs destructive operations');
+    if (
+      functionName.toLowerCase().includes("delete") ||
+      functionName.toLowerCase().includes("remove")
+    ) {
+      riskFactors.push("Function performs destructive operations");
       if (overallRiskLevel === SecurityRiskLevel.LOW) {
         overallRiskLevel = SecurityRiskLevel.MEDIUM;
       }
@@ -809,8 +895,12 @@ export class ParameterCaptureValidationService {
     return {
       overallRiskLevel,
       riskFactors,
-      recommendedValidationLevel: this.mapRiskToValidationLevel(overallRiskLevel),
-      requiresApproval: [SecurityRiskLevel.CRITICAL, SecurityRiskLevel.HIGH].includes(overallRiskLevel)
+      recommendedValidationLevel:
+        this.mapRiskToValidationLevel(overallRiskLevel),
+      requiresApproval: [
+        SecurityRiskLevel.CRITICAL,
+        SecurityRiskLevel.HIGH,
+      ].includes(overallRiskLevel),
     };
   }
 
@@ -820,7 +910,9 @@ export class ParameterCaptureValidationService {
    * @param riskLevel - Security risk level
    * @returns Recommended validation level
    */
-  private mapRiskToValidationLevel(riskLevel: SecurityRiskLevel): ValidationLevel {
+  private mapRiskToValidationLevel(
+    riskLevel: SecurityRiskLevel,
+  ): ValidationLevel {
     switch (riskLevel) {
       case SecurityRiskLevel.CRITICAL:
         return ValidationLevel.CRITICAL;
@@ -845,43 +937,45 @@ export class ParameterCaptureValidationService {
   private generateRecommendations(
     parameters: readonly CapturedParameter[],
     functionName: string,
-    userContext: UserContext
+    userContext: UserContext,
   ): RecommendedAction[] {
     const actions: RecommendedAction[] = [];
 
     // Security recommendations
-    const sensitiveParams = parameters.filter(p => p.metadata.containsPII || p.metadata.containsCredentials);
+    const sensitiveParams = parameters.filter(
+      (p) => p.metadata.containsPII || p.metadata.containsCredentials,
+    );
     if (sensitiveParams.length > 0) {
       actions.push({
-        type: 'security',
-        action: 'review_sensitive_data',
-        description: 'Review sensitive data before proceeding',
+        type: "security",
+        action: "review_sensitive_data",
+        description: "Review sensitive data before proceeding",
         priority: 10,
-        required: true
+        required: true,
       });
     }
 
     // Performance recommendations
-    const largeParams = parameters.filter(p => p.metadata.size > 100000);
+    const largeParams = parameters.filter((p) => p.metadata.size > 100000);
     if (largeParams.length > 0) {
       actions.push({
-        type: 'performance',
-        action: 'monitor_execution_time',
-        description: 'Monitor execution time due to large parameters',
+        type: "performance",
+        action: "monitor_execution_time",
+        description: "Monitor execution time due to large parameters",
         priority: 5,
-        required: false
+        required: false,
       });
     }
 
     // Validation recommendations
-    const complexParams = parameters.filter(p => p.metadata.complexity > 70);
+    const complexParams = parameters.filter((p) => p.metadata.complexity > 70);
     if (complexParams.length > 0) {
       actions.push({
-        type: 'validation',
-        action: 'validate_complex_parameters',
-        description: 'Validate complex parameter structures',
+        type: "validation",
+        action: "validate_complex_parameters",
+        description: "Validate complex parameter structures",
         priority: 7,
-        required: true
+        required: true,
       });
     }
 
@@ -897,7 +991,7 @@ export class ParameterCaptureValidationService {
    */
   private async analyzeParameterChanges(
     original: readonly CapturedParameter[],
-    modified: readonly any[]
+    modified: readonly any[],
   ): Promise<ParameterChangeAnalysis> {
     const changes: ParameterChange[] = [];
 
@@ -910,32 +1004,46 @@ export class ParameterCaptureValidationService {
         // Parameter added
         changes.push({
           index: i,
-          changeType: 'added',
+          changeType: "added",
           originalValue: undefined,
           newValue: modifiedParam,
-          impact: await this.assessChangeImpact('added', undefined, modifiedParam)
+          impact: await this.assessChangeImpact(
+            "added",
+            undefined,
+            modifiedParam,
+          ),
         });
       } else if (originalParam && modifiedParam === undefined) {
         // Parameter removed
         changes.push({
           index: i,
-          changeType: 'removed',
+          changeType: "removed",
           originalValue: originalParam.originalValue,
           newValue: undefined,
-          impact: await this.assessChangeImpact('removed', originalParam.originalValue, undefined)
+          impact: await this.assessChangeImpact(
+            "removed",
+            originalParam.originalValue,
+            undefined,
+          ),
         });
       } else if (originalParam && modifiedParam !== undefined) {
         // Parameter potentially modified
-        const originalSerialized = await this.serializeParameter(originalParam.originalValue);
+        const originalSerialized = await this.serializeParameter(
+          originalParam.originalValue,
+        );
         const modifiedSerialized = await this.serializeParameter(modifiedParam);
 
         if (originalSerialized !== modifiedSerialized) {
           changes.push({
             index: i,
-            changeType: 'modified',
+            changeType: "modified",
             originalValue: originalParam.originalValue,
             newValue: modifiedParam,
-            impact: await this.assessChangeImpact('modified', originalParam.originalValue, modifiedParam)
+            impact: await this.assessChangeImpact(
+              "modified",
+              originalParam.originalValue,
+              modifiedParam,
+            ),
           });
         }
       }
@@ -945,7 +1053,7 @@ export class ParameterCaptureValidationService {
       hasChanges: changes.length > 0,
       changeCount: changes.length,
       changes,
-      overallImpact: this.calculateOverallChangeImpact(changes)
+      overallImpact: this.calculateOverallChangeImpact(changes),
     };
   }
 
@@ -958,35 +1066,41 @@ export class ParameterCaptureValidationService {
    * @returns Change impact level
    */
   private async assessChangeImpact(
-    changeType: 'added' | 'removed' | 'modified',
+    changeType: "added" | "removed" | "modified",
     originalValue: any,
-    newValue: any
+    newValue: any,
   ): Promise<ChangeImpactLevel> {
     switch (changeType) {
-      case 'added':
+      case "added":
         const newValueHasPII = await this.detectPII(newValue);
         const newValueHasCredentials = await this.detectCredentials(newValue);
         if (newValueHasCredentials) return ChangeImpactLevel.CRITICAL;
         if (newValueHasPII) return ChangeImpactLevel.HIGH;
         return ChangeImpactLevel.MEDIUM;
 
-      case 'removed':
+      case "removed":
         const originalHasPII = await this.detectPII(originalValue);
-        const originalHasCredentials = await this.detectCredentials(originalValue);
+        const originalHasCredentials =
+          await this.detectCredentials(originalValue);
         if (originalHasCredentials) return ChangeImpactLevel.HIGH;
         if (originalHasPII) return ChangeImpactLevel.MEDIUM;
         return ChangeImpactLevel.LOW;
 
-      case 'modified':
-        const bothHaveCredentials = await this.detectCredentials(originalValue) && await this.detectCredentials(newValue);
-        const bothHavePII = await this.detectPII(originalValue) && await this.detectPII(newValue);
+      case "modified":
+        const bothHaveCredentials =
+          (await this.detectCredentials(originalValue)) &&
+          (await this.detectCredentials(newValue));
+        const bothHavePII =
+          (await this.detectPII(originalValue)) &&
+          (await this.detectPII(newValue));
 
         if (bothHaveCredentials) return ChangeImpactLevel.CRITICAL;
         if (bothHavePII) return ChangeImpactLevel.HIGH;
 
         const originalSize = this.calculateParameterSize(originalValue);
         const newSize = this.calculateParameterSize(newValue);
-        const sizeChange = Math.abs(newSize - originalSize) / Math.max(originalSize, 1);
+        const sizeChange =
+          Math.abs(newSize - originalSize) / Math.max(originalSize, 1);
 
         if (sizeChange > 0.5) return ChangeImpactLevel.MEDIUM;
         return ChangeImpactLevel.LOW;
@@ -1002,14 +1116,18 @@ export class ParameterCaptureValidationService {
    * @param changes - Parameter changes
    * @returns Overall impact level
    */
-  private calculateOverallChangeImpact(changes: readonly ParameterChange[]): ChangeImpactLevel {
+  private calculateOverallChangeImpact(
+    changes: readonly ParameterChange[],
+  ): ChangeImpactLevel {
     if (changes.length === 0) return ChangeImpactLevel.NONE;
 
-    const impacts = changes.map(c => c.impact);
+    const impacts = changes.map((c) => c.impact);
 
-    if (impacts.includes(ChangeImpactLevel.CRITICAL)) return ChangeImpactLevel.CRITICAL;
+    if (impacts.includes(ChangeImpactLevel.CRITICAL))
+      return ChangeImpactLevel.CRITICAL;
     if (impacts.includes(ChangeImpactLevel.HIGH)) return ChangeImpactLevel.HIGH;
-    if (impacts.includes(ChangeImpactLevel.MEDIUM)) return ChangeImpactLevel.MEDIUM;
+    if (impacts.includes(ChangeImpactLevel.MEDIUM))
+      return ChangeImpactLevel.MEDIUM;
 
     return ChangeImpactLevel.LOW;
   }
@@ -1023,31 +1141,43 @@ export class ParameterCaptureValidationService {
    */
   private async assessSecurityImpactOfChanges(
     changeAnalysis: ParameterChangeAnalysis,
-    userContext: UserContext
+    userContext: UserContext,
   ): Promise<SecurityImpactAssessment> {
     const securityViolations: string[] = [];
     let requiresApproval = false;
     let acceptableRisk = true;
 
     // Check for high-impact changes
-    const criticalChanges = changeAnalysis.changes.filter(c => c.impact === ChangeImpactLevel.CRITICAL);
+    const criticalChanges = changeAnalysis.changes.filter(
+      (c) => c.impact === ChangeImpactLevel.CRITICAL,
+    );
     if (criticalChanges.length > 0) {
-      securityViolations.push(`${criticalChanges.length} critical security changes detected`);
+      securityViolations.push(
+        `${criticalChanges.length} critical security changes detected`,
+      );
       requiresApproval = true;
       acceptableRisk = false;
     }
 
     // Check for credential-related changes
     for (const change of changeAnalysis.changes) {
-      if (change.changeType === 'added' && await this.detectCredentials(change.newValue)) {
-        securityViolations.push(`New credential parameter added at index ${change.index}`);
+      if (
+        change.changeType === "added" &&
+        (await this.detectCredentials(change.newValue))
+      ) {
+        securityViolations.push(
+          `New credential parameter added at index ${change.index}`,
+        );
         requiresApproval = true;
       }
     }
 
     // Check user permissions for changes
-    if (changeAnalysis.hasChanges && !userContext.permissions.includes('modify-parameters')) {
-      securityViolations.push('User lacks permission to modify parameters');
+    if (
+      changeAnalysis.hasChanges &&
+      !userContext.permissions.includes("modify-parameters")
+    ) {
+      securityViolations.push("User lacks permission to modify parameters");
       acceptableRisk = false;
     }
 
@@ -1055,7 +1185,7 @@ export class ParameterCaptureValidationService {
       acceptableRisk,
       requiresApproval,
       securityViolations,
-      riskMitigations: this.generateRiskMitigations(securityViolations)
+      riskMitigations: this.generateRiskMitigations(securityViolations),
     };
   }
 
@@ -1068,16 +1198,18 @@ export class ParameterCaptureValidationService {
   private generateRiskMitigations(violations: readonly string[]): string[] {
     const mitigations: string[] = [];
 
-    violations.forEach(violation => {
-      if (violation.includes('credential')) {
-        mitigations.push('Encrypt credential parameters before processing');
-        mitigations.push('Log credential access for audit trail');
-      } else if (violation.includes('permission')) {
-        mitigations.push('Request elevated permissions from administrator');
-        mitigations.push('Use read-only mode if available');
-      } else if (violation.includes('critical')) {
-        mitigations.push('Require multi-factor authentication for critical changes');
-        mitigations.push('Create backup before applying changes');
+    violations.forEach((violation) => {
+      if (violation.includes("credential")) {
+        mitigations.push("Encrypt credential parameters before processing");
+        mitigations.push("Log credential access for audit trail");
+      } else if (violation.includes("permission")) {
+        mitigations.push("Request elevated permissions from administrator");
+        mitigations.push("Use read-only mode if available");
+      } else if (violation.includes("critical")) {
+        mitigations.push(
+          "Require multi-factor authentication for critical changes",
+        );
+        mitigations.push("Create backup before applying changes");
       }
     });
 
@@ -1093,41 +1225,50 @@ export class ParameterCaptureValidationService {
    */
   private async assessBusinessImpactOfChanges(
     changeAnalysis: ParameterChangeAnalysis,
-    originalParameters: readonly CapturedParameter[]
+    originalParameters: readonly CapturedParameter[],
   ): Promise<BusinessImpactAssessment> {
     const impactFactors: string[] = [];
     let acceptableImpact = true;
 
     // Assess data loss risk
-    const removedParams = changeAnalysis.changes.filter(c => c.changeType === 'removed');
+    const removedParams = changeAnalysis.changes.filter(
+      (c) => c.changeType === "removed",
+    );
     if (removedParams.length > 0) {
-      impactFactors.push(`${removedParams.length} parameter(s) removed - potential data loss`);
+      impactFactors.push(
+        `${removedParams.length} parameter(s) removed - potential data loss`,
+      );
     }
 
     // Assess processing time impact
     const sizeChanges = changeAnalysis.changes
-      .filter(c => c.changeType === 'added' || c.changeType === 'modified')
-      .map(c => this.calculateParameterSize(c.newValue))
+      .filter((c) => c.changeType === "added" || c.changeType === "modified")
+      .map((c) => this.calculateParameterSize(c.newValue))
       .reduce((sum, size) => sum + size, 0);
 
-    if (sizeChanges > 1000000) { // > 1MB
-      impactFactors.push(`Large parameter changes may impact processing time (${(sizeChanges / 1024 / 1024).toFixed(2)} MB)`);
+    if (sizeChanges > 1000000) {
+      // > 1MB
+      impactFactors.push(
+        `Large parameter changes may impact processing time (${(sizeChanges / 1024 / 1024).toFixed(2)} MB)`,
+      );
     }
 
     // Assess complexity impact
-    const highImpactChanges = changeAnalysis.changes.filter(c =>
-      c.impact === ChangeImpactLevel.HIGH || c.impact === ChangeImpactLevel.CRITICAL
+    const highImpactChanges = changeAnalysis.changes.filter(
+      (c) =>
+        c.impact === ChangeImpactLevel.HIGH ||
+        c.impact === ChangeImpactLevel.CRITICAL,
     );
 
     if (highImpactChanges.length > originalParameters.length * 0.5) {
-      impactFactors.push('Majority of parameters have high-impact changes');
+      impactFactors.push("Majority of parameters have high-impact changes");
       acceptableImpact = false;
     }
 
     return {
       acceptableImpact,
       impactFactors,
-      mitigationStrategies: this.generateImpactMitigations(impactFactors)
+      mitigationStrategies: this.generateImpactMitigations(impactFactors),
     };
   }
 
@@ -1140,16 +1281,16 @@ export class ParameterCaptureValidationService {
   private generateImpactMitigations(factors: readonly string[]): string[] {
     const strategies: string[] = [];
 
-    factors.forEach(factor => {
-      if (factor.includes('data loss')) {
-        strategies.push('Create parameter backup before applying changes');
-        strategies.push('Validate removed parameters are not critical');
-      } else if (factor.includes('processing time')) {
-        strategies.push('Consider parameter compression or chunking');
-        strategies.push('Increase timeout limits for execution');
-      } else if (factor.includes('high-impact')) {
-        strategies.push('Apply changes incrementally with validation');
-        strategies.push('Implement rollback mechanism');
+    factors.forEach((factor) => {
+      if (factor.includes("data loss")) {
+        strategies.push("Create parameter backup before applying changes");
+        strategies.push("Validate removed parameters are not critical");
+      } else if (factor.includes("processing time")) {
+        strategies.push("Consider parameter compression or chunking");
+        strategies.push("Increase timeout limits for execution");
+      } else if (factor.includes("high-impact")) {
+        strategies.push("Apply changes incrementally with validation");
+        strategies.push("Implement rollback mechanism");
       }
     });
 
@@ -1165,21 +1306,21 @@ export class ParameterCaptureValidationService {
    */
   private generateRejectionReason(
     securityImpact: SecurityImpactAssessment,
-    businessImpact: BusinessImpactAssessment
+    businessImpact: BusinessImpactAssessment,
   ): string {
     const reasons: string[] = [];
 
     if (!securityImpact.acceptableRisk) {
-      reasons.push('Security risk too high');
+      reasons.push("Security risk too high");
       reasons.push(...securityImpact.securityViolations);
     }
 
     if (!businessImpact.acceptableImpact) {
-      reasons.push('Business impact too significant');
+      reasons.push("Business impact too significant");
       reasons.push(...businessImpact.impactFactors);
     }
 
-    return reasons.join('; ');
+    return reasons.join("; ");
   }
 
   /**
@@ -1193,7 +1334,7 @@ export class ParameterCaptureValidationService {
   private generateChangeRecommendations(
     changeAnalysis: ParameterChangeAnalysis,
     securityImpact: SecurityImpactAssessment,
-    businessImpact: BusinessImpactAssessment
+    businessImpact: BusinessImpactAssessment,
   ): string[] {
     const recommendations: string[] = [];
 
@@ -1205,11 +1346,13 @@ export class ParameterCaptureValidationService {
 
     // General recommendations
     if (changeAnalysis.changeCount > 5) {
-      recommendations.push('Consider splitting changes into smaller batches');
+      recommendations.push("Consider splitting changes into smaller batches");
     }
 
     if (changeAnalysis.overallImpact === ChangeImpactLevel.CRITICAL) {
-      recommendations.push('Require administrator approval for critical changes');
+      recommendations.push(
+        "Require administrator approval for critical changes",
+      );
     }
 
     return [...new Set(recommendations)]; // Remove duplicates
@@ -1232,7 +1375,7 @@ export class ParameterSanitizer {
    */
   public async sanitizeParameters(
     parameters: readonly CapturedParameter[],
-    sensitiveIndices: readonly number[]
+    sensitiveIndices: readonly number[],
   ): Promise<CapturedParameter[]> {
     const sanitized: CapturedParameter[] = [];
 
@@ -1243,8 +1386,11 @@ export class ParameterSanitizer {
       const sanitizedParam: CapturedParameter = {
         ...param,
         serializedValue: isSensitive
-          ? await this.sanitizeSensitiveValue(param.serializedValue, param.metadata)
-          : param.serializedValue
+          ? await this.sanitizeSensitiveValue(
+              param.serializedValue,
+              param.metadata,
+            )
+          : param.serializedValue,
       };
 
       sanitized.push(sanitizedParam);
@@ -1262,10 +1408,10 @@ export class ParameterSanitizer {
    */
   private async sanitizeSensitiveValue(
     value: string,
-    metadata: ParameterMetadata
+    metadata: ParameterMetadata,
   ): Promise<string> {
     if (metadata.containsCredentials) {
-      return '[CREDENTIALS_REDACTED]';
+      return "[CREDENTIALS_REDACTED]";
     }
 
     if (metadata.containsPII) {
@@ -1273,7 +1419,7 @@ export class ParameterSanitizer {
     }
 
     if (metadata.size > 10000) {
-      return value.substring(0, 100) + '...[TRUNCATED_FOR_SECURITY]';
+      return value.substring(0, 100) + "...[TRUNCATED_FOR_SECURITY]";
     }
 
     return value;
@@ -1289,10 +1435,16 @@ export class ParameterSanitizer {
     let redacted = value;
 
     // Redact common PII patterns
-    redacted = redacted.replace(/\b\d{3}-\d{2}-\d{4}\b/g, 'XXX-XX-XXXX'); // SSN
-    redacted = redacted.replace(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g, '[EMAIL_REDACTED]'); // Email
-    redacted = redacted.replace(/\b\d{4}\s?\d{4}\s?\d{4}\s?\d{4}\b/g, 'XXXX XXXX XXXX XXXX'); // Credit card
-    redacted = redacted.replace(/\b\d{3}-\d{3}-\d{4}\b/g, 'XXX-XXX-XXXX'); // Phone
+    redacted = redacted.replace(/\b\d{3}-\d{2}-\d{4}\b/g, "XXX-XX-XXXX"); // SSN
+    redacted = redacted.replace(
+      /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g,
+      "[EMAIL_REDACTED]",
+    ); // Email
+    redacted = redacted.replace(
+      /\b\d{4}\s?\d{4}\s?\d{4}\s?\d{4}\b/g,
+      "XXXX XXXX XXXX XXXX",
+    ); // Credit card
+    redacted = redacted.replace(/\b\d{3}-\d{3}-\d{4}\b/g, "XXX-XXX-XXXX"); // Phone
 
     return redacted;
   }
@@ -1314,16 +1466,16 @@ export class ParameterTypeAnalyzer {
    */
   public async analyzeParameterTypes(
     parameters: readonly CapturedParameter[],
-    functionName: string
+    functionName: string,
   ): Promise<ParameterTypeAnalysis> {
-    const parameterTypes = parameters.map(p => this.analyzeParameterType(p));
+    const parameterTypes = parameters.map((p) => this.analyzeParameterType(p));
     const complexityScore = this.calculateOverallComplexity(parameters);
     const riskFactors = this.identifyRiskFactors(parameters, functionName);
 
     return {
       parameterTypes,
       complexityScore,
-      riskFactors
+      riskFactors,
     };
   }
 
@@ -1333,7 +1485,9 @@ export class ParameterTypeAnalyzer {
    * @param parameter - Parameter to analyze
    * @returns Type analysis
    */
-  private analyzeParameterType(parameter: CapturedParameter): ParameterTypeInfo {
+  private analyzeParameterType(
+    parameter: CapturedParameter,
+  ): ParameterTypeInfo {
     const baseType = parameter.type;
     let detailedType = baseType;
     let isCollection = false;
@@ -1344,11 +1498,14 @@ export class ParameterTypeAnalyzer {
       detailedType = `Array<${this.inferArrayElementType(parameter.originalValue)}>`;
       isCollection = true;
       elementCount = parameter.originalValue.length;
-    } else if (parameter.originalValue && typeof parameter.originalValue === 'object') {
-      if (parameter.originalValue.constructor.name !== 'Object') {
+    } else if (
+      parameter.originalValue &&
+      typeof parameter.originalValue === "object"
+    ) {
+      if (parameter.originalValue.constructor.name !== "Object") {
         detailedType = parameter.originalValue.constructor.name;
       } else {
-        detailedType = 'Object';
+        detailedType = "Object";
         elementCount = Object.keys(parameter.originalValue).length;
       }
     }
@@ -1358,8 +1515,10 @@ export class ParameterTypeAnalyzer {
       detailedType,
       isCollection,
       elementCount,
-      nullable: parameter.originalValue === null || parameter.originalValue === undefined,
-      complexity: parameter.metadata.complexity
+      nullable:
+        parameter.originalValue === null ||
+        parameter.originalValue === undefined,
+      complexity: parameter.metadata.complexity,
     };
   }
 
@@ -1370,14 +1529,14 @@ export class ParameterTypeAnalyzer {
    * @returns Element type
    */
   private inferArrayElementType(array: any[]): string {
-    if (array.length === 0) return 'unknown';
+    if (array.length === 0) return "unknown";
 
-    const types = new Set(array.map(item => typeof item));
+    const types = new Set(array.map((item) => typeof item));
     if (types.size === 1) {
       return Array.from(types)[0];
     }
 
-    return 'mixed';
+    return "mixed";
   }
 
   /**
@@ -1386,16 +1545,21 @@ export class ParameterTypeAnalyzer {
    * @param parameters - Parameters to analyze
    * @returns Complexity score (0-100)
    */
-  private calculateOverallComplexity(parameters: readonly CapturedParameter[]): number {
+  private calculateOverallComplexity(
+    parameters: readonly CapturedParameter[],
+  ): number {
     if (parameters.length === 0) return 0;
 
-    const totalComplexity = parameters.reduce((sum, p) => sum + p.metadata.complexity, 0);
+    const totalComplexity = parameters.reduce(
+      (sum, p) => sum + p.metadata.complexity,
+      0,
+    );
     const averageComplexity = totalComplexity / parameters.length;
 
     // Adjust for parameter count
     const countFactor = Math.min(parameters.length / 10, 1);
 
-    return Math.min(averageComplexity + (countFactor * 20), 100);
+    return Math.min(averageComplexity + countFactor * 20, 100);
   }
 
   /**
@@ -1407,7 +1571,7 @@ export class ParameterTypeAnalyzer {
    */
   private identifyRiskFactors(
     parameters: readonly CapturedParameter[],
-    functionName: string
+    functionName: string,
   ): string[] {
     const riskFactors: string[] = [];
 
@@ -1417,28 +1581,37 @@ export class ParameterTypeAnalyzer {
     }
 
     // Complexity risks
-    const highComplexityParams = parameters.filter(p => p.metadata.complexity > 80);
+    const highComplexityParams = parameters.filter(
+      (p) => p.metadata.complexity > 80,
+    );
     if (highComplexityParams.length > 0) {
-      riskFactors.push(`${highComplexityParams.length} high-complexity parameters`);
+      riskFactors.push(
+        `${highComplexityParams.length} high-complexity parameters`,
+      );
     }
 
     // Size risks
-    const largeParams = parameters.filter(p => p.metadata.size > 100000);
+    const largeParams = parameters.filter((p) => p.metadata.size > 100000);
     if (largeParams.length > 0) {
       riskFactors.push(`${largeParams.length} large parameters (>100KB)`);
     }
 
     // Security risks
-    const sensitiveParams = parameters.filter(p =>
-      p.metadata.containsPII || p.metadata.containsCredentials
+    const sensitiveParams = parameters.filter(
+      (p) => p.metadata.containsPII || p.metadata.containsCredentials,
     );
     if (sensitiveParams.length > 0) {
-      riskFactors.push(`${sensitiveParams.length} parameters with sensitive data`);
+      riskFactors.push(
+        `${sensitiveParams.length} parameters with sensitive data`,
+      );
     }
 
     // Function-specific risks
-    if (functionName.toLowerCase().includes('sql') || functionName.toLowerCase().includes('query')) {
-      riskFactors.push('SQL injection risk due to function type');
+    if (
+      functionName.toLowerCase().includes("sql") ||
+      functionName.toLowerCase().includes("query")
+    ) {
+      riskFactors.push("SQL injection risk due to function type");
     }
 
     return riskFactors;
@@ -1463,7 +1636,7 @@ export class ParameterSecurityValidator {
   public async validateParameterSecurity(
     parameters: readonly CapturedParameter[],
     userContext: UserContext,
-    validationLevel: ValidationLevel
+    validationLevel: ValidationLevel,
   ): Promise<ParameterSecurityValidationResult> {
     const violations: string[] = [];
     const sensitiveParameterIndices: number[] = [];
@@ -1475,7 +1648,7 @@ export class ParameterSecurityValidator {
         param,
         userContext,
         validationLevel,
-        i
+        i,
       );
 
       violations.push(...paramViolations);
@@ -1488,7 +1661,7 @@ export class ParameterSecurityValidator {
     return {
       passed: violations.length === 0,
       violations,
-      sensitiveParameterIndices
+      sensitiveParameterIndices,
     };
   }
 
@@ -1505,37 +1678,48 @@ export class ParameterSecurityValidator {
     parameter: CapturedParameter,
     userContext: UserContext,
     validationLevel: ValidationLevel,
-    index: number
+    index: number,
   ): Promise<string[]> {
     const violations: string[] = [];
 
     // Check credentials access permissions
     if (parameter.metadata.containsCredentials) {
-      if (!userContext.permissions.includes('access-credentials')) {
-        violations.push(`Parameter ${index + 1}: User lacks permission to access credentials`);
+      if (!userContext.permissions.includes("access-credentials")) {
+        violations.push(
+          `Parameter ${index + 1}: User lacks permission to access credentials`,
+        );
       }
 
       if (validationLevel === ValidationLevel.LOW) {
-        violations.push(`Parameter ${index + 1}: Credentials require higher validation level`);
+        violations.push(
+          `Parameter ${index + 1}: Credentials require higher validation level`,
+        );
       }
     }
 
     // Check PII access permissions
     if (parameter.metadata.containsPII) {
-      if (!userContext.permissions.includes('access-pii')) {
-        violations.push(`Parameter ${index + 1}: User lacks permission to access PII`);
+      if (!userContext.permissions.includes("access-pii")) {
+        violations.push(
+          `Parameter ${index + 1}: User lacks permission to access PII`,
+        );
       }
     }
 
     // Check parameter size limits
-    if (parameter.metadata.size > 10000000) { // 10MB
-      violations.push(`Parameter ${index + 1}: Exceeds maximum size limit (${(parameter.metadata.size / 1024 / 1024).toFixed(2)} MB)`);
+    if (parameter.metadata.size > 10000000) {
+      // 10MB
+      violations.push(
+        `Parameter ${index + 1}: Exceeds maximum size limit (${(parameter.metadata.size / 1024 / 1024).toFixed(2)} MB)`,
+      );
     }
 
     // Check security risk level
     if (parameter.metadata.securityRisk === SecurityRiskLevel.CRITICAL) {
       if (validationLevel !== ValidationLevel.CRITICAL) {
-        violations.push(`Parameter ${index + 1}: Critical security risk requires critical validation level`);
+        violations.push(
+          `Parameter ${index + 1}: Critical security risk requires critical validation level`,
+        );
       }
     }
 
@@ -1559,19 +1743,17 @@ export class ParameterPerformanceOptimizer {
    */
   public async analyzeParameterPerformance(
     parameters: readonly CapturedParameter[],
-    typeAnalysis: ParameterTypeAnalysis
+    typeAnalysis: ParameterTypeAnalysis,
   ): Promise<ParameterPerformanceAnalysis> {
     const estimatedProcessingTime = this.estimateProcessingTime(parameters);
     const memoryFootprint = this.estimateMemoryFootprint(parameters);
-    const optimizationRecommendations = this.generateOptimizationRecommendations(
-      parameters,
-      typeAnalysis
-    );
+    const optimizationRecommendations =
+      this.generateOptimizationRecommendations(parameters, typeAnalysis);
 
     return {
       estimatedProcessingTime,
       memoryFootprint,
-      optimizationRecommendations
+      optimizationRecommendations,
     };
   }
 
@@ -1581,10 +1763,12 @@ export class ParameterPerformanceOptimizer {
    * @param parameters - Parameters to analyze
    * @returns Estimated processing time in milliseconds
    */
-  private estimateProcessingTime(parameters: readonly CapturedParameter[]): number {
+  private estimateProcessingTime(
+    parameters: readonly CapturedParameter[],
+  ): number {
     let totalTime = 0;
 
-    parameters.forEach(param => {
+    parameters.forEach((param) => {
       // Base processing time
       totalTime += 10; // 10ms base per parameter
 
@@ -1610,8 +1794,13 @@ export class ParameterPerformanceOptimizer {
    * @param parameters - Parameters to analyze
    * @returns Estimated memory footprint in bytes
    */
-  private estimateMemoryFootprint(parameters: readonly CapturedParameter[]): number {
-    const totalSize = parameters.reduce((sum, param) => sum + param.metadata.size, 0);
+  private estimateMemoryFootprint(
+    parameters: readonly CapturedParameter[],
+  ): number {
+    const totalSize = parameters.reduce(
+      (sum, param) => sum + param.metadata.size,
+      0,
+    );
 
     // Account for processing overhead (typically 2-3x)
     const processingOverhead = totalSize * 2.5;
@@ -1631,36 +1820,44 @@ export class ParameterPerformanceOptimizer {
    */
   private generateOptimizationRecommendations(
     parameters: readonly CapturedParameter[],
-    typeAnalysis: ParameterTypeAnalysis
+    typeAnalysis: ParameterTypeAnalysis,
   ): string[] {
     const recommendations: string[] = [];
 
     // Large parameter recommendations
-    const largeParams = parameters.filter(p => p.metadata.size > 1000000);
+    const largeParams = parameters.filter((p) => p.metadata.size > 1000000);
     if (largeParams.length > 0) {
-      recommendations.push('Consider compressing large parameters before processing');
-      recommendations.push('Use streaming processing for large data sets');
+      recommendations.push(
+        "Consider compressing large parameters before processing",
+      );
+      recommendations.push("Use streaming processing for large data sets");
     }
 
     // Complex parameter recommendations
     if (typeAnalysis.complexityScore > 80) {
-      recommendations.push('Simplify complex parameter structures if possible');
-      recommendations.push('Consider breaking complex operations into smaller steps');
+      recommendations.push("Simplify complex parameter structures if possible");
+      recommendations.push(
+        "Consider breaking complex operations into smaller steps",
+      );
     }
 
     // Performance recommendations based on parameter count
     if (parameters.length > 10) {
-      recommendations.push('Consider using batch processing for multiple parameters');
-      recommendations.push('Implement parameter validation caching');
+      recommendations.push(
+        "Consider using batch processing for multiple parameters",
+      );
+      recommendations.push("Implement parameter validation caching");
     }
 
     // Security performance recommendations
-    const sensitiveParams = parameters.filter(p =>
-      p.metadata.containsPII || p.metadata.containsCredentials
+    const sensitiveParams = parameters.filter(
+      (p) => p.metadata.containsPII || p.metadata.containsCredentials,
     );
     if (sensitiveParams.length > 0) {
-      recommendations.push('Cache security validation results where appropriate');
-      recommendations.push('Use secure parameter serialization');
+      recommendations.push(
+        "Cache security validation results where appropriate",
+      );
+      recommendations.push("Use secure parameter serialization");
     }
 
     return recommendations;
@@ -1673,21 +1870,21 @@ export class ParameterPerformanceOptimizer {
  * Security risk level enumeration
  */
 export enum SecurityRiskLevel {
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  CRITICAL = 'critical'
+  LOW = "low",
+  MEDIUM = "medium",
+  HIGH = "high",
+  CRITICAL = "critical",
 }
 
 /**
  * Change impact level enumeration
  */
 export enum ChangeImpactLevel {
-  NONE = 'none',
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  CRITICAL = 'critical'
+  NONE = "none",
+  LOW = "low",
+  MEDIUM = "medium",
+  HIGH = "high",
+  CRITICAL = "critical",
 }
 
 /**
@@ -1808,7 +2005,11 @@ export interface ParameterConversationSummary {
  * Conversation prompt
  */
 export interface ConversationPrompt {
-  readonly type: 'confirmation' | 'security_warning' | 'performance_warning' | 'information';
+  readonly type:
+    | "confirmation"
+    | "security_warning"
+    | "performance_warning"
+    | "information";
   readonly message: string;
   readonly priority: number;
   readonly requiresResponse: boolean;
@@ -1828,7 +2029,7 @@ export interface ParameterRiskAssessment {
  * Recommended action
  */
 export interface RecommendedAction {
-  readonly type: 'security' | 'performance' | 'validation' | 'optimization';
+  readonly type: "security" | "performance" | "validation" | "optimization";
   readonly action: string;
   readonly description: string;
   readonly priority: number;
@@ -1863,7 +2064,7 @@ export interface ParameterChangeAnalysis {
  */
 export interface ParameterChange {
   readonly index: number;
-  readonly changeType: 'added' | 'removed' | 'modified';
+  readonly changeType: "added" | "removed" | "modified";
   readonly originalValue: any;
   readonly newValue: any;
   readonly impact: ChangeImpactLevel;

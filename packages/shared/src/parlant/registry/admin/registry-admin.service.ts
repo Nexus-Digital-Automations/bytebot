@@ -10,9 +10,9 @@
  * @author Registry Administration Agent #10
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { Cron, CronExpression } from '@nestjs/schedule';
+import { Injectable, Logger } from "@nestjs/common";
+import { EventEmitter2 } from "@nestjs/event-emitter";
+import { Cron, CronExpression } from "@nestjs/schedule";
 import {
   IRegistryAdmin,
   MaintenanceResult,
@@ -55,31 +55,31 @@ import {
   PerformanceLevel,
   StorageStatus,
   ValidationResult,
-  TrendDirection
-} from '../core/registry.interface';
+  TrendDirection,
+} from "../core/registry.interface";
 
 /**
  * Maintenance task types
  */
 export enum MaintenanceTaskType {
-  _CLEANUP_STALE_DATA = 'cleanup_stale_data',
-  _REBUILD_INDICES = 'rebuild_indices',
-  _COMPACT_STORAGE = 'compact_storage',
-  _VALIDATE_INTEGRITY = 'validate_integrity',
-  _OPTIMIZE_PERFORMANCE = 'optimize_performance',
-  _UPDATE_STATISTICS = 'update_statistics',
-  _CLEANUP_LOGS = 'cleanup_logs',
-  _VACUUM_DATABASE = 'vacuum_database'
+  _CLEANUP_STALE_DATA = "cleanup_stale_data",
+  _REBUILD_INDICES = "rebuild_indices",
+  _COMPACT_STORAGE = "compact_storage",
+  _VALIDATE_INTEGRITY = "validate_integrity",
+  _OPTIMIZE_PERFORMANCE = "optimize_performance",
+  _UPDATE_STATISTICS = "update_statistics",
+  _CLEANUP_LOGS = "cleanup_logs",
+  _VACUUM_DATABASE = "vacuum_database",
 }
 
 /**
  * Backup types
  */
 export enum BackupType {
-  _FULL = 'full',
-  _INCREMENTAL = 'incremental',
-  _DIFFERENTIAL = 'differential',
-  _SNAPSHOT = 'snapshot'
+  _FULL = "full",
+  _INCREMENTAL = "incremental",
+  _DIFFERENTIAL = "differential",
+  _SNAPSHOT = "snapshot",
 }
 
 /**
@@ -92,7 +92,10 @@ export interface IRegistryStorage {
 
   // Backup operations
   createBackup(options: BackupOptions): Promise<BackupResult>;
-  restoreFromBackup(backupId: string, options: RestoreOptions): Promise<RestoreResult>;
+  restoreFromBackup(
+    backupId: string,
+    options: RestoreOptions,
+  ): Promise<RestoreResult>;
   listBackups(): Promise<BackupInfo[]>;
   deleteBackup(backupId: string): Promise<void>;
 
@@ -103,7 +106,7 @@ export interface IRegistryStorage {
 
   // Audit operations
   getAuditEntries(options: AuditLogOptions): Promise<AuditEntry[]>;
-  addAuditEntry(entry: Omit<AuditEntry, 'id'>): Promise<void>;
+  addAuditEntry(entry: Omit<AuditEntry, "id">): Promise<void>;
 
   // Maintenance operations
   cleanupStaleData(cutoffDate: Date): Promise<number>;
@@ -179,7 +182,7 @@ export class RegistryAdminService implements IRegistryAdmin {
 
   constructor(
     private readonly eventEmitter: EventEmitter2,
-    private readonly storage: IRegistryStorage
+    private readonly storage: IRegistryStorage,
   ) {
     this.initializeService();
   }
@@ -187,7 +190,9 @@ export class RegistryAdminService implements IRegistryAdmin {
   /**
    * Perform registry maintenance
    */
-  async performMaintenance(options: MaintenanceOptions): Promise<MaintenanceResult> {
+  async performMaintenance(
+    options: MaintenanceOptions,
+  ): Promise<MaintenanceResult> {
     const maintenanceId = this.generateMaintenanceId();
     this.logger.log(`Starting registry maintenance: ${maintenanceId}`);
 
@@ -227,32 +232,36 @@ export class RegistryAdminService implements IRegistryAdmin {
       }
 
       const duration = Date.now() - startTime;
-      const recommendations = this.generateMaintenanceRecommendations(actionsPerformed, issues);
+      const recommendations = this.generateMaintenanceRecommendations(
+        actionsPerformed,
+        issues,
+      );
 
       const result: MaintenanceResult = {
         success: true,
         duration,
         actionsPerformed,
         issues,
-        recommendations
+        recommendations,
       };
 
       // Store maintenance history
       this.maintenanceHistory.set(maintenanceId, result);
 
       // Emit maintenance completed event
-      this.eventEmitter.emit('registry.maintenance-completed', {
+      this.eventEmitter.emit("registry.maintenance-completed", {
         maintenanceId,
         duration,
         actionsCount: actionsPerformed.length,
         issuesFound: issues.length,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
-      this.logger.log(`Registry maintenance completed: ${maintenanceId} in ${duration}ms`);
+      this.logger.log(
+        `Registry maintenance completed: ${maintenanceId} in ${duration}ms`,
+      );
 
       return result;
-
     } catch (error) {
       this.logger.error(`Registry maintenance failed: ${maintenanceId}`, error);
 
@@ -266,10 +275,12 @@ export class RegistryAdminService implements IRegistryAdmin {
             type: IssueType._PERFORMANCE_ISSUE,
             description: `Maintenance failed: ${error instanceof Error ? error.message : String(error)}`,
             severity: IssueSeverity._HIGH,
-            resolution: 'Review error logs and retry maintenance'
-          }
+            resolution: "Review error logs and retry maintenance",
+          },
         ],
-        recommendations: ['Review maintenance failure and retry with adjusted parameters']
+        recommendations: [
+          "Review maintenance failure and retry with adjusted parameters",
+        ],
       };
 
       this.maintenanceHistory.set(maintenanceId, result);
@@ -294,17 +305,18 @@ export class RegistryAdminService implements IRegistryAdmin {
       this.backupHistory.set(backupId, result);
 
       // Emit backup completed event
-      this.eventEmitter.emit('registry.backup-completed', {
+      this.eventEmitter.emit("registry.backup-completed", {
         backupId: result.backupId,
         size: result.size,
         duration: result.duration,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
-      this.logger.log(`Registry backup completed: ${result.backupId} (${result.size} bytes)`);
+      this.logger.log(
+        `Registry backup completed: ${result.backupId} (${result.size} bytes)`,
+      );
 
       return result;
-
     } catch (error) {
       this.logger.error(`Registry backup failed: ${backupId}`, error);
       throw error;
@@ -314,7 +326,10 @@ export class RegistryAdminService implements IRegistryAdmin {
   /**
    * Restore registry from backup
    */
-  async restore(backupId: string, options: RestoreOptions): Promise<RestoreResult> {
+  async restore(
+    backupId: string,
+    options: RestoreOptions,
+  ): Promise<RestoreResult> {
     this.logger.log(`Starting registry restore from backup: ${backupId}`);
 
     const startTime = Date.now();
@@ -323,19 +338,23 @@ export class RegistryAdminService implements IRegistryAdmin {
       const result = await this.storage.restoreFromBackup(backupId, options);
 
       // Emit restore completed event
-      this.eventEmitter.emit('registry.restore-completed', {
+      this.eventEmitter.emit("registry.restore-completed", {
         backupId,
         restoredItems: result.restoredItems,
         duration: result.duration,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
-      this.logger.log(`Registry restore completed from backup: ${backupId} (${result.restoredItems} items)`);
+      this.logger.log(
+        `Registry restore completed from backup: ${backupId} (${result.restoredItems} items)`,
+      );
 
       return result;
-
     } catch (error) {
-      this.logger.error(`Registry restore failed from backup: ${backupId}`, error);
+      this.logger.error(
+        `Registry restore failed from backup: ${backupId}`,
+        error,
+      );
       throw error;
     }
   }
@@ -344,29 +363,33 @@ export class RegistryAdminService implements IRegistryAdmin {
    * Get registry metrics
    */
   async getMetrics(timeRange: TimeRange): Promise<RegistryMetrics> {
-    this.logger.debug(`Getting registry metrics for time range: ${timeRange.start} - ${timeRange.end}`);
+    this.logger.debug(
+      `Getting registry metrics for time range: ${timeRange.start} - ${timeRange.end}`,
+    );
 
     try {
       const [performance, usage, health, storage] = await Promise.all([
         this.storage.getPerformanceMetrics(timeRange),
         this.storage.getUsageMetrics(timeRange),
         this.getHealthMetrics(),
-        this.storage.getStorageMetrics()
+        this.storage.getStorageMetrics(),
       ]);
 
       const metrics: RegistryMetrics = {
         performance,
         usage,
         health,
-        storage
+        storage,
       };
 
-      this.logger.debug('Registry metrics retrieved successfully');
+      this.logger.debug("Registry metrics retrieved successfully");
 
       return metrics;
-
     } catch (error) {
-      this.logger.error(`Failed to get registry metrics: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
+      this.logger.error(
+        `Failed to get registry metrics: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
       throw error;
     }
   }
@@ -374,14 +397,18 @@ export class RegistryAdminService implements IRegistryAdmin {
   /**
    * Configure registry settings
    */
-  async configureRegistry(settings: RegistrySettings): Promise<ConfigurationResult> {
-    this.logger.log('Configuring registry settings');
+  async configureRegistry(
+    settings: RegistrySettings,
+  ): Promise<ConfigurationResult> {
+    this.logger.log("Configuring registry settings");
 
     try {
       // Validate settings
       const validationResult = this.validateRegistrySettings(settings);
       if (!validationResult.valid) {
-        throw new Error(`Invalid settings: ${validationResult.issues.join(', ')}`);
+        throw new Error(
+          `Invalid settings: ${validationResult.issues.join(", ")}`,
+        );
       }
 
       // Get current settings
@@ -394,33 +421,39 @@ export class RegistryAdminService implements IRegistryAdmin {
       const restartRequired = this.requiresRestart(currentSettings, settings);
 
       // Get applied settings
-      const appliedSettings = Object.keys(settings).filter(key =>
-        JSON.stringify((currentSettings as any)[key]) !== JSON.stringify((settings as any)[key])
+      const appliedSettings = Object.keys(settings).filter(
+        (key) =>
+          JSON.stringify((currentSettings as any)[key]) !==
+          JSON.stringify((settings as any)[key]),
       );
 
       // Generate warnings
       const warnings = this.generateConfigurationWarnings(settings);
 
       // Emit configuration updated event
-      this.eventEmitter.emit('registry.configuration-updated', {
+      this.eventEmitter.emit("registry.configuration-updated", {
         appliedSettings,
         restartRequired,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       const result: ConfigurationResult = {
         success: true,
         appliedSettings,
         restartRequired,
-        warnings
+        warnings,
       };
 
-      this.logger.log(`Registry configuration updated: ${appliedSettings.length} settings changed`);
+      this.logger.log(
+        `Registry configuration updated: ${appliedSettings.length} settings changed`,
+      );
 
       return result;
-
     } catch (error) {
-      this.logger.error(`Failed to configure registry: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
+      this.logger.error(
+        `Failed to configure registry: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
       throw error;
     }
   }
@@ -429,7 +462,7 @@ export class RegistryAdminService implements IRegistryAdmin {
    * Get audit log
    */
   async getAuditLog(options: AuditLogOptions): Promise<AuditLog> {
-    this.logger.debug('Getting audit log');
+    this.logger.debug("Getting audit log");
 
     try {
       const entries = await this.storage.getAuditEntries(options);
@@ -439,16 +472,18 @@ export class RegistryAdminService implements IRegistryAdmin {
         totalCount: entries.length,
         timeRange: {
           start: options.startTime,
-          end: options.endTime
-        }
+          end: options.endTime,
+        },
       };
 
       this.logger.debug(`Audit log retrieved: ${entries.length} entries`);
 
       return auditLog;
-
     } catch (error) {
-      this.logger.error(`Failed to get audit log: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
+      this.logger.error(
+        `Failed to get audit log: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
       throw error;
     }
   }
@@ -457,14 +492,15 @@ export class RegistryAdminService implements IRegistryAdmin {
    * Purge inactive functions
    */
   async purgeInactive(criteria: PurgeCriteria): Promise<PurgeResult> {
-    this.logger.log('Purging inactive functions');
+    this.logger.log("Purging inactive functions");
 
     try {
       if (criteria.dryRun) {
-        this.logger.log('Performing dry run for purge operation');
+        this.logger.log("Performing dry run for purge operation");
       }
 
-      const purgedFunctions = await this.storage.purgeInactiveFunctions(criteria);
+      const purgedFunctions =
+        await this.storage.purgeInactiveFunctions(criteria);
 
       // Calculate space saved (estimated)
       const spaceSaved = purgedFunctions.length * 1024; // Estimated 1KB per function
@@ -478,24 +514,28 @@ export class RegistryAdminService implements IRegistryAdmin {
         success: true,
         purgedFunctions,
         preservedFunctions,
-        spaceSaved
+        spaceSaved,
       };
 
       // Emit purge completed event
-      this.eventEmitter.emit('registry.purge-completed', {
+      this.eventEmitter.emit("registry.purge-completed", {
         purgedCount: purgedFunctions.length,
         preservedCount: preservedFunctions.length,
         spaceSaved,
         dryRun: criteria.dryRun,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
-      this.logger.log(`Purge operation completed: ${purgedFunctions.length} functions purged`);
+      this.logger.log(
+        `Purge operation completed: ${purgedFunctions.length} functions purged`,
+      );
 
       return result;
-
     } catch (error) {
-      this.logger.error(`Failed to purge inactive functions: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
+      this.logger.error(
+        `Failed to purge inactive functions: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
       throw error;
     }
   }
@@ -504,7 +544,7 @@ export class RegistryAdminService implements IRegistryAdmin {
    * Rebuild registry indices
    */
   async rebuildIndices(): Promise<IndexRebuildResult> {
-    this.logger.log('Rebuilding registry indices');
+    this.logger.log("Rebuilding registry indices");
 
     const startTime = Date.now();
 
@@ -512,30 +552,39 @@ export class RegistryAdminService implements IRegistryAdmin {
       await this.storage.rebuildIndices();
 
       const rebuildTime = Date.now() - startTime;
-      const indicesRebuilt = ['function_name', 'function_type', 'creation_date', 'status']; // Example indices
+      const indicesRebuilt = [
+        "function_name",
+        "function_type",
+        "creation_date",
+        "status",
+      ]; // Example indices
       const performanceImprovement = 25; // Estimated percentage improvement
 
       const result: IndexRebuildResult = {
         success: true,
         rebuildTime,
         indicesRebuilt,
-        performanceImprovement
+        performanceImprovement,
       };
 
       // Emit index rebuild completed event
-      this.eventEmitter.emit('registry.indices-rebuilt', {
+      this.eventEmitter.emit("registry.indices-rebuilt", {
         indicesCount: indicesRebuilt.length,
         rebuildTime,
         performanceImprovement,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
-      this.logger.log(`Registry indices rebuilt successfully in ${rebuildTime}ms`);
+      this.logger.log(
+        `Registry indices rebuilt successfully in ${rebuildTime}ms`,
+      );
 
       return result;
-
     } catch (error) {
-      this.logger.error(`Failed to rebuild indices: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
+      this.logger.error(
+        `Failed to rebuild indices: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
       throw error;
     }
   }
@@ -544,7 +593,7 @@ export class RegistryAdminService implements IRegistryAdmin {
    * Get registry status
    */
   async getStatus(): Promise<RegistryStatus> {
-    this.logger.debug('Getting registry status');
+    this.logger.debug("Getting registry status");
 
     try {
       const systemStatus = await this.storage.getSystemStatus();
@@ -554,13 +603,15 @@ export class RegistryAdminService implements IRegistryAdmin {
         health: this.determineHealthStatus(systemStatus),
         performance: this.determinePerformanceStatus(systemStatus),
         storage: this.determineStorageStatus(systemStatus),
-        lastMaintenance: systemStatus.lastMaintenance
+        lastMaintenance: systemStatus.lastMaintenance,
       };
 
       return status;
-
     } catch (error) {
-      this.logger.error(`Failed to get registry status: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
+      this.logger.error(
+        `Failed to get registry status: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
       throw error;
     }
   }
@@ -570,7 +621,7 @@ export class RegistryAdminService implements IRegistryAdmin {
    */
   // @Cron('0 2 * * *') - Decorator temporarily commented due to TypeScript issue
   async performScheduledMaintenance(): Promise<void> {
-    this.logger.log('Starting scheduled maintenance');
+    this.logger.log("Starting scheduled maintenance");
 
     try {
       const options: MaintenanceOptions = {
@@ -578,15 +629,17 @@ export class RegistryAdminService implements IRegistryAdmin {
         rebuildIndices: false, // Only on weekends
         compactStorage: true,
         validateIntegrity: true,
-        optimizePerformance: false // Only on demand
+        optimizePerformance: false, // Only on demand
       };
 
       await this.performMaintenance(options);
 
-      this.logger.log('Scheduled maintenance completed successfully');
-
+      this.logger.log("Scheduled maintenance completed successfully");
     } catch (error) {
-      this.logger.error(`Scheduled maintenance failed: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
+      this.logger.error(
+        `Scheduled maintenance failed: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
     }
   }
 
@@ -595,7 +648,7 @@ export class RegistryAdminService implements IRegistryAdmin {
    */
   // @Cron('0 3 * * 0') - Decorator temporarily commented due to TypeScript issue
   async performWeeklyMaintenance(): Promise<void> {
-    this.logger.log('Starting weekly comprehensive maintenance');
+    this.logger.log("Starting weekly comprehensive maintenance");
 
     try {
       const options: MaintenanceOptions = {
@@ -603,15 +656,19 @@ export class RegistryAdminService implements IRegistryAdmin {
         rebuildIndices: true,
         compactStorage: true,
         validateIntegrity: true,
-        optimizePerformance: true
+        optimizePerformance: true,
       };
 
       await this.performMaintenance(options);
 
-      this.logger.log('Weekly comprehensive maintenance completed successfully');
-
+      this.logger.log(
+        "Weekly comprehensive maintenance completed successfully",
+      );
     } catch (error) {
-      this.logger.error(`Weekly comprehensive maintenance failed: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
+      this.logger.error(
+        `Weekly comprehensive maintenance failed: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
     }
   }
 
@@ -620,7 +677,7 @@ export class RegistryAdminService implements IRegistryAdmin {
    */
   // @Cron('0 1 * * *') - Decorator temporarily commented due to TypeScript issue
   async performAutomatedBackup(): Promise<void> {
-    this.logger.log('Starting automated backup');
+    this.logger.log("Starting automated backup");
 
     try {
       const options: BackupOptions = {
@@ -628,7 +685,7 @@ export class RegistryAdminService implements IRegistryAdmin {
         includeMetadata: true,
         includeHistory: true,
         compression: true,
-        encryption: true
+        encryption: true,
       };
 
       await this.backup(options);
@@ -636,10 +693,12 @@ export class RegistryAdminService implements IRegistryAdmin {
       // Cleanup old backups (keep last 7 days)
       await this.cleanupOldBackups(7);
 
-      this.logger.log('Automated backup completed successfully');
-
+      this.logger.log("Automated backup completed successfully");
     } catch (error) {
-      this.logger.error(`Automated backup failed: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
+      this.logger.error(
+        `Automated backup failed: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
     }
   }
 
@@ -651,14 +710,16 @@ export class RegistryAdminService implements IRegistryAdmin {
    * Initialize the service
    */
   private async initializeService(): Promise<void> {
-    this.logger.log('Initializing Registry Admin Service');
+    this.logger.log("Initializing Registry Admin Service");
 
     try {
       // Initialize service state
-      this.logger.log('Registry Admin Service initialized successfully');
-
+      this.logger.log("Registry Admin Service initialized successfully");
     } catch (error) {
-      this.logger.error(`Failed to initialize Registry Admin Service: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
+      this.logger.error(
+        `Failed to initialize Registry Admin Service: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
     }
   }
 
@@ -687,18 +748,17 @@ export class RegistryAdminService implements IRegistryAdmin {
       const cleanedItems = await this.storage.cleanupStaleData(cutoffDate);
 
       return {
-        name: 'cleanup_stale_data',
+        name: "cleanup_stale_data",
         duration: Date.now() - startTime,
         result: ActionResult._SUCCESS,
-        details: `Cleaned up ${cleanedItems} stale data items`
+        details: `Cleaned up ${cleanedItems} stale data items`,
       };
-
     } catch (error) {
       return {
-        name: 'cleanup_stale_data',
+        name: "cleanup_stale_data",
         duration: Date.now() - startTime,
         result: ActionResult._FAILURE,
-        details: `Failed to cleanup stale data: ${error instanceof Error ? error.message : String(error)}`
+        details: `Failed to cleanup stale data: ${error instanceof Error ? error.message : String(error)}`,
       };
     }
   }
@@ -713,18 +773,17 @@ export class RegistryAdminService implements IRegistryAdmin {
       await this.storage.rebuildIndices();
 
       return {
-        name: 'rebuild_indices',
+        name: "rebuild_indices",
         duration: Date.now() - startTime,
         result: ActionResult._SUCCESS,
-        details: 'All indices rebuilt successfully'
+        details: "All indices rebuilt successfully",
       };
-
     } catch (error) {
       return {
-        name: 'rebuild_indices',
+        name: "rebuild_indices",
         duration: Date.now() - startTime,
         result: ActionResult._FAILURE,
-        details: `Failed to rebuild indices: ${error instanceof Error ? error.message : String(error)}`
+        details: `Failed to rebuild indices: ${error instanceof Error ? error.message : String(error)}`,
       };
     }
   }
@@ -739,18 +798,17 @@ export class RegistryAdminService implements IRegistryAdmin {
       const spaceSaved = await this.storage.compactStorage();
 
       return {
-        name: 'compact_storage',
+        name: "compact_storage",
         duration: Date.now() - startTime,
         result: ActionResult._SUCCESS,
-        details: `Storage compacted, saved ${spaceSaved} bytes`
+        details: `Storage compacted, saved ${spaceSaved} bytes`,
       };
-
     } catch (error) {
       return {
-        name: 'compact_storage',
+        name: "compact_storage",
         duration: Date.now() - startTime,
         result: ActionResult._FAILURE,
-        details: `Failed to compact storage: ${error instanceof Error ? error.message : String(error)}`
+        details: `Failed to compact storage: ${error instanceof Error ? error.message : String(error)}`,
       };
     }
   }
@@ -758,35 +816,36 @@ export class RegistryAdminService implements IRegistryAdmin {
   /**
    * Perform validate integrity
    */
-  private async performValidateIntegrity(issues: MaintenanceIssue[]): Promise<MaintenanceAction> {
+  private async performValidateIntegrity(
+    issues: MaintenanceIssue[],
+  ): Promise<MaintenanceAction> {
     const startTime = Date.now();
 
     try {
       const report = await this.storage.validateIntegrity();
 
       // Convert integrity issues to maintenance issues
-      report.issues.forEach(issue => {
+      report.issues.forEach((issue) => {
         issues.push({
           type: IssueType._DATA_CORRUPTION,
           description: issue.description,
           severity: issue.severity,
-          resolution: issue.suggestedFix
+          resolution: issue.suggestedFix,
         });
       });
 
       return {
-        name: 'validate_integrity',
+        name: "validate_integrity",
         duration: Date.now() - startTime,
         result: report.valid ? ActionResult._SUCCESS : ActionResult._WARNING,
-        details: `Integrity validation completed, ${report.issues.length} issues found`
+        details: `Integrity validation completed, ${report.issues.length} issues found`,
       };
-
     } catch (error) {
       return {
-        name: 'validate_integrity',
+        name: "validate_integrity",
         duration: Date.now() - startTime,
         result: ActionResult._FAILURE,
-        details: `Failed to validate integrity: ${error instanceof Error ? error.message : String(error)}`
+        details: `Failed to validate integrity: ${error instanceof Error ? error.message : String(error)}`,
       };
     }
   }
@@ -801,18 +860,17 @@ export class RegistryAdminService implements IRegistryAdmin {
       const report = await this.storage.optimizePerformance();
 
       return {
-        name: 'optimize_performance',
+        name: "optimize_performance",
         duration: Date.now() - startTime,
         result: ActionResult._SUCCESS,
-        details: `Performance optimized, ${report.performanceImprovement}% improvement`
+        details: `Performance optimized, ${report.performanceImprovement}% improvement`,
       };
-
     } catch (error) {
       return {
-        name: 'optimize_performance',
+        name: "optimize_performance",
         duration: Date.now() - startTime,
         result: ActionResult._FAILURE,
-        details: `Failed to optimize performance: ${error instanceof Error ? error.message : String(error)}`
+        details: `Failed to optimize performance: ${error instanceof Error ? error.message : String(error)}`,
       };
     }
   }
@@ -822,31 +880,37 @@ export class RegistryAdminService implements IRegistryAdmin {
    */
   private generateMaintenanceRecommendations(
     actions: MaintenanceAction[],
-    issues: MaintenanceIssue[]
+    issues: MaintenanceIssue[],
   ): string[] {
     const recommendations: string[] = [];
 
     // Check for failed actions
-    const failedActions = actions.filter(a => a.result === ActionResult._FAILURE);
+    const failedActions = actions.filter(
+      (a) => a.result === ActionResult._FAILURE,
+    );
     if (failedActions.length > 0) {
-      recommendations.push('Review and retry failed maintenance actions');
+      recommendations.push("Review and retry failed maintenance actions");
     }
 
     // Check for performance issues
-    const performanceIssues = issues.filter(i => i.type === IssueType._PERFORMANCE_ISSUE);
+    const performanceIssues = issues.filter(
+      (i) => i.type === IssueType._PERFORMANCE_ISSUE,
+    );
     if (performanceIssues.length > 0) {
-      recommendations.push('Consider additional performance optimization');
+      recommendations.push("Consider additional performance optimization");
     }
 
     // Check for storage issues
-    const storageIssues = issues.filter(i => i.type === IssueType._STORAGE_ISSUE);
+    const storageIssues = issues.filter(
+      (i) => i.type === IssueType._STORAGE_ISSUE,
+    );
     if (storageIssues.length > 0) {
-      recommendations.push('Monitor storage usage and consider cleanup');
+      recommendations.push("Monitor storage usage and consider cleanup");
     }
 
     // General recommendations
-    recommendations.push('Schedule regular maintenance operations');
-    recommendations.push('Monitor system metrics for early issue detection');
+    recommendations.push("Schedule regular maintenance operations");
+    recommendations.push("Monitor system metrics for early issue detection");
 
     return recommendations;
   }
@@ -854,50 +918,59 @@ export class RegistryAdminService implements IRegistryAdmin {
   /**
    * Validate registry settings
    */
-  private validateRegistrySettings(settings: RegistrySettings): { valid: boolean; issues: string[] } {
+  private validateRegistrySettings(settings: RegistrySettings): {
+    valid: boolean;
+    issues: string[];
+  } {
     const issues: string[] = [];
 
     // Validate cache settings
     if (settings.cacheSettings.enabled && settings.cacheSettings.maxSize <= 0) {
-      issues.push('Cache max size must be greater than 0');
+      issues.push("Cache max size must be greater than 0");
     }
 
     if (settings.cacheSettings.ttl <= 0) {
-      issues.push('Cache TTL must be greater than 0');
+      issues.push("Cache TTL must be greater than 0");
     }
 
     // Validate index settings
-    if (settings.indexSettings.rebuildThreshold < 0 || settings.indexSettings.rebuildThreshold > 1) {
-      issues.push('Index rebuild threshold must be between 0 and 1');
+    if (
+      settings.indexSettings.rebuildThreshold < 0 ||
+      settings.indexSettings.rebuildThreshold > 1
+    ) {
+      issues.push("Index rebuild threshold must be between 0 and 1");
     }
 
     // Validate performance settings
     if (settings.performanceSettings.queryTimeout <= 0) {
-      issues.push('Query timeout must be greater than 0');
+      issues.push("Query timeout must be greater than 0");
     }
 
     if (settings.performanceSettings.batchSize <= 0) {
-      issues.push('Batch size must be greater than 0');
+      issues.push("Batch size must be greater than 0");
     }
 
     return {
       valid: issues.length === 0,
-      issues
+      issues,
     };
   }
 
   /**
    * Check if settings require restart
    */
-  private requiresRestart(current: RegistrySettings, updated: RegistrySettings): boolean {
+  private requiresRestart(
+    current: RegistrySettings,
+    updated: RegistrySettings,
+  ): boolean {
     // Settings that require restart
     const restartRequired = [
-      'securitySettings.encryptionEnabled',
-      'performanceSettings.maxCacheSize',
-      'indexSettings.optimizationLevel'
+      "securitySettings.encryptionEnabled",
+      "performanceSettings.maxCacheSize",
+      "indexSettings.optimizationLevel",
     ];
 
-    return restartRequired.some(path => {
+    return restartRequired.some((path) => {
       const currentValue = this.getNestedValue(current, path);
       const updatedValue = this.getNestedValue(updated, path);
       return currentValue !== updatedValue;
@@ -908,7 +981,7 @@ export class RegistryAdminService implements IRegistryAdmin {
    * Get nested value from object
    */
   private getNestedValue(obj: any, path: string): any {
-    return path.split('.').reduce((current, key) => current?.[key], obj);
+    return path.split(".").reduce((current, key) => current?.[key], obj);
   }
 
   /**
@@ -918,16 +991,17 @@ export class RegistryAdminService implements IRegistryAdmin {
     const warnings: string[] = [];
 
     // Check for potential issues
-    if (settings.cacheSettings.maxSize > 1000000000) { // 1GB
-      warnings.push('Large cache size may impact memory usage');
+    if (settings.cacheSettings.maxSize > 1000000000) {
+      // 1GB
+      warnings.push("Large cache size may impact memory usage");
     }
 
     if (settings.performanceSettings.batchSize > 1000) {
-      warnings.push('Large batch size may impact query performance');
+      warnings.push("Large batch size may impact query performance");
     }
 
     if (!settings.securitySettings.auditingLevel) {
-      warnings.push('Consider enabling auditing for security compliance');
+      warnings.push("Consider enabling auditing for security compliance");
     }
 
     return warnings;
@@ -940,13 +1014,37 @@ export class RegistryAdminService implements IRegistryAdmin {
     // This would integrate with the health monitoring service
     // For now, return mock metrics
     return {
-      functionId: 'system',
+      functionId: "system",
       timestamp: new Date(),
       metrics: new Map([
-        ['uptime', { value: 99.9, unit: '%', trend: 'stable' as TrendDirection, history: [] }],
-        ['response_time', { value: 50, unit: 'ms', trend: 'improving' as TrendDirection, history: [] }],
-        ['error_rate', { value: 0.1, unit: '%', trend: 'stable' as TrendDirection, history: [] }]
-      ])
+        [
+          "uptime",
+          {
+            value: 99.9,
+            unit: "%",
+            trend: "stable" as TrendDirection,
+            history: [],
+          },
+        ],
+        [
+          "response_time",
+          {
+            value: 50,
+            unit: "ms",
+            trend: "improving" as TrendDirection,
+            history: [],
+          },
+        ],
+        [
+          "error_rate",
+          {
+            value: 0.1,
+            unit: "%",
+            trend: "stable" as TrendDirection,
+            history: [],
+          },
+        ],
+      ]),
     };
   }
 
@@ -955,7 +1053,7 @@ export class RegistryAdminService implements IRegistryAdmin {
    */
   private async getSystemFunctions(): Promise<string[]> {
     // Return list of system functions that should not be purged
-    return ['system_health_check', 'system_backup', 'system_restore'];
+    return ["system_health_check", "system_backup", "system_restore"];
   }
 
   /**
@@ -963,7 +1061,8 @@ export class RegistryAdminService implements IRegistryAdmin {
    */
   private determineHealthStatus(systemStatus: SystemStatus): HealthStatus {
     if (!systemStatus.operational) return HealthStatus._CRITICAL;
-    if (systemStatus.memoryUsage > 90 || systemStatus.diskUsage > 90) return HealthStatus._POOR;
+    if (systemStatus.memoryUsage > 90 || systemStatus.diskUsage > 90)
+      return HealthStatus._POOR;
     if (systemStatus.cpuUsage > 80) return HealthStatus._POOR;
     return HealthStatus._EXCELLENT;
   }
@@ -971,20 +1070,34 @@ export class RegistryAdminService implements IRegistryAdmin {
   /**
    * Determine performance status
    */
-  private determinePerformanceStatus(systemStatus: SystemStatus): PerformanceStatus {
-    const queryPerformance = systemStatus.cpuUsage < 50 ? PerformanceLevel._OPTIMAL :
-                            systemStatus.cpuUsage < 80 ? PerformanceLevel._GOOD : PerformanceLevel._POOR;
+  private determinePerformanceStatus(
+    systemStatus: SystemStatus,
+  ): PerformanceStatus {
+    const queryPerformance =
+      systemStatus.cpuUsage < 50
+        ? PerformanceLevel._OPTIMAL
+        : systemStatus.cpuUsage < 80
+          ? PerformanceLevel._GOOD
+          : PerformanceLevel._POOR;
 
-    const indexPerformance = systemStatus.diskUsage < 70 ? PerformanceLevel._OPTIMAL :
-                            systemStatus.diskUsage < 90 ? PerformanceLevel._GOOD : PerformanceLevel._POOR;
+    const indexPerformance =
+      systemStatus.diskUsage < 70
+        ? PerformanceLevel._OPTIMAL
+        : systemStatus.diskUsage < 90
+          ? PerformanceLevel._GOOD
+          : PerformanceLevel._POOR;
 
-    const cachePerformance = systemStatus.memoryUsage < 70 ? PerformanceLevel._OPTIMAL :
-                            systemStatus.memoryUsage < 90 ? PerformanceLevel._GOOD : PerformanceLevel._POOR;
+    const cachePerformance =
+      systemStatus.memoryUsage < 70
+        ? PerformanceLevel._OPTIMAL
+        : systemStatus.memoryUsage < 90
+          ? PerformanceLevel._GOOD
+          : PerformanceLevel._POOR;
 
     return {
       queryPerformance,
       indexPerformance,
-      cachePerformance
+      cachePerformance,
     };
   }
 
@@ -996,7 +1109,7 @@ export class RegistryAdminService implements IRegistryAdmin {
       utilization: systemStatus.diskUsage,
       fragmentation: 10, // Mock value
       compressionRatio: 0.7, // Mock value
-      freeSpace: 100 - systemStatus.diskUsage
+      freeSpace: 100 - systemStatus.diskUsage,
     };
   }
 
@@ -1006,7 +1119,9 @@ export class RegistryAdminService implements IRegistryAdmin {
   private async cleanupOldBackups(retentionDays: number): Promise<void> {
     try {
       const backups = await this.storage.listBackups();
-      const cutoffDate = new Date(Date.now() - retentionDays * 24 * 60 * 60 * 1000);
+      const cutoffDate = new Date(
+        Date.now() - retentionDays * 24 * 60 * 60 * 1000,
+      );
 
       for (const backup of backups) {
         if (backup.createdAt < cutoffDate) {
@@ -1014,9 +1129,10 @@ export class RegistryAdminService implements IRegistryAdmin {
           this.logger.debug(`Deleted old backup: ${backup.id}`);
         }
       }
-
     } catch (error) {
-      this.logger.warn(`Failed to cleanup old backups: ${error instanceof Error ? error.message : String(error)}`);
+      this.logger.warn(
+        `Failed to cleanup old backups: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 }

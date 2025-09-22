@@ -330,7 +330,10 @@ export class ParlantTokenPropagationService
   // Security configuration
   private readonly maxTokenUsage = 1000;
   private readonly maxPropagationHops = 10;
-  private readonly tokenValidationCache = new Map<string, TokenValidationResult>();
+  private readonly tokenValidationCache = new Map<
+    string,
+    TokenValidationResult
+  >();
   private readonly validationCacheTTL = 300000; // 5 minutes
 
   // Performance metrics
@@ -364,10 +367,15 @@ export class ParlantTokenPropagationService
       await this.startPeriodicTasks();
       await this.loadTokenBlacklist();
 
-      this.logger.log("✅ Enhanced JWT Token Propagation Service initialized successfully");
+      this.logger.log(
+        "✅ Enhanced JWT Token Propagation Service initialized successfully",
+      );
       this.emit("token:service:initialized");
     } catch (error) {
-      this.logger.error("❌ Failed to initialize Token Propagation Service", error);
+      this.logger.error(
+        "❌ Failed to initialize Token Propagation Service",
+        error,
+      );
       throw new ParlantIntegrationError(
         "Token Propagation Service initialization failed",
         "TOKEN_SERVICE_INIT_ERROR",
@@ -380,13 +388,17 @@ export class ParlantTokenPropagationService
    * Clean up on module destruction
    */
   async onModuleDestroy(): Promise<void> {
-    this.logger.log("🔄 Shutting down Enhanced JWT Token Propagation Service...");
+    this.logger.log(
+      "🔄 Shutting down Enhanced JWT Token Propagation Service...",
+    );
 
     await this.stopPeriodicTasks();
     await this.saveTokenBlacklist();
     await this.saveMetrics();
 
-    this.logger.log("✅ Enhanced JWT Token Propagation Service shutdown complete");
+    this.logger.log(
+      "✅ Enhanced JWT Token Propagation Service shutdown complete",
+    );
   }
 
   /**
@@ -401,7 +413,8 @@ export class ParlantTokenPropagationService
 
     try {
       const now = new Date();
-      const expiresIn = tokenType === "refresh" ? this.refreshTokenTTL : this.accessTokenTTL;
+      const expiresIn =
+        tokenType === "refresh" ? this.refreshTokenTTL : this.accessTokenTTL;
 
       const payload: EnhancedJwtPayload = {
         sub: userContext.userId,
@@ -416,12 +429,16 @@ export class ParlantTokenPropagationService
         iss: "parlant-security",
         aud: "parlant-services",
         jti: crypto.randomUUID(),
-        security: await this.buildTokenSecurityMetadata(userContext, securityContext),
+        security: await this.buildTokenSecurityMetadata(
+          userContext,
+          securityContext,
+        ),
         propagation: this.buildTokenPropagationHistory(),
         validation: this.buildTokenValidationContext(),
       };
 
-      const secret = tokenType === "refresh" ? this.refreshSecret : this.jwtSecret;
+      const secret =
+        tokenType === "refresh" ? this.refreshSecret : this.jwtSecret;
       const token = jwt.sign(payload, secret, {
         algorithm: this.defaultAlgorithm,
         keyid: "parlant-key-1",
@@ -434,7 +451,7 @@ export class ParlantTokenPropagationService
       // Update metrics
       const generationTime = performance.now() - startTime;
       this.logger.debug(
-        `✅ Enhanced JWT token generated: ${payload.jti} (${generationTime.toFixed(2)}ms)`
+        `✅ Enhanced JWT token generated: ${payload.jti} (${generationTime.toFixed(2)}ms)`,
       );
 
       // Emit generation event
@@ -455,7 +472,7 @@ export class ParlantTokenPropagationService
         {
           userId: userContext.userId,
           tokenType,
-          error: error instanceof Error ? error.message : String(error)
+          error: error instanceof Error ? error.message : String(error),
         },
       );
     }
@@ -464,7 +481,9 @@ export class ParlantTokenPropagationService
   /**
    * Validate JWT token with comprehensive checks
    */
-  async validateToken(request: TokenValidationRequest): Promise<TokenValidationResult> {
+  async validateToken(
+    request: TokenValidationRequest,
+  ): Promise<TokenValidationResult> {
     const startTime = performance.now();
 
     try {
@@ -490,18 +509,29 @@ export class ParlantTokenPropagationService
       // Decode and verify token
       let payload: EnhancedJwtPayload;
       try {
-        const secret = request.expectedType === "refresh" ? this.refreshSecret : this.jwtSecret;
+        const secret =
+          request.expectedType === "refresh"
+            ? this.refreshSecret
+            : this.jwtSecret;
         payload = jwt.verify(request.token, secret, {
           algorithms: [this.defaultAlgorithm],
         }) as EnhancedJwtPayload;
       } catch (jwtError) {
         errors.push(`Invalid token: ${(jwtError as Error).message}`);
-        return this.buildValidationResult(false, undefined, errors, warnings, startTime);
+        return this.buildValidationResult(
+          false,
+          undefined,
+          errors,
+          warnings,
+          startTime,
+        );
       }
 
       // Validate token type
       if (request.expectedType && payload.tokenType !== request.expectedType) {
-        errors.push(`Expected token type ${request.expectedType}, got ${payload.tokenType}`);
+        errors.push(
+          `Expected token type ${request.expectedType}, got ${payload.tokenType}`,
+        );
       }
 
       // Check token usage limits
@@ -525,7 +555,12 @@ export class ParlantTokenPropagationService
 
       // Real-time validation
       if (request.options?.realTimeValidation) {
-        await this.performRealTimeValidation(payload, request, errors, warnings);
+        await this.performRealTimeValidation(
+          payload,
+          request,
+          errors,
+          warnings,
+        );
       }
 
       // Calculate validation score
@@ -538,7 +573,7 @@ export class ParlantTokenPropagationService
         errors,
         warnings,
         startTime,
-        score
+        score,
       );
 
       // Cache result
@@ -575,7 +610,7 @@ export class ParlantTokenPropagationService
         "TOKEN_VALIDATION_ERROR",
         {
           requestingService: request.requestingService,
-          error: error instanceof Error ? error.message : String(error)
+          error: error instanceof Error ? error.message : String(error),
         },
       );
     }
@@ -584,7 +619,9 @@ export class ParlantTokenPropagationService
   /**
    * Propagate token across services
    */
-  async propagateToken(request: TokenPropagationRequest): Promise<TokenPropagationResult> {
+  async propagateToken(
+    request: TokenPropagationRequest,
+  ): Promise<TokenPropagationResult> {
     const startTime = performance.now();
 
     try {
@@ -596,7 +633,9 @@ export class ParlantTokenPropagationService
       });
 
       if (!validationResult.valid) {
-        throw new UnauthorizedException(`Invalid source token: ${validationResult.errors.join(", ")}`);
+        throw new UnauthorizedException(
+          `Invalid source token: ${validationResult.errors.join(", ")}`,
+        );
       }
 
       const payload = validationResult.payload!;
@@ -632,7 +671,8 @@ export class ParlantTokenPropagationService
       };
 
       // Generate new token
-      const secret = payload.tokenType === "refresh" ? this.refreshSecret : this.jwtSecret;
+      const secret =
+        payload.tokenType === "refresh" ? this.refreshSecret : this.jwtSecret;
       const propagatedToken = jwt.sign(propagatedPayload, secret, {
         algorithm: this.defaultAlgorithm,
         keyid: "parlant-key-1",
@@ -672,7 +712,7 @@ export class ParlantTokenPropagationService
       });
 
       this.logger.debug(
-        `✅ Token propagated: ${payload.jti} from ${request.sourceService} to ${request.targetService} (${propagationTime.toFixed(2)}ms)`
+        `✅ Token propagated: ${payload.jti} from ${request.sourceService} to ${request.targetService} (${propagationTime.toFixed(2)}ms)`,
       );
 
       return result;
@@ -684,7 +724,7 @@ export class ParlantTokenPropagationService
         {
           sourceService: request.sourceService,
           targetService: request.targetService,
-          error: error instanceof Error ? error.message : String(error)
+          error: error instanceof Error ? error.message : String(error),
         },
       );
     }
@@ -693,7 +733,9 @@ export class ParlantTokenPropagationService
   /**
    * Refresh JWT token
    */
-  async refreshToken(request: TokenRefreshRequest): Promise<TokenRefreshResult> {
+  async refreshToken(
+    request: TokenRefreshRequest,
+  ): Promise<TokenRefreshResult> {
     const startTime = performance.now();
 
     try {
@@ -706,7 +748,9 @@ export class ParlantTokenPropagationService
       });
 
       if (!validationResult.valid) {
-        throw new UnauthorizedException(`Invalid refresh token: ${validationResult.errors.join(", ")}`);
+        throw new UnauthorizedException(
+          `Invalid refresh token: ${validationResult.errors.join(", ")}`,
+        );
       }
 
       const payload = validationResult.payload!;
@@ -726,7 +770,9 @@ export class ParlantTokenPropagationService
       }
 
       if (request.options?.addSecurityControls) {
-        newTokenPayload.security.securityControls.push(...request.options.addSecurityControls);
+        newTokenPayload.security.securityControls.push(
+          ...request.options.addSecurityControls,
+        );
       }
 
       if (request.options?.resetUsageCount) {
@@ -786,7 +832,7 @@ export class ParlantTokenPropagationService
       });
 
       this.logger.debug(
-        `✅ Token refreshed: ${payload.jti} -> ${newTokenPayload.jti} (${refreshTime.toFixed(2)}ms)`
+        `✅ Token refreshed: ${payload.jti} -> ${newTokenPayload.jti} (${refreshTime.toFixed(2)}ms)`,
       );
 
       return result;
@@ -797,7 +843,7 @@ export class ParlantTokenPropagationService
         "TOKEN_REFRESH_ERROR",
         {
           requestingService: request.requestingService,
-          error: error instanceof Error ? error.message : String(error)
+          error: error instanceof Error ? error.message : String(error),
         },
       );
     }
@@ -806,7 +852,10 @@ export class ParlantTokenPropagationService
   /**
    * Revoke JWT token
    */
-  async revokeToken(tokenId: string, reason: string = "user_request"): Promise<void> {
+  async revokeToken(
+    tokenId: string,
+    reason: string = "user_request",
+  ): Promise<void> {
     try {
       const payload = this.activeTokens.get(tokenId);
       if (!payload) {
@@ -873,11 +922,15 @@ export class ParlantTokenPropagationService
       deviceBinding: this.generateDeviceFingerprint(userContext),
       mfaVerified: false, // Would be set based on actual MFA status
       riskScore: securityContext.threatAnalysis.overallScore,
-      securityControls: securityContext.securityControls.map(c => c.controlId),
+      securityControls: securityContext.securityControls.map(
+        (c) => c.controlId,
+      ),
     };
   }
 
-  private getEncryptionLevel(securityLevel: SecurityLevel): "standard" | "enhanced" | "critical" {
+  private getEncryptionLevel(
+    securityLevel: SecurityLevel,
+  ): "standard" | "enhanced" | "critical" {
     switch (securityLevel) {
       case SecurityLevel._CRITICAL:
         return "critical";
@@ -924,9 +977,13 @@ export class ParlantTokenPropagationService
     });
   }
 
-  private generateCacheKey(token: string, options?: TokenValidationOptions): string {
+  private generateCacheKey(
+    token: string,
+    options?: TokenValidationOptions,
+  ): string {
     const hash = crypto.createHash("sha256").update(token).digest("hex");
-    const optionsHash = crypto.createHash("sha256")
+    const optionsHash = crypto
+      .createHash("sha256")
       .update(JSON.stringify(options || {}))
       .digest("hex");
     return `${hash}_${optionsHash}`;
@@ -940,9 +997,9 @@ export class ParlantTokenPropagationService
   private updateCacheHitRate(hit: boolean): void {
     const current = this.metrics.cacheHitRate;
     const total = this.metrics.tokensValidated + 1;
-    this.metrics.cacheHitRate = hit ?
-      (current * (total - 1) + 1) / total :
-      (current * (total - 1)) / total;
+    this.metrics.cacheHitRate = hit
+      ? (current * (total - 1) + 1) / total
+      : (current * (total - 1)) / total;
   }
 
   private async validateIpBinding(
@@ -965,7 +1022,9 @@ export class ParlantTokenPropagationService
     warnings: string[],
   ): Promise<void> {
     if (payload.security.deviceBinding && request.metadata?.deviceFingerprint) {
-      if (payload.security.deviceBinding !== request.metadata.deviceFingerprint) {
+      if (
+        payload.security.deviceBinding !== request.metadata.deviceFingerprint
+      ) {
         warnings.push("Device fingerprint mismatch detected");
       }
     }
@@ -1044,21 +1103,34 @@ export class ParlantTokenPropagationService
     for (const restriction of payload.propagation.restrictions) {
       switch (restriction.type) {
         case "service":
-          if (restriction.value === request.targetService && restriction.enforcement === "strict") {
-            throw new ForbiddenException(`Service propagation restricted: ${restriction.description}`);
+          if (
+            restriction.value === request.targetService &&
+            restriction.enforcement === "strict"
+          ) {
+            throw new ForbiddenException(
+              `Service propagation restricted: ${restriction.description}`,
+            );
           }
           break;
         case "usage":
-          if (typeof restriction.value === "number" &&
-              payload.propagation.usageCount >= restriction.value) {
-            throw new ForbiddenException(`Usage limit exceeded: ${restriction.description}`);
+          if (
+            typeof restriction.value === "number" &&
+            payload.propagation.usageCount >= restriction.value
+          ) {
+            throw new ForbiddenException(
+              `Usage limit exceeded: ${restriction.description}`,
+            );
           }
           break;
       }
     }
   }
 
-  private updateAverage(currentAverage: number, newValue: number, count: number): number {
+  private updateAverage(
+    currentAverage: number,
+    newValue: number,
+    count: number,
+  ): number {
     return (currentAverage * (count - 1) + newValue) / count;
   }
 
@@ -1080,9 +1152,12 @@ export class ParlantTokenPropagationService
 
   private async startPeriodicTasks(): Promise<void> {
     // Token cleanup every 10 minutes
-    this.cleanupTimer = setInterval(() => {
-      this.performTokenCleanup();
-    }, 10 * 60 * 1000);
+    this.cleanupTimer = setInterval(
+      () => {
+        this.performTokenCleanup();
+      },
+      10 * 60 * 1000,
+    );
 
     // Metrics update every minute
     this.metricsTimer = setInterval(() => {
@@ -1119,7 +1194,7 @@ export class ParlantTokenPropagationService
 
     if (cleanedCount > 0 || cacheCleanedCount > 0) {
       this.logger.debug(
-        `🧹 Token cleanup completed: ${cleanedCount} expired tokens, ${cacheCleanedCount} cache entries removed`
+        `🧹 Token cleanup completed: ${cleanedCount} expired tokens, ${cacheCleanedCount} cache entries removed`,
       );
     }
   }

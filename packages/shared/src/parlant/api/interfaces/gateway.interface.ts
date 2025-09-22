@@ -509,7 +509,7 @@ export interface UserContext {
   roles: string[];
   permissions: string[];
   sessionId: string;
-  authLevel: 'BASIC' | 'ENHANCED' | 'ENTERPRISE';
+  authLevel: "BASIC" | "ENHANCED" | "ENTERPRISE";
 }
 
 export interface ValidationResult {
@@ -524,7 +524,7 @@ export interface ValidationError {
   field: string;
   message: string;
   code: string;
-  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
 }
 
 export interface ValidationWarning {
@@ -541,7 +541,7 @@ export interface LoadBalancingStrategy {
 }
 
 export interface AffinityRule {
-  type: 'SESSION' | 'USER' | 'GEOGRAPHIC' | 'CUSTOM';
+  type: "SESSION" | "USER" | "GEOGRAPHIC" | "CUSTOM";
   key: string;
   duration?: number;
 }
@@ -549,8 +549,8 @@ export interface AffinityRule {
 export interface SecurityEnforcement {
   authenticationRequired: boolean;
   authorizationPolicies: string[];
-  encryptionLevel: 'NONE' | 'BASIC' | 'ADVANCED' | 'ENTERPRISE';
-  auditLevel: 'MINIMAL' | 'STANDARD' | 'COMPREHENSIVE';
+  encryptionLevel: "NONE" | "BASIC" | "ADVANCED" | "ENTERPRISE";
+  auditLevel: "MINIMAL" | "STANDARD" | "COMPREHENSIVE";
   allowed: boolean;
 }
 

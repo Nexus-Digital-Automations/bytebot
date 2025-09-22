@@ -474,8 +474,10 @@ export class EmergencyOverrideService
           id: requester.id,
           username: requester.username,
           role: requester.roles[0] || Role._USER,
-          ipAddress: ((requester.metadata as any)?.clientIP as string) || "unknown",
-          userAgent: ((requester.metadata as any)?.userAgent as string) || "unknown",
+          ipAddress:
+            ((requester.metadata as any)?.clientIP as string) || "unknown",
+          userAgent:
+            ((requester.metadata as any)?.userAgent as string) || "unknown",
         },
         details: {
           action: "emergency_override_requested",
@@ -594,8 +596,10 @@ export class EmergencyOverrideService
         id: approverId,
         username: approverContext.username,
         role: approverContext.roles[0] || Role._USER,
-        ipAddress: ((approverContext.metadata as any)?.clientIP as string) || "unknown",
-        userAgent: ((approverContext.metadata as any)?.userAgent as string) || "unknown",
+        ipAddress:
+          ((approverContext.metadata as any)?.clientIP as string) || "unknown",
+        userAgent:
+          ((approverContext.metadata as any)?.userAgent as string) || "unknown",
       },
       details: {
         action: "emergency_override_approved",
@@ -869,8 +873,18 @@ export class EmergencyOverrideService
   > {
     // In a real implementation, this would query the user database
     return [
-      { id: "admin1", username: "admin1", role: Role._ADMIN, status: "pending" },
-      { id: "admin2", username: "admin2", role: Role._ADMIN, status: "pending" },
+      {
+        id: "admin1",
+        username: "admin1",
+        role: Role._ADMIN,
+        status: "pending",
+      },
+      {
+        id: "admin2",
+        username: "admin2",
+        role: Role._ADMIN,
+        status: "pending",
+      },
       {
         id: "moderator1",
         username: "moderator1",

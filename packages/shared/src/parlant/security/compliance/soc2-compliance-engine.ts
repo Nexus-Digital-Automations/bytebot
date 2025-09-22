@@ -9,18 +9,18 @@
  * @author PARLANT Compliance Specialist
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Injectable, Logger } from "@nestjs/common";
+import { EventEmitter2 } from "@nestjs/event-emitter";
 
 /**
  * SOC2 Trust Service Criteria
  */
 export enum TrustServiceCriteria {
-  SECURITY = 'security',
-  AVAILABILITY = 'availability',
-  PROCESSING_INTEGRITY = 'processing_integrity',
-  CONFIDENTIALITY = 'confidentiality',
-  PRIVACY = 'privacy'
+  SECURITY = "security",
+  AVAILABILITY = "availability",
+  PROCESSING_INTEGRITY = "processing_integrity",
+  CONFIDENTIALITY = "confidentiality",
+  PRIVACY = "privacy",
 }
 
 /**
@@ -28,27 +28,27 @@ export enum TrustServiceCriteria {
  */
 export enum SOC2ControlCategory {
   // Common Criteria (CC)
-  CC1_CONTROL_ENVIRONMENT = 'CC1',
-  CC2_COMMUNICATION_INFORMATION = 'CC2',
-  CC3_RISK_ASSESSMENT = 'CC3',
-  CC4_MONITORING_ACTIVITIES = 'CC4',
-  CC5_CONTROL_ACTIVITIES = 'CC5',
-  CC6_LOGICAL_PHYSICAL_ACCESS = 'CC6',
-  CC7_SYSTEM_OPERATIONS = 'CC7',
-  CC8_CHANGE_MANAGEMENT = 'CC8',
-  CC9_RISK_MITIGATION = 'CC9',
+  CC1_CONTROL_ENVIRONMENT = "CC1",
+  CC2_COMMUNICATION_INFORMATION = "CC2",
+  CC3_RISK_ASSESSMENT = "CC3",
+  CC4_MONITORING_ACTIVITIES = "CC4",
+  CC5_CONTROL_ACTIVITIES = "CC5",
+  CC6_LOGICAL_PHYSICAL_ACCESS = "CC6",
+  CC7_SYSTEM_OPERATIONS = "CC7",
+  CC8_CHANGE_MANAGEMENT = "CC8",
+  CC9_RISK_MITIGATION = "CC9",
 
   // Additional Criteria
-  A1_AVAILABILITY_PROCESSING = 'A1',
-  PI1_PROCESSING_INTEGRITY = 'PI1',
-  C1_CONFIDENTIALITY = 'C1',
-  P1_PRIVACY_COLLECTION = 'P1',
-  P2_PRIVACY_USE = 'P2',
-  P3_PRIVACY_RETENTION = 'P3',
-  P4_PRIVACY_DISCLOSURE = 'P4',
-  P5_PRIVACY_QUALITY = 'P5',
-  P6_PRIVACY_MONITORING = 'P6',
-  P7_PRIVACY_INCIDENTS = 'P7'
+  A1_AVAILABILITY_PROCESSING = "A1",
+  PI1_PROCESSING_INTEGRITY = "PI1",
+  C1_CONFIDENTIALITY = "C1",
+  P1_PRIVACY_COLLECTION = "P1",
+  P2_PRIVACY_USE = "P2",
+  P3_PRIVACY_RETENTION = "P3",
+  P4_PRIVACY_DISCLOSURE = "P4",
+  P5_PRIVACY_QUALITY = "P5",
+  P6_PRIVACY_MONITORING = "P6",
+  P7_PRIVACY_INCIDENTS = "P7",
 }
 
 /**
@@ -60,7 +60,11 @@ export interface SOC2Control {
   criteria: TrustServiceCriteria;
   title: string;
   description: string;
-  implementationStatus: 'not_implemented' | 'in_progress' | 'implemented' | 'effective';
+  implementationStatus:
+    | "not_implemented"
+    | "in_progress"
+    | "implemented"
+    | "effective";
   operatingEffectiveness: number; // 0-1 scale
   lastAssessment: Date;
   evidencePoints: SOC2Evidence[];
@@ -69,7 +73,7 @@ export interface SOC2Control {
     plan: string;
     timeline: Date;
     responsible: string;
-    status: 'pending' | 'in_progress' | 'completed';
+    status: "pending" | "in_progress" | "completed";
   };
 }
 
@@ -79,7 +83,13 @@ export interface SOC2Control {
 export interface SOC2Evidence {
   id: string;
   controlId: string;
-  type: 'policy' | 'procedure' | 'log' | 'configuration' | 'test_result' | 'documentation';
+  type:
+    | "policy"
+    | "procedure"
+    | "log"
+    | "configuration"
+    | "test_result"
+    | "documentation";
   title: string;
   description: string;
   collectionDate: Date;
@@ -96,14 +106,14 @@ export interface SOC2Evidence {
 export interface SOC2Exception {
   id: string;
   controlId: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
-  type: 'design_deficiency' | 'operating_deficiency' | 'material_weakness';
+  severity: "low" | "medium" | "high" | "critical";
+  type: "design_deficiency" | "operating_deficiency" | "material_weakness";
   description: string;
   risk_rating: number;
   discovered_date: Date;
   remediation_plan?: string;
   target_resolution_date?: Date;
-  status: 'open' | 'remediated' | 'accepted_risk';
+  status: "open" | "remediated" | "accepted_risk";
 }
 
 /**
@@ -117,11 +127,14 @@ export interface SOC2ComplianceResult {
   };
   criteria: TrustServiceCriteria[];
   overallScore: number;
-  controlResults: Map<string, {
-    score: number;
-    effectiveness: number;
-    exceptions: number;
-  }>;
+  controlResults: Map<
+    string,
+    {
+      score: number;
+      effectiveness: number;
+      exceptions: number;
+    }
+  >;
   evidenceCount: number;
   exceptionsCount: number;
   recommendations: string[];
@@ -142,7 +155,7 @@ export class SOC2ComplianceEngine {
   constructor(eventEmitter: EventEmitter2) {
     this.eventEmitter = eventEmitter;
     this.initializeSOC2Controls();
-    this.logger.log('SOC2 Type II Compliance Engine initialized');
+    this.logger.log("SOC2 Type II Compliance Engine initialized");
   }
 
   /**
@@ -152,111 +165,121 @@ export class SOC2ComplianceEngine {
     const standardControls: Partial<SOC2Control>[] = [
       // Security Controls (Common Criteria)
       {
-        id: 'CC6.1',
+        id: "CC6.1",
         category: SOC2ControlCategory.CC6_LOGICAL_PHYSICAL_ACCESS,
         criteria: TrustServiceCriteria.SECURITY,
-        title: 'Logical and Physical Access Controls',
-        description: 'Controls provide reasonable assurance that access to information and system resources is restricted to authorized users',
-        implementationStatus: 'implemented',
-        operatingEffectiveness: 0.95
+        title: "Logical and Physical Access Controls",
+        description:
+          "Controls provide reasonable assurance that access to information and system resources is restricted to authorized users",
+        implementationStatus: "implemented",
+        operatingEffectiveness: 0.95,
       },
       {
-        id: 'CC6.2',
+        id: "CC6.2",
         category: SOC2ControlCategory.CC6_LOGICAL_PHYSICAL_ACCESS,
         criteria: TrustServiceCriteria.SECURITY,
-        title: 'System Passwords',
-        description: 'Prior to issuing system credentials and granting system access, the entity registers and authorizes new users',
-        implementationStatus: 'implemented',
-        operatingEffectiveness: 0.98
+        title: "System Passwords",
+        description:
+          "Prior to issuing system credentials and granting system access, the entity registers and authorizes new users",
+        implementationStatus: "implemented",
+        operatingEffectiveness: 0.98,
       },
       {
-        id: 'CC6.3',
+        id: "CC6.3",
         category: SOC2ControlCategory.CC6_LOGICAL_PHYSICAL_ACCESS,
         criteria: TrustServiceCriteria.SECURITY,
-        title: 'Network Security Controls',
-        description: 'The entity authorizes, manages, and removes access to data, software, functions, and services',
-        implementationStatus: 'implemented',
-        operatingEffectiveness: 0.92
+        title: "Network Security Controls",
+        description:
+          "The entity authorizes, manages, and removes access to data, software, functions, and services",
+        implementationStatus: "implemented",
+        operatingEffectiveness: 0.92,
       },
       {
-        id: 'CC6.7',
+        id: "CC6.7",
         category: SOC2ControlCategory.CC6_LOGICAL_PHYSICAL_ACCESS,
         criteria: TrustServiceCriteria.SECURITY,
-        title: 'Data Transmission and Disposal',
-        description: 'The entity restricts the transmission, movement, and removal of information to authorized internal and external users',
-        implementationStatus: 'implemented',
-        operatingEffectiveness: 0.94
+        title: "Data Transmission and Disposal",
+        description:
+          "The entity restricts the transmission, movement, and removal of information to authorized internal and external users",
+        implementationStatus: "implemented",
+        operatingEffectiveness: 0.94,
       },
       {
-        id: 'CC6.8',
+        id: "CC6.8",
         category: SOC2ControlCategory.CC6_LOGICAL_PHYSICAL_ACCESS,
         criteria: TrustServiceCriteria.SECURITY,
-        title: 'System Activity Monitoring',
-        description: 'The entity implements controls to prevent or detect and act upon the introduction of unauthorized or malicious software',
-        implementationStatus: 'implemented',
-        operatingEffectiveness: 0.96
+        title: "System Activity Monitoring",
+        description:
+          "The entity implements controls to prevent or detect and act upon the introduction of unauthorized or malicious software",
+        implementationStatus: "implemented",
+        operatingEffectiveness: 0.96,
       },
 
       // Availability Controls
       {
-        id: 'A1.1',
+        id: "A1.1",
         category: SOC2ControlCategory.A1_AVAILABILITY_PROCESSING,
         criteria: TrustServiceCriteria.AVAILABILITY,
-        title: 'Availability Monitoring',
-        description: 'The entity maintains, monitors, and evaluates current processing capacity and use of system components',
-        implementationStatus: 'implemented',
-        operatingEffectiveness: 0.93
+        title: "Availability Monitoring",
+        description:
+          "The entity maintains, monitors, and evaluates current processing capacity and use of system components",
+        implementationStatus: "implemented",
+        operatingEffectiveness: 0.93,
       },
       {
-        id: 'A1.2',
+        id: "A1.2",
         category: SOC2ControlCategory.A1_AVAILABILITY_PROCESSING,
         criteria: TrustServiceCriteria.AVAILABILITY,
-        title: 'System Recovery',
-        description: 'The entity authorizes, designs, develops or acquires, implements, operates, approves, maintains, and monitors environmental protections',
-        implementationStatus: 'implemented',
-        operatingEffectiveness: 0.91
+        title: "System Recovery",
+        description:
+          "The entity authorizes, designs, develops or acquires, implements, operates, approves, maintains, and monitors environmental protections",
+        implementationStatus: "implemented",
+        operatingEffectiveness: 0.91,
       },
 
       // Processing Integrity Controls
       {
-        id: 'PI1.1',
+        id: "PI1.1",
         category: SOC2ControlCategory.PI1_PROCESSING_INTEGRITY,
         criteria: TrustServiceCriteria.PROCESSING_INTEGRITY,
-        title: 'Data Input Validation',
-        description: 'The entity implements controls over system inputs to provide reasonable assurance that data and transactions are valid',
-        implementationStatus: 'implemented',
-        operatingEffectiveness: 0.97
+        title: "Data Input Validation",
+        description:
+          "The entity implements controls over system inputs to provide reasonable assurance that data and transactions are valid",
+        implementationStatus: "implemented",
+        operatingEffectiveness: 0.97,
       },
 
       // Confidentiality Controls
       {
-        id: 'C1.1',
+        id: "C1.1",
         category: SOC2ControlCategory.C1_CONFIDENTIALITY,
         criteria: TrustServiceCriteria.CONFIDENTIALITY,
-        title: 'Confidentiality Protection',
-        description: 'The entity identifies and maintains confidential information to meet the entity\'s objectives',
-        implementationStatus: 'implemented',
-        operatingEffectiveness: 0.95
+        title: "Confidentiality Protection",
+        description:
+          "The entity identifies and maintains confidential information to meet the entity's objectives",
+        implementationStatus: "implemented",
+        operatingEffectiveness: 0.95,
       },
 
       // Privacy Controls
       {
-        id: 'P1.1',
+        id: "P1.1",
         category: SOC2ControlCategory.P1_PRIVACY_COLLECTION,
         criteria: TrustServiceCriteria.PRIVACY,
-        title: 'Privacy Notice',
-        description: 'The entity provides notice about its privacy practices to data subjects',
-        implementationStatus: 'implemented',
-        operatingEffectiveness: 0.94
-      }
+        title: "Privacy Notice",
+        description:
+          "The entity provides notice about its privacy practices to data subjects",
+        implementationStatus: "implemented",
+        operatingEffectiveness: 0.94,
+      },
     ];
 
-    standardControls.forEach(controlData => {
+    standardControls.forEach((controlData) => {
       const control: SOC2Control = {
         ...controlData,
         lastAssessment: new Date(),
         evidencePoints: [],
-        exceptions: []
+        exceptions: [],
       } as SOC2Control;
 
       this.controls.set(control.id, control);
@@ -270,23 +293,27 @@ export class SOC2ComplianceEngine {
    */
   public async performComplianceAssessment(
     criteria: TrustServiceCriteria[] = Object.values(TrustServiceCriteria),
-    period?: { start: Date; end: Date }
+    period?: { start: Date; end: Date },
   ): Promise<SOC2ComplianceResult> {
     const assessmentId = this.generateAssessmentId();
     const assessmentPeriod = period || {
       start: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000), // 1 year ago
-      end: new Date()
+      end: new Date(),
     };
 
     this.logger.log(`Starting SOC2 compliance assessment: ${assessmentId}`);
 
     try {
       // Filter controls by criteria
-      const relevantControls = Array.from(this.controls.values())
-        .filter(control => criteria.includes(control.criteria));
+      const relevantControls = Array.from(this.controls.values()).filter(
+        (control) => criteria.includes(control.criteria),
+      );
 
       // Assess each control
-      const controlResults = new Map<string, { score: number; effectiveness: number; exceptions: number }>();
+      const controlResults = new Map<
+        string,
+        { score: number; effectiveness: number; exceptions: number }
+      >();
       let totalScore = 0;
       let totalEvidence = 0;
       let totalExceptions = 0;
@@ -299,13 +326,14 @@ export class SOC2ComplianceEngine {
         totalExceptions += control.exceptions.length;
       }
 
-      const overallScore = relevantControls.length > 0 ? totalScore / relevantControls.length : 0;
+      const overallScore =
+        relevantControls.length > 0 ? totalScore / relevantControls.length : 0;
 
       // Generate recommendations
       const recommendations = this.generateRecommendations(relevantControls);
 
       // Determine audit readiness
-      const auditReadiness = overallScore >= 0.90 && totalExceptions === 0;
+      const auditReadiness = overallScore >= 0.9 && totalExceptions === 0;
 
       const result: SOC2ComplianceResult = {
         assessmentId,
@@ -318,21 +346,22 @@ export class SOC2ComplianceEngine {
         recommendations,
         auditReadiness,
         nextAssessment: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000), // 90 days from now
-        generatedAt: new Date()
+        generatedAt: new Date(),
       };
 
-      this.logger.log(`SOC2 assessment completed - Score: ${(overallScore * 100).toFixed(1)}%, Audit Ready: ${auditReadiness}`);
+      this.logger.log(
+        `SOC2 assessment completed - Score: ${(overallScore * 100).toFixed(1)}%, Audit Ready: ${auditReadiness}`,
+      );
 
       // Emit compliance event
-      this.eventEmitter.emit('compliance.soc2.assessment.completed', {
+      this.eventEmitter.emit("compliance.soc2.assessment.completed", {
         assessmentId,
         score: overallScore,
         auditReadiness,
-        criteria: criteria.length
+        criteria: criteria.length,
       });
 
       return result;
-
     } catch (error) {
       this.logger.error(`SOC2 assessment failed: ${assessmentId}`, error);
       throw new Error(`SOC2 compliance assessment failed: ${error.message}`);
@@ -344,29 +373,33 @@ export class SOC2ComplianceEngine {
    */
   private async assessControl(
     control: SOC2Control,
-    period: { start: Date; end: Date }
+    period: { start: Date; end: Date },
   ): Promise<{ score: number; effectiveness: number; exceptions: number }> {
     // Collect evidence for the period
     const relevantEvidence = control.evidencePoints.filter(
-      evidence => evidence.collectionDate >= period.start && evidence.collectionDate <= period.end
+      (evidence) =>
+        evidence.collectionDate >= period.start &&
+        evidence.collectionDate <= period.end,
     );
 
     // Count exceptions in the period
     const relevantExceptions = control.exceptions.filter(
-      exception => exception.discovered_date >= period.start && exception.discovered_date <= period.end
+      (exception) =>
+        exception.discovered_date >= period.start &&
+        exception.discovered_date <= period.end,
     );
 
     // Calculate score based on implementation status, evidence, and exceptions
     let score = 0;
 
     switch (control.implementationStatus) {
-      case 'implemented':
+      case "implemented":
         score = 0.8;
         break;
-      case 'effective':
+      case "effective":
         score = 1.0;
         break;
-      case 'in_progress':
+      case "in_progress":
         score = 0.5;
         break;
       default:
@@ -375,16 +408,21 @@ export class SOC2ComplianceEngine {
 
     // Adjust score based on evidence sufficiency
     const evidenceWeight = Math.min(relevantEvidence.length / 10, 1); // Assuming 10 evidence points is optimal
-    score *= (0.5 + 0.5 * evidenceWeight);
+    score *= 0.5 + 0.5 * evidenceWeight;
 
     // Penalize for exceptions
     const exceptionPenalty = relevantExceptions.reduce((penalty, exception) => {
       switch (exception.severity) {
-        case 'critical': return penalty + 0.3;
-        case 'high': return penalty + 0.2;
-        case 'medium': return penalty + 0.1;
-        case 'low': return penalty + 0.05;
-        default: return penalty;
+        case "critical":
+          return penalty + 0.3;
+        case "high":
+          return penalty + 0.2;
+        case "medium":
+          return penalty + 0.1;
+        case "low":
+          return penalty + 0.05;
+        default:
+          return penalty;
       }
     }, 0);
 
@@ -393,7 +431,7 @@ export class SOC2ComplianceEngine {
     return {
       score,
       effectiveness: control.operatingEffectiveness,
-      exceptions: relevantExceptions.length
+      exceptions: relevantExceptions.length,
     };
   }
 
@@ -402,7 +440,7 @@ export class SOC2ComplianceEngine {
    */
   public async collectEvidence(
     controlId: string,
-    evidenceData: Partial<SOC2Evidence>
+    evidenceData: Partial<SOC2Evidence>,
   ): Promise<string> {
     const control = this.controls.get(controlId);
     if (!control) {
@@ -413,21 +451,23 @@ export class SOC2ComplianceEngine {
     const evidence: SOC2Evidence = {
       id: evidenceId,
       controlId,
-      type: evidenceData.type || 'documentation',
-      title: evidenceData.title || 'Evidence',
-      description: evidenceData.description || '',
+      type: evidenceData.type || "documentation",
+      title: evidenceData.title || "Evidence",
+      description: evidenceData.description || "",
       collectionDate: new Date(),
-      source: evidenceData.source || 'manual',
+      source: evidenceData.source || "manual",
       integrity_hash: this.calculateIntegrityHash(evidenceData),
       retention_period: evidenceData.retention_period || 2555200000, // 7 years default
       automated: evidenceData.automated || false,
-      metadata: evidenceData.metadata || {}
+      metadata: evidenceData.metadata || {},
     };
 
     this.evidence.set(evidenceId, evidence);
     control.evidencePoints.push(evidence);
 
-    this.logger.log(`Evidence collected for control ${controlId}: ${evidenceId}`);
+    this.logger.log(
+      `Evidence collected for control ${controlId}: ${evidenceId}`,
+    );
     return evidenceId;
   }
 
@@ -436,7 +476,7 @@ export class SOC2ComplianceEngine {
    */
   public async reportException(
     controlId: string,
-    exceptionData: Partial<SOC2Exception>
+    exceptionData: Partial<SOC2Exception>,
   ): Promise<string> {
     const control = this.controls.get(controlId);
     if (!control) {
@@ -447,25 +487,27 @@ export class SOC2ComplianceEngine {
     const exception: SOC2Exception = {
       id: exceptionId,
       controlId,
-      severity: exceptionData.severity || 'medium',
-      type: exceptionData.type || 'operating_deficiency',
-      description: exceptionData.description || '',
+      severity: exceptionData.severity || "medium",
+      type: exceptionData.type || "operating_deficiency",
+      description: exceptionData.description || "",
       risk_rating: exceptionData.risk_rating || 0.5,
       discovered_date: new Date(),
-      status: 'open',
-      ...exceptionData
+      status: "open",
+      ...exceptionData,
     };
 
     this.exceptions.set(exceptionId, exception);
     control.exceptions.push(exception);
 
-    this.logger.warn(`Exception reported for control ${controlId}: ${exceptionId} (${exception.severity})`);
+    this.logger.warn(
+      `Exception reported for control ${controlId}: ${exceptionId} (${exception.severity})`,
+    );
 
     // Emit exception event
-    this.eventEmitter.emit('compliance.soc2.exception.reported', {
+    this.eventEmitter.emit("compliance.soc2.exception.reported", {
       exceptionId,
       controlId,
-      severity: exception.severity
+      severity: exception.severity,
     });
 
     return exceptionId;
@@ -478,27 +520,43 @@ export class SOC2ComplianceEngine {
     const recommendations: string[] = [];
 
     // Check for controls with low effectiveness
-    const lowEffectivenessControls = controls.filter(c => c.operatingEffectiveness < 0.8);
+    const lowEffectivenessControls = controls.filter(
+      (c) => c.operatingEffectiveness < 0.8,
+    );
     if (lowEffectivenessControls.length > 0) {
-      recommendations.push(`Improve operating effectiveness for ${lowEffectivenessControls.length} controls`);
+      recommendations.push(
+        `Improve operating effectiveness for ${lowEffectivenessControls.length} controls`,
+      );
     }
 
     // Check for insufficient evidence
-    const lowEvidenceControls = controls.filter(c => c.evidencePoints.length < 5);
+    const lowEvidenceControls = controls.filter(
+      (c) => c.evidencePoints.length < 5,
+    );
     if (lowEvidenceControls.length > 0) {
-      recommendations.push(`Collect additional evidence for ${lowEvidenceControls.length} controls`);
+      recommendations.push(
+        `Collect additional evidence for ${lowEvidenceControls.length} controls`,
+      );
     }
 
     // Check for open exceptions
-    const controlsWithExceptions = controls.filter(c => c.exceptions.some(e => e.status === 'open'));
+    const controlsWithExceptions = controls.filter((c) =>
+      c.exceptions.some((e) => e.status === "open"),
+    );
     if (controlsWithExceptions.length > 0) {
-      recommendations.push(`Address open exceptions in ${controlsWithExceptions.length} controls`);
+      recommendations.push(
+        `Address open exceptions in ${controlsWithExceptions.length} controls`,
+      );
     }
 
     // Check for controls needing remediation
-    const controlsNeedingRemediation = controls.filter(c => c.remediation && c.remediation.status !== 'completed');
+    const controlsNeedingRemediation = controls.filter(
+      (c) => c.remediation && c.remediation.status !== "completed",
+    );
     if (controlsNeedingRemediation.length > 0) {
-      recommendations.push(`Complete remediation plans for ${controlsNeedingRemediation.length} controls`);
+      recommendations.push(
+        `Complete remediation plans for ${controlsNeedingRemediation.length} controls`,
+      );
     }
 
     return recommendations;
@@ -514,15 +572,29 @@ export class SOC2ComplianceEngine {
     evidenceCount: number;
     exceptionsCount: number;
   } {
-    const relevantControls = Array.from(this.controls.values())
-      .filter(control => control.criteria === criteria);
+    const relevantControls = Array.from(this.controls.values()).filter(
+      (control) => control.criteria === criteria,
+    );
 
     return {
       controlsCount: relevantControls.length,
-      implementedCount: relevantControls.filter(c => c.implementationStatus === 'implemented' || c.implementationStatus === 'effective').length,
-      effectiveCount: relevantControls.filter(c => c.implementationStatus === 'effective').length,
-      evidenceCount: relevantControls.reduce((sum, c) => sum + c.evidencePoints.length, 0),
-      exceptionsCount: relevantControls.reduce((sum, c) => sum + c.exceptions.filter(e => e.status === 'open').length, 0)
+      implementedCount: relevantControls.filter(
+        (c) =>
+          c.implementationStatus === "implemented" ||
+          c.implementationStatus === "effective",
+      ).length,
+      effectiveCount: relevantControls.filter(
+        (c) => c.implementationStatus === "effective",
+      ).length,
+      evidenceCount: relevantControls.reduce(
+        (sum, c) => sum + c.evidencePoints.length,
+        0,
+      ),
+      exceptionsCount: relevantControls.reduce(
+        (sum, c) =>
+          sum + c.exceptions.filter((e) => e.status === "open").length,
+        0,
+      ),
     };
   }
 

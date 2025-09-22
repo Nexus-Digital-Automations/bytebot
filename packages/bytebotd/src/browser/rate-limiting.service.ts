@@ -236,15 +236,18 @@ export class BrowserRateLimitingService {
         reason: result.reason,
       });
 
-      throw new HttpException({
-        message: 'Rate limit exceeded',
-        type: 'rate_limit_exceeded',
-        limit: result.limit,
-        remaining: result.remaining,
-        resetTime: result.resetTime,
-        retryAfter: result.retryAfter,
-        reason: result.reason,
-      }, HttpStatus.TOO_MANY_REQUESTS);
+      throw new HttpException(
+        {
+          message: 'Rate limit exceeded',
+          type: 'rate_limit_exceeded',
+          limit: result.limit,
+          remaining: result.remaining,
+          resetTime: result.resetTime,
+          retryAfter: result.retryAfter,
+          reason: result.reason,
+        },
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
     }
   }
 

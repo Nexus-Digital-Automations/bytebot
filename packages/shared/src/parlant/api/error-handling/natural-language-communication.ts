@@ -16,16 +16,13 @@
  * @author PARLANT Phase 1 Implementation Team
  */
 
-import {
-  Injectable,
-  Logger
-} from '@nestjs/common';
+import { Injectable, Logger } from "@nestjs/common";
 
 import {
   ConversationalErrorContext,
   ConversationalErrorSeverity,
-  ConversationalErrorCategory
-} from './conversational-error-handler';
+  ConversationalErrorCategory,
+} from "./conversational-error-handler";
 
 // ===== COMMUNICATION INTERFACES =====
 
@@ -40,10 +37,10 @@ export interface CommunicationLocale {
   region?: string;
 
   /** Cultural communication preferences */
-  culturalStyle: 'DIRECT' | 'INDIRECT' | 'FORMAL' | 'CASUAL' | 'EMPATHETIC';
+  culturalStyle: "DIRECT" | "INDIRECT" | "FORMAL" | "CASUAL" | "EMPATHETIC";
 
   /** Technical terminology preference */
-  technicalLevel: 'MINIMAL' | 'MODERATE' | 'DETAILED' | 'EXPERT';
+  technicalLevel: "MINIMAL" | "MODERATE" | "DETAILED" | "EXPERT";
 }
 
 /**
@@ -54,16 +51,21 @@ export interface UserCommunicationProfile {
   userId: string;
 
   /** Preferred communication style */
-  communicationStyle: 'CONCISE' | 'DETAILED' | 'STEP_BY_STEP' | 'VISUAL' | 'TECHNICAL';
+  communicationStyle:
+    | "CONCISE"
+    | "DETAILED"
+    | "STEP_BY_STEP"
+    | "VISUAL"
+    | "TECHNICAL";
 
   /** Learning preference */
-  learningStyle: 'QUICK_TIPS' | 'DEEP_EXPLANATION' | 'EXAMPLES' | 'HANDS_ON';
+  learningStyle: "QUICK_TIPS" | "DEEP_EXPLANATION" | "EXAMPLES" | "HANDS_ON";
 
   /** Expertise level across different domains */
   expertiseLevels: {
-    technical: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | 'EXPERT';
-    domain: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | 'EXPERT';
-    general: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | 'EXPERT';
+    technical: "BEGINNER" | "INTERMEDIATE" | "ADVANCED" | "EXPERT";
+    domain: "BEGINNER" | "INTERMEDIATE" | "ADVANCED" | "EXPERT";
+    general: "BEGINNER" | "INTERMEDIATE" | "ADVANCED" | "EXPERT";
   };
 
   /** Preferred language and locale */
@@ -96,14 +98,21 @@ export interface ContextualHelpResource {
   description: string;
 
   /** Resource type */
-  type: 'DOCUMENTATION' | 'TUTORIAL' | 'VIDEO' | 'INTERACTIVE' | 'FAQ' | 'EXAMPLE' | 'TROUBLESHOOT';
+  type:
+    | "DOCUMENTATION"
+    | "TUTORIAL"
+    | "VIDEO"
+    | "INTERACTIVE"
+    | "FAQ"
+    | "EXAMPLE"
+    | "TROUBLESHOOT";
 
   /** Resource URL or content */
   url?: string;
   content?: string;
 
   /** Difficulty level */
-  difficulty: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | 'EXPERT';
+  difficulty: "BEGINNER" | "INTERMEDIATE" | "ADVANCED" | "EXPERT";
 
   /** Estimated time to consume */
   estimatedTime: string;
@@ -164,7 +173,7 @@ export interface TroubleshootingStep {
 
   /** Input validation */
   inputValidation?: {
-    type: 'TEXT' | 'NUMBER' | 'SELECTION' | 'BOOLEAN' | 'FILE';
+    type: "TEXT" | "NUMBER" | "SELECTION" | "BOOLEAN" | "FILE";
     options?: string[];
     validationRules?: string[];
   };
@@ -192,7 +201,7 @@ export interface TroubleshootingStep {
  */
 export interface ProgressiveDisclosureConfig {
   /** Initial disclosure level */
-  initialLevel: 'SUMMARY' | 'BASIC' | 'DETAILED' | 'COMPREHENSIVE';
+  initialLevel: "SUMMARY" | "BASIC" | "DETAILED" | "COMPREHENSIVE";
 
   /** Available disclosure levels */
   availableLevels: Array<{
@@ -213,7 +222,7 @@ export interface ProgressiveDisclosureConfig {
   /** Adaptive disclosure rules */
   adaptiveRules: Array<{
     condition: string;
-    action: 'EXPAND' | 'SIMPLIFY' | 'REDIRECT' | 'SUGGEST';
+    action: "EXPAND" | "SIMPLIFY" | "REDIRECT" | "SUGGEST";
     reason: string;
   }>;
 }
@@ -229,7 +238,7 @@ export interface CommunicationResult {
   metadata: {
     messageId: string;
     generationTime: number;
-    complexity: 'LOW' | 'MEDIUM' | 'HIGH';
+    complexity: "LOW" | "MEDIUM" | "HIGH";
     readabilityScore: number;
     estimatedReadTime: string;
   };
@@ -262,7 +271,7 @@ export interface CommunicationResult {
 
   /** Engagement tracking */
   engagement: {
-    expectedEngagement: 'LOW' | 'MEDIUM' | 'HIGH';
+    expectedEngagement: "LOW" | "MEDIUM" | "HIGH";
     interactionPoints: number;
     clarificationOpportunities: string[];
   };
@@ -285,29 +294,44 @@ export class MessageGenerationEngine {
     context: ConversationalErrorContext,
     userProfile: UserCommunicationProfile,
     severity: ConversationalErrorSeverity,
-    category: ConversationalErrorCategory
+    category: ConversationalErrorCategory,
   ): Promise<string> {
     const startTime = Date.now();
 
     try {
       // Analyze error for message generation
-      const errorAnalysis = this.analyzeErrorForMessage(error, context, category);
+      const errorAnalysis = this.analyzeErrorForMessage(
+        error,
+        context,
+        category,
+      );
 
       // Generate base message
-      const baseMessage = this.generateBaseMessage(errorAnalysis, severity, category);
+      const baseMessage = this.generateBaseMessage(
+        errorAnalysis,
+        severity,
+        category,
+      );
 
       // Adapt for user profile
-      const adaptedMessage = this.adaptMessageForUser(baseMessage, userProfile, errorAnalysis);
+      const adaptedMessage = this.adaptMessageForUser(
+        baseMessage,
+        userProfile,
+        errorAnalysis,
+      );
 
       // Apply cultural and linguistic adaptations
-      const finalMessage = this.applyCulturalAdaptations(adaptedMessage, userProfile.locale);
+      const finalMessage = this.applyCulturalAdaptations(
+        adaptedMessage,
+        userProfile.locale,
+      );
 
       const generationTime = Date.now() - startTime;
       this.logger.log(`Message generated in ${generationTime}ms`);
 
       return finalMessage;
     } catch (generationError) {
-      this.logger.error('Message generation failed', generationError);
+      this.logger.error("Message generation failed", generationError);
       return this.getFallbackMessage(error, severity);
     }
   }
@@ -318,7 +342,7 @@ export class MessageGenerationEngine {
   private analyzeErrorForMessage(
     error: Error,
     context: ConversationalErrorContext,
-    category: ConversationalErrorCategory
+    category: ConversationalErrorCategory,
   ): {
     errorType: string;
     userIntent: string;
@@ -343,7 +367,7 @@ export class MessageGenerationEngine {
       userIntent,
       systemContext,
       impactLevel,
-      keyFactors
+      keyFactors,
     };
   }
 
@@ -351,64 +375,73 @@ export class MessageGenerationEngine {
    * Extract user intent from context
    */
   private extractUserIntent(context: ConversationalErrorContext): string {
-    const method = context.method?.toLowerCase() || '';
-    const endpoint = context.endpoint || '';
+    const method = context.method?.toLowerCase() || "";
+    const endpoint = context.endpoint || "";
 
-    if (method === 'post') {
-      return endpoint.includes('create') ? 'creating something new' : 'submitting information';
+    if (method === "post") {
+      return endpoint.includes("create")
+        ? "creating something new"
+        : "submitting information";
     }
 
-    if (method === 'get') {
-      return 'retrieving information';
+    if (method === "get") {
+      return "retrieving information";
     }
 
-    if (method === 'put' || method === 'patch') {
-      return 'updating information';
+    if (method === "put" || method === "patch") {
+      return "updating information";
     }
 
-    if (method === 'delete') {
-      return 'removing something';
+    if (method === "delete") {
+      return "removing something";
     }
 
-    return 'performing an action';
+    return "performing an action";
   }
 
   /**
    * Determine system context
    */
   private determineSystemContext(context: ConversationalErrorContext): string {
-    const endpoint = context.endpoint || '';
+    const endpoint = context.endpoint || "";
 
-    if (endpoint.includes('auth') || endpoint.includes('login')) {
-      return 'authentication system';
+    if (endpoint.includes("auth") || endpoint.includes("login")) {
+      return "authentication system";
     }
 
-    if (endpoint.includes('user') || endpoint.includes('profile')) {
-      return 'user management system';
+    if (endpoint.includes("user") || endpoint.includes("profile")) {
+      return "user management system";
     }
 
-    if (endpoint.includes('api')) {
-      return 'API service';
+    if (endpoint.includes("api")) {
+      return "API service";
     }
 
-    return 'system';
+    return "system";
   }
 
   /**
    * Assess impact level
    */
-  private assessImpactLevel(error: Error, context: ConversationalErrorContext): string {
-    if (error.message.toLowerCase().includes('critical') ||
-        error.message.toLowerCase().includes('fatal')) {
-      return 'HIGH';
+  private assessImpactLevel(
+    error: Error,
+    context: ConversationalErrorContext,
+  ): string {
+    if (
+      error.message.toLowerCase().includes("critical") ||
+      error.message.toLowerCase().includes("fatal")
+    ) {
+      return "HIGH";
     }
 
-    if (error.message.toLowerCase().includes('warning') ||
-        error.message.toLowerCase().includes('temporary')) {
-      return 'LOW';
+    if (
+      error.message.toLowerCase().includes("warning") ||
+      error.message.toLowerCase().includes("temporary")
+    ) {
+      return "LOW";
     }
 
-    return 'MEDIUM';
+    return "MEDIUM";
   }
 
   /**
@@ -417,30 +450,32 @@ export class MessageGenerationEngine {
   private identifyKeyFactors(
     error: Error,
     context: ConversationalErrorContext,
-    category: ConversationalErrorCategory
+    category: ConversationalErrorCategory,
   ): string[] {
     const factors: string[] = [];
 
     // Check for common patterns
-    if (error.message.toLowerCase().includes('timeout')) {
-      factors.push('network_timeout');
+    if (error.message.toLowerCase().includes("timeout")) {
+      factors.push("network_timeout");
     }
 
-    if (error.message.toLowerCase().includes('validation')) {
-      factors.push('input_validation');
+    if (error.message.toLowerCase().includes("validation")) {
+      factors.push("input_validation");
     }
 
-    if (error.message.toLowerCase().includes('permission') ||
-        error.message.toLowerCase().includes('authorized')) {
-      factors.push('access_control');
+    if (
+      error.message.toLowerCase().includes("permission") ||
+      error.message.toLowerCase().includes("authorized")
+    ) {
+      factors.push("access_control");
     }
 
     if (context.systemLoad && context.systemLoad > 0.8) {
-      factors.push('high_system_load');
+      factors.push("high_system_load");
     }
 
     if (category === ConversationalErrorCategory.USER_INPUT) {
-      factors.push('user_input_issue');
+      factors.push("user_input_issue");
     }
 
     return factors;
@@ -452,7 +487,7 @@ export class MessageGenerationEngine {
   private generateBaseMessage(
     analysis: any,
     severity: ConversationalErrorSeverity,
-    category: ConversationalErrorCategory
+    category: ConversationalErrorCategory,
   ): string {
     const { userIntent, systemContext, impactLevel, keyFactors } = analysis;
 
@@ -464,11 +499,11 @@ export class MessageGenerationEngine {
 
     // Add specific factor information
     if (keyFactors.length > 0) {
-      message += ' ' + this.getFactorExplanation(keyFactors);
+      message += " " + this.getFactorExplanation(keyFactors);
     }
 
     // Add reassurance or urgency based on severity
-    message += ' ' + this.getSeverityStatement(severity);
+    message += " " + this.getSeverityStatement(severity);
 
     return message;
   }
@@ -478,21 +513,21 @@ export class MessageGenerationEngine {
    */
   private getImpactStatement(
     severity: ConversationalErrorSeverity,
-    impactLevel: string
+    impactLevel: string,
   ): string {
     switch (severity) {
       case ConversationalErrorSeverity.CRITICAL:
-        return 'We\'re experiencing a serious issue that needs immediate attention.';
+        return "We're experiencing a serious issue that needs immediate attention.";
       case ConversationalErrorSeverity.ERROR:
-        return impactLevel === 'HIGH' ?
-          'Something went wrong that prevented your action from completing.' :
-          'We encountered a problem processing your request.';
+        return impactLevel === "HIGH"
+          ? "Something went wrong that prevented your action from completing."
+          : "We encountered a problem processing your request.";
       case ConversationalErrorSeverity.WARNING:
-        return 'There\'s a minor issue that might affect your experience.';
+        return "There's a minor issue that might affect your experience.";
       case ConversationalErrorSeverity.INFO:
-        return 'Just a heads up about something we noticed.';
+        return "Just a heads up about something we noticed.";
       default:
-        return 'We encountered an unexpected situation.';
+        return "We encountered an unexpected situation.";
     }
   }
 
@@ -501,26 +536,33 @@ export class MessageGenerationEngine {
    */
   private getFactorExplanation(factors: string[]): string {
     const explanations: Record<string, string> = {
-      'network_timeout': 'This appears to be related to network connectivity or response time.',
-      'input_validation': 'The information provided doesn\'t match the expected format.',
-      'access_control': 'This involves permissions or access restrictions.',
-      'high_system_load': 'Our systems are currently experiencing high demand.',
-      'user_input_issue': 'There\'s something about the information you provided that needs attention.'
+      network_timeout:
+        "This appears to be related to network connectivity or response time.",
+      input_validation:
+        "The information provided doesn't match the expected format.",
+      access_control: "This involves permissions or access restrictions.",
+      high_system_load: "Our systems are currently experiencing high demand.",
+      user_input_issue:
+        "There's something about the information you provided that needs attention.",
     };
 
     const relevantExplanations = factors
-      .filter(factor => explanations[factor])
-      .map(factor => explanations[factor]);
+      .filter((factor) => explanations[factor])
+      .map((factor) => explanations[factor]);
 
     if (relevantExplanations.length === 0) {
-      return 'The specific cause is being investigated.';
+      return "The specific cause is being investigated.";
     }
 
     if (relevantExplanations.length === 1) {
       return relevantExplanations[0];
     }
 
-    return relevantExplanations.slice(0, -1).join(', ') + ', and ' + relevantExplanations.slice(-1)[0];
+    return (
+      relevantExplanations.slice(0, -1).join(", ") +
+      ", and " +
+      relevantExplanations.slice(-1)[0]
+    );
   }
 
   /**
@@ -529,15 +571,15 @@ export class MessageGenerationEngine {
   private getSeverityStatement(severity: ConversationalErrorSeverity): string {
     switch (severity) {
       case ConversationalErrorSeverity.CRITICAL:
-        return 'Our team has been automatically notified and is working on a resolution.';
+        return "Our team has been automatically notified and is working on a resolution.";
       case ConversationalErrorSeverity.ERROR:
-        return 'The good news is that this is usually something we can resolve quickly.';
+        return "The good news is that this is usually something we can resolve quickly.";
       case ConversationalErrorSeverity.WARNING:
-        return 'This shouldn\'t prevent you from continuing with other tasks.';
+        return "This shouldn't prevent you from continuing with other tasks.";
       case ConversationalErrorSeverity.INFO:
-        return 'No action is required on your part, but we wanted to keep you informed.';
+        return "No action is required on your part, but we wanted to keep you informed.";
       default:
-        return 'We\'re looking into what happened.';
+        return "We're looking into what happened.";
     }
   }
 
@@ -547,18 +589,27 @@ export class MessageGenerationEngine {
   private adaptMessageForUser(
     baseMessage: string,
     userProfile: UserCommunicationProfile,
-    analysis: any
+    analysis: any,
   ): string {
     let adaptedMessage = baseMessage;
 
     // Adapt for communication style
-    adaptedMessage = this.adaptForCommunicationStyle(adaptedMessage, userProfile.communicationStyle);
+    adaptedMessage = this.adaptForCommunicationStyle(
+      adaptedMessage,
+      userProfile.communicationStyle,
+    );
 
     // Adapt for expertise level
-    adaptedMessage = this.adaptForExpertiseLevel(adaptedMessage, userProfile.expertiseLevels);
+    adaptedMessage = this.adaptForExpertiseLevel(
+      adaptedMessage,
+      userProfile.expertiseLevels,
+    );
 
     // Add personalization based on history
-    adaptedMessage = this.addPersonalization(adaptedMessage, userProfile.interactionHistory);
+    adaptedMessage = this.addPersonalization(
+      adaptedMessage,
+      userProfile.interactionHistory,
+    );
 
     return adaptedMessage;
   }
@@ -566,18 +617,15 @@ export class MessageGenerationEngine {
   /**
    * Adapt for communication style
    */
-  private adaptForCommunicationStyle(
-    message: string,
-    style: string
-  ): string {
+  private adaptForCommunicationStyle(message: string, style: string): string {
     switch (style) {
-      case 'CONCISE':
+      case "CONCISE":
         return this.makeConcise(message);
-      case 'DETAILED':
+      case "DETAILED":
         return this.makeDetailed(message);
-      case 'STEP_BY_STEP':
+      case "STEP_BY_STEP":
         return this.makeStepByStep(message);
-      case 'TECHNICAL':
+      case "TECHNICAL":
         return this.makeTechnical(message);
       default:
         return message;
@@ -589,31 +637,51 @@ export class MessageGenerationEngine {
    */
   private makeConcise(message: string): string {
     return message
-      .replace(/We\'re experiencing a serious issue that needs immediate attention\./g, 'Critical system issue detected.')
-      .replace(/Something went wrong that prevented your action from completing\./g, 'Action failed.')
-      .replace(/We encountered a problem processing your request\./g, 'Request failed.')
-      .replace(/The good news is that this is usually something we can resolve quickly\./g, 'Usually quick to resolve.');
+      .replace(
+        /We\'re experiencing a serious issue that needs immediate attention\./g,
+        "Critical system issue detected.",
+      )
+      .replace(
+        /Something went wrong that prevented your action from completing\./g,
+        "Action failed.",
+      )
+      .replace(
+        /We encountered a problem processing your request\./g,
+        "Request failed.",
+      )
+      .replace(
+        /The good news is that this is usually something we can resolve quickly\./g,
+        "Usually quick to resolve.",
+      );
   }
 
   /**
    * Make message more detailed
    */
   private makeDetailed(message: string): string {
-    return message + ' Let me provide you with more context about what this means and what we can do about it.';
+    return (
+      message +
+      " Let me provide you with more context about what this means and what we can do about it."
+    );
   }
 
   /**
    * Make message step-by-step
    */
   private makeStepByStep(message: string): string {
-    return message + ' Here\'s what happened step by step, and what we can do next.';
+    return (
+      message + " Here's what happened step by step, and what we can do next."
+    );
   }
 
   /**
    * Make message more technical
    */
   private makeTechnical(message: string): string {
-    return message + ' Technical details and diagnostic information are available if needed.';
+    return (
+      message +
+      " Technical details and diagnostic information are available if needed."
+    );
   }
 
   /**
@@ -621,14 +689,19 @@ export class MessageGenerationEngine {
    */
   private adaptForExpertiseLevel(
     message: string,
-    expertiseLevels: any
+    expertiseLevels: any,
   ): string {
-    if (expertiseLevels.technical === 'EXPERT') {
-      return message + ' Error codes and system diagnostics are available for further analysis.';
+    if (expertiseLevels.technical === "EXPERT") {
+      return (
+        message +
+        " Error codes and system diagnostics are available for further analysis."
+      );
     }
 
-    if (expertiseLevels.technical === 'BEGINNER') {
-      return message.replace(/system/g, 'our service').replace(/encountered/g, 'found');
+    if (expertiseLevels.technical === "BEGINNER") {
+      return message
+        .replace(/system/g, "our service")
+        .replace(/encountered/g, "found");
     }
 
     return message;
@@ -637,16 +710,19 @@ export class MessageGenerationEngine {
   /**
    * Add personalization based on history
    */
-  private addPersonalization(
-    message: string,
-    history: any
-  ): string {
+  private addPersonalization(message: string, history: any): string {
     if (history.commonErrorPatterns?.length > 0) {
-      return message + ' Based on your previous experiences, we have some targeted suggestions that might help.';
+      return (
+        message +
+        " Based on your previous experiences, we have some targeted suggestions that might help."
+      );
     }
 
     if (history.successfulRecoveryMethods?.length > 0) {
-      return message + ' We remember what worked well for you before and can try similar approaches.';
+      return (
+        message +
+        " We remember what worked well for you before and can try similar approaches."
+      );
     }
 
     return message;
@@ -657,16 +733,16 @@ export class MessageGenerationEngine {
    */
   private applyCulturalAdaptations(
     message: string,
-    locale: CommunicationLocale
+    locale: CommunicationLocale,
   ): string {
     switch (locale.culturalStyle) {
-      case 'FORMAL':
+      case "FORMAL":
         return this.makeFormal(message);
-      case 'EMPATHETIC':
+      case "EMPATHETIC":
         return this.makeEmpathetic(message);
-      case 'DIRECT':
+      case "DIRECT":
         return this.makeDirect(message);
-      case 'INDIRECT':
+      case "INDIRECT":
         return this.makeIndirect(message);
       default:
         return message;
@@ -678,46 +754,58 @@ export class MessageGenerationEngine {
    */
   private makeFormal(message: string): string {
     return message
-      .replace(/We\'re/g, 'We are')
-      .replace(/doesn\'t/g, 'does not')
-      .replace(/can\'t/g, 'cannot')
-      .replace(/won\'t/g, 'will not');
+      .replace(/We\'re/g, "We are")
+      .replace(/doesn\'t/g, "does not")
+      .replace(/can\'t/g, "cannot")
+      .replace(/won\'t/g, "will not");
   }
 
   /**
    * Make message more empathetic
    */
   private makeEmpathetic(message: string): string {
-    return 'We understand this can be frustrating. ' + message + ' We\'re here to help you through this.';
+    return (
+      "We understand this can be frustrating. " +
+      message +
+      " We're here to help you through this."
+    );
   }
 
   /**
    * Make message more direct
    */
   private makeDirect(message: string): string {
-    return message.replace(/might/g, 'will').replace(/could/g, 'can').replace(/usually/g, '');
+    return message
+      .replace(/might/g, "will")
+      .replace(/could/g, "can")
+      .replace(/usually/g, "");
   }
 
   /**
    * Make message more indirect
    */
   private makeIndirect(message: string): string {
-    return message.replace(/failed/g, 'was not successful').replace(/error/g, 'issue');
+    return message
+      .replace(/failed/g, "was not successful")
+      .replace(/error/g, "issue");
   }
 
   /**
    * Get fallback message
    */
-  private getFallbackMessage(error: Error, severity: ConversationalErrorSeverity): string {
+  private getFallbackMessage(
+    error: Error,
+    severity: ConversationalErrorSeverity,
+  ): string {
     switch (severity) {
       case ConversationalErrorSeverity.CRITICAL:
-        return 'We\'re experiencing a critical system issue and our team is working on a resolution.';
+        return "We're experiencing a critical system issue and our team is working on a resolution.";
       case ConversationalErrorSeverity.ERROR:
-        return 'Something went wrong with your request, but we\'re here to help resolve it.';
+        return "Something went wrong with your request, but we're here to help resolve it.";
       case ConversationalErrorSeverity.WARNING:
-        return 'We noticed a minor issue that might affect your experience.';
+        return "We noticed a minor issue that might affect your experience.";
       default:
-        return 'We encountered an unexpected situation and are looking into it.';
+        return "We encountered an unexpected situation and are looking into it.";
     }
   }
 }
@@ -738,7 +826,7 @@ export class ContextualHelpEngine {
     error: Error,
     context: ConversationalErrorContext,
     userProfile: UserCommunicationProfile,
-    category: ConversationalErrorCategory
+    category: ConversationalErrorCategory,
   ): Promise<ContextualHelpResource[]> {
     const startTime = Date.now();
 
@@ -750,17 +838,24 @@ export class ContextualHelpEngine {
       const baseResources = this.getBaseResourcesForCategory(category);
 
       // Filter and rank resources based on user profile
-      const rankedResources = this.rankResourcesForUser(baseResources, userProfile, helpContext);
+      const rankedResources = this.rankResourcesForUser(
+        baseResources,
+        userProfile,
+        helpContext,
+      );
 
       // Personalize resource descriptions
-      const personalizedResources = this.personalizeResources(rankedResources, userProfile);
+      const personalizedResources = this.personalizeResources(
+        rankedResources,
+        userProfile,
+      );
 
       const processingTime = Date.now() - startTime;
       this.logger.log(`Contextual help generated in ${processingTime}ms`);
 
       return personalizedResources;
     } catch (helpError) {
-      this.logger.error('Contextual help generation failed', helpError);
+      this.logger.error("Contextual help generation failed", helpError);
       return this.getFallbackHelp(category);
     }
   }
@@ -771,10 +866,10 @@ export class ContextualHelpEngine {
   private analyzeHelpContext(
     error: Error,
     context: ConversationalErrorContext,
-    category: ConversationalErrorCategory
+    category: ConversationalErrorCategory,
   ): {
-    urgency: 'LOW' | 'MEDIUM' | 'HIGH';
-    complexity: 'SIMPLE' | 'MODERATE' | 'COMPLEX';
+    urgency: "LOW" | "MEDIUM" | "HIGH";
+    complexity: "SIMPLE" | "MODERATE" | "COMPLEX";
     domain: string;
     keywords: string[];
   } {
@@ -789,67 +884,91 @@ export class ContextualHelpEngine {
   /**
    * Assess urgency level
    */
-  private assessUrgency(error: Error, category: ConversationalErrorCategory): 'LOW' | 'MEDIUM' | 'HIGH' {
+  private assessUrgency(
+    error: Error,
+    category: ConversationalErrorCategory,
+  ): "LOW" | "MEDIUM" | "HIGH" {
     if (category === ConversationalErrorCategory.SYSTEM) {
-      return 'HIGH';
+      return "HIGH";
     }
 
-    if (category === ConversationalErrorCategory.AUTHENTICATION ||
-        category === ConversationalErrorCategory.AUTHORIZATION) {
-      return 'MEDIUM';
+    if (
+      category === ConversationalErrorCategory.AUTHENTICATION ||
+      category === ConversationalErrorCategory.AUTHORIZATION
+    ) {
+      return "MEDIUM";
     }
 
-    return 'LOW';
+    return "LOW";
   }
 
   /**
    * Assess complexity level
    */
-  private assessComplexity(error: Error, context: ConversationalErrorContext): 'SIMPLE' | 'MODERATE' | 'COMPLEX' {
+  private assessComplexity(
+    error: Error,
+    context: ConversationalErrorContext,
+  ): "SIMPLE" | "MODERATE" | "COMPLEX" {
     const errorMessage = error.message.toLowerCase();
 
-    if (errorMessage.includes('validation') || errorMessage.includes('format')) {
-      return 'SIMPLE';
+    if (
+      errorMessage.includes("validation") ||
+      errorMessage.includes("format")
+    ) {
+      return "SIMPLE";
     }
 
-    if (errorMessage.includes('integration') || errorMessage.includes('network')) {
-      return 'COMPLEX';
+    if (
+      errorMessage.includes("integration") ||
+      errorMessage.includes("network")
+    ) {
+      return "COMPLEX";
     }
 
-    return 'MODERATE';
+    return "MODERATE";
   }
 
   /**
    * Identify domain from context
    */
   private identifyDomain(context: ConversationalErrorContext): string {
-    const endpoint = context.endpoint?.toLowerCase() || '';
+    const endpoint = context.endpoint?.toLowerCase() || "";
 
-    if (endpoint.includes('auth') || endpoint.includes('login')) {
-      return 'authentication';
+    if (endpoint.includes("auth") || endpoint.includes("login")) {
+      return "authentication";
     }
 
-    if (endpoint.includes('user') || endpoint.includes('profile')) {
-      return 'user_management';
+    if (endpoint.includes("user") || endpoint.includes("profile")) {
+      return "user_management";
     }
 
-    if (endpoint.includes('api')) {
-      return 'api_integration';
+    if (endpoint.includes("api")) {
+      return "api_integration";
     }
 
-    return 'general';
+    return "general";
   }
 
   /**
    * Extract keywords for help matching
    */
-  private extractHelpKeywords(error: Error, context: ConversationalErrorContext): string[] {
-    const text = (error.message + ' ' + (context.endpoint || '')).toLowerCase();
+  private extractHelpKeywords(
+    error: Error,
+    context: ConversationalErrorContext,
+  ): string[] {
+    const text = (error.message + " " + (context.endpoint || "")).toLowerCase();
     const keywords: string[] = [];
 
     // Common error-related keywords
-    const errorKeywords = ['validation', 'authentication', 'authorization', 'timeout', 'connection', 'format'];
-    errorKeywords.forEach(keyword => {
+    const errorKeywords = [
+      "validation",
+      "authentication",
+      "authorization",
+      "timeout",
+      "connection",
+      "format",
+    ];
+    errorKeywords.forEach((keyword) => {
       if (text.includes(keyword)) {
         keywords.push(keyword);
       }
@@ -857,7 +976,9 @@ export class ContextualHelpEngine {
 
     // Extract from endpoint
     if (context.endpoint) {
-      const endpointParts = context.endpoint.split('/').filter(part => part.length > 2);
+      const endpointParts = context.endpoint
+        .split("/")
+        .filter((part) => part.length > 2);
       keywords.push(...endpointParts);
     }
 
@@ -867,16 +988,22 @@ export class ContextualHelpEngine {
   /**
    * Get base resources for category
    */
-  private getBaseResourcesForCategory(category: ConversationalErrorCategory): ContextualHelpResource[] {
+  private getBaseResourcesForCategory(
+    category: ConversationalErrorCategory,
+  ): ContextualHelpResource[] {
     const baseResources = {
       [ConversationalErrorCategory.USER_INPUT]: this.getUserInputResources(),
-      [ConversationalErrorCategory.AUTHENTICATION]: this.getAuthenticationResources(),
-      [ConversationalErrorCategory.AUTHORIZATION]: this.getAuthorizationResources(),
+      [ConversationalErrorCategory.AUTHENTICATION]:
+        this.getAuthenticationResources(),
+      [ConversationalErrorCategory.AUTHORIZATION]:
+        this.getAuthorizationResources(),
       [ConversationalErrorCategory.SYSTEM]: this.getSystemResources(),
       [ConversationalErrorCategory.INTEGRATION]: this.getIntegrationResources(),
       [ConversationalErrorCategory.PERFORMANCE]: this.getPerformanceResources(),
-      [ConversationalErrorCategory.BUSINESS_LOGIC]: this.getBusinessLogicResources(),
-      [ConversationalErrorCategory.RATE_LIMITING]: this.getRateLimitingResources()
+      [ConversationalErrorCategory.BUSINESS_LOGIC]:
+        this.getBusinessLogicResources(),
+      [ConversationalErrorCategory.RATE_LIMITING]:
+        this.getRateLimitingResources(),
     };
 
     return baseResources[category] || [];
@@ -888,41 +1015,42 @@ export class ContextualHelpEngine {
   private getUserInputResources(): ContextualHelpResource[] {
     return [
       {
-        resourceId: 'input_validation_guide',
-        title: 'Input Validation Guide',
-        description: 'Learn about proper input formats and validation requirements',
-        type: 'DOCUMENTATION',
-        url: '/docs/input-validation',
-        difficulty: 'BEGINNER',
-        estimatedTime: '5 minutes',
+        resourceId: "input_validation_guide",
+        title: "Input Validation Guide",
+        description:
+          "Learn about proper input formats and validation requirements",
+        type: "DOCUMENTATION",
+        url: "/docs/input-validation",
+        difficulty: "BEGINNER",
+        estimatedTime: "5 minutes",
         prerequisites: [],
-        relatedTopics: ['form_validation', 'data_formats'],
+        relatedTopics: ["form_validation", "data_formats"],
         ratings: {
           helpfulness: 4.5,
           clarity: 4.2,
           completeness: 4.0,
           averageRating: 4.2,
-          totalRatings: 150
-        }
+          totalRatings: 150,
+        },
       },
       {
-        resourceId: 'common_format_examples',
-        title: 'Common Format Examples',
-        description: 'Examples of correctly formatted data for common fields',
-        type: 'EXAMPLE',
-        url: '/docs/format-examples',
-        difficulty: 'BEGINNER',
-        estimatedTime: '3 minutes',
+        resourceId: "common_format_examples",
+        title: "Common Format Examples",
+        description: "Examples of correctly formatted data for common fields",
+        type: "EXAMPLE",
+        url: "/docs/format-examples",
+        difficulty: "BEGINNER",
+        estimatedTime: "3 minutes",
         prerequisites: [],
-        relatedTopics: ['input_validation', 'data_types'],
+        relatedTopics: ["input_validation", "data_types"],
         ratings: {
           helpfulness: 4.7,
           clarity: 4.8,
           completeness: 4.3,
           averageRating: 4.6,
-          totalRatings: 220
-        }
-      }
+          totalRatings: 220,
+        },
+      },
     ];
   }
 
@@ -932,41 +1060,41 @@ export class ContextualHelpEngine {
   private getAuthenticationResources(): ContextualHelpResource[] {
     return [
       {
-        resourceId: 'login_troubleshooting',
-        title: 'Login Troubleshooting Guide',
-        description: 'Step-by-step guide to resolve login issues',
-        type: 'TROUBLESHOOT',
-        url: '/docs/login-troubleshooting',
-        difficulty: 'BEGINNER',
-        estimatedTime: '10 minutes',
+        resourceId: "login_troubleshooting",
+        title: "Login Troubleshooting Guide",
+        description: "Step-by-step guide to resolve login issues",
+        type: "TROUBLESHOOT",
+        url: "/docs/login-troubleshooting",
+        difficulty: "BEGINNER",
+        estimatedTime: "10 minutes",
         prerequisites: [],
-        relatedTopics: ['authentication', 'password_reset', 'account_security'],
+        relatedTopics: ["authentication", "password_reset", "account_security"],
         ratings: {
           helpfulness: 4.4,
           clarity: 4.1,
           completeness: 4.2,
           averageRating: 4.2,
-          totalRatings: 180
-        }
+          totalRatings: 180,
+        },
       },
       {
-        resourceId: 'session_management',
-        title: 'Understanding Sessions',
-        description: 'Learn how user sessions work and how to manage them',
-        type: 'DOCUMENTATION',
-        url: '/docs/session-management',
-        difficulty: 'INTERMEDIATE',
-        estimatedTime: '15 minutes',
-        prerequisites: ['basic_authentication'],
-        relatedTopics: ['security', 'session_timeout', 'multi_device'],
+        resourceId: "session_management",
+        title: "Understanding Sessions",
+        description: "Learn how user sessions work and how to manage them",
+        type: "DOCUMENTATION",
+        url: "/docs/session-management",
+        difficulty: "INTERMEDIATE",
+        estimatedTime: "15 minutes",
+        prerequisites: ["basic_authentication"],
+        relatedTopics: ["security", "session_timeout", "multi_device"],
         ratings: {
           helpfulness: 4.3,
           clarity: 3.9,
           completeness: 4.1,
           averageRating: 4.1,
-          totalRatings: 95
-        }
-      }
+          totalRatings: 95,
+        },
+      },
     ];
   }
 
@@ -976,23 +1104,23 @@ export class ContextualHelpEngine {
   private getAuthorizationResources(): ContextualHelpResource[] {
     return [
       {
-        resourceId: 'permissions_guide',
-        title: 'Understanding Permissions',
-        description: 'Learn about user roles and permissions',
-        type: 'DOCUMENTATION',
-        url: '/docs/permissions',
-        difficulty: 'INTERMEDIATE',
-        estimatedTime: '12 minutes',
-        prerequisites: ['authentication_basics'],
-        relatedTopics: ['user_roles', 'access_control', 'security'],
+        resourceId: "permissions_guide",
+        title: "Understanding Permissions",
+        description: "Learn about user roles and permissions",
+        type: "DOCUMENTATION",
+        url: "/docs/permissions",
+        difficulty: "INTERMEDIATE",
+        estimatedTime: "12 minutes",
+        prerequisites: ["authentication_basics"],
+        relatedTopics: ["user_roles", "access_control", "security"],
         ratings: {
           helpfulness: 4.2,
           clarity: 3.8,
           completeness: 4.0,
           averageRating: 4.0,
-          totalRatings: 120
-        }
-      }
+          totalRatings: 120,
+        },
+      },
     ];
   }
 
@@ -1002,41 +1130,41 @@ export class ContextualHelpEngine {
   private getSystemResources(): ContextualHelpResource[] {
     return [
       {
-        resourceId: 'system_status_check',
-        title: 'System Status and Health',
-        description: 'Check current system status and known issues',
-        type: 'INTERACTIVE',
-        url: '/status',
-        difficulty: 'BEGINNER',
-        estimatedTime: '2 minutes',
+        resourceId: "system_status_check",
+        title: "System Status and Health",
+        description: "Check current system status and known issues",
+        type: "INTERACTIVE",
+        url: "/status",
+        difficulty: "BEGINNER",
+        estimatedTime: "2 minutes",
         prerequisites: [],
-        relatedTopics: ['system_health', 'maintenance', 'outages'],
+        relatedTopics: ["system_health", "maintenance", "outages"],
         ratings: {
           helpfulness: 4.6,
           clarity: 4.9,
           completeness: 4.4,
           averageRating: 4.6,
-          totalRatings: 300
-        }
+          totalRatings: 300,
+        },
       },
       {
-        resourceId: 'error_reporting',
-        title: 'How to Report System Errors',
-        description: 'Guide for reporting system errors effectively',
-        type: 'DOCUMENTATION',
-        url: '/docs/error-reporting',
-        difficulty: 'BEGINNER',
-        estimatedTime: '8 minutes',
+        resourceId: "error_reporting",
+        title: "How to Report System Errors",
+        description: "Guide for reporting system errors effectively",
+        type: "DOCUMENTATION",
+        url: "/docs/error-reporting",
+        difficulty: "BEGINNER",
+        estimatedTime: "8 minutes",
         prerequisites: [],
-        relatedTopics: ['support', 'bug_reports', 'system_logs'],
+        relatedTopics: ["support", "bug_reports", "system_logs"],
         ratings: {
           helpfulness: 4.1,
           clarity: 4.3,
           completeness: 3.9,
           averageRating: 4.1,
-          totalRatings: 85
-        }
-      }
+          totalRatings: 85,
+        },
+      },
     ];
   }
 
@@ -1046,23 +1174,23 @@ export class ContextualHelpEngine {
   private getIntegrationResources(): ContextualHelpResource[] {
     return [
       {
-        resourceId: 'api_integration_guide',
-        title: 'API Integration Best Practices',
-        description: 'Comprehensive guide to API integration',
-        type: 'DOCUMENTATION',
-        url: '/docs/api-integration',
-        difficulty: 'ADVANCED',
-        estimatedTime: '30 minutes',
-        prerequisites: ['api_basics', 'authentication'],
-        relatedTopics: ['webhooks', 'rate_limiting', 'error_handling'],
+        resourceId: "api_integration_guide",
+        title: "API Integration Best Practices",
+        description: "Comprehensive guide to API integration",
+        type: "DOCUMENTATION",
+        url: "/docs/api-integration",
+        difficulty: "ADVANCED",
+        estimatedTime: "30 minutes",
+        prerequisites: ["api_basics", "authentication"],
+        relatedTopics: ["webhooks", "rate_limiting", "error_handling"],
         ratings: {
           helpfulness: 4.5,
           clarity: 4.0,
           completeness: 4.3,
           averageRating: 4.3,
-          totalRatings: 75
-        }
-      }
+          totalRatings: 75,
+        },
+      },
     ];
   }
 
@@ -1072,23 +1200,23 @@ export class ContextualHelpEngine {
   private getPerformanceResources(): ContextualHelpResource[] {
     return [
       {
-        resourceId: 'performance_optimization',
-        title: 'Performance Optimization Tips',
-        description: 'Tips to improve application performance',
-        type: 'DOCUMENTATION',
-        url: '/docs/performance',
-        difficulty: 'INTERMEDIATE',
-        estimatedTime: '20 minutes',
-        prerequisites: ['basic_usage'],
-        relatedTopics: ['caching', 'optimization', 'best_practices'],
+        resourceId: "performance_optimization",
+        title: "Performance Optimization Tips",
+        description: "Tips to improve application performance",
+        type: "DOCUMENTATION",
+        url: "/docs/performance",
+        difficulty: "INTERMEDIATE",
+        estimatedTime: "20 minutes",
+        prerequisites: ["basic_usage"],
+        relatedTopics: ["caching", "optimization", "best_practices"],
         ratings: {
           helpfulness: 4.3,
           clarity: 4.1,
           completeness: 4.2,
           averageRating: 4.2,
-          totalRatings: 110
-        }
-      }
+          totalRatings: 110,
+        },
+      },
     ];
   }
 
@@ -1098,23 +1226,23 @@ export class ContextualHelpEngine {
   private getBusinessLogicResources(): ContextualHelpResource[] {
     return [
       {
-        resourceId: 'business_rules_guide',
-        title: 'Understanding Business Rules',
-        description: 'Learn about business logic and validation rules',
-        type: 'DOCUMENTATION',
-        url: '/docs/business-rules',
-        difficulty: 'INTERMEDIATE',
-        estimatedTime: '15 minutes',
-        prerequisites: ['basic_concepts'],
-        relatedTopics: ['validation', 'workflows', 'data_integrity'],
+        resourceId: "business_rules_guide",
+        title: "Understanding Business Rules",
+        description: "Learn about business logic and validation rules",
+        type: "DOCUMENTATION",
+        url: "/docs/business-rules",
+        difficulty: "INTERMEDIATE",
+        estimatedTime: "15 minutes",
+        prerequisites: ["basic_concepts"],
+        relatedTopics: ["validation", "workflows", "data_integrity"],
         ratings: {
           helpfulness: 4.0,
           clarity: 3.8,
           completeness: 3.9,
           averageRating: 3.9,
-          totalRatings: 60
-        }
-      }
+          totalRatings: 60,
+        },
+      },
     ];
   }
 
@@ -1124,23 +1252,23 @@ export class ContextualHelpEngine {
   private getRateLimitingResources(): ContextualHelpResource[] {
     return [
       {
-        resourceId: 'rate_limiting_guide',
-        title: 'Understanding Rate Limits',
-        description: 'Learn about API rate limits and how to work with them',
-        type: 'DOCUMENTATION',
-        url: '/docs/rate-limits',
-        difficulty: 'INTERMEDIATE',
-        estimatedTime: '10 minutes',
-        prerequisites: ['api_basics'],
-        relatedTopics: ['quotas', 'throttling', 'best_practices'],
+        resourceId: "rate_limiting_guide",
+        title: "Understanding Rate Limits",
+        description: "Learn about API rate limits and how to work with them",
+        type: "DOCUMENTATION",
+        url: "/docs/rate-limits",
+        difficulty: "INTERMEDIATE",
+        estimatedTime: "10 minutes",
+        prerequisites: ["api_basics"],
+        relatedTopics: ["quotas", "throttling", "best_practices"],
         ratings: {
           helpfulness: 4.4,
           clarity: 4.2,
           completeness: 4.1,
           averageRating: 4.2,
-          totalRatings: 90
-        }
-      }
+          totalRatings: 90,
+        },
+      },
     ];
   }
 
@@ -1150,12 +1278,16 @@ export class ContextualHelpEngine {
   private rankResourcesForUser(
     resources: ContextualHelpResource[],
     userProfile: UserCommunicationProfile,
-    helpContext: any
+    helpContext: any,
   ): ContextualHelpResource[] {
     return resources
-      .map(resource => ({
+      .map((resource) => ({
         ...resource,
-        relevanceScore: this.calculateRelevanceScore(resource, userProfile, helpContext)
+        relevanceScore: this.calculateRelevanceScore(
+          resource,
+          userProfile,
+          helpContext,
+        ),
       }))
       .sort((a, b) => (b.relevanceScore || 0) - (a.relevanceScore || 0))
       .slice(0, 5); // Return top 5 most relevant
@@ -1167,7 +1299,7 @@ export class ContextualHelpEngine {
   private calculateRelevanceScore(
     resource: ContextualHelpResource,
     userProfile: UserCommunicationProfile,
-    helpContext: any
+    helpContext: any,
   ): number {
     let score = 0;
 
@@ -1176,29 +1308,46 @@ export class ContextualHelpEngine {
 
     // Difficulty match (0-20)
     const userLevel = userProfile.expertiseLevels.technical;
-    if ((userLevel === 'BEGINNER' && resource.difficulty === 'BEGINNER') ||
-        (userLevel === 'INTERMEDIATE' && (resource.difficulty === 'BEGINNER' || resource.difficulty === 'INTERMEDIATE')) ||
-        (userLevel === 'ADVANCED' && resource.difficulty !== 'EXPERT') ||
-        (userLevel === 'EXPERT')) {
+    if (
+      (userLevel === "BEGINNER" && resource.difficulty === "BEGINNER") ||
+      (userLevel === "INTERMEDIATE" &&
+        (resource.difficulty === "BEGINNER" ||
+          resource.difficulty === "INTERMEDIATE")) ||
+      (userLevel === "ADVANCED" && resource.difficulty !== "EXPERT") ||
+      userLevel === "EXPERT"
+    ) {
       score += 20;
     }
 
     // Learning style match (0-15)
-    if (userProfile.learningStyle === 'EXAMPLES' && resource.type === 'EXAMPLE') {
+    if (
+      userProfile.learningStyle === "EXAMPLES" &&
+      resource.type === "EXAMPLE"
+    ) {
       score += 15;
-    } else if (userProfile.learningStyle === 'DEEP_EXPLANATION' && resource.type === 'DOCUMENTATION') {
+    } else if (
+      userProfile.learningStyle === "DEEP_EXPLANATION" &&
+      resource.type === "DOCUMENTATION"
+    ) {
       score += 15;
-    } else if (userProfile.learningStyle === 'HANDS_ON' && resource.type === 'INTERACTIVE') {
+    } else if (
+      userProfile.learningStyle === "HANDS_ON" &&
+      resource.type === "INTERACTIVE"
+    ) {
       score += 15;
     }
 
     // Urgency match (0-10)
-    if (helpContext.urgency === 'HIGH' && resource.type === 'TROUBLESHOOT') {
+    if (helpContext.urgency === "HIGH" && resource.type === "TROUBLESHOOT") {
       score += 10;
     }
 
     // Historical success (0-5)
-    if (userProfile.interactionHistory.preferredSolutionTypes.includes(resource.type)) {
+    if (
+      userProfile.interactionHistory.preferredSolutionTypes.includes(
+        resource.type,
+      )
+    ) {
       score += 5;
     }
 
@@ -1210,11 +1359,14 @@ export class ContextualHelpEngine {
    */
   private personalizeResources(
     resources: ContextualHelpResource[],
-    userProfile: UserCommunicationProfile
+    userProfile: UserCommunicationProfile,
   ): ContextualHelpResource[] {
-    return resources.map(resource => ({
+    return resources.map((resource) => ({
       ...resource,
-      description: this.personalizeDescription(resource.description, userProfile)
+      description: this.personalizeDescription(
+        resource.description,
+        userProfile,
+      ),
     }));
   }
 
@@ -1223,15 +1375,18 @@ export class ContextualHelpEngine {
    */
   private personalizeDescription(
     description: string,
-    userProfile: UserCommunicationProfile
+    userProfile: UserCommunicationProfile,
   ): string {
     // Add personalization based on communication style
-    if (userProfile.communicationStyle === 'CONCISE') {
-      return description.split('.')[0] + '.'; // Keep only first sentence
+    if (userProfile.communicationStyle === "CONCISE") {
+      return description.split(".")[0] + "."; // Keep only first sentence
     }
 
-    if (userProfile.communicationStyle === 'DETAILED') {
-      return description + ' This resource includes comprehensive examples and detailed explanations.';
+    if (userProfile.communicationStyle === "DETAILED") {
+      return (
+        description +
+        " This resource includes comprehensive examples and detailed explanations."
+      );
     }
 
     return description;
@@ -1240,26 +1395,28 @@ export class ContextualHelpEngine {
   /**
    * Get fallback help resources
    */
-  private getFallbackHelp(category: ConversationalErrorCategory): ContextualHelpResource[] {
+  private getFallbackHelp(
+    category: ConversationalErrorCategory,
+  ): ContextualHelpResource[] {
     return [
       {
-        resourceId: 'general_help',
-        title: 'General Help Center',
-        description: 'Browse our comprehensive help documentation',
-        type: 'DOCUMENTATION',
-        url: '/help',
-        difficulty: 'BEGINNER',
-        estimatedTime: '5 minutes',
+        resourceId: "general_help",
+        title: "General Help Center",
+        description: "Browse our comprehensive help documentation",
+        type: "DOCUMENTATION",
+        url: "/help",
+        difficulty: "BEGINNER",
+        estimatedTime: "5 minutes",
         prerequisites: [],
-        relatedTopics: ['general_help'],
+        relatedTopics: ["general_help"],
         ratings: {
           helpfulness: 4.0,
           clarity: 4.0,
           completeness: 4.0,
           averageRating: 4.0,
-          totalRatings: 100
-        }
-      }
+          totalRatings: 100,
+        },
+      },
     ];
   }
 }
@@ -1280,14 +1437,18 @@ export class ProgressiveDisclosureEngine {
     error: Error,
     context: ConversationalErrorContext,
     userProfile: UserCommunicationProfile,
-    severity: ConversationalErrorSeverity
+    severity: ConversationalErrorSeverity,
   ): Promise<ProgressiveDisclosureConfig> {
     try {
       // Determine initial disclosure level
       const initialLevel = this.determineInitialLevel(userProfile, severity);
 
       // Create available levels
-      const availableLevels = this.createAvailableLevels(error, context, userProfile);
+      const availableLevels = this.createAvailableLevels(
+        error,
+        context,
+        userProfile,
+      );
 
       // Configure detail triggers
       const detailTriggers = this.configureDetailTriggers(userProfile);
@@ -1299,10 +1460,13 @@ export class ProgressiveDisclosureEngine {
         initialLevel,
         availableLevels,
         detailTriggers,
-        adaptiveRules
+        adaptiveRules,
       };
     } catch (disclosureError) {
-      this.logger.error('Progressive disclosure configuration failed', disclosureError);
+      this.logger.error(
+        "Progressive disclosure configuration failed",
+        disclosureError,
+      );
       return this.getFallbackDisclosureConfig();
     }
   }
@@ -1312,34 +1476,34 @@ export class ProgressiveDisclosureEngine {
    */
   private determineInitialLevel(
     userProfile: UserCommunicationProfile,
-    severity: ConversationalErrorSeverity
-  ): 'SUMMARY' | 'BASIC' | 'DETAILED' | 'COMPREHENSIVE' {
+    severity: ConversationalErrorSeverity,
+  ): "SUMMARY" | "BASIC" | "DETAILED" | "COMPREHENSIVE" {
     // Critical errors start with more detail
     if (severity === ConversationalErrorSeverity.CRITICAL) {
-      return 'DETAILED';
+      return "DETAILED";
     }
 
     // Expert users get more detail initially
-    if (userProfile.expertiseLevels.technical === 'EXPERT') {
-      return 'DETAILED';
+    if (userProfile.expertiseLevels.technical === "EXPERT") {
+      return "DETAILED";
     }
 
     // Beginners start with summary
-    if (userProfile.expertiseLevels.technical === 'BEGINNER') {
-      return 'SUMMARY';
+    if (userProfile.expertiseLevels.technical === "BEGINNER") {
+      return "SUMMARY";
     }
 
     // Concise communicators prefer summary
-    if (userProfile.communicationStyle === 'CONCISE') {
-      return 'SUMMARY';
+    if (userProfile.communicationStyle === "CONCISE") {
+      return "SUMMARY";
     }
 
     // Detailed communicators prefer more info
-    if (userProfile.communicationStyle === 'DETAILED') {
-      return 'DETAILED';
+    if (userProfile.communicationStyle === "DETAILED") {
+      return "DETAILED";
     }
 
-    return 'BASIC';
+    return "BASIC";
   }
 
   /**
@@ -1348,7 +1512,7 @@ export class ProgressiveDisclosureEngine {
   private createAvailableLevels(
     error: Error,
     context: ConversationalErrorContext,
-    userProfile: UserCommunicationProfile
+    userProfile: UserCommunicationProfile,
   ): Array<{
     level: string;
     label: string;
@@ -1357,32 +1521,49 @@ export class ProgressiveDisclosureEngine {
   }> {
     const levels = [
       {
-        level: 'SUMMARY',
-        label: 'Quick Summary',
-        description: 'Essential information only',
-        includes: ['basic_message', 'immediate_action']
+        level: "SUMMARY",
+        label: "Quick Summary",
+        description: "Essential information only",
+        includes: ["basic_message", "immediate_action"],
       },
       {
-        level: 'BASIC',
-        label: 'Basic Details',
-        description: 'Core information with context',
-        includes: ['basic_message', 'immediate_action', 'brief_explanation', 'next_steps']
+        level: "BASIC",
+        label: "Basic Details",
+        description: "Core information with context",
+        includes: [
+          "basic_message",
+          "immediate_action",
+          "brief_explanation",
+          "next_steps",
+        ],
       },
       {
-        level: 'DETAILED',
-        label: 'Detailed Information',
-        description: 'Comprehensive explanation and guidance',
-        includes: ['basic_message', 'detailed_explanation', 'multiple_solutions', 'prevention_tips', 'resources']
-      }
+        level: "DETAILED",
+        label: "Detailed Information",
+        description: "Comprehensive explanation and guidance",
+        includes: [
+          "basic_message",
+          "detailed_explanation",
+          "multiple_solutions",
+          "prevention_tips",
+          "resources",
+        ],
+      },
     ];
 
     // Add expert level for technical users
-    if (userProfile.expertiseLevels.technical === 'EXPERT') {
+    if (userProfile.expertiseLevels.technical === "EXPERT") {
       levels.push({
-        level: 'COMPREHENSIVE',
-        label: 'Technical Details',
-        description: 'Full technical information and diagnostics',
-        includes: ['all_basic_info', 'technical_details', 'system_diagnostics', 'debug_info', 'api_details']
+        level: "COMPREHENSIVE",
+        label: "Technical Details",
+        description: "Full technical information and diagnostics",
+        includes: [
+          "all_basic_info",
+          "technical_details",
+          "system_diagnostics",
+          "debug_info",
+          "api_details",
+        ],
       });
     }
 
@@ -1400,9 +1581,9 @@ export class ProgressiveDisclosureEngine {
   } {
     return {
       clickForMore: true,
-      askQuestions: userProfile.learningStyle === 'DEEP_EXPLANATION',
-      showExamples: userProfile.learningStyle === 'EXAMPLES',
-      technicalDetails: userProfile.expertiseLevels.technical === 'EXPERT'
+      askQuestions: userProfile.learningStyle === "DEEP_EXPLANATION",
+      showExamples: userProfile.learningStyle === "EXAMPLES",
+      technicalDetails: userProfile.expertiseLevels.technical === "EXPERT",
     };
   }
 
@@ -1412,42 +1593,50 @@ export class ProgressiveDisclosureEngine {
   private createAdaptiveRules(
     error: Error,
     context: ConversationalErrorContext,
-    severity: ConversationalErrorSeverity
+    severity: ConversationalErrorSeverity,
   ): Array<{
     condition: string;
-    action: 'EXPAND' | 'SIMPLIFY' | 'REDIRECT' | 'SUGGEST';
+    action: "EXPAND" | "SIMPLIFY" | "REDIRECT" | "SUGGEST";
     reason: string;
   }> {
     const rules: Array<{
       condition: string;
-      action: 'EXPAND' | 'SIMPLIFY' | 'REDIRECT' | 'SUGGEST';
+      action: "EXPAND" | "SIMPLIFY" | "REDIRECT" | "SUGGEST";
       reason: string;
     }> = [];
 
     // Critical errors should expand automatically
     if (severity === ConversationalErrorSeverity.CRITICAL) {
       rules.push({
-        condition: 'error_severity_critical',
-        action: 'EXPAND',
-        reason: 'Critical errors require detailed information for proper handling'
+        condition: "error_severity_critical",
+        action: "EXPAND",
+        reason:
+          "Critical errors require detailed information for proper handling",
       });
     }
 
     // Authentication errors should redirect to auth help
-    if (error.name.includes('Unauthorized') || error.name.includes('Authentication')) {
+    if (
+      error.name.includes("Unauthorized") ||
+      error.name.includes("Authentication")
+    ) {
       rules.push({
-        condition: 'authentication_error',
-        action: 'REDIRECT',
-        reason: 'Authentication errors benefit from specialized guidance'
+        condition: "authentication_error",
+        action: "REDIRECT",
+        reason: "Authentication errors benefit from specialized guidance",
       });
     }
 
     // Input validation errors should show examples
-    if (error.name.includes('BadRequest') || error.message.toLowerCase().includes('validation')) {
+    if (
+      error.name.includes("BadRequest") ||
+      error.message.toLowerCase().includes("validation")
+    ) {
       rules.push({
-        condition: 'validation_error',
-        action: 'SUGGEST',
-        reason: 'Validation errors are best resolved with examples and guidance'
+        condition: "validation_error",
+        action: "SUGGEST",
+        reason:
+          "Validation errors are best resolved with examples and guidance",
       });
     }
 
@@ -1459,22 +1648,22 @@ export class ProgressiveDisclosureEngine {
    */
   private getFallbackDisclosureConfig(): ProgressiveDisclosureConfig {
     return {
-      initialLevel: 'BASIC',
+      initialLevel: "BASIC",
       availableLevels: [
         {
-          level: 'BASIC',
-          label: 'Basic Information',
-          description: 'Essential error information',
-          includes: ['basic_message', 'immediate_action']
-        }
+          level: "BASIC",
+          label: "Basic Information",
+          description: "Essential error information",
+          includes: ["basic_message", "immediate_action"],
+        },
       ],
       detailTriggers: {
         clickForMore: true,
         askQuestions: false,
         showExamples: false,
-        technicalDetails: false
+        technicalDetails: false,
       },
-      adaptiveRules: []
+      adaptiveRules: [],
     };
   }
 }
@@ -1491,9 +1680,9 @@ export class NaturalLanguageCommunicationSystem {
   constructor(
     private readonly messageEngine: MessageGenerationEngine,
     private readonly helpEngine: ContextualHelpEngine,
-    private readonly disclosureEngine: ProgressiveDisclosureEngine
+    private readonly disclosureEngine: ProgressiveDisclosureEngine,
   ) {
-    this.logger.log('NaturalLanguageCommunicationSystem initialized');
+    this.logger.log("NaturalLanguageCommunicationSystem initialized");
   }
 
   /**
@@ -1504,7 +1693,7 @@ export class NaturalLanguageCommunicationSystem {
     context: ConversationalErrorContext,
     userProfile: UserCommunicationProfile,
     severity: ConversationalErrorSeverity,
-    category: ConversationalErrorCategory
+    category: ConversationalErrorCategory,
   ): Promise<CommunicationResult> {
     const startTime = Date.now();
 
@@ -1515,7 +1704,7 @@ export class NaturalLanguageCommunicationSystem {
         context,
         userProfile,
         severity,
-        category
+        category,
       );
 
       // Generate contextual help resources
@@ -1523,7 +1712,7 @@ export class NaturalLanguageCommunicationSystem {
         error,
         context,
         userProfile,
-        category
+        category,
       );
 
       // Configure progressive disclosure
@@ -1531,11 +1720,15 @@ export class NaturalLanguageCommunicationSystem {
         error,
         context,
         userProfile,
-        severity
+        severity,
       );
 
       // Generate interactive elements
-      const interactive = this.generateInteractiveElements(error, context, category);
+      const interactive = this.generateInteractiveElements(
+        error,
+        context,
+        category,
+      );
 
       // Calculate communication metrics
       const processingTime = Date.now() - startTime;
@@ -1550,30 +1743,42 @@ export class NaturalLanguageCommunicationSystem {
           generationTime: processingTime,
           complexity,
           readabilityScore,
-          estimatedReadTime
+          estimatedReadTime,
         },
         resources,
         interactive,
         disclosure: {
           currentLevel: disclosureConfig.initialLevel,
-          availableLevels: disclosureConfig.availableLevels.map(level => level.level),
-          expandOptions: disclosureConfig.availableLevels.map(level => ({
+          availableLevels: disclosureConfig.availableLevels.map(
+            (level) => level.level,
+          ),
+          expandOptions: disclosureConfig.availableLevels.map((level) => ({
             optionId: level.level,
             label: level.label,
-            description: level.description
-          }))
+            description: level.description,
+          })),
         },
         engagement: {
-          expectedEngagement: this.assessExpectedEngagement(message, resources, interactive),
-          interactionPoints: this.countInteractionPoints(resources, interactive),
-          clarificationOpportunities: this.identifyClarificationOpportunities(message, category)
-        }
+          expectedEngagement: this.assessExpectedEngagement(
+            message,
+            resources,
+            interactive,
+          ),
+          interactionPoints: this.countInteractionPoints(
+            resources,
+            interactive,
+          ),
+          clarificationOpportunities: this.identifyClarificationOpportunities(
+            message,
+            category,
+          ),
+        },
       };
 
       this.logger.log(`Communication generated in ${processingTime}ms`);
       return result;
     } catch (communicationError) {
-      this.logger.error('Communication generation failed', communicationError);
+      this.logger.error("Communication generation failed", communicationError);
       return this.generateFallbackCommunication(error, severity);
     }
   }
@@ -1584,9 +1789,14 @@ export class NaturalLanguageCommunicationSystem {
   private generateInteractiveElements(
     error: Error,
     context: ConversationalErrorContext,
-    category: ConversationalErrorCategory
+    category: ConversationalErrorCategory,
   ): {
-    quickActions?: Array<{ actionId: string; label: string; description: string; estimatedTime: string; }>;
+    quickActions?: Array<{
+      actionId: string;
+      label: string;
+      description: string;
+      estimatedTime: string;
+    }>;
     followUpQuestions?: string[];
   } {
     const quickActions = [];
@@ -1597,104 +1807,105 @@ export class NaturalLanguageCommunicationSystem {
       case ConversationalErrorCategory.USER_INPUT:
         quickActions.push(
           {
-            actionId: 'validate_input',
-            label: 'Check My Input',
-            description: 'Validate the information I provided',
-            estimatedTime: '30 seconds'
+            actionId: "validate_input",
+            label: "Check My Input",
+            description: "Validate the information I provided",
+            estimatedTime: "30 seconds",
           },
           {
-            actionId: 'show_examples',
-            label: 'Show Examples',
-            description: 'See examples of correct input formats',
-            estimatedTime: '2 minutes'
-          }
+            actionId: "show_examples",
+            label: "Show Examples",
+            description: "See examples of correct input formats",
+            estimatedTime: "2 minutes",
+          },
         );
         followUpQuestions.push(
-          'What format should I use for this field?',
-          'Can you show me an example?',
-          'Which fields are required?'
+          "What format should I use for this field?",
+          "Can you show me an example?",
+          "Which fields are required?",
         );
         break;
 
       case ConversationalErrorCategory.AUTHENTICATION:
         quickActions.push(
           {
-            actionId: 'retry_login',
-            label: 'Try Logging In Again',
-            description: 'Attempt to log in with current credentials',
-            estimatedTime: '1 minute'
+            actionId: "retry_login",
+            label: "Try Logging In Again",
+            description: "Attempt to log in with current credentials",
+            estimatedTime: "1 minute",
           },
           {
-            actionId: 'reset_password',
-            label: 'Reset Password',
-            description: 'Start the password reset process',
-            estimatedTime: '5 minutes'
-          }
+            actionId: "reset_password",
+            label: "Reset Password",
+            description: "Start the password reset process",
+            estimatedTime: "5 minutes",
+          },
         );
         followUpQuestions.push(
-          'How do I reset my password?',
-          'Why did my session expire?',
-          'Can I stay logged in longer?'
+          "How do I reset my password?",
+          "Why did my session expire?",
+          "Can I stay logged in longer?",
         );
         break;
 
       default:
         quickActions.push(
           {
-            actionId: 'retry_action',
-            label: 'Try Again',
-            description: 'Retry the action that caused the error',
-            estimatedTime: '1 minute'
+            actionId: "retry_action",
+            label: "Try Again",
+            description: "Retry the action that caused the error",
+            estimatedTime: "1 minute",
           },
           {
-            actionId: 'get_help',
-            label: 'Get More Help',
-            description: 'Access additional help resources',
-            estimatedTime: '5 minutes'
-          }
+            actionId: "get_help",
+            label: "Get More Help",
+            description: "Access additional help resources",
+            estimatedTime: "5 minutes",
+          },
         );
         followUpQuestions.push(
-          'What should I do next?',
-          'How can I prevent this in the future?',
-          'Is this a known issue?'
+          "What should I do next?",
+          "How can I prevent this in the future?",
+          "Is this a known issue?",
         );
     }
 
     return {
       quickActions: quickActions.slice(0, 3), // Limit to 3 actions
-      followUpQuestions: followUpQuestions.slice(0, 3) // Limit to 3 questions
+      followUpQuestions: followUpQuestions.slice(0, 3), // Limit to 3 questions
     };
   }
 
   /**
    * Assess message complexity
    */
-  private assessComplexity(message: string): 'LOW' | 'MEDIUM' | 'HIGH' {
-    const wordCount = message.split(' ').length;
-    const sentenceCount = message.split('.').length;
+  private assessComplexity(message: string): "LOW" | "MEDIUM" | "HIGH" {
+    const wordCount = message.split(" ").length;
+    const sentenceCount = message.split(".").length;
     const avgWordsPerSentence = wordCount / sentenceCount;
 
     if (wordCount < 50 && avgWordsPerSentence < 15) {
-      return 'LOW';
+      return "LOW";
     }
 
     if (wordCount > 150 || avgWordsPerSentence > 25) {
-      return 'HIGH';
+      return "HIGH";
     }
 
-    return 'MEDIUM';
+    return "MEDIUM";
   }
 
   /**
    * Calculate readability score (simplified Flesch Reading Ease)
    */
   private calculateReadabilityScore(message: string): number {
-    const words = message.split(' ').length;
-    const sentences = message.split('.').length;
+    const words = message.split(" ").length;
+    const sentences = message.split(".").length;
     const syllables = this.countSyllables(message);
 
     // Simplified Flesch Reading Ease formula
-    const score = 206.835 - (1.015 * (words / sentences)) - (84.6 * (syllables / words));
+    const score =
+      206.835 - 1.015 * (words / sentences) - 84.6 * (syllables / words);
     return Math.max(0, Math.min(100, score));
   }
 
@@ -1702,12 +1913,12 @@ export class NaturalLanguageCommunicationSystem {
    * Count syllables in text
    */
   private countSyllables(text: string): number {
-    return text.toLowerCase()
-      .replace(/[^a-z]/g, '')
-      .replace(/[aeiou]{2,}/g, 'a')
-      .replace(/[bcdfghjklmnpqrstvwxyz][aeiou]/g, 'ba')
-      .replace(/[aeiou]$/, '')
-      .length;
+    return text
+      .toLowerCase()
+      .replace(/[^a-z]/g, "")
+      .replace(/[aeiou]{2,}/g, "a")
+      .replace(/[bcdfghjklmnpqrstvwxyz][aeiou]/g, "ba")
+      .replace(/[aeiou]$/, "").length;
   }
 
   /**
@@ -1715,13 +1926,13 @@ export class NaturalLanguageCommunicationSystem {
    */
   private estimateReadTime(message: string): string {
     const wordsPerMinute = 200; // Average reading speed
-    const wordCount = message.split(' ').length;
+    const wordCount = message.split(" ").length;
     const minutes = Math.ceil(wordCount / wordsPerMinute);
 
     if (minutes < 1) {
-      return '< 1 minute';
+      return "< 1 minute";
     } else if (minutes === 1) {
-      return '1 minute';
+      return "1 minute";
     } else {
       return `${minutes} minutes`;
     }
@@ -1733,13 +1944,14 @@ export class NaturalLanguageCommunicationSystem {
   private assessExpectedEngagement(
     message: string,
     resources: ContextualHelpResource[],
-    interactive: any
-  ): 'LOW' | 'MEDIUM' | 'HIGH' {
+    interactive: any,
+  ): "LOW" | "MEDIUM" | "HIGH" {
     let engagementScore = 0;
 
     // Message factors
-    if (message.includes('?')) engagementScore += 1;
-    if (message.includes('you can') || message.includes('try')) engagementScore += 1;
+    if (message.includes("?")) engagementScore += 1;
+    if (message.includes("you can") || message.includes("try"))
+      engagementScore += 1;
 
     // Resources factor
     engagementScore += Math.min(resources.length, 3);
@@ -1748,9 +1960,9 @@ export class NaturalLanguageCommunicationSystem {
     if (interactive.quickActions?.length > 0) engagementScore += 2;
     if (interactive.followUpQuestions?.length > 0) engagementScore += 1;
 
-    if (engagementScore <= 3) return 'LOW';
-    if (engagementScore <= 6) return 'MEDIUM';
-    return 'HIGH';
+    if (engagementScore <= 3) return "LOW";
+    if (engagementScore <= 6) return "MEDIUM";
+    return "HIGH";
   }
 
   /**
@@ -1758,7 +1970,7 @@ export class NaturalLanguageCommunicationSystem {
    */
   private countInteractionPoints(
     resources: ContextualHelpResource[],
-    interactive: any
+    interactive: any,
   ): number {
     let points = 0;
 
@@ -1774,31 +1986,31 @@ export class NaturalLanguageCommunicationSystem {
    */
   private identifyClarificationOpportunities(
     message: string,
-    category: ConversationalErrorCategory
+    category: ConversationalErrorCategory,
   ): string[] {
     const opportunities = [];
 
     // Generic opportunities
-    opportunities.push('What does this mean exactly?');
-    opportunities.push('Can you explain this in simpler terms?');
+    opportunities.push("What does this mean exactly?");
+    opportunities.push("Can you explain this in simpler terms?");
 
     // Category-specific opportunities
     switch (category) {
       case ConversationalErrorCategory.USER_INPUT:
-        opportunities.push('What format should I use?');
-        opportunities.push('Can you show me an example?');
+        opportunities.push("What format should I use?");
+        opportunities.push("Can you show me an example?");
         break;
       case ConversationalErrorCategory.AUTHENTICATION:
-        opportunities.push('How do I log in properly?');
-        opportunities.push('Why does this keep happening?');
+        opportunities.push("How do I log in properly?");
+        opportunities.push("Why does this keep happening?");
         break;
       case ConversationalErrorCategory.SYSTEM:
-        opportunities.push('When will this be fixed?');
-        opportunities.push('Is there a workaround?');
+        opportunities.push("When will this be fixed?");
+        opportunities.push("Is there a workaround?");
         break;
       default:
-        opportunities.push('What should I do next?');
-        opportunities.push('How can I prevent this?');
+        opportunities.push("What should I do next?");
+        opportunities.push("How can I prevent this?");
     }
 
     return opportunities.slice(0, 3);
@@ -1816,39 +2028,40 @@ export class NaturalLanguageCommunicationSystem {
    */
   private generateFallbackCommunication(
     error: Error,
-    severity: ConversationalErrorSeverity
+    severity: ConversationalErrorSeverity,
   ): CommunicationResult {
     return {
-      message: 'We encountered an issue and are working to resolve it. Please try again shortly.',
+      message:
+        "We encountered an issue and are working to resolve it. Please try again shortly.",
       metadata: {
         messageId: this.generateMessageId(),
         generationTime: 0,
-        complexity: 'LOW',
+        complexity: "LOW",
         readabilityScore: 80,
-        estimatedReadTime: '< 1 minute'
+        estimatedReadTime: "< 1 minute",
       },
       resources: [],
       interactive: {
         quickActions: [
           {
-            actionId: 'retry',
-            label: 'Try Again',
-            description: 'Retry your last action',
-            estimatedTime: '1 minute'
-          }
+            actionId: "retry",
+            label: "Try Again",
+            description: "Retry your last action",
+            estimatedTime: "1 minute",
+          },
         ],
-        followUpQuestions: ['What should I do next?']
+        followUpQuestions: ["What should I do next?"],
       },
       disclosure: {
-        currentLevel: 'BASIC',
-        availableLevels: ['BASIC'],
-        expandOptions: []
+        currentLevel: "BASIC",
+        availableLevels: ["BASIC"],
+        expandOptions: [],
       },
       engagement: {
-        expectedEngagement: 'LOW',
+        expectedEngagement: "LOW",
         interactionPoints: 1,
-        clarificationOpportunities: ['What does this mean?']
-      }
+        clarificationOpportunities: ["What does this mean?"],
+      },
     };
   }
 }

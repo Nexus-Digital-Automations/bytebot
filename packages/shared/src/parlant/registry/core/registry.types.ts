@@ -14,8 +14,8 @@ import {
   ValidationMode,
   ApprovalLevel,
   RiskLevel,
-  FunctionSecurityLevel
-} from '../../../types/parlant-integration.types';
+  FunctionSecurityLevel,
+} from "../../../types/parlant-integration.types";
 
 // ===========================
 // CORE REGISTRY TYPES
@@ -150,7 +150,7 @@ export enum TypeCategory {
   _ENUM = "enum",
   _UNION = "union",
   _GENERIC = "generic",
-  _UNKNOWN = "unknown"
+  _UNKNOWN = "unknown",
 }
 
 /**
@@ -215,7 +215,7 @@ export enum ValidationRuleType {
   _MIN_LENGTH = "min_length",
   _MAX_LENGTH = "max_length",
   _PATTERN = "pattern",
-  _CUSTOM = "custom"
+  _CUSTOM = "custom",
 }
 
 /**
@@ -278,7 +278,7 @@ export enum ExampleCategory {
   _ADVANCED_USAGE = "advanced_usage",
   _EDGE_CASE = "edge_case",
   _INTEGRATION = "integration",
-  _PERFORMANCE = "performance"
+  _PERFORMANCE = "performance",
 }
 
 /**
@@ -315,7 +315,7 @@ export enum IntensityLevel {
   _LOW = "low",
   _MEDIUM = "medium",
   _HIGH = "high",
-  _EXTREME = "extreme"
+  _EXTREME = "extreme",
 }
 
 /**
@@ -367,7 +367,7 @@ export enum DocumentationType {
   _EXAMPLE = "example",
   _SPECIFICATION = "specification",
   _CHANGELOG = "changelog",
-  _MIGRATION_GUIDE = "migration_guide"
+  _MIGRATION_GUIDE = "migration_guide",
 }
 
 /**
@@ -440,7 +440,7 @@ export enum SecurityConsiderationType {
   _PRIVILEGE_ESCALATION = "privilege_escalation",
   _INJECTION_VULNERABILITY = "injection_vulnerability",
   _AUTHENTICATION_BYPASS = "authentication_bypass",
-  _AUTHORIZATION_BYPASS = "authorization_bypass"
+  _AUTHORIZATION_BYPASS = "authorization_bypass",
 }
 
 /**
@@ -451,7 +451,7 @@ export enum SecuritySeverity {
   _LOW = "low",
   _MEDIUM = "medium",
   _HIGH = "high",
-  _CRITICAL = "critical"
+  _CRITICAL = "critical",
 }
 
 /**
@@ -479,7 +479,7 @@ export enum PermissionScope {
   _WRITE = "write",
   _EXECUTE = "execute",
   _ADMIN = "admin",
-  _SYSTEM = "system"
+  _SYSTEM = "system",
 }
 
 /**
@@ -508,7 +508,7 @@ export enum SecurityConstraintType {
   _TIME_WINDOW = "time_window",
   _USER_VERIFICATION = "user_verification",
   _MULTI_FACTOR_AUTH = "multi_factor_auth",
-  _APPROVAL_REQUIRED = "approval_required"
+  _APPROVAL_REQUIRED = "approval_required",
 }
 
 /**
@@ -518,7 +518,7 @@ export enum EnforcementLevel {
   _ADVISORY = "advisory",
   _WARNING = "warning",
   _BLOCKING = "blocking",
-  _FATAL = "fatal"
+  _FATAL = "fatal",
 }
 
 /**
@@ -547,7 +547,7 @@ export enum AuditType {
   _PARAMETER_LOG = "parameter_log",
   _RESULT_LOG = "result_log",
   _ERROR_LOG = "error_log",
-  _SECURITY_EVENT = "security_event"
+  _SECURITY_EVENT = "security_event",
 }
 
 /**
@@ -557,7 +557,7 @@ export enum AuditLevel {
   _NONE = "none",
   _BASIC = "basic",
   _DETAILED = "detailed",
-  _COMPREHENSIVE = "comprehensive"
+  _COMPREHENSIVE = "comprehensive",
 }
 
 /**
@@ -617,7 +617,7 @@ export enum CacheStrategy {
   _FUNCTION_LEVEL = "function_level",
   _PARAMETER_AWARE = "parameter_aware",
   _USER_AWARE = "user_aware",
-  _CONTEXT_AWARE = "context_aware"
+  _CONTEXT_AWARE = "context_aware",
 }
 
 /**
@@ -627,7 +627,7 @@ export enum CacheStorageType {
   _MEMORY = "memory",
   _REDIS = "redis",
   _DATABASE = "database",
-  _FILE_SYSTEM = "file_system"
+  _FILE_SYSTEM = "file_system",
 }
 
 /**
@@ -656,7 +656,7 @@ export enum MonitoringMetric {
   _CPU_USAGE = "cpu_usage",
   _ERROR_RATE = "error_rate",
   _CALL_FREQUENCY = "call_frequency",
-  _CACHE_HIT_RATE = "cache_hit_rate"
+  _CACHE_HIT_RATE = "cache_hit_rate",
 }
 
 /**
@@ -699,7 +699,7 @@ export enum ComparisonOperator {
   _LESS_THAN = "lt",
   _LESS_THAN_EQUAL = "lte",
   _EQUAL = "eq",
-  _NOT_EQUAL = "ne"
+  _NOT_EQUAL = "ne",
 }
 
 /**
@@ -709,7 +709,7 @@ export enum AlertSeverity {
   _INFO = "info",
   _WARNING = "warning",
   _ERROR = "error",
-  _CRITICAL = "critical"
+  _CRITICAL = "critical",
 }
 
 /**
@@ -734,7 +734,7 @@ export enum ChannelType {
   _SLACK = "slack",
   _WEBHOOK = "webhook",
   _SMS = "sms",
-  _PAGER_DUTY = "pager_duty"
+  _PAGER_DUTY = "pager_duty",
 }
 
 /**
@@ -762,7 +762,7 @@ export enum ErrorHandlingStrategy {
   _RETRY = "retry",
   _CIRCUIT_BREAKER = "circuit_breaker",
   _FALLBACK = "fallback",
-  _HYBRID = "hybrid"
+  _HYBRID = "hybrid",
 }
 
 /**
@@ -820,7 +820,7 @@ export enum FallbackStrategy {
   _RETURN_DEFAULT = "return_default",
   _RETURN_CACHED = "return_cached",
   _RETURN_ERROR = "return_error",
-  _CALL_ALTERNATIVE = "call_alternative"
+  _CALL_ALTERNATIVE = "call_alternative",
 }
 
 /**
@@ -859,7 +859,7 @@ export enum ConditionType {
   _ENVIRONMENT = "environment",
   _TIME_WINDOW = "time_window",
   _PARAMETER_VALUE = "parameter_value",
-  _CUSTOM = "custom"
+  _CUSTOM = "custom",
 }
 
 /**
@@ -908,7 +908,7 @@ export enum DependencyType {
   _CALLBACK = "callback",
   _EVENT_HANDLER = "event_handler",
   _COMPOSITION = "composition",
-  _INHERITANCE = "inheritance"
+  _INHERITANCE = "inheritance",
 }
 
 /**
@@ -918,7 +918,7 @@ export enum DependencyStrength {
   _WEAK = "weak",
   _MODERATE = "moderate",
   _STRONG = "strong",
-  _CRITICAL = "critical"
+  _CRITICAL = "critical",
 }
 
 /**
@@ -928,7 +928,7 @@ export enum CallFrequency {
   _RARE = "rare",
   _OCCASIONAL = "occasional",
   _FREQUENT = "frequent",
-  _CONSTANT = "constant"
+  _CONSTANT = "constant",
 }
 
 /**
@@ -960,7 +960,7 @@ export enum ExternalDependencyType {
   _DATABASE = "database",
   _FILE_SYSTEM = "file_system",
   _NETWORK_RESOURCE = "network_resource",
-  _SYSTEM_RESOURCE = "system_resource"
+  _SYSTEM_RESOURCE = "system_resource",
 }
 
 /**
@@ -1028,7 +1028,7 @@ export enum HealthStatus {
   _WARNING = "warning",
   _UNHEALTHY = "unhealthy",
   _CRITICAL = "critical",
-  _UNKNOWN = "unknown"
+  _UNKNOWN = "unknown",
 }
 
 /**
@@ -1038,7 +1038,7 @@ export enum HealthTrend {
   _IMPROVING = "improving",
   _STABLE = "stable",
   _DEGRADING = "degrading",
-  _UNKNOWN = "unknown"
+  _UNKNOWN = "unknown",
 }
 
 /**
@@ -1128,7 +1128,7 @@ export enum ChangeType {
   _SECURITY = "security",
   _DEPRECATION = "deprecation",
   _REMOVAL = "removal",
-  _BREAKING = "breaking"
+  _BREAKING = "breaking",
 }
 
 /**
@@ -1139,7 +1139,7 @@ export enum ChangeImpact {
   _MINOR = "minor",
   _MODERATE = "moderate",
   _MAJOR = "major",
-  _BREAKING = "breaking"
+  _BREAKING = "breaking",
 }
 
 /**
@@ -1197,7 +1197,7 @@ export enum CompatibilityLevel {
   _FULL = "full",
   _PARTIAL = "partial",
   _NONE = "none",
-  _UNKNOWN = "unknown"
+  _UNKNOWN = "unknown",
 }
 
 /**
@@ -1247,7 +1247,7 @@ export enum MigrationStepType {
   _DATA_MIGRATION = "data_migration",
   _TESTING = "testing",
   _DEPLOYMENT = "deployment",
-  _VALIDATION = "validation"
+  _VALIDATION = "validation",
 }
 
 /**
@@ -1256,7 +1256,7 @@ export enum MigrationStepType {
 export enum AutomationLevel {
   _MANUAL = "manual",
   _SEMI_AUTOMATED = "semi_automated",
-  _FULLY_AUTOMATED = "fully_automated"
+  _FULLY_AUTOMATED = "fully_automated",
 }
 
 /**
@@ -1298,7 +1298,7 @@ export enum CriteriaType {
   _PERFORMANCE = "performance",
   _SECURITY = "security",
   _COMPATIBILITY = "compatibility",
-  _COMPLIANCE = "compliance"
+  _COMPLIANCE = "compliance",
 }
 
 /**
@@ -1309,7 +1309,7 @@ export enum ValidationMethod {
   _INTEGRATION_TEST = "integration_test",
   _PERFORMANCE_TEST = "performance_test",
   _SECURITY_SCAN = "security_scan",
-  _MANUAL_VERIFICATION = "manual_verification"
+  _MANUAL_VERIFICATION = "manual_verification",
 }
 
 /**
@@ -1320,7 +1320,7 @@ export enum MigrationComplexity {
   _SIMPLE = "simple",
   _MODERATE = "moderate",
   _COMPLEX = "complex",
-  _VERY_COMPLEX = "very_complex"
+  _VERY_COMPLEX = "very_complex",
 }
 
 /**
@@ -1352,7 +1352,7 @@ export enum RegistrationStatus {
   _DEPRECATED = "deprecated",
   _MAINTENANCE = "maintenance",
   _ERROR = "error",
-  _UNKNOWN = "unknown"
+  _UNKNOWN = "unknown",
 }
 
 // ===========================
@@ -1421,7 +1421,7 @@ export enum DiscoveryMethod {
   _RUNTIME_REFLECTION = "runtime_reflection",
   _AST_PARSING = "ast_parsing",
   _ANNOTATION_SCANNING = "annotation_scanning",
-  _CONFIGURATION_BASED = "configuration_based"
+  _CONFIGURATION_BASED = "configuration_based",
 }
 
 /**
@@ -1556,7 +1556,7 @@ export enum FilterOperator {
   _LESS_THAN = "lt",
   _LESS_THAN_EQUAL = "lte",
   _IN = "in",
-  _NOT_IN = "not_in"
+  _NOT_IN = "not_in",
 }
 
 /**
@@ -1578,7 +1578,7 @@ export interface SortConfiguration {
  */
 export enum SortDirection {
   _ASC = "asc",
-  _DESC = "desc"
+  _DESC = "desc",
 }
 
 /**

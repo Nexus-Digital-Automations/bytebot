@@ -82,10 +82,10 @@ export enum ElementTargetingStrategy {
  * Interaction safety levels
  */
 export enum InteractionSafetyLevel {
-  SAFE = 'safe',           // Standard interactions with validation
-  CAUTIOUS = 'cautious',   // Extra validation and confirmation
+  SAFE = 'safe', // Standard interactions with validation
+  CAUTIOUS = 'cautious', // Extra validation and confirmation
   AGGRESSIVE = 'aggressive', // Bypass some safety checks
-  TESTING = 'testing',     // Allow dangerous operations for testing
+  TESTING = 'testing', // Allow dangerous operations for testing
 }
 
 /**
@@ -101,10 +101,10 @@ export enum ScrollBehavior {
  * Element visibility requirements
  */
 export enum VisibilityRequirement {
-  VISIBLE = 'visible',           // Element must be visible
-  IN_VIEWPORT = 'in_viewport',   // Element must be in viewport
+  VISIBLE = 'visible', // Element must be visible
+  IN_VIEWPORT = 'in_viewport', // Element must be in viewport
   PARTIALLY_VISIBLE = 'partially_visible', // Element can be partially visible
-  ANY = 'any',                   // Element can be hidden
+  ANY = 'any', // Element can be hidden
 }
 
 /**
@@ -127,7 +127,7 @@ export class ElementLocator {
   @MinLength(1, { message: 'CSS selector cannot be empty' })
   @MaxLength(2000, { message: 'CSS selector too long' })
   @Matches(/^[a-zA-Z0-9\s\-_#.,:[\]()>"'=*+~^$|\\]+$/, {
-    message: 'Invalid CSS selector format'
+    message: 'Invalid CSS selector format',
   })
   cssSelector?: string;
 
@@ -339,7 +339,7 @@ export class ClickInteractionDto {
   @IsArray({ message: 'Modifier keys must be an array' })
   @IsEnum(['ctrl', 'alt', 'shift', 'meta'], {
     each: true,
-    message: 'Invalid modifier key'
+    message: 'Invalid modifier key',
   })
   @ArrayMaxSize(4, { message: 'Too many modifier keys' })
   modifierKeys?: string[];
@@ -446,7 +446,7 @@ export class TypeInteractionDto {
   @IsString({ message: 'Text must be a string' })
   @MinLength(1, { message: 'Text cannot be empty' })
   @MaxLength(50000, { message: 'Text too long' })
-  @Transform(({ value }) => typeof value === 'string' ? value : value)
+  @Transform(({ value }) => (typeof value === 'string' ? value : value))
   text!: string;
 
   @ApiPropertyOptional({
@@ -556,7 +556,9 @@ export class ScrollInteractionDto {
     default: 'down',
   })
   @IsOptional()
-  @IsEnum(['up', 'down', 'left', 'right'], { message: 'Invalid scroll direction' })
+  @IsEnum(['up', 'down', 'left', 'right'], {
+    message: 'Invalid scroll direction',
+  })
   direction?: 'up' | 'down' | 'left' | 'right' = 'down';
 
   @ApiPropertyOptional({
@@ -711,7 +713,12 @@ export class InteractionResponseDto {
   error?: {
     code: string;
     message: string;
-    category: 'element_not_found' | 'interaction_failed' | 'validation_failed' | 'timeout' | 'security_violation';
+    category:
+      | 'element_not_found'
+      | 'interaction_failed'
+      | 'validation_failed'
+      | 'timeout'
+      | 'security_violation';
     severity: 'low' | 'medium' | 'high' | 'critical';
     retryable: boolean;
     context: {

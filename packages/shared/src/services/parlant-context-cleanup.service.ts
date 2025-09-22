@@ -218,7 +218,11 @@ export interface SecurityCleanupPolicy {
  */
 export interface SecurityTrigger {
   /** Trigger type */
-  type: "breach_detected" | "suspicious_activity" | "compliance_violation" | "audit_requirement";
+  type:
+    | "breach_detected"
+    | "suspicious_activity"
+    | "compliance_violation"
+    | "audit_requirement";
   /** Trigger condition */
   condition: Record<string, unknown>;
   /** Priority */
@@ -297,16 +301,16 @@ export class ParlantContextCleanupService
     enableAutomaticCleanup: true,
     cleanupIntervals: {
       contextCleanup: 300000, // 5 minutes
-      cacheCleanup: 600000,   // 10 minutes
-      logCleanup: 3600000,    // 1 hour
+      cacheCleanup: 600000, // 10 minutes
+      logCleanup: 3600000, // 1 hour
       memoryOptimization: 1800000, // 30 minutes
       securityCleanup: 900000, // 15 minutes
     },
     retentionPolicies: [],
     performanceThresholds: {
       memoryThreshold: 512, // 512MB
-      cpuThreshold: 80,     // 80%
-      diskThreshold: 85,    // 85%
+      cpuThreshold: 80, // 80%
+      diskThreshold: 85, // 85%
       responseTimeThreshold: 1000, // 1 second
       triggerAction: "scheduled",
     },
@@ -353,7 +357,10 @@ export class ParlantContextCleanupService
       this.logger.log("✅ Context Cleanup Service initialized successfully");
       this.emit("cleanup:service:initialized");
     } catch (error) {
-      this.logger.error("❌ Failed to initialize Context Cleanup Service", error);
+      this.logger.error(
+        "❌ Failed to initialize Context Cleanup Service",
+        error,
+      );
       throw new ParlantIntegrationError(
         "Context Cleanup initialization failed",
         "CLEANUP_INIT_ERROR",
@@ -426,7 +433,8 @@ export class ParlantContextCleanupService
       // Complete operation
       operation.status = "completed";
       operation.endTime = new Date();
-      operation.metadata.performanceMetrics.totalProcessingTime = performance.now() - startTime;
+      operation.metadata.performanceMetrics.totalProcessingTime =
+        performance.now() - startTime;
 
       // Move to history
       this.operationHistory.set(operationId, operation);
@@ -440,7 +448,10 @@ export class ParlantContextCleanupService
         operationId,
         type,
         duration: operation.metadata.performanceMetrics.totalProcessingTime,
-        itemsCleaned: operation.results.reduce((sum, r) => sum + r.itemsCleaned, 0),
+        itemsCleaned: operation.results.reduce(
+          (sum, r) => sum + r.itemsCleaned,
+          0,
+        ),
       });
 
       this.logger.log(
@@ -464,7 +475,11 @@ export class ParlantContextCleanupService
       throw new ParlantIntegrationError(
         "Cleanup operation failed",
         "CLEANUP_OPERATION_ERROR",
-        { operationId, type, error: error instanceof Error ? error.message : String(error) },
+        {
+          operationId,
+          type,
+          error: error instanceof Error ? error.message : String(error),
+        },
       );
     }
   }
@@ -484,7 +499,9 @@ export class ParlantContextCleanupService
       const scheduleId = this.generateScheduleId();
 
       // Create scheduled cleanup (simplified for demo)
-      this.logger.log(`📅 Cleanup scheduled: ${scheduleId} - Type: ${type} - Schedule: ${schedule}`);
+      this.logger.log(
+        `📅 Cleanup scheduled: ${scheduleId} - Type: ${type} - Schedule: ${schedule}`,
+      );
 
       return scheduleId;
     } catch (error) {
@@ -492,7 +509,11 @@ export class ParlantContextCleanupService
       throw new ParlantIntegrationError(
         "Cleanup scheduling failed",
         "CLEANUP_SCHEDULE_ERROR",
-        { type, schedule, error: error instanceof Error ? error.message : String(error) },
+        {
+          type,
+          schedule,
+          error: error instanceof Error ? error.message : String(error),
+        },
       );
     }
   }
@@ -505,20 +526,33 @@ export class ParlantContextCleanupService
       const systemMetrics = await this.getSystemMetrics();
 
       // Check memory threshold
-      if (systemMetrics.memoryUsage > this.gcConfig.performanceThresholds.memoryThreshold) {
-        this.logger.warn(`Memory threshold exceeded: ${systemMetrics.memoryUsage}MB`);
+      if (
+        systemMetrics.memoryUsage >
+        this.gcConfig.performanceThresholds.memoryThreshold
+      ) {
+        this.logger.warn(
+          `Memory threshold exceeded: ${systemMetrics.memoryUsage}MB`,
+        );
         await this.performCleanup(CleanupType.MEMORY_OPTIMIZATION);
       }
 
       // Check CPU threshold
-      if (systemMetrics.cpuUsage > this.gcConfig.performanceThresholds.cpuThreshold) {
+      if (
+        systemMetrics.cpuUsage >
+        this.gcConfig.performanceThresholds.cpuThreshold
+      ) {
         this.logger.warn(`CPU threshold exceeded: ${systemMetrics.cpuUsage}%`);
         await this.performCleanup(CleanupType.MEMORY_OPTIMIZATION);
       }
 
       // Check response time threshold
-      if (systemMetrics.responseTime > this.gcConfig.performanceThresholds.responseTimeThreshold) {
-        this.logger.warn(`Response time threshold exceeded: ${systemMetrics.responseTime}ms`);
+      if (
+        systemMetrics.responseTime >
+        this.gcConfig.performanceThresholds.responseTimeThreshold
+      ) {
+        this.logger.warn(
+          `Response time threshold exceeded: ${systemMetrics.responseTime}ms`,
+        );
         await this.performCleanup(CleanupType.STALE_CACHE_ENTRIES);
       }
     } catch (error) {
@@ -556,7 +590,9 @@ export class ParlantContextCleanupService
    * Helper Methods
    */
 
-  private async executeCleanupOperation(operation: CleanupOperationRecord): Promise<void> {
+  private async executeCleanupOperation(
+    operation: CleanupOperationRecord,
+  ): Promise<void> {
     switch (operation.type) {
       case CleanupType.EXPIRED_CONTEXTS:
         await this.cleanupExpiredContexts(operation);
@@ -595,7 +631,9 @@ export class ParlantContextCleanupService
     }
   }
 
-  private async cleanupExpiredContexts(operation: CleanupOperationRecord): Promise<void> {
+  private async cleanupExpiredContexts(
+    operation: CleanupOperationRecord,
+  ): Promise<void> {
     const startTime = performance.now();
     let itemsProcessed = 0;
     let itemsCleaned = 0;
@@ -645,7 +683,9 @@ export class ParlantContextCleanupService
     }
   }
 
-  private async cleanupOrphanedSessions(operation: CleanupOperationRecord): Promise<void> {
+  private async cleanupOrphanedSessions(
+    operation: CleanupOperationRecord,
+  ): Promise<void> {
     const startTime = performance.now();
     let itemsProcessed = 0;
     let itemsCleaned = 0;
@@ -694,7 +734,9 @@ export class ParlantContextCleanupService
     }
   }
 
-  private async cleanupStaleCacheEntries(operation: CleanupOperationRecord): Promise<void> {
+  private async cleanupStaleCacheEntries(
+    operation: CleanupOperationRecord,
+  ): Promise<void> {
     const startTime = performance.now();
     let itemsProcessed = 0;
     let itemsCleaned = 0;
@@ -743,7 +785,9 @@ export class ParlantContextCleanupService
     }
   }
 
-  private async cleanupOldAuditLogs(operation: CleanupOperationRecord): Promise<void> {
+  private async cleanupOldAuditLogs(
+    operation: CleanupOperationRecord,
+  ): Promise<void> {
     const startTime = performance.now();
     let itemsProcessed = 0;
     let itemsCleaned = 0;
@@ -792,7 +836,9 @@ export class ParlantContextCleanupService
     }
   }
 
-  private async cleanupTemporaryFiles(operation: CleanupOperationRecord): Promise<void> {
+  private async cleanupTemporaryFiles(
+    operation: CleanupOperationRecord,
+  ): Promise<void> {
     const startTime = performance.now();
     let itemsProcessed = 0;
     let itemsCleaned = 0;
@@ -841,7 +887,9 @@ export class ParlantContextCleanupService
     }
   }
 
-  private async performMemoryOptimization(operation: CleanupOperationRecord): Promise<void> {
+  private async performMemoryOptimization(
+    operation: CleanupOperationRecord,
+  ): Promise<void> {
     const startTime = performance.now();
 
     try {
@@ -883,7 +931,9 @@ export class ParlantContextCleanupService
     }
   }
 
-  private async performSecurityCleanup(operation: CleanupOperationRecord): Promise<void> {
+  private async performSecurityCleanup(
+    operation: CleanupOperationRecord,
+  ): Promise<void> {
     const startTime = performance.now();
     let itemsCleaned = 0;
 
@@ -928,7 +978,9 @@ export class ParlantContextCleanupService
     }
   }
 
-  private async performComplianceCleanup(operation: CleanupOperationRecord): Promise<void> {
+  private async performComplianceCleanup(
+    operation: CleanupOperationRecord,
+  ): Promise<void> {
     const startTime = performance.now();
     let itemsCleaned = 0;
 
@@ -1047,7 +1099,9 @@ export class ParlantContextCleanupService
     cpuUsage: number;
     responseTime: number;
   }> {
-    const memoryUsage = Math.round(process.memoryUsage().heapUsed / 1024 / 1024);
+    const memoryUsage = Math.round(
+      process.memoryUsage().heapUsed / 1024 / 1024,
+    );
     const cpuUsage = Math.random() * 100; // Simulated
     const responseTime = Math.random() * 2000; // Simulated
 
@@ -1076,8 +1130,14 @@ export class ParlantContextCleanupService
       this.cleanupStats.failedOperations++;
     }
 
-    const totalItemsCleaned = operation.results.reduce((sum, r) => sum + r.itemsCleaned, 0);
-    const totalSizeFreed = operation.results.reduce((sum, r) => sum + r.sizeFreed, 0);
+    const totalItemsCleaned = operation.results.reduce(
+      (sum, r) => sum + r.itemsCleaned,
+      0,
+    );
+    const totalSizeFreed = operation.results.reduce(
+      (sum, r) => sum + r.sizeFreed,
+      0,
+    );
 
     this.cleanupStats.totalItemsCleaned += totalItemsCleaned;
     this.cleanupStats.totalSizeFreed += totalSizeFreed;
@@ -1085,7 +1145,9 @@ export class ParlantContextCleanupService
     // Update average operation time
     const count = this.cleanupStats.totalOperations;
     this.cleanupStats.averageOperationTime =
-      (this.cleanupStats.averageOperationTime * (count - 1) + operation.metadata.performanceMetrics.totalProcessingTime) / count;
+      (this.cleanupStats.averageOperationTime * (count - 1) +
+        operation.metadata.performanceMetrics.totalProcessingTime) /
+      count;
 
     this.cleanupStats.lastCleanupTime = new Date();
   }
@@ -1164,43 +1226,43 @@ export class ParlantContextCleanupService
 
     // Context cleanup
     this.contextCleanupTimer = setInterval(() => {
-      this.performCleanup(CleanupType.EXPIRED_CONTEXTS).catch(error =>
-        this.logger.error("Context cleanup failed:", error)
+      this.performCleanup(CleanupType.EXPIRED_CONTEXTS).catch((error) =>
+        this.logger.error("Context cleanup failed:", error),
       );
     }, this.gcConfig.cleanupIntervals.contextCleanup);
 
     // Cache cleanup
     this.cacheCleanupTimer = setInterval(() => {
-      this.performCleanup(CleanupType.STALE_CACHE_ENTRIES).catch(error =>
-        this.logger.error("Cache cleanup failed:", error)
+      this.performCleanup(CleanupType.STALE_CACHE_ENTRIES).catch((error) =>
+        this.logger.error("Cache cleanup failed:", error),
       );
     }, this.gcConfig.cleanupIntervals.cacheCleanup);
 
     // Log cleanup
     this.logCleanupTimer = setInterval(() => {
-      this.performCleanup(CleanupType.OLD_AUDIT_LOGS).catch(error =>
-        this.logger.error("Log cleanup failed:", error)
+      this.performCleanup(CleanupType.OLD_AUDIT_LOGS).catch((error) =>
+        this.logger.error("Log cleanup failed:", error),
       );
     }, this.gcConfig.cleanupIntervals.logCleanup);
 
     // Memory optimization
     this.memoryOptimizationTimer = setInterval(() => {
-      this.performCleanup(CleanupType.MEMORY_OPTIMIZATION).catch(error =>
-        this.logger.error("Memory optimization failed:", error)
+      this.performCleanup(CleanupType.MEMORY_OPTIMIZATION).catch((error) =>
+        this.logger.error("Memory optimization failed:", error),
       );
     }, this.gcConfig.cleanupIntervals.memoryOptimization);
 
     // Security cleanup
     this.securityCleanupTimer = setInterval(() => {
-      this.performCleanup(CleanupType.SECURITY_CLEANUP).catch(error =>
-        this.logger.error("Security cleanup failed:", error)
+      this.performCleanup(CleanupType.SECURITY_CLEANUP).catch((error) =>
+        this.logger.error("Security cleanup failed:", error),
       );
     }, this.gcConfig.cleanupIntervals.securityCleanup);
 
     // Performance monitoring
     this.performanceMonitorTimer = setInterval(() => {
-      this.monitorAndCleanup().catch(error =>
-        this.logger.error("Performance monitoring failed:", error)
+      this.monitorAndCleanup().catch((error) =>
+        this.logger.error("Performance monitoring failed:", error),
       );
     }, 60000); // Every minute
   }
@@ -1232,7 +1294,9 @@ export class ParlantContextCleanupService
   private async completeActiveOperations(): Promise<void> {
     // Wait for active operations to complete
     const activeOps = Array.from(this.activeOperations.values());
-    this.logger.debug(`Waiting for ${activeOps.length} active operations to complete...`);
+    this.logger.debug(
+      `Waiting for ${activeOps.length} active operations to complete...`,
+    );
 
     // In a real implementation, we would wait for operations to complete
     for (const [operationId, operation] of this.activeOperations.entries()) {

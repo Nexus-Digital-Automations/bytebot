@@ -9,28 +9,28 @@
  */
 
 // Core interfaces and types
-export * from './interfaces/real-time-monitoring.interface';
+export * from "./interfaces/real-time-monitoring.interface";
 
 // Main monitoring service
-export { EnhancedRealTimeAPIMonitorService } from './services/real-time-api-monitor.service';
+export { EnhancedRealTimeAPIMonitorService } from "./services/real-time-api-monitor.service";
 
 // Conversational dashboard
-export { ConversationalMonitoringDashboardService } from './dashboard/conversational-monitoring-dashboard.service';
+export { ConversationalMonitoringDashboardService } from "./dashboard/conversational-monitoring-dashboard.service";
 
 // WebSocket integration
-export { WebSocketIntegrationService } from './websocket/websocket-integration.service';
+export { WebSocketIntegrationService } from "./websocket/websocket-integration.service";
 
 // Performance analytics
-export { PerformanceAnalyticsService } from './analytics/performance-analytics.service';
+export { PerformanceAnalyticsService } from "./analytics/performance-analytics.service";
 
 // Intelligent alerting
-export { IntelligentAlertingService } from './alerting/intelligent-alerting.service';
+export { IntelligentAlertingService } from "./alerting/intelligent-alerting.service";
 
 // Security and access control
-export { MonitoringSecurityService } from './security/monitoring-security.service';
+export { MonitoringSecurityService } from "./security/monitoring-security.service";
 
 // API endpoints
-export { MonitoringAPIEndpointsService } from './api/monitoring-api-endpoints.service';
+export { MonitoringAPIEndpointsService } from "./api/monitoring-api-endpoints.service";
 
 // Configuration defaults
 export const defaultRealTimeMonitoringConfig = {
@@ -42,7 +42,7 @@ export const defaultRealTimeMonitoringConfig = {
   rateLimiting: {
     messagesPerSecond: 100,
     burstLimit: 200,
-    windowSizeMs: 1000
+    windowSizeMs: 1000,
   },
   monitoring: {
     updateIntervalMs: 100, // Sub-100ms updates
@@ -52,22 +52,22 @@ export const defaultRealTimeMonitoringConfig = {
       errorRatePercent: 5,
       throughputDropPercent: 20,
       resourceUtilizationPercent: 80,
-      businessMetricThresholds: new Map()
+      businessMetricThresholds: new Map(),
     },
-    conversationalEnabled: true
+    conversationalEnabled: true,
   },
   performance: {
     targetLatencyMs: 50,
     maxConcurrentOperations: 1000,
     memoryThresholdMB: 1024,
-    cpuThresholdPercent: 70
+    cpuThresholdPercent: 70,
   },
   security: {
     authenticationRequired: true,
     encryptionEnabled: true,
     auditLoggingEnabled: true,
-    sessionTimeoutMs: 3600000
-  }
+    sessionTimeoutMs: 3600000,
+  },
 };
 
 // Utility functions
@@ -81,12 +81,12 @@ export const MonitoringUtils = {
       ...baseConfig,
       performance: {
         ...defaultRealTimeMonitoringConfig.performance,
-        ...baseConfig.performance
+        ...baseConfig.performance,
       },
       security: {
         ...defaultRealTimeMonitoringConfig.security,
-        ...baseConfig.security
-      }
+        ...baseConfig.security,
+      },
     };
   },
 
@@ -94,10 +94,12 @@ export const MonitoringUtils = {
    * Validates monitoring configuration
    */
   validateConfig: (config: any): boolean => {
-    return config.enabled !== undefined &&
-           config.webSocketPort > 0 &&
-           config.maxConnections > 0 &&
-           config.performance?.targetLatencyMs > 0;
+    return (
+      config.enabled !== undefined &&
+      config.webSocketPort > 0 &&
+      config.maxConnections > 0 &&
+      config.performance?.targetLatencyMs > 0
+    );
   },
 
   /**
@@ -111,9 +113,9 @@ export const MonitoringUtils = {
       maxConnections: Math.min(1000, cpuCores * 100),
       connectionPoolSize: cpuCores * 10,
       bufferSize: Math.min(8192, memoryGB * 1024),
-      targetLatencyMs: cpuCores >= 8 ? 25 : 50
+      targetLatencyMs: cpuCores >= 8 ? 25 : 50,
     };
-  }
+  },
 };
 
 /**
@@ -201,7 +203,7 @@ export class RealTimeMonitoringModule {
     await Promise.all([
       this.security.onModuleInit?.(),
       this.websocket.onModuleInit?.(),
-      this.realTimeMonitor.onModuleInit?.()
+      this.realTimeMonitor.onModuleInit?.(),
     ]);
   }
 
@@ -213,7 +215,7 @@ export class RealTimeMonitoringModule {
     await Promise.all([
       this.realTimeMonitor.onModuleDestroy?.(),
       this.websocket.onModuleDestroy?.(),
-      this.security.onModuleDestroy?.()
+      this.security.onModuleDestroy?.(),
     ]);
   }
 
@@ -222,51 +224,70 @@ export class RealTimeMonitoringModule {
    */
   async getSystemHealth(): Promise<SystemHealthStatus> {
     const healthChecks = await Promise.allSettled([
-      this.checkServiceHealth('monitoring', this.realTimeMonitor),
-      this.checkServiceHealth('dashboard', this.dashboard),
-      this.checkServiceHealth('websocket', this.websocket),
-      this.checkServiceHealth('analytics', this.analytics),
-      this.checkServiceHealth('alerting', this.alerting),
-      this.checkServiceHealth('security', this.security),
-      this.checkServiceHealth('api', this.apiEndpoints)
+      this.checkServiceHealth("monitoring", this.realTimeMonitor),
+      this.checkServiceHealth("dashboard", this.dashboard),
+      this.checkServiceHealth("websocket", this.websocket),
+      this.checkServiceHealth("analytics", this.analytics),
+      this.checkServiceHealth("alerting", this.alerting),
+      this.checkServiceHealth("security", this.security),
+      this.checkServiceHealth("api", this.apiEndpoints),
     ]);
 
     const services: Record<string, ServiceHealth> = {};
     healthChecks.forEach((result, index) => {
-      const serviceName = ['monitoring', 'dashboard', 'websocket', 'analytics', 'alerting', 'security', 'api'][index];
-      services[serviceName] = result.status === 'fulfilled' ? result.value : { status: 'unhealthy', error: 'Health check failed' };
+      const serviceName = [
+        "monitoring",
+        "dashboard",
+        "websocket",
+        "analytics",
+        "alerting",
+        "security",
+        "api",
+      ][index];
+      services[serviceName] =
+        result.status === "fulfilled"
+          ? result.value
+          : { status: "unhealthy", error: "Health check failed" };
     });
 
-    const overallStatus = Object.values(services).every(s => s.status === 'healthy') ? 'healthy' :
-                         Object.values(services).some(s => s.status === 'healthy') ? 'degraded' : 'unhealthy';
+    const overallStatus = Object.values(services).every(
+      (s) => s.status === "healthy",
+    )
+      ? "healthy"
+      : Object.values(services).some((s) => s.status === "healthy")
+        ? "degraded"
+        : "unhealthy";
 
     return {
       status: overallStatus,
       timestamp: new Date(),
       services,
       uptime: process.uptime() * 1000,
-      version: '1.0.0'
+      version: "1.0.0",
     };
   }
 
-  private async checkServiceHealth(name: string, service: any): Promise<ServiceHealth> {
+  private async checkServiceHealth(
+    name: string,
+    service: any,
+  ): Promise<ServiceHealth> {
     try {
       // Basic health check - verify service is initialized
       if (!service) {
-        return { status: 'unhealthy', error: 'Service not initialized' };
+        return { status: "unhealthy", error: "Service not initialized" };
       }
 
       // Check if service has health check method
-      if (typeof service.healthCheck === 'function') {
+      if (typeof service.healthCheck === "function") {
         const health = await service.healthCheck();
-        return { status: health.healthy ? 'healthy' : 'unhealthy', ...health };
+        return { status: health.healthy ? "healthy" : "unhealthy", ...health };
       }
 
-      return { status: 'healthy' };
+      return { status: "healthy" };
     } catch (error) {
       return {
-        status: 'unhealthy',
-        error: error instanceof Error ? error.message : String(error)
+        status: "unhealthy",
+        error: error instanceof Error ? error.message : String(error),
       };
     }
   }
@@ -274,7 +295,7 @@ export class RealTimeMonitoringModule {
 
 // Type definitions for module
 interface SystemHealthStatus {
-  status: 'healthy' | 'degraded' | 'unhealthy';
+  status: "healthy" | "degraded" | "unhealthy";
   timestamp: Date;
   services: Record<string, ServiceHealth>;
   uptime: number;
@@ -282,15 +303,15 @@ interface SystemHealthStatus {
 }
 
 interface ServiceHealth {
-  status: 'healthy' | 'degraded' | 'unhealthy';
+  status: "healthy" | "degraded" | "unhealthy";
   error?: string;
   metrics?: any;
   lastCheck?: Date;
 }
 
 // Version and metadata
-export const REAL_TIME_MONITORING_VERSION = '1.0.0';
-export const REAL_TIME_MONITORING_BUILD = '2025.09.22.001';
+export const REAL_TIME_MONITORING_VERSION = "1.0.0";
+export const REAL_TIME_MONITORING_BUILD = "2025.09.22.001";
 
 /**
  * Feature flags for enterprise deployment
@@ -303,7 +324,7 @@ export const FeatureFlags = {
   REAL_TIME_ANALYTICS: true,
   SUB_100MS_LATENCY: true,
   AUTO_SCALING: true,
-  PREDICTIVE_INSIGHTS: true
+  PREDICTIVE_INSIGHTS: true,
 };
 
 /**
@@ -313,14 +334,14 @@ export const SystemCapabilities = {
   maxConcurrentOperations: 1000,
   maxWebSocketConnections: 1000,
   targetLatencyMs: 50,
-  supportedAlertTypes: ['performance', 'security', 'business', 'system'],
-  supportedLanguages: ['en', 'es', 'fr', 'de', 'ja', 'zh'],
+  supportedAlertTypes: ["performance", "security", "business", "system"],
+  supportedLanguages: ["en", "es", "fr", "de", "ja", "zh"],
   enterpriseFeatures: [
-    'SSO Integration',
-    'RBAC Authorization',
-    'Audit Logging',
-    'Encryption at Rest',
-    'Zero Trust Security',
-    'Compliance Reporting'
-  ]
+    "SSO Integration",
+    "RBAC Authorization",
+    "Audit Logging",
+    "Encryption at Rest",
+    "Zero Trust Security",
+    "Compliance Reporting",
+  ],
 };

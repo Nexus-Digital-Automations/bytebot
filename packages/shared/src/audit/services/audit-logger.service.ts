@@ -295,7 +295,9 @@ export class AuditLoggerService implements OnModuleInit, OnModuleDestroy {
    */
   private getWinstonLogger(): WinstonLogger {
     if (!this.winstonLogger) {
-      throw new Error('Winston logger not initialized. Call onModuleInit() first.');
+      throw new Error(
+        "Winston logger not initialized. Call onModuleInit() first.",
+      );
     }
     return this.winstonLogger;
   }
@@ -305,7 +307,7 @@ export class AuditLoggerService implements OnModuleInit, OnModuleDestroy {
    */
   private getConfig(): AuditLoggerConfig {
     if (!this.config) {
-      throw new Error('Configuration not loaded. Call onModuleInit() first.');
+      throw new Error("Configuration not loaded. Call onModuleInit() first.");
     }
     return this.config;
   }

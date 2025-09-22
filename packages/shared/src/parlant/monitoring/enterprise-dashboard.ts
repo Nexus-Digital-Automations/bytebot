@@ -166,7 +166,10 @@ export interface DashboardSnapshot {
   /** Cache analytics */
   cache: {
     overallHitRate: number;
-    byLevel: Record<string, { hitRate: number; avgDuration: number; operations: number }>;
+    byLevel: Record<
+      string,
+      { hitRate: number; avgDuration: number; operations: number }
+    >;
     optimization: {
       recommendations: number;
       potentialSavings: string;
@@ -202,9 +205,21 @@ export interface DashboardSnapshot {
       overall: number;
     };
     objectives: {
-      availability: { target: number; current: number; status: "met" | "at-risk" | "breached" };
-      responseTime: { target: number; current: number; status: "met" | "at-risk" | "breached" };
-      errorRate: { target: number; current: number; status: "met" | "at-risk" | "breached" };
+      availability: {
+        target: number;
+        current: number;
+        status: "met" | "at-risk" | "breached";
+      };
+      responseTime: {
+        target: number;
+        current: number;
+        status: "met" | "at-risk" | "breached";
+      };
+      errorRate: {
+        target: number;
+        current: number;
+        status: "met" | "at-risk" | "breached";
+      };
     };
   };
   /** Predictive insights */
@@ -421,7 +436,8 @@ export class EnterpriseDashboard extends EventEmitter {
    */
   getLayoutsForTenant(tenantId?: string): DashboardLayout[] {
     return Array.from(this.layouts.values()).filter(
-      (layout) => !tenantId || layout.tenantId === tenantId || layout.sharing.isPublic
+      (layout) =>
+        !tenantId || layout.tenantId === tenantId || layout.sharing.isPublic,
     );
   }
 
@@ -432,7 +448,7 @@ export class EnterpriseDashboard extends EventEmitter {
     connection: WebSocket,
     userId: string,
     roles: string[] = [],
-    tenantId?: string
+    tenantId?: string,
   ): string {
     const sessionId = `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
@@ -462,7 +478,9 @@ export class EnterpriseDashboard extends EventEmitter {
     this.setupConnectionHandlers(session);
 
     this.emit("session.connected", session);
-    this.logger.log(`Dashboard session registered: ${sessionId} for user: ${userId}`);
+    this.logger.log(
+      `Dashboard session registered: ${sessionId} for user: ${userId}`,
+    );
 
     return sessionId;
   }
@@ -502,7 +520,7 @@ export class EnterpriseDashboard extends EventEmitter {
    */
   async exportDashboard(
     layoutId: string,
-    request: DashboardExportRequest
+    request: DashboardExportRequest,
   ): Promise<Buffer | string> {
     const layout = this.layouts.get(layoutId);
     if (!layout) {
@@ -513,7 +531,11 @@ export class EnterpriseDashboard extends EventEmitter {
 
     switch (request.format) {
       case "json":
-        return JSON.stringify({ layout, snapshot, exportedAt: new Date() }, null, 2);
+        return JSON.stringify(
+          { layout, snapshot, exportedAt: new Date() },
+          null,
+          2,
+        );
 
       case "csv":
         return this.generateCSVExport(snapshot, request);
@@ -549,7 +571,10 @@ export class EnterpriseDashboard extends EventEmitter {
     const memUsage = process.memoryUsage();
 
     return {
-      status: this.activeSessions.size < this.config.maxConnections ? "healthy" : "degraded",
+      status:
+        this.activeSessions.size < this.config.maxConnections
+          ? "healthy"
+          : "degraded",
       activeSessions: this.activeSessions.size,
       memoryUsage: memUsage.heapUsed / 1024 / 1024, // MB
       uptime: process.uptime(),
@@ -559,7 +584,9 @@ export class EnterpriseDashboard extends EventEmitter {
 
   // ===== PRIVATE IMPLEMENTATION METHODS =====
 
-  private mergeConfig(userConfig: Partial<EnterpriseDashboardConfig>): EnterpriseDashboardConfig {
+  private mergeConfig(
+    userConfig: Partial<EnterpriseDashboardConfig>,
+  ): EnterpriseDashboardConfig {
     const defaultConfig: EnterpriseDashboardConfig = {
       refreshInterval: 5000,
       websocketPort: 8080,
@@ -590,7 +617,9 @@ export class EnterpriseDashboard extends EventEmitter {
   private async initializeWebSocketServer(): Promise<void> {
     // WebSocket server initialization would be implemented here
     // For now, this is a placeholder
-    this.logger.log(`WebSocket server would start on port ${this.config.websocketPort}`);
+    this.logger.log(
+      `WebSocket server would start on port ${this.config.websocketPort}`,
+    );
   }
 
   private setupDefaultLayouts(): void {
@@ -686,7 +715,11 @@ export class EnterpriseDashboard extends EventEmitter {
         const message = JSON.parse(data);
         this.handleSessionMessage(session, message);
       } catch (error) {
-        this.logger.error("Invalid message from session:", session.sessionId, error);
+        this.logger.error(
+          "Invalid message from session:",
+          session.sessionId,
+          error,
+        );
       }
     });
 
@@ -696,7 +729,11 @@ export class EnterpriseDashboard extends EventEmitter {
     });
 
     session.connection.on("error", (error) => {
-      this.logger.error("WebSocket error for session:", session.sessionId, error);
+      this.logger.error(
+        "WebSocket error for session:",
+        session.sessionId,
+        error,
+      );
     });
   }
 
@@ -708,7 +745,10 @@ export class EnterpriseDashboard extends EventEmitter {
         break;
 
       case "update_subscriptions":
-        session.subscriptions = { ...session.subscriptions, ...message.subscriptions };
+        session.subscriptions = {
+          ...session.subscriptions,
+          ...message.subscriptions,
+        };
         break;
 
       case "request_export":
@@ -846,13 +886,20 @@ export class EnterpriseDashboard extends EventEmitter {
             timestamp: new Date(),
           });
         } catch (error) {
-          this.logger.error("Error generating update for session:", session.sessionId, error);
+          this.logger.error(
+            "Error generating update for session:",
+            session.sessionId,
+            error,
+          );
         }
       }
     });
   }
 
-  private broadcastLayoutUpdate(layoutId: string, layout: DashboardLayout): void {
+  private broadcastLayoutUpdate(
+    layoutId: string,
+    layout: DashboardLayout,
+  ): void {
     this.activeSessions.forEach((session) => {
       if (session.activeDashboard === layoutId) {
         this.sendToSession(session, {
@@ -891,7 +938,11 @@ export class EnterpriseDashboard extends EventEmitter {
     try {
       session.connection.send(JSON.stringify(data));
     } catch (error) {
-      this.logger.error("Error sending data to session:", session.sessionId, error);
+      this.logger.error(
+        "Error sending data to session:",
+        session.sessionId,
+        error,
+      );
     }
   }
 
@@ -914,24 +965,28 @@ export class EnterpriseDashboard extends EventEmitter {
   }
 
   private cleanupOldData(): void {
-    const cutoffTime = Date.now() - (this.config.dataRetentionHours * 60 * 60 * 1000);
+    const cutoffTime =
+      Date.now() - this.config.dataRetentionHours * 60 * 60 * 1000;
 
     // Clean up metrics buffer
     this.metricsBuffer = this.metricsBuffer.filter(
-      (metric) => metric.timestamp.getTime() > cutoffTime
+      (metric) => metric.timestamp.getTime() > cutoffTime,
     );
 
     // Clean up alerts buffer
     this.alertsBuffer = this.alertsBuffer.filter(
-      (alert) => alert.timestamp.getTime() > cutoffTime
+      (alert) => alert.timestamp.getTime() > cutoffTime,
     );
   }
 
-  private async handleExportRequest(session: DashboardSession, message: any): Promise<void> {
+  private async handleExportRequest(
+    session: DashboardSession,
+    message: any,
+  ): Promise<void> {
     try {
       const exportData = await this.exportDashboard(
         session.activeDashboard!,
-        message.request
+        message.request,
       );
 
       this.sendToSession(session, {
@@ -950,22 +1005,35 @@ export class EnterpriseDashboard extends EventEmitter {
     }
   }
 
-  private generateCSVExport(snapshot: DashboardSnapshot, request: DashboardExportRequest): string {
+  private generateCSVExport(
+    snapshot: DashboardSnapshot,
+    request: DashboardExportRequest,
+  ): string {
     // Generate CSV export from snapshot data
     const csvLines = ["Timestamp,Metric,Value,Unit"];
 
     // Add performance metrics
     if (snapshot.performance.overall) {
       const perf = snapshot.performance.overall;
-      csvLines.push(`${snapshot.timestamp.toISOString()},P95 Response Time,${perf.p95},ms`);
-      csvLines.push(`${snapshot.timestamp.toISOString()},Throughput,${perf.throughput},ops/sec`);
-      csvLines.push(`${snapshot.timestamp.toISOString()},Error Rate,${perf.errorRate * 100},%`);
+      csvLines.push(
+        `${snapshot.timestamp.toISOString()},P95 Response Time,${perf.p95},ms`,
+      );
+      csvLines.push(
+        `${snapshot.timestamp.toISOString()},Throughput,${perf.throughput},ops/sec`,
+      );
+      csvLines.push(
+        `${snapshot.timestamp.toISOString()},Error Rate,${perf.errorRate * 100},%`,
+      );
     }
 
     // Add cache metrics
     Object.entries(snapshot.cache.byLevel).forEach(([level, stats]) => {
-      csvLines.push(`${snapshot.timestamp.toISOString()},${level} Hit Rate,${stats.hitRate * 100},%`);
-      csvLines.push(`${snapshot.timestamp.toISOString()},${level} Avg Duration,${stats.avgDuration},ms`);
+      csvLines.push(
+        `${snapshot.timestamp.toISOString()},${level} Hit Rate,${stats.hitRate * 100},%`,
+      );
+      csvLines.push(
+        `${snapshot.timestamp.toISOString()},${level} Avg Duration,${stats.avgDuration},ms`,
+      );
     });
 
     return csvLines.join("\n");
@@ -974,7 +1042,7 @@ export class EnterpriseDashboard extends EventEmitter {
   private generatePDFExport(
     layout: DashboardLayout,
     snapshot: DashboardSnapshot,
-    request: DashboardExportRequest
+    request: DashboardExportRequest,
   ): Buffer {
     // PDF generation would be implemented here with a library like PDFKit
     // For now, return a placeholder
@@ -984,7 +1052,7 @@ export class EnterpriseDashboard extends EventEmitter {
   private generateImageExport(
     layout: DashboardLayout,
     snapshot: DashboardSnapshot,
-    request: DashboardExportRequest
+    request: DashboardExportRequest,
   ): Buffer {
     // Image generation would be implemented here with a library like Canvas
     // For now, return a placeholder
@@ -1001,9 +1069,11 @@ export const enterpriseDashboard = new EnterpriseDashboard();
  * Start enterprise dashboard with configuration
  */
 export async function startEnterpriseDashboard(
-  config?: Partial<EnterpriseDashboardConfig>
+  config?: Partial<EnterpriseDashboardConfig>,
 ): Promise<EnterpriseDashboard> {
-  const dashboard = config ? new EnterpriseDashboard(config) : enterpriseDashboard;
+  const dashboard = config
+    ? new EnterpriseDashboard(config)
+    : enterpriseDashboard;
   await dashboard.initialize();
   return dashboard;
 }

@@ -11,8 +11,13 @@
  * @created 2025-09-19
  */
 
-import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import { EventEmitter } from 'events';
+import {
+  Injectable,
+  Logger,
+  OnModuleInit,
+  OnModuleDestroy,
+} from "@nestjs/common";
+import { EventEmitter } from "events";
 import {
   AnyFunction,
   WrapFunction,
@@ -24,26 +29,28 @@ import {
   ValidationRule,
   WrapperError,
   ErrorCategory,
-  WrapperStatus
-} from '../interfaces/wrapper-types';
+  WrapperStatus,
+} from "../interfaces/wrapper-types";
 
 // Re-export WrapperStatus for external use
-export { WrapperStatus } from '../interfaces/wrapper-types';
+export { WrapperStatus } from "../interfaces/wrapper-types";
 import {
   SignaturePreservingWrapper,
-  WrapperStatistics
-} from './signature-preserving-wrapper';
+  WrapperStatistics,
+} from "./signature-preserving-wrapper";
 import {
   EnterpriseFunctionWrapperFactory,
-  WrapperCreationError
-} from '../factories/function-wrapper-factory';
+  WrapperCreationError,
+} from "../factories/function-wrapper-factory";
 
 /**
  * Enterprise Wrapper Registry and Management Service
  * Centralized management system for all PARLANT function wrappers
  */
 @Injectable()
-export class WrapperRegistryManagementService implements OnModuleInit, OnModuleDestroy {
+export class WrapperRegistryManagementService
+  implements OnModuleInit, OnModuleDestroy
+{
   private readonly logger = new Logger(WrapperRegistryManagementService.name);
   private readonly eventEmitter = new EventEmitter();
 
@@ -65,19 +72,20 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
 
   constructor(
     private readonly wrapperFactory: EnterpriseFunctionWrapperFactory,
-    registryConfig?: Partial<RegistryConfiguration>
+    registryConfig?: Partial<RegistryConfiguration>,
   ) {
-    this.registryConfig = this.createDefaultRegistryConfiguration(registryConfig);
+    this.registryConfig =
+      this.createDefaultRegistryConfiguration(registryConfig);
 
     // Setup periodic tasks
     this.cleanupInterval = setInterval(
       () => this.performPeriodicCleanup(),
-      this.registryConfig.cleanupInterval
+      this.registryConfig.cleanupInterval,
     );
 
     this.healthCheckInterval = setInterval(
       () => this.performHealthChecks(),
-      this.registryConfig.healthCheckInterval
+      this.registryConfig.healthCheckInterval,
     );
 
     this.setupEventListeners();
@@ -87,7 +95,7 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
    * Module initialization
    */
   async onModuleInit(): Promise<void> {
-    this.logger.log('Initializing Wrapper Registry Management Service');
+    this.logger.log("Initializing Wrapper Registry Management Service");
 
     // Initialize monitoring systems
     await this.performanceMonitor.initialize();
@@ -99,14 +107,16 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
       await this.restoreRegistryState();
     }
 
-    this.logger.log('Wrapper Registry Management Service initialized successfully');
+    this.logger.log(
+      "Wrapper Registry Management Service initialized successfully",
+    );
   }
 
   /**
    * Module cleanup
    */
   async onModuleDestroy(): Promise<void> {
-    this.logger.log('Shutting down Wrapper Registry Management Service');
+    this.logger.log("Shutting down Wrapper Registry Management Service");
 
     // Clear intervals
     clearInterval(this.cleanupInterval);
@@ -120,7 +130,7 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
     // Cleanup all wrappers
     await this.cleanupAllWrappers();
 
-    this.logger.log('Wrapper Registry Management Service shutdown complete');
+    this.logger.log("Wrapper Registry Management Service shutdown complete");
   }
 
   /**
@@ -136,7 +146,7 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
     functionId: string,
     originalFunction: T,
     config: WrapperConfig,
-    metadata: WrapperRegistrationMetadata = {}
+    metadata: WrapperRegistrationMetadata = {},
   ): Promise<WrapperRegistrationResult<T>> {
     const registrationId = this.generateRegistrationId();
     const startTime = Date.now();
@@ -144,7 +154,7 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
     this.logger.debug(`Registering wrapper: ${functionId}`, {
       registrationId,
       validationLevel: config.validationLevel,
-      category: config.metadata?.category
+      category: config.metadata?.category,
     });
 
     try {
@@ -152,7 +162,10 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
       await this.validateWrapperRegistration(functionId, config, metadata);
 
       // Create wrapper using factory
-      const wrappedFunction = this.wrapperFactory.createWrapper(originalFunction, config);
+      const wrappedFunction = this.wrapperFactory.createWrapper(
+        originalFunction,
+        config,
+      );
 
       // Create registration record
       const registration: RegisteredWrapper = {
@@ -164,10 +177,10 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
         metadata: {
           ...metadata,
           registeredAt: new Date(),
-          registeredBy: metadata.registeredBy || 'system',
-          version: metadata.version || '1.0.0',
+          registeredBy: metadata.registeredBy || "system",
+          version: metadata.version || "1.0.0",
           tags: metadata.tags || [],
-          description: metadata.description || config.description
+          description: metadata.description || config.description,
         },
         status: WrapperStatus.ACTIVE,
         statistics: {
@@ -176,15 +189,15 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
           totalExecutionTime: 0,
           averageExecutionTime: 0,
           lastInvocation: null,
-          healthScore: 100
+          healthScore: 100,
         },
         lifecycle: {
           createdAt: new Date(),
           lastHealthCheck: new Date(),
           lastAccessTime: new Date(),
           accessCount: 0,
-          errorCount: 0
-        }
+          errorCount: 0,
+        },
       };
 
       // Store in registries
@@ -210,11 +223,11 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
       await this.healthMonitor.startMonitoring(functionId, registration);
 
       // Emit registration event
-      this.eventEmitter.emit('wrapper-registered', {
+      this.eventEmitter.emit("wrapper-registered", {
         functionId,
         registrationId,
         config,
-        metadata
+        metadata,
       });
 
       const registrationTime = Date.now() - startTime;
@@ -223,7 +236,7 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
         registrationId,
         registrationTime,
         category,
-        validationLevel: config.validationLevel
+        validationLevel: config.validationLevel,
       });
 
       return {
@@ -236,17 +249,16 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
           category,
           validationLevel: config.validationLevel,
           securityRisk: this.assessSecurityRisk(config),
-          registeredAt: registration.metadata.registeredAt
-        }
+          registeredAt: registration.metadata.registeredAt,
+        },
       };
-
     } catch (error) {
       const registrationTime = Date.now() - startTime;
 
       this.logger.error(`Failed to register wrapper: ${functionId}`, {
         registrationId,
         error: error instanceof Error ? error.message : String(error),
-        registrationTime
+        registrationTime,
       });
 
       return {
@@ -260,8 +272,8 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
           category: config.metadata?.category || FunctionCategory.UTILITY,
           validationLevel: config.validationLevel,
           securityRisk: SecurityRiskLevel.LOW,
-          registeredAt: new Date()
-        }
+          registeredAt: new Date(),
+        },
       };
     }
   }
@@ -272,11 +284,15 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
    * @param functionId - Function identifier to unregister
    * @returns Unregistration result
    */
-  public async unregisterWrapper(functionId: string): Promise<WrapperUnregistrationResult> {
+  public async unregisterWrapper(
+    functionId: string,
+  ): Promise<WrapperUnregistrationResult> {
     const unregistrationId = this.generateRegistrationId();
     const startTime = Date.now();
 
-    this.logger.debug(`Unregistering wrapper: ${functionId}`, { unregistrationId });
+    this.logger.debug(`Unregistering wrapper: ${functionId}`, {
+      unregistrationId,
+    });
 
     try {
       const registration = this.wrapperRegistry.get(functionId);
@@ -295,7 +311,8 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
       this.wrapperRegistry.delete(functionId);
 
       // Update category registry
-      const category = registration.config.metadata?.category || FunctionCategory.UTILITY;
+      const category =
+        registration.config.metadata?.category || FunctionCategory.UTILITY;
       const categorySet = this.categoryRegistry.get(category);
       if (categorySet) {
         categorySet.delete(functionId);
@@ -306,7 +323,9 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
 
       // Update user registry
       if (registration.metadata.registeredBy) {
-        const userSet = this.userWrapperRegistry.get(registration.metadata.registeredBy);
+        const userSet = this.userWrapperRegistry.get(
+          registration.metadata.registeredBy,
+        );
         if (userSet) {
           userSet.delete(functionId);
           if (userSet.size === 0) {
@@ -316,10 +335,10 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
       }
 
       // Emit unregistration event
-      this.eventEmitter.emit('wrapper-unregistered', {
+      this.eventEmitter.emit("wrapper-unregistered", {
         functionId,
         unregistrationId,
-        finalStatistics: registration.statistics
+        finalStatistics: registration.statistics,
       });
 
       const unregistrationTime = Date.now() - startTime;
@@ -327,7 +346,7 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
       this.logger.log(`Successfully unregistered wrapper: ${functionId}`, {
         unregistrationId,
         unregistrationTime,
-        finalStatistics: registration.statistics
+        finalStatistics: registration.statistics,
       });
 
       return {
@@ -335,16 +354,15 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
         unregistrationId,
         functionId,
         unregistrationTime,
-        finalStatistics: registration.statistics
+        finalStatistics: registration.statistics,
       };
-
     } catch (error) {
       const unregistrationTime = Date.now() - startTime;
 
       this.logger.error(`Failed to unregister wrapper: ${functionId}`, {
         unregistrationId,
         error: error instanceof Error ? error.message : String(error),
-        unregistrationTime
+        unregistrationTime,
       });
 
       return {
@@ -352,7 +370,7 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
         unregistrationId,
         functionId,
         unregistrationTime,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       };
     }
   }
@@ -377,7 +395,7 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
       statistics: registration.statistics,
       lifecycle: registration.lifecycle,
       healthStatus: this.healthMonitor.getHealthStatus(functionId),
-      performanceMetrics: this.performanceMonitor.getMetrics(functionId)
+      performanceMetrics: this.performanceMonitor.getMetrics(functionId),
     };
   }
 
@@ -392,11 +410,17 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
 
     for (const registration of this.wrapperRegistry.values()) {
       // Apply filters
-      if (filters.category && registration.config.metadata?.category !== filters.category) {
+      if (
+        filters.category &&
+        registration.config.metadata?.category !== filters.category
+      ) {
         continue;
       }
 
-      if (filters.validationLevel && registration.config.validationLevel !== filters.validationLevel) {
+      if (
+        filters.validationLevel &&
+        registration.config.validationLevel !== filters.validationLevel
+      ) {
         continue;
       }
 
@@ -404,12 +428,17 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
         continue;
       }
 
-      if (filters.registeredBy && registration.metadata.registeredBy !== filters.registeredBy) {
+      if (
+        filters.registeredBy &&
+        registration.metadata.registeredBy !== filters.registeredBy
+      ) {
         continue;
       }
 
       if (filters.tags && filters.tags.length > 0) {
-        const hasAllTags = filters.tags.every(tag => registration.metadata.tags.includes(tag));
+        const hasAllTags = filters.tags.every((tag) =>
+          registration.metadata.tags.includes(tag),
+        );
         if (!hasAllTags) {
           continue;
         }
@@ -422,8 +451,12 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
         status: registration.status,
         statistics: registration.statistics,
         lifecycle: registration.lifecycle,
-        healthStatus: this.healthMonitor.getHealthStatus(registration.functionId),
-        performanceMetrics: this.performanceMonitor.getMetrics(registration.functionId)
+        healthStatus: this.healthMonitor.getHealthStatus(
+          registration.functionId,
+        ),
+        performanceMetrics: this.performanceMonitor.getMetrics(
+          registration.functionId,
+        ),
       });
     }
 
@@ -431,19 +464,25 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
     if (filters.sortBy) {
       wrappers.sort((a, b) => {
         switch (filters.sortBy) {
-          case 'registrationDate':
-            return b.lifecycle.createdAt.getTime() - a.lifecycle.createdAt.getTime();
-          case 'invocationCount':
-            return b.statistics.totalInvocations - a.statistics.totalInvocations;
-          case 'errorRate':
-            const aErrorRate = a.statistics.totalInvocations > 0
-              ? a.statistics.totalErrors / a.statistics.totalInvocations
-              : 0;
-            const bErrorRate = b.statistics.totalInvocations > 0
-              ? b.statistics.totalErrors / b.statistics.totalInvocations
-              : 0;
+          case "registrationDate":
+            return (
+              b.lifecycle.createdAt.getTime() - a.lifecycle.createdAt.getTime()
+            );
+          case "invocationCount":
+            return (
+              b.statistics.totalInvocations - a.statistics.totalInvocations
+            );
+          case "errorRate":
+            const aErrorRate =
+              a.statistics.totalInvocations > 0
+                ? a.statistics.totalErrors / a.statistics.totalInvocations
+                : 0;
+            const bErrorRate =
+              b.statistics.totalInvocations > 0
+                ? b.statistics.totalErrors / b.statistics.totalInvocations
+                : 0;
             return bErrorRate - aErrorRate;
-          case 'healthScore':
+          case "healthScore":
             return b.statistics.healthScore - a.statistics.healthScore;
           default:
             return a.functionId.localeCompare(b.functionId);
@@ -470,15 +509,21 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
 
     // Status distribution
     const statusDistribution = new Map<WrapperStatus, number>();
-    Object.values(WrapperStatus).forEach(status => statusDistribution.set(status, 0));
+    Object.values(WrapperStatus).forEach((status) =>
+      statusDistribution.set(status, 0),
+    );
 
     // Category distribution
     const categoryDistribution = new Map<FunctionCategory, number>();
-    Object.values(FunctionCategory).forEach(category => categoryDistribution.set(category, 0));
+    Object.values(FunctionCategory).forEach((category) =>
+      categoryDistribution.set(category, 0),
+    );
 
     // Validation level distribution
     const validationLevelDistribution = new Map<ValidationLevel, number>();
-    Object.values(ValidationLevel).forEach(level => validationLevelDistribution.set(level, 0));
+    Object.values(ValidationLevel).forEach((level) =>
+      validationLevelDistribution.set(level, 0),
+    );
 
     // Aggregate statistics
     let totalInvocations = 0;
@@ -492,13 +537,19 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
       statusDistribution.set(registration.status, currentCount + 1);
 
       // Category distribution
-      const category = registration.config.metadata?.category || FunctionCategory.UTILITY;
+      const category =
+        registration.config.metadata?.category || FunctionCategory.UTILITY;
       const categoryCount = categoryDistribution.get(category) || 0;
       categoryDistribution.set(category, categoryCount + 1);
 
       // Validation level distribution
-      const levelCount = validationLevelDistribution.get(registration.config.validationLevel) || 0;
-      validationLevelDistribution.set(registration.config.validationLevel, levelCount + 1);
+      const levelCount =
+        validationLevelDistribution.get(registration.config.validationLevel) ||
+        0;
+      validationLevelDistribution.set(
+        registration.config.validationLevel,
+        levelCount + 1,
+      );
 
       // Aggregate statistics
       totalInvocations += registration.statistics.totalInvocations;
@@ -510,7 +561,8 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
       }
     }
 
-    const averageExecutionTime = totalInvocations > 0 ? totalExecutionTime / totalInvocations : 0;
+    const averageExecutionTime =
+      totalInvocations > 0 ? totalExecutionTime / totalInvocations : 0;
     const errorRate = totalInvocations > 0 ? totalErrors / totalInvocations : 0;
     const healthRatio = totalWrappers > 0 ? healthyWrappers / totalWrappers : 1;
 
@@ -519,59 +571,83 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
       activeWrappers: statusDistribution.get(WrapperStatus.ACTIVE) || 0,
       inactiveWrappers: statusDistribution.get(WrapperStatus.INACTIVE) || 0,
       errorWrappers: statusDistribution.get(WrapperStatus.ERROR) || 0,
-      statusDistribution: this.createCompleteStatusDistribution(statusDistribution),
-      categoryDistribution: this.createCompleteCategoryDistribution(categoryDistribution),
-      validationLevelDistribution: this.createCompleteValidationLevelDistribution(validationLevelDistribution),
+      statusDistribution:
+        this.createCompleteStatusDistribution(statusDistribution),
+      categoryDistribution:
+        this.createCompleteCategoryDistribution(categoryDistribution),
+      validationLevelDistribution:
+        this.createCompleteValidationLevelDistribution(
+          validationLevelDistribution,
+        ),
       totalInvocations,
       totalErrors,
       errorRate,
       averageExecutionTime,
       healthRatio,
       memoryUsage: this.calculateMemoryUsage(),
-      uptime: Date.now() - this.lifecycleManager.getStartTime()
+      uptime: Date.now() - this.lifecycleManager.getStartTime(),
     };
   }
 
   /**
    * Create complete status distribution with all enum values
    */
-  private createCompleteStatusDistribution(statusMap: Map<WrapperStatus, number>): Record<WrapperStatus, number> {
+  private createCompleteStatusDistribution(
+    statusMap: Map<WrapperStatus, number>,
+  ): Record<WrapperStatus, number> {
     return {
       [WrapperStatus.ACTIVE]: statusMap.get(WrapperStatus.ACTIVE) || 0,
       [WrapperStatus.INACTIVE]: statusMap.get(WrapperStatus.INACTIVE) || 0,
       [WrapperStatus.ERROR]: statusMap.get(WrapperStatus.ERROR) || 0,
-      [WrapperStatus.DEACTIVATING]: statusMap.get(WrapperStatus.DEACTIVATING) || 0,
-      [WrapperStatus.MAINTENANCE]: statusMap.get(WrapperStatus.MAINTENANCE) || 0,
+      [WrapperStatus.DEACTIVATING]:
+        statusMap.get(WrapperStatus.DEACTIVATING) || 0,
+      [WrapperStatus.MAINTENANCE]:
+        statusMap.get(WrapperStatus.MAINTENANCE) || 0,
     } as Record<WrapperStatus, number>;
   }
 
   /**
    * Create complete category distribution with all enum values
    */
-  private createCompleteCategoryDistribution(categoryMap: Map<FunctionCategory, number>): Record<FunctionCategory, number> {
+  private createCompleteCategoryDistribution(
+    categoryMap: Map<FunctionCategory, number>,
+  ): Record<FunctionCategory, number> {
     return {
-      [FunctionCategory.DATABASE_READ]: categoryMap.get(FunctionCategory.DATABASE_READ) || 0,
-      [FunctionCategory.DATABASE_WRITE]: categoryMap.get(FunctionCategory.DATABASE_WRITE) || 0,
-      [FunctionCategory.API_CALL]: categoryMap.get(FunctionCategory.API_CALL) || 0,
-      [FunctionCategory.FILE_OPERATION]: categoryMap.get(FunctionCategory.FILE_OPERATION) || 0,
-      [FunctionCategory.COMPUTATION]: categoryMap.get(FunctionCategory.COMPUTATION) || 0,
-      [FunctionCategory.AUTHENTICATION]: categoryMap.get(FunctionCategory.AUTHENTICATION) || 0,
-      [FunctionCategory.AUTHORIZATION]: categoryMap.get(FunctionCategory.AUTHORIZATION) || 0,
-      [FunctionCategory.MONITORING]: categoryMap.get(FunctionCategory.MONITORING) || 0,
-      [FunctionCategory.UTILITY]: categoryMap.get(FunctionCategory.UTILITY) || 0,
+      [FunctionCategory.DATABASE_READ]:
+        categoryMap.get(FunctionCategory.DATABASE_READ) || 0,
+      [FunctionCategory.DATABASE_WRITE]:
+        categoryMap.get(FunctionCategory.DATABASE_WRITE) || 0,
+      [FunctionCategory.API_CALL]:
+        categoryMap.get(FunctionCategory.API_CALL) || 0,
+      [FunctionCategory.FILE_OPERATION]:
+        categoryMap.get(FunctionCategory.FILE_OPERATION) || 0,
+      [FunctionCategory.COMPUTATION]:
+        categoryMap.get(FunctionCategory.COMPUTATION) || 0,
+      [FunctionCategory.AUTHENTICATION]:
+        categoryMap.get(FunctionCategory.AUTHENTICATION) || 0,
+      [FunctionCategory.AUTHORIZATION]:
+        categoryMap.get(FunctionCategory.AUTHORIZATION) || 0,
+      [FunctionCategory.MONITORING]:
+        categoryMap.get(FunctionCategory.MONITORING) || 0,
+      [FunctionCategory.UTILITY]:
+        categoryMap.get(FunctionCategory.UTILITY) || 0,
     } as Record<FunctionCategory, number>;
   }
 
   /**
    * Create complete validation level distribution with all enum values
    */
-  private createCompleteValidationLevelDistribution(validationMap: Map<ValidationLevel, number>): Record<ValidationLevel, number> {
+  private createCompleteValidationLevelDistribution(
+    validationMap: Map<ValidationLevel, number>,
+  ): Record<ValidationLevel, number> {
     return {
-      [ValidationLevel.CRITICAL]: validationMap.get(ValidationLevel.CRITICAL) || 0,
+      [ValidationLevel.CRITICAL]:
+        validationMap.get(ValidationLevel.CRITICAL) || 0,
       [ValidationLevel.HIGH]: validationMap.get(ValidationLevel.HIGH) || 0,
       [ValidationLevel.MEDIUM]: validationMap.get(ValidationLevel.MEDIUM) || 0,
       [ValidationLevel.LOW]: validationMap.get(ValidationLevel.LOW) || 0,
-      [ValidationLevel.OPTIONAL]: validationMap.get(ValidationLevel.OPTIONAL) || 0,
+      [ValidationLevel.OPTIONAL]:
+        validationMap.get(ValidationLevel.OPTIONAL) || 0,
     } as Record<ValidationLevel, number>;
   }
 
@@ -581,7 +657,9 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
    * @param functionId - Function identifier (optional, checks all if not provided)
    * @returns Health check results
    */
-  public async performHealthCheck(functionId?: string): Promise<HealthCheckResult[]> {
+  public async performHealthCheck(
+    functionId?: string,
+  ): Promise<HealthCheckResult[]> {
     const results: HealthCheckResult[] = [];
 
     const wrappersToCheck = functionId
@@ -592,7 +670,9 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
       if (!registration) continue;
 
       try {
-        const healthCheck = await this.healthMonitor.performHealthCheck(registration.functionId);
+        const healthCheck = await this.healthMonitor.performHealthCheck(
+          registration.functionId,
+        );
         results.push(healthCheck);
 
         // Update wrapper status based on health check
@@ -604,22 +684,29 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
         } else {
           if (registration.status === WrapperStatus.ACTIVE) {
             registration.status = WrapperStatus.ERROR;
-            this.logger.warn(`Wrapper became unhealthy: ${registration.functionId}`, healthCheck.issues);
+            this.logger.warn(
+              `Wrapper became unhealthy: ${registration.functionId}`,
+              healthCheck.issues,
+            );
           }
         }
 
         registration.lifecycle.lastHealthCheck = new Date();
-
       } catch (error) {
-        this.logger.error(`Health check failed for wrapper: ${registration.functionId}`, error);
+        this.logger.error(
+          `Health check failed for wrapper: ${registration.functionId}`,
+          error,
+        );
 
         results.push({
           functionId: registration.functionId,
           healthy: false,
           healthScore: 0,
-          issues: [`Health check failed: ${error instanceof Error ? error.message : String(error)}`],
-          recommendations: ['Check wrapper configuration and dependencies'],
-          lastCheck: new Date()
+          issues: [
+            `Health check failed: ${error instanceof Error ? error.message : String(error)}`,
+          ],
+          recommendations: ["Check wrapper configuration and dependencies"],
+          lastCheck: new Date(),
         });
       }
     }
@@ -636,7 +723,7 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
    */
   public async updateWrapperConfig(
     functionId: string,
-    configUpdate: Partial<WrapperConfig>
+    configUpdate: Partial<WrapperConfig>,
   ): Promise<WrapperConfigUpdateResult> {
     const updateId = this.generateRegistrationId();
     const startTime = Date.now();
@@ -662,24 +749,24 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
         config: newConfig,
         metadata: {
           ...registration.metadata,
-          lastUpdated: new Date()
-        }
+          lastUpdated: new Date(),
+        },
       };
       this.wrapperRegistry.set(functionId, updatedRegistration);
 
       // Emit update event
-      this.eventEmitter.emit('wrapper-config-updated', {
+      this.eventEmitter.emit("wrapper-config-updated", {
         functionId,
         updateId,
         oldConfig,
-        newConfig
+        newConfig,
       });
 
       const updateTime = Date.now() - startTime;
 
       this.logger.log(`Successfully updated wrapper config: ${functionId}`, {
         updateId,
-        updateTime
+        updateTime,
       });
 
       return {
@@ -688,16 +775,15 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
         functionId,
         oldConfig,
         newConfig,
-        updateTime
+        updateTime,
       };
-
     } catch (error) {
       const updateTime = Date.now() - startTime;
 
       this.logger.error(`Failed to update wrapper config: ${functionId}`, {
         updateId,
         error: error instanceof Error ? error.message : String(error),
-        updateTime
+        updateTime,
       });
 
       return {
@@ -707,7 +793,7 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
         oldConfig: null,
         newConfig: null,
         updateTime,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       };
     }
   }
@@ -718,7 +804,9 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
    * @param criteria - Search criteria
    * @returns Search results
    */
-  public searchWrappers(criteria: WrapperSearchCriteria): WrapperSearchResult[] {
+  public searchWrappers(
+    criteria: WrapperSearchCriteria,
+  ): WrapperSearchResult[] {
     const results: WrapperSearchResult[] = [];
 
     for (const registration of this.wrapperRegistry.values()) {
@@ -726,42 +814,61 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
       const matches: string[] = [];
 
       // Function ID match
-      if (criteria.functionId && registration.functionId.includes(criteria.functionId)) {
+      if (
+        criteria.functionId &&
+        registration.functionId.includes(criteria.functionId)
+      ) {
         score += 10;
-        matches.push('functionId');
+        matches.push("functionId");
       }
 
       // Description match
-      if (criteria.description && registration.config.description.toLowerCase().includes(criteria.description.toLowerCase())) {
+      if (
+        criteria.description &&
+        registration.config.description
+          .toLowerCase()
+          .includes(criteria.description.toLowerCase())
+      ) {
         score += 8;
-        matches.push('description');
+        matches.push("description");
       }
 
       // Tag match
       if (criteria.tags && criteria.tags.length > 0) {
-        const matchingTags = criteria.tags.filter(tag => registration.metadata.tags.includes(tag));
+        const matchingTags = criteria.tags.filter((tag) =>
+          registration.metadata.tags.includes(tag),
+        );
         score += matchingTags.length * 5;
         if (matchingTags.length > 0) {
-          matches.push('tags');
+          matches.push("tags");
         }
       }
 
       // Category match
-      if (criteria.category && registration.config.metadata?.category === criteria.category) {
+      if (
+        criteria.category &&
+        registration.config.metadata?.category === criteria.category
+      ) {
         score += 6;
-        matches.push('category');
+        matches.push("category");
       }
 
       // Validation level match
-      if (criteria.validationLevel && registration.config.validationLevel === criteria.validationLevel) {
+      if (
+        criteria.validationLevel &&
+        registration.config.validationLevel === criteria.validationLevel
+      ) {
         score += 4;
-        matches.push('validationLevel');
+        matches.push("validationLevel");
       }
 
       // Registered by match
-      if (criteria.registeredBy && registration.metadata.registeredBy === criteria.registeredBy) {
+      if (
+        criteria.registeredBy &&
+        registration.metadata.registeredBy === criteria.registeredBy
+      ) {
         score += 3;
-        matches.push('registeredBy');
+        matches.push("registeredBy");
       }
 
       // Only include results with matches
@@ -777,9 +884,13 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
             status: registration.status,
             statistics: registration.statistics,
             lifecycle: registration.lifecycle,
-            healthStatus: this.healthMonitor.getHealthStatus(registration.functionId),
-            performanceMetrics: this.performanceMonitor.getMetrics(registration.functionId)
-          }
+            healthStatus: this.healthMonitor.getHealthStatus(
+              registration.functionId,
+            ),
+            performanceMetrics: this.performanceMonitor.getMetrics(
+              registration.functionId,
+            ),
+          },
         });
       }
     }
@@ -801,13 +912,15 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
    * @param functionIds - Specific function IDs to export (optional)
    * @returns Exported configurations
    */
-  public exportWrapperConfigurations(functionIds?: string[]): WrapperConfigurationExport {
+  public exportWrapperConfigurations(
+    functionIds?: string[],
+  ): WrapperConfigurationExport {
     const exportId = this.generateRegistrationId();
     const exportTimestamp = new Date();
     const configurations: ExportedWrapperConfig[] = [];
 
     const wrappersToExport = functionIds
-      ? functionIds.map(id => this.wrapperRegistry.get(id)).filter(Boolean)
+      ? functionIds.map((id) => this.wrapperRegistry.get(id)).filter(Boolean)
       : Array.from(this.wrapperRegistry.values());
 
     for (const registration of wrappersToExport) {
@@ -818,7 +931,7 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
         config: registration.config,
         metadata: registration.metadata,
         statistics: registration.statistics,
-        exportedAt: exportTimestamp
+        exportedAt: exportTimestamp,
       });
     }
 
@@ -827,11 +940,11 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
       exportTimestamp,
       totalConfigurations: configurations.length,
       configurations,
-      registryVersion: '1.0.0',
+      registryVersion: "1.0.0",
       compatibility: {
-        minFrameworkVersion: '1.0.0',
-        maxFrameworkVersion: '2.0.0'
-      }
+        minFrameworkVersion: "1.0.0",
+        maxFrameworkVersion: "2.0.0",
+      },
     };
   }
 
@@ -842,7 +955,7 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
    * @returns Import result
    */
   public async importWrapperConfigurations(
-    importData: WrapperConfigurationExport
+    importData: WrapperConfigurationExport,
   ): Promise<WrapperConfigurationImportResult> {
     const importId = this.generateRegistrationId();
     const startTime = Date.now();
@@ -850,7 +963,7 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
 
     this.logger.log(`Starting wrapper configuration import`, {
       importId,
-      totalConfigurations: importData.totalConfigurations
+      totalConfigurations: importData.totalConfigurations,
     });
 
     for (const configData of importData.configurations) {
@@ -865,8 +978,8 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
           results.push({
             functionId: configData.functionId,
             success: false,
-            action: 'skipped',
-            reason: 'Wrapper already exists'
+            action: "skipped",
+            reason: "Wrapper already exists",
           });
           continue;
         }
@@ -876,30 +989,29 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
         results.push({
           functionId: configData.functionId,
           success: true,
-          action: 'configuration-imported',
-          reason: 'Configuration stored for future registration'
+          action: "configuration-imported",
+          reason: "Configuration stored for future registration",
         });
-
       } catch (error) {
         results.push({
           functionId: configData.functionId,
           success: false,
-          action: 'failed',
-          reason: error instanceof Error ? error.message : String(error)
+          action: "failed",
+          reason: error instanceof Error ? error.message : String(error),
         });
       }
     }
 
     const importTime = Date.now() - startTime;
-    const successCount = results.filter(r => r.success).length;
-    const failureCount = results.filter(r => !r.success).length;
+    const successCount = results.filter((r) => r.success).length;
+    const failureCount = results.filter((r) => !r.success).length;
 
     this.logger.log(`Wrapper configuration import completed`, {
       importId,
       importTime,
       successCount,
       failureCount,
-      totalConfigurations: importData.totalConfigurations
+      totalConfigurations: importData.totalConfigurations,
     });
 
     return {
@@ -908,7 +1020,7 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
       totalConfigurations: importData.totalConfigurations,
       successCount,
       failureCount,
-      results
+      results,
     };
   }
 
@@ -933,16 +1045,20 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
   private async validateWrapperRegistration(
     functionId: string,
     config: WrapperConfig,
-    metadata: WrapperRegistrationMetadata
+    metadata: WrapperRegistrationMetadata,
   ): Promise<void> {
     // Check for duplicate registration
     if (this.wrapperRegistry.has(functionId)) {
-      throw new WrapperCreationError(`Function already registered: ${functionId}`);
+      throw new WrapperCreationError(
+        `Function already registered: ${functionId}`,
+      );
     }
 
     // Validate function ID format
     if (!/^[a-zA-Z][a-zA-Z0-9._-]*$/.test(functionId)) {
-      throw new WrapperCreationError(`Invalid function ID format: ${functionId}`);
+      throw new WrapperCreationError(
+        `Invalid function ID format: ${functionId}`,
+      );
     }
 
     // Validate configuration
@@ -950,7 +1066,9 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
 
     // Check registry limits
     if (this.wrapperRegistry.size >= this.registryConfig.maxWrappers) {
-      throw new WrapperCreationError(`Registry limit exceeded: ${this.registryConfig.maxWrappers}`);
+      throw new WrapperCreationError(
+        `Registry limit exceeded: ${this.registryConfig.maxWrappers}`,
+      );
     }
   }
 
@@ -959,13 +1077,15 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
    *
    * @param config - Configuration to validate
    */
-  private async validateWrapperConfiguration(config: WrapperConfig): Promise<void> {
+  private async validateWrapperConfiguration(
+    config: WrapperConfig,
+  ): Promise<void> {
     if (!config.functionId || config.functionId.trim().length === 0) {
-      throw new Error('Function ID is required');
+      throw new Error("Function ID is required");
     }
 
     if (!config.description || config.description.trim().length === 0) {
-      throw new Error('Function description is required');
+      throw new Error("Function description is required");
     }
 
     if (!Object.values(ValidationLevel).includes(config.validationLevel)) {
@@ -992,7 +1112,9 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
       return SecurityRiskLevel.CRITICAL;
     }
 
-    if (config.metadata?.dataClassification === DataClassification.CONFIDENTIAL) {
+    if (
+      config.metadata?.dataClassification === DataClassification.CONFIDENTIAL
+    ) {
       return SecurityRiskLevel.HIGH;
     }
 
@@ -1003,17 +1125,20 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
    * Setup event listeners for wrapper events
    */
   private setupEventListeners(): void {
-    this.eventEmitter.on('wrapper-invoked', (event: WrapperInvocationEvent) => {
+    this.eventEmitter.on("wrapper-invoked", (event: WrapperInvocationEvent) => {
       this.updateWrapperStatistics(event.functionId, event);
     });
 
-    this.eventEmitter.on('wrapper-error', (event: WrapperErrorEvent) => {
+    this.eventEmitter.on("wrapper-error", (event: WrapperErrorEvent) => {
       this.handleWrapperError(event.functionId, event);
     });
 
-    this.eventEmitter.on('wrapper-performance', (event: WrapperPerformanceEvent) => {
-      this.updatePerformanceMetrics(event.functionId, event);
-    });
+    this.eventEmitter.on(
+      "wrapper-performance",
+      (event: WrapperPerformanceEvent) => {
+        this.updatePerformanceMetrics(event.functionId, event);
+      },
+    );
   }
 
   /**
@@ -1022,14 +1147,18 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
    * @param functionId - Function identifier
    * @param event - Invocation event
    */
-  private updateWrapperStatistics(functionId: string, event: WrapperInvocationEvent): void {
+  private updateWrapperStatistics(
+    functionId: string,
+    event: WrapperInvocationEvent,
+  ): void {
     const registration = this.wrapperRegistry.get(functionId);
     if (!registration) return;
 
     registration.statistics.totalInvocations++;
     registration.statistics.totalExecutionTime += event.executionTime;
     registration.statistics.averageExecutionTime =
-      registration.statistics.totalExecutionTime / registration.statistics.totalInvocations;
+      registration.statistics.totalExecutionTime /
+      registration.statistics.totalInvocations;
     registration.statistics.lastInvocation = new Date();
 
     registration.lifecycle.lastAccessTime = new Date();
@@ -1042,7 +1171,10 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
    * @param functionId - Function identifier
    * @param event - Error event
    */
-  private handleWrapperError(functionId: string, event: WrapperErrorEvent): void {
+  private handleWrapperError(
+    functionId: string,
+    event: WrapperErrorEvent,
+  ): void {
     const registration = this.wrapperRegistry.get(functionId);
     if (!registration) return;
 
@@ -1050,8 +1182,10 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
     registration.lifecycle.errorCount++;
 
     // Update health score based on error rate
-    const errorRate = registration.statistics.totalErrors / Math.max(registration.statistics.totalInvocations, 1);
-    registration.statistics.healthScore = Math.max(0, 100 - (errorRate * 100));
+    const errorRate =
+      registration.statistics.totalErrors /
+      Math.max(registration.statistics.totalInvocations, 1);
+    registration.statistics.healthScore = Math.max(0, 100 - errorRate * 100);
 
     // Mark as error status if health is critically low
     if (registration.statistics.healthScore < 20) {
@@ -1065,7 +1199,10 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
    * @param functionId - Function identifier
    * @param event - Performance event
    */
-  private updatePerformanceMetrics(functionId: string, event: WrapperPerformanceEvent): void {
+  private updatePerformanceMetrics(
+    functionId: string,
+    event: WrapperPerformanceEvent,
+  ): void {
     // Delegate to performance monitor
     this.performanceMonitor.recordPerformanceEvent(functionId, event);
   }
@@ -1074,7 +1211,9 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
    * Perform periodic cleanup of inactive wrappers
    */
   private async performPeriodicCleanup(): Promise<void> {
-    const cutoffTime = new Date(Date.now() - this.registryConfig.inactivityTimeout);
+    const cutoffTime = new Date(
+      Date.now() - this.registryConfig.inactivityTimeout,
+    );
     const inactiveWrappers: string[] = [];
 
     for (const [functionId, registration] of this.wrapperRegistry.entries()) {
@@ -1092,7 +1231,9 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
     }
 
     if (inactiveWrappers.length > 0) {
-      this.logger.log(`Periodic cleanup completed: ${inactiveWrappers.length} wrappers marked inactive`);
+      this.logger.log(
+        `Periodic cleanup completed: ${inactiveWrappers.length} wrappers marked inactive`,
+      );
     }
   }
 
@@ -1101,12 +1242,17 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
    */
   private async performHealthChecks(): Promise<void> {
     const healthCheckResults = await this.performHealthCheck();
-    const unhealthyWrappers = healthCheckResults.filter(result => !result.healthy);
+    const unhealthyWrappers = healthCheckResults.filter(
+      (result) => !result.healthy,
+    );
 
     if (unhealthyWrappers.length > 0) {
-      this.logger.warn(`Health check found ${unhealthyWrappers.length} unhealthy wrappers`, {
-        unhealthyWrappers: unhealthyWrappers.map(w => w.functionId)
-      });
+      this.logger.warn(
+        `Health check found ${unhealthyWrappers.length} unhealthy wrappers`,
+        {
+          unhealthyWrappers: unhealthyWrappers.map((w) => w.functionId),
+        },
+      );
     }
   }
 
@@ -1121,7 +1267,7 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
     const perWrapperMemory = 512; // Estimated memory per wrapper
     const totalWrappers = this.wrapperRegistry.size;
 
-    return baseMemory + (totalWrappers * perWrapperMemory);
+    return baseMemory + totalWrappers * perWrapperMemory;
   }
 
   /**
@@ -1130,9 +1276,9 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
   private async restoreRegistryState(): Promise<void> {
     try {
       // Implementation would restore from persistent storage
-      this.logger.debug('Registry state restoration not implemented yet');
+      this.logger.debug("Registry state restoration not implemented yet");
     } catch (error) {
-      this.logger.error('Failed to restore registry state', error);
+      this.logger.error("Failed to restore registry state", error);
     }
   }
 
@@ -1142,9 +1288,9 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
   private async persistRegistryState(): Promise<void> {
     try {
       // Implementation would persist to storage
-      this.logger.debug('Registry state persistence not implemented yet');
+      this.logger.debug("Registry state persistence not implemented yet");
     } catch (error) {
-      this.logger.error('Failed to persist registry state', error);
+      this.logger.error("Failed to persist registry state", error);
     }
   }
 
@@ -1170,7 +1316,7 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
    * @returns Default configuration
    */
   private createDefaultRegistryConfiguration(
-    overrides?: Partial<RegistryConfiguration>
+    overrides?: Partial<RegistryConfiguration>,
   ): RegistryConfiguration {
     return {
       maxWrappers: 10000,
@@ -1181,7 +1327,7 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
       persistenceInterval: 900000, // 15 minutes
       enableMetrics: true,
       enableEvents: true,
-      ...overrides
+      ...overrides,
     };
   }
 }
@@ -1193,13 +1339,19 @@ export class WrapperRegistryManagementService implements OnModuleInit, OnModuleD
 export class WrapperPerformanceMonitor {
   private readonly logger = new Logger(WrapperPerformanceMonitor.name);
   private readonly metrics = new Map<string, PerformanceMetrics[]>();
-  private readonly aggregatedMetrics = new Map<string, AggregatedPerformanceMetrics>();
+  private readonly aggregatedMetrics = new Map<
+    string,
+    AggregatedPerformanceMetrics
+  >();
 
   async initialize(): Promise<void> {
-    this.logger.debug('Initializing Wrapper Performance Monitor');
+    this.logger.debug("Initializing Wrapper Performance Monitor");
   }
 
-  async startMonitoring(functionId: string, registration: RegisteredWrapper): Promise<void> {
+  async startMonitoring(
+    functionId: string,
+    registration: RegisteredWrapper,
+  ): Promise<void> {
     this.metrics.set(functionId, []);
     this.aggregatedMetrics.set(functionId, {
       totalInvocations: 0,
@@ -1210,7 +1362,7 @@ export class WrapperPerformanceMonitor {
       averageMemoryUsage: 0,
       errorRate: 0,
       throughput: 0,
-      lastUpdated: new Date()
+      lastUpdated: new Date(),
     });
   }
 
@@ -1219,7 +1371,10 @@ export class WrapperPerformanceMonitor {
     this.aggregatedMetrics.delete(functionId);
   }
 
-  recordPerformanceEvent(functionId: string, event: WrapperPerformanceEvent): void {
+  recordPerformanceEvent(
+    functionId: string,
+    event: WrapperPerformanceEvent,
+  ): void {
     const metrics = this.metrics.get(functionId);
     if (!metrics) return;
 
@@ -1228,7 +1383,7 @@ export class WrapperPerformanceMonitor {
       timestamp: event.timestamp,
       executionTime: event.executionTime,
       memoryUsage: event.memoryUsage,
-      success: event.success
+      success: event.success,
     });
 
     // Update aggregated metrics
@@ -1254,14 +1409,19 @@ export class WrapperPerformanceMonitor {
 
     const updatedAggregated: AggregatedPerformanceMetrics = {
       totalInvocations: metrics.length,
-      averageExecutionTime: recentMetrics.reduce((sum, m) => sum + m.executionTime, 0) / recentMetrics.length,
-      minExecutionTime: Math.min(...recentMetrics.map(m => m.executionTime)),
-      maxExecutionTime: Math.max(...recentMetrics.map(m => m.executionTime)),
+      averageExecutionTime:
+        recentMetrics.reduce((sum, m) => sum + m.executionTime, 0) /
+        recentMetrics.length,
+      minExecutionTime: Math.min(...recentMetrics.map((m) => m.executionTime)),
+      maxExecutionTime: Math.max(...recentMetrics.map((m) => m.executionTime)),
       totalMemoryUsage: aggregated?.totalMemoryUsage || 0,
-      averageMemoryUsage: recentMetrics.reduce((sum, m) => sum + m.memoryUsage, 0) / recentMetrics.length,
-      errorRate: recentMetrics.filter(m => !m.success).length / recentMetrics.length,
+      averageMemoryUsage:
+        recentMetrics.reduce((sum, m) => sum + m.memoryUsage, 0) /
+        recentMetrics.length,
+      errorRate:
+        recentMetrics.filter((m) => !m.success).length / recentMetrics.length,
       throughput: aggregated?.throughput || 0,
-      lastUpdated: new Date()
+      lastUpdated: new Date(),
     };
     this.aggregatedMetrics.set(functionId, updatedAggregated);
   }
@@ -1276,17 +1436,20 @@ export class WrapperHealthMonitor {
   private readonly healthStatus = new Map<string, WrapperHealthStatus>();
 
   async initialize(): Promise<void> {
-    this.logger.debug('Initializing Wrapper Health Monitor');
+    this.logger.debug("Initializing Wrapper Health Monitor");
   }
 
-  async startMonitoring(functionId: string, registration: RegisteredWrapper): Promise<void> {
+  async startMonitoring(
+    functionId: string,
+    registration: RegisteredWrapper,
+  ): Promise<void> {
     this.healthStatus.set(functionId, {
       functionId,
       healthy: true,
       healthScore: 100,
       issues: [],
       recommendations: [],
-      lastCheck: new Date()
+      lastCheck: new Date(),
     });
   }
 
@@ -1301,9 +1464,9 @@ export class WrapperHealthMonitor {
         functionId,
         healthy: false,
         healthScore: 0,
-        issues: ['Wrapper not found in health monitor'],
-        recommendations: ['Re-register wrapper'],
-        lastCheck: new Date()
+        issues: ["Wrapper not found in health monitor"],
+        recommendations: ["Re-register wrapper"],
+        lastCheck: new Date(),
       };
     }
 
@@ -1329,7 +1492,7 @@ export class WrapperHealthMonitor {
       healthScore,
       issues,
       recommendations,
-      lastCheck: new Date()
+      lastCheck: new Date(),
     };
 
     // Update health status
@@ -1352,7 +1515,7 @@ export class WrapperLifecycleManager {
   private readonly startTime = Date.now();
 
   async initialize(): Promise<void> {
-    this.logger.debug('Initializing Wrapper Lifecycle Manager');
+    this.logger.debug("Initializing Wrapper Lifecycle Manager");
   }
 
   getStartTime(): number {
@@ -1361,7 +1524,6 @@ export class WrapperLifecycleManager {
 }
 
 // Type Definitions
-
 
 /**
  * Registered wrapper information
@@ -1394,7 +1556,11 @@ export interface WrapperRegistrationMetadata {
 /**
  * Full wrapper registration metadata
  */
-export interface WrapperRegistrationFullMetadata extends Omit<WrapperRegistrationMetadata, 'tags' | 'description' | 'version' | 'registeredBy'> {
+export interface WrapperRegistrationFullMetadata
+  extends Omit<
+    WrapperRegistrationMetadata,
+    "tags" | "description" | "version" | "registeredBy"
+  > {
   readonly registeredAt: Date;
   readonly registeredBy: string;
   readonly version: string;
@@ -1479,7 +1645,11 @@ export interface WrapperListFilters {
   readonly status?: WrapperStatus;
   readonly registeredBy?: string;
   readonly tags?: readonly string[];
-  readonly sortBy?: 'registrationDate' | 'invocationCount' | 'errorRate' | 'healthScore';
+  readonly sortBy?:
+    | "registrationDate"
+    | "invocationCount"
+    | "errorRate"
+    | "healthScore";
   readonly limit?: number;
   readonly offset?: number;
 }
@@ -1608,7 +1778,7 @@ export interface WrapperConfigurationImportResult {
 export interface WrapperImportResult {
   readonly functionId: string;
   readonly success: boolean;
-  readonly action: 'imported' | 'skipped' | 'failed' | 'configuration-imported';
+  readonly action: "imported" | "skipped" | "failed" | "configuration-imported";
   readonly reason: string;
 }
 

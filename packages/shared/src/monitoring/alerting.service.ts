@@ -167,7 +167,10 @@ export class AlertingService implements OnModuleInit {
   private readonly logger = new Logger(AlertingService.name);
 
   private readonly activeAlerts = new Map<string, Alert>();
-  private readonly notificationChannels = new Map<string, NotificationChannel>();
+  private readonly notificationChannels = new Map<
+    string,
+    NotificationChannel
+  >();
   private readonly escalationPolicies = new Map<string, EscalationPolicy>();
   private readonly onCallSchedules = new Map<string, OnCallSchedule>();
   private readonly correlationRules: CorrelationRule[] = [];
@@ -234,10 +237,13 @@ export class AlertingService implements OnModuleInit {
     // Check for correlation
     const correlatedAlert = await this.checkCorrelation(alert);
     if (correlatedAlert) {
-      this.logger.debug(`Alert correlated with existing alert: ${correlatedAlert.id}`, {
-        newAlertId: alertId,
-        correlatedAlertId: correlatedAlert.id,
-      });
+      this.logger.debug(
+        `Alert correlated with existing alert: ${correlatedAlert.id}`,
+        {
+          newAlertId: alertId,
+          correlatedAlertId: correlatedAlert.id,
+        },
+      );
       return correlatedAlert.id;
     }
 
@@ -267,7 +273,10 @@ export class AlertingService implements OnModuleInit {
   /**
    * Acknowledge alert
    */
-  async acknowledgeAlert(alertId: string, acknowledgerId: string): Promise<boolean> {
+  async acknowledgeAlert(
+    alertId: string,
+    acknowledgerId: string,
+  ): Promise<boolean> {
     const alert = this.activeAlerts.get(alertId);
     if (!alert || alert.status !== "TRIGGERED") {
       return false;
@@ -314,7 +323,10 @@ export class AlertingService implements OnModuleInit {
 
     // Maintain history size
     if (this.alertHistory.length > this.maxAlertHistory) {
-      this.alertHistory.splice(0, this.alertHistory.length - this.maxAlertHistory);
+      this.alertHistory.splice(
+        0,
+        this.alertHistory.length - this.maxAlertHistory,
+      );
     }
 
     this.logger.log(`Alert resolved: ${alert.name}`, {
@@ -367,17 +379,19 @@ export class AlertingService implements OnModuleInit {
 
     if (filters) {
       if (filters.severity) {
-        alerts = alerts.filter(alert => alert.severity === filters.severity);
+        alerts = alerts.filter((alert) => alert.severity === filters.severity);
       }
       if (filters.source) {
-        alerts = alerts.filter(alert => alert.source === filters.source);
+        alerts = alerts.filter((alert) => alert.source === filters.source);
       }
       if (filters.status) {
-        alerts = alerts.filter(alert => alert.status === filters.status);
+        alerts = alerts.filter((alert) => alert.status === filters.status);
       }
     }
 
-    return alerts.sort((a, b) => b.triggeredAt.getTime() - a.triggeredAt.getTime());
+    return alerts.sort(
+      (a, b) => b.triggeredAt.getTime() - a.triggeredAt.getTime(),
+    );
   }
 
   /**
@@ -392,7 +406,9 @@ export class AlertingService implements OnModuleInit {
     falsePositiveRate: number;
   } {
     const cutoffTime = new Date(Date.now() - timeRangeHours * 60 * 60 * 1000);
-    const recentAlerts = this.alertHistory.filter(alert => alert.triggeredAt >= cutoffTime);
+    const recentAlerts = this.alertHistory.filter(
+      (alert) => alert.triggeredAt >= cutoffTime,
+    );
 
     const alertsBySeverity = {
       low: 0,
@@ -416,12 +432,17 @@ export class AlertingService implements OnModuleInit {
 
       if (alert.resolvedAt) {
         resolvedAlerts++;
-        totalResolutionTime += alert.resolvedAt.getTime() - alert.triggeredAt.getTime();
+        totalResolutionTime +=
+          alert.resolvedAt.getTime() - alert.triggeredAt.getTime();
       }
     }
 
-    const averageResolutionTime = resolvedAlerts > 0 ? totalResolutionTime / resolvedAlerts : 0;
-    const acknowledgmentRate = recentAlerts.length > 0 ? (acknowledgedAlerts / recentAlerts.length) * 100 : 0;
+    const averageResolutionTime =
+      resolvedAlerts > 0 ? totalResolutionTime / resolvedAlerts : 0;
+    const acknowledgmentRate =
+      recentAlerts.length > 0
+        ? (acknowledgedAlerts / recentAlerts.length) * 100
+        : 0;
     const falsePositiveRate = 0; // Would be calculated based on alert feedback
 
     return {
@@ -468,7 +489,11 @@ export class AlertingService implements OnModuleInit {
     const now = new Date();
 
     for (const alert of this.activeAlerts.values()) {
-      if (alert.status === "TRIGGERED" && alert.nextEscalationAt && alert.nextEscalationAt <= now) {
+      if (
+        alert.status === "TRIGGERED" &&
+        alert.nextEscalationAt &&
+        alert.nextEscalationAt <= now
+      ) {
         await this.escalateAlert(alert);
       }
     }
@@ -540,10 +565,10 @@ export class AlertingService implements OnModuleInit {
         alertId: alert.id,
         escalationLevel,
       });
-
     } catch (error) {
       result.success = false;
-      result.errorMessage = error instanceof Error ? error.message : String(error);
+      result.errorMessage =
+        error instanceof Error ? error.message : String(error);
 
       this.logger.error(`Notification failed`, {
         channelId: channel.id,
@@ -557,7 +582,10 @@ export class AlertingService implements OnModuleInit {
 
     // Maintain history size
     if (this.notificationHistory.length > this.maxNotificationHistory) {
-      this.notificationHistory.splice(0, this.notificationHistory.length - this.maxNotificationHistory);
+      this.notificationHistory.splice(
+        0,
+        this.notificationHistory.length - this.maxNotificationHistory,
+      );
     }
 
     return result;
@@ -570,9 +598,12 @@ export class AlertingService implements OnModuleInit {
     for (const rule of this.correlationRules) {
       if (!rule.enabled) continue;
 
-      const timeWindow = new Date(Date.now() - rule.timeWindowMinutes * 60 * 1000);
-      const existingAlerts = Array.from(this.activeAlerts.values())
-        .filter(alert => alert.triggeredAt >= timeWindow);
+      const timeWindow = new Date(
+        Date.now() - rule.timeWindowMinutes * 60 * 1000,
+      );
+      const existingAlerts = Array.from(this.activeAlerts.values()).filter(
+        (alert) => alert.triggeredAt >= timeWindow,
+      );
 
       for (const existingAlert of existingAlerts) {
         if (this.matchesCorrelationRule(newAlert, existingAlert, rule)) {
@@ -596,22 +627,32 @@ export class AlertingService implements OnModuleInit {
   /**
    * Check if alerts match correlation rule
    */
-  private matchesCorrelationRule(alert1: Alert, alert2: Alert, rule: CorrelationRule): boolean {
-    if (rule.conditions.sources &&
-        !rule.conditions.sources.includes(alert1.source) &&
-        !rule.conditions.sources.includes(alert2.source)) {
+  private matchesCorrelationRule(
+    alert1: Alert,
+    alert2: Alert,
+    rule: CorrelationRule,
+  ): boolean {
+    if (
+      rule.conditions.sources &&
+      !rule.conditions.sources.includes(alert1.source) &&
+      !rule.conditions.sources.includes(alert2.source)
+    ) {
       return false;
     }
 
-    if (rule.conditions.metrics &&
-        !rule.conditions.metrics.includes(alert1.metric) &&
-        !rule.conditions.metrics.includes(alert2.metric)) {
+    if (
+      rule.conditions.metrics &&
+      !rule.conditions.metrics.includes(alert1.metric) &&
+      !rule.conditions.metrics.includes(alert2.metric)
+    ) {
       return false;
     }
 
-    if (rule.conditions.severities &&
-        !rule.conditions.severities.includes(alert1.severity) &&
-        !rule.conditions.severities.includes(alert2.severity)) {
+    if (
+      rule.conditions.severities &&
+      !rule.conditions.severities.includes(alert1.severity) &&
+      !rule.conditions.severities.includes(alert2.severity)
+    ) {
       return false;
     }
 
@@ -622,15 +663,18 @@ export class AlertingService implements OnModuleInit {
    * Schedule alert escalation
    */
   private async scheduleEscalation(alert: Alert): Promise<void> {
-    const policy = Array.from(this.escalationPolicies.values())
-      .find(p => p.enabled && this.matchesEscalationPolicy(alert, p));
+    const policy = Array.from(this.escalationPolicies.values()).find(
+      (p) => p.enabled && this.matchesEscalationPolicy(alert, p),
+    );
 
     if (!policy || policy.steps.length === 0) {
       return;
     }
 
     const firstStep = policy.steps[0];
-    alert.nextEscalationAt = new Date(Date.now() + firstStep.delayMinutes * 60 * 1000);
+    alert.nextEscalationAt = new Date(
+      Date.now() + firstStep.delayMinutes * 60 * 1000,
+    );
 
     this.logger.debug(`Escalation scheduled for alert: ${alert.id}`, {
       policyId: policy.id,
@@ -643,8 +687,9 @@ export class AlertingService implements OnModuleInit {
    * Escalate alert to next level
    */
   private async escalateAlert(alert: Alert): Promise<void> {
-    const policy = Array.from(this.escalationPolicies.values())
-      .find(p => p.enabled && this.matchesEscalationPolicy(alert, p));
+    const policy = Array.from(this.escalationPolicies.values()).find(
+      (p) => p.enabled && this.matchesEscalationPolicy(alert, p),
+    );
 
     if (!policy) return;
 
@@ -665,7 +710,9 @@ export class AlertingService implements OnModuleInit {
     // Schedule next escalation if available
     const nextStep = policy.steps[alert.escalationLevel];
     if (nextStep) {
-      alert.nextEscalationAt = new Date(Date.now() + nextStep.delayMinutes * 60 * 1000);
+      alert.nextEscalationAt = new Date(
+        Date.now() + nextStep.delayMinutes * 60 * 1000,
+      );
     } else {
       alert.nextEscalationAt = undefined;
     }
@@ -716,7 +763,9 @@ export class AlertingService implements OnModuleInit {
       },
     });
 
-    this.logger.log(`Initialized ${this.notificationChannels.size} default notification channels`);
+    this.logger.log(
+      `Initialized ${this.notificationChannels.size} default notification channels`,
+    );
   }
 
   /**
@@ -786,41 +835,85 @@ export class AlertingService implements OnModuleInit {
           severities: ["medium", "high", "critical"],
         },
         action: "escalate",
-      }
+      },
     );
 
-    this.logger.log(`Initialized ${this.correlationRules.length} correlation rules`);
+    this.logger.log(
+      `Initialized ${this.correlationRules.length} correlation rules`,
+    );
   }
 
   // Placeholder implementations for notification methods
-  private async sendEmailNotification(channel: NotificationChannel, alert: Alert, escalationLevel: number): Promise<void> {
+  private async sendEmailNotification(
+    channel: NotificationChannel,
+    alert: Alert,
+    escalationLevel: number,
+  ): Promise<void> {
     // Email notification implementation
-    this.logger.debug("Sending email notification", { channelId: channel.id, alertId: alert.id });
+    this.logger.debug("Sending email notification", {
+      channelId: channel.id,
+      alertId: alert.id,
+    });
   }
 
-  private async sendSlackNotification(channel: NotificationChannel, alert: Alert, escalationLevel: number): Promise<void> {
+  private async sendSlackNotification(
+    channel: NotificationChannel,
+    alert: Alert,
+    escalationLevel: number,
+  ): Promise<void> {
     // Slack notification implementation
-    this.logger.debug("Sending Slack notification", { channelId: channel.id, alertId: alert.id });
+    this.logger.debug("Sending Slack notification", {
+      channelId: channel.id,
+      alertId: alert.id,
+    });
   }
 
-  private async sendSMSNotification(channel: NotificationChannel, alert: Alert, escalationLevel: number): Promise<void> {
+  private async sendSMSNotification(
+    channel: NotificationChannel,
+    alert: Alert,
+    escalationLevel: number,
+  ): Promise<void> {
     // SMS notification implementation
-    this.logger.debug("Sending SMS notification", { channelId: channel.id, alertId: alert.id });
+    this.logger.debug("Sending SMS notification", {
+      channelId: channel.id,
+      alertId: alert.id,
+    });
   }
 
-  private async sendWebhookNotification(channel: NotificationChannel, alert: Alert, escalationLevel: number): Promise<void> {
+  private async sendWebhookNotification(
+    channel: NotificationChannel,
+    alert: Alert,
+    escalationLevel: number,
+  ): Promise<void> {
     // Webhook notification implementation
-    this.logger.debug("Sending webhook notification", { channelId: channel.id, alertId: alert.id });
+    this.logger.debug("Sending webhook notification", {
+      channelId: channel.id,
+      alertId: alert.id,
+    });
   }
 
-  private async sendPagerDutyNotification(channel: NotificationChannel, alert: Alert, escalationLevel: number): Promise<void> {
+  private async sendPagerDutyNotification(
+    channel: NotificationChannel,
+    alert: Alert,
+    escalationLevel: number,
+  ): Promise<void> {
     // PagerDuty notification implementation
-    this.logger.debug("Sending PagerDuty notification", { channelId: channel.id, alertId: alert.id });
+    this.logger.debug("Sending PagerDuty notification", {
+      channelId: channel.id,
+      alertId: alert.id,
+    });
   }
 
-  private async sendTeamsNotification(channel: NotificationChannel, alert: Alert, escalationLevel: number): Promise<void> {
+  private async sendTeamsNotification(
+    channel: NotificationChannel,
+    alert: Alert,
+    escalationLevel: number,
+  ): Promise<void> {
     // Microsoft Teams notification implementation
-    this.logger.debug("Sending Teams notification", { channelId: channel.id, alertId: alert.id });
+    this.logger.debug("Sending Teams notification", {
+      channelId: channel.id,
+      alertId: alert.id,
+    });
   }
 
   private async startAlertProcessing(): Promise<void> {
@@ -839,14 +932,19 @@ export class AlertingService implements OnModuleInit {
     alert.nextEscalationAt = undefined;
   }
 
-  private matchesEscalationPolicy(alert: Alert, policy: EscalationPolicy): boolean {
+  private matchesEscalationPolicy(
+    alert: Alert,
+    policy: EscalationPolicy,
+  ): boolean {
     // Implementation for matching alerts to escalation policies
     return true;
   }
 
   private async rotateOnCall(rotation: OnCallRotation): Promise<void> {
     // Implementation for on-call rotation
-    this.logger.debug("Rotating on-call assignment", { rotationId: rotation.id });
+    this.logger.debug("Rotating on-call assignment", {
+      rotationId: rotation.id,
+    });
   }
 
   private generateAlertId(): string {

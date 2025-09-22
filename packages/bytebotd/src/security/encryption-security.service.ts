@@ -758,9 +758,7 @@ export class EncryptionSecurityService {
     };
   }
 
-  private async performEncryption(
-    request: EncryptionRequest,
-  ): Promise<{
+  private async performEncryption(request: EncryptionRequest): Promise<{
     result: Buffer;
     keyId?: string;
     metadata: Partial<EncryptionMetadata>;

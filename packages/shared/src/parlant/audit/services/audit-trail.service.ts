@@ -19,9 +19,9 @@
  * @author Claude Code - Audit Trail System Agent
  */
 
-import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Injectable, Logger, OnApplicationShutdown } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { EventEmitter2 } from "@nestjs/event-emitter";
 import {
   AuditEvent,
   AuditEventId,
@@ -48,14 +48,14 @@ import {
   AnomalyDetectionConfig,
   ThreatIntelligenceConfig,
   IncidentResponseConfig,
-} from '../types/audit-core.types';
+} from "../types/audit-core.types";
 import {
   ComplianceFramework,
   DataCategory,
   SensitiveDataType,
-} from '../types/compliance-forensic.types';
-import { RiskLevel, SecurityLevel } from '../../../types/parlant.types';
-import { createHash, randomBytes, createHmac } from 'crypto';
+} from "../types/compliance-forensic.types";
+import { RiskLevel, SecurityLevel } from "../../../types/parlant.types";
+import { createHash, randomBytes, createHmac } from "crypto";
 
 // ===========================
 // AUDIT SERVICE INTERFACES
@@ -154,11 +154,11 @@ export interface BufferConfig {
  * Memory pressure handling
  */
 export enum MemoryPressureHandling {
-  BLOCK_NEW_EVENTS = 'block_new_events',
-  DROP_OLDEST_EVENTS = 'drop_oldest_events',
-  COMPRESS_EVENTS = 'compress_events',
-  EMERGENCY_FLUSH = 'emergency_flush',
-  ALERT_AND_CONTINUE = 'alert_and_continue',
+  BLOCK_NEW_EVENTS = "block_new_events",
+  DROP_OLDEST_EVENTS = "drop_oldest_events",
+  COMPRESS_EVENTS = "compress_events",
+  EMERGENCY_FLUSH = "emergency_flush",
+  ALERT_AND_CONTINUE = "alert_and_continue",
 }
 
 /**
@@ -208,13 +208,13 @@ export interface StorageBackend {
  * Storage backend types
  */
 export enum StorageBackendType {
-  DATABASE = 'database',
-  FILE_SYSTEM = 'file_system',
-  OBJECT_STORAGE = 'object_storage',
-  TIME_SERIES_DB = 'time_series_db',
-  ELASTICSEARCH = 'elasticsearch',
-  BLOCKCHAIN = 'blockchain',
-  APPEND_ONLY_LOG = 'append_only_log',
+  DATABASE = "database",
+  FILE_SYSTEM = "file_system",
+  OBJECT_STORAGE = "object_storage",
+  TIME_SERIES_DB = "time_series_db",
+  ELASTICSEARCH = "elasticsearch",
+  BLOCKCHAIN = "blockchain",
+  APPEND_ONLY_LOG = "append_only_log",
 }
 
 /**
@@ -289,33 +289,33 @@ export interface ReplicationConfig {
  * Consistency levels
  */
 export enum ConsistencyLevel {
-  EVENTUAL = 'eventual',
-  STRONG = 'strong',
-  CAUSAL = 'causal',
-  SEQUENTIAL = 'sequential',
-  LINEARIZABLE = 'linearizable',
+  EVENTUAL = "eventual",
+  STRONG = "strong",
+  CAUSAL = "causal",
+  SEQUENTIAL = "sequential",
+  LINEARIZABLE = "linearizable",
 }
 
 /**
  * Replication strategies
  */
 export enum ReplicationStrategy {
-  SYNCHRONOUS = 'synchronous',
-  ASYNCHRONOUS = 'asynchronous',
-  SEMI_SYNCHRONOUS = 'semi_synchronous',
-  ACTIVE_ACTIVE = 'active_active',
-  ACTIVE_PASSIVE = 'active_passive',
+  SYNCHRONOUS = "synchronous",
+  ASYNCHRONOUS = "asynchronous",
+  SEMI_SYNCHRONOUS = "semi_synchronous",
+  ACTIVE_ACTIVE = "active_active",
+  ACTIVE_PASSIVE = "active_passive",
 }
 
 /**
  * Conflict resolution strategies
  */
 export enum ConflictResolutionStrategy {
-  LAST_WRITE_WINS = 'last_write_wins',
-  FIRST_WRITE_WINS = 'first_write_wins',
-  MANUAL_RESOLUTION = 'manual_resolution',
-  AUTOMATIC_MERGE = 'automatic_merge',
-  VERSION_VECTOR = 'version_vector',
+  LAST_WRITE_WINS = "last_write_wins",
+  FIRST_WRITE_WINS = "first_write_wins",
+  MANUAL_RESOLUTION = "manual_resolution",
+  AUTOMATIC_MERGE = "automatic_merge",
+  VERSION_VECTOR = "version_vector",
 }
 
 /**
@@ -342,11 +342,11 @@ export interface CompressionConfig {
  * Compression algorithms
  */
 export enum CompressionAlgorithm {
-  GZIP = 'gzip',
-  BROTLI = 'brotli',
-  LZ4 = 'lz4',
-  ZSTD = 'zstd',
-  SNAPPY = 'snappy',
+  GZIP = "gzip",
+  BROTLI = "brotli",
+  LZ4 = "lz4",
+  ZSTD = "zstd",
+  SNAPPY = "snappy",
 }
 
 /**
@@ -410,11 +410,11 @@ export interface PerformanceAlert {
  * Alert actions
  */
 export enum AlertAction {
-  LOG_WARNING = 'log_warning',
-  SEND_NOTIFICATION = 'send_notification',
-  SCALE_RESOURCES = 'scale_resources',
-  THROTTLE_REQUESTS = 'throttle_requests',
-  EMERGENCY_SHUTDOWN = 'emergency_shutdown',
+  LOG_WARNING = "log_warning",
+  SEND_NOTIFICATION = "send_notification",
+  SCALE_RESOURCES = "scale_resources",
+  THROTTLE_REQUESTS = "throttle_requests",
+  EMERGENCY_SHUTDOWN = "emergency_shutdown",
 }
 
 /**
@@ -438,10 +438,10 @@ export interface ProfilingConfig {
  * Profiling modes
  */
 export enum ProfilingMode {
-  CPU_PROFILING = 'cpu_profiling',
-  MEMORY_PROFILING = 'memory_profiling',
-  I_O_PROFILING = 'io_profiling',
-  FULL_PROFILING = 'full_profiling',
+  CPU_PROFILING = "cpu_profiling",
+  MEMORY_PROFILING = "memory_profiling",
+  I_O_PROFILING = "io_profiling",
+  FULL_PROFILING = "full_profiling",
 }
 
 /**
@@ -505,10 +505,10 @@ export interface EncryptionConfig {
  * Encryption algorithms
  */
 export enum EncryptionAlgorithm {
-  AES_256_GCM = 'aes_256_gcm',
-  CHACHA20_POLY1305 = 'chacha20_poly1305',
-  RSA_4096 = 'rsa_4096',
-  ELLIPTIC_CURVE = 'elliptic_curve',
+  AES_256_GCM = "aes_256_gcm",
+  CHACHA20_POLY1305 = "chacha20_poly1305",
+  RSA_4096 = "rsa_4096",
+  ELLIPTIC_CURVE = "elliptic_curve",
 }
 
 /**
@@ -532,20 +532,20 @@ export interface KeyManagementConfig {
  * Key derivation functions
  */
 export enum KeyDerivationFunction {
-  PBKDF2 = 'pbkdf2',
-  SCRYPT = 'scrypt',
-  ARGON2 = 'argon2',
-  HKDF = 'hkdf',
+  PBKDF2 = "pbkdf2",
+  SCRYPT = "scrypt",
+  ARGON2 = "argon2",
+  HKDF = "hkdf",
 }
 
 /**
  * Key storage methods
  */
 export enum KeyStorageMethod {
-  HARDWARE_SECURITY_MODULE = 'hardware_security_module',
-  KEY_MANAGEMENT_SERVICE = 'key_management_service',
-  ENCRYPTED_FILE = 'encrypted_file',
-  ENVIRONMENT_VARIABLE = 'environment_variable',
+  HARDWARE_SECURITY_MODULE = "hardware_security_module",
+  KEY_MANAGEMENT_SERVICE = "key_management_service",
+  ENCRYPTED_FILE = "encrypted_file",
+  ENVIRONMENT_VARIABLE = "environment_variable",
 }
 
 /**
@@ -620,22 +620,22 @@ export interface AuthenticationRequirement {
  * Authentication methods
  */
 export enum AuthenticationMethod {
-  USERNAME_PASSWORD = 'username_password',
-  CERTIFICATE = 'certificate',
-  API_KEY = 'api_key',
-  OAUTH2 = 'oauth2',
-  SAML = 'saml',
-  BIOMETRIC = 'biometric',
+  USERNAME_PASSWORD = "username_password",
+  CERTIFICATE = "certificate",
+  API_KEY = "api_key",
+  OAUTH2 = "oauth2",
+  SAML = "saml",
+  BIOMETRIC = "biometric",
 }
 
 /**
  * Authentication strength levels
  */
 export enum AuthenticationStrength {
-  WEAK = 'weak',
-  MODERATE = 'moderate',
-  STRONG = 'strong',
-  VERY_STRONG = 'very_strong',
+  WEAK = "weak",
+  MODERATE = "moderate",
+  STRONG = "strong",
+  VERY_STRONG = "very_strong",
 }
 
 /**
@@ -693,21 +693,21 @@ export interface AuthorizationRule {
  * Authorization actions
  */
 export enum AuthorizationAction {
-  ALLOW = 'allow',
-  DENY = 'deny',
-  AUDIT = 'audit',
-  REQUIRE_APPROVAL = 'require_approval',
-  ESCALATE = 'escalate',
+  ALLOW = "allow",
+  DENY = "deny",
+  AUDIT = "audit",
+  REQUIRE_APPROVAL = "require_approval",
+  ESCALATE = "escalate",
 }
 
 /**
  * Policy enforcement
  */
 export enum PolicyEnforcement {
-  STRICT = 'strict',
-  PERMISSIVE = 'permissive',
-  ADVISORY = 'advisory',
-  MONITORING_ONLY = 'monitoring_only',
+  STRICT = "strict",
+  PERMISSIVE = "permissive",
+  ADVISORY = "advisory",
+  MONITORING_ONLY = "monitoring_only",
 }
 
 /**
@@ -762,9 +762,9 @@ export interface RoleInheritance {
  * Inheritance types
  */
 export enum InheritanceType {
-  FULL_INHERITANCE = 'full_inheritance',
-  PARTIAL_INHERITANCE = 'partial_inheritance',
-  CONDITIONAL_INHERITANCE = 'conditional_inheritance',
+  FULL_INHERITANCE = "full_inheritance",
+  PARTIAL_INHERITANCE = "partial_inheritance",
+  CONDITIONAL_INHERITANCE = "conditional_inheritance",
 }
 
 /**
@@ -802,10 +802,10 @@ export interface RoleConstraint {
  * Constraint types
  */
 export enum ConstraintType {
-  TIME_CONSTRAINT = 'time_constraint',
-  LOCATION_CONSTRAINT = 'location_constraint',
-  DEVICE_CONSTRAINT = 'device_constraint',
-  CONTEXT_CONSTRAINT = 'context_constraint',
+  TIME_CONSTRAINT = "time_constraint",
+  LOCATION_CONSTRAINT = "location_constraint",
+  DEVICE_CONSTRAINT = "device_constraint",
+  CONTEXT_CONSTRAINT = "context_constraint",
 }
 
 /**
@@ -846,13 +846,13 @@ export interface AttributeDefinition {
  * Attribute types
  */
 export enum AttributeType {
-  STRING = 'string',
-  NUMBER = 'number',
-  BOOLEAN = 'boolean',
-  DATE = 'date',
-  TIME = 'time',
-  ENUM = 'enum',
-  SET = 'set',
+  STRING = "string",
+  NUMBER = "number",
+  BOOLEAN = "boolean",
+  DATE = "date",
+  TIME = "time",
+  ENUM = "enum",
+  SET = "set",
 }
 
 /**
@@ -870,22 +870,22 @@ export interface ValueConstraint {
  * Value constraint types
  */
 export enum ValueConstraintType {
-  RANGE = 'range',
-  PATTERN = 'pattern',
-  ENUMERATION = 'enumeration',
-  LENGTH = 'length',
-  FORMAT = 'format',
+  RANGE = "range",
+  PATTERN = "pattern",
+  ENUMERATION = "enumeration",
+  LENGTH = "length",
+  FORMAT = "format",
 }
 
 /**
  * Attribute value source
  */
 export enum AttributeValueSource {
-  USER_PROFILE = 'user_profile',
-  SESSION_CONTEXT = 'session_context',
-  REQUEST_CONTEXT = 'request_context',
-  SYSTEM_CONTEXT = 'system_context',
-  EXTERNAL_SERVICE = 'external_service',
+  USER_PROFILE = "user_profile",
+  SESSION_CONTEXT = "session_context",
+  REQUEST_CONTEXT = "request_context",
+  SYSTEM_CONTEXT = "system_context",
+  EXTERNAL_SERVICE = "external_service",
 }
 
 /**
@@ -974,10 +974,10 @@ export interface FunctionParameter {
  * Policy effects
  */
 export enum PolicyEffect {
-  PERMIT = 'permit',
-  DENY = 'deny',
-  NOT_APPLICABLE = 'not_applicable',
-  INDETERMINATE = 'indeterminate',
+  PERMIT = "permit",
+  DENY = "deny",
+  NOT_APPLICABLE = "not_applicable",
+  INDETERMINATE = "indeterminate",
 }
 
 /**
@@ -1001,12 +1001,12 @@ export interface PolicyObligation {
  * Obligation types
  */
 export enum ObligationType {
-  LOGGING = 'logging',
-  NOTIFICATION = 'notification',
-  DATA_RETENTION = 'data_retention',
-  ENCRYPTION = 'encryption',
-  ANONYMIZATION = 'anonymization',
-  APPROVAL = 'approval',
+  LOGGING = "logging",
+  NOTIFICATION = "notification",
+  DATA_RETENTION = "data_retention",
+  ENCRYPTION = "encryption",
+  ANONYMIZATION = "anonymization",
+  APPROVAL = "approval",
 }
 
 /**
@@ -1027,11 +1027,11 @@ export interface EvaluationEngineConfig {
  * Evaluation engine types
  */
 export enum EvaluationEngineType {
-  BUILT_IN = 'built_in',
-  XACML = 'xacml',
-  CEDAR = 'cedar',
-  OPA = 'opa',
-  CUSTOM = 'custom',
+  BUILT_IN = "built_in",
+  XACML = "xacml",
+  CEDAR = "cedar",
+  OPA = "opa",
+  CUSTOM = "custom",
 }
 
 /**
@@ -1055,10 +1055,10 @@ export interface EvaluationCachingConfig {
  * Cache invalidation strategies
  */
 export enum CacheInvalidationStrategy {
-  TIME_BASED = 'time_based',
-  EVENT_BASED = 'event_based',
-  MANUAL = 'manual',
-  HYBRID = 'hybrid',
+  TIME_BASED = "time_based",
+  EVENT_BASED = "event_based",
+  MANUAL = "manual",
+  HYBRID = "hybrid",
 }
 
 /**
@@ -1082,10 +1082,10 @@ export interface EvaluationPerformanceTuning {
  * Optimization levels
  */
 export enum OptimizationLevel {
-  NONE = 'none',
-  BASIC = 'basic',
-  STANDARD = 'standard',
-  AGGRESSIVE = 'aggressive',
+  NONE = "none",
+  BASIC = "basic",
+  STANDARD = "standard",
+  AGGRESSIVE = "aggressive",
 }
 
 /**
@@ -1123,10 +1123,10 @@ export interface IntegrityConfig {
  * Hash algorithms
  */
 export enum HashAlgorithm {
-  SHA256 = 'sha256',
-  SHA3_256 = 'sha3_256',
-  BLAKE2B = 'blake2b',
-  BLAKE3 = 'blake3',
+  SHA256 = "sha256",
+  SHA3_256 = "sha3_256",
+  BLAKE2B = "blake2b",
+  BLAKE3 = "blake3",
 }
 
 /**
@@ -1150,10 +1150,10 @@ export interface DigitalSignatureConfig {
  * Digital signature algorithms
  */
 export enum DigitalSignatureAlgorithm {
-  RSA_PSS = 'rsa_pss',
-  ECDSA = 'ecdsa',
-  ED25519 = 'ed25519',
-  DILITHIUM = 'dilithium',
+  RSA_PSS = "rsa_pss",
+  ECDSA = "ecdsa",
+  ED25519 = "ed25519",
+  DILITHIUM = "dilithium",
 }
 
 /**
@@ -1267,11 +1267,11 @@ export interface BlockchainIntegrationConfig {
  * Blockchain types
  */
 export enum BlockchainType {
-  ETHEREUM = 'ethereum',
-  HYPERLEDGER_FABRIC = 'hyperledger_fabric',
-  BITCOIN = 'bitcoin',
-  POLYGON = 'polygon',
-  AVALANCHE = 'avalanche',
+  ETHEREUM = "ethereum",
+  HYPERLEDGER_FABRIC = "hyperledger_fabric",
+  BITCOIN = "bitcoin",
+  POLYGON = "polygon",
+  AVALANCHE = "avalanche",
 }
 
 /**
@@ -1453,13 +1453,13 @@ export interface EventFilterCondition {
  * Filter operators
  */
 export enum FilterOperator {
-  EQUALS = 'equals',
-  NOT_EQUALS = 'not_equals',
-  GREATER_THAN = 'greater_than',
-  LESS_THAN = 'less_than',
-  IN = 'in',
-  NOT_IN = 'not_in',
-  CONTAINS = 'contains',
+  EQUALS = "equals",
+  NOT_EQUALS = "not_equals",
+  GREATER_THAN = "greater_than",
+  LESS_THAN = "less_than",
+  IN = "in",
+  NOT_IN = "not_in",
+  CONTAINS = "contains",
 }
 
 /**
@@ -1497,9 +1497,9 @@ export interface EventProcessingConfig {
  * Event processing modes
  */
 export enum EventProcessingMode {
-  SEQUENTIAL = 'sequential',
-  PARALLEL = 'parallel',
-  BATCH = 'batch',
+  SEQUENTIAL = "sequential",
+  PARALLEL = "parallel",
+  BATCH = "batch",
 }
 
 /**
@@ -1520,11 +1520,11 @@ export interface EventErrorHandling {
  * Retry strategies
  */
 export enum RetryStrategy {
-  EXPONENTIAL_BACKOFF = 'exponential_backoff',
-  LINEAR_BACKOFF = 'linear_backoff',
-  FIXED_DELAY = 'fixed_delay',
-  IMMEDIATE = 'immediate',
-  NO_RETRY = 'no_retry',
+  EXPONENTIAL_BACKOFF = "exponential_backoff",
+  LINEAR_BACKOFF = "linear_backoff",
+  FIXED_DELAY = "fixed_delay",
+  IMMEDIATE = "immediate",
+  NO_RETRY = "no_retry",
 }
 
 /**
@@ -1585,12 +1585,12 @@ export interface DetectionRule {
  * Detection rule categories
  */
 export enum DetectionRuleCategory {
-  UNAUTHORIZED_ACCESS = 'unauthorized_access',
-  PRIVILEGE_ESCALATION = 'privilege_escalation',
-  DATA_EXFILTRATION = 'data_exfiltration',
-  MALICIOUS_ACTIVITY = 'malicious_activity',
-  POLICY_VIOLATION = 'policy_violation',
-  SUSPICIOUS_BEHAVIOR = 'suspicious_behavior',
+  UNAUTHORIZED_ACCESS = "unauthorized_access",
+  PRIVILEGE_ESCALATION = "privilege_escalation",
+  DATA_EXFILTRATION = "data_exfiltration",
+  MALICIOUS_ACTIVITY = "malicious_activity",
+  POLICY_VIOLATION = "policy_violation",
+  SUSPICIOUS_BEHAVIOR = "suspicious_behavior",
 }
 
 /**
@@ -1631,16 +1631,16 @@ export interface ResponseAction {
  * Response action types
  */
 export enum ResponseActionType {
-  BLOCK_REQUEST = 'block_request',
-  QUARANTINE_USER = 'quarantine_user',
-  ALERT_ADMINISTRATOR = 'alert_administrator',
-  LOG_INCIDENT = 'log_incident',
-  INITIATE_INVESTIGATION = 'initiate_investigation',
-  ESCALATE_TO_SOC = 'escalate_to_soc',
+  BLOCK_REQUEST = "block_request",
+  QUARANTINE_USER = "quarantine_user",
+  ALERT_ADMINISTRATOR = "alert_administrator",
+  LOG_INCIDENT = "log_incident",
+  INITIATE_INVESTIGATION = "initiate_investigation",
+  ESCALATE_TO_SOC = "escalate_to_soc",
 }
 
 /**
  * Continue with remaining types and implementation in next part...
  */
 
-export * from './audit-trail.service';
+export * from "./audit-trail.service";

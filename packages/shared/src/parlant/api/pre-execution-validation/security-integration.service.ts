@@ -20,15 +20,15 @@
  * @author PARLANT Phase 1 Security Team
  */
 
-import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter } from 'events';
+import { Injectable, Logger, OnApplicationShutdown } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { EventEmitter } from "events";
 import {
   PreExecutionValidationRequest,
   UserValidationContext,
-  ValidationLevel
-} from './pre-execution-validation.service';
-import { SecurityLevel } from '../../validation/types/validation-layer.types';
+  ValidationLevel,
+} from "./pre-execution-validation.service";
+import { SecurityLevel } from "../../validation/types/validation-layer.types";
 
 // ===== SECURITY INTEGRATION TYPES =====
 
@@ -65,7 +65,7 @@ export interface ParlantSecurityContext {
 
   /** Threat detection context */
   threatContext: {
-    threatLevel: 'NONE' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+    threatLevel: "NONE" | "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
     activeThreats: SecurityThreat[];
     behavioralAnomalies: BehavioralAnomaly[];
     geoLocation: GeoSecurityContext;
@@ -161,7 +161,7 @@ export interface SecurityPermission {
   action: string;
 
   /** Permission effect */
-  effect: 'ALLOW' | 'DENY';
+  effect: "ALLOW" | "DENY";
 
   /** Permission conditions */
   conditions?: PermissionCondition[];
@@ -186,7 +186,7 @@ export interface SecurityGroup {
   name: string;
 
   /** Group type */
-  type: 'DEPARTMENT' | 'PROJECT' | 'FUNCTIONAL' | 'EMERGENCY';
+  type: "DEPARTMENT" | "PROJECT" | "FUNCTIONAL" | "EMERGENCY";
 
   /** Group members */
   members: string[];
@@ -219,7 +219,7 @@ export interface SecurityRiskProfile {
   riskHistory: {
     averageRisk: number;
     peakRisk: number;
-    riskTrend: 'INCREASING' | 'DECREASING' | 'STABLE';
+    riskTrend: "INCREASING" | "DECREASING" | "STABLE";
     lastRiskEvent: Date;
   };
 
@@ -241,10 +241,15 @@ export interface SecurityThreat {
   id: string;
 
   /** Threat type */
-  type: 'BRUTE_FORCE' | 'CREDENTIAL_STUFFING' | 'ANOMALOUS_BEHAVIOR' | 'SUSPICIOUS_LOCATION' | 'PRIVILEGE_ESCALATION';
+  type:
+    | "BRUTE_FORCE"
+    | "CREDENTIAL_STUFFING"
+    | "ANOMALOUS_BEHAVIOR"
+    | "SUSPICIOUS_LOCATION"
+    | "PRIVILEGE_ESCALATION";
 
   /** Threat severity */
-  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
 
   /** Threat description */
   description: string;
@@ -267,7 +272,7 @@ export interface SecurityThreat {
   responseActions: string[];
 
   /** Threat status */
-  status: 'ACTIVE' | 'MITIGATED' | 'RESOLVED' | 'FALSE_POSITIVE';
+  status: "ACTIVE" | "MITIGATED" | "RESOLVED" | "FALSE_POSITIVE";
 }
 
 /**
@@ -278,7 +283,12 @@ export interface BehavioralAnomaly {
   id: string;
 
   /** Anomaly type */
-  type: 'ACCESS_PATTERN' | 'OPERATION_FREQUENCY' | 'TIME_PATTERN' | 'LOCATION_CHANGE' | 'PERMISSION_USAGE';
+  type:
+    | "ACCESS_PATTERN"
+    | "OPERATION_FREQUENCY"
+    | "TIME_PATTERN"
+    | "LOCATION_CHANGE"
+    | "PERMISSION_USAGE";
 
   /** Anomaly score (0-1) */
   score: number;
@@ -329,7 +339,7 @@ export interface GeoSecurityContext {
   isp: {
     name: string;
     organization: string;
-    type: 'RESIDENTIAL' | 'BUSINESS' | 'MOBILE' | 'HOSTING' | 'VPN' | 'TOR';
+    type: "RESIDENTIAL" | "BUSINESS" | "MOBILE" | "HOSTING" | "VPN" | "TOR";
   };
 }
 
@@ -350,7 +360,7 @@ export interface TimeRestriction {
   timezone: string;
 
   /** Restriction type */
-  type: 'ALLOWED' | 'DENIED' | 'RESTRICTED';
+  type: "ALLOWED" | "DENIED" | "RESTRICTED";
 }
 
 /**
@@ -358,10 +368,17 @@ export interface TimeRestriction {
  */
 export interface PermissionCondition {
   /** Condition type */
-  type: 'TIME' | 'LOCATION' | 'RISK_SCORE' | 'MFA' | 'DEVICE' | 'CUSTOM';
+  type: "TIME" | "LOCATION" | "RISK_SCORE" | "MFA" | "DEVICE" | "CUSTOM";
 
   /** Condition operator */
-  operator: 'EQUALS' | 'NOT_EQUALS' | 'GREATER_THAN' | 'LESS_THAN' | 'IN' | 'NOT_IN' | 'CONTAINS';
+  operator:
+    | "EQUALS"
+    | "NOT_EQUALS"
+    | "GREATER_THAN"
+    | "LESS_THAN"
+    | "IN"
+    | "NOT_IN"
+    | "CONTAINS";
 
   /** Condition value */
   value: any;
@@ -381,13 +398,18 @@ export interface SecurityPolicy {
   name: string;
 
   /** Policy type */
-  type: 'ACCESS_CONTROL' | 'DATA_PROTECTION' | 'OPERATION_RESTRICTION' | 'COMPLIANCE' | 'INCIDENT_RESPONSE';
+  type:
+    | "ACCESS_CONTROL"
+    | "DATA_PROTECTION"
+    | "OPERATION_RESTRICTION"
+    | "COMPLIANCE"
+    | "INCIDENT_RESPONSE";
 
   /** Policy rules */
   rules: SecurityPolicyRule[];
 
   /** Policy enforcement level */
-  enforcementLevel: 'ADVISORY' | 'ENFORCED' | 'STRICT';
+  enforcementLevel: "ADVISORY" | "ENFORCED" | "STRICT";
 
   /** Policy priority */
   priority: number;
@@ -407,7 +429,7 @@ export interface SecurityPolicyRule {
   condition: string;
 
   /** Rule action */
-  action: 'ALLOW' | 'DENY' | 'REQUIRE_APPROVAL' | 'LOG' | 'ALERT' | 'ESCALATE';
+  action: "ALLOW" | "DENY" | "REQUIRE_APPROVAL" | "LOG" | "ALERT" | "ESCALATE";
 
   /** Rule parameters */
   parameters: Record<string, any>;
@@ -474,7 +496,12 @@ export interface SecurityIntegrationConfig {
  */
 export interface SecurityValidationResult {
   /** Validation decision */
-  decision: 'APPROVED' | 'DENIED' | 'REQUIRES_ADDITIONAL_AUTH' | 'REQUIRES_APPROVAL' | 'EMERGENCY_OVERRIDE';
+  decision:
+    | "APPROVED"
+    | "DENIED"
+    | "REQUIRES_ADDITIONAL_AUTH"
+    | "REQUIRES_APPROVAL"
+    | "EMERGENCY_OVERRIDE";
 
   /** Security score (0-100) */
   securityScore: number;
@@ -510,7 +537,12 @@ export interface SecurityValidationResult {
  */
 export interface SecurityMeasure {
   /** Measure type */
-  type: 'MFA' | 'APPROVAL' | 'ELEVATED_AUTH' | 'DEVICE_VERIFICATION' | 'LOCATION_VERIFICATION';
+  type:
+    | "MFA"
+    | "APPROVAL"
+    | "ELEVATED_AUTH"
+    | "DEVICE_VERIFICATION"
+    | "LOCATION_VERIFICATION";
 
   /** Measure description */
   description: string;
@@ -530,10 +562,10 @@ export interface SecurityMeasure {
  */
 export interface SecurityWarning {
   /** Warning type */
-  type: 'ANOMALY' | 'THREAT' | 'POLICY' | 'COMPLIANCE' | 'RISK';
+  type: "ANOMALY" | "THREAT" | "POLICY" | "COMPLIANCE" | "RISK";
 
   /** Warning severity */
-  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
 
   /** Warning message */
   message: string;
@@ -556,13 +588,18 @@ export interface PolicyViolation {
   policyName: string;
 
   /** Violation type */
-  violationType: 'ACCESS_DENIED' | 'TIME_RESTRICTION' | 'LOCATION_RESTRICTION' | 'RISK_THRESHOLD' | 'COMPLIANCE';
+  violationType:
+    | "ACCESS_DENIED"
+    | "TIME_RESTRICTION"
+    | "LOCATION_RESTRICTION"
+    | "RISK_THRESHOLD"
+    | "COMPLIANCE";
 
   /** Violation description */
   description: string;
 
   /** Violation severity */
-  severity: 'WARNING' | 'ERROR' | 'CRITICAL';
+  severity: "WARNING" | "ERROR" | "CRITICAL";
 
   /** Required remediation */
   remediation: string[];
@@ -583,7 +620,10 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
   private readonly config: SecurityIntegrationConfig;
 
   // Security caches
-  private readonly securityContextCache = new Map<string, ParlantSecurityContext>();
+  private readonly securityContextCache = new Map<
+    string,
+    ParlantSecurityContext
+  >();
   private readonly permissionCache = new Map<string, SecurityPermission[]>();
   private readonly threatCache = new Map<string, SecurityThreat[]>();
 
@@ -594,32 +634,32 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
     averageSecurityValidationTime: 0,
     threatDetections: 0,
     policyViolations: 0,
-    emergencyOverrides: 0
+    emergencyOverrides: 0,
   };
 
   constructor(private readonly configService: ConfigService) {
     this.config = this.loadSecurityConfiguration();
     this.initializeSecurityIntegration();
 
-    this.logger.log('SecurityIntegrationService initialized', {
-      version: '1.0.0',
+    this.logger.log("SecurityIntegrationService initialized", {
+      version: "1.0.0",
       features: [
-        'jwt_authentication_bridge',
-        'rbac_integration',
-        'threat_detection',
-        'geo_security',
-        'policy_enforcement',
-        'emergency_override',
-        'compliance_validation',
-        'behavioral_analysis'
+        "jwt_authentication_bridge",
+        "rbac_integration",
+        "threat_detection",
+        "geo_security",
+        "policy_enforcement",
+        "emergency_override",
+        "compliance_validation",
+        "behavioral_analysis",
       ],
       config: {
         enabled: this.config.enabled,
         jwtVerification: this.config.jwt.verificationEnabled,
         rbacEnabled: this.config.rbac.enabled,
         threatDetection: this.config.threatDetection.enabled,
-        geoSecurity: this.config.geoSecurity.enabled
-      }
+        geoSecurity: this.config.geoSecurity.enabled,
+      },
     });
   }
 
@@ -630,7 +670,7 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
    * @returns Promise<SecurityValidationResult>
    */
   async validateSecurityContext(
-    request: PreExecutionValidationRequest
+    request: PreExecutionValidationRequest,
   ): Promise<SecurityValidationResult> {
     const startTime = performance.now();
 
@@ -639,29 +679,40 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
         return this.createBypassSecurityResult();
       }
 
-      this.logger.debug('Starting security context validation', {
+      this.logger.debug("Starting security context validation", {
         requestId: request.id,
         userId: request.userContext.userId,
-        functionName: request.functionName
+        functionName: request.functionName,
       });
 
       // Extract security context
-      const securityContext = await this.extractSecurityContext(request.userContext);
+      const securityContext = await this.extractSecurityContext(
+        request.userContext,
+      );
 
       // Validate JWT authentication
       const authResult = await this.validateAuthentication(securityContext);
 
       // Validate RBAC authorization
-      const authzResult = await this.validateAuthorization(request, securityContext);
+      const authzResult = await this.validateAuthorization(
+        request,
+        securityContext,
+      );
 
       // Assess security risk profile
-      const riskResult = await this.assessSecurityRisk(request, securityContext);
+      const riskResult = await this.assessSecurityRisk(
+        request,
+        securityContext,
+      );
 
       // Detect threats and anomalies
       const threatResult = await this.detectThreats(request, securityContext);
 
       // Validate compliance policies
-      const complianceResult = await this.validateCompliance(request, securityContext);
+      const complianceResult = await this.validateCompliance(
+        request,
+        securityContext,
+      );
 
       // Calculate overall security score
       const securityScore = this.calculateSecurityScore({
@@ -670,7 +721,7 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
         riskProfile: riskResult.score,
         threatLevel: threatResult.score,
         compliance: complianceResult.score,
-        behavioral: this.calculateBehavioralScore(securityContext)
+        behavioral: this.calculateBehavioralScore(securityContext),
       });
 
       // Determine final security decision
@@ -680,7 +731,7 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
         authzResult,
         riskResult,
         threatResult,
-        complianceResult
+        complianceResult,
       );
 
       // Compile additional security measures
@@ -689,7 +740,7 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
         authResult,
         authzResult,
         riskResult,
-        threatResult
+        threatResult,
       );
 
       // Compile security warnings
@@ -698,13 +749,13 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
         authzResult,
         riskResult,
         threatResult,
-        complianceResult
+        complianceResult,
       );
 
       // Compile policy violations
       const policyViolations = this.compilePolicyViolations(
         authzResult,
-        complianceResult
+        complianceResult,
       );
 
       const result: SecurityValidationResult = {
@@ -716,13 +767,13 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
           riskProfile: riskResult.score,
           threatLevel: threatResult.score,
           compliance: complianceResult.score,
-          behavioral: this.calculateBehavioralScore(securityContext)
+          behavioral: this.calculateBehavioralScore(securityContext),
         },
         additionalSecurityMeasures,
         securityWarnings,
         policyViolations,
         validatedAt: new Date(),
-        securityContext
+        securityContext,
       };
 
       // Update metrics and emit events
@@ -730,27 +781,26 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
       this.updateSecurityMetrics(result, validationTime);
       this.emitSecurityEvents(result, request);
 
-      this.logger.debug('Security context validation completed', {
+      this.logger.debug("Security context validation completed", {
         requestId: request.id,
         decision,
         securityScore,
         validationTime,
         additionalMeasures: additionalSecurityMeasures.length,
-        warnings: securityWarnings.length
+        warnings: securityWarnings.length,
       });
 
       return result;
-
     } catch (error) {
-      this.logger.error('Security context validation failed', {
+      this.logger.error("Security context validation failed", {
         requestId: request.id,
         error: error.message,
-        stack: error.stack
+        stack: error.stack,
       });
 
       // Return deny-by-default on security errors
       return {
-        decision: 'DENIED',
+        decision: "DENIED",
         securityScore: 0,
         securityFactors: {
           authentication: 0,
@@ -758,19 +808,21 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
           riskProfile: 100,
           threatLevel: 100,
           compliance: 0,
-          behavioral: 0
+          behavioral: 0,
         },
         additionalSecurityMeasures: [],
-        securityWarnings: [{
-          type: 'RISK',
-          severity: 'CRITICAL',
-          message: 'Security validation system error',
-          details: { error: error.message },
-          recommendedActions: ['Contact security team', 'Review system logs']
-        }],
+        securityWarnings: [
+          {
+            type: "RISK",
+            severity: "CRITICAL",
+            message: "Security validation system error",
+            details: { error: error.message },
+            recommendedActions: ["Contact security team", "Review system logs"],
+          },
+        ],
         policyViolations: [],
         validatedAt: new Date(),
-        securityContext: await this.getDefaultSecurityContext()
+        securityContext: await this.getDefaultSecurityContext(),
       };
     }
   }
@@ -779,7 +831,7 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
    * Extract security context from user validation context
    */
   private async extractSecurityContext(
-    userContext: UserValidationContext
+    userContext: UserValidationContext,
   ): Promise<ParlantSecurityContext> {
     // Check cache first
     const cacheKey = `security-context-${userContext.userId}-${userContext.sessionContext.sessionId}`;
@@ -805,7 +857,7 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
       jwtContext,
       sessionSecurity,
       rbacContext,
-      threatContext
+      threatContext,
     };
 
     // Cache the context
@@ -823,7 +875,7 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
    * Validate JWT authentication
    */
   private async validateAuthentication(
-    securityContext: ParlantSecurityContext
+    securityContext: ParlantSecurityContext,
   ): Promise<{ score: number; valid: boolean; issues: string[] }> {
     if (!this.config.jwt.verificationEnabled) {
       return { score: 100, valid: true, issues: [] };
@@ -836,7 +888,7 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
 
     // Check token expiration
     if (jwt.expiresAt <= new Date()) {
-      issues.push('JWT token expired');
+      issues.push("JWT token expired");
       score -= 50;
     }
 
@@ -844,19 +896,19 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
     const tokenAge = Date.now() - jwt.issuedAt.getTime();
     const maxAge = 24 * 60 * 60 * 1000; // 24 hours
     if (tokenAge > maxAge) {
-      issues.push('JWT token too old');
+      issues.push("JWT token too old");
       score -= 20;
     }
 
     // Check issuer
     if (jwt.issuer !== this.config.jwt.issuer) {
-      issues.push('Invalid JWT issuer');
+      issues.push("Invalid JWT issuer");
       score -= 30;
     }
 
     // Check algorithm
     if (!this.config.jwt.algorithms.includes(jwt.algorithm)) {
-      issues.push('Unsupported JWT algorithm');
+      issues.push("Unsupported JWT algorithm");
       score -= 40;
     }
 
@@ -865,17 +917,21 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
       const secCtx = jwt.claims.securityContext;
 
       // Check MFA status for high-security operations
-      if (!secCtx.mfaVerified && securityContext.sessionSecurity.securityLevel === 'RESTRICTED') {
-        issues.push('MFA verification required for restricted operations');
+      if (
+        !secCtx.mfaVerified &&
+        securityContext.sessionSecurity.securityLevel === "RESTRICTED"
+      ) {
+        issues.push("MFA verification required for restricted operations");
         score -= 25;
       }
 
       // Check password age
       if (secCtx.lastPasswordChange) {
-        const passwordAge = Date.now() - new Date(secCtx.lastPasswordChange).getTime();
+        const passwordAge =
+          Date.now() - new Date(secCtx.lastPasswordChange).getTime();
         const maxPasswordAge = 90 * 24 * 60 * 60 * 1000; // 90 days
         if (passwordAge > maxPasswordAge) {
-          issues.push('Password change required');
+          issues.push("Password change required");
           score -= 15;
         }
       }
@@ -884,7 +940,7 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
     return {
       score: Math.max(0, score),
       valid: score > 50,
-      issues
+      issues,
     };
   }
 
@@ -893,8 +949,13 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
    */
   private async validateAuthorization(
     request: PreExecutionValidationRequest,
-    securityContext: ParlantSecurityContext
-  ): Promise<{ score: number; authorized: boolean; issues: string[]; violations: PolicyViolation[] }> {
+    securityContext: ParlantSecurityContext,
+  ): Promise<{
+    score: number;
+    authorized: boolean;
+    issues: string[];
+    violations: PolicyViolation[];
+  }> {
     if (!this.config.rbac.enabled) {
       return { score: 100, authorized: true, issues: [], violations: [] };
     }
@@ -907,19 +968,22 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
 
     // Check if user has required permissions for operation
     const requiredPermissions = this.getRequiredPermissions(request);
-    const hasPermissions = this.checkPermissions(rbac.effectivePermissions, requiredPermissions);
+    const hasPermissions = this.checkPermissions(
+      rbac.effectivePermissions,
+      requiredPermissions,
+    );
 
     if (!hasPermissions.allGranted) {
-      issues.push(`Missing permissions: ${hasPermissions.missing.join(', ')}`);
+      issues.push(`Missing permissions: ${hasPermissions.missing.join(", ")}`);
       score -= 40;
 
       violations.push({
-        policyId: 'rbac-permission-check',
-        policyName: 'RBAC Permission Verification',
-        violationType: 'ACCESS_DENIED',
-        description: `User lacks required permissions: ${hasPermissions.missing.join(', ')}`,
-        severity: 'ERROR',
-        remediation: ['Request permission elevation', 'Contact administrator']
+        policyId: "rbac-permission-check",
+        policyName: "RBAC Permission Verification",
+        violationType: "ACCESS_DENIED",
+        description: `User lacks required permissions: ${hasPermissions.missing.join(", ")}`,
+        severity: "ERROR",
+        remediation: ["Request permission elevation", "Contact administrator"],
       });
     }
 
@@ -935,17 +999,24 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
 
     // Check security level requirements
     const requiredSecurityLevel = this.getRequiredSecurityLevel(request);
-    if (!this.hasRequiredSecurityLevel(securityContext.sessionSecurity.securityLevel, requiredSecurityLevel)) {
-      issues.push(`Insufficient security level: required ${requiredSecurityLevel}, current ${securityContext.sessionSecurity.securityLevel}`);
+    if (
+      !this.hasRequiredSecurityLevel(
+        securityContext.sessionSecurity.securityLevel,
+        requiredSecurityLevel,
+      )
+    ) {
+      issues.push(
+        `Insufficient security level: required ${requiredSecurityLevel}, current ${securityContext.sessionSecurity.securityLevel}`,
+      );
       score -= 30;
 
       violations.push({
-        policyId: 'security-level-check',
-        policyName: 'Security Level Verification',
-        violationType: 'ACCESS_DENIED',
+        policyId: "security-level-check",
+        policyName: "Security Level Verification",
+        violationType: "ACCESS_DENIED",
         description: `Operation requires ${requiredSecurityLevel} security level`,
-        severity: 'ERROR',
-        remediation: ['Elevate security level', 'Use privileged session']
+        severity: "ERROR",
+        remediation: ["Elevate security level", "Use privileged session"],
       });
     }
 
@@ -953,7 +1024,7 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
       score: Math.max(0, score),
       authorized: score > 60,
       issues,
-      violations
+      violations,
     };
   }
 
@@ -962,8 +1033,12 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
    */
   private async assessSecurityRisk(
     request: PreExecutionValidationRequest,
-    securityContext: ParlantSecurityContext
-  ): Promise<{ score: number; riskLevel: string; factors: Record<string, number> }> {
+    securityContext: ParlantSecurityContext,
+  ): Promise<{
+    score: number;
+    riskLevel: string;
+    factors: Record<string, number>;
+  }> {
     const sessionSecurity = securityContext.sessionSecurity;
     const riskProfile = sessionSecurity.riskProfile;
 
@@ -971,20 +1046,21 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
     const factors = {
       userRisk: riskProfile.riskScore,
       behavioralRisk: riskProfile.riskFactors.behavioralRisk,
-      locationRisk: securityContext.threatContext.geoLocation.locationRisk.riskScore,
+      locationRisk:
+        securityContext.threatContext.geoLocation.locationRisk.riskScore,
       deviceRisk: riskProfile.riskFactors.deviceRisk,
       operationRisk: this.assessOperationRisk(request),
-      contextualRisk: this.assessContextualRisk(request, securityContext)
+      contextualRisk: this.assessContextualRisk(request, securityContext),
     };
 
     // Weight and combine risk factors
     const weights = {
       userRisk: 0.25,
-      behavioralRisk: 0.20,
+      behavioralRisk: 0.2,
       locationRisk: 0.15,
       deviceRisk: 0.15,
       operationRisk: 0.15,
-      contextualRisk: 0.10
+      contextualRisk: 0.1,
     };
 
     let weightedRisk = 0;
@@ -993,13 +1069,13 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
     }
 
     // Determine risk level
-    let riskLevel = 'LOW';
+    let riskLevel = "LOW";
     if (weightedRisk > 75) {
-      riskLevel = 'CRITICAL';
+      riskLevel = "CRITICAL";
     } else if (weightedRisk > 60) {
-      riskLevel = 'HIGH';
+      riskLevel = "HIGH";
     } else if (weightedRisk > 40) {
-      riskLevel = 'MEDIUM';
+      riskLevel = "MEDIUM";
     }
 
     // Risk score is inverse of risk level (higher risk = lower security score)
@@ -1013,8 +1089,12 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
    */
   private async detectThreats(
     request: PreExecutionValidationRequest,
-    securityContext: ParlantSecurityContext
-  ): Promise<{ score: number; threats: SecurityThreat[]; anomalies: BehavioralAnomaly[] }> {
+    securityContext: ParlantSecurityContext,
+  ): Promise<{
+    score: number;
+    threats: SecurityThreat[];
+    anomalies: BehavioralAnomaly[];
+  }> {
     if (!this.config.threatDetection.enabled) {
       return { score: 100, threats: [], anomalies: [] };
     }
@@ -1028,10 +1108,10 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
 
     for (const threat of threats) {
       const threatPenalty = {
-        'LOW': 5,
-        'MEDIUM': 15,
-        'HIGH': 30,
-        'CRITICAL': 50
+        LOW: 5,
+        MEDIUM: 15,
+        HIGH: 30,
+        CRITICAL: 50,
       };
       threatScore -= threatPenalty[threat.severity] || 0;
     }
@@ -1044,18 +1124,18 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
 
     // Consider threat level
     const threatLevelPenalty = {
-      'NONE': 0,
-      'LOW': 5,
-      'MEDIUM': 15,
-      'HIGH': 30,
-      'CRITICAL': 50
+      NONE: 0,
+      LOW: 5,
+      MEDIUM: 15,
+      HIGH: 30,
+      CRITICAL: 50,
     };
     threatScore -= threatLevelPenalty[threatContext.threatLevel] || 0;
 
     return {
       score: Math.max(0, threatScore),
       threats,
-      anomalies
+      anomalies,
     };
   }
 
@@ -1064,27 +1144,38 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
    */
   private async validateCompliance(
     request: PreExecutionValidationRequest,
-    securityContext: ParlantSecurityContext
-  ): Promise<{ score: number; compliant: boolean; violations: PolicyViolation[] }> {
+    securityContext: ParlantSecurityContext,
+  ): Promise<{
+    score: number;
+    compliant: boolean;
+    violations: PolicyViolation[];
+  }> {
     const violations: PolicyViolation[] = [];
     let score = 100;
 
     // Check compliance frameworks
-    const requiredFrameworks = request.riskMetadata.compliance.complianceFrameworks;
+    const requiredFrameworks =
+      request.riskMetadata.compliance.complianceFrameworks;
 
     for (const framework of requiredFrameworks) {
       const frameworkViolations = await this.validateComplianceFramework(
         framework,
         request,
-        securityContext
+        securityContext,
       );
       violations.push(...frameworkViolations);
       score -= frameworkViolations.length * 10;
     }
 
     // Check data protection requirements
-    if (request.riskMetadata.dataSensitivity === 'restricted' || request.riskMetadata.dataSensitivity === 'confidential') {
-      const dataProtectionViolations = this.validateDataProtection(request, securityContext);
+    if (
+      request.riskMetadata.dataSensitivity === "restricted" ||
+      request.riskMetadata.dataSensitivity === "confidential"
+    ) {
+      const dataProtectionViolations = this.validateDataProtection(
+        request,
+        securityContext,
+      );
       violations.push(...dataProtectionViolations);
       score -= dataProtectionViolations.length * 15;
     }
@@ -1092,7 +1183,7 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
     return {
       score: Math.max(0, score),
       compliant: violations.length === 0,
-      violations
+      violations,
     };
   }
 
@@ -1100,7 +1191,7 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
 
   private createBypassSecurityResult(): SecurityValidationResult {
     return {
-      decision: 'APPROVED',
+      decision: "APPROVED",
       securityScore: 100,
       securityFactors: {
         authentication: 100,
@@ -1108,20 +1199,22 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
         riskProfile: 0,
         threatLevel: 0,
         compliance: 100,
-        behavioral: 100
+        behavioral: 100,
       },
       additionalSecurityMeasures: [],
       securityWarnings: [],
       policyViolations: [],
       validatedAt: new Date(),
-      securityContext: {} as ParlantSecurityContext
+      securityContext: {} as ParlantSecurityContext,
     };
   }
 
-  private async extractJWTContext(userContext: UserValidationContext): Promise<ParlantSecurityContext['jwtContext']> {
+  private async extractJWTContext(
+    userContext: UserValidationContext,
+  ): Promise<ParlantSecurityContext["jwtContext"]> {
     // Simulate JWT extraction - would integrate with actual JWT service
     return {
-      token: 'simulated-jwt-token',
+      token: "simulated-jwt-token",
       claims: {
         sub: userContext.userId,
         iat: Math.floor(Date.now() / 1000) - 3600, // 1 hour ago
@@ -1133,24 +1226,26 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
         securityContext: {
           ipAddress: userContext.sessionContext.ipAddress,
           userAgent: userContext.sessionContext.userAgent,
-          deviceFingerprint: 'simulated-fingerprint',
+          deviceFingerprint: "simulated-fingerprint",
           sessionRisk: 0.2,
           lastPasswordChange: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
           mfaEnabled: true,
-          mfaVerified: userContext.roles.includes('admin')
-        }
+          mfaVerified: userContext.roles.includes("admin"),
+        },
       },
-      algorithm: 'RS256',
+      algorithm: "RS256",
       issuedAt: new Date(Date.now() - 3600000),
       expiresAt: new Date(Date.now() + 3600000),
-      issuer: this.config.jwt.issuer
+      issuer: this.config.jwt.issuer,
     };
   }
 
-  private async extractSessionSecurity(userContext: UserValidationContext): Promise<ParlantSecurityContext['sessionSecurity']> {
+  private async extractSessionSecurity(
+    userContext: UserValidationContext,
+  ): Promise<ParlantSecurityContext["sessionSecurity"]> {
     return {
       sessionId: userContext.sessionContext.sessionId,
-      securityLevel: 'INTERNAL',
+      securityLevel: "INTERNAL",
       trustScore: userContext.validationHistory.successRate,
       riskProfile: {
         riskScore: (1 - userContext.validationHistory.successRate) * 100,
@@ -1160,36 +1255,38 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
           deviceRisk: Math.random() * 10,
           locationRisk: Math.random() * 25,
           timeRisk: Math.random() * 10,
-          operationalRisk: Math.random() * 20
+          operationalRisk: Math.random() * 20,
         },
         riskHistory: {
           averageRisk: 25,
           peakRisk: 45,
-          riskTrend: 'STABLE',
-          lastRiskEvent: new Date(Date.now() - 86400000) // 1 day ago
+          riskTrend: "STABLE",
+          lastRiskEvent: new Date(Date.now() - 86400000), // 1 day ago
         },
         mitigationMeasures: {
-          mfaRequired: userContext.roles.includes('admin'),
+          mfaRequired: userContext.roles.includes("admin"),
           sessionTimeout: 3600000, // 1 hour
           ipWhitelisting: false,
           deviceRestriction: false,
-          operationLimits: { 'high-risk': 10, 'medium-risk': 50 }
-        }
+          operationLimits: { "high-risk": 10, "medium-risk": 50 },
+        },
       },
-      lastSecurityCheck: new Date()
+      lastSecurityCheck: new Date(),
     };
   }
 
-  private async extractRBACContext(userContext: UserValidationContext): Promise<ParlantSecurityContext['rbacContext']> {
+  private async extractRBACContext(
+    userContext: UserValidationContext,
+  ): Promise<ParlantSecurityContext["rbacContext"]> {
     // Simulate RBAC context extraction
-    const roles = userContext.roles.map(roleName => ({
+    const roles = userContext.roles.map((roleName) => ({
       id: `role-${roleName}`,
       name: roleName,
       description: `${roleName} role`,
-      level: roleName === 'admin' ? 100 : roleName === 'user' ? 50 : 25,
+      level: roleName === "admin" ? 100 : roleName === "user" ? 50 : 25,
       permissions: [],
       inheritsFrom: [],
-      constraints: {}
+      constraints: {},
     }));
 
     const permissions = this.generatePermissionsForRoles(userContext.roles);
@@ -1198,37 +1295,39 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
       roles,
       permissions,
       groups: [],
-      effectivePermissions: permissions.map(p => `${p.resource}:${p.action}`)
+      effectivePermissions: permissions.map((p) => `${p.resource}:${p.action}`),
     };
   }
 
-  private async extractThreatContext(userContext: UserValidationContext): Promise<ParlantSecurityContext['threatContext']> {
+  private async extractThreatContext(
+    userContext: UserValidationContext,
+  ): Promise<ParlantSecurityContext["threatContext"]> {
     return {
-      threatLevel: 'LOW',
+      threatLevel: "LOW",
       activeThreats: [],
       behavioralAnomalies: [],
       geoLocation: {
         ipAddress: userContext.sessionContext.ipAddress,
         location: {
-          country: 'US',
-          region: 'CA',
-          city: 'San Francisco',
+          country: "US",
+          region: "CA",
+          city: "San Francisco",
           latitude: 37.7749,
-          longitude: -122.4194
+          longitude: -122.4194,
         },
         locationRisk: {
           riskScore: 10,
           riskFactors: [],
           isKnownLocation: true,
           isVpnDetected: false,
-          isTorDetected: false
+          isTorDetected: false,
         },
         isp: {
-          name: 'Example ISP',
-          organization: 'Example Corp',
-          type: 'BUSINESS'
-        }
-      }
+          name: "Example ISP",
+          organization: "Example Corp",
+          type: "BUSINESS",
+        },
+      },
     };
   }
 
@@ -1236,36 +1335,56 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
     const permissions: SecurityPermission[] = [];
 
     for (const role of roles) {
-      if (role === 'admin') {
+      if (role === "admin") {
+        permissions.push({
+          id: "admin-all",
+          name: "Admin All Access",
+          resource: "*",
+          action: "*",
+          effect: "ALLOW",
+          scope: {
+            global: true,
+            resources: ["*"],
+            operations: ["*"],
+            contexts: ["*"],
+          },
+        });
+      } else if (role === "user") {
         permissions.push(
           {
-            id: 'admin-all',
-            name: 'Admin All Access',
-            resource: '*',
-            action: '*',
-            effect: 'ALLOW',
-            scope: { global: true, resources: ['*'], operations: ['*'], contexts: ['*'] }
-          }
-        );
-      } else if (role === 'user') {
-        permissions.push(
-          {
-            id: 'user-read',
-            name: 'User Read Access',
-            resource: 'user-data',
-            action: 'read',
-            effect: 'ALLOW',
-            scope: { global: false, resources: ['user-data'], operations: ['read'], contexts: ['user'] }
+            id: "user-read",
+            name: "User Read Access",
+            resource: "user-data",
+            action: "read",
+            effect: "ALLOW",
+            scope: {
+              global: false,
+              resources: ["user-data"],
+              operations: ["read"],
+              contexts: ["user"],
+            },
           },
           {
-            id: 'user-write-own',
-            name: 'User Write Own Data',
-            resource: 'user-data',
-            action: 'write',
-            effect: 'ALLOW',
-            conditions: [{ type: 'CUSTOM', operator: 'EQUALS', value: 'own-data', description: 'User can only modify own data' }],
-            scope: { global: false, resources: ['user-data'], operations: ['write'], contexts: ['user'] }
-          }
+            id: "user-write-own",
+            name: "User Write Own Data",
+            resource: "user-data",
+            action: "write",
+            effect: "ALLOW",
+            conditions: [
+              {
+                type: "CUSTOM",
+                operator: "EQUALS",
+                value: "own-data",
+                description: "User can only modify own data",
+              },
+            ],
+            scope: {
+              global: false,
+              resources: ["user-data"],
+              operations: ["write"],
+              contexts: ["user"],
+            },
+          },
         );
       }
     }
@@ -1275,17 +1394,19 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
 
   private isSecurityContextValid(context: ParlantSecurityContext): boolean {
     const maxAge = 5 * 60 * 1000; // 5 minutes
-    return (Date.now() - context.sessionSecurity.lastSecurityCheck.getTime()) < maxAge;
+    return (
+      Date.now() - context.sessionSecurity.lastSecurityCheck.getTime() < maxAge
+    );
   }
 
   private calculateSecurityScore(factors: Record<string, number>): number {
     const weights = {
       authentication: 0.25,
       authorization: 0.25,
-      riskProfile: 0.20,
+      riskProfile: 0.2,
       threatLevel: 0.15,
-      compliance: 0.10,
-      behavioral: 0.05
+      compliance: 0.1,
+      behavioral: 0.05,
     };
 
     let weightedScore = 0;
@@ -1296,14 +1417,19 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
     return Math.round(weightedScore);
   }
 
-  private calculateBehavioralScore(securityContext: ParlantSecurityContext): number {
+  private calculateBehavioralScore(
+    securityContext: ParlantSecurityContext,
+  ): number {
     const anomalies = securityContext.threatContext.behavioralAnomalies;
     if (anomalies.length === 0) return 100;
 
-    const totalAnomalyScore = anomalies.reduce((sum, anomaly) => sum + anomaly.score, 0);
+    const totalAnomalyScore = anomalies.reduce(
+      (sum, anomaly) => sum + anomaly.score,
+      0,
+    );
     const averageAnomalyScore = totalAnomalyScore / anomalies.length;
 
-    return Math.max(0, 100 - (averageAnomalyScore * 100));
+    return Math.max(0, 100 - averageAnomalyScore * 100);
   }
 
   private determineSecurityDecision(
@@ -1312,78 +1438,84 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
     authzResult: any,
     riskResult: any,
     threatResult: any,
-    complianceResult: any
-  ): SecurityValidationResult['decision'] {
+    complianceResult: any,
+  ): SecurityValidationResult["decision"] {
     // Deny if authentication failed
     if (!authResult.valid) {
-      return 'DENIED';
+      return "DENIED";
     }
 
     // Deny if authorization failed
     if (!authzResult.authorized) {
-      return 'DENIED';
+      return "DENIED";
     }
 
     // Require additional auth for high risk
-    if (riskResult.riskLevel === 'CRITICAL' || riskResult.riskLevel === 'HIGH') {
-      return 'REQUIRES_ADDITIONAL_AUTH';
+    if (
+      riskResult.riskLevel === "CRITICAL" ||
+      riskResult.riskLevel === "HIGH"
+    ) {
+      return "REQUIRES_ADDITIONAL_AUTH";
     }
 
     // Require approval for active critical threats
-    if (threatResult.threats.some(t => t.severity === 'CRITICAL')) {
-      return 'REQUIRES_APPROVAL';
+    if (threatResult.threats.some((t) => t.severity === "CRITICAL")) {
+      return "REQUIRES_APPROVAL";
     }
 
     // Require approval for compliance violations
     if (!complianceResult.compliant) {
-      return 'REQUIRES_APPROVAL';
+      return "REQUIRES_APPROVAL";
     }
 
     // Approve if security score is sufficient
     if (securityScore >= 70) {
-      return 'APPROVED';
+      return "APPROVED";
     }
 
     // Default to requiring additional auth
-    return 'REQUIRES_ADDITIONAL_AUTH';
+    return "REQUIRES_ADDITIONAL_AUTH";
   }
 
   private compileSecurityMeasures(
-    decision: SecurityValidationResult['decision'],
+    decision: SecurityValidationResult["decision"],
     authResult: any,
     authzResult: any,
     riskResult: any,
-    threatResult: any
+    threatResult: any,
   ): SecurityMeasure[] {
     const measures: SecurityMeasure[] = [];
 
-    if (decision === 'REQUIRES_ADDITIONAL_AUTH') {
+    if (decision === "REQUIRES_ADDITIONAL_AUTH") {
       measures.push({
-        type: 'MFA',
-        description: 'Multi-factor authentication required',
+        type: "MFA",
+        description: "Multi-factor authentication required",
         priority: 1,
         timeoutMs: 300000, // 5 minutes
-        parameters: { methods: ['totp', 'sms', 'email'] }
+        parameters: { methods: ["totp", "sms", "email"] },
       });
     }
 
-    if (decision === 'REQUIRES_APPROVAL') {
+    if (decision === "REQUIRES_APPROVAL") {
       measures.push({
-        type: 'APPROVAL',
-        description: 'Supervisor approval required',
+        type: "APPROVAL",
+        description: "Supervisor approval required",
         priority: 1,
         timeoutMs: 1800000, // 30 minutes
-        parameters: { approvers: ['supervisor', 'security-team'] }
+        parameters: { approvers: ["supervisor", "security-team"] },
       });
     }
 
-    if (riskResult.riskLevel === 'HIGH' || riskResult.riskLevel === 'CRITICAL') {
+    if (
+      riskResult.riskLevel === "HIGH" ||
+      riskResult.riskLevel === "CRITICAL"
+    ) {
       measures.push({
-        type: 'ELEVATED_AUTH',
-        description: 'Elevated authentication required for high-risk operation',
+        type: "ELEVATED_AUTH",
+        description: "Elevated authentication required for high-risk operation",
         priority: 2,
         timeoutMs: 600000, // 10 minutes
-        parameters: { elevation_level: 'high' }
+        parameters: { elevation_level: "high" },
       });
     }
 
@@ -1395,40 +1527,40 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
     authzResult: any,
     riskResult: any,
     threatResult: any,
-    complianceResult: any
+    complianceResult: any,
   ): SecurityWarning[] {
     const warnings: SecurityWarning[] = [];
 
     // Authentication warnings
     for (const issue of authResult.issues) {
       warnings.push({
-        type: 'RISK',
-        severity: 'MEDIUM',
+        type: "RISK",
+        severity: "MEDIUM",
         message: `Authentication issue: ${issue}`,
         details: { issue },
-        recommendedActions: ['Renew authentication', 'Verify credentials']
+        recommendedActions: ["Renew authentication", "Verify credentials"],
       });
     }
 
     // Authorization warnings
     for (const issue of authzResult.issues) {
       warnings.push({
-        type: 'POLICY',
-        severity: 'HIGH',
+        type: "POLICY",
+        severity: "HIGH",
         message: `Authorization issue: ${issue}`,
         details: { issue },
-        recommendedActions: ['Check permissions', 'Contact administrator']
+        recommendedActions: ["Check permissions", "Contact administrator"],
       });
     }
 
     // Threat warnings
     for (const threat of threatResult.threats) {
       warnings.push({
-        type: 'THREAT',
+        type: "THREAT",
         severity: threat.severity as any,
         message: `Active threat detected: ${threat.description}`,
         details: { threat },
-        recommendedActions: ['Review security logs', 'Verify user identity']
+        recommendedActions: ["Review security logs", "Verify user identity"],
       });
     }
 
@@ -1436,11 +1568,14 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
     for (const anomaly of threatResult.anomalies) {
       if (anomaly.score > 0.7) {
         warnings.push({
-          type: 'ANOMALY',
-          severity: 'MEDIUM',
+          type: "ANOMALY",
+          severity: "MEDIUM",
           message: `Behavioral anomaly detected: ${anomaly.description}`,
           details: { anomaly },
-          recommendedActions: ['Monitor user behavior', 'Verify normal operation']
+          recommendedActions: [
+            "Monitor user behavior",
+            "Verify normal operation",
+          ],
         });
       }
     }
@@ -1450,7 +1585,7 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
 
   private compilePolicyViolations(
     authzResult: any,
-    complianceResult: any
+    complianceResult: any,
   ): PolicyViolation[] {
     const violations: PolicyViolation[] = [];
 
@@ -1460,15 +1595,17 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
     return violations;
   }
 
-  private getRequiredPermissions(request: PreExecutionValidationRequest): string[] {
+  private getRequiredPermissions(
+    request: PreExecutionValidationRequest,
+  ): string[] {
     // Map operation to required permissions
     const functionPermissionMap = {
-      'delete': ['data:delete'],
-      'create': ['data:create'],
-      'update': ['data:update'],
-      'read': ['data:read'],
-      'admin': ['admin:*'],
-      'system': ['system:*']
+      delete: ["data:delete"],
+      create: ["data:create"],
+      update: ["data:update"],
+      read: ["data:read"],
+      admin: ["admin:*"],
+      system: ["system:*"],
     };
 
     const permissions: string[] = [];
@@ -1481,7 +1618,7 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
 
     // Default permission
     if (permissions.length === 0) {
-      permissions.push('operation:execute');
+      permissions.push("operation:execute");
     }
 
     return permissions;
@@ -1489,16 +1626,19 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
 
   private checkPermissions(
     userPermissions: string[],
-    requiredPermissions: string[]
+    requiredPermissions: string[],
   ): { allGranted: boolean; missing: string[] } {
     const missing: string[] = [];
 
     for (const required of requiredPermissions) {
-      const hasPermission = userPermissions.some(userPerm => {
+      const hasPermission = userPermissions.some((userPerm) => {
         // Check for exact match or wildcard match
-        return userPerm === required ||
-               userPerm === '*' ||
-               userPerm.endsWith(':*') && required.startsWith(userPerm.slice(0, -1));
+        return (
+          userPerm === required ||
+          userPerm === "*" ||
+          (userPerm.endsWith(":*") &&
+            required.startsWith(userPerm.slice(0, -1)))
+        );
       });
 
       if (!hasPermission) {
@@ -1508,13 +1648,13 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
 
     return {
       allGranted: missing.length === 0,
-      missing
+      missing,
     };
   }
 
   private checkRoleRestrictions(
     role: SecurityRole,
-    request: PreExecutionValidationRequest
+    request: PreExecutionValidationRequest,
   ): PolicyViolation[] {
     const violations: PolicyViolation[] = [];
 
@@ -1525,19 +1665,24 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
       const currentDay = now.getDay();
 
       for (const timeRestriction of role.constraints.timeRestrictions) {
-        if (timeRestriction.type === 'DENIED' &&
-            timeRestriction.daysOfWeek.includes(currentDay)) {
-          const startHour = parseInt(timeRestriction.startTime.split(':')[0]);
-          const endHour = parseInt(timeRestriction.endTime.split(':')[0]);
+        if (
+          timeRestriction.type === "DENIED" &&
+          timeRestriction.daysOfWeek.includes(currentDay)
+        ) {
+          const startHour = parseInt(timeRestriction.startTime.split(":")[0]);
+          const endHour = parseInt(timeRestriction.endTime.split(":")[0]);
 
           if (currentHour >= startHour && currentHour <= endHour) {
             violations.push({
               policyId: `role-time-restriction-${role.id}`,
               policyName: `${role.name} Time Restriction`,
-              violationType: 'TIME_RESTRICTION',
+              violationType: "TIME_RESTRICTION",
               description: `Operation not allowed during ${timeRestriction.startTime}-${timeRestriction.endTime}`,
-              severity: 'ERROR',
-              remediation: ['Wait for allowed time window', 'Request emergency override']
+              severity: "ERROR",
+              remediation: [
+                "Wait for allowed time window",
+                "Request emergency override",
+              ],
             });
           }
         }
@@ -1547,20 +1692,28 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
     return violations;
   }
 
-  private getRequiredSecurityLevel(request: PreExecutionValidationRequest): SecurityLevel {
+  private getRequiredSecurityLevel(
+    request: PreExecutionValidationRequest,
+  ): SecurityLevel {
     return request.securityClassification;
   }
 
-  private hasRequiredSecurityLevel(currentLevel: SecurityLevel, requiredLevel: SecurityLevel): boolean {
+  private hasRequiredSecurityLevel(
+    currentLevel: SecurityLevel,
+    requiredLevel: SecurityLevel,
+  ): boolean {
     const securityLevelHierarchy = {
-      'PUBLIC': 0,
-      'INTERNAL': 1,
-      'CONFIDENTIAL': 2,
-      'RESTRICTED': 3,
-      'CLASSIFIED': 4
+      PUBLIC: 0,
+      INTERNAL: 1,
+      CONFIDENTIAL: 2,
+      RESTRICTED: 3,
+      CLASSIFIED: 4,
     };
 
-    return securityLevelHierarchy[currentLevel] >= securityLevelHierarchy[requiredLevel];
+    return (
+      securityLevelHierarchy[currentLevel] >=
+      securityLevelHierarchy[requiredLevel]
+    );
   }
 
   private assessOperationRisk(request: PreExecutionValidationRequest): number {
@@ -1568,15 +1721,15 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
 
     // Function name risk patterns
     const riskPatterns = {
-      'delete|drop|remove': 40,
-      'admin|system|root': 35,
-      'batch|bulk|mass': 30,
-      'update|modify': 20,
-      'create|insert': 10
+      "delete|drop|remove": 40,
+      "admin|system|root": 35,
+      "batch|bulk|mass": 30,
+      "update|modify": 20,
+      "create|insert": 10,
     };
 
     for (const [pattern, riskValue] of Object.entries(riskPatterns)) {
-      if (new RegExp(pattern, 'i').test(request.functionName)) {
+      if (new RegExp(pattern, "i").test(request.functionName)) {
         risk += riskValue;
         break;
       }
@@ -1591,7 +1744,7 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
 
   private assessContextualRisk(
     request: PreExecutionValidationRequest,
-    securityContext: ParlantSecurityContext
+    securityContext: ParlantSecurityContext,
   ): number {
     let risk = 0;
 
@@ -1602,11 +1755,13 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
     }
 
     // Location risk
-    const locationRisk = securityContext.threatContext.geoLocation.locationRisk.riskScore;
+    const locationRisk =
+      securityContext.threatContext.geoLocation.locationRisk.riskScore;
     risk += locationRisk * 0.3; // Scale down location risk
 
     // Session age risk
-    const sessionAge = Date.now() - securityContext.sessionSecurity.lastSecurityCheck.getTime();
+    const sessionAge =
+      Date.now() - securityContext.sessionSecurity.lastSecurityCheck.getTime();
     const maxSessionAge = 4 * 60 * 60 * 1000; // 4 hours
     if (sessionAge > maxSessionAge) {
       risk += 20;
@@ -1618,51 +1773,60 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
   private async validateComplianceFramework(
     framework: string,
     request: PreExecutionValidationRequest,
-    securityContext: ParlantSecurityContext
+    securityContext: ParlantSecurityContext,
   ): Promise<PolicyViolation[]> {
     const violations: PolicyViolation[] = [];
 
     switch (framework) {
-      case 'SOC2':
+      case "SOC2":
         // SOC2 requires audit trails and access controls
         if (!request.riskMetadata.compliance.auditRequired) {
           violations.push({
-            policyId: 'soc2-audit-requirement',
-            policyName: 'SOC2 Audit Requirement',
-            violationType: 'COMPLIANCE',
-            description: 'SOC2 requires audit trail for this operation',
-            severity: 'ERROR',
-            remediation: ['Enable audit logging', 'Document operation purpose']
+            policyId: "soc2-audit-requirement",
+            policyName: "SOC2 Audit Requirement",
+            violationType: "COMPLIANCE",
+            description: "SOC2 requires audit trail for this operation",
+            severity: "ERROR",
+            remediation: ["Enable audit logging", "Document operation purpose"],
           });
         }
         break;
 
-      case 'GDPR':
+      case "GDPR":
         // GDPR requires data protection for personal data
-        if (request.riskMetadata.dataSensitivity === 'restricted' &&
-            !securityContext.jwtContext.claims.securityContext?.mfaVerified) {
+        if (
+          request.riskMetadata.dataSensitivity === "restricted" &&
+          !securityContext.jwtContext.claims.securityContext?.mfaVerified
+        ) {
           violations.push({
-            policyId: 'gdpr-data-protection',
-            policyName: 'GDPR Data Protection',
-            violationType: 'COMPLIANCE',
-            description: 'GDPR requires MFA for personal data access',
-            severity: 'ERROR',
-            remediation: ['Complete MFA verification', 'Request data controller approval']
+            policyId: "gdpr-data-protection",
+            policyName: "GDPR Data Protection",
+            violationType: "COMPLIANCE",
+            description: "GDPR requires MFA for personal data access",
+            severity: "ERROR",
+            remediation: [
+              "Complete MFA verification",
+              "Request data controller approval",
+            ],
           });
         }
         break;
 
-      case 'HIPAA':
+      case "HIPAA":
         // HIPAA requires enhanced security for health data
-        if (request.riskMetadata.dataSensitivity === 'restricted') {
-          if (securityContext.sessionSecurity.securityLevel !== 'RESTRICTED') {
+        if (request.riskMetadata.dataSensitivity === "restricted") {
+          if (securityContext.sessionSecurity.securityLevel !== "RESTRICTED") {
             violations.push({
-              policyId: 'hipaa-security-level',
-              policyName: 'HIPAA Security Level Requirement',
-              violationType: 'COMPLIANCE',
-              description: 'HIPAA requires RESTRICTED security level for health data',
-              severity: 'CRITICAL',
-              remediation: ['Elevate to RESTRICTED security level', 'Use HIPAA-compliant session']
+              policyId: "hipaa-security-level",
+              policyName: "HIPAA Security Level Requirement",
+              violationType: "COMPLIANCE",
+              description:
+                "HIPAA requires RESTRICTED security level for health data",
+              severity: "CRITICAL",
+              remediation: [
+                "Elevate to RESTRICTED security level",
+                "Use HIPAA-compliant session",
+              ],
             });
           }
         }
@@ -1674,13 +1838,15 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
 
   private validateDataProtection(
     request: PreExecutionValidationRequest,
-    securityContext: ParlantSecurityContext
+    securityContext: ParlantSecurityContext,
   ): PolicyViolation[] {
     const violations: PolicyViolation[] = [];
 
     // Check encryption requirements
-    if (request.riskMetadata.dataSensitivity === 'restricted' ||
-        request.riskMetadata.dataSensitivity === 'confidential') {
+    if (
+      request.riskMetadata.dataSensitivity === "restricted" ||
+      request.riskMetadata.dataSensitivity === "confidential"
+    ) {
       // In a real implementation, would check if data is encrypted
       // For this simulation, assume encryption is required but not verified
     }
@@ -1688,12 +1854,15 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
     // Check access logging
     if (!request.riskMetadata.compliance.auditRequired) {
       violations.push({
-        policyId: 'data-protection-audit',
-        policyName: 'Data Protection Audit Requirement',
-        violationType: 'COMPLIANCE',
-        description: 'Sensitive data operations require audit logging',
-        severity: 'ERROR',
-        remediation: ['Enable audit logging', 'Configure data access monitoring']
+        policyId: "data-protection-audit",
+        policyName: "Data Protection Audit Requirement",
+        violationType: "COMPLIANCE",
+        description: "Sensitive data operations require audit logging",
+        severity: "ERROR",
+        remediation: [
+          "Enable audit logging",
+          "Configure data access monitoring",
+        ],
       });
     }
 
@@ -1703,16 +1872,16 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
   private async getDefaultSecurityContext(): Promise<ParlantSecurityContext> {
     return {
       jwtContext: {
-        token: '',
-        claims: { sub: '', iat: 0, exp: 0, iss: '', aud: '', jti: '' },
-        algorithm: 'none',
+        token: "",
+        claims: { sub: "", iat: 0, exp: 0, iss: "", aud: "", jti: "" },
+        algorithm: "none",
         issuedAt: new Date(),
         expiresAt: new Date(),
-        issuer: ''
+        issuer: "",
       },
       sessionSecurity: {
-        sessionId: '',
-        securityLevel: 'PUBLIC',
+        sessionId: "",
+        securityLevel: "PUBLIC",
         trustScore: 0,
         riskProfile: {
           riskScore: 100,
@@ -1722,99 +1891,123 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
             deviceRisk: 100,
             locationRisk: 100,
             timeRisk: 100,
-            operationalRisk: 100
+            operationalRisk: 100,
           },
           riskHistory: {
             averageRisk: 100,
             peakRisk: 100,
-            riskTrend: 'INCREASING',
-            lastRiskEvent: new Date()
+            riskTrend: "INCREASING",
+            lastRiskEvent: new Date(),
           },
           mitigationMeasures: {
             mfaRequired: true,
             sessionTimeout: 300000,
             ipWhitelisting: true,
             deviceRestriction: true,
-            operationLimits: {}
-          }
+            operationLimits: {},
+          },
         },
-        lastSecurityCheck: new Date()
+        lastSecurityCheck: new Date(),
       },
       rbacContext: {
         roles: [],
         permissions: [],
         groups: [],
-        effectivePermissions: []
+        effectivePermissions: [],
       },
       threatContext: {
-        threatLevel: 'CRITICAL',
+        threatLevel: "CRITICAL",
         activeThreats: [],
         behavioralAnomalies: [],
         geoLocation: {
-          ipAddress: '',
-          location: { country: '', region: '', city: '', latitude: 0, longitude: 0 },
-          locationRisk: { riskScore: 100, riskFactors: [], isKnownLocation: false, isVpnDetected: true, isTorDetected: true },
-          isp: { name: '', organization: '', type: 'VPN' }
-        }
-      }
+          ipAddress: "",
+          location: {
+            country: "",
+            region: "",
+            city: "",
+            latitude: 0,
+            longitude: 0,
+          },
+          locationRisk: {
+            riskScore: 100,
+            riskFactors: [],
+            isKnownLocation: false,
+            isVpnDetected: true,
+            isTorDetected: true,
+          },
+          isp: { name: "", organization: "", type: "VPN" },
+        },
+      },
     };
   }
 
-  private updateSecurityMetrics(result: SecurityValidationResult, validationTime: number): void {
+  private updateSecurityMetrics(
+    result: SecurityValidationResult,
+    validationTime: number,
+  ): void {
     this.metrics.totalSecurityValidations++;
 
-    if (result.decision === 'APPROVED') {
-      this.metrics.securityApprovalsRate = (
-        this.metrics.securityApprovalsRate * (this.metrics.totalSecurityValidations - 1) + 1
-      ) / this.metrics.totalSecurityValidations;
+    if (result.decision === "APPROVED") {
+      this.metrics.securityApprovalsRate =
+        (this.metrics.securityApprovalsRate *
+          (this.metrics.totalSecurityValidations - 1) +
+          1) /
+        this.metrics.totalSecurityValidations;
     } else {
-      this.metrics.securityApprovalsRate = (
-        this.metrics.securityApprovalsRate * (this.metrics.totalSecurityValidations - 1)
-      ) / this.metrics.totalSecurityValidations;
+      this.metrics.securityApprovalsRate =
+        (this.metrics.securityApprovalsRate *
+          (this.metrics.totalSecurityValidations - 1)) /
+        this.metrics.totalSecurityValidations;
     }
 
     // Update average validation time
-    this.metrics.averageSecurityValidationTime = (
-      this.metrics.averageSecurityValidationTime * (this.metrics.totalSecurityValidations - 1) +
-      validationTime
-    ) / this.metrics.totalSecurityValidations;
+    this.metrics.averageSecurityValidationTime =
+      (this.metrics.averageSecurityValidationTime *
+        (this.metrics.totalSecurityValidations - 1) +
+        validationTime) /
+      this.metrics.totalSecurityValidations;
 
     // Update threat and violation counts
-    this.metrics.threatDetections += result.securityWarnings.filter(w => w.type === 'THREAT').length;
+    this.metrics.threatDetections += result.securityWarnings.filter(
+      (w) => w.type === "THREAT",
+    ).length;
     this.metrics.policyViolations += result.policyViolations.length;
 
-    if (result.decision === 'EMERGENCY_OVERRIDE') {
+    if (result.decision === "EMERGENCY_OVERRIDE") {
       this.metrics.emergencyOverrides++;
     }
   }
 
-  private emitSecurityEvents(result: SecurityValidationResult, request: PreExecutionValidationRequest): void {
+  private emitSecurityEvents(
+    result: SecurityValidationResult,
+    request: PreExecutionValidationRequest,
+  ): void {
     // Emit security decision event
-    this.eventEmitter.emit('security-validation-completed', {
+    this.eventEmitter.emit("security-validation-completed", {
       requestId: request.id,
       decision: result.decision,
       securityScore: result.securityScore,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     // Emit threat events
     for (const warning of result.securityWarnings) {
-      if (warning.type === 'THREAT' && warning.severity === 'CRITICAL') {
-        this.eventEmitter.emit('critical-threat-detected', {
+      if (warning.type === "THREAT" && warning.severity === "CRITICAL") {
+        this.eventEmitter.emit("critical-threat-detected", {
           requestId: request.id,
           warning,
-          timestamp: new Date()
+          timestamp: new Date(),
         });
       }
     }
 
     // Emit policy violation events
     for (const violation of result.policyViolations) {
-      if (violation.severity === 'CRITICAL') {
-        this.eventEmitter.emit('critical-policy-violation', {
+      if (violation.severity === "CRITICAL") {
+        this.eventEmitter.emit("critical-policy-violation", {
           requestId: request.id,
           violation,
-          timestamp: new Date()
+          timestamp: new Date(),
         });
       }
     }
@@ -1822,60 +2015,133 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
 
   private loadSecurityConfiguration(): SecurityIntegrationConfig {
     return {
-      enabled: this.configService.get<boolean>('PARLANT_SECURITY_INTEGRATION_ENABLED', true),
+      enabled: this.configService.get<boolean>(
+        "PARLANT_SECURITY_INTEGRATION_ENABLED",
+        true,
+      ),
       jwt: {
-        verificationEnabled: this.configService.get<boolean>('PARLANT_JWT_VERIFICATION_ENABLED', true),
-        algorithms: this.configService.get<string>('PARLANT_JWT_ALGORITHMS', 'RS256,ES256').split(','),
-        secretOrKey: this.configService.get<string>('PARLANT_JWT_SECRET', 'default-secret'),
-        issuer: this.configService.get<string>('PARLANT_JWT_ISSUER', 'parlant-system'),
-        audience: this.configService.get<string>('PARLANT_JWT_AUDIENCE', 'parlant-validation'),
-        clockTolerance: this.configService.get<number>('PARLANT_JWT_CLOCK_TOLERANCE', 60)
+        verificationEnabled: this.configService.get<boolean>(
+          "PARLANT_JWT_VERIFICATION_ENABLED",
+          true,
+        ),
+        algorithms: this.configService
+          .get<string>("PARLANT_JWT_ALGORITHMS", "RS256,ES256")
+          .split(","),
+        secretOrKey: this.configService.get<string>(
+          "PARLANT_JWT_SECRET",
+          "default-secret",
+        ),
+        issuer: this.configService.get<string>(
+          "PARLANT_JWT_ISSUER",
+          "parlant-system",
+        ),
+        audience: this.configService.get<string>(
+          "PARLANT_JWT_AUDIENCE",
+          "parlant-validation",
+        ),
+        clockTolerance: this.configService.get<number>(
+          "PARLANT_JWT_CLOCK_TOLERANCE",
+          60,
+        ),
       },
       rbac: {
-        enabled: this.configService.get<boolean>('PARLANT_RBAC_ENABLED', true),
-        strictMode: this.configService.get<boolean>('PARLANT_RBAC_STRICT_MODE', true),
-        inheritanceEnabled: this.configService.get<boolean>('PARLANT_RBAC_INHERITANCE_ENABLED', true),
-        cacheEnabled: this.configService.get<boolean>('PARLANT_RBAC_CACHE_ENABLED', true),
-        cacheTtlMs: this.configService.get<number>('PARLANT_RBAC_CACHE_TTL_MS', 300000)
+        enabled: this.configService.get<boolean>("PARLANT_RBAC_ENABLED", true),
+        strictMode: this.configService.get<boolean>(
+          "PARLANT_RBAC_STRICT_MODE",
+          true,
+        ),
+        inheritanceEnabled: this.configService.get<boolean>(
+          "PARLANT_RBAC_INHERITANCE_ENABLED",
+          true,
+        ),
+        cacheEnabled: this.configService.get<boolean>(
+          "PARLANT_RBAC_CACHE_ENABLED",
+          true,
+        ),
+        cacheTtlMs: this.configService.get<number>(
+          "PARLANT_RBAC_CACHE_TTL_MS",
+          300000,
+        ),
       },
       threatDetection: {
-        enabled: this.configService.get<boolean>('PARLANT_THREAT_DETECTION_ENABLED', true),
-        realTimeMonitoring: this.configService.get<boolean>('PARLANT_REAL_TIME_MONITORING_ENABLED', true),
-        anomalyDetectionThreshold: this.configService.get<number>('PARLANT_ANOMALY_THRESHOLD', 0.7),
-        responseActions: this.configService.get<string>('PARLANT_THREAT_RESPONSE_ACTIONS', 'alert,log').split(',')
+        enabled: this.configService.get<boolean>(
+          "PARLANT_THREAT_DETECTION_ENABLED",
+          true,
+        ),
+        realTimeMonitoring: this.configService.get<boolean>(
+          "PARLANT_REAL_TIME_MONITORING_ENABLED",
+          true,
+        ),
+        anomalyDetectionThreshold: this.configService.get<number>(
+          "PARLANT_ANOMALY_THRESHOLD",
+          0.7,
+        ),
+        responseActions: this.configService
+          .get<string>("PARLANT_THREAT_RESPONSE_ACTIONS", "alert,log")
+          .split(","),
       },
       geoSecurity: {
-        enabled: this.configService.get<boolean>('PARLANT_GEO_SECURITY_ENABLED', true),
-        restrictedCountries: this.configService.get<string>('PARLANT_RESTRICTED_COUNTRIES', '').split(',').filter(Boolean),
-        vpnDetection: this.configService.get<boolean>('PARLANT_VPN_DETECTION_ENABLED', true),
-        torDetection: this.configService.get<boolean>('PARLANT_TOR_DETECTION_ENABLED', true),
-        locationTrustScoring: this.configService.get<boolean>('PARLANT_LOCATION_TRUST_SCORING_ENABLED', true)
+        enabled: this.configService.get<boolean>(
+          "PARLANT_GEO_SECURITY_ENABLED",
+          true,
+        ),
+        restrictedCountries: this.configService
+          .get<string>("PARLANT_RESTRICTED_COUNTRIES", "")
+          .split(",")
+          .filter(Boolean),
+        vpnDetection: this.configService.get<boolean>(
+          "PARLANT_VPN_DETECTION_ENABLED",
+          true,
+        ),
+        torDetection: this.configService.get<boolean>(
+          "PARLANT_TOR_DETECTION_ENABLED",
+          true,
+        ),
+        locationTrustScoring: this.configService.get<boolean>(
+          "PARLANT_LOCATION_TRUST_SCORING_ENABLED",
+          true,
+        ),
       },
       emergencyOverride: {
-        enabled: this.configService.get<boolean>('PARLANT_EMERGENCY_OVERRIDE_ENABLED', true),
-        overrideCodes: this.configService.get<string>('PARLANT_EMERGENCY_OVERRIDE_CODES', '').split(',').filter(Boolean),
-        approvalRequired: this.configService.get<boolean>('PARLANT_EMERGENCY_APPROVAL_REQUIRED', true),
-        auditRequired: this.configService.get<boolean>('PARLANT_EMERGENCY_AUDIT_REQUIRED', true),
-        timeoutMinutes: this.configService.get<number>('PARLANT_EMERGENCY_TIMEOUT_MINUTES', 30)
-      }
+        enabled: this.configService.get<boolean>(
+          "PARLANT_EMERGENCY_OVERRIDE_ENABLED",
+          true,
+        ),
+        overrideCodes: this.configService
+          .get<string>("PARLANT_EMERGENCY_OVERRIDE_CODES", "")
+          .split(",")
+          .filter(Boolean),
+        approvalRequired: this.configService.get<boolean>(
+          "PARLANT_EMERGENCY_APPROVAL_REQUIRED",
+          true,
+        ),
+        auditRequired: this.configService.get<boolean>(
+          "PARLANT_EMERGENCY_AUDIT_REQUIRED",
+          true,
+        ),
+        timeoutMinutes: this.configService.get<number>(
+          "PARLANT_EMERGENCY_TIMEOUT_MINUTES",
+          30,
+        ),
+      },
     };
   }
 
   private initializeSecurityIntegration(): void {
-    this.logger.log('Initializing security integration framework');
+    this.logger.log("Initializing security integration framework");
 
     // Set up event listeners for security events
-    this.eventEmitter.on('critical-threat-detected', (event) => {
-      this.logger.warn('Critical threat detected during validation', event);
+    this.eventEmitter.on("critical-threat-detected", (event) => {
+      this.logger.warn("Critical threat detected during validation", event);
       // In production, would trigger automated incident response
     });
 
-    this.eventEmitter.on('critical-policy-violation', (event) => {
-      this.logger.error('Critical policy violation detected', event);
+    this.eventEmitter.on("critical-policy-violation", (event) => {
+      this.logger.error("Critical policy violation detected", event);
       // In production, would trigger compliance alerts
     });
 
-    this.logger.log('Security integration framework initialized');
+    this.logger.log("Security integration framework initialized");
   }
 
   /**
@@ -1886,24 +2152,24 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
       ...this.metrics,
       securityContextCacheSize: this.securityContextCache.size,
       permissionCacheSize: this.permissionCache.size,
-      threatCacheSize: this.threatCache.size
+      threatCacheSize: this.threatCache.size,
     };
   }
 
   /**
    * Health check for security integration service
    */
-  async healthCheck(): Promise<{status: string; metrics: any; config: any}> {
+  async healthCheck(): Promise<{ status: string; metrics: any; config: any }> {
     return {
-      status: 'healthy',
+      status: "healthy",
       metrics: this.getSecurityMetrics(),
       config: {
         enabled: this.config.enabled,
         jwtVerification: this.config.jwt.verificationEnabled,
         rbacEnabled: this.config.rbac.enabled,
         threatDetection: this.config.threatDetection.enabled,
-        geoSecurity: this.config.geoSecurity.enabled
-      }
+        geoSecurity: this.config.geoSecurity.enabled,
+      },
     };
   }
 
@@ -1911,7 +2177,7 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
    * Cleanup when application shuts down
    */
   async onApplicationShutdown(signal?: string) {
-    this.logger.log('SecurityIntegrationService shutting down', { signal });
+    this.logger.log("SecurityIntegrationService shutting down", { signal });
 
     // Clear caches
     this.securityContextCache.clear();
@@ -1919,7 +2185,7 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
     this.threatCache.clear();
 
     // Log final metrics
-    this.logger.log('Final security metrics', this.getSecurityMetrics());
+    this.logger.log("Final security metrics", this.getSecurityMetrics());
   }
 }
 
@@ -1929,9 +2195,9 @@ export class SecurityIntegrationService implements OnApplicationShutdown {
 export class SecurityIntegrationError extends Error {
   constructor(
     message: string,
-    public readonly context: Record<string, unknown>
+    public readonly context: Record<string, unknown>,
   ) {
     super(message);
-    this.name = 'SecurityIntegrationError';
+    this.name = "SecurityIntegrationError";
   }
 }

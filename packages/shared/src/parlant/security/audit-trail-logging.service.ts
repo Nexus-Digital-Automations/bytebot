@@ -20,11 +20,11 @@
  * @author Claude Code - Audit Trail & Logging Specialist
  */
 
-import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { Cron, CronExpression } from '@nestjs/schedule';
-import { createHash, randomBytes, createHmac } from 'crypto';
+import { Injectable, Logger, OnApplicationShutdown } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { EventEmitter2 } from "@nestjs/event-emitter";
+import { Cron, CronExpression } from "@nestjs/schedule";
+import { createHash, randomBytes, createHmac } from "crypto";
 
 // ===========================
 // AUDIT TRAIL TYPES AND ENUMS
@@ -34,104 +34,104 @@ import { createHash, randomBytes, createHmac } from 'crypto';
  * Log levels for audit events
  */
 export enum AuditLogLevel {
-  TRACE = 'trace',
-  DEBUG = 'debug',
-  INFO = 'info',
-  WARN = 'warn',
-  ERROR = 'error',
-  FATAL = 'fatal',
+  TRACE = "trace",
+  DEBUG = "debug",
+  INFO = "info",
+  WARN = "warn",
+  ERROR = "error",
+  FATAL = "fatal",
 }
 
 /**
  * Event categories for classification
  */
 export enum EventCategory {
-  AUTHENTICATION = 'authentication',
-  AUTHORIZATION = 'authorization',
-  ACCESS_CONTROL = 'access_control',
-  DATA_ACCESS = 'data_access',
-  DATA_MODIFICATION = 'data_modification',
-  CONFIGURATION_CHANGE = 'configuration_change',
-  SECURITY_VIOLATION = 'security_violation',
-  COMPLIANCE_EVENT = 'compliance_event',
-  SYSTEM_EVENT = 'system_event',
-  PERFORMANCE_EVENT = 'performance_event',
-  ERROR_EVENT = 'error_event',
-  ADMINISTRATIVE_ACTION = 'administrative_action',
+  AUTHENTICATION = "authentication",
+  AUTHORIZATION = "authorization",
+  ACCESS_CONTROL = "access_control",
+  DATA_ACCESS = "data_access",
+  DATA_MODIFICATION = "data_modification",
+  CONFIGURATION_CHANGE = "configuration_change",
+  SECURITY_VIOLATION = "security_violation",
+  COMPLIANCE_EVENT = "compliance_event",
+  SYSTEM_EVENT = "system_event",
+  PERFORMANCE_EVENT = "performance_event",
+  ERROR_EVENT = "error_event",
+  ADMINISTRATIVE_ACTION = "administrative_action",
 }
 
 /**
  * Security event types
  */
 export enum SecurityEventType {
-  LOGIN_SUCCESS = 'login_success',
-  LOGIN_FAILURE = 'login_failure',
-  LOGOUT = 'logout',
-  PERMISSION_GRANTED = 'permission_granted',
-  PERMISSION_DENIED = 'permission_denied',
-  PRIVILEGE_ESCALATION = 'privilege_escalation',
-  UNAUTHORIZED_ACCESS = 'unauthorized_access',
-  DATA_BREACH_ATTEMPT = 'data_breach_attempt',
-  MALICIOUS_ACTIVITY = 'malicious_activity',
-  POLICY_VIOLATION = 'policy_violation',
-  SECURITY_CONFIGURATION_CHANGE = 'security_configuration_change',
-  EMERGENCY_ACCESS = 'emergency_access',
-  ACCOUNT_LOCKED = 'account_locked',
-  ACCOUNT_UNLOCKED = 'account_unlocked',
-  PASSWORD_CHANGE = 'password_change',
-  MFA_CHALLENGE = 'mfa_challenge',
-  MFA_SUCCESS = 'mfa_success',
-  MFA_FAILURE = 'mfa_failure',
+  LOGIN_SUCCESS = "login_success",
+  LOGIN_FAILURE = "login_failure",
+  LOGOUT = "logout",
+  PERMISSION_GRANTED = "permission_granted",
+  PERMISSION_DENIED = "permission_denied",
+  PRIVILEGE_ESCALATION = "privilege_escalation",
+  UNAUTHORIZED_ACCESS = "unauthorized_access",
+  DATA_BREACH_ATTEMPT = "data_breach_attempt",
+  MALICIOUS_ACTIVITY = "malicious_activity",
+  POLICY_VIOLATION = "policy_violation",
+  SECURITY_CONFIGURATION_CHANGE = "security_configuration_change",
+  EMERGENCY_ACCESS = "emergency_access",
+  ACCOUNT_LOCKED = "account_locked",
+  ACCOUNT_UNLOCKED = "account_unlocked",
+  PASSWORD_CHANGE = "password_change",
+  MFA_CHALLENGE = "mfa_challenge",
+  MFA_SUCCESS = "mfa_success",
+  MFA_FAILURE = "mfa_failure",
 }
 
 /**
  * Compliance frameworks
  */
 export enum ComplianceFramework {
-  SOC2 = 'soc2',
-  GDPR = 'gdpr',
-  HIPAA = 'hipaa',
-  PCI_DSS = 'pci_dss',
-  ISO27001 = 'iso27001',
-  NIST = 'nist',
-  SOX = 'sox',
-  FISMA = 'fisma',
+  SOC2 = "soc2",
+  GDPR = "gdpr",
+  HIPAA = "hipaa",
+  PCI_DSS = "pci_dss",
+  ISO27001 = "iso27001",
+  NIST = "nist",
+  SOX = "sox",
+  FISMA = "fisma",
 }
 
 /**
  * Log storage types
  */
 export enum LogStorageType {
-  DATABASE = 'database',
-  FILE_SYSTEM = 'file_system',
-  ELASTICSEARCH = 'elasticsearch',
-  SPLUNK = 'splunk',
-  CLOUDWATCH = 'cloudwatch',
-  AZURE_MONITOR = 'azure_monitor',
-  GOOGLE_CLOUD_LOGGING = 'google_cloud_logging',
-  SIEM = 'siem',
+  DATABASE = "database",
+  FILE_SYSTEM = "file_system",
+  ELASTICSEARCH = "elasticsearch",
+  SPLUNK = "splunk",
+  CLOUDWATCH = "cloudwatch",
+  AZURE_MONITOR = "azure_monitor",
+  GOOGLE_CLOUD_LOGGING = "google_cloud_logging",
+  SIEM = "siem",
 }
 
 /**
  * Alert severity levels
  */
 export enum AlertSeverity {
-  INFO = 'info',
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  CRITICAL = 'critical',
+  INFO = "info",
+  LOW = "low",
+  MEDIUM = "medium",
+  HIGH = "high",
+  CRITICAL = "critical",
 }
 
 /**
  * Threat levels
  */
 export enum ThreatLevel {
-  NONE = 'none',
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  CRITICAL = 'critical',
+  NONE = "none",
+  LOW = "low",
+  MEDIUM = "medium",
+  HIGH = "high",
+  CRITICAL = "critical",
 }
 
 // ===========================
@@ -282,12 +282,12 @@ export interface Actor {
  * Actor types
  */
 export enum ActorType {
-  USER = 'user',
-  SERVICE_ACCOUNT = 'service_account',
-  SYSTEM = 'system',
-  API_CLIENT = 'api_client',
-  AUTOMATED_PROCESS = 'automated_process',
-  EXTERNAL_SYSTEM = 'external_system',
+  USER = "user",
+  SERVICE_ACCOUNT = "service_account",
+  SYSTEM = "system",
+  API_CLIENT = "api_client",
+  AUTOMATED_PROCESS = "automated_process",
+  EXTERNAL_SYSTEM = "external_system",
 }
 
 /**
@@ -343,21 +343,21 @@ export interface Target {
  * Data classification levels
  */
 export enum DataClassification {
-  PUBLIC = 'public',
-  INTERNAL = 'internal',
-  CONFIDENTIAL = 'confidential',
-  RESTRICTED = 'restricted',
-  TOP_SECRET = 'top_secret',
+  PUBLIC = "public",
+  INTERNAL = "internal",
+  CONFIDENTIAL = "confidential",
+  RESTRICTED = "restricted",
+  TOP_SECRET = "top_secret",
 }
 
 /**
  * Sensitivity levels
  */
 export enum SensitivityLevel {
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  VERY_HIGH = 'very_high',
+  LOW = "low",
+  MEDIUM = "medium",
+  HIGH = "high",
+  VERY_HIGH = "very_high",
 }
 
 /**
@@ -496,20 +496,20 @@ export interface SecurityControl {
  * Security control types
  */
 export enum SecurityControlType {
-  PREVENTIVE = 'preventive',
-  DETECTIVE = 'detective',
-  CORRECTIVE = 'corrective',
-  COMPENSATING = 'compensating',
+  PREVENTIVE = "preventive",
+  DETECTIVE = "detective",
+  CORRECTIVE = "corrective",
+  COMPENSATING = "compensating",
 }
 
 /**
  * Control status
  */
 export enum ControlStatus {
-  ACTIVE = 'active',
-  INACTIVE = 'inactive',
-  BYPASSED = 'bypassed',
-  FAILED = 'failed',
+  ACTIVE = "active",
+  INACTIVE = "inactive",
+  BYPASSED = "bypassed",
+  FAILED = "failed",
 }
 
 /**
@@ -536,13 +536,13 @@ export interface ThreatIndicator {
  * Threat indicator types
  */
 export enum ThreatIndicatorType {
-  IP_ADDRESS = 'ip_address',
-  DOMAIN = 'domain',
-  URL = 'url',
-  FILE_HASH = 'file_hash',
-  EMAIL = 'email',
-  USER_AGENT = 'user_agent',
-  BEHAVIOR_PATTERN = 'behavior_pattern',
+  IP_ADDRESS = "ip_address",
+  DOMAIN = "domain",
+  URL = "url",
+  FILE_HASH = "file_hash",
+  EMAIL = "email",
+  USER_AGENT = "user_agent",
+  BEHAVIOR_PATTERN = "behavior_pattern",
 }
 
 /**
@@ -614,11 +614,11 @@ export interface PrivacyControl {
  * Privacy control types
  */
 export enum PrivacyControlType {
-  ANONYMIZATION = 'anonymization',
-  PSEUDONYMIZATION = 'pseudonymization',
-  ENCRYPTION = 'encryption',
-  REDACTION = 'redaction',
-  MASKING = 'masking',
+  ANONYMIZATION = "anonymization",
+  PSEUDONYMIZATION = "pseudonymization",
+  ENCRYPTION = "encryption",
+  REDACTION = "redaction",
+  MASKING = "masking",
 }
 
 /**
@@ -717,24 +717,24 @@ export interface AlertCondition {
  * Alert condition types
  */
 export enum AlertConditionType {
-  EVENT_COUNT = 'event_count',
-  ERROR_RATE = 'error_rate',
-  ANOMALY_DETECTION = 'anomaly_detection',
-  PATTERN_MATCH = 'pattern_match',
-  THRESHOLD = 'threshold',
-  CHANGE_DETECTION = 'change_detection',
+  EVENT_COUNT = "event_count",
+  ERROR_RATE = "error_rate",
+  ANOMALY_DETECTION = "anomaly_detection",
+  PATTERN_MATCH = "pattern_match",
+  THRESHOLD = "threshold",
+  CHANGE_DETECTION = "change_detection",
 }
 
 /**
  * Aggregation methods
  */
 export enum AggregationMethod {
-  COUNT = 'count',
-  SUM = 'sum',
-  AVERAGE = 'average',
-  MAXIMUM = 'maximum',
-  MINIMUM = 'minimum',
-  PERCENTILE = 'percentile',
+  COUNT = "count",
+  SUM = "sum",
+  AVERAGE = "average",
+  MAXIMUM = "maximum",
+  MINIMUM = "minimum",
+  PERCENTILE = "percentile",
 }
 
 /**
@@ -755,12 +755,12 @@ export interface NotificationChannel {
  * Notification channel types
  */
 export enum NotificationChannelType {
-  EMAIL = 'email',
-  SLACK = 'slack',
-  WEBHOOK = 'webhook',
-  SMS = 'sms',
-  PAGERDUTY = 'pagerduty',
-  TEAMS = 'teams',
+  EMAIL = "email",
+  SLACK = "slack",
+  WEBHOOK = "webhook",
+  SMS = "sms",
+  PAGERDUTY = "pagerduty",
+  TEAMS = "teams",
 }
 
 /**
@@ -863,11 +863,11 @@ export interface RelativeTime {
  * Time units
  */
 export enum TimeUnit {
-  MINUTES = 'minutes',
-  HOURS = 'hours',
-  DAYS = 'days',
-  WEEKS = 'weeks',
-  MONTHS = 'months',
+  MINUTES = "minutes",
+  HOURS = "hours",
+  DAYS = "days",
+  WEEKS = "weeks",
+  MONTHS = "months",
 }
 
 /**
@@ -888,17 +888,17 @@ export interface LogFilter {
  * Filter operators
  */
 export enum FilterOperator {
-  EQUALS = 'equals',
-  NOT_EQUALS = 'not_equals',
-  CONTAINS = 'contains',
-  STARTS_WITH = 'starts_with',
-  ENDS_WITH = 'ends_with',
-  GREATER_THAN = 'greater_than',
-  LESS_THAN = 'less_than',
-  IN = 'in',
-  NOT_IN = 'not_in',
-  EXISTS = 'exists',
-  NOT_EXISTS = 'not_exists',
+  EQUALS = "equals",
+  NOT_EQUALS = "not_equals",
+  CONTAINS = "contains",
+  STARTS_WITH = "starts_with",
+  ENDS_WITH = "ends_with",
+  GREATER_THAN = "greater_than",
+  LESS_THAN = "less_than",
+  IN = "in",
+  NOT_IN = "not_in",
+  EXISTS = "exists",
+  NOT_EXISTS = "not_exists",
 }
 
 /**
@@ -919,13 +919,13 @@ export interface LogAggregation {
  * Aggregation types
  */
 export enum AggregationType {
-  COUNT = 'count',
-  SUM = 'sum',
-  AVG = 'avg',
-  MIN = 'min',
-  MAX = 'max',
-  DISTINCT_COUNT = 'distinct_count',
-  PERCENTILE = 'percentile',
+  COUNT = "count",
+  SUM = "sum",
+  AVG = "avg",
+  MIN = "min",
+  MAX = "max",
+  DISTINCT_COUNT = "distinct_count",
+  PERCENTILE = "percentile",
 }
 
 /**
@@ -943,8 +943,8 @@ export interface SortCriteria {
  * Sort directions
  */
 export enum SortDirection {
-  ASC = 'asc',
-  DESC = 'desc',
+  ASC = "asc",
+  DESC = "desc",
 }
 
 // ===========================
@@ -1055,10 +1055,10 @@ export interface KeyManagementSettings {
  * Key sources
  */
 export enum KeySource {
-  LOCAL = 'local',
-  KMS = 'kms',
-  HSM = 'hsm',
-  VAULT = 'vault',
+  LOCAL = "local",
+  KMS = "kms",
+  HSM = "hsm",
+  VAULT = "vault",
 }
 
 /**
@@ -1079,10 +1079,10 @@ export interface CompressionSettings {
  * Compression algorithms
  */
 export enum CompressionAlgorithm {
-  GZIP = 'gzip',
-  BROTLI = 'brotli',
-  LZ4 = 'lz4',
-  ZSTD = 'zstd',
+  GZIP = "gzip",
+  BROTLI = "brotli",
+  LZ4 = "lz4",
+  ZSTD = "zstd",
 }
 
 /**
@@ -1151,10 +1151,10 @@ export interface BackupStorageConfig {
  * Backup frequencies
  */
 export enum BackupFrequency {
-  HOURLY = 'hourly',
-  DAILY = 'daily',
-  WEEKLY = 'weekly',
-  MONTHLY = 'monthly',
+  HOURLY = "hourly",
+  DAILY = "daily",
+  WEEKLY = "weekly",
+  MONTHLY = "monthly",
 }
 
 /**
@@ -1175,11 +1175,11 @@ export interface BackupLocation {
  * Backup location types
  */
 export enum BackupLocationType {
-  LOCAL = 'local',
-  S3 = 's3',
-  AZURE_BLOB = 'azure_blob',
-  GOOGLE_CLOUD_STORAGE = 'google_cloud_storage',
-  TAPE = 'tape',
+  LOCAL = "local",
+  S3 = "s3",
+  AZURE_BLOB = "azure_blob",
+  GOOGLE_CLOUD_STORAGE = "google_cloud_storage",
+  TAPE = "tape",
 }
 
 /**
@@ -1203,10 +1203,10 @@ export interface ArchivalStorageConfig {
  * Archival storage types
  */
 export enum ArchivalStorageType {
-  COLD_STORAGE = 'cold_storage',
-  GLACIER = 'glacier',
-  TAPE_ARCHIVE = 'tape_archive',
-  OPTICAL_STORAGE = 'optical_storage',
+  COLD_STORAGE = "cold_storage",
+  GLACIER = "glacier",
+  TAPE_ARCHIVE = "tape_archive",
+  OPTICAL_STORAGE = "optical_storage",
 }
 
 /**
@@ -1261,12 +1261,12 @@ export interface ProcessingStep {
  * Processing step types
  */
 export enum ProcessingStepType {
-  FILTER = 'filter',
-  TRANSFORM = 'transform',
-  ENRICH = 'enrich',
-  VALIDATE = 'validate',
-  ROUTE = 'route',
-  AGGREGATE = 'aggregate',
+  FILTER = "filter",
+  TRANSFORM = "transform",
+  ENRICH = "enrich",
+  VALIDATE = "validate",
+  ROUTE = "route",
+  AGGREGATE = "aggregate",
 }
 
 /**
@@ -1318,11 +1318,11 @@ export interface StreamProcessingConfig {
  * Stream processing frameworks
  */
 export enum StreamProcessingFramework {
-  KAFKA_STREAMS = 'kafka_streams',
-  APACHE_STORM = 'apache_storm',
-  APACHE_FLINK = 'apache_flink',
-  AMAZON_KINESIS = 'amazon_kinesis',
-  AZURE_STREAM_ANALYTICS = 'azure_stream_analytics',
+  KAFKA_STREAMS = "kafka_streams",
+  APACHE_STORM = "apache_storm",
+  APACHE_FLINK = "apache_flink",
+  AMAZON_KINESIS = "amazon_kinesis",
+  AZURE_STREAM_ANALYTICS = "azure_stream_analytics",
 }
 
 /**
@@ -1380,20 +1380,20 @@ export interface CorrelationRule {
  * Correlation actions
  */
 export enum CorrelationAction {
-  CREATE_INCIDENT = 'create_incident',
-  SEND_ALERT = 'send_alert',
-  TRIGGER_AUTOMATION = 'trigger_automation',
-  LOG_CORRELATION = 'log_correlation',
+  CREATE_INCIDENT = "create_incident",
+  SEND_ALERT = "send_alert",
+  TRIGGER_AUTOMATION = "trigger_automation",
+  LOG_CORRELATION = "log_correlation",
 }
 
 /**
  * Correlation algorithms
  */
 export enum CorrelationAlgorithm {
-  TIME_BASED = 'time_based',
-  PATTERN_BASED = 'pattern_based',
-  STATISTICAL = 'statistical',
-  MACHINE_LEARNING = 'machine_learning',
+  TIME_BASED = "time_based",
+  PATTERN_BASED = "pattern_based",
+  STATISTICAL = "statistical",
+  MACHINE_LEARNING = "machine_learning",
 }
 
 /**
@@ -1417,11 +1417,11 @@ export interface AnalyticsConfig {
  * Analytics engines
  */
 export enum AnalyticsEngine {
-  ELASTICSEARCH = 'elasticsearch',
-  SPLUNK = 'splunk',
-  TABLEAU = 'tableau',
-  POWER_BI = 'power_bi',
-  CUSTOM = 'custom',
+  ELASTICSEARCH = "elasticsearch",
+  SPLUNK = "splunk",
+  TABLEAU = "tableau",
+  POWER_BI = "power_bi",
+  CUSTOM = "custom",
 }
 
 /**
@@ -1459,12 +1459,12 @@ export interface WidgetConfig {
  * Widget types
  */
 export enum WidgetType {
-  LINE_CHART = 'line_chart',
-  BAR_CHART = 'bar_chart',
-  PIE_CHART = 'pie_chart',
-  TABLE = 'table',
-  METRIC = 'metric',
-  HEATMAP = 'heatmap',
+  LINE_CHART = "line_chart",
+  BAR_CHART = "bar_chart",
+  PIE_CHART = "pie_chart",
+  TABLE = "table",
+  METRIC = "metric",
+  HEATMAP = "heatmap",
 }
 
 /**
@@ -1491,11 +1491,11 @@ export interface ScheduledReportConfig {
  * Report formats
  */
 export enum ReportFormat {
-  PDF = 'pdf',
-  HTML = 'html',
-  CSV = 'csv',
-  EXCEL = 'excel',
-  JSON = 'json',
+  PDF = "pdf",
+  HTML = "html",
+  CSV = "csv",
+  EXCEL = "excel",
+  JSON = "json",
 }
 
 /**
@@ -1683,9 +1683,9 @@ export interface LegalHoldNotification {
  * Legal hold events
  */
 export enum LegalHoldEvent {
-  HOLD_APPLIED = 'hold_applied',
-  HOLD_RELEASED = 'hold_released',
-  HOLD_EXPIRED = 'hold_expired',
+  HOLD_APPLIED = "hold_applied",
+  HOLD_RELEASED = "hold_released",
+  HOLD_EXPIRED = "hold_expired",
 }
 
 /**
@@ -1748,10 +1748,10 @@ export interface SizeCriteria {
  * Deletion strategies
  */
 export enum DeletionStrategy {
-  OLDEST_FIRST = 'oldest_first',
-  LARGEST_FIRST = 'largest_first',
-  LEAST_ACCESSED = 'least_accessed',
-  LOWEST_PRIORITY = 'lowest_priority',
+  OLDEST_FIRST = "oldest_first",
+  LARGEST_FIRST = "largest_first",
+  LEAST_ACCESSED = "least_accessed",
+  LOWEST_PRIORITY = "lowest_priority",
 }
 
 /**
@@ -1792,9 +1792,9 @@ export interface GlobalEncryptionConfig {
  * Encryption algorithms
  */
 export enum EncryptionAlgorithm {
-  AES_256_GCM = 'aes_256_gcm',
-  CHACHA20_POLY1305 = 'chacha20_poly1305',
-  AES_256_CBC = 'aes_256_cbc',
+  AES_256_GCM = "aes_256_gcm",
+  CHACHA20_POLY1305 = "chacha20_poly1305",
+  AES_256_CBC = "aes_256_cbc",
 }
 
 /**
@@ -1894,9 +1894,9 @@ export interface IntegrityVerificationConfig {
  * Hash algorithms
  */
 export enum HashAlgorithm {
-  SHA256 = 'sha256',
-  SHA3_256 = 'sha3_256',
-  BLAKE2B = 'blake2b',
+  SHA256 = "sha256",
+  SHA3_256 = "sha3_256",
+  BLAKE2B = "blake2b",
 }
 
 /**
@@ -1940,12 +1940,12 @@ export interface ThreatDetectionRule {
  * Threat types
  */
 export enum ThreatType {
-  BRUTE_FORCE = 'brute_force',
-  DATA_EXFILTRATION = 'data_exfiltration',
-  PRIVILEGE_ESCALATION = 'privilege_escalation',
-  MALWARE = 'malware',
-  INSIDER_THREAT = 'insider_threat',
-  APT = 'apt',
+  BRUTE_FORCE = "brute_force",
+  DATA_EXFILTRATION = "data_exfiltration",
+  PRIVILEGE_ESCALATION = "privilege_escalation",
+  MALWARE = "malware",
+  INSIDER_THREAT = "insider_threat",
+  APT = "apt",
 }
 
 /**
@@ -1972,10 +1972,10 @@ export interface MLModelConfig {
  * ML model types
  */
 export enum MLModelType {
-  ANOMALY_DETECTION = 'anomaly_detection',
-  CLASSIFICATION = 'classification',
-  CLUSTERING = 'clustering',
-  TIME_SERIES = 'time_series',
+  ANOMALY_DETECTION = "anomaly_detection",
+  CLASSIFICATION = "classification",
+  CLUSTERING = "clustering",
+  TIME_SERIES = "time_series",
 }
 
 /**
@@ -1999,12 +1999,12 @@ export interface ThreatResponseAction {
  * Threat response action types
  */
 export enum ThreatResponseActionType {
-  ALERT = 'alert',
-  BLOCK_IP = 'block_ip',
-  QUARANTINE_USER = 'quarantine_user',
-  ISOLATE_SYSTEM = 'isolate_system',
-  COLLECT_EVIDENCE = 'collect_evidence',
-  ESCALATE = 'escalate',
+  ALERT = "alert",
+  BLOCK_IP = "block_ip",
+  QUARANTINE_USER = "quarantine_user",
+  ISOLATE_SYSTEM = "isolate_system",
+  COLLECT_EVIDENCE = "collect_evidence",
+  ESCALATE = "escalate",
 }
 
 // ===========================
@@ -2036,10 +2036,10 @@ export class AuditTrailLoggingService implements OnApplicationShutdown {
    */
   private async initializeAuditTrailService(): Promise<void> {
     try {
-      this.logger.log('🔧 Initializing audit trail and logging service');
+      this.logger.log("🔧 Initializing audit trail and logging service");
 
       if (!this.config.enabled) {
-        this.logger.warn('⚠️ Audit trail is disabled');
+        this.logger.warn("⚠️ Audit trail is disabled");
         return;
       }
 
@@ -2057,10 +2057,12 @@ export class AuditTrailLoggingService implements OnApplicationShutdown {
       // Start background processing
       await this.startBackgroundProcessing();
 
-      this.logger.log('✅ Audit trail and logging service initialized successfully');
+      this.logger.log(
+        "✅ Audit trail and logging service initialized successfully",
+      );
 
       // Emit initialization event
-      this.eventEmitter.emit('audit.trail.initialized', {
+      this.eventEmitter.emit("audit.trail.initialized", {
         timestamp: new Date(),
         config: {
           enabled: this.config.enabled,
@@ -2069,9 +2071,8 @@ export class AuditTrailLoggingService implements OnApplicationShutdown {
           alertRules: this.alertRules.size,
         },
       });
-
     } catch (error) {
-      this.logger.error('❌ Failed to initialize audit trail service', error);
+      this.logger.error("❌ Failed to initialize audit trail service", error);
       throw error;
     }
   }
@@ -2118,9 +2119,8 @@ export class AuditTrailLoggingService implements OnApplicationShutdown {
       this.logger.debug(`📝 Audit event logged: ${auditEvent.eventId}`);
 
       return auditEvent.eventId;
-
     } catch (error) {
-      this.logger.error('❌ Failed to log audit event', error);
+      this.logger.error("❌ Failed to log audit event", error);
       throw error;
     }
   }
@@ -2188,7 +2188,9 @@ export class AuditTrailLoggingService implements OnApplicationShutdown {
       message,
       { ...details, success },
       target,
-      success ? SecurityEventType.PERMISSION_GRANTED : SecurityEventType.PERMISSION_DENIED,
+      success
+        ? SecurityEventType.PERMISSION_GRANTED
+        : SecurityEventType.PERMISSION_DENIED,
     );
   }
 
@@ -2206,12 +2208,16 @@ export class AuditTrailLoggingService implements OnApplicationShutdown {
       const results = await this.executeQueryAgainstStorage(query);
 
       // Apply post-processing
-      const processedResults = await this.postProcessQueryResults(results, query);
+      const processedResults = await this.postProcessQueryResults(
+        results,
+        query,
+      );
 
-      this.logger.log(`✅ Query executed successfully: ${query.queryId} (${processedResults.totalCount} results)`);
+      this.logger.log(
+        `✅ Query executed successfully: ${query.queryId} (${processedResults.totalCount} results)`,
+      );
 
       return processedResults;
-
     } catch (error) {
       this.logger.error(`❌ Query execution failed: ${query.queryId}`, error);
       throw error;
@@ -2232,7 +2238,7 @@ export class AuditTrailLoggingService implements OnApplicationShutdown {
       this.alertRules.set(alertRule.id, alertRule);
 
       // Emit alert rule created event
-      this.eventEmitter.emit('audit.alert.rule.created', {
+      this.eventEmitter.emit("audit.alert.rule.created", {
         ruleId: alertRule.id,
         ruleName: alertRule.name,
         severity: alertRule.severity,
@@ -2240,9 +2246,11 @@ export class AuditTrailLoggingService implements OnApplicationShutdown {
       });
 
       this.logger.log(`✅ Alert rule created: ${alertRule.id}`);
-
     } catch (error) {
-      this.logger.error(`❌ Failed to create alert rule: ${alertRule.id}`, error);
+      this.logger.error(
+        `❌ Failed to create alert rule: ${alertRule.id}`,
+        error,
+      );
       throw error;
     }
   }
@@ -2259,20 +2267,31 @@ export class AuditTrailLoggingService implements OnApplicationShutdown {
       this.logger.log(`📋 Generating compliance report for ${framework}`);
 
       // Query compliance events
-      const complianceEvents = await this.queryComplianceEvents(framework, timeRange);
+      const complianceEvents = await this.queryComplianceEvents(
+        framework,
+        timeRange,
+      );
 
       // Analyze compliance status
-      const complianceAnalysis = await this.analyzeComplianceStatus(framework, complianceEvents);
+      const complianceAnalysis = await this.analyzeComplianceStatus(
+        framework,
+        complianceEvents,
+      );
 
       // Generate report
-      const report = await this.generateReportFromAnalysis(complianceAnalysis, format);
+      const report = await this.generateReportFromAnalysis(
+        complianceAnalysis,
+        format,
+      );
 
       this.logger.log(`✅ Compliance report generated for ${framework}`);
 
       return report;
-
     } catch (error) {
-      this.logger.error(`❌ Failed to generate compliance report for ${framework}`, error);
+      this.logger.error(
+        `❌ Failed to generate compliance report for ${framework}`,
+        error,
+      );
       throw error;
     }
   }
@@ -2295,14 +2314,21 @@ export class AuditTrailLoggingService implements OnApplicationShutdown {
       const exportData = await this.convertToExportFormat(queryResult, format);
 
       // Export to destination
-      const exportResult = await this.exportToDestination(exportData, destination);
+      const exportResult = await this.exportToDestination(
+        exportData,
+        destination,
+      );
 
-      this.logger.log(`✅ Audit logs exported successfully: ${exportResult.exportId}`);
+      this.logger.log(
+        `✅ Audit logs exported successfully: ${exportResult.exportId}`,
+      );
 
       return exportResult;
-
     } catch (error) {
-      this.logger.error(`❌ Failed to export audit logs: ${query.queryId}`, error);
+      this.logger.error(
+        `❌ Failed to export audit logs: ${query.queryId}`,
+        error,
+      );
       throw error;
     }
   }
@@ -2335,8 +2361,8 @@ export class AuditTrailLoggingService implements OnApplicationShutdown {
       action: eventData.action,
       outcome: {
         success: true,
-        resultCode: '200',
-        resultMessage: 'Success',
+        resultCode: "200",
+        resultMessage: "Success",
       },
       message: eventData.message,
       details: eventData.details,
@@ -2365,15 +2391,17 @@ export class AuditTrailLoggingService implements OnApplicationShutdown {
       await this.evaluateAlertRules(event);
 
       // Emit real-time event
-      this.eventEmitter.emit('audit.event.processed', {
+      this.eventEmitter.emit("audit.event.processed", {
         eventId: event.eventId,
         category: event.category,
         level: event.level,
         timestamp: event.timestamp,
       });
-
     } catch (error) {
-      this.logger.error(`❌ Failed to process event immediately: ${event.eventId}`, error);
+      this.logger.error(
+        `❌ Failed to process event immediately: ${event.eventId}`,
+        error,
+      );
     }
   }
 
@@ -2396,9 +2424,8 @@ export class AuditTrailLoggingService implements OnApplicationShutdown {
       await this.evaluateAlertRulesForBatch(events);
 
       this.logger.debug(`📦 Flushed ${events.length} events from buffer`);
-
     } catch (error) {
-      this.logger.error('❌ Failed to flush event buffer', error);
+      this.logger.error("❌ Failed to flush event buffer", error);
     }
   }
 
@@ -2424,9 +2451,8 @@ export class AuditTrailLoggingService implements OnApplicationShutdown {
 
       // Cleanup expired data
       await this.cleanupExpiredData();
-
     } catch (error) {
-      this.logger.error('❌ Background processing failed', error);
+      this.logger.error("❌ Background processing failed", error);
     } finally {
       this.isProcessing = false;
     }
@@ -2436,19 +2462,19 @@ export class AuditTrailLoggingService implements OnApplicationShutdown {
    * Helper methods (stubs for implementation)
    */
   private async initializeStorageBackends(): Promise<void> {
-    this.logger.log('🔧 Initializing storage backends');
+    this.logger.log("🔧 Initializing storage backends");
   }
 
   private async loadAlertRules(): Promise<void> {
-    this.logger.log('📚 Loading alert rules');
+    this.logger.log("📚 Loading alert rules");
   }
 
   private async startRealTimeProcessing(): Promise<void> {
-    this.logger.log('🔄 Starting real-time processing');
+    this.logger.log("🔄 Starting real-time processing");
   }
 
   private async startBackgroundProcessing(): Promise<void> {
-    this.logger.log('🔄 Starting background processing');
+    this.logger.log("🔄 Starting background processing");
   }
 
   private getConfiguredStorageTypes(): string[] {
@@ -2456,8 +2482,12 @@ export class AuditTrailLoggingService implements OnApplicationShutdown {
   }
 
   private isHighPriorityEvent(event: AuditEvent): boolean {
-    return event.level === AuditLogLevel.ERROR || event.level === AuditLogLevel.FATAL ||
-           event.security.threatLevel === ThreatLevel.HIGH || event.security.threatLevel === ThreatLevel.CRITICAL;
+    return (
+      event.level === AuditLogLevel.ERROR ||
+      event.level === AuditLogLevel.FATAL ||
+      event.security.threatLevel === ThreatLevel.HIGH ||
+      event.security.threatLevel === ThreatLevel.CRITICAL
+    );
   }
 
   private getLogLevelFromThreatLevel(threatLevel: ThreatLevel): AuditLogLevel {
@@ -2474,26 +2504,30 @@ export class AuditTrailLoggingService implements OnApplicationShutdown {
   }
 
   private generateEventId(): string {
-    return `audit_${Date.now()}_${randomBytes(8).toString('hex')}`;
+    return `audit_${Date.now()}_${randomBytes(8).toString("hex")}`;
   }
 
-  private generateEventHash(eventId: string, timestamp: Date, eventData: any): string {
+  private generateEventHash(
+    eventId: string,
+    timestamp: Date,
+    eventData: any,
+  ): string {
     const data = JSON.stringify({ eventId, timestamp, ...eventData });
-    return createHash('sha256').update(data).digest('hex');
+    return createHash("sha256").update(data).digest("hex");
   }
 
   private createEventSource(): EventSource {
     return {
-      service: 'parlant-audit-service',
-      component: 'audit-trail-logging',
-      instance: process.env.INSTANCE_ID || 'unknown',
-      version: '1.0.0',
-      environment: process.env.NODE_ENV || 'unknown',
+      service: "parlant-audit-service",
+      component: "audit-trail-logging",
+      instance: process.env.INSTANCE_ID || "unknown",
+      version: "1.0.0",
+      environment: process.env.NODE_ENV || "unknown",
       host: {
-        hostname: require('os').hostname(),
-        ipAddress: '127.0.0.1',
-        operatingSystem: require('os').type(),
-        architecture: require('os').arch(),
+        hostname: require("os").hostname(),
+        ipAddress: "127.0.0.1",
+        operatingSystem: require("os").type(),
+        architecture: require("os").arch(),
       },
     };
   }
@@ -2501,16 +2535,18 @@ export class AuditTrailLoggingService implements OnApplicationShutdown {
   private createEventContext(): EventContext {
     return {
       timestamp: new Date(),
-      requestId: randomBytes(8).toString('hex'),
-      correlationId: randomBytes(8).toString('hex'),
-      traceId: randomBytes(16).toString('hex'),
-      spanId: randomBytes(8).toString('hex'),
+      requestId: randomBytes(8).toString("hex"),
+      correlationId: randomBytes(8).toString("hex"),
+      traceId: randomBytes(16).toString("hex"),
+      spanId: randomBytes(8).toString("hex"),
       businessContext: {},
       technicalContext: {},
     };
   }
 
-  private async createSecurityMetadata(eventData: any): Promise<SecurityMetadata> {
+  private async createSecurityMetadata(
+    eventData: any,
+  ): Promise<SecurityMetadata> {
     return {
       threatLevel: eventData.threatLevel || ThreatLevel.LOW,
       riskScore: 0,
@@ -2520,14 +2556,16 @@ export class AuditTrailLoggingService implements OnApplicationShutdown {
     };
   }
 
-  private async createComplianceMetadata(eventData: any): Promise<ComplianceMetadata> {
+  private async createComplianceMetadata(
+    eventData: any,
+  ): Promise<ComplianceMetadata> {
     return {
       frameworks: eventData.framework ? [eventData.framework] : [],
       requirements: [],
       retention: {
         minimumRetentionDays: this.config.retention.defaultRetentionDays,
         legalHold: false,
-        retentionReasons: ['compliance'],
+        retentionReasons: ["compliance"],
       },
       privacyControls: [],
     };
@@ -2545,7 +2583,9 @@ export class AuditTrailLoggingService implements OnApplicationShutdown {
     // Implementation for evaluating alert rules
   }
 
-  private async evaluateAlertRulesForBatch(events: AuditEvent[]): Promise<void> {
+  private async evaluateAlertRulesForBatch(
+    events: AuditEvent[],
+  ): Promise<void> {
     // Implementation for batch alert evaluation
   }
 
@@ -2561,12 +2601,17 @@ export class AuditTrailLoggingService implements OnApplicationShutdown {
     // Implementation for query validation
   }
 
-  private async executeQueryAgainstStorage(query: LogAnalyticsQuery): Promise<any> {
+  private async executeQueryAgainstStorage(
+    query: LogAnalyticsQuery,
+  ): Promise<any> {
     // Implementation for executing query against storage
     return { results: [], totalCount: 0 };
   }
 
-  private async postProcessQueryResults(results: any, query: LogAnalyticsQuery): Promise<QueryResult> {
+  private async postProcessQueryResults(
+    results: any,
+    query: LogAnalyticsQuery,
+  ): Promise<QueryResult> {
     // Implementation for post-processing query results
     return {
       queryId: query.queryId,
@@ -2581,33 +2626,48 @@ export class AuditTrailLoggingService implements OnApplicationShutdown {
     // Implementation for alert rule validation
   }
 
-  private async queryComplianceEvents(framework: ComplianceFramework, timeRange: TimeRange): Promise<AuditEvent[]> {
+  private async queryComplianceEvents(
+    framework: ComplianceFramework,
+    timeRange: TimeRange,
+  ): Promise<AuditEvent[]> {
     // Implementation for querying compliance events
     return [];
   }
 
-  private async analyzeComplianceStatus(framework: ComplianceFramework, events: AuditEvent[]): Promise<any> {
+  private async analyzeComplianceStatus(
+    framework: ComplianceFramework,
+    events: AuditEvent[],
+  ): Promise<any> {
     // Implementation for compliance analysis
     return {};
   }
 
-  private async generateReportFromAnalysis(analysis: any, format: ReportFormat): Promise<ComplianceReport> {
+  private async generateReportFromAnalysis(
+    analysis: any,
+    format: ReportFormat,
+  ): Promise<ComplianceReport> {
     // Implementation for report generation
     return {
       reportId: this.generateEventId(),
       framework: analysis.framework,
       generatedAt: new Date(),
       format,
-      content: 'Report content',
+      content: "Report content",
     };
   }
 
-  private async convertToExportFormat(queryResult: QueryResult, format: ExportFormat): Promise<any> {
+  private async convertToExportFormat(
+    queryResult: QueryResult,
+    format: ExportFormat,
+  ): Promise<any> {
     // Implementation for format conversion
     return {};
   }
 
-  private async exportToDestination(exportData: any, destination: ExportDestination): Promise<ExportResult> {
+  private async exportToDestination(
+    exportData: any,
+    destination: ExportDestination,
+  ): Promise<ExportResult> {
     // Implementation for export to destination
     return {
       exportId: this.generateEventId(),
@@ -2622,7 +2682,7 @@ export class AuditTrailLoggingService implements OnApplicationShutdown {
    */
   private loadConfiguration(): AuditTrailConfig {
     return {
-      enabled: this.configService.get<boolean>('audit.trail.enabled', true),
+      enabled: this.configService.get<boolean>("audit.trail.enabled", true),
       logLevel: AuditLogLevel.INFO,
       storage: {
         primary: {
@@ -2630,7 +2690,7 @@ export class AuditTrailLoggingService implements OnApplicationShutdown {
           config: {},
           encryption: {
             enabled: true,
-            algorithm: 'aes-256-gcm',
+            algorithm: "aes-256-gcm",
             keyManagement: {
               source: KeySource.KMS,
               rotationFrequencyDays: 90,
@@ -2644,15 +2704,15 @@ export class AuditTrailLoggingService implements OnApplicationShutdown {
           },
           indexing: {
             enabled: true,
-            indexedFields: ['timestamp', 'category', 'level', 'actor.id'],
+            indexedFields: ["timestamp", "category", "level", "actor.id"],
             fullTextSearch: true,
             optimization: {
               optimizeFrequencyHours: 24,
-              mergePolicy: 'default',
+              mergePolicy: "default",
               shardSettings: {
                 numberOfShards: 5,
                 numberOfReplicas: 1,
-                allocation: 'default',
+                allocation: "default",
               },
             },
           },
@@ -2737,7 +2797,7 @@ export class AuditTrailLoggingService implements OnApplicationShutdown {
           encryptInTransit: true,
           algorithms: [EncryptionAlgorithm.AES_256_GCM],
           keyManagement: {
-            keyDerivationFunction: 'pbkdf2',
+            keyDerivationFunction: "pbkdf2",
             rotationPolicy: {
               frequencyDays: 90,
               autoRotation: true,
@@ -2746,7 +2806,7 @@ export class AuditTrailLoggingService implements OnApplicationShutdown {
             backup: {
               enabled: true,
               frequencyDays: 30,
-              locations: ['vault', 'hsm'],
+              locations: ["vault", "hsm"],
             },
           },
         },
@@ -2816,16 +2876,16 @@ export interface ExportResult {
 }
 
 export enum ExportFormat {
-  JSON = 'json',
-  CSV = 'csv',
-  PARQUET = 'parquet',
-  AVRO = 'avro',
+  JSON = "json",
+  CSV = "csv",
+  PARQUET = "parquet",
+  AVRO = "avro",
 }
 
 export enum ExportDestination {
-  S3 = 's3',
-  AZURE_BLOB = 'azure_blob',
-  GOOGLE_CLOUD_STORAGE = 'google_cloud_storage',
-  FTP = 'ftp',
-  EMAIL = 'email',
+  S3 = "s3",
+  AZURE_BLOB = "azure_blob",
+  GOOGLE_CLOUD_STORAGE = "google_cloud_storage",
+  FTP = "ftp",
+  EMAIL = "email",
 }

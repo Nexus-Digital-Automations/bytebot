@@ -9,22 +9,22 @@
  */
 
 // Core rate limiting services
-export { ConversationalRateLimiterService } from './core/conversational-rate-limiter.service';
+export { ConversationalRateLimiterService } from "./core/conversational-rate-limiter.service";
 
 // Multi-tier framework
-export { MultiTierRateManagerService } from './framework/multi-tier-rate-manager.service';
+export { MultiTierRateManagerService } from "./framework/multi-tier-rate-manager.service";
 
 // Natural language communication
-export { NaturalLanguageRateCommunicatorService } from './communication/natural-language-rate-communicator.service';
+export { NaturalLanguageRateCommunicatorService } from "./communication/natural-language-rate-communicator.service";
 
 // Enterprise traffic management
-export { EnterpriseTrafficManagerService } from './enterprise/enterprise-traffic-manager.service';
+export { EnterpriseTrafficManagerService } from "./enterprise/enterprise-traffic-manager.service";
 
 // Analytics and monitoring
-export { RateLimitingAnalyticsService } from './analytics/rate-limiting-analytics.service';
+export { RateLimitingAnalyticsService } from "./analytics/rate-limiting-analytics.service";
 
 // Type definitions
-export * from './types/rate-limiting.types';
+export * from "./types/rate-limiting.types";
 
 // Re-export key interfaces from conversational API
 export {
@@ -34,8 +34,8 @@ export {
   APIRequest,
   ConversationalPreExecutionValidator,
   IntentAnalysis,
-  RiskAssessment
-} from '../interfaces/conversational-api.interface';
+  RiskAssessment,
+} from "../interfaces/conversational-api.interface";
 
 /**
  * PARLANT Phase 1 Rate Limiting System

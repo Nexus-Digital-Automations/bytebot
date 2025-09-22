@@ -14,38 +14,36 @@ import {
   ExceptionFilter,
   Catch,
   ArgumentsHost,
-  HttpException
-} from '@nestjs/common';
-import { Request, Response } from 'express';
+  HttpException,
+} from "@nestjs/common";
+import { Request, Response } from "express";
 
 import {
   ConversationalErrorHandler,
   ConversationalErrorContext,
-  ConversationalErrorResponse
-} from './conversational-error-handler';
+  ConversationalErrorResponse,
+} from "./conversational-error-handler";
 
 import {
   AdvancedRecoveryFramework,
-  RecoverySession
-} from './advanced-recovery-framework';
+  RecoverySession,
+} from "./advanced-recovery-framework";
 
 import {
   NaturalLanguageCommunicationSystem,
   UserCommunicationProfile,
-  CommunicationResult
-} from './natural-language-communication';
+  CommunicationResult,
+} from "./natural-language-communication";
 
-import {
-  EnterpriseErrorManagementSystem
-} from './enterprise-error-management';
+import { EnterpriseErrorManagementSystem } from "./enterprise-error-management";
 
 // Import existing PARLANT error handler for compatibility
 import {
   ParlantErrorFilter,
-  ParlantErrorResponse
-} from '../../parlant-error-handler';
+  ParlantErrorResponse,
+} from "../../parlant-error-handler";
 
-import { ConversationalValidationError } from '../../monitoring/parlant-integration.service';
+import { ConversationalValidationError } from "../../monitoring/parlant-integration.service";
 
 // ===== INTEGRATION INTERFACES =====
 
@@ -59,7 +57,7 @@ export interface EnhancedParlantErrorResponse extends ParlantErrorResponse {
   /** Recovery session information */
   recoverySession?: {
     sessionId: string;
-    status: 'ACTIVE' | 'COMPLETED' | 'FAILED' | 'ESCALATED';
+    status: "ACTIVE" | "COMPLETED" | "FAILED" | "ESCALATED";
     availableActions: string[];
   };
 
@@ -125,10 +123,15 @@ export interface ParlantIntegrationConfig {
   fallbackToLegacy: boolean;
 
   /** User profile resolver */
-  userProfileResolver?: (context: ConversationalErrorContext) => Promise<UserCommunicationProfile | null>;
+  userProfileResolver?: (
+    context: ConversationalErrorContext,
+  ) => Promise<UserCommunicationProfile | null>;
 
   /** Custom error context enhancer */
-  contextEnhancer?: (req: Request, baseContext: ConversationalErrorContext) => ConversationalErrorContext;
+  contextEnhancer?: (
+    req: Request,
+    baseContext: ConversationalErrorContext,
+  ) => ConversationalErrorContext;
 
   /** Response transformer */
   responseTransformer?: (response: EnhancedParlantErrorResponse) => any;
@@ -149,9 +152,11 @@ export class ParlantErrorHandlingBridge {
     private readonly recoveryFramework: AdvancedRecoveryFramework,
     private readonly communicationSystem: NaturalLanguageCommunicationSystem,
     private readonly enterpriseManagement: EnterpriseErrorManagementSystem,
-    private readonly config: ParlantIntegrationConfig
+    private readonly config: ParlantIntegrationConfig,
   ) {
-    this.logger.log('ParlantErrorHandlingBridge initialized with Phase 1 capabilities');
+    this.logger.log(
+      "ParlantErrorHandlingBridge initialized with Phase 1 capabilities",
+    );
   }
 
   /**
@@ -159,7 +164,7 @@ export class ParlantErrorHandlingBridge {
    */
   async processErrorWithIntegration(
     error: Error,
-    host: ArgumentsHost
+    host: ArgumentsHost,
   ): Promise<EnhancedParlantErrorResponse> {
     const startTime = Date.now();
 
@@ -177,7 +182,10 @@ export class ParlantErrorHandlingBridge {
         return await this.processWithLegacy(error, host);
       }
     } catch (integrationError) {
-      this.logger.error('Integration processing failed, falling back to legacy', integrationError);
+      this.logger.error(
+        "Integration processing failed, falling back to legacy",
+        integrationError,
+      );
 
       if (this.config.fallbackToLegacy) {
         return await this.processWithLegacy(error, host);
@@ -193,7 +201,7 @@ export class ParlantErrorHandlingBridge {
   private async processWithPhase1(
     error: Error,
     context: ConversationalErrorContext,
-    host: ArgumentsHost
+    host: ArgumentsHost,
   ): Promise<EnhancedParlantErrorResponse> {
     const startTime = Date.now();
 
@@ -202,12 +210,16 @@ export class ParlantErrorHandlingBridge {
       const legacyResponse = await this.getLegacyResponse(error, host);
 
       // Step 2: Process with conversational handler
-      const conversationalResponse = await this.conversationalHandler.processError(error, context);
+      const conversationalResponse =
+        await this.conversationalHandler.processError(error, context);
 
       // Step 3: Initiate recovery if appropriate
       let recoverySession: RecoverySession | null = null;
       if (this.shouldInitiateRecovery(conversationalResponse)) {
-        const recoveryResult = await this.recoveryFramework.initiateRecovery(error, context);
+        const recoveryResult = await this.recoveryFramework.initiateRecovery(
+          error,
+          context,
+        );
         recoverySession = recoveryResult.session;
       }
 
@@ -220,7 +232,7 @@ export class ParlantErrorHandlingBridge {
           context,
           userProfile,
           conversationalResponse.severity,
-          conversationalResponse.category
+          conversationalResponse.category,
         );
       }
 
@@ -229,29 +241,31 @@ export class ParlantErrorHandlingBridge {
         error,
         context,
         conversationalResponse,
-        recoverySession || undefined
+        recoverySession || undefined,
       );
 
       // Step 6: Create enhanced response
       const enhancedResponse: EnhancedParlantErrorResponse = {
         ...legacyResponse,
         conversational: conversationalResponse,
-        recoverySession: recoverySession ? {
-          sessionId: recoverySession.sessionId,
-          status: recoverySession.status,
-          availableActions: this.extractAvailableActions(recoverySession)
-        } : undefined,
+        recoverySession: recoverySession
+          ? {
+              sessionId: recoverySession.sessionId,
+              status: recoverySession.status,
+              availableActions: this.extractAvailableActions(recoverySession),
+            }
+          : undefined,
         communication: communication || undefined,
         tracking: {
           logEntryId: managementResult.logEntryId,
           patternId: managementResult.patterns[0]?.patternId,
-          analyticsEnabled: true
+          analyticsEnabled: true,
         },
         integration: {
           phase1Enabled: true,
           processingTime: Date.now() - startTime,
-          version: '1.0.0'
-        }
+          version: "1.0.0",
+        },
       };
 
       // Step 7: Transform response if configured
@@ -261,7 +275,7 @@ export class ParlantErrorHandlingBridge {
 
       return enhancedResponse;
     } catch (phase1Error) {
-      this.logger.error('Phase 1 processing failed', phase1Error);
+      this.logger.error("Phase 1 processing failed", phase1Error);
 
       if (this.config.fallbackToLegacy) {
         return await this.processWithLegacy(error, host);
@@ -276,7 +290,7 @@ export class ParlantErrorHandlingBridge {
    */
   private async processWithLegacy(
     error: Error,
-    host: ArgumentsHost
+    host: ArgumentsHost,
   ): Promise<EnhancedParlantErrorResponse> {
     const startTime = Date.now();
 
@@ -287,8 +301,8 @@ export class ParlantErrorHandlingBridge {
       integration: {
         phase1Enabled: false,
         processingTime: Date.now() - startTime,
-        version: '1.0.0'
-      }
+        version: "1.0.0",
+      },
     };
   }
 
@@ -297,7 +311,7 @@ export class ParlantErrorHandlingBridge {
    */
   private async getLegacyResponse(
     error: Error,
-    host: ArgumentsHost
+    host: ArgumentsHost,
   ): Promise<ParlantErrorResponse> {
     // Use reflection to access legacy filter's internal methods
     // This is a simplified approach - in practice would need proper integration
@@ -310,67 +324,70 @@ export class ParlantErrorHandlingBridge {
         message: error.message,
         error: error.name,
         details: {
-          category: 'HTTP_EXCEPTION' as any,
-          severity: 'MEDIUM' as any,
-          errorCode: error.getStatus().toString()
+          category: "HTTP_EXCEPTION" as any,
+          severity: "MEDIUM" as any,
+          errorCode: error.getStatus().toString(),
         },
         guidance: {
-          explanation: 'Legacy error processing',
+          explanation: "Legacy error processing",
           immediateActions: [],
           alternatives: [],
           preventionTips: [],
-          documentationLinks: []
+          documentationLinks: [],
         },
         recovery: {
           autoRetryAvailable: false,
-          recommendedStrategy: 'MANUAL_INTERVENTION' as any
+          recommendedStrategy: "MANUAL_INTERVENTION" as any,
         },
         metadata: {
           correlationId: `legacy_${Date.now()}`,
           timestamp: new Date().toISOString(),
           requestContext: {
             method: ctx.getRequest<Request>().method,
-            path: ctx.getRequest<Request>().url
-          }
-        }
+            path: ctx.getRequest<Request>().url,
+          },
+        },
       };
     }
 
     return {
       statusCode: 500,
-      message: 'Internal server error',
-      error: 'InternalServerError',
+      message: "Internal server error",
+      error: "InternalServerError",
       details: {
-        category: 'INTERNAL_ERROR' as any,
-        severity: 'HIGH' as any,
-        errorCode: '500'
+        category: "INTERNAL_ERROR" as any,
+        severity: "HIGH" as any,
+        errorCode: "500",
       },
       guidance: {
-        explanation: 'An unexpected error occurred',
+        explanation: "An unexpected error occurred",
         immediateActions: [],
         alternatives: [],
         preventionTips: [],
-        documentationLinks: []
+        documentationLinks: [],
       },
       recovery: {
         autoRetryAvailable: false,
-        recommendedStrategy: 'ESCALATE' as any
+        recommendedStrategy: "ESCALATE" as any,
       },
       metadata: {
         correlationId: `legacy_${Date.now()}`,
         timestamp: new Date().toISOString(),
         requestContext: {
           method: ctx.getRequest<Request>().method,
-          path: ctx.getRequest<Request>().url
-        }
-      }
+          path: ctx.getRequest<Request>().url,
+        },
+      },
     };
   }
 
   /**
    * Create error context from request
    */
-  private createErrorContext(request: Request, error: Error): ConversationalErrorContext {
+  private createErrorContext(
+    request: Request,
+    error: Error,
+  ): ConversationalErrorContext {
     const baseContext: ConversationalErrorContext = {
       userId: this.extractUserId(request),
       sessionId: this.extractSessionId(request),
@@ -381,7 +398,7 @@ export class ParlantErrorHandlingBridge {
       parameters: { ...request.params, ...request.query, ...request.body },
       headers: request.headers as Record<string, string>,
       timestamp: new Date(),
-      requestId: this.extractRequestId(request)
+      requestId: this.extractRequestId(request),
     };
 
     // Apply custom context enhancer if configured
@@ -396,58 +413,74 @@ export class ParlantErrorHandlingBridge {
    * Extract user ID from request
    */
   private extractUserId(request: Request): string | undefined {
-    return (request as any).user?.id ||
-           request.headers['x-user-id'] as string ||
-           undefined;
+    return (
+      (request as any).user?.id ||
+      (request.headers["x-user-id"] as string) ||
+      undefined
+    );
   }
 
   /**
    * Extract session ID from request
    */
   private extractSessionId(request: Request): string | undefined {
-    return request.headers['x-session-id'] as string ||
-           (request as any).session?.id ||
-           undefined;
+    return (
+      (request.headers["x-session-id"] as string) ||
+      (request as any).session?.id ||
+      undefined
+    );
   }
 
   /**
    * Extract user language from request
    */
   private extractUserLanguage(request: Request): string | undefined {
-    return request.headers['accept-language']?.split(',')[0]?.split('-')[0] ||
-           'en';
+    return (
+      request.headers["accept-language"]?.split(",")[0]?.split("-")[0] || "en"
+    );
   }
 
   /**
    * Extract user expertise level from request
    */
-  private extractUserExpertiseLevel(request: Request): 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | 'EXPERT' | undefined {
-    const level = request.headers['x-expertise-level'] as string;
-    if (level && ['BEGINNER', 'INTERMEDIATE', 'ADVANCED', 'EXPERT'].includes(level.toUpperCase())) {
+  private extractUserExpertiseLevel(
+    request: Request,
+  ): "BEGINNER" | "INTERMEDIATE" | "ADVANCED" | "EXPERT" | undefined {
+    const level = request.headers["x-expertise-level"] as string;
+    if (
+      level &&
+      ["BEGINNER", "INTERMEDIATE", "ADVANCED", "EXPERT"].includes(
+        level.toUpperCase(),
+      )
+    ) {
       return level.toUpperCase() as any;
     }
-    return 'INTERMEDIATE'; // Default
+    return "INTERMEDIATE"; // Default
   }
 
   /**
    * Extract request ID from request
    */
   private extractRequestId(request: Request): string {
-    return request.headers['x-request-id'] as string ||
-           `req_${Date.now()}_${Math.random().toString(36).substring(2)}`;
+    return (
+      (request.headers["x-request-id"] as string) ||
+      `req_${Date.now()}_${Math.random().toString(36).substring(2)}`
+    );
   }
 
   /**
    * Determine if recovery should be initiated
    */
-  private shouldInitiateRecovery(response: ConversationalErrorResponse): boolean {
+  private shouldInitiateRecovery(
+    response: ConversationalErrorResponse,
+  ): boolean {
     // Don't initiate recovery for info-level messages
-    if (response.severity === 'INFO') {
+    if (response.severity === "INFO") {
       return false;
     }
 
     // Always initiate for critical errors
-    if (response.severity === 'CRITICAL') {
+    if (response.severity === "CRITICAL") {
       return true;
     }
 
@@ -458,7 +491,9 @@ export class ParlantErrorHandlingBridge {
   /**
    * Resolve user profile for communication
    */
-  private async resolveUserProfile(context: ConversationalErrorContext): Promise<UserCommunicationProfile | null> {
+  private async resolveUserProfile(
+    context: ConversationalErrorContext,
+  ): Promise<UserCommunicationProfile | null> {
     if (this.config.userProfileResolver) {
       return await this.config.userProfileResolver(context);
     }
@@ -467,17 +502,17 @@ export class ParlantErrorHandlingBridge {
     if (context.userId) {
       return {
         userId: context.userId,
-        communicationStyle: 'DETAILED',
-        learningStyle: 'EXAMPLES',
+        communicationStyle: "DETAILED",
+        learningStyle: "EXAMPLES",
         expertiseLevels: {
-          technical: context.userExpertiseLevel || 'INTERMEDIATE',
-          domain: 'INTERMEDIATE',
-          general: 'INTERMEDIATE'
+          technical: context.userExpertiseLevel || "INTERMEDIATE",
+          domain: "INTERMEDIATE",
+          general: "INTERMEDIATE",
         },
         locale: {
-          language: context.userLanguage || 'en',
-          culturalStyle: 'DIRECT',
-          technicalLevel: 'MODERATE'
+          language: context.userLanguage || "en",
+          culturalStyle: "DIRECT",
+          technicalLevel: "MODERATE",
         },
         interactionHistory: {
           preferredSolutionTypes: [],
@@ -486,9 +521,9 @@ export class ParlantErrorHandlingBridge {
           feedbackPatterns: {
             helpfulnessRating: 4.0,
             clarityRating: 4.0,
-            completenessRating: 4.0
-          }
-        }
+            completenessRating: 4.0,
+          },
+        },
       };
     }
 
@@ -501,18 +536,18 @@ export class ParlantErrorHandlingBridge {
   private extractAvailableActions(session: RecoverySession): string[] {
     const actions: string[] = [];
 
-    if (session.status === 'ACTIVE') {
-      actions.push('continue_recovery');
+    if (session.status === "ACTIVE") {
+      actions.push("continue_recovery");
 
       if (session.attempts.length === 0) {
-        actions.push('start_recovery');
+        actions.push("start_recovery");
       }
 
       if (session.currentStage < session.workflow.stages.length - 1) {
-        actions.push('next_stage');
+        actions.push("next_stage");
       }
 
-      actions.push('get_guidance', 'escalate', 'cancel');
+      actions.push("get_guidance", "escalate", "cancel");
     }
 
     return actions;
@@ -529,10 +564,8 @@ export class ParlantErrorHandlingBridge {
 export class EnhancedParlantErrorFilter implements ExceptionFilter {
   private readonly logger = new Logger(EnhancedParlantErrorFilter.name);
 
-  constructor(
-    private readonly bridge: ParlantErrorHandlingBridge
-  ) {
-    this.logger.log('EnhancedParlantErrorFilter initialized');
+  constructor(private readonly bridge: ParlantErrorHandlingBridge) {
+    this.logger.log("EnhancedParlantErrorFilter initialized");
   }
 
   async catch(exception: any, host: ArgumentsHost): Promise<void> {
@@ -542,29 +575,30 @@ export class EnhancedParlantErrorFilter implements ExceptionFilter {
 
     try {
       // Process error through integration bridge
-      const errorResponse = await this.bridge.processErrorWithIntegration(exception, host);
+      const errorResponse = await this.bridge.processErrorWithIntegration(
+        exception,
+        host,
+      );
 
       // Set appropriate status code
       const status = errorResponse.statusCode || 500;
 
       // Log error for monitoring
-      this.logger.error(
-        `Error processed: ${exception.message}`,
-        {
-          errorId: errorResponse.conversational?.errorId || errorResponse.metadata?.errorId,
-          path: request.url,
-          method: request.method,
-          status,
-          phase1Enabled: errorResponse.integration.phase1Enabled,
-          processingTime: errorResponse.integration.processingTime
-        }
-      );
+      this.logger.error(`Error processed: ${exception.message}`, {
+        errorId:
+          errorResponse.conversational?.errorId ||
+          errorResponse.metadata?.errorId,
+        path: request.url,
+        method: request.method,
+        status,
+        phase1Enabled: errorResponse.integration.phase1Enabled,
+        processingTime: errorResponse.integration.processingTime,
+      });
 
       // Send response
       response.status(status).json(errorResponse);
-
     } catch (filterError) {
-      this.logger.error('Enhanced error filter failed', filterError);
+      this.logger.error("Enhanced error filter failed", filterError);
 
       // Fallback response
       response.status(500).json({
@@ -572,13 +606,13 @@ export class EnhancedParlantErrorFilter implements ExceptionFilter {
         timestamp: new Date().toISOString(),
         path: request.url,
         method: request.method,
-        message: 'Internal server error',
-        error: 'InternalServerError',
+        message: "Internal server error",
+        error: "InternalServerError",
         integration: {
           phase1Enabled: false,
           processingTime: 0,
-          version: '1.0.0'
-        }
+          version: "1.0.0",
+        },
       });
     }
   }
@@ -598,11 +632,11 @@ export class ParlantIntegrationFactory {
     conversationalHandler: ConversationalErrorHandler,
     recoveryFramework: AdvancedRecoveryFramework,
     communicationSystem: NaturalLanguageCommunicationSystem,
-    enterpriseManagement: EnterpriseErrorManagementSystem
+    enterpriseManagement: EnterpriseErrorManagementSystem,
   ): ParlantErrorHandlingBridge {
     const config: ParlantIntegrationConfig = {
       enablePhase1: true,
-      fallbackToLegacy: true
+      fallbackToLegacy: true,
     };
 
     return new ParlantErrorHandlingBridge(
@@ -611,14 +645,16 @@ export class ParlantIntegrationFactory {
       recoveryFramework,
       communicationSystem,
       enterpriseManagement,
-      config
+      config,
     );
   }
 
   /**
    * Create enhanced exception filter
    */
-  static createEnhancedFilter(bridge: ParlantErrorHandlingBridge): EnhancedParlantErrorFilter {
+  static createEnhancedFilter(
+    bridge: ParlantErrorHandlingBridge,
+  ): EnhancedParlantErrorFilter {
     return new EnhancedParlantErrorFilter(bridge);
   }
 
@@ -631,7 +667,7 @@ export class ParlantIntegrationFactory {
     recoveryFramework: AdvancedRecoveryFramework,
     communicationSystem: NaturalLanguageCommunicationSystem,
     enterpriseManagement: EnterpriseErrorManagementSystem,
-    config?: Partial<ParlantIntegrationConfig>
+    config?: Partial<ParlantIntegrationConfig>,
   ): {
     bridge: ParlantErrorHandlingBridge;
     filter: EnhancedParlantErrorFilter;
@@ -639,7 +675,7 @@ export class ParlantIntegrationFactory {
     const defaultConfig: ParlantIntegrationConfig = {
       enablePhase1: true,
       fallbackToLegacy: true,
-      ...config
+      ...config,
     };
 
     const bridge = new ParlantErrorHandlingBridge(
@@ -648,7 +684,7 @@ export class ParlantIntegrationFactory {
       recoveryFramework,
       communicationSystem,
       enterpriseManagement,
-      defaultConfig
+      defaultConfig,
     );
 
     const filter = new EnhancedParlantErrorFilter(bridge);

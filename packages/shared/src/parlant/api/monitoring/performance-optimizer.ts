@@ -7,7 +7,7 @@
  * @since 2025-09-22
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from "@nestjs/common";
 
 /**
  * Performance optimization metrics interface
@@ -25,8 +25,8 @@ export interface PerformanceMetrics {
  * Performance optimization recommendations interface
  */
 export interface OptimizationRecommendation {
-  type: 'CACHING' | 'BATCHING' | 'INDEXING' | 'SCALING' | 'ALGORITHM';
-  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  type: "CACHING" | "BATCHING" | "INDEXING" | "SCALING" | "ALGORITHM";
+  priority: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
   description: string;
   expectedImprovement: number;
   implementationCost: number;
@@ -42,7 +42,7 @@ export class PerformanceOptimizer {
   private metrics: PerformanceMetrics[] = [];
 
   constructor() {
-    this.logger.log('PerformanceOptimizer service initialized');
+    this.logger.log("PerformanceOptimizer service initialized");
   }
 
   /**
@@ -50,25 +50,28 @@ export class PerformanceOptimizer {
    * Placeholder method - replace with actual monitoring initialization
    */
   async initialize(): Promise<void> {
-    this.logger.debug('Performance optimizer initialized');
+    this.logger.debug("Performance optimizer initialized");
   }
 
   /**
    * Collect performance metrics for a request
    * Placeholder method - replace with actual metrics collection
    */
-  async collectMetrics(requestId: string, startTime: number): Promise<PerformanceMetrics> {
+  async collectMetrics(
+    requestId: string,
+    startTime: number,
+  ): Promise<PerformanceMetrics> {
     const metrics: PerformanceMetrics = {
       responseTime: Date.now() - startTime,
       throughput: 100, // requests per second
       errorRate: 0.05, // 5% error rate
       cpuUsage: 45.2,
       memoryUsage: 62.8,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     this.metrics.push(metrics);
-    this.logger.debug('Performance metrics collected', { requestId, metrics });
+    this.logger.debug("Performance metrics collected", { requestId, metrics });
 
     return metrics;
   }
@@ -77,25 +80,30 @@ export class PerformanceOptimizer {
    * Analyze performance trends and generate optimization recommendations
    * Placeholder method - replace with actual performance analysis
    */
-  async generateOptimizationRecommendations(): Promise<OptimizationRecommendation[]> {
+  async generateOptimizationRecommendations(): Promise<
+    OptimizationRecommendation[]
+  > {
     const recommendations: OptimizationRecommendation[] = [
       {
-        type: 'CACHING',
-        priority: 'MEDIUM',
-        description: 'Implement response caching for frequently accessed endpoints',
+        type: "CACHING",
+        priority: "MEDIUM",
+        description:
+          "Implement response caching for frequently accessed endpoints",
         expectedImprovement: 25.0,
-        implementationCost: 3
+        implementationCost: 3,
       },
       {
-        type: 'INDEXING',
-        priority: 'HIGH',
-        description: 'Add database indexes for query optimization',
+        type: "INDEXING",
+        priority: "HIGH",
+        description: "Add database indexes for query optimization",
         expectedImprovement: 40.0,
-        implementationCost: 2
-      }
+        implementationCost: 2,
+      },
     ];
 
-    this.logger.debug('Generated optimization recommendations', { count: recommendations.length });
+    this.logger.debug("Generated optimization recommendations", {
+      count: recommendations.length,
+    });
     return recommendations;
   }
 
@@ -109,7 +117,7 @@ export class PerformanceOptimizer {
         averageResponseTime: 0,
         throughput: 0,
         errorRate: 0,
-        status: 'INITIALIZING'
+        status: "INITIALIZING",
       };
     }
 
@@ -120,8 +128,8 @@ export class PerformanceOptimizer {
       errorRate: latest.errorRate,
       cpuUsage: latest.cpuUsage,
       memoryUsage: latest.memoryUsage,
-      status: 'HEALTHY',
-      lastUpdated: latest.timestamp
+      status: "HEALTHY",
+      lastUpdated: latest.timestamp,
     };
   }
 
@@ -130,11 +138,13 @@ export class PerformanceOptimizer {
    * Placeholder method - replace with actual optimization logic
    */
   async optimizeRequest(request: any): Promise<any> {
-    this.logger.debug('Optimizing request processing', { requestId: request?.id });
+    this.logger.debug("Optimizing request processing", {
+      requestId: request?.id,
+    });
     return {
       optimized: true,
-      strategy: 'default',
-      estimatedImprovement: 10.0
+      strategy: "default",
+      estimatedImprovement: 10.0,
     };
   }
 
@@ -149,15 +159,21 @@ export class PerformanceOptimizer {
       executionDuration: durationMetrics.executionDuration || 0,
       explanationDuration: durationMetrics.explanationDuration || 0,
       baselineExecutionTime: durationMetrics.baselineExecutionTime || 0,
-      throughput: 1000 / (durationMetrics.totalDuration || 1) * 1000, // requests per second
+      throughput: (1000 / (durationMetrics.totalDuration || 1)) * 1000, // requests per second
       successRate: 0.95,
       errorRate: 0.05,
-      efficiency: durationMetrics.baselineExecutionTime > 0 ?
-        durationMetrics.baselineExecutionTime / durationMetrics.totalDuration : 1.0,
-      timestamp: new Date()
+      efficiency:
+        durationMetrics.baselineExecutionTime > 0
+          ? durationMetrics.baselineExecutionTime /
+            durationMetrics.totalDuration
+          : 1.0,
+      timestamp: new Date(),
     };
 
-    this.logger.debug('Calculated performance metrics', { durationMetrics, metrics });
+    this.logger.debug("Calculated performance metrics", {
+      durationMetrics,
+      metrics,
+    });
     return metrics;
   }
 }

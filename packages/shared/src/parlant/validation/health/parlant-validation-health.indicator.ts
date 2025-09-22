@@ -10,11 +10,15 @@
  * @author AIgent Integration Team
  */
 
-import { Injectable } from '@nestjs/common';
-import { HealthIndicator, HealthIndicatorResult, HealthCheckError } from '@nestjs/terminus';
-import { ParlantValidationBridge } from '../parlant-validation-bridge.service';
-import { ParlantWebSocketManager } from '../websocket/parlant-websocket-manager.service';
-import { ValidationLayerConfigService } from '../config/validation-layer.config';
+import { Injectable } from "@nestjs/common";
+import {
+  HealthIndicator,
+  HealthIndicatorResult,
+  HealthCheckError,
+} from "@nestjs/terminus";
+import { ParlantValidationBridge } from "../parlant-validation-bridge.service";
+import { ParlantWebSocketManager } from "../websocket/parlant-websocket-manager.service";
+import { ValidationLayerConfigService } from "../config/validation-layer.config";
 
 @Injectable()
 export class ParlantValidationHealthIndicator extends HealthIndicator {
@@ -37,7 +41,10 @@ export class ParlantValidationHealthIndicator extends HealthIndicator {
       return result;
     }
 
-    throw new HealthCheckError('PARLANT validation health check failed', result);
+    throw new HealthCheckError(
+      "PARLANT validation health check failed",
+      result,
+    );
   }
 
   /**
@@ -72,13 +79,14 @@ export class ParlantValidationHealthIndicator extends HealthIndicator {
       }
 
       // Check error rate
-      const errorRate = (metrics.failedValidations / metrics.totalRequests) * 100;
-      if (errorRate > 10) { // 10% error rate threshold
+      const errorRate =
+        (metrics.failedValidations / metrics.totalRequests) * 100;
+      if (errorRate > 10) {
+        // 10% error rate threshold
         return false;
       }
 
       return true;
-
     } catch (error) {
       return false;
     }

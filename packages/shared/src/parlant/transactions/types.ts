@@ -23,7 +23,7 @@ import {
   ParlantValidationResponse,
   ParlantUserContext,
   SecurityLevel,
-} from '../../types/parlant-integration.types';
+} from "../../types/parlant-integration.types";
 
 // ===== CORE TRANSACTION INTERFACES =====
 
@@ -32,58 +32,58 @@ import {
  */
 export enum TransactionOperationType {
   // Single operations
-  READ = 'READ',
-  WRITE = 'WRITE',
-  UPDATE = 'UPDATE',
-  DELETE = 'DELETE',
+  READ = "READ",
+  WRITE = "WRITE",
+  UPDATE = "UPDATE",
+  DELETE = "DELETE",
 
   // Batch operations
-  BATCH_READ = 'BATCH_READ',
-  BATCH_WRITE = 'BATCH_WRITE',
-  BATCH_UPDATE = 'BATCH_UPDATE',
-  BATCH_DELETE = 'BATCH_DELETE',
+  BATCH_READ = "BATCH_READ",
+  BATCH_WRITE = "BATCH_WRITE",
+  BATCH_UPDATE = "BATCH_UPDATE",
+  BATCH_DELETE = "BATCH_DELETE",
 
   // Complex operations
-  MIGRATION = 'MIGRATION',
-  BACKUP = 'BACKUP',
-  RESTORE = 'RESTORE',
-  SCHEMA_CHANGE = 'SCHEMA_CHANGE',
+  MIGRATION = "MIGRATION",
+  BACKUP = "BACKUP",
+  RESTORE = "RESTORE",
+  SCHEMA_CHANGE = "SCHEMA_CHANGE",
 }
 
 /**
  * Transaction isolation levels for consistency control
  */
 export enum TransactionIsolationLevel {
-  READ_UNCOMMITTED = 'READ_UNCOMMITTED',
-  READ_COMMITTED = 'READ_COMMITTED',
-  REPEATABLE_READ = 'REPEATABLE_READ',
-  SERIALIZABLE = 'SERIALIZABLE',
+  READ_UNCOMMITTED = "READ_UNCOMMITTED",
+  READ_COMMITTED = "READ_COMMITTED",
+  REPEATABLE_READ = "REPEATABLE_READ",
+  SERIALIZABLE = "SERIALIZABLE",
 }
 
 /**
  * Transaction state management
  */
 export enum TransactionState {
-  INITIALIZED = 'INITIALIZED',
-  PENDING_VALIDATION = 'PENDING_VALIDATION',
-  VALIDATED = 'VALIDATED',
-  EXECUTING = 'EXECUTING',
-  COMMITTED = 'COMMITTED',
-  ROLLED_BACK = 'ROLLED_BACK',
-  FAILED = 'FAILED',
-  TIMEOUT = 'TIMEOUT',
-  DEADLOCKED = 'DEADLOCKED',
+  INITIALIZED = "INITIALIZED",
+  PENDING_VALIDATION = "PENDING_VALIDATION",
+  VALIDATED = "VALIDATED",
+  EXECUTING = "EXECUTING",
+  COMMITTED = "COMMITTED",
+  ROLLED_BACK = "ROLLED_BACK",
+  FAILED = "FAILED",
+  TIMEOUT = "TIMEOUT",
+  DEADLOCKED = "DEADLOCKED",
 }
 
 /**
  * Transaction priority levels for conflict resolution
  */
 export enum TransactionPriority {
-  LOW = 'LOW',
-  NORMAL = 'NORMAL',
-  HIGH = 'HIGH',
-  CRITICAL = 'CRITICAL',
-  SYSTEM = 'SYSTEM',
+  LOW = "LOW",
+  NORMAL = "NORMAL",
+  HIGH = "HIGH",
+  CRITICAL = "CRITICAL",
+  SYSTEM = "SYSTEM",
 }
 
 // ===== TRANSACTION CONTEXT AND METADATA =====
@@ -272,7 +272,7 @@ export interface TransactionOperation {
  * Transaction executor function type
  */
 export type TransactionExecutor = (
-  context: TransactionExecutionContext
+  context: TransactionExecutionContext,
 ) => Promise<TransactionOperationResult>;
 
 /**
@@ -280,7 +280,7 @@ export type TransactionExecutor = (
  */
 export type TransactionRollbackExecutor = (
   context: TransactionExecutionContext,
-  originalResult: TransactionOperationResult
+  originalResult: TransactionOperationResult,
 ) => Promise<void>;
 
 /**
@@ -338,15 +338,15 @@ export interface TransactionOperationResult {
  * Transaction error types
  */
 export enum TransactionErrorType {
-  VALIDATION_FAILED = 'VALIDATION_FAILED',
-  EXECUTION_FAILED = 'EXECUTION_FAILED',
-  TIMEOUT = 'TIMEOUT',
-  DEADLOCK = 'DEADLOCK',
-  CONNECTION_FAILED = 'CONNECTION_FAILED',
-  ROLLBACK_FAILED = 'ROLLBACK_FAILED',
-  RESOURCE_EXHAUSTED = 'RESOURCE_EXHAUSTED',
-  SECURITY_VIOLATION = 'SECURITY_VIOLATION',
-  CONSTRAINT_VIOLATION = 'CONSTRAINT_VIOLATION',
+  VALIDATION_FAILED = "VALIDATION_FAILED",
+  EXECUTION_FAILED = "EXECUTION_FAILED",
+  TIMEOUT = "TIMEOUT",
+  DEADLOCK = "DEADLOCK",
+  CONNECTION_FAILED = "CONNECTION_FAILED",
+  ROLLBACK_FAILED = "ROLLBACK_FAILED",
+  RESOURCE_EXHAUSTED = "RESOURCE_EXHAUSTED",
+  SECURITY_VIOLATION = "SECURITY_VIOLATION",
+  CONSTRAINT_VIOLATION = "CONSTRAINT_VIOLATION",
 }
 
 /**
@@ -386,7 +386,7 @@ export interface TransactionRollbackInfo {
   readonly reason: string;
 
   /** Rollback execution status */
-  readonly status: 'PENDING' | 'EXECUTING' | 'COMPLETED' | 'FAILED';
+  readonly status: "PENDING" | "EXECUTING" | "COMPLETED" | "FAILED";
 
   /** Operations that need rollback */
   readonly operationsToRollback: string[];
@@ -411,7 +411,10 @@ export interface TransactionPerformanceMonitor {
   recordOperationStart(operationId: string): void;
 
   /** Record operation completion */
-  recordOperationCompletion(operationId: string, result: TransactionOperationResult): void;
+  recordOperationCompletion(
+    operationId: string,
+    result: TransactionOperationResult,
+  ): void;
 
   /** Record resource usage */
   recordResourceUsage(metrics: Partial<TransactionPerformanceMetrics>): void;
@@ -425,10 +428,17 @@ export interface TransactionPerformanceMonitor {
  */
 export interface TransactionAuditLogger {
   /** Log transaction state change */
-  logStateChange(oldState: TransactionState, newState: TransactionState, reason: string): void;
+  logStateChange(
+    oldState: TransactionState,
+    newState: TransactionState,
+    reason: string,
+  ): void;
 
   /** Log operation execution */
-  logOperationExecution(operation: TransactionOperation, result: TransactionOperationResult): void;
+  logOperationExecution(
+    operation: TransactionOperation,
+    result: TransactionOperationResult,
+  ): void;
 
   /** Log validation request */
   logValidationRequest(request: ParlantValidationRequest): void;
@@ -451,7 +461,12 @@ export interface TransactionAuditInfo {
   readonly auditId: string;
 
   /** Audit entry type */
-  readonly type: 'STATE_CHANGE' | 'OPERATION' | 'VALIDATION' | 'ERROR' | 'SECURITY';
+  readonly type:
+    | "STATE_CHANGE"
+    | "OPERATION"
+    | "VALIDATION"
+    | "ERROR"
+    | "SECURITY";
 
   /** Audit entry timestamp */
   readonly timestamp: Date;
@@ -485,10 +500,10 @@ export interface TransactionBatchConfiguration {
   maxParallelOperations: number;
 
   /** Batch validation strategy */
-  validationStrategy: 'INDIVIDUAL' | 'BATCH' | 'HYBRID';
+  validationStrategy: "INDIVIDUAL" | "BATCH" | "HYBRID";
 
   /** Failure handling strategy */
-  failureStrategy: 'FAIL_FAST' | 'CONTINUE_ON_ERROR' | 'ROLLBACK_ALL';
+  failureStrategy: "FAIL_FAST" | "CONTINUE_ON_ERROR" | "ROLLBACK_ALL";
 }
 
 /**
@@ -524,13 +539,18 @@ export interface DistributedTransactionParticipant {
   readonly participantName: string;
 
   /** Database type */
-  readonly databaseType: 'SQLITE' | 'MYSQL' | 'POSTGRESQL' | 'MONGODB' | 'REDIS';
+  readonly databaseType:
+    | "SQLITE"
+    | "MYSQL"
+    | "POSTGRESQL"
+    | "MONGODB"
+    | "REDIS";
 
   /** Connection string */
   readonly connectionString: string;
 
   /** Participant status */
-  status: 'ACTIVE' | 'INACTIVE' | 'FAILED' | 'RECOVERING';
+  status: "ACTIVE" | "INACTIVE" | "FAILED" | "RECOVERING";
 
   /** Last heartbeat timestamp */
   lastHeartbeat: Date;
@@ -550,10 +570,10 @@ export interface DistributedTransactionInfo {
   readonly participants: DistributedTransactionParticipant[];
 
   /** Two-phase commit status */
-  readonly commitPhase: 'PREPARE' | 'COMMIT' | 'ABORT';
+  readonly commitPhase: "PREPARE" | "COMMIT" | "ABORT";
 
   /** Participant votes */
-  readonly participantVotes: Map<string, 'YES' | 'NO' | 'TIMEOUT'>;
+  readonly participantVotes: Map<string, "YES" | "NO" | "TIMEOUT">;
 
   /** Coordination timeout */
   readonly coordinationTimeout: number;
@@ -570,16 +590,16 @@ export interface DistributedTransactionRecoveryInfo {
   readonly recoveryStartTime: Date;
 
   /** Recovery type */
-  readonly recoveryType: 'AUTOMATIC' | 'MANUAL' | 'OPERATOR_INTERVENTION';
+  readonly recoveryType: "AUTOMATIC" | "MANUAL" | "OPERATOR_INTERVENTION";
 
   /** Failed participants */
   readonly failedParticipants: string[];
 
   /** Recovery strategy */
-  readonly recoveryStrategy: 'RETRY' | 'COMPENSATE' | 'ROLLBACK';
+  readonly recoveryStrategy: "RETRY" | "COMPENSATE" | "ROLLBACK";
 
   /** Recovery status */
-  status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'FAILED';
+  status: "PENDING" | "IN_PROGRESS" | "COMPLETED" | "FAILED";
 }
 
 // ===== DEADLOCK DETECTION INTERFACES =====
@@ -601,10 +621,13 @@ export interface DeadlockInfo {
   readonly suggestedVictim: string;
 
   /** Resolution strategy */
-  readonly resolutionStrategy: 'TIMEOUT' | 'VICTIM_SELECTION' | 'PRIORITY_BASED';
+  readonly resolutionStrategy:
+    | "TIMEOUT"
+    | "VICTIM_SELECTION"
+    | "PRIORITY_BASED";
 
   /** Resolution status */
-  status: 'DETECTED' | 'RESOLVING' | 'RESOLVED' | 'FAILED';
+  status: "DETECTED" | "RESOLVING" | "RESOLVED" | "FAILED";
 }
 
 /**
@@ -621,7 +644,7 @@ export interface DeadlockCycle {
   readonly resource: string;
 
   /** Lock type */
-  readonly lockType: 'READ' | 'WRITE' | 'EXCLUSIVE';
+  readonly lockType: "READ" | "WRITE" | "EXCLUSIVE";
 }
 
 // ===== VALIDATION INTEGRATION INTERFACES =====
@@ -629,7 +652,8 @@ export interface DeadlockCycle {
 /**
  * PARLANT transaction validation request
  */
-export interface ParlantTransactionValidationRequest extends ParlantValidationRequest {
+export interface ParlantTransactionValidationRequest
+  extends ParlantValidationRequest {
   /** Transaction metadata */
   readonly transaction: TransactionMetadata;
 
@@ -637,7 +661,7 @@ export interface ParlantTransactionValidationRequest extends ParlantValidationRe
   readonly operations: TransactionOperation[];
 
   /** Validation scope */
-  readonly validationScope: 'TRANSACTION' | 'OPERATION' | 'BATCH';
+  readonly validationScope: "TRANSACTION" | "OPERATION" | "BATCH";
 
   /** Risk assessment */
   readonly riskAssessment: TransactionRiskAssessment;
@@ -648,7 +672,7 @@ export interface ParlantTransactionValidationRequest extends ParlantValidationRe
  */
 export interface TransactionRiskAssessment {
   /** Overall risk level */
-  readonly riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  readonly riskLevel: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
 
   /** Risk factors identified */
   readonly riskFactors: string[];
@@ -666,7 +690,8 @@ export interface TransactionRiskAssessment {
 /**
  * PARLANT transaction validation response
  */
-export interface ParlantTransactionValidationResponse extends ParlantValidationResponse {
+export interface ParlantTransactionValidationResponse
+  extends ParlantValidationResponse {
   /** Transaction-specific constraints */
   readonly transactionConstraints?: TransactionConstraints;
 
@@ -711,5 +736,5 @@ export interface ConditionalApproval {
   readonly conditionTimeout: number;
 
   /** Fallback action if conditions not met */
-  readonly fallbackAction: 'REJECT' | 'DEFER' | 'REQUEST_APPROVAL';
+  readonly fallbackAction: "REJECT" | "DEFER" | "REQUEST_APPROVAL";
 }

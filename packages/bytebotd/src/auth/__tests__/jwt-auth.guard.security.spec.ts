@@ -332,14 +332,12 @@ describe('JwtAuthGuard - Advanced Security Tests', () => {
 
         jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
         if (scenario.shouldSucceed) {
-          jest
-            .spyOn(jwtService, 'verifyAsync')
-            .mockResolvedValue({
-              sub: 'user123',
-              email: 'test@example.com',
-              role: 'viewer',
-              exp: Math.floor(Date.now() / 1000) + 3600,
-            });
+          jest.spyOn(jwtService, 'verifyAsync').mockResolvedValue({
+            sub: 'user123',
+            email: 'test@example.com',
+            role: 'viewer',
+            exp: Math.floor(Date.now() / 1000) + 3600,
+          });
         } else {
           jest
             .spyOn(jwtService, 'verifyAsync')

@@ -27,37 +27,42 @@
  * @version 1.0.0 - Enterprise Coordination Framework
  */
 
-import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
-import { Cron, CronExpression } from '@nestjs/schedule';
-import { ParlantIntegrationService } from './parlant-integration.service';
+import {
+  Injectable,
+  Logger,
+  OnModuleInit,
+  OnModuleDestroy,
+} from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { EventEmitter2, OnEvent } from "@nestjs/event-emitter";
+import { Cron, CronExpression } from "@nestjs/schedule";
+import { ParlantIntegrationService } from "./parlant-integration.service";
 import {
   SecurityLevel,
   ValidationMode,
   ConversationPriority,
   ApprovalLevel,
   RiskLevel,
-} from '../types/parlant.types';
+} from "../types/parlant.types";
 import {
   ParlantValidationRequest,
   ParlantValidationResponse,
-} from '../types/parlant-integration.types';
+} from "../types/parlant-integration.types";
 
 // Specialized Agent Types
 enum SpecializedAgentType {
-  COMPUTER_USE = 'COMPUTER_USE',
-  DATA_EXTRACTION = 'DATA_EXTRACTION',
-  FILE_MANAGEMENT = 'FILE_MANAGEMENT',
-  BROWSER_AUTOMATION = 'BROWSER_AUTOMATION',
-  WORKFLOW_ORCHESTRATION = 'WORKFLOW_ORCHESTRATION',
+  COMPUTER_USE = "COMPUTER_USE",
+  DATA_EXTRACTION = "DATA_EXTRACTION",
+  FILE_MANAGEMENT = "FILE_MANAGEMENT",
+  BROWSER_AUTOMATION = "BROWSER_AUTOMATION",
+  WORKFLOW_ORCHESTRATION = "WORKFLOW_ORCHESTRATION",
 }
 
 // Integration coordination interfaces
 interface AgentIntegrationStatus {
   agentType: SpecializedAgentType;
   isActive: boolean;
-  healthStatus: 'HEALTHY' | 'DEGRADED' | 'UNAVAILABLE';
+  healthStatus: "HEALTHY" | "DEGRADED" | "UNAVAILABLE";
   lastHealthCheck: Date;
   activeValidations: number;
   queuedValidations: number;
@@ -134,7 +139,7 @@ interface CachingStrategy {
 interface SecurityPolicy {
   encryptionRequired: boolean;
   allowedSecurityLevels: SecurityLevel[];
-  auditLevel: 'BASIC' | 'DETAILED' | 'COMPREHENSIVE';
+  auditLevel: "BASIC" | "DETAILED" | "COMPREHENSIVE";
   accessControlRules: AccessControlRule[];
 }
 
@@ -179,7 +184,7 @@ interface ConversationHistoryEntry {
   timestamp: Date;
   agentType: SpecializedAgentType;
   conversationId: string;
-  decision: 'APPROVED' | 'DENIED' | 'ESCALATED';
+  decision: "APPROVED" | "DENIED" | "ESCALATED";
   reason: string;
   participants: string[];
 }
@@ -205,15 +210,27 @@ interface CoordinationResponse {
 interface CoordinationDecision {
   primaryAgent: SpecializedAgentType;
   fallbackAgents: SpecializedAgentType[];
-  loadBalancingStrategy: 'ROUND_ROBIN' | 'LEAST_LOADED' | 'CAPABILITY_BASED' | 'PERFORMANCE_BASED';
+  loadBalancingStrategy:
+    | "ROUND_ROBIN"
+    | "LEAST_LOADED"
+    | "CAPABILITY_BASED"
+    | "PERFORMANCE_BASED";
   conflictResolution: ConflictResolutionStrategy;
   resourceAllocation: ResourceAllocation;
 }
 
 interface ConflictResolutionStrategy {
-  type: 'FIRST_COME_FIRST_SERVE' | 'PRIORITY_BASED' | 'CAPABILITY_MATCH' | 'PERFORMANCE_OPTIMIZED';
-  tieBreaker: 'RANDOM' | 'LEAST_LOADED' | 'FASTEST_RESPONSE' | 'HIGHEST_SUCCESS_RATE';
-  timeoutHandling: 'QUEUE' | 'REDIRECT' | 'FAIL_FAST';
+  type:
+    | "FIRST_COME_FIRST_SERVE"
+    | "PRIORITY_BASED"
+    | "CAPABILITY_MATCH"
+    | "PERFORMANCE_OPTIMIZED";
+  tieBreaker:
+    | "RANDOM"
+    | "LEAST_LOADED"
+    | "FASTEST_RESPONSE"
+    | "HIGHEST_SUCCESS_RATE";
+  timeoutHandling: "QUEUE" | "REDIRECT" | "FAIL_FAST";
 }
 
 interface ResourceAllocation {
@@ -244,16 +261,29 @@ interface GlobalCoordinationStats {
 }
 
 @Injectable()
-export class ParlantIntegrationCoordinatorService implements OnModuleInit, OnModuleDestroy {
-  private readonly logger = new Logger(ParlantIntegrationCoordinatorService.name);
+export class ParlantIntegrationCoordinatorService
+  implements OnModuleInit, OnModuleDestroy
+{
+  private readonly logger = new Logger(
+    ParlantIntegrationCoordinatorService.name,
+  );
 
   // Agent registry and status tracking
-  private readonly agentRegistry = new Map<SpecializedAgentType, AgentIntegrationStatus>();
+  private readonly agentRegistry = new Map<
+    SpecializedAgentType,
+    AgentIntegrationStatus
+  >();
   private readonly activeCoordinations = new Map<string, CoordinationRequest>();
-  private readonly coordinationHistory = new Map<string, CoordinationResponse[]>();
+  private readonly coordinationHistory = new Map<
+    string,
+    CoordinationResponse[]
+  >();
 
   // Performance tracking
-  private readonly performanceTracker = new Map<SpecializedAgentType, AgentMetrics>();
+  private readonly performanceTracker = new Map<
+    SpecializedAgentType,
+    AgentMetrics
+  >();
   private globalStats: GlobalCoordinationStats;
 
   // Configuration and policies
@@ -272,7 +302,7 @@ export class ParlantIntegrationCoordinatorService implements OnModuleInit, OnMod
   }
 
   async onModuleInit() {
-    this.logger.log('PARLANT Integration Coordinator initializing...');
+    this.logger.log("PARLANT Integration Coordinator initializing...");
 
     // Initialize all specialized agents
     await this.initializeSpecializedAgents();
@@ -286,15 +316,19 @@ export class ParlantIntegrationCoordinatorService implements OnModuleInit, OnMod
     // Initialize coordination algorithms
     this.initializeCoordinationAlgorithms();
 
-    this.logger.log('PARLANT Integration Coordinator initialized successfully', {
-      activeAgents: this.agentRegistry.size,
-      coordinationAlgorithms: Object.keys(this.coordinationConfig.algorithms).length,
-      monitoringEnabled: this.coordinationConfig.monitoring.enabled,
-    });
+    this.logger.log(
+      "PARLANT Integration Coordinator initialized successfully",
+      {
+        activeAgents: this.agentRegistry.size,
+        coordinationAlgorithms: Object.keys(this.coordinationConfig.algorithms)
+          .length,
+        monitoringEnabled: this.coordinationConfig.monitoring.enabled,
+      },
+    );
   }
 
   async onModuleDestroy() {
-    this.logger.log('PARLANT Integration Coordinator shutting down...');
+    this.logger.log("PARLANT Integration Coordinator shutting down...");
 
     // Gracefully shutdown all agents
     await this.shutdownAllAgents();
@@ -302,7 +336,7 @@ export class ParlantIntegrationCoordinatorService implements OnModuleInit, OnMod
     // Save coordination statistics
     await this.saveCoordinationStatistics();
 
-    this.logger.log('PARLANT Integration Coordinator shutdown complete');
+    this.logger.log("PARLANT Integration Coordinator shutdown complete");
   }
 
   /**
@@ -324,7 +358,10 @@ export class ParlantIntegrationCoordinatorService implements OnModuleInit, OnMod
 
     try {
       // Analyze request to determine optimal agent
-      const agentAnalysis = await this.analyzeValidationRequest(validationRequest, context);
+      const agentAnalysis = await this.analyzeValidationRequest(
+        validationRequest,
+        context,
+      );
 
       // Create coordination request
       const coordinationRequest: CoordinationRequest = {
@@ -342,13 +379,21 @@ export class ParlantIntegrationCoordinatorService implements OnModuleInit, OnMod
       this.activeCoordinations.set(requestId, coordinationRequest);
 
       // Coordinate with selected agent
-      const coordinationResponse = await this.routeToSpecializedAgent(coordinationRequest);
+      const coordinationResponse =
+        await this.routeToSpecializedAgent(coordinationRequest);
 
       // Execute validation through specialized agent
-      const validationResponse = await this.executeValidation(coordinationRequest, coordinationResponse);
+      const validationResponse = await this.executeValidation(
+        coordinationRequest,
+        coordinationResponse,
+      );
 
       // Update coordination statistics
-      this.updateCoordinationStatistics(coordinationRequest, coordinationResponse, validationResponse);
+      this.updateCoordinationStatistics(
+        coordinationRequest,
+        coordinationResponse,
+        validationResponse,
+      );
 
       const processingTime = Date.now() - startTime;
       this.logger.log(`Coordination completed successfully: ${requestId}`, {
@@ -360,7 +405,6 @@ export class ParlantIntegrationCoordinatorService implements OnModuleInit, OnMod
       });
 
       return validationResponse;
-
     } catch (error) {
       const processingTime = Date.now() - startTime;
       this.logger.error(`Coordination failed: ${requestId}`, {
@@ -371,7 +415,6 @@ export class ParlantIntegrationCoordinatorService implements OnModuleInit, OnMod
 
       // Handle coordination failure with fallback
       return this.handleCoordinationFailure(requestId, error, context);
-
     } finally {
       // Clean up active coordination
       this.activeCoordinations.delete(requestId);
@@ -395,68 +438,108 @@ export class ParlantIntegrationCoordinatorService implements OnModuleInit, OnMod
     let fallbackAgents: SpecializedAgentType[] = [];
 
     // Computer Use Agent - direct system control operations
-    if (functionName.includes('computer') ||
-        functionName.includes('execute') ||
-        functionName.includes('action') ||
-        packageName.includes('computer-use')) {
+    if (
+      functionName.includes("computer") ||
+      functionName.includes("execute") ||
+      functionName.includes("action") ||
+      packageName.includes("computer-use")
+    ) {
       recommendedAgent = SpecializedAgentType.COMPUTER_USE;
-      requiredCapabilities = ['system_control', 'security_validation', 'real_time_monitoring'];
+      requiredCapabilities = [
+        "system_control",
+        "security_validation",
+        "real_time_monitoring",
+      ];
       fallbackAgents = [SpecializedAgentType.WORKFLOW_ORCHESTRATION];
     }
 
     // Data Extraction Agent - data processing operations
-    else if (functionName.includes('extract') ||
-             functionName.includes('data') ||
-             functionName.includes('parse') ||
-             packageName.includes('data-extraction')) {
+    else if (
+      functionName.includes("extract") ||
+      functionName.includes("data") ||
+      functionName.includes("parse") ||
+      packageName.includes("data-extraction")
+    ) {
       recommendedAgent = SpecializedAgentType.DATA_EXTRACTION;
-      requiredCapabilities = ['data_processing', 'content_analysis', 'format_validation'];
-      fallbackAgents = [SpecializedAgentType.FILE_MANAGEMENT, SpecializedAgentType.BROWSER_AUTOMATION];
+      requiredCapabilities = [
+        "data_processing",
+        "content_analysis",
+        "format_validation",
+      ];
+      fallbackAgents = [
+        SpecializedAgentType.FILE_MANAGEMENT,
+        SpecializedAgentType.BROWSER_AUTOMATION,
+      ];
     }
 
     // File Management Agent - file system operations
-    else if (functionName.includes('file') ||
-             functionName.includes('upload') ||
-             functionName.includes('download') ||
-             packageName.includes('file-management')) {
+    else if (
+      functionName.includes("file") ||
+      functionName.includes("upload") ||
+      functionName.includes("download") ||
+      packageName.includes("file-management")
+    ) {
       recommendedAgent = SpecializedAgentType.FILE_MANAGEMENT;
-      requiredCapabilities = ['file_operations', 'content_validation', 'security_scanning'];
+      requiredCapabilities = [
+        "file_operations",
+        "content_validation",
+        "security_scanning",
+      ];
       fallbackAgents = [SpecializedAgentType.DATA_EXTRACTION];
     }
 
     // Browser Automation Agent - web interaction operations
-    else if (functionName.includes('browser') ||
-             functionName.includes('web') ||
-             functionName.includes('navigate') ||
-             packageName.includes('browser')) {
+    else if (
+      functionName.includes("browser") ||
+      functionName.includes("web") ||
+      functionName.includes("navigate") ||
+      packageName.includes("browser")
+    ) {
       recommendedAgent = SpecializedAgentType.BROWSER_AUTOMATION;
-      requiredCapabilities = ['web_automation', 'dom_interaction', 'session_management'];
+      requiredCapabilities = [
+        "web_automation",
+        "dom_interaction",
+        "session_management",
+      ];
       fallbackAgents = [SpecializedAgentType.DATA_EXTRACTION];
     }
 
     // Workflow Orchestration Agent - complex multi-step operations
-    else if (functionName.includes('workflow') ||
-             functionName.includes('batch') ||
-             functionName.includes('orchestrate') ||
-             description.includes('multi-step')) {
+    else if (
+      functionName.includes("workflow") ||
+      functionName.includes("batch") ||
+      functionName.includes("orchestrate") ||
+      description.includes("multi-step")
+    ) {
       recommendedAgent = SpecializedAgentType.WORKFLOW_ORCHESTRATION;
-      requiredCapabilities = ['workflow_management', 'step_coordination', 'dependency_resolution'];
+      requiredCapabilities = [
+        "workflow_management",
+        "step_coordination",
+        "dependency_resolution",
+      ];
       fallbackAgents = [SpecializedAgentType.COMPUTER_USE];
     }
 
     // Default to Computer Use Agent for general operations
     else {
       recommendedAgent = SpecializedAgentType.COMPUTER_USE;
-      requiredCapabilities = ['general_validation', 'security_assessment'];
+      requiredCapabilities = ["general_validation", "security_assessment"];
       fallbackAgents = [SpecializedAgentType.WORKFLOW_ORCHESTRATION];
     }
 
     // Consider security level for agent selection
     if (request.securityLevel === SecurityLevel._CRITICAL) {
       // Ensure the agent can handle critical security operations
-      if (!this.agentSupportsSecurityLevel(recommendedAgent, SecurityLevel._CRITICAL)) {
+      if (
+        !this.agentSupportsSecurityLevel(
+          recommendedAgent,
+          SecurityLevel._CRITICAL,
+        )
+      ) {
         // Find an agent that can handle critical operations
-        const criticalCapableAgent = this.findAgentWithSecurityLevel(SecurityLevel._CRITICAL);
+        const criticalCapableAgent = this.findAgentWithSecurityLevel(
+          SecurityLevel._CRITICAL,
+        );
         if (criticalCapableAgent) {
           fallbackAgents.unshift(recommendedAgent);
           recommendedAgent = criticalCapableAgent;
@@ -466,7 +549,7 @@ export class ParlantIntegrationCoordinatorService implements OnModuleInit, OnMod
 
     // Consider current agent load and availability
     const agentStatus = this.agentRegistry.get(recommendedAgent);
-    if (agentStatus && agentStatus.healthStatus !== 'HEALTHY') {
+    if (agentStatus && agentStatus.healthStatus !== "HEALTHY") {
       // Agent is not healthy, promote first fallback
       if (fallbackAgents.length > 0) {
         fallbackAgents.unshift(recommendedAgent);
@@ -478,22 +561,30 @@ export class ParlantIntegrationCoordinatorService implements OnModuleInit, OnMod
       recommendedAgent,
       requiredCapabilities,
       fallbackAgents,
-      confidence: this.calculateAgentSelectionConfidence(recommendedAgent, request),
-      reasoning: this.generateAgentSelectionReasoning(recommendedAgent, request),
+      confidence: this.calculateAgentSelectionConfidence(
+        recommendedAgent,
+        request,
+      ),
+      reasoning: this.generateAgentSelectionReasoning(
+        recommendedAgent,
+        request,
+      ),
     };
   }
 
   /**
    * Route coordination request to specialized agent
    */
-  private async routeToSpecializedAgent(request: CoordinationRequest): Promise<CoordinationResponse> {
+  private async routeToSpecializedAgent(
+    request: CoordinationRequest,
+  ): Promise<CoordinationResponse> {
     const agentStatus = this.agentRegistry.get(request.agentType);
 
-    if (!agentStatus || agentStatus.healthStatus === 'UNAVAILABLE') {
+    if (!agentStatus || agentStatus.healthStatus === "UNAVAILABLE") {
       // Try fallback agents
       for (const fallbackAgent of request.fallbackOptions) {
         const fallbackStatus = this.agentRegistry.get(fallbackAgent);
-        if (fallbackStatus && fallbackStatus.healthStatus === 'HEALTHY') {
+        if (fallbackStatus && fallbackStatus.healthStatus === "HEALTHY") {
           this.logger.warn(`Routing to fallback agent: ${fallbackAgent}`, {
             requestId: request.requestId,
             originalAgent: request.agentType,
@@ -510,12 +601,17 @@ export class ParlantIntegrationCoordinatorService implements OnModuleInit, OnMod
     const coordinationDecision = this.makeCoordinationDecision(request);
 
     // Calculate performance expectations
-    const performanceExpectations = this.calculatePerformanceExpectations(request, coordinationDecision);
+    const performanceExpectations = this.calculatePerformanceExpectations(
+      request,
+      coordinationDecision,
+    );
 
     return {
       requestId: request.requestId,
       assignedAgent: coordinationDecision.primaryAgent,
-      estimatedCompletionTime: new Date(Date.now() + performanceExpectations.estimatedDuration),
+      estimatedCompletionTime: new Date(
+        Date.now() + performanceExpectations.estimatedDuration,
+      ),
       alternativeAgents: coordinationDecision.fallbackAgents,
       coordinationDecision,
       routingReason: this.generateRoutingReason(coordinationDecision),
@@ -539,21 +635,29 @@ export class ParlantIntegrationCoordinatorService implements OnModuleInit, OnMod
     try {
       // Execute validation with agent-specific configuration
       const agentConfig = this.agentRegistry.get(agentType)?.configuration;
-      const enhancedRequest = this.enhanceRequestForAgent(request.validationRequest, agentType, agentConfig);
+      const enhancedRequest = this.enhanceRequestForAgent(
+        request.validationRequest,
+        agentType,
+        agentConfig,
+      );
 
       // Call PARLANT validation service with agent context
-      const response = await this.parlantService.validateFunctionExecution(enhancedRequest);
+      const response =
+        await this.parlantService.validateFunctionExecution(enhancedRequest);
 
       // Record successful validation
       this.recordSuccessfulValidation(agentType, Date.now() - startTime);
 
       // Store conversation context for cross-agent sharing
       if (response.conversationId) {
-        this.storeConversationContext(response.conversationId, agentType, request.context);
+        this.storeConversationContext(
+          response.conversationId,
+          agentType,
+          request.context,
+        );
       }
 
       return response;
-
     } catch (error) {
       // Record failed validation
       this.recordFailedValidation(agentType, Date.now() - startTime, error);
@@ -577,7 +681,6 @@ export class ParlantIntegrationCoordinatorService implements OnModuleInit, OnMod
       }
 
       throw error;
-
     } finally {
       // Update agent metrics
       this.updateAgentActiveValidations(agentType, -1);
@@ -598,7 +701,7 @@ export class ParlantIntegrationCoordinatorService implements OnModuleInit, OnMod
     enhanced.metadata = {
       ...enhanced.metadata,
       assignedAgent: agentType,
-      coordinationService: 'ParlantIntegrationCoordinator',
+      coordinationService: "ParlantIntegrationCoordinator",
       enhancedProcessing: true,
     };
 
@@ -654,7 +757,7 @@ export class ParlantIntegrationCoordinatorService implements OnModuleInit, OnMod
         status.lastHealthCheck = new Date();
         status.resourceUtilization = healthResult.resourceUtilization;
 
-        if (healthResult.status === 'UNAVAILABLE') {
+        if (healthResult.status === "UNAVAILABLE") {
           this.logger.warn(`Agent health check failed: ${agentType}`, {
             agentType,
             lastHealthy: status.lastHealthCheck,
@@ -662,20 +765,19 @@ export class ParlantIntegrationCoordinatorService implements OnModuleInit, OnMod
           });
 
           // Emit agent unavailable event
-          this.eventEmitter.emit('agent.unavailable', {
+          this.eventEmitter.emit("agent.unavailable", {
             agentType,
             status,
             timestamp: new Date(),
           });
         }
-
       } catch (error) {
         this.logger.error(`Health check error for agent: ${agentType}`, {
           agentType,
           error: error instanceof Error ? error.message : String(error),
         });
 
-        status.healthStatus = 'UNAVAILABLE';
+        status.healthStatus = "UNAVAILABLE";
         status.lastHealthCheck = new Date();
       }
     }
@@ -691,7 +793,10 @@ export class ParlantIntegrationCoordinatorService implements OnModuleInit, OnMod
 
     // Optimize agent configurations based on performance
     for (const [agentType, metrics] of this.performanceTracker.entries()) {
-      if (metrics.averageProcessingTime > this.coordinationConfig.performance.maxResponseTime) {
+      if (
+        metrics.averageProcessingTime >
+        this.coordinationConfig.performance.maxResponseTime
+      ) {
         await this.optimizeAgentConfiguration(agentType, metrics);
       }
     }
@@ -703,19 +808,19 @@ export class ParlantIntegrationCoordinatorService implements OnModuleInit, OnMod
   /**
    * Event handlers for coordination events
    */
-  @OnEvent('validation.started')
+  @OnEvent("validation.started")
   handleValidationStarted(event: any) {
-    this.logger.debug('Validation started event received', event);
+    this.logger.debug("Validation started event received", event);
   }
 
-  @OnEvent('validation.completed')
+  @OnEvent("validation.completed")
   handleValidationCompleted(event: any) {
-    this.logger.debug('Validation completed event received', event);
+    this.logger.debug("Validation completed event received", event);
   }
 
-  @OnEvent('agent.overloaded')
+  @OnEvent("agent.overloaded")
   handleAgentOverloaded(event: any) {
-    this.logger.warn('Agent overloaded event received', event);
+    this.logger.warn("Agent overloaded event received", event);
     // Implement load redistribution logic
   }
 
@@ -723,24 +828,60 @@ export class ParlantIntegrationCoordinatorService implements OnModuleInit, OnMod
   private initializeCoordinationConfiguration() {
     this.coordinationConfig = {
       algorithms: {
-        loadBalancing: this.configService.get('coordination.loadBalancing', 'CAPABILITY_BASED'),
-        conflictResolution: this.configService.get('coordination.conflictResolution', 'PERFORMANCE_OPTIMIZED'),
-        failoverStrategy: this.configService.get('coordination.failoverStrategy', 'AUTO_FAILOVER'),
+        loadBalancing: this.configService.get(
+          "coordination.loadBalancing",
+          "CAPABILITY_BASED",
+        ),
+        conflictResolution: this.configService.get(
+          "coordination.conflictResolution",
+          "PERFORMANCE_OPTIMIZED",
+        ),
+        failoverStrategy: this.configService.get(
+          "coordination.failoverStrategy",
+          "AUTO_FAILOVER",
+        ),
       },
       performance: {
-        maxResponseTime: this.configService.get('coordination.performance.maxResponseTime', 30000),
-        targetThroughput: this.configService.get('coordination.performance.targetThroughput', 1000),
-        resourceUtilizationThreshold: this.configService.get('coordination.performance.resourceThreshold', 80),
+        maxResponseTime: this.configService.get(
+          "coordination.performance.maxResponseTime",
+          30000,
+        ),
+        targetThroughput: this.configService.get(
+          "coordination.performance.targetThroughput",
+          1000,
+        ),
+        resourceUtilizationThreshold: this.configService.get(
+          "coordination.performance.resourceThreshold",
+          80,
+        ),
       },
       monitoring: {
-        enabled: this.configService.get('coordination.monitoring.enabled', true),
-        healthCheckInterval: this.configService.get('coordination.monitoring.healthCheckInterval', 30000),
-        metricsRetention: this.configService.get('coordination.monitoring.metricsRetention', 86400000), // 24 hours
+        enabled: this.configService.get(
+          "coordination.monitoring.enabled",
+          true,
+        ),
+        healthCheckInterval: this.configService.get(
+          "coordination.monitoring.healthCheckInterval",
+          30000,
+        ),
+        metricsRetention: this.configService.get(
+          "coordination.monitoring.metricsRetention",
+          86400000,
+        ), // 24 hours
       },
       security: {
-        encryptionRequired: this.configService.get('coordination.security.encryptionRequired', true),
-        auditLevel: this.configService.get('coordination.security.auditLevel', 'DETAILED'),
-        accessControlEnabled: this.configService.get('coordination.security.accessControlEnabled', true),
+        encryptionRequired: this.configService.get(
+          "coordination.security.encryptionRequired",
+          true,
+        ),
+        auditLevel: this.configService.get(
+          "coordination.security.auditLevel",
+          "DETAILED",
+        ),
+        accessControlEnabled: this.configService.get(
+          "coordination.security.accessControlEnabled",
+          true,
+        ),
       },
     };
   }
@@ -763,16 +904,21 @@ export class ParlantIntegrationCoordinatorService implements OnModuleInit, OnMod
     const agentTypes = Object.values(SpecializedAgentType);
 
     for (const agentType of agentTypes) {
-      this.agentRegistry.set(agentType, this.createDefaultAgentStatus(agentType));
+      this.agentRegistry.set(
+        agentType,
+        this.createDefaultAgentStatus(agentType),
+      );
       this.performanceTracker.set(agentType, this.createDefaultAgentMetrics());
     }
   }
 
-  private createDefaultAgentStatus(agentType: SpecializedAgentType): AgentIntegrationStatus {
+  private createDefaultAgentStatus(
+    agentType: SpecializedAgentType,
+  ): AgentIntegrationStatus {
     return {
       agentType,
       isActive: true,
-      healthStatus: 'HEALTHY',
+      healthStatus: "HEALTHY",
       lastHealthCheck: new Date(),
       activeValidations: 0,
       queuedValidations: 0,
@@ -810,14 +956,16 @@ export class ParlantIntegrationCoordinatorService implements OnModuleInit, OnMod
     };
   }
 
-  private getAgentCapabilities(agentType: SpecializedAgentType): AgentCapability[] {
+  private getAgentCapabilities(
+    agentType: SpecializedAgentType,
+  ): AgentCapability[] {
     const capabilityMap: Record<SpecializedAgentType, AgentCapability[]> = {
       [SpecializedAgentType.COMPUTER_USE]: [
         {
-          name: 'system_control',
-          version: '1.0.0',
+          name: "system_control",
+          version: "1.0.0",
           enabled: true,
-          supportedOperations: ['execute', 'monitor', 'control'],
+          supportedOperations: ["execute", "monitor", "control"],
           riskLevels: [RiskLevel._HIGH, RiskLevel._CRITICAL],
           performanceProfile: {
             avgResponseTimeMs: 2000,
@@ -829,10 +977,10 @@ export class ParlantIntegrationCoordinatorService implements OnModuleInit, OnMod
       ],
       [SpecializedAgentType.DATA_EXTRACTION]: [
         {
-          name: 'data_processing',
-          version: '1.0.0',
+          name: "data_processing",
+          version: "1.0.0",
           enabled: true,
-          supportedOperations: ['extract', 'parse', 'analyze'],
+          supportedOperations: ["extract", "parse", "analyze"],
           riskLevels: [RiskLevel._LOW, RiskLevel._MODERATE, RiskLevel._HIGH],
           performanceProfile: {
             avgResponseTimeMs: 1500,
@@ -844,10 +992,10 @@ export class ParlantIntegrationCoordinatorService implements OnModuleInit, OnMod
       ],
       [SpecializedAgentType.FILE_MANAGEMENT]: [
         {
-          name: 'file_operations',
-          version: '1.0.0',
+          name: "file_operations",
+          version: "1.0.0",
           enabled: true,
-          supportedOperations: ['upload', 'download', 'scan', 'validate'],
+          supportedOperations: ["upload", "download", "scan", "validate"],
           riskLevels: [RiskLevel._MODERATE, RiskLevel._HIGH],
           performanceProfile: {
             avgResponseTimeMs: 3000,
@@ -859,10 +1007,10 @@ export class ParlantIntegrationCoordinatorService implements OnModuleInit, OnMod
       ],
       [SpecializedAgentType.BROWSER_AUTOMATION]: [
         {
-          name: 'web_automation',
-          version: '1.0.0',
+          name: "web_automation",
+          version: "1.0.0",
           enabled: true,
-          supportedOperations: ['navigate', 'interact', 'extract'],
+          supportedOperations: ["navigate", "interact", "extract"],
           riskLevels: [RiskLevel._MODERATE, RiskLevel._HIGH],
           performanceProfile: {
             avgResponseTimeMs: 4000,
@@ -874,11 +1022,15 @@ export class ParlantIntegrationCoordinatorService implements OnModuleInit, OnMod
       ],
       [SpecializedAgentType.WORKFLOW_ORCHESTRATION]: [
         {
-          name: 'workflow_management',
-          version: '1.0.0',
+          name: "workflow_management",
+          version: "1.0.0",
           enabled: true,
-          supportedOperations: ['orchestrate', 'coordinate', 'monitor'],
-          riskLevels: [RiskLevel._MODERATE, RiskLevel._HIGH, RiskLevel._CRITICAL],
+          supportedOperations: ["orchestrate", "coordinate", "monitor"],
+          riskLevels: [
+            RiskLevel._MODERATE,
+            RiskLevel._HIGH,
+            RiskLevel._CRITICAL,
+          ],
           performanceProfile: {
             avgResponseTimeMs: 5000,
             maxConcurrentRequests: 5,
@@ -892,7 +1044,9 @@ export class ParlantIntegrationCoordinatorService implements OnModuleInit, OnMod
     return capabilityMap[agentType] || [];
   }
 
-  private getDefaultAgentConfiguration(agentType: SpecializedAgentType): AgentConfiguration {
+  private getDefaultAgentConfiguration(
+    agentType: SpecializedAgentType,
+  ): AgentConfiguration {
     return {
       priorityWeighting: 1.0,
       timeoutConfiguration: {
@@ -906,7 +1060,7 @@ export class ParlantIntegrationCoordinatorService implements OnModuleInit, OnMod
         initialDelay: 1000,
         maxDelay: 10000,
         backoffMultiplier: 2,
-        retryableErrors: ['TIMEOUT', 'CONNECTION_ERROR', 'TEMPORARY_FAILURE'],
+        retryableErrors: ["TIMEOUT", "CONNECTION_ERROR", "TEMPORARY_FAILURE"],
       },
       circuitBreakerConfig: {
         failureThreshold: 5,
@@ -922,8 +1076,13 @@ export class ParlantIntegrationCoordinatorService implements OnModuleInit, OnMod
       },
       securityPolicy: {
         encryptionRequired: false,
-        allowedSecurityLevels: [SecurityLevel._LOW, SecurityLevel._MEDIUM, SecurityLevel._HIGH, SecurityLevel._CRITICAL],
-        auditLevel: 'DETAILED',
+        allowedSecurityLevels: [
+          SecurityLevel._LOW,
+          SecurityLevel._MEDIUM,
+          SecurityLevel._HIGH,
+          SecurityLevel._CRITICAL,
+        ],
+        auditLevel: "DETAILED",
         accessControlRules: [],
       },
     };
@@ -931,32 +1090,32 @@ export class ParlantIntegrationCoordinatorService implements OnModuleInit, OnMod
 
   // Stub methods for complex operations (would implement with real infrastructure)
   private async initializeSpecializedAgents(): Promise<void> {
-    this.logger.log('Initializing specialized agents...');
+    this.logger.log("Initializing specialized agents...");
     // Would implement real agent initialization
   }
 
   private startHealthMonitoring(): void {
-    this.logger.log('Starting health monitoring...');
+    this.logger.log("Starting health monitoring...");
     // Would implement real health monitoring
   }
 
   private startPerformanceMonitoring(): void {
-    this.logger.log('Starting performance monitoring...');
+    this.logger.log("Starting performance monitoring...");
     // Would implement real performance monitoring
   }
 
   private initializeCoordinationAlgorithms(): void {
-    this.logger.log('Initializing coordination algorithms...');
+    this.logger.log("Initializing coordination algorithms...");
     // Would implement real coordination algorithms
   }
 
   private async shutdownAllAgents(): Promise<void> {
-    this.logger.log('Shutting down all agents...');
+    this.logger.log("Shutting down all agents...");
     // Would implement graceful shutdown
   }
 
   private async saveCoordinationStatistics(): Promise<void> {
-    this.logger.log('Saving coordination statistics...');
+    this.logger.log("Saving coordination statistics...");
     // Would implement statistics persistence
   }
 
@@ -964,7 +1123,10 @@ export class ParlantIntegrationCoordinatorService implements OnModuleInit, OnMod
     return `coord_${Date.now()}_${Math.random().toString(36).substring(7)}`;
   }
 
-  private determinePriority(request: ParlantValidationRequest, context: CoordinationContext): CoordinationPriority {
+  private determinePriority(
+    request: ParlantValidationRequest,
+    context: CoordinationContext,
+  ): CoordinationPriority {
     if (request.securityLevel === SecurityLevel._CRITICAL) {
       return CoordinationPriority.EMERGENCY;
     }
@@ -979,51 +1141,78 @@ export class ParlantIntegrationCoordinatorService implements OnModuleInit, OnMod
     return new Date(Date.now() + timeoutMs);
   }
 
-  private agentSupportsSecurityLevel(agentType: SpecializedAgentType, securityLevel: SecurityLevel): boolean {
+  private agentSupportsSecurityLevel(
+    agentType: SpecializedAgentType,
+    securityLevel: SecurityLevel,
+  ): boolean {
     const agentStatus = this.agentRegistry.get(agentType);
-    return agentStatus?.configuration.securityPolicy.allowedSecurityLevels.includes(securityLevel) || false;
+    return (
+      agentStatus?.configuration.securityPolicy.allowedSecurityLevels.includes(
+        securityLevel,
+      ) || false
+    );
   }
 
-  private findAgentWithSecurityLevel(securityLevel: SecurityLevel): SpecializedAgentType | null {
+  private findAgentWithSecurityLevel(
+    securityLevel: SecurityLevel,
+  ): SpecializedAgentType | null {
     for (const [agentType, status] of this.agentRegistry.entries()) {
-      if (status.configuration.securityPolicy.allowedSecurityLevels.includes(securityLevel) &&
-          status.healthStatus === 'HEALTHY') {
+      if (
+        status.configuration.securityPolicy.allowedSecurityLevels.includes(
+          securityLevel,
+        ) &&
+        status.healthStatus === "HEALTHY"
+      ) {
         return agentType;
       }
     }
     return null;
   }
 
-  private calculateAgentSelectionConfidence(agentType: SpecializedAgentType, request: ParlantValidationRequest): number {
+  private calculateAgentSelectionConfidence(
+    agentType: SpecializedAgentType,
+    request: ParlantValidationRequest,
+  ): number {
     // Would implement confidence calculation algorithm
     return 0.85;
   }
 
-  private generateAgentSelectionReasoning(agentType: SpecializedAgentType, request: ParlantValidationRequest): string {
+  private generateAgentSelectionReasoning(
+    agentType: SpecializedAgentType,
+    request: ParlantValidationRequest,
+  ): string {
     return `Selected ${agentType} based on function signature and security requirements`;
   }
 
-  private makeCoordinationDecision(request: CoordinationRequest): CoordinationDecision {
+  private makeCoordinationDecision(
+    request: CoordinationRequest,
+  ): CoordinationDecision {
     return {
       primaryAgent: request.agentType,
       fallbackAgents: request.fallbackOptions,
-      loadBalancingStrategy: 'CAPABILITY_BASED',
+      loadBalancingStrategy: "CAPABILITY_BASED",
       conflictResolution: {
-        type: 'PERFORMANCE_OPTIMIZED',
-        tieBreaker: 'FASTEST_RESPONSE',
-        timeoutHandling: 'QUEUE',
+        type: "PERFORMANCE_OPTIMIZED",
+        tieBreaker: "FASTEST_RESPONSE",
+        timeoutHandling: "QUEUE",
       },
       resourceAllocation: {
         reservedCapacity: 10,
         maxConcurrentRequests: 5,
         memoryLimitMB: 512,
-        timeoutMs: request.deadline ? request.deadline.getTime() - Date.now() : 30000,
-        priorityBoost: request.priority === CoordinationPriority.EMERGENCY ? 2 : 1,
+        timeoutMs: request.deadline
+          ? request.deadline.getTime() - Date.now()
+          : 30000,
+        priorityBoost:
+          request.priority === CoordinationPriority.EMERGENCY ? 2 : 1,
       },
     };
   }
 
-  private calculatePerformanceExpectations(request: CoordinationRequest, decision: CoordinationDecision): PerformanceExpectations {
+  private calculatePerformanceExpectations(
+    request: CoordinationRequest,
+    decision: CoordinationDecision,
+  ): PerformanceExpectations {
     const agentStatus = this.agentRegistry.get(decision.primaryAgent);
     const averageTime = agentStatus?.averageResponseTime || 1000;
 
@@ -1031,7 +1220,7 @@ export class ParlantIntegrationCoordinatorService implements OnModuleInit, OnMod
       estimatedDuration: averageTime * 1.2, // Add 20% buffer
       successProbability: (agentStatus?.metrics.successRate || 90) / 100,
       qualityScore: 0.85,
-      reliabilityScore: 0.90,
+      reliabilityScore: 0.9,
     };
   }
 
@@ -1039,53 +1228,75 @@ export class ParlantIntegrationCoordinatorService implements OnModuleInit, OnMod
     return `Routed to ${decision.primaryAgent} using ${decision.loadBalancingStrategy} strategy`;
   }
 
-  private updateAgentActiveValidations(agentType: SpecializedAgentType, delta: number): void {
+  private updateAgentActiveValidations(
+    agentType: SpecializedAgentType,
+    delta: number,
+  ): void {
     const status = this.agentRegistry.get(agentType);
     if (status) {
       status.activeValidations = Math.max(0, status.activeValidations + delta);
     }
   }
 
-  private recordSuccessfulValidation(agentType: SpecializedAgentType, duration: number): void {
+  private recordSuccessfulValidation(
+    agentType: SpecializedAgentType,
+    duration: number,
+  ): void {
     const metrics = this.performanceTracker.get(agentType);
     if (metrics) {
       metrics.validationsProcessed++;
-      metrics.averageProcessingTime = (metrics.averageProcessingTime + duration) / 2;
+      metrics.averageProcessingTime =
+        (metrics.averageProcessingTime + duration) / 2;
       // Update success rate
       const total = metrics.validationsProcessed;
-      const successful = Math.floor(total * metrics.successRate / 100) + 1;
+      const successful = Math.floor((total * metrics.successRate) / 100) + 1;
       metrics.successRate = (successful / total) * 100;
     }
   }
 
-  private recordFailedValidation(agentType: SpecializedAgentType, duration: number, error: unknown): void {
+  private recordFailedValidation(
+    agentType: SpecializedAgentType,
+    duration: number,
+    error: unknown,
+  ): void {
     const metrics = this.performanceTracker.get(agentType);
     if (metrics) {
       metrics.validationsProcessed++;
-      metrics.averageProcessingTime = (metrics.averageProcessingTime + duration) / 2;
+      metrics.averageProcessingTime =
+        (metrics.averageProcessingTime + duration) / 2;
 
       // Update error breakdown
-      const errorType = error instanceof Error ? error.constructor.name : 'UnknownError';
-      metrics.errorBreakdown[errorType] = (metrics.errorBreakdown[errorType] || 0) + 1;
+      const errorType =
+        error instanceof Error ? error.constructor.name : "UnknownError";
+      metrics.errorBreakdown[errorType] =
+        (metrics.errorBreakdown[errorType] || 0) + 1;
 
       // Update success rate
       const total = metrics.validationsProcessed;
-      const successful = Math.floor(total * metrics.successRate / 100);
+      const successful = Math.floor((total * metrics.successRate) / 100);
       metrics.successRate = (successful / total) * 100;
     }
   }
 
-  private storeConversationContext(conversationId: string, agentType: SpecializedAgentType, context: CoordinationContext): void {
+  private storeConversationContext(
+    conversationId: string,
+    agentType: SpecializedAgentType,
+    context: CoordinationContext,
+  ): void {
     // Would implement conversation context storage for cross-agent sharing
-    this.logger.debug('Storing conversation context for cross-agent sharing', {
+    this.logger.debug("Storing conversation context for cross-agent sharing", {
       conversationId,
       agentType,
       hasContext: !!context,
     });
   }
 
-  private async handleCoordinationFailure(requestId: string, error: unknown, context: CoordinationContext): Promise<ParlantValidationResponse> {
-    this.logger.error('Implementing coordination failure handling', {
+  private async handleCoordinationFailure(
+    requestId: string,
+    error: unknown,
+    context: CoordinationContext,
+  ): Promise<ParlantValidationResponse> {
+    this.logger.error("Implementing coordination failure handling", {
       requestId,
       error: error instanceof Error ? error.message : String(error),
     });
@@ -1093,9 +1304,9 @@ export class ParlantIntegrationCoordinatorService implements OnModuleInit, OnMod
     // Return a failure response
     return {
       approved: false,
-      reason: 'Coordination failure - unable to process validation request',
+      reason: "Coordination failure - unable to process validation request",
       confidence: 0,
-      conversationId: '',
+      conversationId: "",
       executionContext: undefined,
       metadata: {
         coordinationFailure: true,
@@ -1105,10 +1316,12 @@ export class ParlantIntegrationCoordinatorService implements OnModuleInit, OnMod
     };
   }
 
-  private async checkAgentHealth(agentType: SpecializedAgentType): Promise<any> {
+  private async checkAgentHealth(
+    agentType: SpecializedAgentType,
+  ): Promise<any> {
     // Would implement actual health checks
     return {
-      status: 'HEALTHY' as const,
+      status: "HEALTHY" as const,
       resourceUtilization: {
         cpuPercent: Math.random() * 50,
         memoryPercent: Math.random() * 60,
@@ -1124,13 +1337,16 @@ export class ParlantIntegrationCoordinatorService implements OnModuleInit, OnMod
     return {
       timestamp: new Date(),
       agentPerformance: {},
-      systemHealth: 'GOOD',
+      systemHealth: "GOOD",
     };
   }
 
-  private async optimizeAgentConfiguration(agentType: SpecializedAgentType, metrics: AgentMetrics): Promise<void> {
+  private async optimizeAgentConfiguration(
+    agentType: SpecializedAgentType,
+    metrics: AgentMetrics,
+  ): Promise<void> {
     // Would implement configuration optimization
-    this.logger.debug('Optimizing agent configuration', { agentType, metrics });
+    this.logger.debug("Optimizing agent configuration", { agentType, metrics });
   }
 
   private updateGlobalStatistics(performanceReport: any): void {
@@ -1144,7 +1360,7 @@ export class ParlantIntegrationCoordinatorService implements OnModuleInit, OnMod
     validationResponse: ParlantValidationResponse,
   ): void {
     // Would implement coordination statistics tracking
-    this.logger.debug('Updating coordination statistics', {
+    this.logger.debug("Updating coordination statistics", {
       requestId: request.requestId,
       agentType: response.assignedAgent,
       success: validationResponse.approved,
@@ -1158,7 +1374,9 @@ export class ParlantIntegrationCoordinatorService implements OnModuleInit, OnMod
     return { ...this.globalStats };
   }
 
-  async getAgentStatuses(): Promise<Map<SpecializedAgentType, AgentIntegrationStatus>> {
+  async getAgentStatuses(): Promise<
+    Map<SpecializedAgentType, AgentIntegrationStatus>
+  > {
     return new Map(this.agentRegistry);
   }
 
@@ -1169,12 +1387,15 @@ export class ParlantIntegrationCoordinatorService implements OnModuleInit, OnMod
   async forceAgentFailover(agentType: SpecializedAgentType): Promise<void> {
     const status = this.agentRegistry.get(agentType);
     if (status) {
-      status.healthStatus = 'UNAVAILABLE';
+      status.healthStatus = "UNAVAILABLE";
       this.logger.warn(`Forced failover for agent: ${agentType}`);
     }
   }
 
-  async updateAgentConfiguration(agentType: SpecializedAgentType, config: Partial<AgentConfiguration>): Promise<void> {
+  async updateAgentConfiguration(
+    agentType: SpecializedAgentType,
+    config: Partial<AgentConfiguration>,
+  ): Promise<void> {
     const status = this.agentRegistry.get(agentType);
     if (status) {
       status.configuration = { ...status.configuration, ...config };

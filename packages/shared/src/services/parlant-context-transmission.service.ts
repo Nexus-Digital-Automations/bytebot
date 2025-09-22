@@ -141,7 +141,12 @@ export interface TransmissionRoute {
  */
 export interface SecurityRequirement {
   /** Requirement type */
-  type: "encryption" | "authentication" | "authorization" | "audit" | "validation";
+  type:
+    | "encryption"
+    | "authentication"
+    | "authorization"
+    | "audit"
+    | "validation";
   /** Requirement level */
   level: "optional" | "recommended" | "mandatory";
   /** Requirement configuration */
@@ -239,7 +244,14 @@ export interface TransmissionAuditEntry {
   /** Audit entry ID */
   entryId: string;
   /** Event type */
-  eventType: "send" | "receive" | "encrypt" | "decrypt" | "validate" | "retry" | "fail";
+  eventType:
+    | "send"
+    | "receive"
+    | "encrypt"
+    | "decrypt"
+    | "validate"
+    | "retry"
+    | "fail";
   /** Event timestamp */
   timestamp: Date;
   /** Service involved */
@@ -309,7 +321,10 @@ export class ParlantContextTransmissionService
 
   // Transmission management
   private readonly transmissionQueue = new Map<string, TransmissionQueueItem>();
-  private readonly activeTransmissions = new Map<string, SecureTransmissionEnvelope>();
+  private readonly activeTransmissions = new Map<
+    string,
+    SecureTransmissionEnvelope
+  >();
   private readonly transmissionRoutes = new Map<string, TransmissionRoute>();
   private readonly pendingAcknowledgments = new Map<string, NodeJS.Timeout>();
 
@@ -363,10 +378,15 @@ export class ParlantContextTransmissionService
       await this.loadTransmissionRoutes();
       await this.startProcessingTasks();
 
-      this.logger.log("✅ Context Transmission Service initialized successfully");
+      this.logger.log(
+        "✅ Context Transmission Service initialized successfully",
+      );
       this.emit("transmission:service:initialized");
     } catch (error) {
-      this.logger.error("❌ Failed to initialize Context Transmission Service", error);
+      this.logger.error(
+        "❌ Failed to initialize Context Transmission Service",
+        error,
+      );
       throw new ParlantIntegrationError(
         "Context Transmission initialization failed",
         "TRANSMISSION_INIT_ERROR",
@@ -414,7 +434,10 @@ export class ParlantContextTransmissionService
       await this.queueTransmission(envelope, priority);
 
       // Process transmission immediately for high priority
-      if (priority === TransmissionPriority.CRITICAL || priority === TransmissionPriority.EMERGENCY) {
+      if (
+        priority === TransmissionPriority.CRITICAL ||
+        priority === TransmissionPriority.EMERGENCY
+      ) {
         return await this.processTransmissionImmediate(envelope);
       }
 
@@ -432,19 +455,21 @@ export class ParlantContextTransmissionService
           compressedSize: 0,
           retryAttempts: 0,
         },
-        auditTrail: [{
-          entryId: this.generateAuditId(),
-          eventType: "send",
-          timestamp: new Date(),
-          serviceName: sourceService,
-          duration: performance.now() - startTime,
-          result: "success",
-          metadata: {
-            targetService,
-            priority,
-            queued: true,
+        auditTrail: [
+          {
+            entryId: this.generateAuditId(),
+            eventType: "send",
+            timestamp: new Date(),
+            serviceName: sourceService,
+            duration: performance.now() - startTime,
+            result: "success",
+            metadata: {
+              targetService,
+              priority,
+              queued: true,
+            },
           },
-        }],
+        ],
       };
 
       this.logger.debug(
@@ -459,7 +484,11 @@ export class ParlantContextTransmissionService
       throw new ParlantIntegrationError(
         "Context transmission failed",
         "TRANSMISSION_SEND_ERROR",
-        { sourceService, targetService, error: error instanceof Error ? error.message : String(error) },
+        {
+          sourceService,
+          targetService,
+          error: error instanceof Error ? error.message : String(error),
+        },
       );
     }
   }
@@ -519,7 +548,11 @@ export class ParlantContextTransmissionService
       throw new ParlantIntegrationError(
         "Context reception failed",
         "TRANSMISSION_RECEIVE_ERROR",
-        { transmissionId: envelope.transmissionId, receivingService, error: error instanceof Error ? error.message : String(error) },
+        {
+          transmissionId: envelope.transmissionId,
+          receivingService,
+          error: error instanceof Error ? error.message : String(error),
+        },
       );
     }
   }
@@ -535,13 +568,19 @@ export class ParlantContextTransmissionService
 
     try {
       // Check envelope structure
-      if (!envelope.transmissionId || !envelope.sourceService || !envelope.encryptedPayload) {
+      if (
+        !envelope.transmissionId ||
+        !envelope.sourceService ||
+        !envelope.encryptedPayload
+      ) {
         throw new Error("Invalid envelope structure");
       }
 
       // Check target service
       if (envelope.targetService !== receivingService) {
-        throw new Error(`Envelope not intended for service: ${receivingService}`);
+        throw new Error(
+          `Envelope not intended for service: ${receivingService}`,
+        );
       }
 
       // Check expiration
@@ -568,7 +607,9 @@ export class ParlantContextTransmissionService
       }
 
       // Validate checksum
-      const calculatedChecksum = await this.calculateChecksum(envelope.encryptedPayload);
+      const calculatedChecksum = await this.calculateChecksum(
+        envelope.encryptedPayload,
+      );
       if (envelope.securityHeaders.checksum !== calculatedChecksum) {
         throw new Error("Payload checksum validation failed");
       }
@@ -576,7 +617,7 @@ export class ParlantContextTransmissionService
       // Clean up old nonces (prevent memory leak)
       if (this.nonceRegistry.size > 10000) {
         const noncesToRemove = Array.from(this.nonceRegistry).slice(0, 5000);
-        noncesToRemove.forEach(nonce => this.nonceRegistry.delete(nonce));
+        noncesToRemove.forEach((nonce) => this.nonceRegistry.delete(nonce));
       }
 
       const validationTime = performance.now() - startTime;
@@ -590,7 +631,10 @@ export class ParlantContextTransmissionService
       throw new ParlantIntegrationError(
         "Envelope validation failed",
         "TRANSMISSION_VALIDATION_ERROR",
-        { transmissionId: envelope.transmissionId, error: error instanceof Error ? error.message : String(error) },
+        {
+          transmissionId: envelope.transmissionId,
+          error: error instanceof Error ? error.message : String(error),
+        },
       );
     }
   }
@@ -612,7 +656,10 @@ export class ParlantContextTransmissionService
       throw new ParlantIntegrationError(
         "Route configuration failed",
         "ROUTE_CONFIG_ERROR",
-        { routeId: route.routeId, error: error instanceof Error ? error.message : String(error) },
+        {
+          routeId: route.routeId,
+          error: error instanceof Error ? error.message : String(error),
+        },
       );
     }
   }
@@ -629,8 +676,13 @@ export class ParlantContextTransmissionService
   /**
    * Get active transmissions
    */
-  getActiveTransmissions(): Array<{ transmissionId: string; sourceService: string; targetService: string; queuedAt: Date }> {
-    return Array.from(this.transmissionQueue.values()).map(item => ({
+  getActiveTransmissions(): Array<{
+    transmissionId: string;
+    sourceService: string;
+    targetService: string;
+    queuedAt: Date;
+  }> {
+    return Array.from(this.transmissionQueue.values()).map((item) => ({
       transmissionId: item.envelope.transmissionId,
       sourceService: item.envelope.sourceService,
       targetService: item.envelope.targetService,
@@ -655,8 +707,11 @@ export class ParlantContextTransmissionService
 
     // Serialize and potentially compress payload
     const serializedData = JSON.stringify(contextData);
-    const shouldCompress = serializedData.length > this.transmissionConfig.compressionThreshold;
-    const payload = shouldCompress ? await this.compressData(serializedData) : serializedData;
+    const shouldCompress =
+      serializedData.length > this.transmissionConfig.compressionThreshold;
+    const payload = shouldCompress
+      ? await this.compressData(serializedData)
+      : serializedData;
 
     // Encrypt payload
     const encryptedPayload = await this.encryptPayload(payload, targetService);
@@ -664,12 +719,15 @@ export class ParlantContextTransmissionService
     // Create metadata
     const metadata: TransmissionMetadata = {
       contextId: (contextData.contextId as string) || "unknown",
-      securityLevel: (contextData.securityLevel as SecurityLevel) || SecurityLevel._MEDIUM,
+      securityLevel:
+        (contextData.securityLevel as SecurityLevel) || SecurityLevel._MEDIUM,
       encryptionAlgorithm: this.transmissionConfig.encryptionAlgorithm,
       compressionEnabled: shouldCompress,
       payloadSize: Buffer.byteLength(serializedData, "utf8"),
       priority,
-      expiresAt: new Date(timestamp.getTime() + (options?.expiresAt?.getTime() || 300000)), // 5 minutes default
+      expiresAt: new Date(
+        timestamp.getTime() + (options?.expiresAt?.getTime() || 300000),
+      ), // 5 minutes default
       retryConfig: {
         maxAttempts: this.transmissionConfig.defaultRetryAttempts,
         baseDelay: 1000,
@@ -754,25 +812,27 @@ export class ParlantContextTransmissionService
         metrics: {
           totalTime: performance.now() - startTime,
           encryptionTime: 10, // Simulated
-          networkTime: 50,    // Simulated
+          networkTime: 50, // Simulated
           decryptionTime: 0,
-          validationTime: 5,  // Simulated
+          validationTime: 5, // Simulated
           payloadSize: envelope.metadata.payloadSize,
           compressedSize: Buffer.byteLength(envelope.encryptedPayload, "utf8"),
           retryAttempts: 0,
         },
-        auditTrail: [{
-          entryId: this.generateAuditId(),
-          eventType: "send",
-          timestamp: new Date(),
-          serviceName: envelope.sourceService,
-          duration: performance.now() - startTime,
-          result: "success",
-          metadata: {
-            immediate: true,
-            priority: envelope.metadata.priority,
+        auditTrail: [
+          {
+            entryId: this.generateAuditId(),
+            eventType: "send",
+            timestamp: new Date(),
+            serviceName: envelope.sourceService,
+            duration: performance.now() - startTime,
+            result: "success",
+            metadata: {
+              immediate: true,
+              priority: envelope.metadata.priority,
+            },
           },
-        }],
+        ],
       };
 
       this.transmissionStats.successfulTransmissions++;
@@ -785,22 +845,35 @@ export class ParlantContextTransmissionService
     }
   }
 
-  private async encryptPayload(payload: string, targetService: string): Promise<string> {
+  private async encryptPayload(
+    payload: string,
+    targetService: string,
+  ): Promise<string> {
     try {
       const serviceKey = this.getServiceKey(targetService);
-      const cipher = crypto.createCipher(this.transmissionConfig.encryptionAlgorithm, serviceKey);
+      const cipher = crypto.createCipher(
+        this.transmissionConfig.encryptionAlgorithm,
+        serviceKey,
+      );
       let encrypted = cipher.update(payload, "utf8", "hex");
       encrypted += cipher.final("hex");
       return encrypted;
     } catch (error) {
-      throw new Error(`Payload encryption failed: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(
+        `Payload encryption failed: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 
-  private async decryptPayload(envelope: SecureTransmissionEnvelope): Promise<Record<string, unknown>> {
+  private async decryptPayload(
+    envelope: SecureTransmissionEnvelope,
+  ): Promise<Record<string, unknown>> {
     try {
       const serviceKey = this.getServiceKey(envelope.targetService);
-      const decipher = crypto.createDecipher(envelope.metadata.encryptionAlgorithm, serviceKey);
+      const decipher = crypto.createDecipher(
+        envelope.metadata.encryptionAlgorithm,
+        serviceKey,
+      );
       let decrypted = decipher.update(envelope.encryptedPayload, "hex", "utf8");
       decrypted += decipher.final("utf8");
 
@@ -811,11 +884,15 @@ export class ParlantContextTransmissionService
 
       return JSON.parse(finalPayload);
     } catch (error) {
-      throw new Error(`Payload decryption failed: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(
+        `Payload decryption failed: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 
-  private async generateMessageAuthCode(envelope: SecureTransmissionEnvelope): Promise<string> {
+  private async generateMessageAuthCode(
+    envelope: SecureTransmissionEnvelope,
+  ): Promise<string> {
     const data = {
       transmissionId: envelope.transmissionId,
       sourceService: envelope.sourceService,
@@ -825,15 +902,25 @@ export class ParlantContextTransmissionService
     };
 
     const dataString = JSON.stringify(data);
-    return crypto.createHmac("sha256", this.masterEncryptionKey).update(dataString).digest("hex");
+    return crypto
+      .createHmac("sha256", this.masterEncryptionKey)
+      .update(dataString)
+      .digest("hex");
   }
 
-  private async generateDigitalSignature(envelope: SecureTransmissionEnvelope): Promise<string> {
+  private async generateDigitalSignature(
+    envelope: SecureTransmissionEnvelope,
+  ): Promise<string> {
     const data = `${envelope.transmissionId}:${envelope.sourceService}:${envelope.targetService}:${envelope.timestamp.toISOString()}`;
-    return crypto.createHash("sha256").update(data + this.masterEncryptionKey).digest("hex");
+    return crypto
+      .createHash("sha256")
+      .update(data + this.masterEncryptionKey)
+      .digest("hex");
   }
 
-  private async validateDigitalSignature(envelope: SecureTransmissionEnvelope): Promise<boolean> {
+  private async validateDigitalSignature(
+    envelope: SecureTransmissionEnvelope,
+  ): Promise<boolean> {
     const expectedSignature = await this.generateDigitalSignature(envelope);
     return envelope.signature === expectedSignature;
   }
@@ -842,7 +929,10 @@ export class ParlantContextTransmissionService
     return crypto.createHash("md5").update(data).digest("hex");
   }
 
-  private async generateAuthToken(sourceService: string, targetService: string): Promise<string> {
+  private async generateAuthToken(
+    sourceService: string,
+    targetService: string,
+  ): Promise<string> {
     const tokenData = {
       source: sourceService,
       target: targetService,
@@ -854,12 +944,16 @@ export class ParlantContextTransmissionService
   }
 
   private generateMasterKey(): string {
-    return process.env.PARLANT_TRANSMISSION_KEY || crypto.randomBytes(32).toString("hex");
+    return (
+      process.env.PARLANT_TRANSMISSION_KEY ||
+      crypto.randomBytes(32).toString("hex")
+    );
   }
 
   private getServiceKey(serviceName: string): string {
     if (!this.serviceKeys.has(serviceName)) {
-      const serviceKey = crypto.createHash("sha256")
+      const serviceKey = crypto
+        .createHash("sha256")
         .update(this.masterEncryptionKey + serviceName)
         .digest("hex");
       this.serviceKeys.set(serviceName, serviceKey);
@@ -893,7 +987,9 @@ export class ParlantContextTransmissionService
     return Buffer.from(data, "base64").toString("utf8");
   }
 
-  private async simulateNetworkTransmission(envelope: SecureTransmissionEnvelope): Promise<void> {
+  private async simulateNetworkTransmission(
+    envelope: SecureTransmissionEnvelope,
+  ): Promise<void> {
     // Simulate network delay based on priority
     const delays = {
       [TransmissionPriority.EMERGENCY]: 10,
@@ -904,10 +1000,12 @@ export class ParlantContextTransmissionService
     };
 
     const delay = delays[envelope.metadata.priority] || 100;
-    await new Promise(resolve => setTimeout(resolve, delay));
+    await new Promise((resolve) => setTimeout(resolve, delay));
   }
 
-  private async validateRouteConfiguration(route: TransmissionRoute): Promise<void> {
+  private async validateRouteConfiguration(
+    route: TransmissionRoute,
+  ): Promise<void> {
     // Validate route structure
     if (!route.routeId || !route.sourcePattern || !route.targetPattern) {
       throw new Error("Invalid route configuration");
@@ -915,8 +1013,18 @@ export class ParlantContextTransmissionService
 
     // Validate security requirements
     for (const requirement of route.securityRequirements) {
-      if (!["encryption", "authentication", "authorization", "audit", "validation"].includes(requirement.type)) {
-        throw new Error(`Invalid security requirement type: ${requirement.type}`);
+      if (
+        ![
+          "encryption",
+          "authentication",
+          "authorization",
+          "audit",
+          "validation",
+        ].includes(requirement.type)
+      ) {
+        throw new Error(
+          `Invalid security requirement type: ${requirement.type}`,
+        );
       }
     }
   }
@@ -926,13 +1034,16 @@ export class ParlantContextTransmissionService
     if (totalTransmissions === 0) return 0;
 
     // This would calculate actual retry rate from transmission history
-    return Math.round((this.transmissionStats.failedTransmissions / totalTransmissions) * 100);
+    return Math.round(
+      (this.transmissionStats.failedTransmissions / totalTransmissions) * 100,
+    );
   }
 
   private updateAverageTransmissionTime(newTime: number): void {
     const count = this.transmissionStats.successfulTransmissions;
     this.transmissionStats.averageTransmissionTime =
-      (this.transmissionStats.averageTransmissionTime * (count - 1) + newTime) / count;
+      (this.transmissionStats.averageTransmissionTime * (count - 1) + newTime) /
+      count;
   }
 
   private async initializeEncryptionKeys(): Promise<void> {
@@ -981,10 +1092,13 @@ export class ParlantContextTransmissionService
 
   private async processTransmissionQueue(): Promise<void> {
     // Process queued transmissions based on priority
-    const queueItems = Array.from(this.transmissionQueue.values())
-      .sort((a, b) => this.getPriorityOrder(b.priority) - this.getPriorityOrder(a.priority));
+    const queueItems = Array.from(this.transmissionQueue.values()).sort(
+      (a, b) =>
+        this.getPriorityOrder(b.priority) - this.getPriorityOrder(a.priority),
+    );
 
-    for (const item of queueItems.slice(0, 10)) { // Process up to 10 at a time
+    for (const item of queueItems.slice(0, 10)) {
+      // Process up to 10 at a time
       try {
         await this.processTransmissionImmediate(item.envelope);
         this.transmissionQueue.delete(item.envelope.transmissionId);
@@ -1009,7 +1123,10 @@ export class ParlantContextTransmissionService
     }
   }
 
-  private handleTransmissionFailure(item: TransmissionQueueItem, error: unknown): void {
+  private handleTransmissionFailure(
+    item: TransmissionQueueItem,
+    error: unknown,
+  ): void {
     item.attempts++;
 
     if (item.attempts >= item.envelope.metadata.retryConfig.maxAttempts) {
@@ -1037,7 +1154,8 @@ export class ParlantContextTransmissionService
 
   private calculateRetryDelay(item: TransmissionQueueItem): number {
     const config = item.envelope.metadata.retryConfig;
-    let delay = config.baseDelay * Math.pow(config.backoffMultiplier, item.attempts - 1);
+    let delay =
+      config.baseDelay * Math.pow(config.backoffMultiplier, item.attempts - 1);
     delay = Math.min(delay, config.maxDelay);
 
     if (config.jitterEnabled) {
@@ -1086,7 +1204,10 @@ export class ParlantContextTransmissionService
       try {
         await this.processTransmissionImmediate(item.envelope);
       } catch (error) {
-        this.logger.warn(`Failed to process transmission during shutdown: ${item.envelope.transmissionId}`, error);
+        this.logger.warn(
+          `Failed to process transmission during shutdown: ${item.envelope.transmissionId}`,
+          error,
+        );
       }
     }
   }

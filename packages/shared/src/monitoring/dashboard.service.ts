@@ -23,7 +23,10 @@
 
 import { Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { ParlantFunctionMonitorService, FunctionPerformanceMetrics } from "./parlant-function-monitor.service";
+import {
+  ParlantFunctionMonitorService,
+  FunctionPerformanceMetrics,
+} from "./parlant-function-monitor.service";
 import { AlertingService, Alert } from "./alerting.service";
 import { MetricsService } from "./metrics.service";
 import { AlertSeverity } from "./types";
@@ -187,7 +190,13 @@ export interface DashboardData {
 export interface ReportConfig {
   id: string;
   name: string;
-  type: "performance" | "availability" | "security" | "capacity" | "sla" | "custom";
+  type:
+    | "performance"
+    | "availability"
+    | "security"
+    | "capacity"
+    | "sla"
+    | "custom";
   description?: string;
   schedule?: {
     enabled: boolean;
@@ -240,7 +249,10 @@ export class DashboardService {
   private readonly dashboardLayouts = new Map<string, DashboardLayout>();
   private readonly reportConfigs = new Map<string, ReportConfig>();
   private readonly generatedReports: GeneratedReport[] = [];
-  private readonly trendData = new Map<string, Array<{ timestamp: Date; value: number }>>();
+  private readonly trendData = new Map<
+    string,
+    Array<{ timestamp: Date; value: number }>
+  >();
 
   private readonly maxTrendDataPoints = 1000;
   private readonly maxReportHistory = 100;
@@ -322,14 +334,15 @@ export class DashboardService {
    * Get custom dashboard widget data
    */
   async getWidgetData(widgetId: string, timeRange = "1h"): Promise<any> {
-    const layout = Array.from(this.dashboardLayouts.values())
-      .find(l => l.widgets.some(w => w.id === widgetId));
+    const layout = Array.from(this.dashboardLayouts.values()).find((l) =>
+      l.widgets.some((w) => w.id === widgetId),
+    );
 
     if (!layout) {
       throw new Error(`Widget not found: ${widgetId}`);
     }
 
-    const widget = layout.widgets.find(w => w.id === widgetId)!;
+    const widget = layout.widgets.find((w) => w.id === widgetId)!;
     const startTime = this.parseTimeRange(timeRange);
     const now = new Date();
 
@@ -354,7 +367,10 @@ export class DashboardService {
   /**
    * Generate report
    */
-  async generateReport(configId: string, customFilters?: any): Promise<GeneratedReport> {
+  async generateReport(
+    configId: string,
+    customFilters?: any,
+  ): Promise<GeneratedReport> {
     const config = this.reportConfigs.get(configId);
     if (!config) {
       throw new Error(`Report configuration not found: ${configId}`);
@@ -371,7 +387,12 @@ export class DashboardService {
         type: config.type,
       });
 
-      const reportData = await this.generateReportData(config, startTime, now, customFilters);
+      const reportData = await this.generateReportData(
+        config,
+        startTime,
+        now,
+        customFilters,
+      );
 
       const report: GeneratedReport = {
         id: reportId,
@@ -398,7 +419,10 @@ export class DashboardService {
 
       // Maintain report history
       if (this.generatedReports.length > this.maxReportHistory) {
-        this.generatedReports.splice(0, this.generatedReports.length - this.maxReportHistory);
+        this.generatedReports.splice(
+          0,
+          this.generatedReports.length - this.maxReportHistory,
+        );
       }
 
       this.logger.log(`Report generated successfully: ${config.name}`, {
@@ -430,17 +454,21 @@ export class DashboardService {
 
     if (filters) {
       if (filters.type) {
-        reports = reports.filter(r => r.type === filters.type);
+        reports = reports.filter((r) => r.type === filters.type);
       }
       if (filters.configId) {
-        reports = reports.filter(r => r.configId === filters.configId);
+        reports = reports.filter((r) => r.configId === filters.configId);
       }
       if (filters.generatedAfter) {
-        reports = reports.filter(r => r.generatedAt >= filters.generatedAfter!);
+        reports = reports.filter(
+          (r) => r.generatedAt >= filters.generatedAfter!,
+        );
       }
     }
 
-    return reports.sort((a, b) => b.generatedAt.getTime() - a.generatedAt.getTime());
+    return reports.sort(
+      (a, b) => b.generatedAt.getTime() - a.generatedAt.getTime(),
+    );
   }
 
   /**
@@ -498,7 +526,9 @@ export class DashboardService {
 
     switch (format) {
       case "json":
-        exportData = sections ? this.filterDashboardSections(dashboardData, sections) : dashboardData;
+        exportData = sections
+          ? this.filterDashboardSections(dashboardData, sections)
+          : dashboardData;
         filename = `dashboard-${Date.now()}.json`;
         mimeType = "application/json";
         break;
@@ -526,18 +556,29 @@ export class DashboardService {
    * Private helper methods
    */
 
-  private async getOverviewMetrics(): Promise<DashboardData['overview']> {
+  private async getOverviewMetrics(): Promise<DashboardData["overview"]> {
     const functionMetrics = this.parlantMonitor.getFunctionMetrics();
     const activeAlerts = this.alertingService.getActiveAlerts();
 
     const totalFunctions = functionMetrics.length;
-    const functionsOnline = functionMetrics.filter(f => f.errorRate < 5).length;
-    const averageResponseTime = functionMetrics.length > 0
-      ? functionMetrics.reduce((sum, f) => sum + f.averageExecutionTime, 0) / functionMetrics.length
-      : 0;
-    const totalExecutions = functionMetrics.reduce((sum, f) => sum + f.executionCount, 0);
-    const totalErrors = functionMetrics.reduce((sum, f) => sum + f.totalErrors, 0);
-    const errorRate = totalExecutions > 0 ? (totalErrors / totalExecutions) * 100 : 0;
+    const functionsOnline = functionMetrics.filter(
+      (f) => f.errorRate < 5,
+    ).length;
+    const averageResponseTime =
+      functionMetrics.length > 0
+        ? functionMetrics.reduce((sum, f) => sum + f.averageExecutionTime, 0) /
+          functionMetrics.length
+        : 0;
+    const totalExecutions = functionMetrics.reduce(
+      (sum, f) => sum + f.executionCount,
+      0,
+    );
+    const totalErrors = functionMetrics.reduce(
+      (sum, f) => sum + f.totalErrors,
+      0,
+    );
+    const errorRate =
+      totalExecutions > 0 ? (totalErrors / totalExecutions) * 100 : 0;
 
     return {
       totalFunctions,
@@ -547,14 +588,18 @@ export class DashboardService {
       errorRate: Math.round(errorRate * 100) / 100,
       uptimePercentage: this.calculateUptimePercentage(),
       activeAlerts: activeAlerts.length,
-      criticalAlerts: activeAlerts.filter(a => a.severity === "critical").length,
+      criticalAlerts: activeAlerts.filter((a) => a.severity === "critical")
+        .length,
     };
   }
 
-  private async getPerformanceMetrics(startTime: Date, endTime: Date): Promise<DashboardData['performance']> {
+  private async getPerformanceMetrics(
+    startTime: Date,
+    endTime: Date,
+  ): Promise<DashboardData["performance"]> {
     const functionMetrics = this.parlantMonitor.getFunctionMetrics();
 
-    const allResponseTimes = functionMetrics.map(f => f.averageExecutionTime);
+    const allResponseTimes = functionMetrics.map((f) => f.averageExecutionTime);
     const responseTimeMetrics = {
       average: this.calculateAverage(allResponseTimes),
       p50: this.calculatePercentile(allResponseTimes, 50),
@@ -563,7 +608,10 @@ export class DashboardService {
       max: Math.max(...allResponseTimes, 0),
     };
 
-    const totalExecutions = functionMetrics.reduce((sum, f) => sum + f.executionCount, 0);
+    const totalExecutions = functionMetrics.reduce(
+      (sum, f) => sum + f.executionCount,
+      0,
+    );
     const throughputMetrics = {
       requestsPerSecond: this.calculateRequestsPerSecond(),
       peak24h: this.calculatePeak24hThroughput(),
@@ -571,8 +619,12 @@ export class DashboardService {
       totalExecutions,
     };
 
-    const totalErrors = functionMetrics.reduce((sum, f) => sum + f.totalErrors, 0);
-    const errorRate = totalExecutions > 0 ? (totalErrors / totalExecutions) * 100 : 0;
+    const totalErrors = functionMetrics.reduce(
+      (sum, f) => sum + f.totalErrors,
+      0,
+    );
+    const errorRate =
+      totalExecutions > 0 ? (totalErrors / totalExecutions) * 100 : 0;
 
     const errorMetrics = {
       errorRate: Math.round(errorRate * 100) / 100,
@@ -588,7 +640,7 @@ export class DashboardService {
     };
   }
 
-  private async getCapacityMetrics(): Promise<DashboardData['capacity']> {
+  private async getCapacityMetrics(): Promise<DashboardData["capacity"]> {
     const capacityData = this.parlantMonitor.getCapacityMetrics();
 
     return {
@@ -602,7 +654,8 @@ export class DashboardService {
         currentLoad: capacityData.functionsExecutedPerSecond,
         predictedLoad: capacityData.peakExecutionsPerSecond,
         capacityRemaining: 100 - capacityData.memoryUsagePercent,
-        timeToCapacityExhaustion: capacityData.predictedCapacityExhaustion?.getTime(),
+        timeToCapacityExhaustion:
+          capacityData.predictedCapacityExhaustion?.getTime(),
       },
       queueMetrics: {
         queuedRequests: capacityData.queuedExecutions,
@@ -613,13 +666,25 @@ export class DashboardService {
     };
   }
 
-  private async getSecurityMetrics(startTime: Date, endTime: Date): Promise<DashboardData['security']> {
+  private async getSecurityMetrics(
+    startTime: Date,
+    endTime: Date,
+  ): Promise<DashboardData["security"]> {
     const securityData = this.parlantMonitor.getSecurityMetrics();
     const functionMetrics = this.parlantMonitor.getFunctionMetrics();
 
-    const totalValidations = functionMetrics.reduce((sum, f) => sum + f.executionCount, 0);
-    const totalRejections = functionMetrics.reduce((sum, f) => sum + f.totalValidationRejections, 0);
-    const approvalRate = totalValidations > 0 ? ((totalValidations - totalRejections) / totalValidations) * 100 : 100;
+    const totalValidations = functionMetrics.reduce(
+      (sum, f) => sum + f.executionCount,
+      0,
+    );
+    const totalRejections = functionMetrics.reduce(
+      (sum, f) => sum + f.totalValidationRejections,
+      0,
+    );
+    const approvalRate =
+      totalValidations > 0
+        ? ((totalValidations - totalRejections) / totalValidations) * 100
+        : 100;
 
     return {
       validationMetrics: {
@@ -642,11 +707,12 @@ export class DashboardService {
     };
   }
 
-  private async getFunctionMetrics(): Promise<DashboardData['functions']> {
+  private async getFunctionMetrics(): Promise<DashboardData["functions"]> {
     return {
       topPerforming: this.parlantMonitor.getTopPerformingFunctions(5),
       slowest: this.parlantMonitor.getSlowestFunctions(5),
-      mostExecuted: this.parlantMonitor.getFunctionMetrics()
+      mostExecuted: this.parlantMonitor
+        .getFunctionMetrics()
         .sort((a, b) => b.executionCount - a.executionCount)
         .slice(0, 5),
       highestErrorRate: this.parlantMonitor.getHighestErrorRateFunctions(5),
@@ -654,7 +720,10 @@ export class DashboardService {
     };
   }
 
-  private async getAlertMetrics(startTime: Date, endTime: Date): Promise<DashboardData['alerts']> {
+  private async getAlertMetrics(
+    startTime: Date,
+    endTime: Date,
+  ): Promise<DashboardData["alerts"]> {
     const activeAlerts = this.alertingService.getActiveAlerts();
     const alertStats = this.alertingService.getAlertStatistics(24);
 
@@ -684,21 +753,35 @@ export class DashboardService {
     };
   }
 
-  private async getTrendData(startTime: Date, endTime: Date): Promise<DashboardData['trends']> {
+  private async getTrendData(
+    startTime: Date,
+    endTime: Date,
+  ): Promise<DashboardData["trends"]> {
     const responseTimeTrend = this.trendData.get("response_time") || [];
     const throughputTrend = this.trendData.get("throughput") || [];
     const errorRateTrend = this.trendData.get("error_rate") || [];
     const alertsTrend = this.trendData.get("alerts") || [];
 
     return {
-      responseTimeTrend: responseTimeTrend.filter(d => d.timestamp >= startTime && d.timestamp <= endTime),
-      throughputTrend: throughputTrend.filter(d => d.timestamp >= startTime && d.timestamp <= endTime),
-      errorRateTrend: errorRateTrend.filter(d => d.timestamp >= startTime && d.timestamp <= endTime),
-      alertsTrend: alertsTrend.filter(d => d.timestamp >= startTime && d.timestamp <= endTime),
+      responseTimeTrend: responseTimeTrend.filter(
+        (d) => d.timestamp >= startTime && d.timestamp <= endTime,
+      ),
+      throughputTrend: throughputTrend.filter(
+        (d) => d.timestamp >= startTime && d.timestamp <= endTime,
+      ),
+      errorRateTrend: errorRateTrend.filter(
+        (d) => d.timestamp >= startTime && d.timestamp <= endTime,
+      ),
+      alertsTrend: alertsTrend.filter(
+        (d) => d.timestamp >= startTime && d.timestamp <= endTime,
+      ),
     };
   }
 
-  private async getSLAMetrics(startTime: Date, endTime: Date): Promise<DashboardData['sla']> {
+  private async getSLAMetrics(
+    startTime: Date,
+    endTime: Date,
+  ): Promise<DashboardData["sla"]> {
     return {
       currentPeriod: {
         uptime: 99.95,
@@ -808,9 +891,13 @@ export class DashboardService {
       const functionMetrics = this.parlantMonitor.getFunctionMetrics();
 
       // Collect response time trend
-      const avgResponseTime = functionMetrics.length > 0
-        ? functionMetrics.reduce((sum, f) => sum + f.averageExecutionTime, 0) / functionMetrics.length
-        : 0;
+      const avgResponseTime =
+        functionMetrics.length > 0
+          ? functionMetrics.reduce(
+              (sum, f) => sum + f.averageExecutionTime,
+              0,
+            ) / functionMetrics.length
+          : 0;
 
       this.addTrendDataPoint("response_time", now, avgResponseTime);
 
@@ -819,15 +906,21 @@ export class DashboardService {
       this.addTrendDataPoint("throughput", now, throughput);
 
       // Collect error rate trend
-      const totalExecutions = functionMetrics.reduce((sum, f) => sum + f.executionCount, 0);
-      const totalErrors = functionMetrics.reduce((sum, f) => sum + f.totalErrors, 0);
-      const errorRate = totalExecutions > 0 ? (totalErrors / totalExecutions) * 100 : 0;
+      const totalExecutions = functionMetrics.reduce(
+        (sum, f) => sum + f.executionCount,
+        0,
+      );
+      const totalErrors = functionMetrics.reduce(
+        (sum, f) => sum + f.totalErrors,
+        0,
+      );
+      const errorRate =
+        totalExecutions > 0 ? (totalErrors / totalExecutions) * 100 : 0;
       this.addTrendDataPoint("error_rate", now, errorRate);
 
       // Collect alerts trend
       const activeAlerts = this.alertingService.getActiveAlerts().length;
       this.addTrendDataPoint("alerts", now, activeAlerts);
-
     } catch (error) {
       this.logger.error("Failed to collect trend data", {
         error: error instanceof Error ? error.message : String(error),
@@ -835,7 +928,11 @@ export class DashboardService {
     }
   }
 
-  private addTrendDataPoint(metric: string, timestamp: Date, value: number): void {
+  private addTrendDataPoint(
+    metric: string,
+    timestamp: Date,
+    value: number,
+  ): void {
     if (!this.trendData.has(metric)) {
       this.trendData.set(metric, []);
     }
@@ -860,15 +957,21 @@ export class DashboardService {
     const unit = match[2];
 
     switch (unit) {
-      case 'm': return new Date(now.getTime() - value * 60 * 1000);
-      case 'h': return new Date(now.getTime() - value * 60 * 60 * 1000);
-      case 'd': return new Date(now.getTime() - value * 24 * 60 * 60 * 1000);
-      default: return new Date(now.getTime() - 60 * 60 * 1000);
+      case "m":
+        return new Date(now.getTime() - value * 60 * 1000);
+      case "h":
+        return new Date(now.getTime() - value * 60 * 60 * 1000);
+      case "d":
+        return new Date(now.getTime() - value * 24 * 60 * 60 * 1000);
+      default:
+        return new Date(now.getTime() - 60 * 60 * 1000);
     }
   }
 
   private calculateAverage(values: number[]): number {
-    return values.length > 0 ? values.reduce((sum, val) => sum + val, 0) / values.length : 0;
+    return values.length > 0
+      ? values.reduce((sum, val) => sum + val, 0) / values.length
+      : 0;
   }
 
   private calculatePercentile(values: number[], percentile: number): number {
@@ -901,14 +1004,16 @@ export class DashboardService {
 
   private async getErrorsByType(): Promise<Record<string, number>> {
     return {
-      "ValidationError": 45,
-      "TimeoutError": 23,
-      "DatabaseError": 12,
-      "NetworkError": 8,
+      ValidationError: 45,
+      TimeoutError: 23,
+      DatabaseError: 12,
+      NetworkError: 8,
     };
   }
 
-  private async getTopErrors(): Promise<Array<{ error: string; count: number; percentage: number }>> {
+  private async getTopErrors(): Promise<
+    Array<{ error: string; count: number; percentage: number }>
+  > {
     return [
       { error: "Function timeout exceeded", count: 23, percentage: 26.1 },
       { error: "Validation rejected", count: 18, percentage: 20.5 },
@@ -930,18 +1035,51 @@ export class DashboardService {
       },
       performance: {
         responseTimeMetrics: { average: 0, p50: 0, p95: 0, p99: 0, max: 0 },
-        throughputMetrics: { requestsPerSecond: 0, peak24h: 0, executionsToday: 0, totalExecutions: 0 },
-        errorMetrics: { errorRate: 0, totalErrors: 0, errorsByType: {}, topErrors: [] },
+        throughputMetrics: {
+          requestsPerSecond: 0,
+          peak24h: 0,
+          executionsToday: 0,
+          totalExecutions: 0,
+        },
+        errorMetrics: {
+          errorRate: 0,
+          totalErrors: 0,
+          errorsByType: {},
+          topErrors: [],
+        },
       },
       capacity: {
         resourceUtilization: { cpu: 0, memory: 0, disk: 0, network: 0 },
-        scalingMetrics: { currentLoad: 0, predictedLoad: 0, capacityRemaining: 0 },
-        queueMetrics: { queuedRequests: 0, averageQueueTime: 0, maxQueueTime: 0, queueThroughput: 0 },
+        scalingMetrics: {
+          currentLoad: 0,
+          predictedLoad: 0,
+          capacityRemaining: 0,
+        },
+        queueMetrics: {
+          queuedRequests: 0,
+          averageQueueTime: 0,
+          maxQueueTime: 0,
+          queueThroughput: 0,
+        },
       },
       security: {
-        validationMetrics: { approvalRate: 0, rejectionRate: 0, totalValidations: 0, averageValidationTime: 0 },
-        riskMetrics: { highRiskExecutions: 0, securityAlerts: 0, complianceScore: 0, threatLevel: "LOW" },
-        auditMetrics: { auditEventsToday: 0, complianceViolations: 0, securityIncidents: 0 },
+        validationMetrics: {
+          approvalRate: 0,
+          rejectionRate: 0,
+          totalValidations: 0,
+          averageValidationTime: 0,
+        },
+        riskMetrics: {
+          highRiskExecutions: 0,
+          securityAlerts: 0,
+          complianceScore: 0,
+          threatLevel: "LOW",
+        },
+        auditMetrics: {
+          auditEventsToday: 0,
+          complianceViolations: 0,
+          securityIncidents: 0,
+        },
       },
       functions: {
         topPerforming: [],
@@ -955,7 +1093,11 @@ export class DashboardService {
         recent: [],
         bySource: {},
         bySeverity: { low: 0, medium: 0, high: 0, critical: 0 },
-        resolutionMetrics: { averageTimeToAcknowledge: 0, averageTimeToResolve: 0, escalationRate: 0 },
+        resolutionMetrics: {
+          averageTimeToAcknowledge: 0,
+          averageTimeToResolve: 0,
+          escalationRate: 0,
+        },
       },
       trends: {
         responseTimeTrend: [],
@@ -964,7 +1106,12 @@ export class DashboardService {
         alertsTrend: [],
       },
       sla: {
-        currentPeriod: { uptime: 0, availability: 0, responseTimeCompliance: 0, errorRateCompliance: 0 },
+        currentPeriod: {
+          uptime: 0,
+          availability: 0,
+          responseTimeCompliance: 0,
+          errorRateCompliance: 0,
+        },
         breaches: [],
       },
       timestamp: new Date(),
@@ -972,15 +1119,27 @@ export class DashboardService {
   }
 
   // Placeholder implementations for widget data methods
-  private async getMetricWidgetData(widget: DashboardWidget, startTime: Date, endTime: Date): Promise<any> {
+  private async getMetricWidgetData(
+    widget: DashboardWidget,
+    startTime: Date,
+    endTime: Date,
+  ): Promise<any> {
     return { value: 0, unit: "ms", trend: "stable" };
   }
 
-  private async getChartWidgetData(widget: DashboardWidget, startTime: Date, endTime: Date): Promise<any> {
+  private async getChartWidgetData(
+    widget: DashboardWidget,
+    startTime: Date,
+    endTime: Date,
+  ): Promise<any> {
     return { data: [], labels: [] };
   }
 
-  private async getTableWidgetData(widget: DashboardWidget, startTime: Date, endTime: Date): Promise<any> {
+  private async getTableWidgetData(
+    widget: DashboardWidget,
+    startTime: Date,
+    endTime: Date,
+  ): Promise<any> {
     return { headers: [], rows: [] };
   }
 
@@ -988,15 +1147,28 @@ export class DashboardService {
     return { status: "healthy", components: [] };
   }
 
-  private async getAlertWidgetData(widget: DashboardWidget, startTime: Date, endTime: Date): Promise<any> {
+  private async getAlertWidgetData(
+    widget: DashboardWidget,
+    startTime: Date,
+    endTime: Date,
+  ): Promise<any> {
     return { alerts: [], count: 0 };
   }
 
-  private async getTrendWidgetData(widget: DashboardWidget, startTime: Date, endTime: Date): Promise<any> {
+  private async getTrendWidgetData(
+    widget: DashboardWidget,
+    startTime: Date,
+    endTime: Date,
+  ): Promise<any> {
     return { trend: "up", change: 5.2, period: "24h" };
   }
 
-  private async generateReportData(config: ReportConfig, startTime: Date, endTime: Date, customFilters?: any): Promise<any> {
+  private async generateReportData(
+    config: ReportConfig,
+    startTime: Date,
+    endTime: Date,
+    customFilters?: any,
+  ): Promise<any> {
     return {
       summary: {},
       sections: {},
@@ -1005,11 +1177,17 @@ export class DashboardService {
     };
   }
 
-  private async generateReportFile(report: GeneratedReport, config: ReportConfig): Promise<string> {
+  private async generateReportFile(
+    report: GeneratedReport,
+    config: ReportConfig,
+  ): Promise<string> {
     return `/reports/${report.id}.${config.format}`;
   }
 
-  private filterDashboardSections(data: DashboardData, sections: string[]): any {
+  private filterDashboardSections(
+    data: DashboardData,
+    sections: string[],
+  ): any {
     const filtered: any = {};
     for (const section of sections) {
       if (section in data) {
@@ -1019,11 +1197,17 @@ export class DashboardService {
     return filtered;
   }
 
-  private convertDashboardToCSV(data: DashboardData, sections?: string[]): string {
+  private convertDashboardToCSV(
+    data: DashboardData,
+    sections?: string[],
+  ): string {
     return "csv data placeholder";
   }
 
-  private async generateDashboardPDF(data: DashboardData, sections?: string[]): Promise<Buffer> {
+  private async generateDashboardPDF(
+    data: DashboardData,
+    sections?: string[],
+  ): Promise<Buffer> {
     return Buffer.from("pdf data placeholder");
   }
 

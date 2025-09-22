@@ -31,12 +31,12 @@
  * @classification Enterprise Testing Infrastructure
  */
 
-import { testingFrameworkConfig } from '../config/testing-framework.config';
-import { PerformanceProfiler } from '../utils/performance-profiler';
-import { ResourceMonitor } from '../utils/resource-monitor';
-import { LoadGenerator } from '../utils/load-generator';
-import { MetricsCollector } from '../utils/metrics-collector';
-import { BottleneckAnalyzer } from '../utils/bottleneck-analyzer';
+import { testingFrameworkConfig } from "../config/testing-framework.config";
+import { PerformanceProfiler } from "../utils/performance-profiler";
+import { ResourceMonitor } from "../utils/resource-monitor";
+import { LoadGenerator } from "../utils/load-generator";
+import { MetricsCollector } from "../utils/metrics-collector";
+import { BottleneckAnalyzer } from "../utils/bottleneck-analyzer";
 
 export interface PerformanceTestSuite {
   name: string;
@@ -48,7 +48,7 @@ export interface PerformanceTestSuite {
 }
 
 export interface PerformanceTestType {
-  type: 'load' | 'stress' | 'volume' | 'endurance' | 'spike';
+  type: "load" | "stress" | "volume" | "endurance" | "spike";
   enabled: boolean;
   configuration: any;
 }
@@ -95,7 +95,7 @@ export interface PerformanceTestScenario {
 }
 
 export interface UserLoadPattern {
-  type: 'constant' | 'ramp-up' | 'spike' | 'wave';
+  type: "constant" | "ramp-up" | "spike" | "wave";
   initialUsers: number;
   maxUsers: number;
   rampUpDuration?: number;
@@ -114,7 +114,7 @@ export interface PerformanceOperation {
 
 export interface PerformanceAssertion {
   metric: string;
-  operator: 'lt' | 'lte' | 'gt' | 'gte' | 'eq';
+  operator: "lt" | "lte" | "gt" | "gte" | "eq";
   value: number;
   description: string;
 }
@@ -158,13 +158,13 @@ export interface PerformanceFailure {
   metric: string;
   expected: number;
   actual: number;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
   description: string;
 }
 
 export interface PerformanceRecommendation {
-  category: 'optimization' | 'scaling' | 'infrastructure';
-  priority: 'low' | 'medium' | 'high';
+  category: "optimization" | "scaling" | "infrastructure";
+  priority: "low" | "medium" | "high";
   description: string;
   action: string;
 }
@@ -188,7 +188,9 @@ export class PerformanceTestFramework {
   /**
    * Execute comprehensive performance test suite
    */
-  public async executePerformanceTestSuite(testSuite: PerformanceTestSuite): Promise<PerformanceTestResult[]> {
+  public async executePerformanceTestSuite(
+    testSuite: PerformanceTestSuite,
+  ): Promise<PerformanceTestResult[]> {
     console.log(`🚀 Executing Performance Test Suite: ${testSuite.name}`);
 
     const results: PerformanceTestResult[] = [];
@@ -200,7 +202,10 @@ export class PerformanceTestFramework {
       // Execute different performance test types
       for (const testType of testSuite.testTypes) {
         if (testType.enabled) {
-          const testResults = await this.executePerformanceTestType(testType, testSuite);
+          const testResults = await this.executePerformanceTestType(
+            testType,
+            testSuite,
+          );
           results.push(...testResults);
         }
       }
@@ -210,9 +215,11 @@ export class PerformanceTestFramework {
 
       console.log(`✅ Performance Test Suite completed: ${testSuite.name}`);
       return results;
-
     } catch (error) {
-      console.error(`❌ Performance Test Suite failed: ${testSuite.name}`, error);
+      console.error(
+        `❌ Performance Test Suite failed: ${testSuite.name}`,
+        error,
+      );
       throw error;
     } finally {
       // Cleanup performance testing environment
@@ -225,27 +232,49 @@ export class PerformanceTestFramework {
    */
   private async executePerformanceTestType(
     testType: PerformanceTestType,
-    testSuite: PerformanceTestSuite
+    testSuite: PerformanceTestSuite,
   ): Promise<PerformanceTestResult[]> {
     console.log(`📊 Executing ${testType.type} testing...`);
 
     const results: PerformanceTestResult[] = [];
 
     switch (testType.type) {
-      case 'load':
-        results.push(...await this.executeLoadTesting(testSuite, testType.configuration));
+      case "load":
+        results.push(
+          ...(await this.executeLoadTesting(testSuite, testType.configuration)),
+        );
         break;
-      case 'stress':
-        results.push(...await this.executeStressTesting(testSuite, testType.configuration));
+      case "stress":
+        results.push(
+          ...(await this.executeStressTesting(
+            testSuite,
+            testType.configuration,
+          )),
+        );
         break;
-      case 'volume':
-        results.push(...await this.executeVolumeTesting(testSuite, testType.configuration));
+      case "volume":
+        results.push(
+          ...(await this.executeVolumeTesting(
+            testSuite,
+            testType.configuration,
+          )),
+        );
         break;
-      case 'endurance':
-        results.push(...await this.executeEnduranceTesting(testSuite, testType.configuration));
+      case "endurance":
+        results.push(
+          ...(await this.executeEnduranceTesting(
+            testSuite,
+            testType.configuration,
+          )),
+        );
         break;
-      case 'spike':
-        results.push(...await this.executeSpikeTesting(testSuite, testType.configuration));
+      case "spike":
+        results.push(
+          ...(await this.executeSpikeTesting(
+            testSuite,
+            testType.configuration,
+          )),
+        );
         break;
       default:
         throw new Error(`Unknown performance test type: ${testType.type}`);
@@ -259,14 +288,18 @@ export class PerformanceTestFramework {
    */
   private async executeLoadTesting(
     testSuite: PerformanceTestSuite,
-    configuration: any
+    configuration: any,
   ): Promise<PerformanceTestResult[]> {
     const results: PerformanceTestResult[] = [];
 
     for (const scenario of testSuite.scenarios) {
       console.log(`  🔄 Executing Load Test Scenario: ${scenario.name}`);
 
-      const result = await this.executePerformanceScenario(scenario, testSuite, 'load');
+      const result = await this.executePerformanceScenario(
+        scenario,
+        testSuite,
+        "load",
+      );
       results.push(result);
 
       // Validate load test assertions
@@ -281,7 +314,7 @@ export class PerformanceTestFramework {
    */
   private async executeStressTesting(
     testSuite: PerformanceTestSuite,
-    configuration: any
+    configuration: any,
   ): Promise<PerformanceTestResult[]> {
     const results: PerformanceTestResult[] = [];
 
@@ -298,11 +331,15 @@ export class PerformanceTestFramework {
         name: `Stress Test - ${currentLoad} users`,
         userLoad: {
           ...testSuite.scenarios[0].userLoad,
-          maxUsers: currentLoad
-        }
+          maxUsers: currentLoad,
+        },
       };
 
-      const result = await this.executePerformanceScenario(stressScenario, testSuite, 'stress');
+      const result = await this.executePerformanceScenario(
+        stressScenario,
+        testSuite,
+        "stress",
+      );
       results.push(result);
 
       // Check if system has reached breaking point
@@ -322,16 +359,23 @@ export class PerformanceTestFramework {
    */
   private async executeVolumeTesting(
     testSuite: PerformanceTestSuite,
-    configuration: any
+    configuration: any,
   ): Promise<PerformanceTestResult[]> {
     const results: PerformanceTestResult[] = [];
 
-    const volumeScenarios = await this.generateVolumeTestScenarios(testSuite, configuration);
+    const volumeScenarios = await this.generateVolumeTestScenarios(
+      testSuite,
+      configuration,
+    );
 
     for (const scenario of volumeScenarios) {
       console.log(`  📊 Executing Volume Test: ${scenario.name}`);
 
-      const result = await this.executePerformanceScenario(scenario, testSuite, 'volume');
+      const result = await this.executePerformanceScenario(
+        scenario,
+        testSuite,
+        "volume",
+      );
       results.push(result);
     }
 
@@ -343,22 +387,28 @@ export class PerformanceTestFramework {
    */
   private async executeEnduranceTesting(
     testSuite: PerformanceTestSuite,
-    configuration: any
+    configuration: any,
   ): Promise<PerformanceTestResult[]> {
     const results: PerformanceTestResult[] = [];
 
     const enduranceDuration = configuration.duration || 3600000; // 1 hour default
 
     for (const scenario of testSuite.scenarios) {
-      console.log(`  ⏳ Executing Endurance Test: ${scenario.name} (${enduranceDuration}ms)`);
+      console.log(
+        `  ⏳ Executing Endurance Test: ${scenario.name} (${enduranceDuration}ms)`,
+      );
 
       const enduranceScenario: PerformanceTestScenario = {
         ...scenario,
         name: `Endurance Test - ${scenario.name}`,
-        testDuration: enduranceDuration
+        testDuration: enduranceDuration,
       };
 
-      const result = await this.executePerformanceScenario(enduranceScenario, testSuite, 'endurance');
+      const result = await this.executePerformanceScenario(
+        enduranceScenario,
+        testSuite,
+        "endurance",
+      );
       results.push(result);
 
       // Check for memory leaks and performance degradation
@@ -373,16 +423,23 @@ export class PerformanceTestFramework {
    */
   private async executeSpikeTesting(
     testSuite: PerformanceTestSuite,
-    configuration: any
+    configuration: any,
   ): Promise<PerformanceTestResult[]> {
     const results: PerformanceTestResult[] = [];
 
-    const spikeScenarios = await this.generateSpikeTestScenarios(testSuite, configuration);
+    const spikeScenarios = await this.generateSpikeTestScenarios(
+      testSuite,
+      configuration,
+    );
 
     for (const scenario of spikeScenarios) {
       console.log(`  ⚡ Executing Spike Test: ${scenario.name}`);
 
-      const result = await this.executePerformanceScenario(scenario, testSuite, 'spike');
+      const result = await this.executePerformanceScenario(
+        scenario,
+        testSuite,
+        "spike",
+      );
       results.push(result);
 
       // Analyze spike recovery
@@ -398,7 +455,7 @@ export class PerformanceTestFramework {
   private async executePerformanceScenario(
     scenario: PerformanceTestScenario,
     testSuite: PerformanceTestSuite,
-    testType: string
+    testType: string,
   ): Promise<PerformanceTestResult> {
     const testId = `${testType}_${scenario.name}_${Date.now()}`;
     const startTime = new Date();
@@ -411,7 +468,10 @@ export class PerformanceTestFramework {
       const loadResults = await this.loadGenerator.generateLoad(scenario);
 
       // Collect metrics during test execution
-      const metrics = await this.metricsCollector.collectMetrics(testId, scenario.testDuration);
+      const metrics = await this.metricsCollector.collectMetrics(
+        testId,
+        scenario.testDuration,
+      );
 
       // Stop monitoring
       await this.stopPerformanceMonitoring(testId);
@@ -420,9 +480,18 @@ export class PerformanceTestFramework {
       const duration = endTime.getTime() - startTime.getTime();
 
       // Analyze results
-      const performanceMetrics = await this.analyzePerformanceMetrics(metrics, loadResults);
-      const failures = await this.identifyPerformanceFailures(performanceMetrics, testSuite.thresholds);
-      const recommendations = await this.generatePerformanceRecommendations(performanceMetrics, failures);
+      const performanceMetrics = await this.analyzePerformanceMetrics(
+        metrics,
+        loadResults,
+      );
+      const failures = await this.identifyPerformanceFailures(
+        performanceMetrics,
+        testSuite.thresholds,
+      );
+      const recommendations = await this.generatePerformanceRecommendations(
+        performanceMetrics,
+        failures,
+      );
 
       return {
         testName: scenario.name,
@@ -432,9 +501,8 @@ export class PerformanceTestFramework {
         metrics: performanceMetrics,
         passed: failures.length === 0,
         failures,
-        recommendations
+        recommendations,
       };
-
     } catch (error) {
       console.error(`❌ Performance Scenario failed: ${scenario.name}`, error);
       throw error;
@@ -446,13 +514,16 @@ export class PerformanceTestFramework {
   /**
    * Performance monitoring methods
    */
-  private async startPerformanceMonitoring(testId: string, scenario: PerformanceTestScenario): Promise<void> {
+  private async startPerformanceMonitoring(
+    testId: string,
+    scenario: PerformanceTestScenario,
+  ): Promise<void> {
     this.activeTests.set(testId, { scenario, startTime: Date.now() });
 
     await Promise.all([
       this.profiler.startProfiling(testId),
       this.resourceMonitor.startMonitoring(testId),
-      this.metricsCollector.startCollection(testId)
+      this.metricsCollector.startCollection(testId),
     ]);
   }
 
@@ -460,14 +531,17 @@ export class PerformanceTestFramework {
     await Promise.all([
       this.profiler.stopProfiling(testId),
       this.resourceMonitor.stopMonitoring(testId),
-      this.metricsCollector.stopCollection(testId)
+      this.metricsCollector.stopCollection(testId),
     ]);
   }
 
   /**
    * Analysis methods
    */
-  private async analyzePerformanceMetrics(metrics: any, loadResults: any): Promise<PerformanceMetrics> {
+  private async analyzePerformanceMetrics(
+    metrics: any,
+    loadResults: any,
+  ): Promise<PerformanceMetrics> {
     // Implementation for performance metrics analysis
     return {
       responseTime: {
@@ -477,59 +551,59 @@ export class PerformanceTestFramework {
         p50: 75,
         p90: 150,
         p95: 200,
-        p99: 350
+        p99: 350,
       },
       throughput: {
         rps: 1200,
-        total: 36000
+        total: 36000,
       },
       errorRate: 0.5,
       resources: {
         cpu: [45, 52, 48, 50],
         memory: [256, 280, 275, 270],
         disk: [15, 18, 16, 17],
-        network: [100, 120, 110, 115]
+        network: [100, 120, 110, 115],
       },
-      custom: {}
+      custom: {},
     };
   }
 
   private async identifyPerformanceFailures(
     metrics: PerformanceMetrics,
-    thresholds: PerformanceThresholds
+    thresholds: PerformanceThresholds,
   ): Promise<PerformanceFailure[]> {
     const failures: PerformanceFailure[] = [];
 
     // Check response time thresholds
     if (metrics.responseTime.p95 > thresholds.responseTime.p95) {
       failures.push({
-        metric: 'response_time_p95',
+        metric: "response_time_p95",
         expected: thresholds.responseTime.p95,
         actual: metrics.responseTime.p95,
-        severity: 'high',
-        description: '95th percentile response time exceeds threshold'
+        severity: "high",
+        description: "95th percentile response time exceeds threshold",
       });
     }
 
     // Check throughput thresholds
     if (metrics.throughput.rps < thresholds.throughput.min) {
       failures.push({
-        metric: 'throughput_rps',
+        metric: "throughput_rps",
         expected: thresholds.throughput.min,
         actual: metrics.throughput.rps,
-        severity: 'medium',
-        description: 'Requests per second below minimum threshold'
+        severity: "medium",
+        description: "Requests per second below minimum threshold",
       });
     }
 
     // Check error rate thresholds
     if (metrics.errorRate > thresholds.errorRate.max) {
       failures.push({
-        metric: 'error_rate',
+        metric: "error_rate",
         expected: thresholds.errorRate.max,
         actual: metrics.errorRate,
-        severity: 'critical',
-        description: 'Error rate exceeds maximum threshold'
+        severity: "critical",
+        description: "Error rate exceeds maximum threshold",
       });
     }
 
@@ -538,19 +612,20 @@ export class PerformanceTestFramework {
 
   private async generatePerformanceRecommendations(
     metrics: PerformanceMetrics,
-    failures: PerformanceFailure[]
+    failures: PerformanceFailure[],
   ): Promise<PerformanceRecommendation[]> {
     const recommendations: PerformanceRecommendation[] = [];
 
     // Analyze bottlenecks and generate recommendations
-    const bottlenecks = await this.bottleneckAnalyzer.analyzeBottlenecks(metrics);
+    const bottlenecks =
+      await this.bottleneckAnalyzer.analyzeBottlenecks(metrics);
 
     for (const bottleneck of bottlenecks) {
       recommendations.push({
-        category: 'optimization',
-        priority: 'high',
+        category: "optimization",
+        priority: "high",
         description: `${bottleneck.component} bottleneck detected`,
-        action: bottleneck.recommendation
+        action: bottleneck.recommendation,
       });
     }
 
@@ -560,44 +635,68 @@ export class PerformanceTestFramework {
   /**
    * Helper methods
    */
-  private hasReachedBreakingPoint(result: PerformanceTestResult, thresholds: PerformanceThresholds): boolean {
-    return result.metrics.errorRate > thresholds.errorRate.max * 2 ||
-           result.metrics.responseTime.p95 > thresholds.responseTime.p95 * 3;
+  private hasReachedBreakingPoint(
+    result: PerformanceTestResult,
+    thresholds: PerformanceThresholds,
+  ): boolean {
+    return (
+      result.metrics.errorRate > thresholds.errorRate.max * 2 ||
+      result.metrics.responseTime.p95 > thresholds.responseTime.p95 * 3
+    );
   }
 
   private async validatePerformanceAssertions(
     result: PerformanceTestResult,
-    assertions: PerformanceAssertion[]
+    assertions: PerformanceAssertion[],
   ): Promise<void> {
     for (const assertion of assertions) {
       const actualValue = this.getMetricValue(result.metrics, assertion.metric);
-      const passed = this.evaluateAssertion(actualValue, assertion.operator, assertion.value);
+      const passed = this.evaluateAssertion(
+        actualValue,
+        assertion.operator,
+        assertion.value,
+      );
 
       if (!passed) {
-        throw new Error(`Performance assertion failed: ${assertion.description} - Expected ${assertion.metric} ${assertion.operator} ${assertion.value}, got ${actualValue}`);
+        throw new Error(
+          `Performance assertion failed: ${assertion.description} - Expected ${assertion.metric} ${assertion.operator} ${assertion.value}, got ${actualValue}`,
+        );
       }
     }
   }
 
-  private getMetricValue(metrics: PerformanceMetrics, metricPath: string): number {
+  private getMetricValue(
+    metrics: PerformanceMetrics,
+    metricPath: string,
+  ): number {
     // Implementation to extract metric value from metrics object
     return 0;
   }
 
-  private evaluateAssertion(actual: number, operator: string, expected: number): boolean {
+  private evaluateAssertion(
+    actual: number,
+    operator: string,
+    expected: number,
+  ): boolean {
     switch (operator) {
-      case 'lt': return actual < expected;
-      case 'lte': return actual <= expected;
-      case 'gt': return actual > expected;
-      case 'gte': return actual >= expected;
-      case 'eq': return actual === expected;
-      default: return false;
+      case "lt":
+        return actual < expected;
+      case "lte":
+        return actual <= expected;
+      case "gt":
+        return actual > expected;
+      case "gte":
+        return actual >= expected;
+      case "eq":
+        return actual === expected;
+      default:
+        return false;
     }
   }
 
   private async generateVolumeTestScenarios(
     testSuite: PerformanceTestSuite,
-    configuration: any
+    configuration: any,
   ): Promise<PerformanceTestScenario[]> {
     // Implementation to generate volume test scenarios
     return [];
@@ -605,31 +704,39 @@ export class PerformanceTestFramework {
 
   private async generateSpikeTestScenarios(
     testSuite: PerformanceTestSuite,
-    configuration: any
+    configuration: any,
   ): Promise<PerformanceTestScenario[]> {
     // Implementation to generate spike test scenarios
     return [];
   }
 
-  private async analyzeEnduranceResults(result: PerformanceTestResult): Promise<void> {
+  private async analyzeEnduranceResults(
+    result: PerformanceTestResult,
+  ): Promise<void> {
     // Implementation for endurance test analysis
   }
 
-  private async analyzeSpikeRecovery(result: PerformanceTestResult): Promise<void> {
+  private async analyzeSpikeRecovery(
+    result: PerformanceTestResult,
+  ): Promise<void> {
     // Implementation for spike recovery analysis
   }
 
-  private async setupPerformanceTestEnvironment(testSuite: PerformanceTestSuite): Promise<void> {
+  private async setupPerformanceTestEnvironment(
+    testSuite: PerformanceTestSuite,
+  ): Promise<void> {
     // Implementation for performance test environment setup
   }
 
-  private async teardownPerformanceTestEnvironment(testSuite: PerformanceTestSuite): Promise<void> {
+  private async teardownPerformanceTestEnvironment(
+    testSuite: PerformanceTestSuite,
+  ): Promise<void> {
     // Implementation for performance test environment cleanup
   }
 
   private async generatePerformanceReport(
     testSuite: PerformanceTestSuite,
-    results: PerformanceTestResult[]
+    results: PerformanceTestResult[],
   ): Promise<void> {
     // Implementation for performance report generation
   }
@@ -639,10 +746,13 @@ export class PerformanceTestFramework {
 export const performanceTestFramework = new PerformanceTestFramework();
 
 // Convenience methods for performance testing
-export const createPerformanceTest = (testSuite: PerformanceTestSuite): void => {
+export const createPerformanceTest = (
+  testSuite: PerformanceTestSuite,
+): void => {
   describe(`Performance Test Suite: ${testSuite.name}`, () => {
-    it('should meet performance requirements', async () => {
-      const results = await performanceTestFramework.executePerformanceTestSuite(testSuite);
+    it("should meet performance requirements", async () => {
+      const results =
+        await performanceTestFramework.executePerformanceTestSuite(testSuite);
 
       for (const result of results) {
         expect(result.passed).toBe(true);

@@ -9,16 +9,16 @@
  * @compliance GDPR, SOX, HIPAA, SOC2
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { EventEmitter } from 'events';
+import { Injectable, Logger } from "@nestjs/common";
+import { EventEmitter } from "events";
 import {
   ServiceStatus,
   SystemHealthStatus,
   BypassOperationType,
   BypassRole,
   EmergencyTokenStatus,
-  ViolationSeverity
-} from '../types/bypass-core.types';
+  ViolationSeverity,
+} from "../types/bypass-core.types";
 
 /**
  * Health check configuration
@@ -225,33 +225,33 @@ export interface AlertConfig {
  * Alert operators
  */
 export enum AlertOperator {
-  GREATER_THAN = 'gt',
-  GREATER_THAN_EQUAL = 'gte',
-  LESS_THAN = 'lt',
-  LESS_THAN_EQUAL = 'lte',
-  EQUAL = 'eq',
-  NOT_EQUAL = 'ne'
+  GREATER_THAN = "gt",
+  GREATER_THAN_EQUAL = "gte",
+  LESS_THAN = "lt",
+  LESS_THAN_EQUAL = "lte",
+  EQUAL = "eq",
+  NOT_EQUAL = "ne",
 }
 
 /**
  * Alert severity levels
  */
 export enum AlertSeverity {
-  INFO = 'info',
-  WARNING = 'warning',
-  CRITICAL = 'critical',
-  EMERGENCY = 'emergency'
+  INFO = "info",
+  WARNING = "warning",
+  CRITICAL = "critical",
+  EMERGENCY = "emergency",
 }
 
 /**
  * Notification channels
  */
 export enum NotificationChannel {
-  EMAIL = 'email',
-  SMS = 'sms',
-  SLACK = 'slack',
-  WEBHOOK = 'webhook',
-  LOG = 'log'
+  EMAIL = "email",
+  SMS = "sms",
+  SLACK = "slack",
+  WEBHOOK = "webhook",
+  LOG = "log",
 }
 
 /**
@@ -368,19 +368,19 @@ export interface PerformanceIndicator {
  * Indicator status
  */
 export enum IndicatorStatus {
-  EXCELLENT = 'excellent',
-  GOOD = 'good',
-  WARNING = 'warning',
-  CRITICAL = 'critical'
+  EXCELLENT = "excellent",
+  GOOD = "good",
+  WARNING = "warning",
+  CRITICAL = "critical",
 }
 
 /**
  * Indicator trend
  */
 export enum IndicatorTrend {
-  IMPROVING = 'improving',
-  STABLE = 'stable',
-  DEGRADING = 'degrading'
+  IMPROVING = "improving",
+  STABLE = "stable",
+  DEGRADING = "degrading",
 }
 
 /**
@@ -539,7 +539,10 @@ export class BypassMonitoringHealthService extends EventEmitter {
     const components = await this.getComponentHealth();
     const activeAlerts = Array.from(this.activeAlerts.values());
 
-    const healthScore = this.calculateOverallHealthScore(components, activeAlerts);
+    const healthScore = this.calculateOverallHealthScore(
+      components,
+      activeAlerts,
+    );
     const status = this.determineSystemStatus(healthScore, activeAlerts);
 
     return {
@@ -550,7 +553,10 @@ export class BypassMonitoringHealthService extends EventEmitter {
       systemMetrics,
       bypassMetrics,
       activeAlerts,
-      performanceIndicators: this.calculatePerformanceIndicators(systemMetrics, bypassMetrics)
+      performanceIndicators: this.calculatePerformanceIndicators(
+        systemMetrics,
+        bypassMetrics,
+      ),
     };
   }
 
@@ -567,7 +573,7 @@ export class BypassMonitoringHealthService extends EventEmitter {
       historicalTrends: this.getHistoricalTrends(),
       topAlerts: this.getTopAlerts(),
       securitySummary: this.getSecuritySummary(),
-      performanceSummary: this.getPerformanceSummary()
+      performanceSummary: this.getPerformanceSummary(),
     };
   }
 
@@ -603,16 +609,20 @@ export class BypassMonitoringHealthService extends EventEmitter {
    * Get system metrics history
    */
   async getMetricsHistory(hours: number = 24): Promise<SystemMetrics[]> {
-    const cutoff = Date.now() - (hours * 60 * 60 * 1000);
-    return this.metricsHistory.filter(m => m.timestamp.getTime() > cutoff);
+    const cutoff = Date.now() - hours * 60 * 60 * 1000;
+    return this.metricsHistory.filter((m) => m.timestamp.getTime() > cutoff);
   }
 
   /**
    * Get bypass metrics history
    */
-  async getBypassMetricsHistory(hours: number = 24): Promise<BypassSystemMetrics[]> {
-    const cutoff = Date.now() - (hours * 60 * 60 * 1000);
-    return this.bypassMetricsHistory.filter(m => m.timestamp.getTime() > cutoff);
+  async getBypassMetricsHistory(
+    hours: number = 24,
+  ): Promise<BypassSystemMetrics[]> {
+    const cutoff = Date.now() - hours * 60 * 60 * 1000;
+    return this.bypassMetricsHistory.filter(
+      (m) => m.timestamp.getTime() > cutoff,
+    );
   }
 
   /**
@@ -632,7 +642,7 @@ export class BypassMonitoringHealthService extends EventEmitter {
       alert.resolvedAt = new Date();
       this.activeAlerts.delete(eventId);
       this.logger.log(`Alert resolved: ${eventId}`);
-      this.emit('alert-resolved', alert);
+      this.emit("alert-resolved", alert);
     }
   }
 
@@ -645,66 +655,66 @@ export class BypassMonitoringHealthService extends EventEmitter {
    */
   private initializeHealthChecks(): void {
     // Database connectivity check
-    this.healthChecks.set('database', {
-      name: 'database',
-      description: 'Database connectivity and performance',
+    this.healthChecks.set("database", {
+      name: "database",
+      description: "Database connectivity and performance",
       intervalMs: 30000, // 30 seconds
       timeoutMs: 5000,
       retries: 3,
       critical: true,
       checkFunction: async () => this.checkDatabaseHealth(),
-      enabled: true
+      enabled: true,
     });
 
     // PARLANT service check
-    this.healthChecks.set('parlant_service', {
-      name: 'parlant_service',
-      description: 'PARLANT service availability',
+    this.healthChecks.set("parlant_service", {
+      name: "parlant_service",
+      description: "PARLANT service availability",
       intervalMs: 15000, // 15 seconds
       timeoutMs: 3000,
       retries: 2,
       critical: true,
       checkFunction: async () => this.checkParlantServiceHealth(),
-      enabled: true
+      enabled: true,
     });
 
     // Token management check
-    this.healthChecks.set('token_management', {
-      name: 'token_management',
-      description: 'Emergency token management system',
+    this.healthChecks.set("token_management", {
+      name: "token_management",
+      description: "Emergency token management system",
       intervalMs: 60000, // 1 minute
       timeoutMs: 2000,
       retries: 1,
       critical: false,
       checkFunction: async () => this.checkTokenManagementHealth(),
-      enabled: true
+      enabled: true,
     });
 
     // Authorization engine check
-    this.healthChecks.set('authorization_engine', {
-      name: 'authorization_engine',
-      description: 'Bypass authorization engine',
+    this.healthChecks.set("authorization_engine", {
+      name: "authorization_engine",
+      description: "Bypass authorization engine",
       intervalMs: 45000, // 45 seconds
       timeoutMs: 3000,
       retries: 2,
       critical: true,
       checkFunction: async () => this.checkAuthorizationEngineHealth(),
-      enabled: true
+      enabled: true,
     });
 
     // Audit system check
-    this.healthChecks.set('audit_system', {
-      name: 'audit_system',
-      description: 'Audit and forensics system',
+    this.healthChecks.set("audit_system", {
+      name: "audit_system",
+      description: "Audit and forensics system",
       intervalMs: 60000, // 1 minute
       timeoutMs: 2000,
       retries: 1,
       critical: false,
       checkFunction: async () => this.checkAuditSystemHealth(),
-      enabled: true
+      enabled: true,
     });
 
-    this.logger.log('Default health checks initialized');
+    this.logger.log("Default health checks initialized");
   }
 
   /**
@@ -712,27 +722,30 @@ export class BypassMonitoringHealthService extends EventEmitter {
    */
   private initializeAlerts(): void {
     // High error rate alert
-    this.alerts.set('high_error_rate', {
-      alertId: 'high_error_rate',
-      name: 'High Error Rate',
-      description: 'System error rate exceeds threshold',
-      metric: 'error_rate',
+    this.alerts.set("high_error_rate", {
+      alertId: "high_error_rate",
+      name: "High Error Rate",
+      description: "System error rate exceeds threshold",
+      metric: "error_rate",
       threshold: 5, // 5%
       operator: AlertOperator.GREATER_THAN,
       severity: AlertSeverity.WARNING,
       timeWindowMs: 300000, // 5 minutes
       minOccurrences: 3,
       enabled: true,
-      notificationChannels: [NotificationChannel.LOG, NotificationChannel.WEBHOOK],
-      cooldownMs: 600000 // 10 minutes
+      notificationChannels: [
+        NotificationChannel.LOG,
+        NotificationChannel.WEBHOOK,
+      ],
+      cooldownMs: 600000, // 10 minutes
     });
 
     // High response time alert
-    this.alerts.set('high_response_time', {
-      alertId: 'high_response_time',
-      name: 'High Response Time',
-      description: 'Average response time exceeds threshold',
-      metric: 'avg_response_time',
+    this.alerts.set("high_response_time", {
+      alertId: "high_response_time",
+      name: "High Response Time",
+      description: "Average response time exceeds threshold",
+      metric: "avg_response_time",
       threshold: 2000, // 2 seconds
       operator: AlertOperator.GREATER_THAN,
       severity: AlertSeverity.WARNING,
@@ -740,42 +753,48 @@ export class BypassMonitoringHealthService extends EventEmitter {
       minOccurrences: 2,
       enabled: true,
       notificationChannels: [NotificationChannel.LOG],
-      cooldownMs: 300000 // 5 minutes
+      cooldownMs: 300000, // 5 minutes
     });
 
     // Security violation alert
-    this.alerts.set('security_violations', {
-      alertId: 'security_violations',
-      name: 'Security Violations',
-      description: 'High number of security violations detected',
-      metric: 'security_violations_per_hour',
+    this.alerts.set("security_violations", {
+      alertId: "security_violations",
+      name: "Security Violations",
+      description: "High number of security violations detected",
+      metric: "security_violations_per_hour",
       threshold: 10,
       operator: AlertOperator.GREATER_THAN,
       severity: AlertSeverity.CRITICAL,
       timeWindowMs: 3600000, // 1 hour
       minOccurrences: 1,
       enabled: true,
-      notificationChannels: [NotificationChannel.LOG, NotificationChannel.WEBHOOK],
-      cooldownMs: 1800000 // 30 minutes
+      notificationChannels: [
+        NotificationChannel.LOG,
+        NotificationChannel.WEBHOOK,
+      ],
+      cooldownMs: 1800000, // 30 minutes
     });
 
     // Database connectivity alert
-    this.alerts.set('database_down', {
-      alertId: 'database_down',
-      name: 'Database Unavailable',
-      description: 'Database connection failed',
-      metric: 'database_health',
+    this.alerts.set("database_down", {
+      alertId: "database_down",
+      name: "Database Unavailable",
+      description: "Database connection failed",
+      metric: "database_health",
       threshold: 0, // 0 = unhealthy
       operator: AlertOperator.EQUAL,
       severity: AlertSeverity.EMERGENCY,
       timeWindowMs: 60000, // 1 minute
       minOccurrences: 1,
       enabled: true,
-      notificationChannels: [NotificationChannel.LOG, NotificationChannel.WEBHOOK],
-      cooldownMs: 300000 // 5 minutes
+      notificationChannels: [
+        NotificationChannel.LOG,
+        NotificationChannel.WEBHOOK,
+      ],
+      cooldownMs: 300000, // 5 minutes
     });
 
-    this.logger.log('Default alerts initialized');
+    this.logger.log("Default alerts initialized");
   }
 
   /**
@@ -802,19 +821,21 @@ export class BypassMonitoringHealthService extends EventEmitter {
       await this.evaluateAlerts();
     }, 60000); // 1 minute
 
-    this.logger.log('Monitoring loops started');
+    this.logger.log("Monitoring loops started");
   }
 
   /**
    * Execute individual health check
    */
-  private async executeHealthCheck(config: HealthCheckConfig): Promise<HealthCheckResult> {
+  private async executeHealthCheck(
+    config: HealthCheckConfig,
+  ): Promise<HealthCheckResult> {
     if (!config.enabled) {
       return {
         healthy: true,
         responseTime: 0,
-        details: 'Health check disabled',
-        timestamp: new Date()
+        details: "Health check disabled",
+        timestamp: new Date(),
       };
     }
 
@@ -823,7 +844,7 @@ export class BypassMonitoringHealthService extends EventEmitter {
     try {
       const result = await Promise.race([
         config.checkFunction(),
-        this.createTimeoutPromise(config.timeoutMs)
+        this.createTimeoutPromise(config.timeoutMs),
       ]);
 
       result.responseTime = Date.now() - startTime;
@@ -831,14 +852,13 @@ export class BypassMonitoringHealthService extends EventEmitter {
 
       this.healthResults.set(config.name, result);
       return result;
-
     } catch (error) {
       const result: HealthCheckResult = {
         healthy: false,
         responseTime: Date.now() - startTime,
-        details: 'Health check failed',
-        error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date()
+        details: "Health check failed",
+        error: error instanceof Error ? error.message : "Unknown error",
+        timestamp: new Date(),
       };
 
       this.healthResults.set(config.name, result);
@@ -851,7 +871,7 @@ export class BypassMonitoringHealthService extends EventEmitter {
    */
   private createTimeoutPromise(timeoutMs: number): Promise<never> {
     return new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('Health check timeout')), timeoutMs);
+      setTimeout(() => reject(new Error("Health check timeout")), timeoutMs);
     });
   }
 
@@ -866,12 +886,14 @@ export class BypassMonitoringHealthService extends EventEmitter {
     return {
       healthy,
       responseTime,
-      details: healthy ? 'Database connection successful' : 'Database connection failed',
+      details: healthy
+        ? "Database connection successful"
+        : "Database connection failed",
       metrics: {
         connectionCount: Math.floor(Math.random() * 100) + 10,
-        queryTime: responseTime
+        queryTime: responseTime,
       },
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   }
 
@@ -883,12 +905,14 @@ export class BypassMonitoringHealthService extends EventEmitter {
     return {
       healthy,
       responseTime,
-      details: healthy ? 'PARLANT service responsive' : 'PARLANT service unavailable',
+      details: healthy
+        ? "PARLANT service responsive"
+        : "PARLANT service unavailable",
       metrics: {
         activeConnections: Math.floor(Math.random() * 50) + 5,
-        memoryUsage: Math.random() * 1000 + 100
+        memoryUsage: Math.random() * 1000 + 100,
       },
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   }
 
@@ -900,12 +924,14 @@ export class BypassMonitoringHealthService extends EventEmitter {
     return {
       healthy,
       responseTime,
-      details: healthy ? 'Token management operational' : 'Token management issues',
+      details: healthy
+        ? "Token management operational"
+        : "Token management issues",
       metrics: {
         activeTokens: Math.floor(Math.random() * 20) + 1,
-        tokenCreationRate: Math.random() * 10
+        tokenCreationRate: Math.random() * 10,
       },
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   }
 
@@ -917,12 +943,14 @@ export class BypassMonitoringHealthService extends EventEmitter {
     return {
       healthy,
       responseTime,
-      details: healthy ? 'Authorization engine operational' : 'Authorization engine issues',
+      details: healthy
+        ? "Authorization engine operational"
+        : "Authorization engine issues",
       metrics: {
         authorizationRate: Math.random() * 100 + 10,
-        cacheHitRate: Math.random() * 100
+        cacheHitRate: Math.random() * 100,
       },
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   }
 
@@ -934,12 +962,12 @@ export class BypassMonitoringHealthService extends EventEmitter {
     return {
       healthy,
       responseTime,
-      details: healthy ? 'Audit system operational' : 'Audit system issues',
+      details: healthy ? "Audit system operational" : "Audit system issues",
       metrics: {
         auditEntries: Math.floor(Math.random() * 1000) + 100,
-        storageUsage: Math.random() * 100
+        storageUsage: Math.random() * 100,
       },
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   }
 
@@ -959,13 +987,13 @@ export class BypassMonitoringHealthService extends EventEmitter {
         bytesOutPerSec: Math.random() * 1000000,
         packetsInPerSec: Math.random() * 1000,
         packetsOutPerSec: Math.random() * 1000,
-        errorsPerSec: Math.random() * 10
+        errorsPerSec: Math.random() * 10,
       },
       activeConnections: Math.floor(Math.random() * 1000) + 100,
       requestRate: Math.random() * 100 + 10,
       errorRate: Math.random() * 5,
       avgResponseTime: Math.random() * 500 + 100,
-      uptime: Math.floor((Date.now() - this.startTime) / 1000)
+      uptime: Math.floor((Date.now() - this.startTime) / 1000),
     };
   }
 
@@ -980,11 +1008,11 @@ export class BypassMonitoringHealthService extends EventEmitter {
       pendingTokens: Math.floor(Math.random() * 10),
       expiredTokens: Math.floor(Math.random() * 100) + 50,
       tokensByAuthLevel: {
-        'system_critical': Math.floor(Math.random() * 10),
-        'emergency_single': Math.floor(Math.random() * 20),
-        'emergency_dual': Math.floor(Math.random() * 15),
-        'committee_approval': Math.floor(Math.random() * 5),
-        'board_approval': Math.floor(Math.random() * 2)
+        system_critical: Math.floor(Math.random() * 10),
+        emergency_single: Math.floor(Math.random() * 20),
+        emergency_dual: Math.floor(Math.random() * 15),
+        committee_approval: Math.floor(Math.random() * 5),
+        board_approval: Math.floor(Math.random() * 2),
       },
       operationsToday: Math.floor(Math.random() * 500) + 100,
       operationsThisHour: Math.floor(Math.random() * 50) + 5,
@@ -995,7 +1023,7 @@ export class BypassMonitoringHealthService extends EventEmitter {
       abuseEventsToday: Math.floor(Math.random() * 5),
       blockedUsersCount: Math.floor(Math.random() * 5),
       rateLimitedUsersCount: Math.floor(Math.random() * 10),
-      avgRiskScore: Math.random() * 40 + 30 // 30-70
+      avgRiskScore: Math.random() * 40 + 30, // 30-70
     };
   }
 
@@ -1026,17 +1054,17 @@ export class BypassMonitoringHealthService extends EventEmitter {
    * Execute all health checks
    */
   private async executeAllHealthChecks(): Promise<void> {
-    const promises = Array.from(this.healthChecks.values()).map(config =>
-      this.executeHealthCheck(config).catch(error => {
+    const promises = Array.from(this.healthChecks.values()).map((config) =>
+      this.executeHealthCheck(config).catch((error) => {
         this.logger.error(`Health check ${config.name} failed:`, error);
         return {
           healthy: false,
           responseTime: 0,
-          details: 'Health check execution failed',
+          details: "Health check execution failed",
           error: error.message,
-          timestamp: new Date()
+          timestamp: new Date(),
         };
-      })
+      }),
     );
 
     await Promise.all(promises);
@@ -1051,12 +1079,14 @@ export class BypassMonitoringHealthService extends EventEmitter {
     for (const [name, result] of this.healthResults) {
       const component: ComponentHealth = {
         name,
-        status: result.healthy ? ServiceStatus.OPERATIONAL : ServiceStatus.MAJOR_OUTAGE,
+        status: result.healthy
+          ? ServiceStatus.OPERATIONAL
+          : ServiceStatus.MAJOR_OUTAGE,
         healthScore: result.healthy ? 100 : 0,
         lastCheck: result.timestamp,
         responseTime: result.responseTime,
         error: result.error,
-        metrics: result.metrics || {}
+        metrics: result.metrics || {},
       };
 
       components.push(component);
@@ -1068,7 +1098,10 @@ export class BypassMonitoringHealthService extends EventEmitter {
   /**
    * Calculate overall health score
    */
-  private calculateOverallHealthScore(components: ComponentHealth[], alerts: AlertEvent[]): number {
+  private calculateOverallHealthScore(
+    components: ComponentHealth[],
+    alerts: AlertEvent[],
+  ): number {
     let totalScore = 0;
     let criticalComponents = 0;
 
@@ -1084,22 +1117,34 @@ export class BypassMonitoringHealthService extends EventEmitter {
     }
 
     // Alert penalty
-    const criticalAlerts = alerts.filter(a => a.alert.severity === AlertSeverity.CRITICAL).length;
-    const emergencyAlerts = alerts.filter(a => a.alert.severity === AlertSeverity.EMERGENCY).length;
+    const criticalAlerts = alerts.filter(
+      (a) => a.alert.severity === AlertSeverity.CRITICAL,
+    ).length;
+    const emergencyAlerts = alerts.filter(
+      (a) => a.alert.severity === AlertSeverity.EMERGENCY,
+    ).length;
 
-    totalScore -= (criticalAlerts * 10);
-    totalScore -= (emergencyAlerts * 20);
+    totalScore -= criticalAlerts * 10;
+    totalScore -= emergencyAlerts * 20;
 
-    const maxScore = (criticalComponents * 70) + ((components.length - criticalComponents) * 30);
+    const maxScore =
+      criticalComponents * 70 + (components.length - criticalComponents) * 30;
     return Math.max(0, Math.min(100, (totalScore / maxScore) * 100));
   }
 
   /**
    * Determine system status
    */
-  private determineSystemStatus(healthScore: number, alerts: AlertEvent[]): SystemHealthStatus {
-    const emergencyAlerts = alerts.filter(a => a.alert.severity === AlertSeverity.EMERGENCY).length;
-    const criticalAlerts = alerts.filter(a => a.alert.severity === AlertSeverity.CRITICAL).length;
+  private determineSystemStatus(
+    healthScore: number,
+    alerts: AlertEvent[],
+  ): SystemHealthStatus {
+    const emergencyAlerts = alerts.filter(
+      (a) => a.alert.severity === AlertSeverity.EMERGENCY,
+    ).length;
+    const criticalAlerts = alerts.filter(
+      (a) => a.alert.severity === AlertSeverity.CRITICAL,
+    ).length;
 
     if (emergencyAlerts > 0 || healthScore < 30) {
       return SystemHealthStatus.DOWN;
@@ -1117,41 +1162,53 @@ export class BypassMonitoringHealthService extends EventEmitter {
    */
   private calculatePerformanceIndicators(
     systemMetrics: SystemMetrics,
-    bypassMetrics: BypassSystemMetrics
+    bypassMetrics: BypassSystemMetrics,
   ): PerformanceIndicator[] {
     return [
       {
-        name: 'Response Time',
+        name: "Response Time",
         value: systemMetrics.avgResponseTime,
         target: 500,
-        status: systemMetrics.avgResponseTime < 500 ? IndicatorStatus.GOOD : IndicatorStatus.WARNING,
+        status:
+          systemMetrics.avgResponseTime < 500
+            ? IndicatorStatus.GOOD
+            : IndicatorStatus.WARNING,
         trend: IndicatorTrend.STABLE,
-        unit: 'ms'
+        unit: "ms",
       },
       {
-        name: 'Success Rate',
+        name: "Success Rate",
         value: bypassMetrics.successRate,
         target: 95,
-        status: bypassMetrics.successRate > 95 ? IndicatorStatus.EXCELLENT : IndicatorStatus.GOOD,
+        status:
+          bypassMetrics.successRate > 95
+            ? IndicatorStatus.EXCELLENT
+            : IndicatorStatus.GOOD,
         trend: IndicatorTrend.STABLE,
-        unit: '%'
+        unit: "%",
       },
       {
-        name: 'CPU Usage',
+        name: "CPU Usage",
         value: systemMetrics.cpuUsage,
         target: 70,
-        status: systemMetrics.cpuUsage < 70 ? IndicatorStatus.GOOD : IndicatorStatus.WARNING,
+        status:
+          systemMetrics.cpuUsage < 70
+            ? IndicatorStatus.GOOD
+            : IndicatorStatus.WARNING,
         trend: IndicatorTrend.STABLE,
-        unit: '%'
+        unit: "%",
       },
       {
-        name: 'Error Rate',
+        name: "Error Rate",
         value: systemMetrics.errorRate,
         target: 1,
-        status: systemMetrics.errorRate < 1 ? IndicatorStatus.EXCELLENT : IndicatorStatus.WARNING,
+        status:
+          systemMetrics.errorRate < 1
+            ? IndicatorStatus.EXCELLENT
+            : IndicatorStatus.WARNING,
         trend: IndicatorTrend.STABLE,
-        unit: '%'
-      }
+        unit: "%",
+      },
     ];
   }
 
@@ -1160,7 +1217,8 @@ export class BypassMonitoringHealthService extends EventEmitter {
    */
   private getRealTimeMetrics(): RealTimeMetrics {
     const latest = this.metricsHistory[this.metricsHistory.length - 1];
-    const latestBypass = this.bypassMetricsHistory[this.bypassMetricsHistory.length - 1];
+    const latestBypass =
+      this.bypassMetricsHistory[this.bypassMetricsHistory.length - 1];
 
     return {
       requestsPerSecond: latest?.requestRate || 0,
@@ -1168,7 +1226,7 @@ export class BypassMonitoringHealthService extends EventEmitter {
       currentResponseTime: latest?.avgResponseTime || 0,
       currentErrorRate: latest?.errorRate || 0,
       activeUsers: Math.floor(Math.random() * 100) + 10,
-      systemLoad: latest?.cpuUsage || 0
+      systemLoad: latest?.cpuUsage || 0,
     };
   }
 
@@ -1179,23 +1237,23 @@ export class BypassMonitoringHealthService extends EventEmitter {
     // Mock historical trends
     return [
       {
-        metric: 'Response Time',
-        dataPoints: this.metricsHistory.slice(-24).map(m => ({
+        metric: "Response Time",
+        dataPoints: this.metricsHistory.slice(-24).map((m) => ({
           timestamp: m.timestamp,
-          value: m.avgResponseTime
+          value: m.avgResponseTime,
         })),
         trend: IndicatorTrend.STABLE,
-        changePercent: 0
+        changePercent: 0,
       },
       {
-        metric: 'Error Rate',
-        dataPoints: this.metricsHistory.slice(-24).map(m => ({
+        metric: "Error Rate",
+        dataPoints: this.metricsHistory.slice(-24).map((m) => ({
           timestamp: m.timestamp,
-          value: m.errorRate
+          value: m.errorRate,
         })),
         trend: IndicatorTrend.IMPROVING,
-        changePercent: -5
-      }
+        changePercent: -5,
+      },
     ];
   }
 
@@ -1209,9 +1267,11 @@ export class BypassMonitoringHealthService extends EventEmitter {
           [AlertSeverity.EMERGENCY]: 4,
           [AlertSeverity.CRITICAL]: 3,
           [AlertSeverity.WARNING]: 2,
-          [AlertSeverity.INFO]: 1
+          [AlertSeverity.INFO]: 1,
         };
-        return severityOrder[b.alert.severity] - severityOrder[a.alert.severity];
+        return (
+          severityOrder[b.alert.severity] - severityOrder[a.alert.severity]
+        );
       })
       .slice(0, 10);
   }
@@ -1220,14 +1280,15 @@ export class BypassMonitoringHealthService extends EventEmitter {
    * Get security summary
    */
   private getSecuritySummary(): SecuritySummary {
-    const latestBypass = this.bypassMetricsHistory[this.bypassMetricsHistory.length - 1];
+    const latestBypass =
+      this.bypassMetricsHistory[this.bypassMetricsHistory.length - 1];
 
     return {
       incidentsToday: latestBypass?.securityViolationsToday || 0,
       failedAuthAttempts: Math.floor(Math.random() * 50),
       suspiciousActivities: latestBypass?.abuseEventsToday || 0,
       blockedOperations: Math.floor(Math.random() * 10),
-      securityScore: Math.max(0, 100 - (latestBypass?.avgRiskScore || 50))
+      securityScore: Math.max(0, 100 - (latestBypass?.avgRiskScore || 50)),
     };
   }
 
@@ -1236,14 +1297,15 @@ export class BypassMonitoringHealthService extends EventEmitter {
    */
   private getPerformanceSummary(): PerformanceSummary {
     const latest = this.metricsHistory[this.metricsHistory.length - 1];
-    const latestBypass = this.bypassMetricsHistory[this.bypassMetricsHistory.length - 1];
+    const latestBypass =
+      this.bypassMetricsHistory[this.bypassMetricsHistory.length - 1];
 
     return {
       avgResponseTime: latest?.avgResponseTime || 0,
       p95ResponseTime: (latest?.avgResponseTime || 0) * 1.5,
       throughput: latestBypass?.avgOperationsPerMinute || 0,
       errorRate: latest?.errorRate || 0,
-      availability: 99.5 // Mock availability
+      availability: 99.5, // Mock availability
     };
   }
 
@@ -1276,17 +1338,18 @@ export class BypassMonitoringHealthService extends EventEmitter {
    */
   private async getMetricValue(metric: string): Promise<number> {
     const latest = this.metricsHistory[this.metricsHistory.length - 1];
-    const latestBypass = this.bypassMetricsHistory[this.bypassMetricsHistory.length - 1];
+    const latestBypass =
+      this.bypassMetricsHistory[this.bypassMetricsHistory.length - 1];
 
     switch (metric) {
-      case 'error_rate':
+      case "error_rate":
         return latest?.errorRate || 0;
-      case 'avg_response_time':
+      case "avg_response_time":
         return latest?.avgResponseTime || 0;
-      case 'security_violations_per_hour':
+      case "security_violations_per_hour":
         return latestBypass?.securityViolationsToday || 0;
-      case 'database_health':
-        const dbHealth = this.healthResults.get('database');
+      case "database_health":
+        const dbHealth = this.healthResults.get("database");
         return dbHealth?.healthy ? 1 : 0;
       default:
         return 0;
@@ -1296,7 +1359,10 @@ export class BypassMonitoringHealthService extends EventEmitter {
   /**
    * Evaluate alert condition
    */
-  private evaluateAlertCondition(currentValue: number, alert: AlertConfig): boolean {
+  private evaluateAlertCondition(
+    currentValue: number,
+    alert: AlertConfig,
+  ): boolean {
     switch (alert.operator) {
       case AlertOperator.GREATER_THAN:
         return currentValue > alert.threshold;
@@ -1318,7 +1384,10 @@ export class BypassMonitoringHealthService extends EventEmitter {
   /**
    * Trigger alert
    */
-  private async triggerAlert(alert: AlertConfig, currentValue: number): Promise<void> {
+  private async triggerAlert(
+    alert: AlertConfig,
+    currentValue: number,
+  ): Promise<void> {
     const eventId = `alert_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
     const alertEvent: AlertEvent = {
@@ -1329,14 +1398,14 @@ export class BypassMonitoringHealthService extends EventEmitter {
       thresholdValue: alert.threshold,
       message: `${alert.name}: ${alert.description} (Current: ${currentValue}, Threshold: ${alert.threshold})`,
       context: {},
-      resolved: false
+      resolved: false,
     };
 
     this.activeAlerts.set(alert.alertId, alertEvent);
     this.alertHistory.set(alert.alertId, new Date());
 
     this.logger.error(`Alert triggered: ${alert.name} (${eventId})`);
-    this.emit('alert-triggered', alertEvent);
+    this.emit("alert-triggered", alertEvent);
 
     // Send notifications
     await this.sendAlertNotifications(alertEvent);
@@ -1353,7 +1422,9 @@ export class BypassMonitoringHealthService extends EventEmitter {
           break;
         case NotificationChannel.WEBHOOK:
           // Mock webhook notification
-          this.logger.log(`Webhook notification sent for alert: ${alertEvent.eventId}`);
+          this.logger.log(
+            `Webhook notification sent for alert: ${alertEvent.eventId}`,
+          );
           break;
         // Add more notification channels as needed
       }

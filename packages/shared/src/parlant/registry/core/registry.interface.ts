@@ -18,14 +18,11 @@ import {
   DiscoveryConfiguration,
   FunctionRegistrationConfig,
   FunctionHealthStatus,
-  RegistrationStatus
-} from './registry.types';
+  RegistrationStatus,
+} from "./registry.types";
 
 // Re-export commonly used types
-export {
-  FunctionRegistrationConfig,
-  FunctionHealthStatus
-};
+export { FunctionRegistrationConfig, FunctionHealthStatus };
 
 // ===========================
 // CORE REGISTRY INTERFACES
@@ -57,7 +54,7 @@ export interface IFunctionRegistry {
    */
   update(
     functionId: string,
-    updates: Partial<FunctionRegistryEntry>
+    updates: Partial<FunctionRegistryEntry>,
   ): Promise<UpdateResult>;
 
   /**
@@ -118,7 +115,9 @@ export interface IFunctionDiscovery {
    * @param configuration Discovery configuration
    * @returns Promise resolving to discovery results
    */
-  discover(configuration: DiscoveryConfiguration): Promise<FunctionDiscoveryResult>;
+  discover(
+    configuration: DiscoveryConfiguration,
+  ): Promise<FunctionDiscoveryResult>;
 
   /**
    * Discover functions in file
@@ -135,7 +134,7 @@ export interface IFunctionDiscovery {
    */
   discoverInDirectory(
     directoryPath: string,
-    recursive: boolean
+    recursive: boolean,
   ): Promise<FunctionDiscoveryEntry[]>;
 
   /**
@@ -157,7 +156,7 @@ export interface IFunctionDiscovery {
    * @returns Validation result
    */
   validateConfiguration(
-    configuration: DiscoveryConfiguration
+    configuration: DiscoveryConfiguration,
   ): ConfigurationValidationResult;
 }
 
@@ -170,7 +169,9 @@ export interface IConfigurationManager {
    * @param functionId Function ID
    * @returns Promise resolving to function configuration
    */
-  getConfiguration(functionId: string): Promise<FunctionRegistrationConfig | null>;
+  getConfiguration(
+    functionId: string,
+  ): Promise<FunctionRegistrationConfig | null>;
 
   /**
    * Update function configuration
@@ -180,7 +181,7 @@ export interface IConfigurationManager {
    */
   updateConfiguration(
     functionId: string,
-    config: Partial<FunctionRegistrationConfig>
+    config: Partial<FunctionRegistrationConfig>,
   ): Promise<ConfigurationUpdateResult>;
 
   /**
@@ -202,7 +203,7 @@ export interface IConfigurationManager {
    * @returns Promise resolving to update result
    */
   updateGlobalConfiguration(
-    config: Partial<GlobalConfiguration>
+    config: Partial<GlobalConfiguration>,
   ): Promise<GlobalConfigurationUpdateResult>;
 
   /**
@@ -211,7 +212,7 @@ export interface IConfigurationManager {
    * @returns Validation result
    */
   validateConfiguration(
-    config: FunctionRegistrationConfig
+    config: FunctionRegistrationConfig,
   ): ConfigurationValidationResult;
 
   /**
@@ -222,7 +223,7 @@ export interface IConfigurationManager {
    */
   applyTemplate(
     functionId: string,
-    templateName: string
+    templateName: string,
   ): Promise<TemplateApplicationResult>;
 
   /**
@@ -264,7 +265,7 @@ export interface IHealthMonitor {
    */
   getHealthHistory(
     functionId: string,
-    timeRange: TimeRange
+    timeRange: TimeRange,
   ): Promise<HealthHistory>;
 
   /**
@@ -275,7 +276,7 @@ export interface IHealthMonitor {
    */
   setAlertThresholds(
     functionId: string,
-    thresholds: HealthThreshold[]
+    thresholds: HealthThreshold[],
   ): Promise<ThresholdSettingResult>;
 
   /**
@@ -286,7 +287,7 @@ export interface IHealthMonitor {
    */
   getHealthMetrics(
     functionId: string,
-    metrics: string[]
+    metrics: string[],
   ): Promise<HealthMetrics>;
 
   /**
@@ -297,7 +298,7 @@ export interface IHealthMonitor {
    */
   startMonitoring(
     functionId: string,
-    interval: number
+    interval: number,
   ): Promise<MonitoringSession>;
 
   /**
@@ -327,7 +328,7 @@ export interface IVersionManager {
    */
   createVersion(
     functionId: string,
-    versionData: VersionCreationData
+    versionData: VersionCreationData,
   ): Promise<VersionCreationResult>;
 
   /**
@@ -340,7 +341,7 @@ export interface IVersionManager {
   compareVersions(
     functionId: string,
     version1: string,
-    version2: string
+    version2: string,
   ): Promise<VersionComparisonResult>;
 
   /**
@@ -353,7 +354,7 @@ export interface IVersionManager {
   getMigrationPlan(
     functionId: string,
     fromVersion: string,
-    toVersion: string
+    toVersion: string,
   ): Promise<MigrationPlan>;
 
   /**
@@ -361,7 +362,9 @@ export interface IVersionManager {
    * @param migrationPlan Migration plan to execute
    * @returns Promise resolving to migration result
    */
-  executeMigration(migrationPlan: MigrationPlan): Promise<MigrationExecutionResult>;
+  executeMigration(
+    migrationPlan: MigrationPlan,
+  ): Promise<MigrationExecutionResult>;
 
   /**
    * Rollback version
@@ -371,7 +374,7 @@ export interface IVersionManager {
    */
   rollbackVersion(
     functionId: string,
-    targetVersion: string
+    targetVersion: string,
   ): Promise<RollbackResult>;
 
   /**
@@ -389,7 +392,7 @@ export interface IVersionManager {
    */
   archiveVersions(
     functionId: string,
-    retentionPolicy: RetentionPolicy
+    retentionPolicy: RetentionPolicy,
   ): Promise<ArchivalResult>;
 }
 
@@ -416,7 +419,9 @@ export interface IDependencyTracker {
    * @param functionIds Function IDs to check
    * @returns Promise resolving to circular dependency analysis
    */
-  findCircularDependencies(functionIds: string[]): Promise<CircularDependencyAnalysis>;
+  findCircularDependencies(
+    functionIds: string[],
+  ): Promise<CircularDependencyAnalysis>;
 
   /**
    * Get impact analysis
@@ -426,7 +431,7 @@ export interface IDependencyTracker {
    */
   getImpactAnalysis(
     functionId: string,
-    changeType: ChangeType
+    changeType: ChangeType,
   ): Promise<ImpactAnalysis>;
 
   /**
@@ -437,7 +442,7 @@ export interface IDependencyTracker {
    */
   updateDependencies(
     functionId: string,
-    dependencies: DependencyUpdate
+    dependencies: DependencyUpdate,
   ): Promise<DependencyUpdateResult>;
 
   /**
@@ -445,7 +450,9 @@ export interface IDependencyTracker {
    * @param functionIds Function IDs to validate
    * @returns Promise resolving to validation result
    */
-  validateConsistency(functionIds: string[]): Promise<ConsistencyValidationResult>;
+  validateConsistency(
+    functionIds: string[],
+  ): Promise<ConsistencyValidationResult>;
 
   /**
    * Optimize dependency resolution
@@ -587,14 +594,14 @@ export enum IntegrityIssueType {
   _CIRCULAR_DEPENDENCY = "circular_dependency",
   _ORPHANED_FUNCTION = "orphaned_function",
   _INVALID_CONFIGURATION = "invalid_configuration",
-  _CORRUPTED_METADATA = "corrupted_metadata"
+  _CORRUPTED_METADATA = "corrupted_metadata",
 }
 
 export enum IssueSeverity {
   _LOW = "low",
   _MEDIUM = "medium",
   _HIGH = "high",
-  _CRITICAL = "critical"
+  _CRITICAL = "critical",
 }
 
 export interface ExportOptions {
@@ -610,7 +617,7 @@ export enum ExportFormat {
   _JSON = "json",
   _XML = "xml",
   _YAML = "yaml",
-  _BINARY = "binary"
+  _BINARY = "binary",
 }
 
 export interface ExportResult {
@@ -668,7 +675,7 @@ export enum DiscoveryChangeType {
   _SIGNATURE_CHANGE = "signature_change",
   _LOCATION_CHANGE = "location_change",
   _METADATA_CHANGE = "metadata_change",
-  _DEPENDENCY_CHANGE = "dependency_change"
+  _DEPENDENCY_CHANGE = "dependency_change",
 }
 
 export interface DiscoveryError {
@@ -728,13 +735,13 @@ export enum PolicyAction {
   _ALLOW = "allow",
   _DENY = "deny",
   _WARN = "warn",
-  _REQUIRE_APPROVAL = "require_approval"
+  _REQUIRE_APPROVAL = "require_approval",
 }
 
 export enum EnforcementLevel {
   _ADVISORY = "advisory",
   _WARNING = "warning",
-  _BLOCKING = "blocking"
+  _BLOCKING = "blocking",
 }
 
 export interface SecuritySettings {
@@ -748,7 +755,7 @@ export enum AuditLevel {
   _NONE = "none",
   _BASIC = "basic",
   _DETAILED = "detailed",
-  _COMPREHENSIVE = "comprehensive"
+  _COMPREHENSIVE = "comprehensive",
 }
 
 export enum SecurityLevel {
@@ -756,7 +763,7 @@ export enum SecurityLevel {
   _LOW = "low",
   _MEDIUM = "medium",
   _HIGH = "high",
-  _CRITICAL = "critical"
+  _CRITICAL = "critical",
 }
 
 export interface PerformanceSettings {
@@ -790,14 +797,14 @@ export enum RollbackAction {
   _RESTORE_CONFIG = "restore_config",
   _RESTART_SERVICE = "restart_service",
   _CLEAR_CACHE = "clear_cache",
-  _REBUILD_INDEX = "rebuild_index"
+  _REBUILD_INDEX = "rebuild_index",
 }
 
 export enum RiskLevel {
   _LOW = "low",
   _MEDIUM = "medium",
   _HIGH = "high",
-  _CRITICAL = "critical"
+  _CRITICAL = "critical",
 }
 
 export interface TemplateApplicationResult {
@@ -817,7 +824,7 @@ export enum ConflictResolution {
   _USE_TEMPLATE = "use_template",
   _KEEP_CURRENT = "keep_current",
   _MERGE = "merge",
-  _MANUAL_REQUIRED = "manual_required"
+  _MANUAL_REQUIRED = "manual_required",
 }
 
 export interface ConfigurationTemplate {
@@ -833,7 +840,7 @@ export enum TemplateCategory {
   _PERFORMANCE = "performance",
   _MONITORING = "monitoring",
   _DEVELOPMENT = "development",
-  _PRODUCTION = "production"
+  _PRODUCTION = "production",
 }
 
 export interface TemplateApplicability {
@@ -874,7 +881,7 @@ export interface HealthTrend {
 export enum TrendDirection {
   _IMPROVING = "improving",
   _STABLE = "stable",
-  _DEGRADING = "degrading"
+  _DEGRADING = "degrading",
 }
 
 export interface HealthRecommendation {
@@ -888,7 +895,7 @@ export enum RecommendationPriority {
   _LOW = "low",
   _MEDIUM = "medium",
   _HIGH = "high",
-  _URGENT = "urgent"
+  _URGENT = "urgent",
 }
 
 export interface HealthAlert {
@@ -903,14 +910,14 @@ export enum AlertType {
   _PERFORMANCE_DEGRADATION = "performance_degradation",
   _ERROR_RATE_SPIKE = "error_rate_spike",
   _AVAILABILITY_ISSUE = "availability_issue",
-  _SECURITY_CONCERN = "security_concern"
+  _SECURITY_CONCERN = "security_concern",
 }
 
 export enum AlertSeverity {
   _INFO = "info",
   _WARNING = "warning",
   _ERROR = "error",
-  _CRITICAL = "critical"
+  _CRITICAL = "critical",
 }
 
 export interface TimeRange {
@@ -943,7 +950,7 @@ export enum HealthEventType {
   _PERFORMANCE_SPIKE = "performance_spike",
   _ERROR_OCCURRED = "error_occurred",
   _RECOVERY = "recovery",
-  _MAINTENANCE = "maintenance"
+  _MAINTENANCE = "maintenance",
 }
 
 export interface HealthHistorySummary {
@@ -964,7 +971,7 @@ export interface HealthThreshold {
 export enum ComparisonOperator {
   _GREATER_THAN = "gt",
   _LESS_THAN = "lt",
-  _EQUALS = "eq"
+  _EQUALS = "eq",
 }
 
 export interface ThresholdSettingResult {
@@ -1038,7 +1045,7 @@ export enum ChangeType {
   _SECURITY = "security",
   _BREAKING = "breaking",
   _DEPRECATION = "deprecation",
-  _REMOVAL = "removal"
+  _REMOVAL = "removal",
 }
 
 export enum ChangeImpact {
@@ -1046,7 +1053,7 @@ export enum ChangeImpact {
   _MINOR = "minor",
   _MODERATE = "moderate",
   _MAJOR = "major",
-  _BREAKING = "breaking"
+  _BREAKING = "breaking",
 }
 
 export interface VersionEntry {
@@ -1095,7 +1102,7 @@ export interface MigrationInfo {
 export enum CompatibilityLevel {
   _NONE = "none",
   _PARTIAL = "partial",
-  _FULL = "full"
+  _FULL = "full",
 }
 
 export enum MigrationComplexity {
@@ -1103,7 +1110,7 @@ export enum MigrationComplexity {
   _SIMPLE = "simple",
   _MODERATE = "moderate",
   _COMPLEX = "complex",
-  _CRITICAL = "critical"
+  _CRITICAL = "critical",
 }
 
 export interface VersionCreationResult {
@@ -1122,7 +1129,7 @@ export interface VersionConflict {
 export enum ConflictType {
   _VERSION_EXISTS = "version_exists",
   _INCOMPATIBLE_CHANGE = "incompatible_change",
-  _DEPENDENCY_CONFLICT = "dependency_conflict"
+  _DEPENDENCY_CONFLICT = "dependency_conflict",
 }
 
 export interface VersionComparisonResult {
@@ -1144,14 +1151,14 @@ export enum DifferenceCategory {
   _SIGNATURE = "signature",
   _BEHAVIOR = "behavior",
   _PERFORMANCE = "performance",
-  _DEPENDENCIES = "dependencies"
+  _DEPENDENCIES = "dependencies",
 }
 
 export enum ImpactLevel {
   _NONE = "none",
   _LOW = "low",
   _MEDIUM = "medium",
-  _HIGH = "high"
+  _HIGH = "high",
 }
 
 export interface CompatibilityAssessment {
@@ -1188,7 +1195,7 @@ export enum MigrationStepType {
   _DATA_MIGRATION = "data_migration",
   _TESTING = "testing",
   _DEPLOYMENT = "deployment",
-  _VERIFICATION = "verification"
+  _VERIFICATION = "verification",
 }
 
 export interface RiskAssessment {
@@ -1208,13 +1215,13 @@ export enum RiskCategory {
   _TECHNICAL = "technical",
   _OPERATIONAL = "operational",
   _SECURITY = "security",
-  _COMPLIANCE = "compliance"
+  _COMPLIANCE = "compliance",
 }
 
 export enum Likelihood {
   _LOW = "low",
   _MEDIUM = "medium",
-  _HIGH = "high"
+  _HIGH = "high",
 }
 
 export interface MigrationExecutionResult {
@@ -1285,13 +1292,13 @@ export enum DependencyType {
   _DIRECT = "direct",
   _TRANSITIVE = "transitive",
   _DEVELOPMENT = "development",
-  _RUNTIME = "runtime"
+  _RUNTIME = "runtime",
 }
 
 export enum DependencyStrength {
   _WEAK = "weak",
   _MODERATE = "moderate",
-  _STRONG = "strong"
+  _STRONG = "strong",
 }
 
 export interface CircularDependency {
@@ -1303,7 +1310,7 @@ export interface CircularDependency {
 export enum CircularDependencySeverity {
   _LOW = "low",
   _MEDIUM = "medium",
-  _HIGH = "high"
+  _HIGH = "high",
 }
 
 export interface DependencyRiskAssessment {
@@ -1323,7 +1330,7 @@ export enum DependencyRiskType {
   _VERSION_MISMATCH = "version_mismatch",
   _CIRCULAR_DEPENDENCY = "circular_dependency",
   _DEPRECATED_DEPENDENCY = "deprecated_dependency",
-  _SECURITY_VULNERABILITY = "security_vulnerability"
+  _SECURITY_VULNERABILITY = "security_vulnerability",
 }
 
 export interface DependencyGraph {
@@ -1423,7 +1430,7 @@ export enum InconsistencyType {
   _MISSING_DEPENDENCY = "missing_dependency",
   _ORPHANED_DEPENDENCY = "orphaned_dependency",
   _VERSION_CONFLICT = "version_conflict",
-  _CIRCULAR_REFERENCE = "circular_reference"
+  _CIRCULAR_REFERENCE = "circular_reference",
 }
 
 export interface OptimizationResult {
@@ -1443,7 +1450,7 @@ export enum OptimizationType {
   _DEPENDENCY_REDUCTION = "dependency_reduction",
   _LOAD_ORDER_OPTIMIZATION = "load_order_optimization",
   _CACHING_STRATEGY = "caching_strategy",
-  _PARALLELIZATION = "parallelization"
+  _PARALLELIZATION = "parallelization",
 }
 
 export interface OptimizationMetrics {
@@ -1480,7 +1487,7 @@ export enum ActionResult {
   _SUCCESS = "success",
   _WARNING = "warning",
   _FAILURE = "failure",
-  _SKIPPED = "skipped"
+  _SKIPPED = "skipped",
 }
 
 export interface MaintenanceIssue {
@@ -1494,7 +1501,7 @@ export enum IssueType {
   _DATA_CORRUPTION = "data_corruption",
   _INDEX_CORRUPTION = "index_corruption",
   _PERFORMANCE_ISSUE = "performance_issue",
-  _STORAGE_ISSUE = "storage_issue"
+  _STORAGE_ISSUE = "storage_issue",
 }
 
 export interface BackupOptions {
@@ -1584,7 +1591,7 @@ export interface CacheSettings {
 export enum EvictionPolicy {
   _LRU = "lru",
   _LFU = "lfu",
-  _TTL = "ttl"
+  _TTL = "ttl",
 }
 
 export interface IndexSettings {
@@ -1597,7 +1604,7 @@ export enum OptimizationLevel {
   _NONE = "none",
   _BASIC = "basic",
   _ADVANCED = "advanced",
-  _AGGRESSIVE = "aggressive"
+  _AGGRESSIVE = "aggressive",
 }
 
 export interface ConfigurationResult {
@@ -1620,7 +1627,7 @@ export enum AuditOperation {
   _UNREGISTER = "unregister",
   _UPDATE = "update",
   _QUERY = "query",
-  _CONFIGURE = "configure"
+  _CONFIGURE = "configure",
 }
 
 export interface AuditLog {
@@ -1642,7 +1649,7 @@ export interface AuditEntry {
 export enum OperationResult {
   _SUCCESS = "success",
   _FAILURE = "failure",
-  _PARTIAL_SUCCESS = "partial_success"
+  _PARTIAL_SUCCESS = "partial_success",
 }
 
 export interface PurgeCriteria {
@@ -1679,7 +1686,7 @@ export enum HealthStatus {
   _GOOD = "good",
   _FAIR = "fair",
   _POOR = "poor",
-  _CRITICAL = "critical"
+  _CRITICAL = "critical",
 }
 
 export interface PerformanceStatus {
@@ -1693,7 +1700,7 @@ export enum PerformanceLevel {
   _GOOD = "good",
   _ACCEPTABLE = "acceptable",
   _POOR = "poor",
-  _CRITICAL = "critical"
+  _CRITICAL = "critical",
 }
 
 export interface StorageStatus {
@@ -1747,4 +1754,3 @@ export interface AuditRequirement {
   /** Additional audit parameters */
   parameters?: Record<string, unknown>;
 }
-

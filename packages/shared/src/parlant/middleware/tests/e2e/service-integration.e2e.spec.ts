@@ -9,14 +9,14 @@
  * @since 2024-09-22
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import { ThrottlerModule } from '@nestjs/throttler';
-import { EventEmitterModule } from '@nestjs/event-emitter';
-import { ScheduleModule } from '@nestjs/schedule';
-import * as request from 'supertest';
-import { performance } from 'perf_hooks';
+import { Test, TestingModule } from "@nestjs/testing";
+import { INestApplication } from "@nestjs/common";
+import { ConfigModule } from "@nestjs/config";
+import { ThrottlerModule } from "@nestjs/throttler";
+import { EventEmitterModule } from "@nestjs/event-emitter";
+import { ScheduleModule } from "@nestjs/schedule";
+import * as request from "supertest";
+import { performance } from "perf_hooks";
 
 // Import PARLANT middleware framework
 import {
@@ -26,15 +26,15 @@ import {
   ValidationMode,
   ApprovalLevel,
   PERFORMANCE_TARGETS,
-} from '../../index';
+} from "../../index";
 
 // Mock Bytebot service modules for testing
 class MockAnthropicService {
   async generateResponse(prompt: string) {
-    await new Promise(resolve => setTimeout(resolve, 50)); // Simulate API call
+    await new Promise((resolve) => setTimeout(resolve, 50)); // Simulate API call
     return {
       content: `Anthropic response to: ${prompt}`,
-      model: 'claude-3-sonnet',
+      model: "claude-3-sonnet",
       usage: { input_tokens: 10, output_tokens: 20 },
     };
   }
@@ -42,15 +42,17 @@ class MockAnthropicService {
 
 class MockOpenAIService {
   async chatCompletion(messages: any[]) {
-    await new Promise(resolve => setTimeout(resolve, 75)); // Simulate API call
+    await new Promise((resolve) => setTimeout(resolve, 75)); // Simulate API call
     return {
-      choices: [{
-        message: {
-          content: `OpenAI response to: ${messages[0]?.content}`,
-          role: 'assistant',
+      choices: [
+        {
+          message: {
+            content: `OpenAI response to: ${messages[0]?.content}`,
+            role: "assistant",
+          },
         },
-      }],
-      model: 'gpt-4',
+      ],
+      model: "gpt-4",
       usage: { prompt_tokens: 15, completion_tokens: 25 },
     };
   }
@@ -58,10 +60,10 @@ class MockOpenAIService {
 
 class MockGoogleService {
   async generateContent(prompt: string) {
-    await new Promise(resolve => setTimeout(resolve, 60)); // Simulate API call
+    await new Promise((resolve) => setTimeout(resolve, 60)); // Simulate API call
     return {
       text: `Google AI response to: ${prompt}`,
-      model: 'gemini-pro',
+      model: "gemini-pro",
       safety_ratings: [],
     };
   }
@@ -70,41 +72,53 @@ class MockGoogleService {
 class MockPrismaService {
   task = {
     findMany: jest.fn().mockResolvedValue([
-      { id: 1, title: 'Test Task 1', status: 'pending' },
-      { id: 2, title: 'Test Task 2', status: 'completed' },
+      { id: 1, title: "Test Task 1", status: "pending" },
+      { id: 2, title: "Test Task 2", status: "completed" },
     ]),
-    findUnique: jest.fn().mockResolvedValue({ id: 1, title: 'Test Task 1' }),
-    create: jest.fn().mockResolvedValue({ id: 3, title: 'New Task' }),
-    update: jest.fn().mockResolvedValue({ id: 1, title: 'Updated Task' }),
+    findUnique: jest.fn().mockResolvedValue({ id: 1, title: "Test Task 1" }),
+    create: jest.fn().mockResolvedValue({ id: 3, title: "New Task" }),
+    update: jest.fn().mockResolvedValue({ id: 1, title: "Updated Task" }),
     delete: jest.fn().mockResolvedValue({ id: 1, deleted: true }),
   };
 
   summary = {
     findMany: jest.fn().mockResolvedValue([]),
-    create: jest.fn().mockResolvedValue({ id: 1, content: 'Summary' }),
+    create: jest.fn().mockResolvedValue({ id: 1, content: "Summary" }),
   };
 }
 
 // Mock controllers that simulate Bytebot service endpoints
-import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, UseInterceptors } from '@nestjs/common';
-import { EnhancedParlantValidated } from '../../decorators/enhanced-parlant-decorators';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  UseGuards,
+  UseInterceptors,
+} from "@nestjs/common";
+import { EnhancedParlantValidated } from "../../decorators/enhanced-parlant-decorators";
 
-@Controller('anthropic')
+@Controller("anthropic")
 @UseInterceptors(ParlantRequestResponseInterceptor)
 export class MockAnthropicController {
   constructor(private readonly anthropicService: MockAnthropicService) {}
 
-  @Post('generate')
+  @Post("generate")
   @EnhancedParlantValidated({
-    intent: 'Generate AI content using Anthropic Claude',
-    description: 'AI content generation with conversational validation',
+    intent: "Generate AI content using Anthropic Claude",
+    description: "AI content generation with conversational validation",
     securityLevel: SecurityLevel._MEDIUM,
     validationMode: ValidationMode._SYNCHRONOUS,
     enableMetrics: true,
     enableAuditTrail: true,
     performanceTarget: PERFORMANCE_TARGETS.STANDARD,
   })
-  async generateContent(@Body() body: { prompt: string; model?: string; maxTokens?: number }) {
+  async generateContent(
+    @Body() body: { prompt: string; model?: string; maxTokens?: number },
+  ) {
     const startTime = performance.now();
     const result = await this.anthropicService.generateResponse(body.prompt);
     const endTime = performance.now();
@@ -116,43 +130,45 @@ export class MockAnthropicController {
     };
   }
 
-  @Get('models')
+  @Get("models")
   @EnhancedParlantValidated({
-    intent: 'List available Anthropic models',
-    description: 'Retrieve available AI models with caching',
+    intent: "List available Anthropic models",
+    description: "Retrieve available AI models with caching",
     securityLevel: SecurityLevel._LOW,
     enableMetrics: true,
     performanceTarget: PERFORMANCE_TARGETS.FAST,
     cachingStrategy: {
       enabled: true,
       ttl: 300000, // 5 minutes
-      scope: 'global',
+      scope: "global",
     },
   })
   async listModels() {
     return {
-      models: ['claude-3-sonnet', 'claude-3-haiku', 'claude-3-opus'],
+      models: ["claude-3-sonnet", "claude-3-haiku", "claude-3-opus"],
       cached: true,
       timestamp: new Date().toISOString(),
     };
   }
 }
 
-@Controller('openai')
+@Controller("openai")
 @UseInterceptors(ParlantRequestResponseInterceptor)
 export class MockOpenAIController {
   constructor(private readonly openaiService: MockOpenAIService) {}
 
-  @Post('chat')
+  @Post("chat")
   @EnhancedParlantValidated({
-    intent: 'OpenAI chat completion with enhanced validation',
-    description: 'Chat completion with real-time security scanning',
+    intent: "OpenAI chat completion with enhanced validation",
+    description: "Chat completion with real-time security scanning",
     securityLevel: SecurityLevel._MEDIUM,
     validationMode: ValidationMode._SYNCHRONOUS,
     enableMetrics: true,
     performanceTarget: PERFORMANCE_TARGETS.STANDARD,
   })
-  async chatCompletion(@Body() body: { messages: any[]; model?: string; temperature?: number }) {
+  async chatCompletion(
+    @Body() body: { messages: any[]; model?: string; temperature?: number },
+  ) {
     const startTime = performance.now();
     const result = await this.openaiService.chatCompletion(body.messages);
     const endTime = performance.now();
@@ -164,10 +180,10 @@ export class MockOpenAIController {
     };
   }
 
-  @Get('usage')
+  @Get("usage")
   @EnhancedParlantValidated({
-    intent: 'Get OpenAI API usage statistics',
-    description: 'Retrieve usage data with performance monitoring',
+    intent: "Get OpenAI API usage statistics",
+    description: "Retrieve usage data with performance monitoring",
     securityLevel: SecurityLevel._HIGH,
     enableMetrics: true,
     performanceTarget: PERFORMANCE_TARGETS.FAST,
@@ -184,15 +200,15 @@ export class MockOpenAIController {
   }
 }
 
-@Controller('google')
+@Controller("google")
 @UseInterceptors(ParlantRequestResponseInterceptor)
 export class MockGoogleController {
   constructor(private readonly googleService: MockGoogleService) {}
 
-  @Post('generate')
+  @Post("generate")
   @EnhancedParlantValidated({
-    intent: 'Google AI content generation',
-    description: 'Generate content using Google Gemini with safety checks',
+    intent: "Google AI content generation",
+    description: "Generate content using Google Gemini with safety checks",
     securityLevel: SecurityLevel._MEDIUM,
     validationMode: ValidationMode._SYNCHRONOUS,
     enableMetrics: true,
@@ -211,22 +227,22 @@ export class MockGoogleController {
   }
 }
 
-@Controller('tasks')
+@Controller("tasks")
 @UseInterceptors(ParlantRequestResponseInterceptor)
 export class MockTasksController {
   constructor(private readonly prismaService: MockPrismaService) {}
 
   @Get()
   @EnhancedParlantValidated({
-    intent: 'List all tasks with pagination',
-    description: 'Retrieve tasks with intelligent caching and filtering',
+    intent: "List all tasks with pagination",
+    description: "Retrieve tasks with intelligent caching and filtering",
     securityLevel: SecurityLevel._LOW,
     enableMetrics: true,
     performanceTarget: PERFORMANCE_TARGETS.FAST,
     cachingStrategy: {
       enabled: true,
       ttl: 60000, // 1 minute
-      scope: 'user',
+      scope: "user",
     },
   })
   async findAll() {
@@ -240,8 +256,8 @@ export class MockTasksController {
 
   @Post()
   @EnhancedParlantValidated({
-    intent: 'Create new task with validation',
-    description: 'Create task with comprehensive input validation',
+    intent: "Create new task with validation",
+    description: "Create task with comprehensive input validation",
     securityLevel: SecurityLevel._MEDIUM,
     validationMode: ValidationMode._SYNCHRONOUS,
     enableMetrics: true,
@@ -258,15 +274,15 @@ export class MockTasksController {
   }
 }
 
-@Controller('summaries')
+@Controller("summaries")
 @UseInterceptors(ParlantRequestResponseInterceptor)
 export class MockSummariesController {
   constructor(private readonly prismaService: MockPrismaService) {}
 
-  @Post('generate')
+  @Post("generate")
   @EnhancedParlantValidated({
-    intent: 'Generate AI-powered summary',
-    description: 'Create intelligent summaries with multi-service validation',
+    intent: "Generate AI-powered summary",
+    description: "Create intelligent summaries with multi-service validation",
     securityLevel: SecurityLevel._HIGH,
     validationMode: ValidationMode._SYNCHRONOUS,
     approvalLevel: ApprovalLevel._SINGLE_APPROVAL,
@@ -283,12 +299,12 @@ export class MockSummariesController {
     return {
       summary,
       generationTime: new Date().toISOString(),
-      wordCount: body.content.split(' ').length,
+      wordCount: body.content.split(" ").length,
     };
   }
 }
 
-describe('PARLANT Middleware E2E Service Integration', () => {
+describe("PARLANT Middleware E2E Service Integration", () => {
   let app: INestApplication;
   let testingModule: TestingModule;
 
@@ -303,19 +319,19 @@ describe('PARLANT Middleware E2E Service Integration', () => {
   };
 
   beforeAll(async () => {
-    console.log('🚀 Starting PARLANT E2E Service Integration Tests');
-    console.log('🔧 Testing real Bytebot service patterns with middleware');
+    console.log("🚀 Starting PARLANT E2E Service Integration Tests");
+    console.log("🔧 Testing real Bytebot service patterns with middleware");
 
     testingModule = await Test.createTestingModule({
       imports: [
         // Core NestJS modules that Bytebot uses
         ConfigModule.forRoot({
           isGlobal: true,
-          envFilePath: '.env.test',
+          envFilePath: ".env.test",
         }),
         ThrottlerModule.forRoot([
           {
-            name: 'default',
+            name: "default",
             ttl: 60000,
             limit: 100,
           },
@@ -345,36 +361,41 @@ describe('PARLANT Middleware E2E Service Integration', () => {
 
     await app.init();
 
-    console.log('✅ E2E Test application initialized with production-like configuration');
+    console.log(
+      "✅ E2E Test application initialized with production-like configuration",
+    );
   });
 
   afterAll(async () => {
     await app.close();
 
     // Report E2E performance metrics
-    console.log('\n📈 E2E Performance Test Results:');
+    console.log("\n📈 E2E Performance Test Results:");
     Object.entries(e2ePerformanceMetrics).forEach(([service, times]) => {
       if (times.length > 0) {
         const avg = times.reduce((a, b) => a + b, 0) / times.length;
         const min = Math.min(...times);
         const max = Math.max(...times);
-        console.log(`   ${service}: avg=${avg.toFixed(2)}ms, min=${min.toFixed(2)}ms, max=${max.toFixed(2)}ms`);
+        console.log(
+          `   ${service}: avg=${avg.toFixed(2)}ms, min=${min.toFixed(2)}ms, max=${max.toFixed(2)}ms`,
+        );
       }
     });
   });
 
-  describe('Anthropic Service Integration', () => {
-    it('should handle AI content generation with PARLANT validation', async () => {
+  describe("Anthropic Service Integration", () => {
+    it("should handle AI content generation with PARLANT validation", async () => {
       const startTime = performance.now();
 
       const requestData = {
-        prompt: 'Generate a creative story about AI and humans working together',
-        model: 'claude-3-sonnet',
+        prompt:
+          "Generate a creative story about AI and humans working together",
+        model: "claude-3-sonnet",
         maxTokens: 500,
       };
 
       const response = await request(app.getHttpServer())
-        .post('/anthropic/generate')
+        .post("/anthropic/generate")
         .send(requestData)
         .expect(200);
 
@@ -383,25 +404,25 @@ describe('PARLANT Middleware E2E Service Integration', () => {
       e2ePerformanceMetrics.anthropic.push(duration);
 
       expect(response.body.content).toBeDefined();
-      expect(response.body.model).toBe('claude-3-sonnet');
+      expect(response.body.model).toBe("claude-3-sonnet");
       expect(response.body.processingTime).toBeDefined();
       expect(duration).toBeLessThan(PERFORMANCE_TARGETS.STANDARD);
 
       console.log(`✅ Anthropic integration test: ${duration.toFixed(2)}ms`);
     });
 
-    it('should cache model list requests efficiently', async () => {
+    it("should cache model list requests efficiently", async () => {
       // First request
       const startTime1 = performance.now();
       const response1 = await request(app.getHttpServer())
-        .get('/anthropic/models')
+        .get("/anthropic/models")
         .expect(200);
       const endTime1 = performance.now();
 
       // Second request should be faster due to caching
       const startTime2 = performance.now();
       const response2 = await request(app.getHttpServer())
-        .get('/anthropic/models')
+        .get("/anthropic/models")
         .expect(200);
       const endTime2 = performance.now();
 
@@ -412,25 +433,30 @@ describe('PARLANT Middleware E2E Service Integration', () => {
       expect(duration2).toBeLessThan(duration1); // Second request should be faster
       expect(duration2).toBeLessThan(PERFORMANCE_TARGETS.FAST);
 
-      console.log(`✅ Anthropic caching test: ${duration1.toFixed(2)}ms → ${duration2.toFixed(2)}ms`);
+      console.log(
+        `✅ Anthropic caching test: ${duration1.toFixed(2)}ms → ${duration2.toFixed(2)}ms`,
+      );
     });
   });
 
-  describe('OpenAI Service Integration', () => {
-    it('should handle chat completion with security validation', async () => {
+  describe("OpenAI Service Integration", () => {
+    it("should handle chat completion with security validation", async () => {
       const startTime = performance.now();
 
       const requestData = {
         messages: [
-          { role: 'system', content: 'You are a helpful assistant.' },
-          { role: 'user', content: 'Explain quantum computing in simple terms.' },
+          { role: "system", content: "You are a helpful assistant." },
+          {
+            role: "user",
+            content: "Explain quantum computing in simple terms.",
+          },
         ],
-        model: 'gpt-4',
+        model: "gpt-4",
         temperature: 0.7,
       };
 
       const response = await request(app.getHttpServer())
-        .post('/openai/chat')
+        .post("/openai/chat")
         .send(requestData)
         .expect(200);
 
@@ -446,12 +472,12 @@ describe('PARLANT Middleware E2E Service Integration', () => {
       console.log(`✅ OpenAI integration test: ${duration.toFixed(2)}ms`);
     });
 
-    it('should enforce high security for usage endpoint', async () => {
+    it("should enforce high security for usage endpoint", async () => {
       const startTime = performance.now();
 
       const response = await request(app.getHttpServer())
-        .get('/openai/usage')
-        .set('Authorization', 'Bearer test-token')
+        .get("/openai/usage")
+        .set("Authorization", "Bearer test-token")
         .expect(200);
 
       const endTime = performance.now();
@@ -466,17 +492,17 @@ describe('PARLANT Middleware E2E Service Integration', () => {
     });
   });
 
-  describe('Google AI Service Integration', () => {
-    it('should handle content generation with safety checks', async () => {
+  describe("Google AI Service Integration", () => {
+    it("should handle content generation with safety checks", async () => {
       const startTime = performance.now();
 
       const requestData = {
-        prompt: 'Write a brief explanation of machine learning concepts',
-        model: 'gemini-pro',
+        prompt: "Write a brief explanation of machine learning concepts",
+        model: "gemini-pro",
       };
 
       const response = await request(app.getHttpServer())
-        .post('/google/generate')
+        .post("/google/generate")
         .send(requestData)
         .expect(200);
 
@@ -493,12 +519,12 @@ describe('PARLANT Middleware E2E Service Integration', () => {
     });
   });
 
-  describe('Tasks Service Integration', () => {
-    it('should handle task listing with intelligent caching', async () => {
+  describe("Tasks Service Integration", () => {
+    it("should handle task listing with intelligent caching", async () => {
       const startTime = performance.now();
 
       const response = await request(app.getHttpServer())
-        .get('/tasks')
+        .get("/tasks")
         .expect(200);
 
       const endTime = performance.now();
@@ -513,18 +539,18 @@ describe('PARLANT Middleware E2E Service Integration', () => {
       console.log(`✅ Tasks listing test: ${duration.toFixed(2)}ms`);
     });
 
-    it('should validate task creation with audit trail', async () => {
+    it("should validate task creation with audit trail", async () => {
       const startTime = performance.now();
 
       const taskData = {
-        title: 'E2E Test Task',
-        description: 'Task created during E2E testing',
-        priority: 'medium',
-        status: 'pending',
+        title: "E2E Test Task",
+        description: "Task created during E2E testing",
+        priority: "medium",
+        status: "pending",
       };
 
       const response = await request(app.getHttpServer())
-        .post('/tasks')
+        .post("/tasks")
         .send(taskData)
         .expect(201);
 
@@ -541,17 +567,18 @@ describe('PARLANT Middleware E2E Service Integration', () => {
     });
   });
 
-  describe('Summaries Service Integration', () => {
-    it('should generate summaries with high security validation', async () => {
+  describe("Summaries Service Integration", () => {
+    it("should generate summaries with high security validation", async () => {
       const startTime = performance.now();
 
       const summaryData = {
-        content: 'This is a long document that needs to be summarized. It contains important information about project status, team updates, and future plans. The middleware should validate this content and generate an appropriate summary.',
-        type: 'project-update',
+        content:
+          "This is a long document that needs to be summarized. It contains important information about project status, team updates, and future plans. The middleware should validate this content and generate an appropriate summary.",
+        type: "project-update",
       };
 
       const response = await request(app.getHttpServer())
-        .post('/summaries/generate')
+        .post("/summaries/generate")
         .send(summaryData)
         .expect(201);
 
@@ -568,34 +595,35 @@ describe('PARLANT Middleware E2E Service Integration', () => {
     });
   });
 
-  describe('Cross-Service Integration Tests', () => {
-    it('should handle cross-service workflows efficiently', async () => {
+  describe("Cross-Service Integration Tests", () => {
+    it("should handle cross-service workflows efficiently", async () => {
       const startTime = performance.now();
 
       // Simulate a cross-service workflow: create task → generate summary → get AI insights
 
       // Step 1: Create a task
       const taskResponse = await request(app.getHttpServer())
-        .post('/tasks')
+        .post("/tasks")
         .send({
-          title: 'Cross-Service Test Task',
-          description: 'Testing cross-service integration with PARLANT middleware',
-          priority: 'high',
+          title: "Cross-Service Test Task",
+          description:
+            "Testing cross-service integration with PARLANT middleware",
+          priority: "high",
         })
         .expect(201);
 
       // Step 2: Generate a summary
       const summaryResponse = await request(app.getHttpServer())
-        .post('/summaries/generate')
+        .post("/summaries/generate")
         .send({
           content: taskResponse.body.task.description,
-          type: 'task-summary',
+          type: "task-summary",
         })
         .expect(201);
 
       // Step 3: Get AI insights from multiple services
       const anthropicResponse = await request(app.getHttpServer())
-        .post('/anthropic/generate')
+        .post("/anthropic/generate")
         .send({
           prompt: `Analyze this task: ${taskResponse.body.task.title}`,
           maxTokens: 200,
@@ -603,10 +631,13 @@ describe('PARLANT Middleware E2E Service Integration', () => {
         .expect(200);
 
       const openaiResponse = await request(app.getHttpServer())
-        .post('/openai/chat')
+        .post("/openai/chat")
         .send({
           messages: [
-            { role: 'user', content: `Provide insights on: ${taskResponse.body.task.title}` },
+            {
+              role: "user",
+              content: `Provide insights on: ${taskResponse.body.task.title}`,
+            },
           ],
         })
         .expect(200);
@@ -624,14 +655,20 @@ describe('PARLANT Middleware E2E Service Integration', () => {
       // Ensure reasonable total time for cross-service workflow
       expect(totalDuration).toBeLessThan(PERFORMANCE_TARGETS.CRITICAL);
 
-      console.log(`✅ Cross-service workflow test: ${totalDuration.toFixed(2)}ms`);
+      console.log(
+        `✅ Cross-service workflow test: ${totalDuration.toFixed(2)}ms`,
+      );
     });
 
-    it('should maintain consistent middleware behavior across services', async () => {
+    it("should maintain consistent middleware behavior across services", async () => {
       const services = [
-        { endpoint: '/anthropic/models', method: 'GET' },
-        { endpoint: '/openai/usage', method: 'GET', headers: { Authorization: 'Bearer test' } },
-        { endpoint: '/tasks', method: 'GET' },
+        { endpoint: "/anthropic/models", method: "GET" },
+        {
+          endpoint: "/openai/usage",
+          method: "GET",
+          headers: { Authorization: "Bearer test" },
+        },
+        { endpoint: "/tasks", method: "GET" },
       ];
 
       const results = [];
@@ -639,7 +676,9 @@ describe('PARLANT Middleware E2E Service Integration', () => {
       for (const service of services) {
         const startTime = performance.now();
 
-        let req = request(app.getHttpServer())[service.method.toLowerCase()](service.endpoint);
+        let req = request(app.getHttpServer())[service.method.toLowerCase()](
+          service.endpoint,
+        );
 
         if (service.headers) {
           Object.entries(service.headers).forEach(([key, value]) => {
@@ -661,19 +700,22 @@ describe('PARLANT Middleware E2E Service Integration', () => {
       }
 
       // Verify consistent behavior across all services
-      results.forEach(result => {
+      results.forEach((result) => {
         expect(result.status).toBe(200);
         expect(result.hasTimestamp).toBe(true);
         expect(result.duration).toBeLessThan(PERFORMANCE_TARGETS.STANDARD);
       });
 
-      const avgDuration = results.reduce((sum, r) => sum + r.duration, 0) / results.length;
-      console.log(`✅ Consistent middleware behavior test: avg=${avgDuration.toFixed(2)}ms`);
+      const avgDuration =
+        results.reduce((sum, r) => sum + r.duration, 0) / results.length;
+      console.log(
+        `✅ Consistent middleware behavior test: avg=${avgDuration.toFixed(2)}ms`,
+      );
     });
   });
 
-  describe('Load and Stress Testing', () => {
-    it('should handle concurrent requests across multiple services', async () => {
+  describe("Load and Stress Testing", () => {
+    it("should handle concurrent requests across multiple services", async () => {
       const concurrentRequests = 20;
       const promises: Promise<any>[] = [];
 
@@ -686,36 +728,32 @@ describe('PARLANT Middleware E2E Service Integration', () => {
         switch (serviceIndex) {
           case 0:
             promises.push(
-              request(app.getHttpServer())
-                .get('/anthropic/models')
-                .expect(200)
+              request(app.getHttpServer()).get("/anthropic/models").expect(200),
             );
             break;
           case 1:
             promises.push(
-              request(app.getHttpServer())
-                .get('/tasks')
-                .expect(200)
+              request(app.getHttpServer()).get("/tasks").expect(200),
             );
             break;
           case 2:
             promises.push(
               request(app.getHttpServer())
-                .post('/openai/chat')
+                .post("/openai/chat")
                 .send({
-                  messages: [{ role: 'user', content: `Concurrent test ${i}` }],
+                  messages: [{ role: "user", content: `Concurrent test ${i}` }],
                 })
-                .expect(200)
+                .expect(200),
             );
             break;
           case 3:
             promises.push(
               request(app.getHttpServer())
-                .post('/google/generate')
+                .post("/google/generate")
                 .send({
                   prompt: `Concurrent prompt ${i}`,
                 })
-                .expect(200)
+                .expect(200),
             );
             break;
         }
@@ -729,10 +767,12 @@ describe('PARLANT Middleware E2E Service Integration', () => {
       expect(responses).toHaveLength(concurrentRequests);
       expect(avgDuration).toBeLessThan(PERFORMANCE_TARGETS.STANDARD);
 
-      console.log(`✅ Concurrent load test: ${concurrentRequests} requests in ${totalDuration.toFixed(2)}ms (avg: ${avgDuration.toFixed(2)}ms)`);
+      console.log(
+        `✅ Concurrent load test: ${concurrentRequests} requests in ${totalDuration.toFixed(2)}ms (avg: ${avgDuration.toFixed(2)}ms)`,
+      );
     });
 
-    it('should maintain performance under sustained load', async () => {
+    it("should maintain performance under sustained load", async () => {
       const sustainedLoad = 100;
       const batchSize = 10;
       const durations: number[] = [];
@@ -743,9 +783,7 @@ describe('PARLANT Middleware E2E Service Integration', () => {
 
         for (let i = 0; i < batchSize; i++) {
           batchPromises.push(
-            request(app.getHttpServer())
-              .get('/tasks')
-              .expect(200)
+            request(app.getHttpServer()).get("/tasks").expect(200),
           );
         }
 
@@ -756,24 +794,29 @@ describe('PARLANT Middleware E2E Service Integration', () => {
         durations.push(batchDuration);
       }
 
-      const avgDuration = durations.reduce((a, b) => a + b, 0) / durations.length;
+      const avgDuration =
+        durations.reduce((a, b) => a + b, 0) / durations.length;
       const maxDuration = Math.max(...durations);
 
       expect(avgDuration).toBeLessThan(PERFORMANCE_TARGETS.STANDARD);
       expect(maxDuration).toBeLessThan(PERFORMANCE_TARGETS.COMPLEX);
 
-      console.log(`✅ Sustained load test: ${sustainedLoad} requests, avg=${avgDuration.toFixed(2)}ms, max=${maxDuration.toFixed(2)}ms`);
+      console.log(
+        `✅ Sustained load test: ${sustainedLoad} requests, avg=${avgDuration.toFixed(2)}ms, max=${maxDuration.toFixed(2)}ms`,
+      );
     });
   });
 });
 
-console.log('🧪 PARLANT E2E Service Integration Test Suite Loaded');
-console.log('🔧 Real Bytebot Service Simulation:');
-console.log('   ✅ Anthropic AI service endpoints');
-console.log('   ✅ OpenAI chat completion service');
-console.log('   ✅ Google AI content generation');
-console.log('   ✅ Tasks management service');
-console.log('   ✅ Summaries generation service');
-console.log('   ✅ Cross-service workflow testing');
-console.log('   ✅ Load and stress testing');
-console.log('🎯 Production Environment Simulation: Real service patterns, security, caching');
+console.log("🧪 PARLANT E2E Service Integration Test Suite Loaded");
+console.log("🔧 Real Bytebot Service Simulation:");
+console.log("   ✅ Anthropic AI service endpoints");
+console.log("   ✅ OpenAI chat completion service");
+console.log("   ✅ Google AI content generation");
+console.log("   ✅ Tasks management service");
+console.log("   ✅ Summaries generation service");
+console.log("   ✅ Cross-service workflow testing");
+console.log("   ✅ Load and stress testing");
+console.log(
+  "🎯 Production Environment Simulation: Real service patterns, security, caching",
+);

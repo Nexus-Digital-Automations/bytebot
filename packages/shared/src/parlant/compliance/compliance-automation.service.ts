@@ -19,11 +19,11 @@
  * @author Claude Code - Compliance Automation Specialist
  */
 
-import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { Cron, CronExpression } from '@nestjs/schedule';
-import { createHash, randomBytes } from 'crypto';
+import { Injectable, Logger, OnApplicationShutdown } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { EventEmitter2 } from "@nestjs/event-emitter";
+import { Cron, CronExpression } from "@nestjs/schedule";
+import { createHash, randomBytes } from "crypto";
 
 // ===========================
 // COMPLIANCE FRAMEWORK TYPES
@@ -33,53 +33,53 @@ import { createHash, randomBytes } from 'crypto';
  * Supported compliance frameworks
  */
 export enum ComplianceFramework {
-  SOC2 = 'soc2',
-  GDPR = 'gdpr',
-  ISO27001 = 'iso27001',
-  NIST_CSF = 'nist_csf',
-  PCI_DSS = 'pci_dss',
-  HIPAA = 'hipaa',
-  CCPA = 'ccpa',
-  FISMA = 'fisma',
+  SOC2 = "soc2",
+  GDPR = "gdpr",
+  ISO27001 = "iso27001",
+  NIST_CSF = "nist_csf",
+  PCI_DSS = "pci_dss",
+  HIPAA = "hipaa",
+  CCPA = "ccpa",
+  FISMA = "fisma",
 }
 
 /**
  * Compliance status levels
  */
 export enum ComplianceStatus {
-  COMPLIANT = 'compliant',
-  NON_COMPLIANT = 'non_compliant',
-  PARTIALLY_COMPLIANT = 'partially_compliant',
-  UNDER_REVIEW = 'under_review',
-  REMEDIATION_IN_PROGRESS = 'remediation_in_progress',
-  NOT_APPLICABLE = 'not_applicable',
+  COMPLIANT = "compliant",
+  NON_COMPLIANT = "non_compliant",
+  PARTIALLY_COMPLIANT = "partially_compliant",
+  UNDER_REVIEW = "under_review",
+  REMEDIATION_IN_PROGRESS = "remediation_in_progress",
+  NOT_APPLICABLE = "not_applicable",
 }
 
 /**
  * Risk levels for compliance violations
  */
 export enum ComplianceRiskLevel {
-  CRITICAL = 'critical',
-  HIGH = 'high',
-  MEDIUM = 'medium',
-  LOW = 'low',
-  INFORMATIONAL = 'informational',
+  CRITICAL = "critical",
+  HIGH = "high",
+  MEDIUM = "medium",
+  LOW = "low",
+  INFORMATIONAL = "informational",
 }
 
 /**
  * Compliance control categories
  */
 export enum ComplianceControlCategory {
-  ACCESS_CONTROL = 'access_control',
-  DATA_PROTECTION = 'data_protection',
-  SYSTEM_MONITORING = 'system_monitoring',
-  INCIDENT_RESPONSE = 'incident_response',
-  BUSINESS_CONTINUITY = 'business_continuity',
-  VULNERABILITY_MANAGEMENT = 'vulnerability_management',
-  NETWORK_SECURITY = 'network_security',
-  PHYSICAL_SECURITY = 'physical_security',
-  HUMAN_RESOURCES = 'human_resources',
-  VENDOR_MANAGEMENT = 'vendor_management',
+  ACCESS_CONTROL = "access_control",
+  DATA_PROTECTION = "data_protection",
+  SYSTEM_MONITORING = "system_monitoring",
+  INCIDENT_RESPONSE = "incident_response",
+  BUSINESS_CONTINUITY = "business_continuity",
+  VULNERABILITY_MANAGEMENT = "vulnerability_management",
+  NETWORK_SECURITY = "network_security",
+  PHYSICAL_SECURITY = "physical_security",
+  HUMAN_RESOURCES = "human_resources",
+  VENDOR_MANAGEMENT = "vendor_management",
 }
 
 // ===========================
@@ -195,23 +195,23 @@ export interface ControlTestingResult {
  * Control test types
  */
 export enum ControlTestType {
-  AUTOMATED_SCAN = 'automated_scan',
-  MANUAL_REVIEW = 'manual_review',
-  PENETRATION_TEST = 'penetration_test',
-  CONFIGURATION_REVIEW = 'configuration_review',
-  ACCESS_REVIEW = 'access_review',
-  PROCESS_WALKTHROUGH = 'process_walkthrough',
+  AUTOMATED_SCAN = "automated_scan",
+  MANUAL_REVIEW = "manual_review",
+  PENETRATION_TEST = "penetration_test",
+  CONFIGURATION_REVIEW = "configuration_review",
+  ACCESS_REVIEW = "access_review",
+  PROCESS_WALKTHROUGH = "process_walkthrough",
 }
 
 /**
  * Test results
  */
 export enum TestResult {
-  PASS = 'pass',
-  FAIL = 'fail',
-  CONDITIONAL_PASS = 'conditional_pass',
-  NOT_TESTED = 'not_tested',
-  NOT_APPLICABLE = 'not_applicable',
+  PASS = "pass",
+  FAIL = "fail",
+  CONDITIONAL_PASS = "conditional_pass",
+  NOT_TESTED = "not_tested",
+  NOT_APPLICABLE = "not_applicable",
 }
 
 /**
@@ -244,12 +244,12 @@ export interface RemediationStatus {
  * Remediation progress status
  */
 export enum RemediationProgressStatus {
-  NOT_STARTED = 'not_started',
-  IN_PROGRESS = 'in_progress',
-  UNDER_REVIEW = 'under_review',
-  COMPLETED = 'completed',
-  DEFERRED = 'deferred',
-  CANCELLED = 'cancelled',
+  NOT_STARTED = "not_started",
+  IN_PROGRESS = "in_progress",
+  UNDER_REVIEW = "under_review",
+  COMPLETED = "completed",
+  DEFERRED = "deferred",
+  CANCELLED = "cancelled",
 }
 
 /**
@@ -282,13 +282,13 @@ export interface RemediationAction {
  * Remediation action types
  */
 export enum RemediationActionType {
-  POLICY_UPDATE = 'policy_update',
-  PROCEDURE_IMPLEMENTATION = 'procedure_implementation',
-  TECHNICAL_CONTROL = 'technical_control',
-  TRAINING = 'training',
-  DOCUMENTATION = 'documentation',
-  PROCESS_IMPROVEMENT = 'process_improvement',
-  SYSTEM_CONFIGURATION = 'system_configuration',
+  POLICY_UPDATE = "policy_update",
+  PROCEDURE_IMPLEMENTATION = "procedure_implementation",
+  TECHNICAL_CONTROL = "technical_control",
+  TRAINING = "training",
+  DOCUMENTATION = "documentation",
+  PROCESS_IMPROVEMENT = "process_improvement",
+  SYSTEM_CONFIGURATION = "system_configuration",
 }
 
 /**
@@ -365,23 +365,23 @@ export interface ComplianceRecommendation {
  * Recommendation types
  */
 export enum RecommendationType {
-  POLICY_ENHANCEMENT = 'policy_enhancement',
-  TECHNICAL_IMPLEMENTATION = 'technical_implementation',
-  PROCESS_IMPROVEMENT = 'process_improvement',
-  TRAINING_PROGRAM = 'training_program',
-  MONITORING_ENHANCEMENT = 'monitoring_enhancement',
-  DOCUMENTATION_UPDATE = 'documentation_update',
-  RISK_MITIGATION = 'risk_mitigation',
+  POLICY_ENHANCEMENT = "policy_enhancement",
+  TECHNICAL_IMPLEMENTATION = "technical_implementation",
+  PROCESS_IMPROVEMENT = "process_improvement",
+  TRAINING_PROGRAM = "training_program",
+  MONITORING_ENHANCEMENT = "monitoring_enhancement",
+  DOCUMENTATION_UPDATE = "documentation_update",
+  RISK_MITIGATION = "risk_mitigation",
 }
 
 /**
  * Implementation effort levels
  */
 export enum ImplementationEffort {
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  VERY_HIGH = 'very_high',
+  LOW = "low",
+  MEDIUM = "medium",
+  HIGH = "high",
+  VERY_HIGH = "very_high",
 }
 
 /**
@@ -408,11 +408,11 @@ export interface CostEstimate {
  * Cost ranges
  */
 export enum CostRange {
-  UNDER_10K = 'under_10k',
-  TEN_TO_50K = '10k_to_50k',
-  FIFTY_TO_100K = '50k_to_100k',
-  HUNDRED_TO_500K = '100k_to_500k',
-  OVER_500K = 'over_500k',
+  UNDER_10K = "under_10k",
+  TEN_TO_50K = "10k_to_50k",
+  FIFTY_TO_100K = "50k_to_100k",
+  HUNDRED_TO_500K = "100k_to_500k",
+  OVER_500K = "over_500k",
 }
 
 /**
@@ -474,26 +474,26 @@ export interface ComplianceEvidence {
  * Evidence types
  */
 export enum EvidenceType {
-  POLICY_DOCUMENT = 'policy_document',
-  PROCEDURE_DOCUMENT = 'procedure_document',
-  CONFIGURATION_SCREENSHOT = 'configuration_screenshot',
-  LOG_FILE = 'log_file',
-  TEST_REPORT = 'test_report',
-  AUDIT_REPORT = 'audit_report',
-  TRAINING_RECORD = 'training_record',
-  INCIDENT_REPORT = 'incident_report',
-  VULNERABILITY_SCAN = 'vulnerability_scan',
-  PENETRATION_TEST = 'penetration_test',
+  POLICY_DOCUMENT = "policy_document",
+  PROCEDURE_DOCUMENT = "procedure_document",
+  CONFIGURATION_SCREENSHOT = "configuration_screenshot",
+  LOG_FILE = "log_file",
+  TEST_REPORT = "test_report",
+  AUDIT_REPORT = "audit_report",
+  TRAINING_RECORD = "training_record",
+  INCIDENT_REPORT = "incident_report",
+  VULNERABILITY_SCAN = "vulnerability_scan",
+  PENETRATION_TEST = "penetration_test",
 }
 
 /**
  * Verification status
  */
 export enum VerificationStatus {
-  VERIFIED = 'verified',
-  UNVERIFIED = 'unverified',
-  INVALID = 'invalid',
-  EXPIRED = 'expired',
+  VERIFIED = "verified",
+  UNVERIFIED = "unverified",
+  INVALID = "invalid",
+  EXPIRED = "expired",
 }
 
 /**
@@ -529,11 +529,11 @@ export interface ComplianceAssessmentMetadata {
  * Quality review status
  */
 export enum QualityReviewStatus {
-  PENDING = 'pending',
-  IN_REVIEW = 'in_review',
-  APPROVED = 'approved',
-  REJECTED = 'rejected',
-  REQUIRES_REVISION = 'requires_revision',
+  PENDING = "pending",
+  IN_REVIEW = "in_review",
+  APPROVED = "approved",
+  REJECTED = "rejected",
+  REQUIRES_REVISION = "requires_revision",
 }
 
 // ===========================
@@ -618,11 +618,11 @@ export interface AutomatedReportingConfig {
  * Report formats
  */
 export enum ReportFormat {
-  PDF = 'pdf',
-  HTML = 'html',
-  JSON = 'json',
-  CSV = 'csv',
-  EXCEL = 'excel',
+  PDF = "pdf",
+  HTML = "html",
+  JSON = "json",
+  CSV = "csv",
+  EXCEL = "excel",
 }
 
 /**
@@ -660,12 +660,12 @@ export interface ReportDistribution {
  * Distribution methods
  */
 export enum DistributionMethod {
-  EMAIL = 'email',
-  SLACK = 'slack',
-  TEAMS = 'teams',
-  S3_BUCKET = 's3_bucket',
-  SFTP = 'sftp',
-  API_WEBHOOK = 'api_webhook',
+  EMAIL = "email",
+  SLACK = "slack",
+  TEAMS = "teams",
+  S3_BUCKET = "s3_bucket",
+  SFTP = "sftp",
+  API_WEBHOOK = "api_webhook",
 }
 
 /**
@@ -726,10 +726,10 @@ export interface EscalationRule {
  * Escalation actions
  */
 export enum EscalationAction {
-  NOTIFY = 'notify',
-  CREATE_TICKET = 'create_ticket',
-  BLOCK_DEPLOYMENT = 'block_deployment',
-  EMERGENCY_RESPONSE = 'emergency_response',
+  NOTIFY = "notify",
+  CREATE_TICKET = "create_ticket",
+  BLOCK_DEPLOYMENT = "block_deployment",
+  EMERGENCY_RESPONSE = "emergency_response",
 }
 
 /**
@@ -764,12 +764,12 @@ export interface NotificationChannel {
  * Notification channel types
  */
 export enum NotificationChannelType {
-  EMAIL = 'email',
-  SLACK = 'slack',
-  TEAMS = 'teams',
-  WEBHOOK = 'webhook',
-  SMS = 'sms',
-  PAGERDUTY = 'pagerduty',
+  EMAIL = "email",
+  SLACK = "slack",
+  TEAMS = "teams",
+  WEBHOOK = "webhook",
+  SMS = "sms",
+  PAGERDUTY = "pagerduty",
 }
 
 /**
@@ -830,10 +830,10 @@ export interface RetentionPolicy {
  * Archive policies
  */
 export enum ArchivePolicy {
-  DELETE = 'delete',
-  ARCHIVE_COLD_STORAGE = 'archive_cold_storage',
-  ARCHIVE_ENCRYPTED = 'archive_encrypted',
-  RETAIN_INDEFINITELY = 'retain_indefinitely',
+  DELETE = "delete",
+  ARCHIVE_COLD_STORAGE = "archive_cold_storage",
+  ARCHIVE_ENCRYPTED = "archive_encrypted",
+  RETAIN_INDEFINITELY = "retain_indefinitely",
 }
 
 /**
@@ -854,11 +854,11 @@ export interface AccessControl {
  * Permissions
  */
 export enum Permission {
-  READ = 'read',
-  WRITE = 'write',
-  DELETE = 'delete',
-  DOWNLOAD = 'download',
-  SHARE = 'share',
+  READ = "read",
+  WRITE = "write",
+  DELETE = "delete",
+  DOWNLOAD = "download",
+  SHARE = "share",
 }
 
 // ===========================
@@ -888,10 +888,10 @@ export class ComplianceAutomationService implements OnApplicationShutdown {
    */
   private async initializeComplianceMonitoring(): Promise<void> {
     try {
-      this.logger.log('🔧 Initializing compliance automation service');
+      this.logger.log("🔧 Initializing compliance automation service");
 
       if (!this.config.enabled) {
-        this.logger.warn('⚠️ Compliance automation is disabled');
+        this.logger.warn("⚠️ Compliance automation is disabled");
         return;
       }
 
@@ -904,17 +904,21 @@ export class ComplianceAutomationService implements OnApplicationShutdown {
       await this.scheduleAutomatedAssessments();
 
       this.monitoringActive = true;
-      this.logger.log('✅ Compliance automation service initialized successfully');
+      this.logger.log(
+        "✅ Compliance automation service initialized successfully",
+      );
 
       // Emit initialization event
-      this.eventEmitter.emit('compliance.automation.initialized', {
+      this.eventEmitter.emit("compliance.automation.initialized", {
         timestamp: new Date(),
         supportedFrameworks: this.config.supportedFrameworks,
         monitoringActive: this.monitoringActive,
       });
-
     } catch (error) {
-      this.logger.error('❌ Failed to initialize compliance automation service', error);
+      this.logger.error(
+        "❌ Failed to initialize compliance automation service",
+        error,
+      );
       throw error;
     }
   }
@@ -929,7 +933,9 @@ export class ComplianceAutomationService implements OnApplicationShutdown {
     const assessmentId = this.generateAssessmentId();
 
     try {
-      this.logger.log(`🔍 Starting compliance assessment: ${assessmentId} for ${framework}`);
+      this.logger.log(
+        `🔍 Starting compliance assessment: ${assessmentId} for ${framework}`,
+      );
 
       // Create assessment baseline
       const assessment: ComplianceAssessmentResult = {
@@ -944,14 +950,14 @@ export class ComplianceAutomationService implements OnApplicationShutdown {
         evidence: [],
         nextAssessmentDate: this.calculateNextAssessmentDate(framework),
         metadata: {
-          assessor: 'ComplianceAutomationService',
-          scope: scope || ['full_system'],
-          methodology: 'automated_assessment',
-          toolsUsed: ['parlant_compliance_engine'],
+          assessor: "ComplianceAutomationService",
+          scope: scope || ["full_system"],
+          methodology: "automated_assessment",
+          toolsUsed: ["parlant_compliance_engine"],
           duration: 0,
           qualityReviewStatus: QualityReviewStatus.PENDING,
           stakeholderApproval: false,
-          version: '1.0.0',
+          version: "1.0.0",
         },
       };
 
@@ -976,8 +982,12 @@ export class ComplianceAutomationService implements OnApplicationShutdown {
       }
 
       // Calculate overall compliance score
-      assessment.complianceScore = this.calculateComplianceScore(assessment.controlResults);
-      assessment.overallStatus = this.determineOverallStatus(assessment.complianceScore);
+      assessment.complianceScore = this.calculateComplianceScore(
+        assessment.controlResults,
+      );
+      assessment.overallStatus = this.determineOverallStatus(
+        assessment.complianceScore,
+      );
 
       // Set assessment duration
       assessment.metadata.duration = Date.now() - startTime;
@@ -991,10 +1001,12 @@ export class ComplianceAutomationService implements OnApplicationShutdown {
       // Check for compliance violations and trigger notifications
       await this.checkComplianceViolations(assessment);
 
-      this.logger.log(`✅ Compliance assessment completed: ${assessmentId} (Score: ${assessment.complianceScore}%)`);
+      this.logger.log(
+        `✅ Compliance assessment completed: ${assessmentId} (Score: ${assessment.complianceScore}%)`,
+      );
 
       // Emit assessment completion event
-      this.eventEmitter.emit('compliance.assessment.completed', {
+      this.eventEmitter.emit("compliance.assessment.completed", {
         assessmentId,
         framework,
         complianceScore: assessment.complianceScore,
@@ -1003,12 +1015,14 @@ export class ComplianceAutomationService implements OnApplicationShutdown {
       });
 
       return assessment;
-
     } catch (error) {
-      this.logger.error(`❌ Compliance assessment failed: ${assessmentId}`, error);
+      this.logger.error(
+        `❌ Compliance assessment failed: ${assessmentId}`,
+        error,
+      );
 
       // Emit assessment failure event
-      this.eventEmitter.emit('compliance.assessment.failed', {
+      this.eventEmitter.emit("compliance.assessment.failed", {
         assessmentId,
         framework,
         error: error instanceof Error ? error.message : String(error),
@@ -1022,53 +1036,61 @@ export class ComplianceAutomationService implements OnApplicationShutdown {
   /**
    * Assess SOC 2 compliance
    */
-  private async assessSOC2Compliance(assessment: ComplianceAssessmentResult): Promise<void> {
-    this.logger.log('🔍 Performing SOC 2 compliance assessment');
+  private async assessSOC2Compliance(
+    assessment: ComplianceAssessmentResult,
+  ): Promise<void> {
+    this.logger.log("🔍 Performing SOC 2 compliance assessment");
 
     const soc2Controls = [
       // Security Criteria
       {
-        id: 'CC6.1',
-        name: 'Logical and Physical Access Controls',
+        id: "CC6.1",
+        name: "Logical and Physical Access Controls",
         category: ComplianceControlCategory.ACCESS_CONTROL,
-        description: 'Implements logical and physical access security software, infrastructure, and procedures',
+        description:
+          "Implements logical and physical access security software, infrastructure, and procedures",
       },
       {
-        id: 'CC6.2',
-        name: 'User Access Provisioning',
+        id: "CC6.2",
+        name: "User Access Provisioning",
         category: ComplianceControlCategory.ACCESS_CONTROL,
-        description: 'Prior to issuing system credentials and granting system access',
+        description:
+          "Prior to issuing system credentials and granting system access",
       },
       {
-        id: 'CC6.3',
-        name: 'User Access Modification and Termination',
+        id: "CC6.3",
+        name: "User Access Modification and Termination",
         category: ComplianceControlCategory.ACCESS_CONTROL,
-        description: 'Removes or modifies access to data, software, functions, and other protected information assets',
+        description:
+          "Removes or modifies access to data, software, functions, and other protected information assets",
       },
       {
-        id: 'CC7.1',
-        name: 'System Monitoring',
+        id: "CC7.1",
+        name: "System Monitoring",
         category: ComplianceControlCategory.SYSTEM_MONITORING,
-        description: 'Identifies and responds to changes in data sensitivity, risk levels, or system changes',
+        description:
+          "Identifies and responds to changes in data sensitivity, risk levels, or system changes",
       },
       {
-        id: 'CC7.2',
-        name: 'Monitoring Activities',
+        id: "CC7.2",
+        name: "Monitoring Activities",
         category: ComplianceControlCategory.SYSTEM_MONITORING,
-        description: 'Monitors system components and the operation of controls',
+        description: "Monitors system components and the operation of controls",
       },
       // Availability Criteria
       {
-        id: 'A1.1',
-        name: 'Availability Commitments',
+        id: "A1.1",
+        name: "Availability Commitments",
         category: ComplianceControlCategory.BUSINESS_CONTINUITY,
-        description: 'System availability commitments to users are based on the defined system',
+        description:
+          "System availability commitments to users are based on the defined system",
       },
       {
-        id: 'A1.2',
-        name: 'Capacity Management',
+        id: "A1.2",
+        name: "Capacity Management",
         category: ComplianceControlCategory.SYSTEM_MONITORING,
-        description: 'Environmental protections, software, data backup processes, and recovery infrastructure',
+        description:
+          "Environmental protections, software, data backup processes, and recovery infrastructure",
       },
     ];
 
@@ -1084,39 +1106,46 @@ export class ComplianceAutomationService implements OnApplicationShutdown {
   /**
    * Assess GDPR compliance
    */
-  private async assessGDPRCompliance(assessment: ComplianceAssessmentResult): Promise<void> {
-    this.logger.log('🔍 Performing GDPR compliance assessment');
+  private async assessGDPRCompliance(
+    assessment: ComplianceAssessmentResult,
+  ): Promise<void> {
+    this.logger.log("🔍 Performing GDPR compliance assessment");
 
     const gdprControls = [
       {
-        id: 'GDPR.5',
-        name: 'Principles Relating to Processing',
+        id: "GDPR.5",
+        name: "Principles Relating to Processing",
         category: ComplianceControlCategory.DATA_PROTECTION,
-        description: 'Personal data shall be processed lawfully, fairly and in a transparent manner',
+        description:
+          "Personal data shall be processed lawfully, fairly and in a transparent manner",
       },
       {
-        id: 'GDPR.6',
-        name: 'Lawfulness of Processing',
+        id: "GDPR.6",
+        name: "Lawfulness of Processing",
         category: ComplianceControlCategory.DATA_PROTECTION,
-        description: 'Processing shall be lawful only if and to the extent that at least one condition applies',
+        description:
+          "Processing shall be lawful only if and to the extent that at least one condition applies",
       },
       {
-        id: 'GDPR.25',
-        name: 'Data Protection by Design and by Default',
+        id: "GDPR.25",
+        name: "Data Protection by Design and by Default",
         category: ComplianceControlCategory.DATA_PROTECTION,
-        description: 'Implement appropriate technical and organisational measures',
+        description:
+          "Implement appropriate technical and organisational measures",
       },
       {
-        id: 'GDPR.32',
-        name: 'Security of Processing',
+        id: "GDPR.32",
+        name: "Security of Processing",
         category: ComplianceControlCategory.DATA_PROTECTION,
-        description: 'Implement appropriate technical and organisational measures to ensure security',
+        description:
+          "Implement appropriate technical and organisational measures to ensure security",
       },
       {
-        id: 'GDPR.33',
-        name: 'Personal Data Breach Notification',
+        id: "GDPR.33",
+        name: "Personal Data Breach Notification",
         category: ComplianceControlCategory.INCIDENT_RESPONSE,
-        description: 'Notification of a personal data breach to the supervisory authority',
+        description:
+          "Notification of a personal data breach to the supervisory authority",
       },
     ];
 
@@ -1131,39 +1160,46 @@ export class ComplianceAutomationService implements OnApplicationShutdown {
   /**
    * Assess ISO 27001 compliance
    */
-  private async assessISO27001Compliance(assessment: ComplianceAssessmentResult): Promise<void> {
-    this.logger.log('🔍 Performing ISO 27001 compliance assessment');
+  private async assessISO27001Compliance(
+    assessment: ComplianceAssessmentResult,
+  ): Promise<void> {
+    this.logger.log("🔍 Performing ISO 27001 compliance assessment");
 
     const iso27001Controls = [
       {
-        id: 'A.9.1.1',
-        name: 'Access Control Policy',
+        id: "A.9.1.1",
+        name: "Access Control Policy",
         category: ComplianceControlCategory.ACCESS_CONTROL,
-        description: 'An access control policy should be established, documented and reviewed',
+        description:
+          "An access control policy should be established, documented and reviewed",
       },
       {
-        id: 'A.9.2.1',
-        name: 'User Registration and De-registration',
+        id: "A.9.2.1",
+        name: "User Registration and De-registration",
         category: ComplianceControlCategory.ACCESS_CONTROL,
-        description: 'A formal user registration and de-registration process should be implemented',
+        description:
+          "A formal user registration and de-registration process should be implemented",
       },
       {
-        id: 'A.12.1.1',
-        name: 'Documented Operating Procedures',
+        id: "A.12.1.1",
+        name: "Documented Operating Procedures",
         category: ComplianceControlCategory.SYSTEM_MONITORING,
-        description: 'Operating procedures should be documented and made available to all users',
+        description:
+          "Operating procedures should be documented and made available to all users",
       },
       {
-        id: 'A.12.6.1',
-        name: 'Management of Technical Vulnerabilities',
+        id: "A.12.6.1",
+        name: "Management of Technical Vulnerabilities",
         category: ComplianceControlCategory.VULNERABILITY_MANAGEMENT,
-        description: 'Information about technical vulnerabilities should be obtained in a timely fashion',
+        description:
+          "Information about technical vulnerabilities should be obtained in a timely fashion",
       },
       {
-        id: 'A.16.1.1',
-        name: 'Responsibilities and Procedures',
+        id: "A.16.1.1",
+        name: "Responsibilities and Procedures",
         category: ComplianceControlCategory.INCIDENT_RESPONSE,
-        description: 'Management responsibilities and procedures should be established',
+        description:
+          "Management responsibilities and procedures should be established",
       },
     ];
 
@@ -1178,39 +1214,44 @@ export class ComplianceAutomationService implements OnApplicationShutdown {
   /**
    * Assess NIST CSF compliance
    */
-  private async assessNISTCSFCompliance(assessment: ComplianceAssessmentResult): Promise<void> {
-    this.logger.log('🔍 Performing NIST Cybersecurity Framework compliance assessment');
+  private async assessNISTCSFCompliance(
+    assessment: ComplianceAssessmentResult,
+  ): Promise<void> {
+    this.logger.log(
+      "🔍 Performing NIST Cybersecurity Framework compliance assessment",
+    );
 
     const nistCsfControls = [
       {
-        id: 'ID.AM-1',
-        name: 'Physical devices and systems within the organization are inventoried',
+        id: "ID.AM-1",
+        name: "Physical devices and systems within the organization are inventoried",
         category: ComplianceControlCategory.ACCESS_CONTROL,
-        description: 'Asset Management - Physical devices and systems inventory',
+        description:
+          "Asset Management - Physical devices and systems inventory",
       },
       {
-        id: 'PR.AC-1',
-        name: 'Identities and credentials are issued, managed, verified, revoked, and audited',
+        id: "PR.AC-1",
+        name: "Identities and credentials are issued, managed, verified, revoked, and audited",
         category: ComplianceControlCategory.ACCESS_CONTROL,
-        description: 'Identity Management and Access Control',
+        description: "Identity Management and Access Control",
       },
       {
-        id: 'DE.CM-1',
-        name: 'The network is monitored to detect potential cybersecurity events',
+        id: "DE.CM-1",
+        name: "The network is monitored to detect potential cybersecurity events",
         category: ComplianceControlCategory.SYSTEM_MONITORING,
-        description: 'Security Continuous Monitoring',
+        description: "Security Continuous Monitoring",
       },
       {
-        id: 'RS.RP-1',
-        name: 'Response plan is executed during or after an incident',
+        id: "RS.RP-1",
+        name: "Response plan is executed during or after an incident",
         category: ComplianceControlCategory.INCIDENT_RESPONSE,
-        description: 'Response Planning',
+        description: "Response Planning",
       },
       {
-        id: 'RC.RP-1',
-        name: 'Recovery plan is executed during or after a cybersecurity incident',
+        id: "RC.RP-1",
+        name: "Recovery plan is executed during or after a cybersecurity incident",
         category: ComplianceControlCategory.BUSINESS_CONTINUITY,
-        description: 'Recovery Planning',
+        description: "Recovery Planning",
       },
     ];
 
@@ -1239,7 +1280,7 @@ export class ComplianceAutomationService implements OnApplicationShutdown {
         testType: ControlTestType.AUTOMATED_SCAN,
         result: TestResult.PASS,
         executionDate: new Date(),
-        evidence: ['automated_scan_results.json'],
+        evidence: ["automated_scan_results.json"],
         issues: [],
         recommendations: [],
       },
@@ -1253,7 +1294,7 @@ export class ComplianceAutomationService implements OnApplicationShutdown {
       status: ComplianceStatus.COMPLIANT,
       effectivenessScore: 95,
       riskLevel: ComplianceRiskLevel.LOW,
-      evidence: ['policy_documents', 'configuration_screenshots', 'audit_logs'],
+      evidence: ["policy_documents", "configuration_screenshots", "audit_logs"],
       testingResults,
       remediationStatus: {
         required: false,
@@ -1270,12 +1311,16 @@ export class ComplianceAutomationService implements OnApplicationShutdown {
   /**
    * Generate compliance report
    */
-  private async generateComplianceReport(assessment: ComplianceAssessmentResult): Promise<void> {
+  private async generateComplianceReport(
+    assessment: ComplianceAssessmentResult,
+  ): Promise<void> {
     try {
-      this.logger.log(`📊 Generating compliance report for assessment: ${assessment.assessmentId}`);
+      this.logger.log(
+        `📊 Generating compliance report for assessment: ${assessment.assessmentId}`,
+      );
 
       if (!this.config.automatedReporting?.enabled) {
-        this.logger.debug('Automated reporting is disabled');
+        this.logger.debug("Automated reporting is disabled");
         return;
       }
 
@@ -1287,10 +1332,14 @@ export class ComplianceAutomationService implements OnApplicationShutdown {
       // Distribute reports according to configuration
       await this.distributeReports(assessment);
 
-      this.logger.log(`✅ Compliance report generated and distributed for: ${assessment.assessmentId}`);
-
+      this.logger.log(
+        `✅ Compliance report generated and distributed for: ${assessment.assessmentId}`,
+      );
     } catch (error) {
-      this.logger.error(`❌ Failed to generate compliance report: ${assessment.assessmentId}`, error);
+      this.logger.error(
+        `❌ Failed to generate compliance report: ${assessment.assessmentId}`,
+        error,
+      );
       throw error;
     }
   }
@@ -1303,7 +1352,9 @@ export class ComplianceAutomationService implements OnApplicationShutdown {
     format: ReportFormat,
   ): Promise<void> {
     // Implementation would generate reports in various formats
-    this.logger.debug(`Generating ${format} report for assessment: ${assessment.assessmentId}`);
+    this.logger.debug(
+      `Generating ${format} report for assessment: ${assessment.assessmentId}`,
+    );
 
     // This would typically involve:
     // 1. Template rendering
@@ -1315,7 +1366,9 @@ export class ComplianceAutomationService implements OnApplicationShutdown {
   /**
    * Calculate compliance score
    */
-  private calculateComplianceScore(controlResults: ComplianceControlResult[]): number {
+  private calculateComplianceScore(
+    controlResults: ComplianceControlResult[],
+  ): number {
     if (controlResults.length === 0) {
       return 0;
     }
@@ -1344,7 +1397,7 @@ export class ComplianceAutomationService implements OnApplicationShutdown {
    * Start continuous monitoring
    */
   private async startContinuousMonitoring(): Promise<void> {
-    this.logger.log('🔄 Starting continuous compliance monitoring');
+    this.logger.log("🔄 Starting continuous compliance monitoring");
     // Implementation for continuous monitoring
   }
 
@@ -1352,20 +1405,24 @@ export class ComplianceAutomationService implements OnApplicationShutdown {
    * Schedule automated assessments
    */
   private async scheduleAutomatedAssessments(): Promise<void> {
-    this.logger.log('📅 Scheduling automated compliance assessments');
+    this.logger.log("📅 Scheduling automated compliance assessments");
     // Implementation for assessment scheduling
   }
 
   /**
    * Check for compliance violations
    */
-  private async checkComplianceViolations(assessment: ComplianceAssessmentResult): Promise<void> {
+  private async checkComplianceViolations(
+    assessment: ComplianceAssessmentResult,
+  ): Promise<void> {
     const violations = assessment.controlResults.filter(
-      result => result.status === ComplianceStatus.NON_COMPLIANT,
+      (result) => result.status === ComplianceStatus.NON_COMPLIANT,
     );
 
     if (violations.length > 0) {
-      this.logger.warn(`⚠️ Found ${violations.length} compliance violations in assessment: ${assessment.assessmentId}`);
+      this.logger.warn(
+        `⚠️ Found ${violations.length} compliance violations in assessment: ${assessment.assessmentId}`,
+      );
 
       // Trigger notifications for violations
       await this.notifyComplianceViolations(assessment, violations);
@@ -1380,32 +1437,44 @@ export class ComplianceAutomationService implements OnApplicationShutdown {
     violations: ComplianceControlResult[],
   ): Promise<void> {
     // Implementation for violation notifications
-    this.logger.log(`📧 Sending compliance violation notifications for: ${assessment.assessmentId}`);
+    this.logger.log(
+      `📧 Sending compliance violation notifications for: ${assessment.assessmentId}`,
+    );
   }
 
   /**
    * Identify framework-specific gaps
    */
-  private async identifySOC2Gaps(assessment: ComplianceAssessmentResult): Promise<void> {
+  private async identifySOC2Gaps(
+    assessment: ComplianceAssessmentResult,
+  ): Promise<void> {
     // SOC 2 specific gap identification logic
   }
 
-  private async identifyGDPRGaps(assessment: ComplianceAssessmentResult): Promise<void> {
+  private async identifyGDPRGaps(
+    assessment: ComplianceAssessmentResult,
+  ): Promise<void> {
     // GDPR specific gap identification logic
   }
 
-  private async identifyISO27001Gaps(assessment: ComplianceAssessmentResult): Promise<void> {
+  private async identifyISO27001Gaps(
+    assessment: ComplianceAssessmentResult,
+  ): Promise<void> {
     // ISO 27001 specific gap identification logic
   }
 
-  private async identifyNISTCSFGaps(assessment: ComplianceAssessmentResult): Promise<void> {
+  private async identifyNISTCSFGaps(
+    assessment: ComplianceAssessmentResult,
+  ): Promise<void> {
     // NIST CSF specific gap identification logic
   }
 
   /**
    * Distribute reports
    */
-  private async distributeReports(assessment: ComplianceAssessmentResult): Promise<void> {
+  private async distributeReports(
+    assessment: ComplianceAssessmentResult,
+  ): Promise<void> {
     // Implementation for report distribution
   }
 
@@ -1413,8 +1482,8 @@ export class ComplianceAutomationService implements OnApplicationShutdown {
    * Generate assessment ID
    */
   private generateAssessmentId(): string {
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const randomId = randomBytes(4).toString('hex');
+    const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+    const randomId = randomBytes(4).toString("hex");
     return `assessment_${timestamp}_${randomId}`;
   }
 
@@ -1432,7 +1501,10 @@ export class ComplianceAutomationService implements OnApplicationShutdown {
    */
   private loadConfiguration(): ComplianceAutomationConfig {
     return {
-      enabled: this.configService.get<boolean>('compliance.automation.enabled', true),
+      enabled: this.configService.get<boolean>(
+        "compliance.automation.enabled",
+        true,
+      ),
       supportedFrameworks: [
         ComplianceFramework.SOC2,
         ComplianceFramework.GDPR,
@@ -1441,8 +1513,8 @@ export class ComplianceAutomationService implements OnApplicationShutdown {
       ],
       assessmentFrequency: {
         continuousMonitoring: true,
-        fullAssessmentInterval: '90d',
-        incrementalAssessmentInterval: '7d',
+        fullAssessmentInterval: "90d",
+        incrementalAssessmentInterval: "7d",
         riskBasedTriggers: [],
       },
       automatedReporting: {
@@ -1465,7 +1537,7 @@ export class ComplianceAutomationService implements OnApplicationShutdown {
       },
       evidenceManagement: {
         automaticCollection: true,
-        storageLocation: '/security/compliance/evidence',
+        storageLocation: "/security/compliance/evidence",
         retentionPolicies: [],
         accessControls: [],
         integrityVerification: true,
@@ -1483,24 +1555,25 @@ export class ComplianceAutomationService implements OnApplicationShutdown {
     }
 
     try {
-      this.logger.log('🔄 Running scheduled compliance monitoring');
+      this.logger.log("🔄 Running scheduled compliance monitoring");
 
       // Perform incremental assessments for all supported frameworks
       for (const framework of this.config.supportedFrameworks) {
         await this.performComplianceAssessment(framework);
       }
 
-      this.logger.log('✅ Scheduled compliance monitoring completed');
-
+      this.logger.log("✅ Scheduled compliance monitoring completed");
     } catch (error) {
-      this.logger.error('❌ Scheduled compliance monitoring failed', error);
+      this.logger.error("❌ Scheduled compliance monitoring failed", error);
     }
   }
 
   /**
    * Get assessment result
    */
-  public getAssessmentResult(assessmentId: string): ComplianceAssessmentResult | undefined {
+  public getAssessmentResult(
+    assessmentId: string,
+  ): ComplianceAssessmentResult | undefined {
     return this.assessmentCache.get(assessmentId);
   }
 
@@ -1515,7 +1588,9 @@ export class ComplianceAutomationService implements OnApplicationShutdown {
    * Application shutdown cleanup
    */
   async onApplicationShutdown(signal?: string): Promise<void> {
-    this.logger.log(`🔄 Shutting down compliance automation service (signal: ${signal})`);
+    this.logger.log(
+      `🔄 Shutting down compliance automation service (signal: ${signal})`,
+    );
     this.monitoringActive = false;
     this.assessmentCache.clear();
   }

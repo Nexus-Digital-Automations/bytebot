@@ -22,8 +22,8 @@
  * @version 1.0.0 - SOPHISTICATED DEADLOCK MANAGEMENT WITH PARLANT VALIDATION
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { EventEmitter } from 'events';
+import { Injectable, Logger } from "@nestjs/common";
+import { EventEmitter } from "events";
 import {
   TransactionMetadata,
   TransactionState,
@@ -35,26 +35,26 @@ import {
   TransactionAuditInfo,
   ParlantTransactionValidationRequest,
   ParlantTransactionValidationResponse,
-} from '../types';
+} from "../types";
 import {
   ParlantValidationRequest,
   ParlantValidationResponse,
   ParlantUserContext,
   SecurityLevel,
-} from '../../../types/parlant-integration.types';
+} from "../../../types/parlant-integration.types";
 
 /**
  * Deadlock detection algorithm types
  */
 export enum DeadlockDetectionAlgorithm {
   /** Wait-for graph algorithm */
-  WAIT_FOR_GRAPH = 'WAIT_FOR_GRAPH',
+  WAIT_FOR_GRAPH = "WAIT_FOR_GRAPH",
   /** Banker's algorithm */
-  BANKERS_ALGORITHM = 'BANKERS_ALGORITHM',
+  BANKERS_ALGORITHM = "BANKERS_ALGORITHM",
   /** Timeout-based detection */
-  TIMEOUT_BASED = 'TIMEOUT_BASED',
+  TIMEOUT_BASED = "TIMEOUT_BASED",
   /** Hybrid approach combining multiple algorithms */
-  HYBRID = 'HYBRID',
+  HYBRID = "HYBRID",
 }
 
 /**
@@ -62,40 +62,40 @@ export enum DeadlockDetectionAlgorithm {
  */
 export enum DeadlockResolutionStrategy {
   /** Abort victim transaction */
-  VICTIM_ABORT = 'VICTIM_ABORT',
+  VICTIM_ABORT = "VICTIM_ABORT",
   /** Timeout-based resolution */
-  TIMEOUT_RESOLUTION = 'TIMEOUT_RESOLUTION',
+  TIMEOUT_RESOLUTION = "TIMEOUT_RESOLUTION",
   /** Priority-based resolution */
-  PRIORITY_BASED = 'PRIORITY_BASED',
+  PRIORITY_BASED = "PRIORITY_BASED",
   /** Resource preemption */
-  RESOURCE_PREEMPTION = 'RESOURCE_PREEMPTION',
+  RESOURCE_PREEMPTION = "RESOURCE_PREEMPTION",
   /** Wait-die scheme */
-  WAIT_DIE = 'WAIT_DIE',
+  WAIT_DIE = "WAIT_DIE",
   /** Wound-wait scheme */
-  WOUND_WAIT = 'WOUND_WAIT',
+  WOUND_WAIT = "WOUND_WAIT",
 }
 
 /**
  * Lock type enumeration
  */
 export enum LockType {
-  SHARED = 'SHARED',
-  EXCLUSIVE = 'EXCLUSIVE',
-  UPDATE = 'UPDATE',
-  INTENT_SHARED = 'INTENT_SHARED',
-  INTENT_EXCLUSIVE = 'INTENT_EXCLUSIVE',
+  SHARED = "SHARED",
+  EXCLUSIVE = "EXCLUSIVE",
+  UPDATE = "UPDATE",
+  INTENT_SHARED = "INTENT_SHARED",
+  INTENT_EXCLUSIVE = "INTENT_EXCLUSIVE",
 }
 
 /**
  * Resource type enumeration
  */
 export enum ResourceType {
-  TABLE = 'TABLE',
-  ROW = 'ROW',
-  INDEX = 'INDEX',
-  PAGE = 'PAGE',
-  DATABASE = 'DATABASE',
-  SCHEMA = 'SCHEMA',
+  TABLE = "TABLE",
+  ROW = "ROW",
+  INDEX = "INDEX",
+  PAGE = "PAGE",
+  DATABASE = "DATABASE",
+  SCHEMA = "SCHEMA",
 }
 
 /**
@@ -121,7 +121,7 @@ export interface TransactionLock {
   readonly acquiredAt: Date;
 
   /** Lock mode */
-  readonly mode: 'HELD' | 'WAITING';
+  readonly mode: "HELD" | "WAITING";
 
   /** Lock priority */
   readonly priority: number;
@@ -305,7 +305,7 @@ export interface DeadlockPattern {
   readonly resourceTypes: ResourceType[];
 
   /** Pattern severity */
-  readonly severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  readonly severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
 }
 
 /**
@@ -331,7 +331,10 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
 
   // Deadlock detection state
   private readonly detectedDeadlocks = new Map<string, DeadlockInfo>();
-  private readonly resolvedDeadlocks = new Map<string, DeadlockResolutionResult>();
+  private readonly resolvedDeadlocks = new Map<
+    string,
+    DeadlockResolutionResult
+  >();
 
   // Detection interval timer
   private detectionTimer?: NodeJS.Timeout;
@@ -379,7 +382,7 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
   constructor() {
     super();
     this.configuration = { ...this.defaultConfiguration };
-    this.logger.log('PARLANT Deadlock Detector Service initialized');
+    this.logger.log("PARLANT Deadlock Detector Service initialized");
 
     // Start deadlock detection
     this.startDeadlockDetection();
@@ -394,7 +397,9 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
    * Register transaction for deadlock monitoring
    */
   registerTransaction(transaction: TransactionMetadata): void {
-    this.logger.log(`Registering transaction ${transaction.transactionId} for deadlock monitoring`);
+    this.logger.log(
+      `Registering transaction ${transaction.transactionId} for deadlock monitoring`,
+    );
 
     this.activeTransactions.set(transaction.transactionId, transaction);
     this.transactionLocks.set(transaction.transactionId, []);
@@ -402,14 +407,18 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
     // Add to wait-for graph
     this.addNodeToGraph(transaction.transactionId);
 
-    this.emit('transactionRegistered', { transactionId: transaction.transactionId });
+    this.emit("transactionRegistered", {
+      transactionId: transaction.transactionId,
+    });
   }
 
   /**
    * Unregister transaction from deadlock monitoring
    */
   unregisterTransaction(transactionId: string): void {
-    this.logger.log(`Unregistering transaction ${transactionId} from deadlock monitoring`);
+    this.logger.log(
+      `Unregistering transaction ${transactionId} from deadlock monitoring`,
+    );
 
     this.activeTransactions.delete(transactionId);
     this.transactionLocks.delete(transactionId);
@@ -417,7 +426,7 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
     // Remove from wait-for graph
     this.removeNodeFromGraph(transactionId);
 
-    this.emit('transactionUnregistered', { transactionId });
+    this.emit("transactionUnregistered", { transactionId });
   }
 
   /**
@@ -428,14 +437,16 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
     locks.push(lock);
     this.transactionLocks.set(lock.transactionId, locks);
 
-    this.logger.log(`Registered ${lock.lockType} lock on ${lock.resourceType}:${lock.resourceId} for transaction ${lock.transactionId}`);
+    this.logger.log(
+      `Registered ${lock.lockType} lock on ${lock.resourceType}:${lock.resourceId} for transaction ${lock.transactionId}`,
+    );
 
     // Update wait-for graph if this is a waiting lock
-    if (lock.mode === 'WAITING') {
+    if (lock.mode === "WAITING") {
       this.updateWaitForGraph(lock);
     }
 
-    this.emit('lockRegistered', { lock });
+    this.emit("lockRegistered", { lock });
 
     // Trigger proactive detection if enabled
     if (this.configuration.enableProactiveDetection) {
@@ -448,16 +459,18 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
    */
   releaseLock(lockId: string, transactionId: string): void {
     const locks = this.transactionLocks.get(transactionId) || [];
-    const lockIndex = locks.findIndex(lock => lock.lockId === lockId);
+    const lockIndex = locks.findIndex((lock) => lock.lockId === lockId);
 
     if (lockIndex >= 0) {
       const releasedLock = locks.splice(lockIndex, 1)[0];
-      this.logger.log(`Released ${releasedLock.lockType} lock on ${releasedLock.resourceType}:${releasedLock.resourceId} for transaction ${transactionId}`);
+      this.logger.log(
+        `Released ${releasedLock.lockType} lock on ${releasedLock.resourceType}:${releasedLock.resourceId} for transaction ${transactionId}`,
+      );
 
       // Update wait-for graph
       this.updateWaitForGraphOnRelease(releasedLock);
 
-      this.emit('lockReleased', { lock: releasedLock });
+      this.emit("lockReleased", { lock: releasedLock });
     }
   }
 
@@ -466,7 +479,7 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
    */
   async detectDeadlocks(): Promise<DeadlockDetectionResult> {
     const startTime = Date.now();
-    this.logger.log('Starting deadlock detection');
+    this.logger.log("Starting deadlock detection");
 
     try {
       let result: DeadlockDetectionResult;
@@ -489,7 +502,9 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
           break;
 
         default:
-          throw new Error(`Unsupported detection algorithm: ${this.configuration.detectionAlgorithm}`);
+          throw new Error(
+            `Unsupported detection algorithm: ${this.configuration.detectionAlgorithm}`,
+          );
       }
 
       // Update statistics
@@ -501,12 +516,16 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
         await this.processDetectedDeadlocks(result.deadlocks);
       }
 
-      this.logger.log(`Deadlock detection completed in ${detectionTime}ms: ${result.deadlockDetected ? `${result.deadlocks.length} deadlocks detected` : 'no deadlocks'}`);
+      this.logger.log(
+        `Deadlock detection completed in ${detectionTime}ms: ${result.deadlockDetected ? `${result.deadlocks.length} deadlocks detected` : "no deadlocks"}`,
+      );
 
       return result;
-
     } catch (error) {
-      this.logger.error(`Deadlock detection failed: ${error.message}`, error.stack);
+      this.logger.error(
+        `Deadlock detection failed: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -514,9 +533,13 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
   /**
    * Resolve detected deadlock
    */
-  async resolveDeadlock(deadlockInfo: DeadlockInfo): Promise<DeadlockResolutionResult> {
+  async resolveDeadlock(
+    deadlockInfo: DeadlockInfo,
+  ): Promise<DeadlockResolutionResult> {
     const startTime = Date.now();
-    this.logger.log(`Resolving deadlock involving transactions: ${deadlockInfo.involvedTransactions.join(', ')}`);
+    this.logger.log(
+      `Resolving deadlock involving transactions: ${deadlockInfo.involvedTransactions.join(", ")}`,
+    );
 
     try {
       let result: DeadlockResolutionResult;
@@ -547,7 +570,9 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
           break;
 
         default:
-          throw new Error(`Unsupported resolution strategy: ${this.configuration.resolutionStrategy}`);
+          throw new Error(
+            `Unsupported resolution strategy: ${this.configuration.resolutionStrategy}`,
+          );
       }
 
       // Update statistics
@@ -555,17 +580,24 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
       this.updateResolutionStatistics(resolutionTime, result);
 
       // Store resolution result
-      this.resolvedDeadlocks.set(`${deadlockInfo.detectedAt.getTime()}_${deadlockInfo.involvedTransactions.join('_')}`, result);
+      this.resolvedDeadlocks.set(
+        `${deadlockInfo.detectedAt.getTime()}_${deadlockInfo.involvedTransactions.join("_")}`,
+        result,
+      );
 
       // Update deadlock status
-      deadlockInfo.status = result.success ? 'RESOLVED' : 'FAILED';
+      deadlockInfo.status = result.success ? "RESOLVED" : "FAILED";
 
-      this.logger.log(`Deadlock resolution completed in ${resolutionTime}ms: ${result.success ? 'SUCCESS' : 'FAILURE'}`);
+      this.logger.log(
+        `Deadlock resolution completed in ${resolutionTime}ms: ${result.success ? "SUCCESS" : "FAILURE"}`,
+      );
 
       return result;
-
     } catch (error) {
-      this.logger.error(`Deadlock resolution failed: ${error.message}`, error.stack);
+      this.logger.error(
+        `Deadlock resolution failed: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -588,15 +620,22 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
     for (const cycle of cycles) {
       const deadlock: DeadlockInfo = {
         detectedAt: new Date(),
-        involvedTransactions: cycle.map(node => node.waitingTransaction),
+        involvedTransactions: cycle.map((node) => node.waitingTransaction),
         cycle: cycle,
-        suggestedVictim: this.selectVictim(cycle.map(node => node.waitingTransaction)),
-        resolutionStrategy: this.mapResolutionStrategyToString(this.configuration.resolutionStrategy),
-        status: 'DETECTED',
+        suggestedVictim: this.selectVictim(
+          cycle.map((node) => node.waitingTransaction),
+        ),
+        resolutionStrategy: this.mapResolutionStrategyToString(
+          this.configuration.resolutionStrategy,
+        ),
+        status: "DETECTED",
       };
 
       deadlocks.push(deadlock);
-      this.detectedDeadlocks.set(`${deadlock.detectedAt.getTime()}_${deadlock.involvedTransactions.join('_')}`, deadlock);
+      this.detectedDeadlocks.set(
+        `${deadlock.detectedAt.getTime()}_${deadlock.involvedTransactions.join("_")}`,
+        deadlock,
+      );
     }
 
     return {
@@ -607,9 +646,15 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
       transactionsAnalyzed: this.activeTransactions.size,
       graphStats: {
         nodeCount: this.waitForGraph.nodes.size,
-        edgeCount: Array.from(this.waitForGraph.edges.values()).reduce((total, edges) => total + edges.size, 0),
+        edgeCount: Array.from(this.waitForGraph.edges.values()).reduce(
+          (total, edges) => total + edges.size,
+          0,
+        ),
         cycleCount: cycles.length,
-        maxCycleLength: cycles.length > 0 ? Math.max(...cycles.map(cycle => cycle.length)) : 0,
+        maxCycleLength:
+          cycles.length > 0
+            ? Math.max(...cycles.map((cycle) => cycle.length))
+            : 0,
       },
     };
   }
@@ -631,12 +676,17 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
         involvedTransactions: unsafeTransactions,
         cycle: this.constructCycleFromTransactions(unsafeTransactions),
         suggestedVictim: this.selectVictim(unsafeTransactions),
-        resolutionStrategy: this.mapResolutionStrategyToString(this.configuration.resolutionStrategy),
-        status: 'DETECTED',
+        resolutionStrategy: this.mapResolutionStrategyToString(
+          this.configuration.resolutionStrategy,
+        ),
+        status: "DETECTED",
       };
 
       deadlocks.push(deadlock);
-      this.detectedDeadlocks.set(`${deadlock.detectedAt.getTime()}_${deadlock.involvedTransactions.join('_')}`, deadlock);
+      this.detectedDeadlocks.set(
+        `${deadlock.detectedAt.getTime()}_${deadlock.involvedTransactions.join("_")}`,
+        deadlock,
+      );
     }
 
     return {
@@ -649,7 +699,10 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
         nodeCount: this.activeTransactions.size,
         edgeCount: 0,
         cycleCount: deadlocks.length,
-        maxCycleLength: deadlocks.length > 0 ? Math.max(...deadlocks.map(d => d.involvedTransactions.length)) : 0,
+        maxCycleLength:
+          deadlocks.length > 0
+            ? Math.max(...deadlocks.map((d) => d.involvedTransactions.length))
+            : 0,
       },
     };
   }
@@ -666,10 +719,13 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
     const timedOutTransactions: string[] = [];
 
     for (const [transactionId, locks] of this.transactionLocks.entries()) {
-      const waitingLocks = locks.filter(lock => lock.mode === 'WAITING');
+      const waitingLocks = locks.filter((lock) => lock.mode === "WAITING");
 
       for (const lock of waitingLocks) {
-        if (now - lock.acquiredAt.getTime() > this.configuration.transactionWaitTimeout) {
+        if (
+          now - lock.acquiredAt.getTime() >
+          this.configuration.transactionWaitTimeout
+        ) {
           timedOutTransactions.push(transactionId);
           break;
         }
@@ -678,7 +734,8 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
 
     if (timedOutTransactions.length > 0) {
       // Group timed-out transactions that might be in deadlock
-      const potentialDeadlockGroups = this.groupTimedOutTransactions(timedOutTransactions);
+      const potentialDeadlockGroups =
+        this.groupTimedOutTransactions(timedOutTransactions);
 
       for (const group of potentialDeadlockGroups) {
         const deadlock: DeadlockInfo = {
@@ -686,12 +743,15 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
           involvedTransactions: group,
           cycle: this.constructCycleFromTransactions(group),
           suggestedVictim: this.selectVictim(group),
-          resolutionStrategy: 'TIMEOUT',
-          status: 'DETECTED',
+          resolutionStrategy: "TIMEOUT",
+          status: "DETECTED",
         };
 
         deadlocks.push(deadlock);
-        this.detectedDeadlocks.set(`${deadlock.detectedAt.getTime()}_${deadlock.involvedTransactions.join('_')}`, deadlock);
+        this.detectedDeadlocks.set(
+          `${deadlock.detectedAt.getTime()}_${deadlock.involvedTransactions.join("_")}`,
+          deadlock,
+        );
       }
     }
 
@@ -705,7 +765,10 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
         nodeCount: timedOutTransactions.length,
         edgeCount: 0,
         cycleCount: deadlocks.length,
-        maxCycleLength: deadlocks.length > 0 ? Math.max(...deadlocks.map(d => d.involvedTransactions.length)) : 0,
+        maxCycleLength:
+          deadlocks.length > 0
+            ? Math.max(...deadlocks.map((d) => d.involvedTransactions.length))
+            : 0,
       },
     };
   }
@@ -723,7 +786,10 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
     ]);
 
     // Merge and deduplicate results
-    const allDeadlocks = [...waitForResult.deadlocks, ...timeoutResult.deadlocks];
+    const allDeadlocks = [
+      ...waitForResult.deadlocks,
+      ...timeoutResult.deadlocks,
+    ];
     const uniqueDeadlocks = this.deduplicateDeadlocks(allDeadlocks);
 
     return {
@@ -731,12 +797,25 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
       deadlocks: uniqueDeadlocks,
       algorithm: DeadlockDetectionAlgorithm.HYBRID,
       detectionTime: Date.now() - startTime,
-      transactionsAnalyzed: Math.max(waitForResult.transactionsAnalyzed, timeoutResult.transactionsAnalyzed),
+      transactionsAnalyzed: Math.max(
+        waitForResult.transactionsAnalyzed,
+        timeoutResult.transactionsAnalyzed,
+      ),
       graphStats: {
-        nodeCount: Math.max(waitForResult.graphStats.nodeCount, timeoutResult.graphStats.nodeCount),
-        edgeCount: waitForResult.graphStats.edgeCount + timeoutResult.graphStats.edgeCount,
+        nodeCount: Math.max(
+          waitForResult.graphStats.nodeCount,
+          timeoutResult.graphStats.nodeCount,
+        ),
+        edgeCount:
+          waitForResult.graphStats.edgeCount +
+          timeoutResult.graphStats.edgeCount,
         cycleCount: uniqueDeadlocks.length,
-        maxCycleLength: uniqueDeadlocks.length > 0 ? Math.max(...uniqueDeadlocks.map(d => d.involvedTransactions.length)) : 0,
+        maxCycleLength:
+          uniqueDeadlocks.length > 0
+            ? Math.max(
+                ...uniqueDeadlocks.map((d) => d.involvedTransactions.length),
+              )
+            : 0,
       },
     };
   }
@@ -746,7 +825,9 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
   /**
    * Resolve deadlock by aborting victim transaction
    */
-  private async resolveByVictimAbort(deadlockInfo: DeadlockInfo): Promise<DeadlockResolutionResult> {
+  private async resolveByVictimAbort(
+    deadlockInfo: DeadlockInfo,
+  ): Promise<DeadlockResolutionResult> {
     const startTime = Date.now();
 
     try {
@@ -755,21 +836,27 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
       // Validate resolution with PARLANT if enabled
       let validationResult: ParlantValidationResponse | undefined;
       if (this.configuration.enableValidationForResolution) {
-        validationResult = await this.validateResolution(deadlockInfo, DeadlockResolutionStrategy.VICTIM_ABORT, [victimId]);
+        validationResult = await this.validateResolution(
+          deadlockInfo,
+          DeadlockResolutionStrategy.VICTIM_ABORT,
+          [victimId],
+        );
         if (!validationResult.approved) {
           return {
             success: false,
             strategy: DeadlockResolutionStrategy.VICTIM_ABORT,
             victimTransactions: [victimId],
             resolutionTime: Date.now() - startTime,
-            details: { reason: 'Resolution not approved by PARLANT validation' },
+            details: {
+              reason: "Resolution not approved by PARLANT validation",
+            },
             validationResult,
           };
         }
       }
 
       // Abort victim transaction
-      await this.abortTransaction(victimId, 'Selected as deadlock victim');
+      await this.abortTransaction(victimId, "Selected as deadlock victim");
 
       return {
         success: true,
@@ -779,7 +866,6 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
         details: { abortedTransaction: victimId },
         validationResult,
       };
-
     } catch (error) {
       return {
         success: false,
@@ -794,16 +880,19 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
   /**
    * Resolve deadlock by timeout
    */
-  private async resolveByTimeout(deadlockInfo: DeadlockInfo): Promise<DeadlockResolutionResult> {
+  private async resolveByTimeout(
+    deadlockInfo: DeadlockInfo,
+  ): Promise<DeadlockResolutionResult> {
     const startTime = Date.now();
 
     try {
       // Wait for timeout and let the system naturally resolve
       const timeoutDuration = 1000; // 1 second
-      await new Promise(resolve => setTimeout(resolve, timeoutDuration));
+      await new Promise((resolve) => setTimeout(resolve, timeoutDuration));
 
       // Check if deadlock still exists
-      const stillDeadlocked = await this.checkIfDeadlockStillExists(deadlockInfo);
+      const stillDeadlocked =
+        await this.checkIfDeadlockStillExists(deadlockInfo);
 
       return {
         success: !stillDeadlocked,
@@ -812,7 +901,6 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
         resolutionTime: Date.now() - startTime,
         details: { timeoutDuration, stillDeadlocked },
       };
-
     } catch (error) {
       return {
         success: false,
@@ -827,41 +915,56 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
   /**
    * Resolve deadlock using priority-based approach
    */
-  private async resolveByPriority(deadlockInfo: DeadlockInfo): Promise<DeadlockResolutionResult> {
+  private async resolveByPriority(
+    deadlockInfo: DeadlockInfo,
+  ): Promise<DeadlockResolutionResult> {
     const startTime = Date.now();
 
     try {
       // Select victim based on priority
-      const victimId = this.selectVictimByPriority(deadlockInfo.involvedTransactions);
+      const victimId = this.selectVictimByPriority(
+        deadlockInfo.involvedTransactions,
+      );
 
       // Validate resolution with PARLANT if enabled
       let validationResult: ParlantValidationResponse | undefined;
       if (this.configuration.enableValidationForResolution) {
-        validationResult = await this.validateResolution(deadlockInfo, DeadlockResolutionStrategy.PRIORITY_BASED, [victimId]);
+        validationResult = await this.validateResolution(
+          deadlockInfo,
+          DeadlockResolutionStrategy.PRIORITY_BASED,
+          [victimId],
+        );
         if (!validationResult.approved) {
           return {
             success: false,
             strategy: DeadlockResolutionStrategy.PRIORITY_BASED,
             victimTransactions: [victimId],
             resolutionTime: Date.now() - startTime,
-            details: { reason: 'Resolution not approved by PARLANT validation' },
+            details: {
+              reason: "Resolution not approved by PARLANT validation",
+            },
             validationResult,
           };
         }
       }
 
       // Abort victim transaction
-      await this.abortTransaction(victimId, 'Selected as deadlock victim based on priority');
+      await this.abortTransaction(
+        victimId,
+        "Selected as deadlock victim based on priority",
+      );
 
       return {
         success: true,
         strategy: DeadlockResolutionStrategy.PRIORITY_BASED,
         victimTransactions: [victimId],
         resolutionTime: Date.now() - startTime,
-        details: { victimTransaction: victimId, reason: 'Priority-based selection' },
+        details: {
+          victimTransaction: victimId,
+          reason: "Priority-based selection",
+        },
         validationResult,
       };
-
     } catch (error) {
       return {
         success: false,
@@ -876,7 +979,9 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
   /**
    * Resolve deadlock by resource preemption
    */
-  private async resolveByResourcePreemption(deadlockInfo: DeadlockInfo): Promise<DeadlockResolutionResult> {
+  private async resolveByResourcePreemption(
+    deadlockInfo: DeadlockInfo,
+  ): Promise<DeadlockResolutionResult> {
     const startTime = Date.now();
 
     try {
@@ -889,7 +994,7 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
           strategy: DeadlockResolutionStrategy.RESOURCE_PREEMPTION,
           victimTransactions: [],
           resolutionTime: Date.now() - startTime,
-          details: { reason: 'No preemptable resources found' },
+          details: { reason: "No preemptable resources found" },
         };
       }
 
@@ -907,7 +1012,6 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
         resolutionTime: Date.now() - startTime,
         details: { preemptedResources: preemptableResources.length },
       };
-
     } catch (error) {
       return {
         success: false,
@@ -922,18 +1026,22 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
   /**
    * Resolve deadlock using wait-die scheme
    */
-  private async resolveByWaitDie(deadlockInfo: DeadlockInfo): Promise<DeadlockResolutionResult> {
+  private async resolveByWaitDie(
+    deadlockInfo: DeadlockInfo,
+  ): Promise<DeadlockResolutionResult> {
     const startTime = Date.now();
 
     try {
       // In wait-die: older transaction waits, younger dies
-      const transactionsWithAge = deadlockInfo.involvedTransactions.map(txId => {
-        const transaction = this.activeTransactions.get(txId);
-        return {
-          transactionId: txId,
-          age: transaction ? Date.now() - transaction.createdAt.getTime() : 0,
-        };
-      });
+      const transactionsWithAge = deadlockInfo.involvedTransactions.map(
+        (txId) => {
+          const transaction = this.activeTransactions.get(txId);
+          return {
+            transactionId: txId,
+            age: transaction ? Date.now() - transaction.createdAt.getTime() : 0,
+          };
+        },
+      );
 
       transactionsWithAge.sort((a, b) => b.age - a.age); // Sort by age (oldest first)
 
@@ -941,17 +1049,19 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
       const victimsToKill = transactionsWithAge.slice(1); // All except the oldest
 
       for (const victim of victimsToKill) {
-        await this.abortTransaction(victim.transactionId, 'Killed by wait-die scheme');
+        await this.abortTransaction(
+          victim.transactionId,
+          "Killed by wait-die scheme",
+        );
       }
 
       return {
         success: true,
         strategy: DeadlockResolutionStrategy.WAIT_DIE,
-        victimTransactions: victimsToKill.map(v => v.transactionId),
+        victimTransactions: victimsToKill.map((v) => v.transactionId),
         resolutionTime: Date.now() - startTime,
-        details: { scheme: 'wait-die', killedCount: victimsToKill.length },
+        details: { scheme: "wait-die", killedCount: victimsToKill.length },
       };
-
     } catch (error) {
       return {
         success: false,
@@ -966,18 +1076,22 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
   /**
    * Resolve deadlock using wound-wait scheme
    */
-  private async resolveByWoundWait(deadlockInfo: DeadlockInfo): Promise<DeadlockResolutionResult> {
+  private async resolveByWoundWait(
+    deadlockInfo: DeadlockInfo,
+  ): Promise<DeadlockResolutionResult> {
     const startTime = Date.now();
 
     try {
       // In wound-wait: older transaction wounds (kills) younger, younger waits for older
-      const transactionsWithAge = deadlockInfo.involvedTransactions.map(txId => {
-        const transaction = this.activeTransactions.get(txId);
-        return {
-          transactionId: txId,
-          age: transaction ? Date.now() - transaction.createdAt.getTime() : 0,
-        };
-      });
+      const transactionsWithAge = deadlockInfo.involvedTransactions.map(
+        (txId) => {
+          const transaction = this.activeTransactions.get(txId);
+          return {
+            transactionId: txId,
+            age: transaction ? Date.now() - transaction.createdAt.getTime() : 0,
+          };
+        },
+      );
 
       transactionsWithAge.sort((a, b) => b.age - a.age); // Sort by age (oldest first)
 
@@ -986,17 +1100,19 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
       const victimsToWound = transactionsWithAge.slice(1);
 
       for (const victim of victimsToWound) {
-        await this.abortTransaction(victim.transactionId, `Wounded by older transaction ${oldestTransaction.transactionId}`);
+        await this.abortTransaction(
+          victim.transactionId,
+          `Wounded by older transaction ${oldestTransaction.transactionId}`,
+        );
       }
 
       return {
         success: true,
         strategy: DeadlockResolutionStrategy.WOUND_WAIT,
-        victimTransactions: victimsToWound.map(v => v.transactionId),
+        victimTransactions: victimsToWound.map((v) => v.transactionId),
         resolutionTime: Date.now() - startTime,
-        details: { scheme: 'wound-wait', woundedCount: victimsToWound.length },
+        details: { scheme: "wound-wait", woundedCount: victimsToWound.length },
       };
-
     } catch (error) {
       return {
         success: false,
@@ -1020,11 +1136,16 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
           await this.detectDeadlocks();
         }
       } catch (error) {
-        this.logger.error(`Periodic deadlock detection failed: ${error.message}`, error.stack);
+        this.logger.error(
+          `Periodic deadlock detection failed: ${error.message}`,
+          error.stack,
+        );
       }
     }, this.configuration.detectionInterval);
 
-    this.logger.log(`Started periodic deadlock detection with ${this.configuration.detectionInterval}ms interval`);
+    this.logger.log(
+      `Started periodic deadlock detection with ${this.configuration.detectionInterval}ms interval`,
+    );
   }
 
   /**
@@ -1034,7 +1155,7 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
     if (this.detectionTimer) {
       clearInterval(this.detectionTimer);
       this.detectionTimer = undefined;
-      this.logger.log('Stopped deadlock detection');
+      this.logger.log("Stopped deadlock detection");
     }
   }
 
@@ -1045,7 +1166,9 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
     // Check if this transaction might be involved in deadlock
     const potentialCycle = this.findPotentialCycleForTransaction(transactionId);
     if (potentialCycle.length > 1) {
-      this.logger.log(`Proactive deadlock check detected potential cycle for transaction ${transactionId}`);
+      this.logger.log(
+        `Proactive deadlock check detected potential cycle for transaction ${transactionId}`,
+      );
       await this.detectDeadlocks();
     }
   }
@@ -1103,7 +1226,7 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
     const holdingTransactions = this.findTransactionsHoldingResource(
       waitingLock.resourceId,
       waitingLock.resourceType,
-      waitingLock.transactionId
+      waitingLock.transactionId,
     );
 
     const waitingNode = this.waitForGraph.nodes.get(waitingLock.transactionId);
@@ -1141,7 +1264,7 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
       const waitingTransactions = this.findTransactionsWaitingForResource(
         releasedLock.resourceId,
         releasedLock.resourceType,
-        transactionId
+        transactionId,
       );
 
       for (const waitingTransactionId of waitingTransactions) {
@@ -1180,7 +1303,7 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
     // Rebuild from current locks
     for (const [transactionId, locks] of this.transactionLocks.entries()) {
       for (const lock of locks) {
-        if (lock.mode === 'WAITING') {
+        if (lock.mode === "WAITING") {
           this.updateWaitForGraph(lock);
         }
       }
@@ -1217,15 +1340,15 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
 
               // Find the resource being waited for
               const currentLocks = this.transactionLocks.get(current) || [];
-              const waitingLock = currentLocks.find(lock =>
-                lock.mode === 'WAITING' &&
-                this.isLockBlockedBy(lock, next)
+              const waitingLock = currentLocks.find(
+                (lock) =>
+                  lock.mode === "WAITING" && this.isLockBlockedBy(lock, next),
               );
 
               cycle.push({
                 waitingTransaction: current,
                 holdingTransaction: next,
-                resource: waitingLock?.resourceId || 'unknown',
+                resource: waitingLock?.resourceId || "unknown",
                 lockType: this.mapLockTypeToString(waitingLock?.lockType),
               });
             }
@@ -1276,7 +1399,7 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
 
     // Transaction age (newer transactions have higher score)
     const age = Date.now() - transaction.createdAt.getTime();
-    const ageScore = Math.max(0, 1 - (age / 300000)) * weights.transactionAge; // Normalize to 0-1
+    const ageScore = Math.max(0, 1 - age / 300000) * weights.transactionAge; // Normalize to 0-1
 
     // Transaction priority (lower priority has higher score)
     const priorityValues = {
@@ -1286,11 +1409,13 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
       [TransactionPriority.CRITICAL]: 0.1,
       [TransactionPriority.SYSTEM]: 0.05,
     };
-    const priorityScore = priorityValues[transaction.priority] * weights.transactionPriority;
+    const priorityScore =
+      priorityValues[transaction.priority] * weights.transactionPriority;
 
     // Resource count (fewer resources has higher score)
     const locks = this.transactionLocks.get(transaction.transactionId) || [];
-    const resourceScore = Math.max(0, 1 - (locks.length / 10)) * weights.resourceCount;
+    const resourceScore =
+      Math.max(0, 1 - locks.length / 10) * weights.resourceCount;
 
     // Rollback cost estimation (simplified)
     const rollbackScore = 0.5 * weights.rollbackCost;
@@ -1304,17 +1429,18 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
   private findTransactionsHoldingResource(
     resourceId: string,
     resourceType: ResourceType,
-    excludeTransactionId: string
+    excludeTransactionId: string,
   ): string[] {
     const holdingTransactions: string[] = [];
 
     for (const [transactionId, locks] of this.transactionLocks.entries()) {
       if (transactionId === excludeTransactionId) continue;
 
-      const hasHoldingLock = locks.some(lock =>
-        lock.resourceId === resourceId &&
-        lock.resourceType === resourceType &&
-        lock.mode === 'HELD'
+      const hasHoldingLock = locks.some(
+        (lock) =>
+          lock.resourceId === resourceId &&
+          lock.resourceType === resourceType &&
+          lock.mode === "HELD",
       );
 
       if (hasHoldingLock) {
@@ -1331,17 +1457,18 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
   private findTransactionsWaitingForResource(
     resourceId: string,
     resourceType: ResourceType,
-    excludeTransactionId: string
+    excludeTransactionId: string,
   ): string[] {
     const waitingTransactions: string[] = [];
 
     for (const [transactionId, locks] of this.transactionLocks.entries()) {
       if (transactionId === excludeTransactionId) continue;
 
-      const hasWaitingLock = locks.some(lock =>
-        lock.resourceId === resourceId &&
-        lock.resourceType === resourceType &&
-        lock.mode === 'WAITING'
+      const hasWaitingLock = locks.some(
+        (lock) =>
+          lock.resourceId === resourceId &&
+          lock.resourceType === resourceType &&
+          lock.mode === "WAITING",
       );
 
       if (hasWaitingLock) {
@@ -1355,21 +1482,29 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
   /**
    * Check if a lock is blocked by a specific transaction
    */
-  private isLockBlockedBy(lock: TransactionLock, blockingTransactionId: string): boolean {
-    const blockingLocks = this.transactionLocks.get(blockingTransactionId) || [];
+  private isLockBlockedBy(
+    lock: TransactionLock,
+    blockingTransactionId: string,
+  ): boolean {
+    const blockingLocks =
+      this.transactionLocks.get(blockingTransactionId) || [];
 
-    return blockingLocks.some(blockingLock =>
-      blockingLock.resourceId === lock.resourceId &&
-      blockingLock.resourceType === lock.resourceType &&
-      blockingLock.mode === 'HELD' &&
-      this.areLocksIncompatible(lock.lockType, blockingLock.lockType)
+    return blockingLocks.some(
+      (blockingLock) =>
+        blockingLock.resourceId === lock.resourceId &&
+        blockingLock.resourceType === lock.resourceType &&
+        blockingLock.mode === "HELD" &&
+        this.areLocksIncompatible(lock.lockType, blockingLock.lockType),
     );
   }
 
   /**
    * Check if two lock types are incompatible
    */
-  private areLocksIncompatible(lockType1: LockType, lockType2: LockType): boolean {
+  private areLocksIncompatible(
+    lockType1: LockType,
+    lockType2: LockType,
+  ): boolean {
     // Simplified lock compatibility matrix
     if (lockType1 === LockType.EXCLUSIVE || lockType2 === LockType.EXCLUSIVE) {
       return true; // Exclusive locks are incompatible with everything
@@ -1390,8 +1525,9 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
     const unsafeTransactions: string[] = [];
 
     for (const [transactionId, locks] of this.transactionLocks.entries()) {
-      const waitingLocks = locks.filter(lock => lock.mode === 'WAITING');
-      if (waitingLocks.length > 2) { // Arbitrary threshold
+      const waitingLocks = locks.filter((lock) => lock.mode === "WAITING");
+      if (waitingLocks.length > 2) {
+        // Arbitrary threshold
         unsafeTransactions.push(transactionId);
       }
     }
@@ -1402,7 +1538,9 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
   /**
    * Construct cycle from transaction list
    */
-  private constructCycleFromTransactions(transactionIds: string[]): DeadlockCycle[] {
+  private constructCycleFromTransactions(
+    transactionIds: string[],
+  ): DeadlockCycle[] {
     const cycle: DeadlockCycle[] = [];
 
     for (let i = 0; i < transactionIds.length; i++) {
@@ -1412,8 +1550,8 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
       cycle.push({
         waitingTransaction: current,
         holdingTransaction: next,
-        resource: 'unknown_resource',
-        lockType: 'write',
+        resource: "unknown_resource",
+        lockType: "write",
       });
     }
 
@@ -1423,10 +1561,12 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
   /**
    * Group timed-out transactions that might be in deadlock
    */
-  private groupTimedOutTransactions(timedOutTransactions: string[]): string[][] {
+  private groupTimedOutTransactions(
+    timedOutTransactions: string[],
+  ): string[][] {
     // Simplified grouping - in reality, this would analyze resource dependencies
     if (timedOutTransactions.length <= 1) {
-      return timedOutTransactions.map(tx => [tx]);
+      return timedOutTransactions.map((tx) => [tx]);
     }
 
     // Group all timed-out transactions together for simplicity
@@ -1441,7 +1581,7 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
     const unique: DeadlockInfo[] = [];
 
     for (const deadlock of deadlocks) {
-      const signature = deadlock.involvedTransactions.sort().join('_');
+      const signature = deadlock.involvedTransactions.sort().join("_");
       if (!seen.has(signature)) {
         seen.add(signature);
         unique.push(deadlock);
@@ -1493,16 +1633,21 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
   /**
    * Process detected deadlocks
    */
-  private async processDetectedDeadlocks(deadlocks: DeadlockInfo[]): Promise<void> {
+  private async processDetectedDeadlocks(
+    deadlocks: DeadlockInfo[],
+  ): Promise<void> {
     for (const deadlock of deadlocks) {
-      this.emit('deadlockDetected', { deadlock });
+      this.emit("deadlockDetected", { deadlock });
 
       try {
         const resolutionResult = await this.resolveDeadlock(deadlock);
-        this.emit('deadlockResolved', { deadlock, resolutionResult });
+        this.emit("deadlockResolved", { deadlock, resolutionResult });
       } catch (error) {
-        this.logger.error(`Failed to resolve deadlock: ${error.message}`, error.stack);
-        this.emit('deadlockResolutionFailed', { deadlock, error });
+        this.logger.error(
+          `Failed to resolve deadlock: ${error.message}`,
+          error.stack,
+        );
+        this.emit("deadlockResolutionFailed", { deadlock, error });
       }
     }
   }
@@ -1513,21 +1658,23 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
   private async validateResolution(
     deadlockInfo: DeadlockInfo,
     strategy: DeadlockResolutionStrategy,
-    victimTransactions: string[]
+    victimTransactions: string[],
   ): Promise<ParlantValidationResponse> {
     const validationRequest: ParlantValidationRequest = {
       operationId: `deadlock_resolution_${Date.now()}`,
-      functionName: 'deadlock_resolution',
-      packageName: 'parlant-deadlock-detector',
+      functionName: "deadlock_resolution",
+      packageName: "parlant-deadlock-detector",
       description: `Resolve deadlock involving ${deadlockInfo.involvedTransactions.length} transactions using ${strategy} strategy`,
       parameters: {
-        deadlockId: `${deadlockInfo.detectedAt.getTime()}_${deadlockInfo.involvedTransactions.join('_')}`,
+        deadlockId: `${deadlockInfo.detectedAt.getTime()}_${deadlockInfo.involvedTransactions.join("_")}`,
         involvedTransactions: deadlockInfo.involvedTransactions,
         strategy,
         victimTransactions,
         cycle: deadlockInfo.cycle,
       },
-      userContext: this.activeTransactions.get(deadlockInfo.involvedTransactions[0])?.userContext || {} as ParlantUserContext,
+      userContext:
+        this.activeTransactions.get(deadlockInfo.involvedTransactions[0])
+          ?.userContext || ({} as ParlantUserContext),
       securityLevel: SecurityLevel.HIGH,
       timeout: 30000,
     };
@@ -1538,12 +1685,14 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
     return {
       approved,
       conversationId: `deadlock_conv_${Date.now()}`,
-      reason: approved ? 'Deadlock resolution approved' : 'Deadlock resolution requires manual review',
+      reason: approved
+        ? "Deadlock resolution approved"
+        : "Deadlock resolution requires manual review",
       confidence: approved ? 0.9 : 0.95,
       metadata: {
         validationTime: Date.now(),
-        validatorId: 'deadlock-resolution-validator',
-        validationVersion: '1.0.0',
+        validatorId: "deadlock-resolution-validator",
+        validationVersion: "1.0.0",
       },
     };
   }
@@ -1551,7 +1700,10 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
   /**
    * Abort transaction
    */
-  private async abortTransaction(transactionId: string, reason: string): Promise<void> {
+  private async abortTransaction(
+    transactionId: string,
+    reason: string,
+  ): Promise<void> {
     this.logger.log(`Aborting transaction ${transactionId}: ${reason}`);
 
     const transaction = this.activeTransactions.get(transactionId);
@@ -1567,14 +1719,16 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
       // Remove from monitoring
       this.unregisterTransaction(transactionId);
 
-      this.emit('transactionAborted', { transactionId, reason });
+      this.emit("transactionAborted", { transactionId, reason });
     }
   }
 
   /**
    * Check if deadlock still exists
    */
-  private async checkIfDeadlockStillExists(deadlockInfo: DeadlockInfo): Promise<boolean> {
+  private async checkIfDeadlockStillExists(
+    deadlockInfo: DeadlockInfo,
+  ): Promise<boolean> {
     // Re-run detection for the specific transactions
     for (const transactionId of deadlockInfo.involvedTransactions) {
       if (!this.activeTransactions.has(transactionId)) {
@@ -1586,11 +1740,12 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
     this.refreshWaitForGraph();
     const cycles = this.detectCyclesInGraph();
 
-    return cycles.some(cycle =>
-      cycle.every(edge =>
-        deadlockInfo.involvedTransactions.includes(edge.waitingTransaction) &&
-        deadlockInfo.involvedTransactions.includes(edge.holdingTransaction)
-      )
+    return cycles.some((cycle) =>
+      cycle.every(
+        (edge) =>
+          deadlockInfo.involvedTransactions.includes(edge.waitingTransaction) &&
+          deadlockInfo.involvedTransactions.includes(edge.holdingTransaction),
+      ),
     );
   }
 
@@ -1611,7 +1766,10 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
 
     for (const transactionId of transactionIds) {
       const transaction = this.activeTransactions.get(transactionId);
-      if (transaction && priorityOrder[transaction.priority] < priorityOrder[lowestPriority]) {
+      if (
+        transaction &&
+        priorityOrder[transaction.priority] < priorityOrder[lowestPriority]
+      ) {
         lowestPriority = transaction.priority;
         lowestPriorityTransaction = transactionId;
       }
@@ -1623,16 +1781,17 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
   /**
    * Find preemptable resources
    */
-  private findPreemptableResources(deadlockInfo: DeadlockInfo): TransactionLock[] {
+  private findPreemptableResources(
+    deadlockInfo: DeadlockInfo,
+  ): TransactionLock[] {
     const preemptableResources: TransactionLock[] = [];
 
     for (const transactionId of deadlockInfo.involvedTransactions) {
       const locks = this.transactionLocks.get(transactionId) || [];
 
       // Find locks that can be preempted (typically shared locks)
-      const preemptableLocks = locks.filter(lock =>
-        lock.mode === 'HELD' &&
-        lock.lockType === LockType.SHARED
+      const preemptableLocks = locks.filter(
+        (lock) => lock.mode === "HELD" && lock.lockType === LockType.SHARED,
       );
 
       preemptableResources.push(...preemptableLocks);
@@ -1645,19 +1804,24 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
    * Preempt resource
    */
   private async preemptResource(resource: TransactionLock): Promise<void> {
-    this.logger.log(`Preempting resource ${resource.resourceId} from transaction ${resource.transactionId}`);
+    this.logger.log(
+      `Preempting resource ${resource.resourceId} from transaction ${resource.transactionId}`,
+    );
 
     // Release the lock
     this.releaseLock(resource.lockId, resource.transactionId);
 
     // Notify the transaction about preemption
-    this.emit('resourcePreempted', { resource });
+    this.emit("resourcePreempted", { resource });
   }
 
   /**
    * Update detection statistics
    */
-  private updateDetectionStatistics(detectionTime: number, result: DeadlockDetectionResult): void {
+  private updateDetectionStatistics(
+    detectionTime: number,
+    result: DeadlockDetectionResult,
+  ): void {
     this.detectionTimes.push(detectionTime);
 
     if (this.detectionTimes.length > 100) {
@@ -1665,7 +1829,8 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
     }
 
     this.statistics.averageDetectionTime =
-      this.detectionTimes.reduce((sum, time) => sum + time, 0) / this.detectionTimes.length;
+      this.detectionTimes.reduce((sum, time) => sum + time, 0) /
+      this.detectionTimes.length;
 
     if (result.deadlockDetected) {
       this.statistics.totalDeadlocksDetected += result.deadlocks.length;
@@ -1682,7 +1847,10 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
   /**
    * Update resolution statistics
    */
-  private updateResolutionStatistics(resolutionTime: number, result: DeadlockResolutionResult): void {
+  private updateResolutionStatistics(
+    resolutionTime: number,
+    result: DeadlockResolutionResult,
+  ): void {
     this.resolutionTimes.push(resolutionTime);
 
     if (this.resolutionTimes.length > 100) {
@@ -1690,7 +1858,8 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
     }
 
     this.statistics.averageResolutionTime =
-      this.resolutionTimes.reduce((sum, time) => sum + time, 0) / this.resolutionTimes.length;
+      this.resolutionTimes.reduce((sum, time) => sum + time, 0) /
+      this.resolutionTimes.length;
 
     if (result.success) {
       this.statistics.totalDeadlocksResolved++;
@@ -1698,27 +1867,33 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
 
     // Update success rate
     this.statistics.resolutionSuccessRate =
-      this.statistics.totalDeadlocksDetected > 0 ?
-        this.statistics.totalDeadlocksResolved / this.statistics.totalDeadlocksDetected : 0;
+      this.statistics.totalDeadlocksDetected > 0
+        ? this.statistics.totalDeadlocksResolved /
+          this.statistics.totalDeadlocksDetected
+        : 0;
   }
 
   /**
    * Set up event listeners
    */
   private setupEventListeners(): void {
-    this.on('deadlockDetected', ({ deadlock }) => {
-      this.logger.warn(`Deadlock detected involving transactions: ${deadlock.involvedTransactions.join(', ')}`);
+    this.on("deadlockDetected", ({ deadlock }) => {
+      this.logger.warn(
+        `Deadlock detected involving transactions: ${deadlock.involvedTransactions.join(", ")}`,
+      );
     });
 
-    this.on('deadlockResolved', ({ deadlock, resolutionResult }) => {
-      this.logger.log(`Deadlock resolved successfully using ${resolutionResult.strategy} strategy`);
+    this.on("deadlockResolved", ({ deadlock, resolutionResult }) => {
+      this.logger.log(
+        `Deadlock resolved successfully using ${resolutionResult.strategy} strategy`,
+      );
     });
 
-    this.on('deadlockResolutionFailed', ({ deadlock, error }) => {
+    this.on("deadlockResolutionFailed", ({ deadlock, error }) => {
       this.logger.error(`Failed to resolve deadlock: ${error.message}`);
     });
 
-    this.on('transactionAborted', ({ transactionId, reason }) => {
+    this.on("transactionAborted", ({ transactionId, reason }) => {
       this.logger.log(`Transaction ${transactionId} aborted: ${reason}`);
     });
   }
@@ -1736,8 +1911,10 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
    * Get active deadlocks
    */
   getActiveDeadlocks(): DeadlockInfo[] {
-    return Array.from(this.detectedDeadlocks.values())
-      .filter(deadlock => deadlock.status === 'DETECTED' || deadlock.status === 'RESOLVING');
+    return Array.from(this.detectedDeadlocks.values()).filter(
+      (deadlock) =>
+        deadlock.status === "DETECTED" || deadlock.status === "RESOLVING",
+    );
   }
 
   /**
@@ -1755,7 +1932,9 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
   /**
    * Update configuration
    */
-  updateConfiguration(newConfiguration: Partial<DeadlockDetectorConfiguration>): void {
+  updateConfiguration(
+    newConfiguration: Partial<DeadlockDetectorConfiguration>,
+  ): void {
     this.configuration = { ...this.configuration, ...newConfiguration };
 
     // Restart detection with new interval if changed
@@ -1764,14 +1943,14 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
       this.startDeadlockDetection();
     }
 
-    this.logger.log('Deadlock detector configuration updated');
+    this.logger.log("Deadlock detector configuration updated");
   }
 
   /**
    * Force deadlock detection
    */
   async forceDetection(): Promise<DeadlockDetectionResult> {
-    this.logger.log('Forcing deadlock detection');
+    this.logger.log("Forcing deadlock detection");
     return this.detectDeadlocks();
   }
 
@@ -1796,41 +1975,45 @@ export class ParlantDeadlockDetectorService extends EventEmitter {
       }
     }
 
-    this.logger.log('Deadlock detector cleanup completed');
+    this.logger.log("Deadlock detector cleanup completed");
   }
 
   /**
    * Map DeadlockResolutionStrategy enum to string literal type
    */
-  private mapResolutionStrategyToString(strategy: DeadlockResolutionStrategy): 'TIMEOUT' | 'VICTIM_SELECTION' | 'PRIORITY_BASED' {
+  private mapResolutionStrategyToString(
+    strategy: DeadlockResolutionStrategy,
+  ): "TIMEOUT" | "VICTIM_SELECTION" | "PRIORITY_BASED" {
     switch (strategy) {
       case DeadlockResolutionStrategy.TIMEOUT_RESOLUTION:
-        return 'TIMEOUT';
+        return "TIMEOUT";
       case DeadlockResolutionStrategy.VICTIM_ABORT:
       case DeadlockResolutionStrategy.WAIT_DIE:
       case DeadlockResolutionStrategy.WOUND_WAIT:
-        return 'VICTIM_SELECTION';
+        return "VICTIM_SELECTION";
       case DeadlockResolutionStrategy.PRIORITY_BASED:
-        return 'PRIORITY_BASED';
+        return "PRIORITY_BASED";
       default:
-        return 'VICTIM_SELECTION';
+        return "VICTIM_SELECTION";
     }
   }
 
   /**
    * Map LockType enum to string literal type
    */
-  private mapLockTypeToString(lockType?: LockType): 'READ' | 'WRITE' | 'EXCLUSIVE' {
+  private mapLockTypeToString(
+    lockType?: LockType,
+  ): "READ" | "WRITE" | "EXCLUSIVE" {
     switch (lockType) {
       case LockType.SHARED:
-        return 'READ';
+        return "READ";
       case LockType.EXCLUSIVE:
       case LockType.INTENT_EXCLUSIVE:
-        return 'EXCLUSIVE';
+        return "EXCLUSIVE";
       case LockType.UPDATE:
       case LockType.INTENT_SHARED:
       default:
-        return 'WRITE';
+        return "WRITE";
     }
   }
 }

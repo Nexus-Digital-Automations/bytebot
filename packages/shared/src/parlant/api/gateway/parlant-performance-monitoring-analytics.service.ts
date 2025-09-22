@@ -78,7 +78,12 @@ export interface MetricSnapshot {
 }
 
 export interface TrendAnalysis {
-  trendType: "LINEAR" | "EXPONENTIAL" | "LOGARITHMIC" | "CYCLICAL" | "IRREGULAR";
+  trendType:
+    | "LINEAR"
+    | "EXPONENTIAL"
+    | "LOGARITHMIC"
+    | "CYCLICAL"
+    | "IRREGULAR";
   direction: "UPWARD" | "DOWNWARD" | "STABLE" | "OSCILLATING";
   velocity: number;
   acceleration: number;
@@ -173,7 +178,12 @@ export interface ActionableRecommendation {
   technicalDescription: string;
   priority: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
   expectedImpact: ExpectedImpact;
-  implementationComplexity: "TRIVIAL" | "SIMPLE" | "MODERATE" | "COMPLEX" | "VERY_COMPLEX";
+  implementationComplexity:
+    | "TRIVIAL"
+    | "SIMPLE"
+    | "MODERATE"
+    | "COMPLEX"
+    | "VERY_COMPLEX";
   estimatedEffort: EstimatedEffort;
   prerequisites: Prerequisite[];
   implementationSteps: ImplementationStep[];
@@ -400,7 +410,12 @@ export interface AlertTrigger {
 }
 
 export interface AlertAction {
-  actionType: "INVESTIGATE" | "MITIGATE" | "ESCALATE" | "NOTIFY" | "AUTO_REMEDIATE";
+  actionType:
+    | "INVESTIGATE"
+    | "MITIGATE"
+    | "ESCALATE"
+    | "NOTIFY"
+    | "AUTO_REMEDIATE";
   description: string;
   urgency: "LOW" | "MEDIUM" | "HIGH" | "IMMEDIATE";
   assignedTo: string[];
@@ -478,7 +493,12 @@ export interface BenchmarkMetric {
   currentValue: number;
   benchmarkValue: number;
   performanceGap: number;
-  ranking: "BOTTOM_QUARTILE" | "BELOW_AVERAGE" | "AVERAGE" | "ABOVE_AVERAGE" | "TOP_QUARTILE";
+  ranking:
+    | "BOTTOM_QUARTILE"
+    | "BELOW_AVERAGE"
+    | "AVERAGE"
+    | "ABOVE_AVERAGE"
+    | "TOP_QUARTILE";
 }
 
 export interface BenchmarkRanking {
@@ -590,7 +610,10 @@ export interface AdaptiveAlert {
 
 export interface AdaptationEvent {
   timestamp: Date;
-  adaptationType: "THRESHOLD_ADJUSTMENT" | "SENSITIVITY_CHANGE" | "ALGORITHM_UPDATE";
+  adaptationType:
+    | "THRESHOLD_ADJUSTMENT"
+    | "SENSITIVITY_CHANGE"
+    | "ALGORITHM_UPDATE";
   previousValue: number;
   newValue: number;
   reason: string;
@@ -632,7 +655,11 @@ export interface WidgetPosition {
 }
 
 export interface LayoutCustomization {
-  customizationType: "HIDE_WIDGET" | "RESIZE_WIDGET" | "MOVE_WIDGET" | "ADD_WIDGET";
+  customizationType:
+    | "HIDE_WIDGET"
+    | "RESIZE_WIDGET"
+    | "MOVE_WIDGET"
+    | "ADD_WIDGET";
   widgetId: string;
   parameters: Record<string, any>;
   userId: string;
@@ -683,7 +710,14 @@ export interface WidgetFilter {
 }
 
 export interface AggregationSettings {
-  aggregationType: "SUM" | "AVERAGE" | "MIN" | "MAX" | "COUNT" | "MEDIAN" | "PERCENTILE";
+  aggregationType:
+    | "SUM"
+    | "AVERAGE"
+    | "MIN"
+    | "MAX"
+    | "COUNT"
+    | "MEDIAN"
+    | "PERCENTILE";
   groupBy: string[];
   timeWindow: number;
 }
@@ -785,7 +819,12 @@ export interface ConversationalInterface {
 }
 
 export interface SupportedQuery {
-  queryType: "METRIC_INQUIRY" | "TREND_ANALYSIS" | "COMPARISON" | "PREDICTION" | "RECOMMENDATION";
+  queryType:
+    | "METRIC_INQUIRY"
+    | "TREND_ANALYSIS"
+    | "COMPARISON"
+    | "PREDICTION"
+    | "RECOMMENDATION";
   exampleQueries: string[];
   responseTemplates: string[];
 }
@@ -946,11 +985,16 @@ export interface AccessAuditEntry {
  */
 @Injectable()
 export class ParlantPerformanceMonitoringAnalyticsService {
-  private readonly logger = new Logger(ParlantPerformanceMonitoringAnalyticsService.name);
+  private readonly logger = new Logger(
+    ParlantPerformanceMonitoringAnalyticsService.name,
+  );
   private readonly analyticsEventEmitter = new EventEmitter();
   private readonly performanceDataCache = new Map<string, any>();
   private readonly analyticsMetrics = new Map<string, any>();
-  private readonly activeAnalyses = new Map<string, ConversationalPerformanceAnalysis>();
+  private readonly activeAnalyses = new Map<
+    string,
+    ConversationalPerformanceAnalysis
+  >();
   private readonly userSessions = new Map<string, any>();
 
   // Performance analytics targets
@@ -973,15 +1017,14 @@ export class ParlantPerformanceMonitoringAnalyticsService {
     INSIGHT_CONFIDENCE_THRESHOLD: 0.7,
   };
 
-  constructor(
-    // TODO: Inject actual analytics dependencies when available
-    // private readonly timeSeriesAnalyzer: TimeSeriesAnalyzer,
-    // private readonly machineLearningEngine: MachineLearningEngine,
-    // private readonly conversationalAI: ConversationalAI,
-    // private readonly benchmarkDatabase: BenchmarkDatabase,
-    // private readonly predictionEngine: PredictionEngine,
-    // private readonly dashboardRenderer: DashboardRenderer,
-  ) {
+  constructor() // TODO: Inject actual analytics dependencies when available
+  // private readonly timeSeriesAnalyzer: TimeSeriesAnalyzer,
+  // private readonly machineLearningEngine: MachineLearningEngine,
+  // private readonly conversationalAI: ConversationalAI,
+  // private readonly benchmarkDatabase: BenchmarkDatabase,
+  // private readonly predictionEngine: PredictionEngine,
+  // private readonly dashboardRenderer: DashboardRenderer,
+  {
     this.initializeAnalyticsService();
   }
 
@@ -989,16 +1032,19 @@ export class ParlantPerformanceMonitoringAnalyticsService {
    * Main entry point for conversational performance analysis
    */
   async generateConversationalPerformanceAnalysis(
-    metrics: PerformanceMetrics
+    metrics: PerformanceMetrics,
   ): Promise<ConversationalPerformanceAnalysis> {
     const analysisStartTime = performance.now();
     const analysisId = uuidv4();
 
-    this.logger.log(`Starting conversational performance analysis: ${analysisId}`, {
-      responseTime: metrics.responseTime,
-      throughput: metrics.throughput,
-      errorRate: metrics.errorRate,
-    });
+    this.logger.log(
+      `Starting conversational performance analysis: ${analysisId}`,
+      {
+        responseTime: metrics.responseTime,
+        throughput: metrics.throughput,
+        errorRate: metrics.errorRate,
+      },
+    );
 
     try {
       // Step 1: Calculate overall health score
@@ -1011,43 +1057,45 @@ export class ParlantPerformanceMonitoringAnalyticsService {
       const naturalLanguageSummary = await this.generateNaturalLanguageSummary(
         metrics,
         healthScore,
-        performanceGrade
+        performanceGrade,
       );
 
       // Step 4: Generate conversational insights
       const conversationalInsights = await this.generateConversationalInsights(
         metrics,
-        analysisId
+        analysisId,
       );
 
       // Step 5: Analyze performance trends
       const performanceTrends = await this.analyzePerformanceTrends(
         metrics,
-        analysisId
+        analysisId,
       );
 
       // Step 6: Identify optimization opportunities
-      const optimizationOpportunities = await this.identifyOptimizationOpportunities(
-        metrics,
-        conversationalInsights
-      );
+      const optimizationOpportunities =
+        await this.identifyOptimizationOpportunities(
+          metrics,
+          conversationalInsights,
+        );
 
       // Step 7: Generate alerts and recommendations
-      const alertsAndRecommendations = await this.generateAlertsAndRecommendations(
-        metrics,
-        conversationalInsights
-      );
+      const alertsAndRecommendations =
+        await this.generateAlertsAndRecommendations(
+          metrics,
+          conversationalInsights,
+        );
 
       // Step 8: Perform predictive analysis
       const predictiveAnalysis = await this.performPredictiveAnalysis(
         metrics,
-        performanceTrends
+        performanceTrends,
       );
 
       // Step 9: Generate benchmark comparisons
       const benchmarkComparisons = await this.generateBenchmarkComparisons(
         metrics,
-        analysisId
+        analysisId,
       );
 
       const analysis: ConversationalPerformanceAnalysis = {
@@ -1072,22 +1120,27 @@ export class ParlantPerformanceMonitoringAnalyticsService {
 
       const analysisTime = performance.now() - analysisStartTime;
 
-      this.logger.log(`Conversational performance analysis completed: ${analysisId}`, {
-        healthScore: healthScore,
-        performanceGrade: performanceGrade,
-        insightsCount: conversationalInsights.length,
-        analysisTime: analysisTime,
-      });
+      this.logger.log(
+        `Conversational performance analysis completed: ${analysisId}`,
+        {
+          healthScore: healthScore,
+          performanceGrade: performanceGrade,
+          insightsCount: conversationalInsights.length,
+          analysisTime: analysisTime,
+        },
+      );
 
       return analysis;
-
     } catch (error) {
       const analysisTime = performance.now() - analysisStartTime;
 
-      this.logger.error(`Conversational performance analysis failed: ${analysisId}`, {
-        error: error instanceof Error ? error.message : String(error),
-        analysisTime: analysisTime,
-      });
+      this.logger.error(
+        `Conversational performance analysis failed: ${analysisId}`,
+        {
+          error: error instanceof Error ? error.message : String(error),
+          analysisTime: analysisTime,
+        },
+      );
 
       // Return minimal analysis with error information
       return this.createErrorAnalysis(analysisId, error, analysisTime);
@@ -1099,7 +1152,7 @@ export class ParlantPerformanceMonitoringAnalyticsService {
    */
   async createRealTimeAnalyticsDashboard(
     userId: string,
-    preferences?: PersonalizationSettings
+    preferences?: PersonalizationSettings,
   ): Promise<ConversationalDashboard> {
     const dashboardStartTime = performance.now();
     const dashboardId = uuidv4();
@@ -1111,34 +1164,33 @@ export class ParlantPerformanceMonitoringAnalyticsService {
 
     try {
       // Step 1: Load user preferences and customizations
-      const userPreferences = preferences || await this.loadUserPreferences(userId);
+      const userPreferences =
+        preferences || (await this.loadUserPreferences(userId));
 
       // Step 2: Design dashboard layout based on preferences
       const dashboardLayout = await this.designDashboardLayout(
         userPreferences,
-        "PERFORMANCE_MONITORING"
+        "PERFORMANCE_MONITORING",
       );
 
       // Step 3: Create performance monitoring widgets
-      const performanceWidgets = await this.createPerformanceMonitoringWidgets(
-        userPreferences
-      );
+      const performanceWidgets =
+        await this.createPerformanceMonitoringWidgets(userPreferences);
 
       // Step 4: Set up conversational interface
       const conversationalInterface = await this.setupConversationalInterface(
         userId,
-        userPreferences
+        userPreferences,
       );
 
       // Step 5: Configure real-time data sources
-      const dataSources = await this.configureRealTimeDataSources(
-        performanceWidgets
-      );
+      const dataSources =
+        await this.configureRealTimeDataSources(performanceWidgets);
 
       // Step 6: Set up collaboration features
       const collaborationFeatures = await this.setupCollaborationFeatures(
         userId,
-        userPreferences
+        userPreferences,
       );
 
       // Step 7: Initialize adaptive analytics
@@ -1169,15 +1221,17 @@ export class ParlantPerformanceMonitoringAnalyticsService {
       });
 
       return dashboard;
-
     } catch (error) {
       const creationTime = performance.now() - dashboardStartTime;
 
-      this.logger.error(`Real-time analytics dashboard creation failed: ${dashboardId}`, {
-        error: error instanceof Error ? error.message : String(error),
-        userId: userId,
-        creationTime: creationTime,
-      });
+      this.logger.error(
+        `Real-time analytics dashboard creation failed: ${dashboardId}`,
+        {
+          error: error instanceof Error ? error.message : String(error),
+          userId: userId,
+          creationTime: creationTime,
+        },
+      );
 
       throw error;
     }
@@ -1188,7 +1242,7 @@ export class ParlantPerformanceMonitoringAnalyticsService {
    */
   async generateIntelligentPerformanceAlerts(
     metrics: PerformanceMetrics,
-    thresholds: Record<string, number>
+    thresholds: Record<string, number>,
   ): Promise<PerformanceAlert[]> {
     const alertGenerationStartTime = performance.now();
 
@@ -1205,7 +1259,7 @@ export class ParlantPerformanceMonitoringAnalyticsService {
       // Step 1: Evaluate threshold-based alerts
       const thresholdAlerts = await this.evaluateThresholdAlerts(
         metrics,
-        thresholds
+        thresholds,
       );
       alerts.push(...thresholdAlerts);
 
@@ -1230,10 +1284,8 @@ export class ParlantPerformanceMonitoringAnalyticsService {
       alerts.push(...compositeAlerts);
 
       // Step 7: Enhance alerts with conversational explanations
-      const enhancedAlerts = await this.enhanceAlertsWithConversationalExplanations(
-        alerts,
-        metrics
-      );
+      const enhancedAlerts =
+        await this.enhanceAlertsWithConversationalExplanations(alerts, metrics);
 
       // Step 8: Apply suppression rules
       const filteredAlerts = await this.applySuppressionRules(enhancedAlerts);
@@ -1245,12 +1297,13 @@ export class ParlantPerformanceMonitoringAnalyticsService {
 
       this.logger.debug(`Intelligent performance alerts generated`, {
         totalAlerts: prioritizedAlerts.length,
-        criticalAlerts: prioritizedAlerts.filter(a => a.severity === AlertSeverity.CRITICAL).length,
+        criticalAlerts: prioritizedAlerts.filter(
+          (a) => a.severity === AlertSeverity.CRITICAL,
+        ).length,
         alertGenerationTime: alertGenerationTime,
       });
 
       return prioritizedAlerts;
-
     } catch (error) {
       this.logger.error(`Intelligent performance alert generation failed`, {
         error: error instanceof Error ? error.message : String(error),
@@ -1268,7 +1321,7 @@ export class ParlantPerformanceMonitoringAnalyticsService {
   async processNaturalLanguageQuery(
     query: string,
     userId: string,
-    context?: Record<string, any>
+    context?: Record<string, any>,
   ): Promise<ConversationalResponse> {
     const queryStartTime = performance.now();
     const queryId = uuidv4();
@@ -1286,38 +1339,37 @@ export class ParlantPerformanceMonitoringAnalyticsService {
       // Step 2: Extract relevant metrics and time ranges
       const queryParameters = await this.extractQueryParameters(
         query,
-        queryIntent
+        queryIntent,
       );
 
       // Step 3: Retrieve performance data
-      const performanceData = await this.retrievePerformanceData(
-        queryParameters
-      );
+      const performanceData =
+        await this.retrievePerformanceData(queryParameters);
 
       // Step 4: Analyze data based on query intent
       const analysis = await this.analyzeDataForQuery(
         performanceData,
         queryIntent,
-        queryParameters
+        queryParameters,
       );
 
       // Step 5: Generate conversational response
       const conversationalResponse = await this.generateConversationalResponse(
         analysis,
         queryIntent,
-        query
+        query,
       );
 
       // Step 6: Add visual elements if appropriate
       const visualizations = await this.generateQueryVisualizations(
         analysis,
-        queryIntent
+        queryIntent,
       );
 
       // Step 7: Suggest follow-up questions
       const followUpQuestions = await this.generateFollowUpQuestions(
         analysis,
-        queryIntent
+        queryIntent,
       );
 
       const response: ConversationalResponse = {
@@ -1349,16 +1401,18 @@ export class ParlantPerformanceMonitoringAnalyticsService {
       });
 
       return response;
-
     } catch (error) {
       const queryTime = performance.now() - queryStartTime;
 
-      this.logger.error(`Natural language query processing failed: ${queryId}`, {
-        error: error instanceof Error ? error.message : String(error),
-        query: query,
-        userId: userId,
-        queryTime: queryTime,
-      });
+      this.logger.error(
+        `Natural language query processing failed: ${queryId}`,
+        {
+          error: error instanceof Error ? error.message : String(error),
+          query: query,
+          userId: userId,
+          queryTime: queryTime,
+        },
+      );
 
       // Return error response with helpful suggestions
       return this.createErrorResponse(queryId, query, error, queryTime);
@@ -1368,18 +1422,20 @@ export class ParlantPerformanceMonitoringAnalyticsService {
   // Private helper methods for core analytics functionality
 
   private async initializeAnalyticsService(): Promise<void> {
-    this.logger.log(`Initializing PARLANT Performance Monitoring and Analytics Service`);
+    this.logger.log(
+      `Initializing PARLANT Performance Monitoring and Analytics Service`,
+    );
 
     // Set up analytics event listeners
-    this.analyticsEventEmitter.on('analysis_completed', (data) => {
+    this.analyticsEventEmitter.on("analysis_completed", (data) => {
       this.updateAnalyticsMetrics(data);
     });
 
-    this.analyticsEventEmitter.on('alert_generated', (alert) => {
+    this.analyticsEventEmitter.on("alert_generated", (alert) => {
       this.processGeneratedAlert(alert);
     });
 
-    this.analyticsEventEmitter.on('user_interaction', (interaction) => {
+    this.analyticsEventEmitter.on("user_interaction", (interaction) => {
       this.learnFromUserInteraction(interaction);
     });
 
@@ -1387,27 +1443,32 @@ export class ParlantPerformanceMonitoringAnalyticsService {
     this.startBackgroundAnalytics();
   }
 
-  private async calculateOverallHealthScore(metrics: PerformanceMetrics): Promise<number> {
+  private async calculateOverallHealthScore(
+    metrics: PerformanceMetrics,
+  ): Promise<number> {
     // Implement comprehensive health score calculation
-    const responseTimeScore = this.calculateResponseTimeScore(metrics.responseTime);
+    const responseTimeScore = this.calculateResponseTimeScore(
+      metrics.responseTime,
+    );
     const throughputScore = this.calculateThroughputScore(metrics.throughput);
     const errorRateScore = this.calculateErrorRateScore(metrics.errorRate);
     const resourceUtilizationScore = this.calculateResourceUtilizationScore(
-      metrics.resourceUtilization
+      metrics.resourceUtilization,
     );
 
     // Weighted average based on business importance
-    const healthScore = (
+    const healthScore =
       responseTimeScore * 0.3 +
       throughputScore * 0.25 +
       errorRateScore * 0.25 +
-      resourceUtilizationScore * 0.2
-    );
+      resourceUtilizationScore * 0.2;
 
     return Math.min(100, Math.max(0, healthScore));
   }
 
-  private calculatePerformanceGrade(healthScore: number): "A+" | "A" | "B+" | "B" | "C+" | "C" | "D+" | "D" | "F" {
+  private calculatePerformanceGrade(
+    healthScore: number,
+  ): "A+" | "A" | "B+" | "B" | "C+" | "C" | "D+" | "D" | "F" {
     if (healthScore >= 97) return "A+";
     if (healthScore >= 93) return "A";
     if (healthScore >= 90) return "B+";
@@ -1422,32 +1483,49 @@ export class ParlantPerformanceMonitoringAnalyticsService {
   private async generateNaturalLanguageSummary(
     metrics: PerformanceMetrics,
     healthScore: number,
-    performanceGrade: string
+    performanceGrade: string,
   ): Promise<string> {
     // Generate conversational summary
-    const responseTimeStatus = metrics.responseTime < 100 ? "excellent" :
-                               metrics.responseTime < 200 ? "good" :
-                               metrics.responseTime < 500 ? "acceptable" : "concerning";
+    const responseTimeStatus =
+      metrics.responseTime < 100
+        ? "excellent"
+        : metrics.responseTime < 200
+          ? "good"
+          : metrics.responseTime < 500
+            ? "acceptable"
+            : "concerning";
 
-    const throughputStatus = metrics.throughput > 1000 ? "high" :
-                             metrics.throughput > 500 ? "moderate" :
-                             metrics.throughput > 100 ? "low" : "very low";
+    const throughputStatus =
+      metrics.throughput > 1000
+        ? "high"
+        : metrics.throughput > 500
+          ? "moderate"
+          : metrics.throughput > 100
+            ? "low"
+            : "very low";
 
-    const errorRateStatus = metrics.errorRate < 0.01 ? "excellent" :
-                            metrics.errorRate < 0.02 ? "good" :
-                            metrics.errorRate < 0.05 ? "acceptable" : "high";
+    const errorRateStatus =
+      metrics.errorRate < 0.01
+        ? "excellent"
+        : metrics.errorRate < 0.02
+          ? "good"
+          : metrics.errorRate < 0.05
+            ? "acceptable"
+            : "high";
 
-    return `Your API Gateway is performing at a ${performanceGrade} level with an overall health score of ${healthScore.toFixed(1)}%. ` +
-           `Response times are ${responseTimeStatus} at ${metrics.responseTime.toFixed(0)}ms, ` +
-           `throughput is ${throughputStatus} at ${metrics.throughput.toFixed(0)} requests/second, ` +
-           `and error rate is ${errorRateStatus} at ${(metrics.errorRate * 100).toFixed(2)}%.`;
+    return (
+      `Your API Gateway is performing at a ${performanceGrade} level with an overall health score of ${healthScore.toFixed(1)}%. ` +
+      `Response times are ${responseTimeStatus} at ${metrics.responseTime.toFixed(0)}ms, ` +
+      `throughput is ${throughputStatus} at ${metrics.throughput.toFixed(0)} requests/second, ` +
+      `and error rate is ${errorRateStatus} at ${(metrics.errorRate * 100).toFixed(2)}%.`
+    );
   }
 
   // Mock implementations for analytics components - replace with actual integrations
 
   private async generateConversationalInsights(
     metrics: PerformanceMetrics,
-    analysisId: string
+    analysisId: string,
   ): Promise<ConversationalInsight[]> {
     // Mock implementation
     const insights: ConversationalInsight[] = [];
@@ -1458,7 +1536,8 @@ export class ParlantPerformanceMonitoringAnalyticsService {
         category: InsightCategory.LATENCY,
         priority: "HIGH",
         title: "Response Time Optimization Opportunity",
-        conversationalDescription: "Your API response times are higher than optimal. This could be impacting user experience and system efficiency.",
+        conversationalDescription:
+          "Your API response times are higher than optimal. This could be impacting user experience and system efficiency.",
         technicalDetails: await this.createMockTechnicalDetails(),
         actionableRecommendations: await this.createMockRecommendations(),
         businessImpact: await this.createMockBusinessImpact(),
@@ -1471,7 +1550,7 @@ export class ParlantPerformanceMonitoringAnalyticsService {
 
   private async analyzePerformanceTrends(
     metrics: PerformanceMetrics,
-    analysisId: string
+    analysisId: string,
   ): Promise<PerformanceTrend[]> {
     // Mock implementation
     return [
@@ -1480,11 +1559,16 @@ export class ParlantPerformanceMonitoringAnalyticsService {
         metricName: "response_time",
         timeframe: "24_hours",
         trendType: "SHORT_TERM",
-        conversationalDescription: "Response times have shown a gradual increase over the past 24 hours",
+        conversationalDescription:
+          "Response times have shown a gradual increase over the past 24 hours",
         dataPoints: [],
         prediction: {
           predictedValue: metrics.responseTime * 1.1,
-          confidenceInterval: { lowerBound: 0, upperBound: 0, confidenceLevel: 0.95 },
+          confidenceInterval: {
+            lowerBound: 0,
+            upperBound: 0,
+            confidenceLevel: 0.95,
+          },
           predictionHorizon: 3600000,
           assumptions: ["Current traffic patterns continue"],
           riskFactors: ["Increased load", "Resource constraints"],
@@ -1496,14 +1580,15 @@ export class ParlantPerformanceMonitoringAnalyticsService {
 
   private async identifyOptimizationOpportunities(
     metrics: PerformanceMetrics,
-    insights: ConversationalInsight[]
+    insights: ConversationalInsight[],
   ): Promise<OptimizationOpportunity[]> {
     // Mock implementation
     return [
       {
         opportunityId: uuidv4(),
         title: "Response Time Optimization",
-        conversationalDescription: "Implementing caching could significantly improve response times",
+        conversationalDescription:
+          "Implementing caching could significantly improve response times",
         category: OptimizationCategory.CACHING,
         potentialBenefit: {
           performanceGain: 40,
@@ -1529,7 +1614,7 @@ export class ParlantPerformanceMonitoringAnalyticsService {
 
   private async generateAlertsAndRecommendations(
     metrics: PerformanceMetrics,
-    insights: ConversationalInsight[]
+    insights: ConversationalInsight[],
   ): Promise<PerformanceAlert[]> {
     // Mock implementation
     const alerts: PerformanceAlert[] = [];
@@ -1540,7 +1625,8 @@ export class ParlantPerformanceMonitoringAnalyticsService {
         alertType: AlertType.THRESHOLD_BREACH,
         severity: AlertSeverity.CRITICAL,
         title: "High Error Rate Detected",
-        conversationalMessage: "Your API is experiencing an unusually high error rate that requires immediate attention.",
+        conversationalMessage:
+          "Your API is experiencing an unusually high error rate that requires immediate attention.",
         technicalDetails: {
           triggeredMetrics: ["error_rate"],
           thresholdValues: { error_rate: 0.05 },
@@ -1549,27 +1635,34 @@ export class ParlantPerformanceMonitoringAnalyticsService {
           affectedComponents: ["api_gateway"],
           correlatedEvents: [],
         },
-        triggeredBy: [{
-          triggerName: "error_rate_threshold",
-          condition: "error_rate > 0.05",
-          threshold: 0.05,
-          evaluationWindow: 300000,
-          frequency: 60000,
-        }],
-        recommendedActions: [{
-          actionType: "INVESTIGATE",
-          description: "Investigate root cause of increased error rate",
-          urgency: "IMMEDIATE",
-          assignedTo: ["on_call_engineer"],
-          estimatedDuration: 1800000, // 30 minutes
-        }],
-        escalationRules: [{
-          escalationLevel: 1,
-          condition: "error_rate > 0.1",
-          delay: 900000, // 15 minutes
-          escalationTarget: ["engineering_manager"],
-          escalationMessage: "Critical error rate requires immediate management attention",
-        }],
+        triggeredBy: [
+          {
+            triggerName: "error_rate_threshold",
+            condition: "error_rate > 0.05",
+            threshold: 0.05,
+            evaluationWindow: 300000,
+            frequency: 60000,
+          },
+        ],
+        recommendedActions: [
+          {
+            actionType: "INVESTIGATE",
+            description: "Investigate root cause of increased error rate",
+            urgency: "IMMEDIATE",
+            assignedTo: ["on_call_engineer"],
+            estimatedDuration: 1800000, // 30 minutes
+          },
+        ],
+        escalationRules: [
+          {
+            escalationLevel: 1,
+            condition: "error_rate > 0.1",
+            delay: 900000, // 15 minutes
+            escalationTarget: ["engineering_manager"],
+            escalationMessage:
+              "Critical error rate requires immediate management attention",
+          },
+        ],
         suppressionRules: [],
       });
     }
@@ -1583,14 +1676,15 @@ export class ParlantPerformanceMonitoringAnalyticsService {
   private createErrorAnalysis(
     analysisId: string,
     error: unknown,
-    analysisTime: number
+    analysisTime: number,
   ): ConversationalPerformanceAnalysis {
     return {
       analysisId: analysisId,
       timestamp: new Date(),
       overallHealthScore: 0,
       performanceGrade: "F",
-      naturalLanguageSummary: "Performance analysis failed due to system error. Please contact support.",
+      naturalLanguageSummary:
+        "Performance analysis failed due to system error. Please contact support.",
       conversationalInsights: [],
       performanceTrends: [],
       optimizationOpportunities: [],
@@ -1636,8 +1730,15 @@ export class ParlantPerformanceMonitoringAnalyticsService {
     return 20;
   }
 
-  private calculateResourceUtilizationScore(utilization: ResourceUtilization): number {
-    const avgUtilization = (utilization.cpu + utilization.memory + utilization.network + utilization.storage) / 4;
+  private calculateResourceUtilizationScore(
+    utilization: ResourceUtilization,
+  ): number {
+    const avgUtilization =
+      (utilization.cpu +
+        utilization.memory +
+        utilization.network +
+        utilization.storage) /
+      4;
     if (avgUtilization <= 50) return 100;
     if (avgUtilization <= 70) return 90;
     if (avgUtilization <= 80) return 80;
@@ -1685,13 +1786,17 @@ export class ParlantPerformanceMonitoringAnalyticsService {
     };
   }
 
-  private async createMockRecommendations(): Promise<ActionableRecommendation[]> {
+  private async createMockRecommendations(): Promise<
+    ActionableRecommendation[]
+  > {
     return [
       {
         recommendationId: uuidv4(),
         title: "Implement Database Query Optimization",
-        conversationalDescription: "Optimizing database queries can significantly reduce response times",
-        technicalDescription: "Add indexes and optimize slow queries identified in the database",
+        conversationalDescription:
+          "Optimizing database queries can significantly reduce response times",
+        technicalDescription:
+          "Add indexes and optimize slow queries identified in the database",
         priority: "HIGH",
         expectedImpact: {
           performanceImprovement: 30,
@@ -1742,11 +1847,11 @@ export class ParlantPerformanceMonitoringAnalyticsService {
 
   private async logAnalyticsMetrics(
     analysis: ConversationalPerformanceAnalysis,
-    startTime: number
+    startTime: number,
   ): Promise<void> {
     const analysisTime = performance.now() - startTime;
 
-    this.analyticsEventEmitter.emit('analysis_completed', {
+    this.analyticsEventEmitter.emit("analysis_completed", {
       analysisId: analysis.analysisId,
       healthScore: analysis.overallHealthScore,
       performanceGrade: analysis.performanceGrade,
@@ -1774,7 +1879,12 @@ interface ConversationalResponse {
 }
 
 interface QueryIntent {
-  intentType: "METRIC_INQUIRY" | "TREND_ANALYSIS" | "COMPARISON" | "PREDICTION" | "OPTIMIZATION";
+  intentType:
+    | "METRIC_INQUIRY"
+    | "TREND_ANALYSIS"
+    | "COMPARISON"
+    | "PREDICTION"
+    | "OPTIMIZATION";
   entities: string[];
   timeRange: string;
   confidence: number;

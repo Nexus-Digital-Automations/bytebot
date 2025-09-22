@@ -33,8 +33,14 @@ import {
   SecurityLevel,
   ParlantIntegrationError,
 } from "../../types/parlant-integration.types";
-import { UserProfile, ParlantContext } from "./conversational-authenticator.service";
-import { ResponseAction, ForensicEvidence } from "../audit/services/audit-trail.service";
+import {
+  UserProfile,
+  ParlantContext,
+} from "./conversational-authenticator.service";
+import {
+  ResponseAction,
+  ForensicEvidence,
+} from "../audit/services/audit-trail.service";
 
 /**
  * Anomaly detection model types
@@ -64,7 +70,12 @@ export type BehavioralDimension =
 /**
  * Anomaly severity levels
  */
-export type AnomalySeverity = "low" | "medium" | "high" | "critical" | "extreme";
+export type AnomalySeverity =
+  | "low"
+  | "medium"
+  | "high"
+  | "critical"
+  | "extreme";
 
 /**
  * Device activity information
@@ -685,11 +696,14 @@ export class AIAnomalyDetectorService implements OnModuleInit, OnModuleDestroy {
 
       this.logger.log("AI Anomaly Detector Service initialized successfully");
     } catch (error) {
-      this.logger.error("Failed to initialize AI Anomaly Detector Service", error);
+      this.logger.error(
+        "Failed to initialize AI Anomaly Detector Service",
+        error,
+      );
       throw new ParlantIntegrationError(
         "AI anomaly detector initialization failed",
         "ANOMALY_DETECTOR_INIT_ERROR",
-        { error: error.message }
+        { error: error.message },
       );
     }
   }
@@ -714,7 +728,10 @@ export class AIAnomalyDetectorService implements OnModuleInit, OnModuleDestroy {
 
       this.logger.log("AI Anomaly Detector Service shutdown complete");
     } catch (error) {
-      this.logger.error("Error during AI Anomaly Detector Service shutdown", error);
+      this.logger.error(
+        "Error during AI Anomaly Detector Service shutdown",
+        error,
+      );
     }
   }
 
@@ -723,7 +740,7 @@ export class AIAnomalyDetectorService implements OnModuleInit, OnModuleDestroy {
    */
   async detectSecurityAnomalies(
     userActivity: UserActivity,
-    conversationContext: ParlantContext
+    conversationContext: ParlantContext,
   ): Promise<AnomalyDetectionResult> {
     const startTime = performance.now();
     const detectionId = uuidv4();
@@ -733,7 +750,7 @@ export class AIAnomalyDetectorService implements OnModuleInit, OnModuleDestroy {
       userId: userActivity.userId,
       sessionId: userActivity.sessionId,
       activityType: userActivity.activityType,
-      timestamp: userActivity.timestamp.toISOString()
+      timestamp: userActivity.timestamp.toISOString(),
     });
 
     try {
@@ -741,38 +758,41 @@ export class AIAnomalyDetectorService implements OnModuleInit, OnModuleDestroy {
       const extractedFeatures = await this.featureExtractor.extractFeatures({
         userActivity,
         conversationContext,
-        historicalData: userActivity.historicalProfile
+        historicalData: userActivity.historicalProfile,
       });
 
       // Step 2: Multi-model anomaly detection
-      const modelResults = await this.runAnomalyDetectionModels(extractedFeatures);
+      const modelResults =
+        await this.runAnomalyDetectionModels(extractedFeatures);
 
       // Step 3: Ensemble decision making
       const ensembleResult = await this.aggregateModelResults(modelResults);
 
       // Step 4: Behavioral pattern analysis
-      const behaviorAnalysis = await this.behaviorAnalyzer.analyzeBehavioralPatterns(
-        userActivity,
-        extractedFeatures
-      );
+      const behaviorAnalysis =
+        await this.behaviorAnalyzer.analyzeBehavioralPatterns(
+          userActivity,
+          extractedFeatures,
+        );
 
       // Step 5: Threat intelligence correlation
-      const threatCorrelation = await this.threatIntelligence.correlateThreatData(
-        ensembleResult.anomalies,
-        userActivity
-      );
+      const threatCorrelation =
+        await this.threatIntelligence.correlateThreatData(
+          ensembleResult.anomalies,
+          userActivity,
+        );
 
       // Step 6: Confidence scoring and threshold evaluation
       const confidenceScore = await this.calculateConfidenceScore(
         ensembleResult,
         behaviorAnalysis,
-        threatCorrelation
+        threatCorrelation,
       );
 
       const anomalyDecision = await this.evaluateAnomalyThreshold(
         ensembleResult.anomalyScore,
         confidenceScore,
-        userActivity.historicalProfile.riskProfile
+        userActivity.historicalProfile.riskProfile,
       );
 
       // Step 7: Conversational validation for high-risk anomalies
@@ -788,22 +808,25 @@ export class AIAnomalyDetectorService implements OnModuleInit, OnModuleDestroy {
             userActivity,
             conversationContext,
             confidenceScore,
-            threatCorrelation
-          }
+            threatCorrelation,
+          },
         });
 
         // Update decision based on conversational validation
         if (conversationalValidation.validated) {
-          anomalyDecision.confirmedAnomalies = conversationalValidation.confirmedAnomalies;
-          anomalyDecision.adjustedRiskLevel = conversationalValidation.adjustedRiskLevel;
-          anomalyDecision.validatedActions = conversationalValidation.approvedActions;
+          anomalyDecision.confirmedAnomalies =
+            conversationalValidation.confirmedAnomalies;
+          anomalyDecision.adjustedRiskLevel =
+            conversationalValidation.adjustedRiskLevel;
+          anomalyDecision.validatedActions =
+            conversationalValidation.approvedActions;
         }
       }
 
       // Step 8: Determine response actions
       const responseActions = await this.determineResponseActions(
         anomalyDecision,
-        conversationalValidation
+        conversationalValidation,
       );
 
       // Step 9: Collect forensic evidence
@@ -813,7 +836,7 @@ export class AIAnomalyDetectorService implements OnModuleInit, OnModuleDestroy {
         modelResults,
         behaviorAnalysis,
         threatCorrelation,
-        conversationalValidation
+        conversationalValidation,
       });
 
       // Step 10: Execute response actions
@@ -821,7 +844,7 @@ export class AIAnomalyDetectorService implements OnModuleInit, OnModuleDestroy {
         detectionId,
         userId: userActivity.userId,
         anomalies: ensembleResult.anomalies,
-        forensicEvidence
+        forensicEvidence,
       });
 
       const totalProcessingTime = performance.now() - startTime;
@@ -832,7 +855,7 @@ export class AIAnomalyDetectorService implements OnModuleInit, OnModuleDestroy {
         riskLevel: anomalyDecision.riskLevel,
         confidenceScore,
         processingTime: totalProcessingTime,
-        conversationalValidationRequired: !!conversationalValidation
+        conversationalValidationRequired: !!conversationalValidation,
       });
 
       // Emit anomaly detection event
@@ -842,13 +865,15 @@ export class AIAnomalyDetectorService implements OnModuleInit, OnModuleDestroy {
         anomaliesDetected: ensembleResult.anomalies,
         riskLevel: anomalyDecision.riskLevel,
         responseActions: responseActions.length,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       return {
         detectionId,
-        anomaliesDetected: anomalyDecision.confirmedAnomalies || ensembleResult.anomalies,
-        riskLevel: anomalyDecision.adjustedRiskLevel || anomalyDecision.riskLevel,
+        anomaliesDetected:
+          anomalyDecision.confirmedAnomalies || ensembleResult.anomalies,
+        riskLevel:
+          anomalyDecision.adjustedRiskLevel || anomalyDecision.riskLevel,
         confidenceScore,
         responseActions: anomalyDecision.validatedActions || responseActions,
         conversationalValidation,
@@ -859,11 +884,11 @@ export class AIAnomalyDetectorService implements OnModuleInit, OnModuleDestroy {
           modelInferenceTime: ensembleResult.inferenceTime,
           behaviorAnalysisTime: behaviorAnalysis.processingTime,
           threatCorrelationTime: threatCorrelation.processingTime,
-          conversationalValidationTime: conversationalValidation?.processingTime || 0
+          conversationalValidationTime:
+            conversationalValidation?.processingTime || 0,
         },
-        modelPerformance: await this.calculateModelPerformance(modelResults)
+        modelPerformance: await this.calculateModelPerformance(modelResults),
       };
-
     } catch (error) {
       const processingTime = performance.now() - startTime;
 
@@ -872,7 +897,7 @@ export class AIAnomalyDetectorService implements OnModuleInit, OnModuleDestroy {
         error: error.message,
         stack: error.stack,
         processingTime,
-        userId: userActivity.userId
+        userId: userActivity.userId,
       });
 
       // Emit detection failure event
@@ -881,7 +906,7 @@ export class AIAnomalyDetectorService implements OnModuleInit, OnModuleDestroy {
         userId: userActivity.userId,
         error: error.message,
         processingTime,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       throw new ParlantIntegrationError(
@@ -890,8 +915,8 @@ export class AIAnomalyDetectorService implements OnModuleInit, OnModuleDestroy {
         {
           detectionId,
           error: error.message,
-          userId: userActivity.userId
-        }
+          userId: userActivity.userId,
+        },
       );
     }
   }
@@ -901,7 +926,7 @@ export class AIAnomalyDetectorService implements OnModuleInit, OnModuleDestroy {
    */
   async trainModels(
     trainingData: ModelTrainingData[],
-    validationData: ModelValidationData[]
+    validationData: ModelValidationData[],
   ): Promise<ModelTrainingResult> {
     const startTime = performance.now();
     const trainingId = uuidv4();
@@ -910,7 +935,7 @@ export class AIAnomalyDetectorService implements OnModuleInit, OnModuleDestroy {
       trainingId,
       trainingDataSize: trainingData.length,
       validationDataSize: validationData.length,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
 
     try {
@@ -922,9 +947,13 @@ export class AIAnomalyDetectorService implements OnModuleInit, OnModuleDestroy {
           this.logger.debug(`Training ${modelType} model`, { trainingId });
 
           const modelTrainingResult = await model.train({
-            trainingData: trainingData.filter(data => data.modelType === modelType),
-            validationData: validationData.filter(data => data.modelType === modelType),
-            trainingConfig: await this.getModelTrainingConfig(modelType)
+            trainingData: trainingData.filter(
+              (data) => data.modelType === modelType,
+            ),
+            validationData: validationData.filter(
+              (data) => data.modelType === modelType,
+            ),
+            trainingConfig: await this.getModelTrainingConfig(modelType),
           });
 
           trainingResults.push(modelTrainingResult);
@@ -933,14 +962,13 @@ export class AIAnomalyDetectorService implements OnModuleInit, OnModuleDestroy {
             trainingId,
             accuracy: modelTrainingResult.accuracy,
             precision: modelTrainingResult.precision,
-            recall: modelTrainingResult.recall
+            recall: modelTrainingResult.recall,
           });
-
         } catch (error) {
           this.logger.error(`Failed to train ${modelType} model`, {
             trainingId,
             modelType,
-            error: error.message
+            error: error.message,
           });
         }
       }
@@ -948,7 +976,7 @@ export class AIAnomalyDetectorService implements OnModuleInit, OnModuleDestroy {
       // Evaluate ensemble performance
       const ensemblePerformance = await this.evaluateEnsemblePerformance(
         trainingResults,
-        validationData
+        validationData,
       );
 
       // Update model weights and thresholds
@@ -960,7 +988,7 @@ export class AIAnomalyDetectorService implements OnModuleInit, OnModuleDestroy {
         trainingId,
         modelsUpdated: trainingResults.length,
         ensembleAccuracy: ensemblePerformance.accuracy,
-        trainingTime: totalTrainingTime
+        trainingTime: totalTrainingTime,
       });
 
       return {
@@ -969,13 +997,13 @@ export class AIAnomalyDetectorService implements OnModuleInit, OnModuleDestroy {
         trainingResults,
         ensemblePerformance,
         trainingTime: totalTrainingTime,
-        improvements: await this.calculatePerformanceImprovements(trainingResults)
+        improvements:
+          await this.calculatePerformanceImprovements(trainingResults),
       };
-
     } catch (error) {
       this.logger.error("Model training failed", {
         trainingId,
-        error: error.message
+        error: error.message,
       });
 
       throw new ParlantIntegrationError(
@@ -983,8 +1011,8 @@ export class AIAnomalyDetectorService implements OnModuleInit, OnModuleDestroy {
         "MODEL_TRAINING_ERROR",
         {
           trainingId,
-          error: error.message
-        }
+          error: error.message,
+        },
       );
     }
   }
@@ -994,10 +1022,13 @@ export class AIAnomalyDetectorService implements OnModuleInit, OnModuleDestroy {
    */
   async getAnomalyAnalytics(
     timeRange: TimeRange,
-    filters?: AnomalyAnalyticsFilters
+    filters?: AnomalyAnalyticsFilters,
   ): Promise<AnomalyAnalyticsResult> {
     try {
-      const analytics = await this.calculateAnomalyAnalytics(timeRange, filters);
+      const analytics = await this.calculateAnomalyAnalytics(
+        timeRange,
+        filters,
+      );
 
       return {
         timeRange,
@@ -1009,15 +1040,15 @@ export class AIAnomalyDetectorService implements OnModuleInit, OnModuleDestroy {
         modelPerformanceMetrics: analytics.modelPerformanceMetrics,
         responseEffectiveness: analytics.responseEffectiveness,
         userBehaviorTrends: analytics.userBehaviorTrends,
-        threatIntelligenceCorrelations: analytics.threatIntelligenceCorrelations
+        threatIntelligenceCorrelations:
+          analytics.threatIntelligenceCorrelations,
       };
-
     } catch (error) {
       this.logger.error("Failed to get anomaly analytics", error);
       throw new ParlantIntegrationError(
         "Anomaly analytics calculation failed",
         "ANALYTICS_ERROR",
-        { error: error.message }
+        { error: error.message },
       );
     }
   }
@@ -1033,34 +1064,40 @@ export class AIAnomalyDetectorService implements OnModuleInit, OnModuleDestroy {
     const modelConfigs = await this.loadModelConfigurations();
 
     // Initialize Isolation Forest model
-    this.mlModels.set("isolation_forest", new IsolationForestModel(
-      modelConfigs.isolationForest
-    ));
+    this.mlModels.set(
+      "isolation_forest",
+      new IsolationForestModel(modelConfigs.isolationForest),
+    );
 
     // Initialize One-Class SVM model
-    this.mlModels.set("one_class_svm", new OneClassSVMModel(
-      modelConfigs.oneClassSVM
-    ));
+    this.mlModels.set(
+      "one_class_svm",
+      new OneClassSVMModel(modelConfigs.oneClassSVM),
+    );
 
     // Initialize Autoencoder model
-    this.mlModels.set("autoencoder", new AutoencoderModel(
-      modelConfigs.autoencoder
-    ));
+    this.mlModels.set(
+      "autoencoder",
+      new AutoencoderModel(modelConfigs.autoencoder),
+    );
 
     // Initialize LSTM Sequence model
-    this.mlModels.set("lstm_sequence", new LSTMSequenceModel(
-      modelConfigs.lstmSequence
-    ));
+    this.mlModels.set(
+      "lstm_sequence",
+      new LSTMSequenceModel(modelConfigs.lstmSequence),
+    );
 
     // Initialize Transformer Attention model
-    this.mlModels.set("transformer_attention", new TransformerAttentionModel(
-      modelConfigs.transformerAttention
-    ));
+    this.mlModels.set(
+      "transformer_attention",
+      new TransformerAttentionModel(modelConfigs.transformerAttention),
+    );
 
     // Initialize Ensemble Voting model
-    this.mlModels.set("ensemble_voting", new EnsembleVotingModel(
-      modelConfigs.ensembleVoting
-    ));
+    this.mlModels.set(
+      "ensemble_voting",
+      new EnsembleVotingModel(modelConfigs.ensembleVoting),
+    );
 
     // Initialize all models
     for (const [modelType, model] of this.mlModels) {
@@ -1078,7 +1115,7 @@ export class AIAnomalyDetectorService implements OnModuleInit, OnModuleDestroy {
    * Run anomaly detection across multiple models
    */
   private async runAnomalyDetectionModels(
-    features: ExtractedFeatures
+    features: ExtractedFeatures,
   ): Promise<ModelResult[]> {
     const modelResults: ModelResult[] = [];
 
@@ -1089,7 +1126,7 @@ export class AIAnomalyDetectorService implements OnModuleInit, OnModuleDestroy {
       anomalyScore: unsupervisedResult.ensembleScore,
       confidence: unsupervisedResult.confidence,
       anomalies: unsupervisedResult.detectedAnomalies,
-      processingTime: unsupervisedResult.processingTime
+      processingTime: unsupervisedResult.processingTime,
     });
 
     // Run supervised detection models
@@ -1099,7 +1136,7 @@ export class AIAnomalyDetectorService implements OnModuleInit, OnModuleDestroy {
       anomalyScore: supervisedResult.ensembleScore,
       confidence: supervisedResult.confidence,
       anomalies: supervisedResult.detectedAnomalies,
-      processingTime: supervisedResult.processingTime
+      processingTime: supervisedResult.processingTime,
     });
 
     // Run deep learning detection models
@@ -1109,7 +1146,7 @@ export class AIAnomalyDetectorService implements OnModuleInit, OnModuleDestroy {
       anomalyScore: deepLearningResult.ensembleScore,
       confidence: deepLearningResult.confidence,
       anomalies: deepLearningResult.detectedAnomalies,
-      processingTime: deepLearningResult.processingTime
+      processingTime: deepLearningResult.processingTime,
     });
 
     return modelResults;
@@ -1119,7 +1156,7 @@ export class AIAnomalyDetectorService implements OnModuleInit, OnModuleDestroy {
    * Run unsupervised anomaly detection
    */
   private async runUnsupervisedDetection(
-    features: ExtractedFeatures
+    features: ExtractedFeatures,
   ): Promise<UnsupervisedDetectionResult> {
     const startTime = performance.now();
 
@@ -1130,13 +1167,13 @@ export class AIAnomalyDetectorService implements OnModuleInit, OnModuleDestroy {
     const [isolationResult, svmResult, autoencoderResult] = await Promise.all([
       isolationForest?.predict(features.numericFeatures),
       oneClassSVM?.predict(features.numericFeatures),
-      autoencoderModel?.predict(features.sequenceFeatures)
+      autoencoderModel?.predict(features.sequenceFeatures),
     ]);
 
     const ensembleScore = this.calculateUnsupervisedEnsembleScore([
       isolationResult?.anomalyScore || 0,
       svmResult?.anomalyScore || 0,
-      autoencoderResult?.reconstructionError || 0
+      autoencoderResult?.reconstructionError || 0,
     ]);
 
     const processingTime = performance.now() - startTime;
@@ -1149,14 +1186,14 @@ export class AIAnomalyDetectorService implements OnModuleInit, OnModuleDestroy {
       confidence: this.calculateUnsupervisedConfidence([
         isolationResult,
         svmResult,
-        autoencoderResult
+        autoencoderResult,
       ]),
       detectedAnomalies: await this.extractUnsupervisedAnomalies([
         isolationResult,
         svmResult,
-        autoencoderResult
+        autoencoderResult,
       ]),
-      processingTime
+      processingTime,
     };
   }
 
@@ -1164,21 +1201,35 @@ export class AIAnomalyDetectorService implements OnModuleInit, OnModuleDestroy {
    * Setup event listeners
    */
   private setupEventListeners(): void {
-    this.eventEmitter.on("anomaly_detected", this.handleAnomalyDetected.bind(this));
-    this.eventEmitter.on("false_positive_reported", this.handleFalsePositiveReported.bind(this));
-    this.eventEmitter.on("model_performance_degraded", this.handleModelPerformanceDegraded.bind(this));
-    this.eventEmitter.on("detection_failed", this.handleDetectionFailed.bind(this));
+    this.eventEmitter.on(
+      "anomaly_detected",
+      this.handleAnomalyDetected.bind(this),
+    );
+    this.eventEmitter.on(
+      "false_positive_reported",
+      this.handleFalsePositiveReported.bind(this),
+    );
+    this.eventEmitter.on(
+      "model_performance_degraded",
+      this.handleModelPerformanceDegraded.bind(this),
+    );
+    this.eventEmitter.on(
+      "detection_failed",
+      this.handleDetectionFailed.bind(this),
+    );
   }
 
   /**
    * Handle anomaly detected event
    */
-  private async handleAnomalyDetected(event: AnomalyDetectedEvent): Promise<void> {
+  private async handleAnomalyDetected(
+    event: AnomalyDetectedEvent,
+  ): Promise<void> {
     this.logger.info("Anomaly detected event", {
       detectionId: event.detectionId,
       userId: event.userId,
       anomaliesCount: event.anomaliesDetected.length,
-      riskLevel: event.riskLevel
+      riskLevel: event.riskLevel,
     });
 
     // Update anomaly statistics
@@ -1199,80 +1250,112 @@ export class AIAnomalyDetectorService implements OnModuleInit, OnModuleDestroy {
       autoencoder: {},
       lstmSequence: {},
       transformerAttention: {},
-      ensembleVoting: {}
+      ensembleVoting: {},
     };
   }
 
-  private async runAnomalyDetectionModels(features: ExtractedFeatures): Promise<ModelResult[]> {
+  private async runAnomalyDetectionModels(
+    features: ExtractedFeatures,
+  ): Promise<ModelResult[]> {
     return [];
   }
 
-  private async aggregateModelResults(modelResults: ModelResult[]): Promise<any> {
+  private async aggregateModelResults(
+    modelResults: ModelResult[],
+  ): Promise<any> {
     return {
       anomalies: [],
       anomalyScore: 0,
-      inferenceTime: 0
+      inferenceTime: 0,
     };
   }
 
-  private async calculateConfidenceScore(ensemble: any, behavior: any, threat: any): Promise<number> {
+  private async calculateConfidenceScore(
+    ensemble: any,
+    behavior: any,
+    threat: any,
+  ): Promise<number> {
     return 0.85;
   }
 
-  private async evaluateAnomalyThreshold(score: number, confidence: number, riskProfile: any): Promise<any> {
+  private async evaluateAnomalyThreshold(
+    score: number,
+    confidence: number,
+    riskProfile: any,
+  ): Promise<any> {
     return {
       requiresConversationalValidation: score > 0.7,
-      riskLevel: 'medium' as AnomalySeverity,
+      riskLevel: "medium" as AnomalySeverity,
       recommendedActions: [],
       confirmedAnomalies: [],
-      adjustedRiskLevel: 'medium' as AnomalySeverity,
-      validatedActions: []
+      adjustedRiskLevel: "medium" as AnomalySeverity,
+      validatedActions: [],
     };
   }
 
-  private async performConversationalValidation(request: ConversationalValidationRequest): Promise<ConversationalValidationResult> {
+  private async performConversationalValidation(
+    request: ConversationalValidationRequest,
+  ): Promise<ConversationalValidationResult> {
     return {
       validated: true,
       confirmedAnomalies: request.detectedAnomalies,
       adjustedRiskLevel: request.riskLevel,
       approvedActions: request.recommendedActions,
-      conversationId: 'conv-' + Date.now(),
-      processingTime: 500
+      conversationId: "conv-" + Date.now(),
+      processingTime: 500,
     };
   }
 
-  private async determineResponseActions(decision: any, validation?: ConversationalValidationResult): Promise<ResponseAction[]> {
+  private async determineResponseActions(
+    decision: any,
+    validation?: ConversationalValidationResult,
+  ): Promise<ResponseAction[]> {
     return [];
   }
 
-  private async calculateModelPerformance(modelResults: ModelResult[]): Promise<ModelPerformanceMetrics> {
+  private async calculateModelPerformance(
+    modelResults: ModelResult[],
+  ): Promise<ModelPerformanceMetrics> {
     return {
       accuracy: 0.85,
-      precision: 0.80,
+      precision: 0.8,
       recall: 0.75,
       f1Score: 0.77,
       falsePositiveRate: 0.15,
-      truePositiveRate: 0.85
+      truePositiveRate: 0.85,
     };
   }
 
-  private async getModelTrainingConfig(modelType: AnomalyModelType): Promise<any> {
+  private async getModelTrainingConfig(
+    modelType: AnomalyModelType,
+  ): Promise<any> {
     return {};
   }
 
-  private async evaluateEnsemblePerformance(results: ModelTrainingResult[], validation: ModelValidationData[]): Promise<any> {
-    return { accuracy: 0.90 };
+  private async evaluateEnsemblePerformance(
+    results: ModelTrainingResult[],
+    validation: ModelValidationData[],
+  ): Promise<any> {
+    return { accuracy: 0.9 };
   }
 
-  private async updateModelConfiguration(training: ModelTrainingResult[], ensemble: any): Promise<void> {
+  private async updateModelConfiguration(
+    training: ModelTrainingResult[],
+    ensemble: any,
+  ): Promise<void> {
     // Update model configuration
   }
 
-  private async calculatePerformanceImprovements(results: ModelTrainingResult[]): Promise<any> {
+  private async calculatePerformanceImprovements(
+    results: ModelTrainingResult[],
+  ): Promise<any> {
     return {};
   }
 
-  private async calculateAnomalyAnalytics(timeRange: TimeRange, filters?: AnomalyAnalyticsFilters): Promise<any> {
+  private async calculateAnomalyAnalytics(
+    timeRange: TimeRange,
+    filters?: AnomalyAnalyticsFilters,
+  ): Promise<any> {
     return {
       totalDetections: 0,
       anomaliesByType: {},
@@ -1281,19 +1364,21 @@ export class AIAnomalyDetectorService implements OnModuleInit, OnModuleDestroy {
       truePositiveRate: 0.9,
       modelPerformanceMetrics: {
         accuracy: 0.85,
-        precision: 0.80,
+        precision: 0.8,
         recall: 0.75,
         f1Score: 0.77,
         falsePositiveRate: 0.15,
-        truePositiveRate: 0.85
+        truePositiveRate: 0.85,
       },
       responseEffectiveness: 0.85,
       userBehaviorTrends: [],
-      threatIntelligenceCorrelations: []
+      threatIntelligenceCorrelations: [],
     };
   }
 
-  private async runUnsupervisedDetection(features: ExtractedFeatures): Promise<UnsupervisedDetectionResult> {
+  private async runUnsupervisedDetection(
+    features: ExtractedFeatures,
+  ): Promise<UnsupervisedDetectionResult> {
     return {
       isolationForestScore: 0.5,
       oneClassSVMScore: 0.4,
@@ -1301,25 +1386,29 @@ export class AIAnomalyDetectorService implements OnModuleInit, OnModuleDestroy {
       ensembleScore: 0.4,
       confidence: 0.75,
       detectedAnomalies: [],
-      processingTime: 100
+      processingTime: 100,
     };
   }
 
-  private async runSupervisedDetection(features: ExtractedFeatures): Promise<any> {
+  private async runSupervisedDetection(
+    features: ExtractedFeatures,
+  ): Promise<any> {
     return {
       ensembleScore: 0.6,
       confidence: 0.8,
       detectedAnomalies: [],
-      processingTime: 150
+      processingTime: 150,
     };
   }
 
-  private async runDeepLearningDetection(features: ExtractedFeatures): Promise<any> {
+  private async runDeepLearningDetection(
+    features: ExtractedFeatures,
+  ): Promise<any> {
     return {
       ensembleScore: 0.7,
       confidence: 0.9,
       detectedAnomalies: [],
-      processingTime: 200
+      processingTime: 200,
     };
   }
 
@@ -1331,11 +1420,15 @@ export class AIAnomalyDetectorService implements OnModuleInit, OnModuleDestroy {
     return 0.75;
   }
 
-  private async extractUnsupervisedAnomalies(results: any[]): Promise<DetectedAnomaly[]> {
+  private async extractUnsupervisedAnomalies(
+    results: any[],
+  ): Promise<DetectedAnomaly[]> {
     return [];
   }
 
-  private async handleAnomalyDetected(event: AnomalyDetectedEvent): Promise<void> {
+  private async handleAnomalyDetected(
+    event: AnomalyDetectedEvent,
+  ): Promise<void> {
     // Handle anomaly detected event
   }
 
@@ -1351,15 +1444,21 @@ export class AIAnomalyDetectorService implements OnModuleInit, OnModuleDestroy {
     // Handle detection failure
   }
 
-  private async updateAnomalyStatistics(event: AnomalyDetectedEvent): Promise<void> {
+  private async updateAnomalyStatistics(
+    event: AnomalyDetectedEvent,
+  ): Promise<void> {
     // Update anomaly statistics
   }
 
-  private async storeDetectionForTraining(event: AnomalyDetectedEvent): Promise<void> {
+  private async storeDetectionForTraining(
+    event: AnomalyDetectedEvent,
+  ): Promise<void> {
     // Store detection for future training
   }
 
-  private async updateUserBehavioralBaseline(event: AnomalyDetectedEvent): Promise<void> {
+  private async updateUserBehavioralBaseline(
+    event: AnomalyDetectedEvent,
+  ): Promise<void> {
     // Update user behavioral baseline
   }
 
@@ -1384,31 +1483,40 @@ export class AIAnomalyDetectorService implements OnModuleInit, OnModuleDestroy {
    */
   private startLearningTasks(): void {
     // Model retraining task - runs daily
-    setInterval(async () => {
-      try {
-        await this.performScheduledModelRetraining();
-      } catch (error) {
-        this.logger.error("Scheduled model retraining failed", error);
-      }
-    }, 24 * 60 * 60 * 1000);
+    setInterval(
+      async () => {
+        try {
+          await this.performScheduledModelRetraining();
+        } catch (error) {
+          this.logger.error("Scheduled model retraining failed", error);
+        }
+      },
+      24 * 60 * 60 * 1000,
+    );
 
     // Model performance monitoring - runs every hour
-    setInterval(async () => {
-      try {
-        await this.monitorModelPerformance();
-      } catch (error) {
-        this.logger.error("Model performance monitoring failed", error);
-      }
-    }, 60 * 60 * 1000);
+    setInterval(
+      async () => {
+        try {
+          await this.monitorModelPerformance();
+        } catch (error) {
+          this.logger.error("Model performance monitoring failed", error);
+        }
+      },
+      60 * 60 * 1000,
+    );
 
     // Behavioral baseline updates - runs every 6 hours
-    setInterval(async () => {
-      try {
-        await this.updateBehavioralBaselines();
-      } catch (error) {
-        this.logger.error("Behavioral baseline update failed", error);
-      }
-    }, 6 * 60 * 60 * 1000);
+    setInterval(
+      async () => {
+        try {
+          await this.updateBehavioralBaselines();
+        } catch (error) {
+          this.logger.error("Behavioral baseline update failed", error);
+        }
+      },
+      6 * 60 * 60 * 1000,
+    );
   }
 }
 
@@ -1483,11 +1591,11 @@ export class FeatureExtractor {
       behavioralFeatures: [],
       extractionTime: 0,
       featureMetadata: {
-        extractionMethod: 'default',
-        version: '1.0.0',
+        extractionMethod: "default",
+        version: "1.0.0",
         timestamp: new Date(),
-        quality: 1.0
-      }
+        quality: 1.0,
+      },
     };
   }
 }
@@ -1502,7 +1610,7 @@ export class BehaviorAnalyzer {
 
   async analyzeBehavioralPatterns(
     activity: UserActivity,
-    features: ExtractedFeatures
+    features: ExtractedFeatures,
   ): Promise<{ processingTime: number }> {
     return { processingTime: 0 };
   }
@@ -1518,7 +1626,7 @@ export class ThreatIntelligenceIntegration {
 
   async correlateThreatData(
     anomalies: DetectedAnomaly[],
-    activity: UserActivity
+    activity: UserActivity,
   ): Promise<{ processingTime: number }> {
     return { processingTime: 0 };
   }
@@ -1554,15 +1662,15 @@ export class ForensicEvidenceCollector {
     conversationalValidation?: ConversationalValidationResult;
   }): Promise<ForensicEvidence> {
     return {
-      evidenceId: 'evidence-' + Date.now(),
-      evidenceType: 'anomaly_detection',
+      evidenceId: "evidence-" + Date.now(),
+      evidenceType: "anomaly_detection",
       timestamp: new Date(),
       data: data,
       integrity: {
-        hash: 'hash-placeholder',
-        signature: 'signature-placeholder'
+        hash: "hash-placeholder",
+        signature: "signature-placeholder",
       },
-      chain: []
+      chain: [],
     };
   }
 }
@@ -1579,12 +1687,12 @@ export class IsolationForestModel implements MLAnomalyModel {
 
   async train(data: ModelTrainingData): Promise<ModelTrainingResult> {
     return {
-      modelType: 'isolation_forest',
+      modelType: "isolation_forest",
       accuracy: 0.85,
-      precision: 0.80,
+      precision: 0.8,
       recall: 0.75,
       trainingTime: 1000,
-      modelVersion: '1.0.0'
+      modelVersion: "1.0.0",
     };
   }
 
@@ -1602,12 +1710,12 @@ export class OneClassSVMModel implements MLAnomalyModel {
   async initialize(): Promise<void> {}
   async train(data: ModelTrainingData): Promise<ModelTrainingResult> {
     return {
-      modelType: 'one_class_svm',
+      modelType: "one_class_svm",
       accuracy: 0.82,
       precision: 0.78,
       recall: 0.73,
       trainingTime: 1200,
-      modelVersion: '1.0.0'
+      modelVersion: "1.0.0",
     };
   }
   async predict(features: any): Promise<{ anomalyScore: number }> {
@@ -1621,12 +1729,12 @@ export class AutoencoderModel implements MLAnomalyModel {
   async initialize(): Promise<void> {}
   async train(data: ModelTrainingData): Promise<ModelTrainingResult> {
     return {
-      modelType: 'autoencoder',
+      modelType: "autoencoder",
       accuracy: 0.88,
       precision: 0.84,
       recall: 0.81,
       trainingTime: 2000,
-      modelVersion: '1.0.0'
+      modelVersion: "1.0.0",
     };
   }
   async predict(features: any): Promise<{ reconstructionError: number }> {
@@ -1640,12 +1748,12 @@ export class LSTMSequenceModel implements MLAnomalyModel {
   async initialize(): Promise<void> {}
   async train(data: ModelTrainingData): Promise<ModelTrainingResult> {
     return {
-      modelType: 'lstm_sequence',
-      accuracy: 0.90,
+      modelType: "lstm_sequence",
+      accuracy: 0.9,
       precision: 0.87,
       recall: 0.84,
       trainingTime: 3000,
-      modelVersion: '1.0.0'
+      modelVersion: "1.0.0",
     };
   }
   async predict(features: any): Promise<{ anomalyScore: number }> {
@@ -1659,12 +1767,12 @@ export class TransformerAttentionModel implements MLAnomalyModel {
   async initialize(): Promise<void> {}
   async train(data: ModelTrainingData): Promise<ModelTrainingResult> {
     return {
-      modelType: 'transformer_attention',
+      modelType: "transformer_attention",
       accuracy: 0.92,
       precision: 0.89,
       recall: 0.87,
       trainingTime: 4000,
-      modelVersion: '1.0.0'
+      modelVersion: "1.0.0",
     };
   }
   async predict(features: any): Promise<{ anomalyScore: number }> {
@@ -1678,12 +1786,12 @@ export class EnsembleVotingModel implements MLAnomalyModel {
   async initialize(): Promise<void> {}
   async train(data: ModelTrainingData): Promise<ModelTrainingResult> {
     return {
-      modelType: 'ensemble_voting',
+      modelType: "ensemble_voting",
       accuracy: 0.95,
       precision: 0.92,
-      recall: 0.90,
+      recall: 0.9,
       trainingTime: 5000,
-      modelVersion: '1.0.0'
+      modelVersion: "1.0.0",
     };
   }
   async predict(features: any): Promise<{ anomalyScore: number }> {

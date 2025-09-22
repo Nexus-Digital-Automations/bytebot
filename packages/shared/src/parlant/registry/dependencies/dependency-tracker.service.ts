@@ -10,8 +10,8 @@
  * @author Dependency Tracking Agent #9
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Injectable, Logger } from "@nestjs/common";
+import { EventEmitter2 } from "@nestjs/event-emitter";
 import {
   IDependencyTracker,
   DependencyAnalysis,
@@ -55,28 +55,28 @@ import {
   IssueSeverity,
   OptimizationImprovement,
   OptimizationType,
-  OptimizationMetrics
-} from '../core/registry.interface';
+  OptimizationMetrics,
+} from "../core/registry.interface";
 
 /**
  * Dependency analysis mode
  */
 export enum DependencyAnalysisMode {
-  _SHALLOW = 'shallow',
-  _DEEP = 'deep',
-  _COMPREHENSIVE = 'comprehensive',
-  _REAL_TIME = 'real_time'
+  _SHALLOW = "shallow",
+  _DEEP = "deep",
+  _COMPREHENSIVE = "comprehensive",
+  _REAL_TIME = "real_time",
 }
 
 /**
  * Graph analysis algorithm
  */
 export enum GraphAnalysisAlgorithm {
-  _DEPTH_FIRST = 'depth_first',
-  _BREADTH_FIRST = 'breadth_first',
-  _SHORTEST_PATH = 'shortest_path',
-  _STRONGLY_CONNECTED = 'strongly_connected',
-  _TOPOLOGICAL_SORT = 'topological_sort'
+  _DEPTH_FIRST = "depth_first",
+  _BREADTH_FIRST = "breadth_first",
+  _SHORTEST_PATH = "shortest_path",
+  _STRONGLY_CONNECTED = "strongly_connected",
+  _TOPOLOGICAL_SORT = "topological_sort",
 }
 
 /**
@@ -84,9 +84,15 @@ export enum GraphAnalysisAlgorithm {
  */
 export interface IDependencyStorage {
   getDependencyInfo(functionId: string): Promise<FunctionDependency[]>;
-  setDependencyInfo(functionId: string, dependencies: FunctionDependency[]): Promise<void>;
+  setDependencyInfo(
+    functionId: string,
+    dependencies: FunctionDependency[],
+  ): Promise<void>;
   getExternalDependencies(functionId: string): Promise<ExternalDependency[]>;
-  setExternalDependencies(functionId: string, dependencies: ExternalDependency[]): Promise<void>;
+  setExternalDependencies(
+    functionId: string,
+    dependencies: ExternalDependency[],
+  ): Promise<void>;
   getDependencyGraph(functionIds: string[]): Promise<DependencyGraph>;
   saveDependencyGraph(graph: DependencyGraph): Promise<void>;
   getCircularDependencies(): Promise<CircularDependency[]>;
@@ -97,8 +103,12 @@ export interface IDependencyStorage {
  * Code analysis interface
  */
 export interface ICodeAnalyzer {
-  analyzeFunctionDependencies(functionId: string): Promise<FunctionDependency[]>;
-  analyzeExternalDependencies(functionId: string): Promise<ExternalDependency[]>;
+  analyzeFunctionDependencies(
+    functionId: string,
+  ): Promise<FunctionDependency[]>;
+  analyzeExternalDependencies(
+    functionId: string,
+  ): Promise<ExternalDependency[]>;
   analyzeCalls(fromFunction: string, toFunction: string): Promise<CallAnalysis>;
   getSourceCode(functionId: string): Promise<string>;
 }
@@ -142,7 +152,7 @@ export class DependencyTrackerService implements IDependencyTracker {
   constructor(
     private readonly eventEmitter: EventEmitter2,
     private readonly storage: IDependencyStorage,
-    private readonly codeAnalyzer: ICodeAnalyzer
+    private readonly codeAnalyzer: ICodeAnalyzer,
   ) {
     this.initializeService();
   }
@@ -157,23 +167,28 @@ export class DependencyTrackerService implements IDependencyTracker {
       const startTime = Date.now();
 
       // Get or analyze direct dependencies
-      const directDependencies = await this.getOrAnalyzeDependencies(functionId);
+      const directDependencies =
+        await this.getOrAnalyzeDependencies(functionId);
 
       // Analyze transitive dependencies
-      const transitiveDependencies = await this.analyzeTransitiveDependencies(functionId, directDependencies);
+      const transitiveDependencies = await this.analyzeTransitiveDependencies(
+        functionId,
+        directDependencies,
+      );
 
       // Find dependents (functions that depend on this function)
       const dependents = await this.findDependents(functionId);
 
       // Detect circular dependencies
-      const circularDependencies = await this.detectCircularDependenciesForFunction(functionId);
+      const circularDependencies =
+        await this.detectCircularDependenciesForFunction(functionId);
 
       // Assess dependency risks
       const riskAssessment = await this.assessDependencyRisks(
         functionId,
         directDependencies,
         transitiveDependencies,
-        circularDependencies
+        circularDependencies,
       );
 
       const analysis: DependencyAnalysis = {
@@ -182,14 +197,14 @@ export class DependencyTrackerService implements IDependencyTracker {
         transitiveDependencies,
         dependents,
         circularDependencies,
-        riskAssessment
+        riskAssessment,
       };
 
       // Cache the analysis
       this.dependencyCache.set(functionId, directDependencies);
 
       // Emit analysis event
-      this.eventEmitter.emit('dependencies.analyzed', {
+      this.eventEmitter.emit("dependencies.analyzed", {
         functionId,
         directCount: directDependencies.length,
         transitiveCount: transitiveDependencies.length,
@@ -197,15 +212,19 @@ export class DependencyTrackerService implements IDependencyTracker {
         circularCount: circularDependencies.length,
         riskLevel: riskAssessment.overallRisk,
         analysisTime: Date.now() - startTime,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
-      this.logger.log(`Dependency analysis completed for function ${functionId} in ${Date.now() - startTime}ms`);
+      this.logger.log(
+        `Dependency analysis completed for function ${functionId} in ${Date.now() - startTime}ms`,
+      );
 
       return analysis;
-
     } catch (error) {
-      this.logger.error(`Failed to analyze dependencies for function ${functionId}: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
+      this.logger.error(
+        `Failed to analyze dependencies for function ${functionId}: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
       throw error;
     }
   }
@@ -214,7 +233,9 @@ export class DependencyTrackerService implements IDependencyTracker {
    * Get dependency graph
    */
   async getDependencyGraph(functionIds: string[]): Promise<DependencyGraph> {
-    this.logger.log(`Building dependency graph for ${functionIds.length} functions`);
+    this.logger.log(
+      `Building dependency graph for ${functionIds.length} functions`,
+    );
 
     try {
       const cacheKey = this.generateGraphCacheKey(functionIds);
@@ -233,12 +254,16 @@ export class DependencyTrackerService implements IDependencyTracker {
       // Save to storage
       await this.storage.saveDependencyGraph(graph);
 
-      this.logger.log(`Dependency graph built with ${graph.nodes.length} nodes and ${graph.edges.length} edges`);
+      this.logger.log(
+        `Dependency graph built with ${graph.nodes.length} nodes and ${graph.edges.length} edges`,
+      );
 
       return graph;
-
     } catch (error) {
-      this.logger.error(`Failed to build dependency graph: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
+      this.logger.error(
+        `Failed to build dependency graph: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
       throw error;
     }
   }
@@ -246,8 +271,12 @@ export class DependencyTrackerService implements IDependencyTracker {
   /**
    * Find circular dependencies
    */
-  async findCircularDependencies(functionIds: string[]): Promise<CircularDependencyAnalysis> {
-    this.logger.log(`Finding circular dependencies in ${functionIds.length} functions`);
+  async findCircularDependencies(
+    functionIds: string[],
+  ): Promise<CircularDependencyAnalysis> {
+    this.logger.log(
+      `Finding circular dependencies in ${functionIds.length} functions`,
+    );
 
     try {
       // Build dependency graph
@@ -258,24 +287,28 @@ export class DependencyTrackerService implements IDependencyTracker {
 
       // Filter out trivial cycles (single nodes)
       const circularDependencies = cycles
-        .filter(cycle => cycle.length > 1)
-        .map(cycle => this.createCircularDependency(cycle, graph));
+        .filter((cycle) => cycle.length > 1)
+        .map((cycle) => this.createCircularDependency(cycle, graph));
 
       // Find affected functions
-      const affectedFunctions = this.getAffectedFunctionsFromCycles(circularDependencies);
+      const affectedFunctions =
+        this.getAffectedFunctionsFromCycles(circularDependencies);
 
       // Generate resolution plan
-      const resolutionPlan = await this.generateCircularDependencyResolutionPlan(circularDependencies);
+      const resolutionPlan =
+        await this.generateCircularDependencyResolutionPlan(
+          circularDependencies,
+        );
 
       const analysis: CircularDependencyAnalysis = {
         cyclesFound: circularDependencies,
         affectedFunctions,
-        resolutionPlan
+        resolutionPlan,
       };
 
       // Cache circular dependencies
-      circularDependencies.forEach(cycle => {
-        cycle.cycle.forEach(functionId => {
+      circularDependencies.forEach((cycle) => {
+        cycle.cycle.forEach((functionId) => {
           this.circularDependencyCache.add(functionId);
         });
       });
@@ -284,19 +317,24 @@ export class DependencyTrackerService implements IDependencyTracker {
       await this.storage.saveCircularDependencies(circularDependencies);
 
       // Emit circular dependency event
-      this.eventEmitter.emit('dependencies.circular-found', {
+      this.eventEmitter.emit("dependencies.circular-found", {
         cycleCount: circularDependencies.length,
         affectedFunctionCount: affectedFunctions.length,
-        severity: this.getHighestCircularDependencySeverity(circularDependencies),
-        timestamp: new Date()
+        severity:
+          this.getHighestCircularDependencySeverity(circularDependencies),
+        timestamp: new Date(),
       });
 
-      this.logger.log(`Found ${circularDependencies.length} circular dependencies affecting ${affectedFunctions.length} functions`);
+      this.logger.log(
+        `Found ${circularDependencies.length} circular dependencies affecting ${affectedFunctions.length} functions`,
+      );
 
       return analysis;
-
     } catch (error) {
-      this.logger.error(`Failed to find circular dependencies: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
+      this.logger.error(
+        `Failed to find circular dependencies: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
       throw error;
     }
   }
@@ -304,8 +342,13 @@ export class DependencyTrackerService implements IDependencyTracker {
   /**
    * Get impact analysis
    */
-  async getImpactAnalysis(functionId: string, changeType: ChangeType): Promise<ImpactAnalysis> {
-    this.logger.log(`Analyzing impact of ${changeType} change to function: ${functionId}`);
+  async getImpactAnalysis(
+    functionId: string,
+    changeType: ChangeType,
+  ): Promise<ImpactAnalysis> {
+    this.logger.log(
+      `Analyzing impact of ${changeType} change to function: ${functionId}`,
+    );
 
     try {
       const config: ImpactPropagationConfig = {
@@ -313,23 +356,39 @@ export class DependencyTrackerService implements IDependencyTracker {
         includeTransitive: true,
         includeExternal: false,
         strengthThreshold: DependencyStrength._WEAK,
-        riskThreshold: RiskLevel._LOW
+        riskThreshold: RiskLevel._LOW,
       };
 
       // Get dependency analysis
       const dependencyAnalysis = await this.analyzeDependencies(functionId);
 
       // Find affected functions through dependency propagation
-      const affectedFunctions = await this.propagateImpact(functionId, changeType, config);
+      const affectedFunctions = await this.propagateImpact(
+        functionId,
+        changeType,
+        config,
+      );
 
       // Assess impact level
-      const impactLevel = this.assessImpactLevel(changeType, affectedFunctions, dependencyAnalysis);
+      const impactLevel = this.assessImpactLevel(
+        changeType,
+        affectedFunctions,
+        dependencyAnalysis,
+      );
 
       // Identify risk factors
-      const riskFactors = await this.identifyRiskFactors(functionId, changeType, affectedFunctions);
+      const riskFactors = await this.identifyRiskFactors(
+        functionId,
+        changeType,
+        affectedFunctions,
+      );
 
       // Generate mitigation strategies
-      const mitigationStrategies = this.generateMitigationStrategies(changeType, impactLevel, riskFactors);
+      const mitigationStrategies = this.generateMitigationStrategies(
+        changeType,
+        impactLevel,
+        riskFactors,
+      );
 
       const analysis: ImpactAnalysis = {
         functionId,
@@ -337,24 +396,28 @@ export class DependencyTrackerService implements IDependencyTracker {
         affectedFunctions,
         impactLevel,
         riskFactors,
-        mitigationStrategies
+        mitigationStrategies,
       };
 
       // Emit impact analysis event
-      this.eventEmitter.emit('dependencies.impact-analyzed', {
+      this.eventEmitter.emit("dependencies.impact-analyzed", {
         functionId,
         changeType,
         affectedFunctionCount: affectedFunctions.length,
         impactLevel,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
-      this.logger.log(`Impact analysis completed: ${affectedFunctions.length} functions affected with ${impactLevel} impact`);
+      this.logger.log(
+        `Impact analysis completed: ${affectedFunctions.length} functions affected with ${impactLevel} impact`,
+      );
 
       return analysis;
-
     } catch (error) {
-      this.logger.error(`Failed to analyze impact for function ${functionId}: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
+      this.logger.error(
+        `Failed to analyze impact for function ${functionId}: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
       throw error;
     }
   }
@@ -364,31 +427,41 @@ export class DependencyTrackerService implements IDependencyTracker {
    */
   async updateDependencies(
     functionId: string,
-    dependencies: DependencyUpdate
+    dependencies: DependencyUpdate,
   ): Promise<DependencyUpdateResult> {
     this.logger.log(`Updating dependencies for function: ${functionId}`);
 
     try {
       // Get current dependencies
-      const currentDependencies = await this.getOrAnalyzeDependencies(functionId);
+      const currentDependencies =
+        await this.getOrAnalyzeDependencies(functionId);
 
       // Apply updates
-      const updatedDependencies = this.applyDependencyUpdates(currentDependencies, dependencies);
+      const updatedDependencies = this.applyDependencyUpdates(
+        currentDependencies,
+        dependencies,
+      );
 
       // Validate updates
-      const validationResult = await this.validateDependencyUpdates(functionId, updatedDependencies);
+      const validationResult = await this.validateDependencyUpdates(
+        functionId,
+        updatedDependencies,
+      );
 
       if (!validationResult.valid) {
         return {
           success: false,
           updatedDependencies: [],
           conflicts: [],
-          validationErrors: validationResult.errors
+          validationErrors: validationResult.errors,
         };
       }
 
       // Detect conflicts
-      const conflicts = await this.detectDependencyConflicts(functionId, updatedDependencies);
+      const conflicts = await this.detectDependencyConflicts(
+        functionId,
+        updatedDependencies,
+      );
 
       // Save updated dependencies
       await this.storage.setDependencyInfo(functionId, updatedDependencies);
@@ -400,27 +473,31 @@ export class DependencyTrackerService implements IDependencyTracker {
       this.invalidateGraphCache();
 
       // Emit dependency update event
-      this.eventEmitter.emit('dependencies.updated', {
+      this.eventEmitter.emit("dependencies.updated", {
         functionId,
         addedCount: dependencies.added.length,
         modifiedCount: dependencies.modified.length,
         removedCount: dependencies.removed.length,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       const result: DependencyUpdateResult = {
         success: true,
         updatedDependencies: this.getDependencyIds(updatedDependencies),
         conflicts,
-        validationErrors: []
+        validationErrors: [],
       };
 
-      this.logger.log(`Dependencies updated successfully for function: ${functionId}`);
+      this.logger.log(
+        `Dependencies updated successfully for function: ${functionId}`,
+      );
 
       return result;
-
     } catch (error) {
-      this.logger.error(`Failed to update dependencies for function ${functionId}: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
+      this.logger.error(
+        `Failed to update dependencies for function ${functionId}: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
       throw error;
     }
   }
@@ -428,8 +505,12 @@ export class DependencyTrackerService implements IDependencyTracker {
   /**
    * Validate dependency consistency
    */
-  async validateConsistency(functionIds: string[]): Promise<ConsistencyValidationResult> {
-    this.logger.log(`Validating dependency consistency for ${functionIds.length} functions`);
+  async validateConsistency(
+    functionIds: string[],
+  ): Promise<ConsistencyValidationResult> {
+    this.logger.log(
+      `Validating dependency consistency for ${functionIds.length} functions`,
+    );
 
     try {
       const inconsistencies: DependencyInconsistency[] = [];
@@ -447,28 +528,33 @@ export class DependencyTrackerService implements IDependencyTracker {
       await this.checkCircularReferences(functionIds, inconsistencies);
 
       // Generate recommendations
-      const recommendations = this.generateConsistencyRecommendations(inconsistencies);
+      const recommendations =
+        this.generateConsistencyRecommendations(inconsistencies);
 
       const result: ConsistencyValidationResult = {
         consistent: inconsistencies.length === 0,
         inconsistencies,
-        recommendations
+        recommendations,
       };
 
       // Emit consistency validation event
-      this.eventEmitter.emit('dependencies.consistency-validated', {
+      this.eventEmitter.emit("dependencies.consistency-validated", {
         functionCount: functionIds.length,
         inconsistencyCount: inconsistencies.length,
         consistent: result.consistent,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
-      this.logger.log(`Dependency consistency validation completed: ${inconsistencies.length} inconsistencies found`);
+      this.logger.log(
+        `Dependency consistency validation completed: ${inconsistencies.length} inconsistencies found`,
+      );
 
       return result;
-
     } catch (error) {
-      this.logger.error(`Failed to validate dependency consistency: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
+      this.logger.error(
+        `Failed to validate dependency consistency: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
       throw error;
     }
   }
@@ -477,7 +563,9 @@ export class DependencyTrackerService implements IDependencyTracker {
    * Optimize dependency resolution
    */
   async optimizeResolution(functionIds: string[]): Promise<OptimizationResult> {
-    this.logger.log(`Optimizing dependency resolution for ${functionIds.length} functions`);
+    this.logger.log(
+      `Optimizing dependency resolution for ${functionIds.length} functions`,
+    );
 
     try {
       const optimizedFunctions: string[] = [];
@@ -504,24 +592,28 @@ export class DependencyTrackerService implements IDependencyTracker {
       const result: OptimizationResult = {
         optimizedFunctions,
         improvements,
-        metrics
+        metrics,
       };
 
       // Emit optimization event
-      this.eventEmitter.emit('dependencies.optimized', {
+      this.eventEmitter.emit("dependencies.optimized", {
         functionCount: functionIds.length,
         optimizedCount: optimizedFunctions.length,
         improvementCount: improvements.length,
         performanceGain: metrics.performanceGain,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
-      this.logger.log(`Dependency optimization completed: ${optimizedFunctions.length} functions optimized`);
+      this.logger.log(
+        `Dependency optimization completed: ${optimizedFunctions.length} functions optimized`,
+      );
 
       return result;
-
     } catch (error) {
-      this.logger.error(`Failed to optimize dependency resolution: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
+      this.logger.error(
+        `Failed to optimize dependency resolution: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
       throw error;
     }
   }
@@ -534,28 +626,34 @@ export class DependencyTrackerService implements IDependencyTracker {
    * Initialize the service
    */
   private async initializeService(): Promise<void> {
-    this.logger.log('Initializing Dependency Tracker Service');
+    this.logger.log("Initializing Dependency Tracker Service");
 
     try {
       // Load cached circular dependencies
       const circularDependencies = await this.storage.getCircularDependencies();
-      circularDependencies.forEach(cycle => {
-        cycle.cycle.forEach(functionId => {
+      circularDependencies.forEach((cycle) => {
+        cycle.cycle.forEach((functionId) => {
           this.circularDependencyCache.add(functionId);
         });
       });
 
-      this.logger.log(`Dependency Tracker Service initialized with ${circularDependencies.length} cached circular dependencies`);
-
+      this.logger.log(
+        `Dependency Tracker Service initialized with ${circularDependencies.length} cached circular dependencies`,
+      );
     } catch (error) {
-      this.logger.error(`Failed to initialize Dependency Tracker Service: ${error instanceof Error ? error.message : String(error)}`, error instanceof Error ? error.stack : undefined);
+      this.logger.error(
+        `Failed to initialize Dependency Tracker Service: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
     }
   }
 
   /**
    * Get or analyze dependencies
    */
-  private async getOrAnalyzeDependencies(functionId: string): Promise<FunctionDependency[]> {
+  private async getOrAnalyzeDependencies(
+    functionId: string,
+  ): Promise<FunctionDependency[]> {
     // Check cache first
     if (this.dependencyCache.has(functionId)) {
       return this.dependencyCache.get(functionId)!;
@@ -566,7 +664,8 @@ export class DependencyTrackerService implements IDependencyTracker {
 
     if (!dependencies || dependencies.length === 0) {
       // Analyze dependencies from code
-      dependencies = await this.codeAnalyzer.analyzeFunctionDependencies(functionId);
+      dependencies =
+        await this.codeAnalyzer.analyzeFunctionDependencies(functionId);
 
       // Save to storage
       await this.storage.setDependencyInfo(functionId, dependencies);
@@ -583,25 +682,34 @@ export class DependencyTrackerService implements IDependencyTracker {
    */
   private async analyzeTransitiveDependencies(
     functionId: string,
-    directDependencies: FunctionDependency[]
+    directDependencies: FunctionDependency[],
   ): Promise<FunctionDependency[]> {
     const transitiveDependencies: FunctionDependency[] = [];
     const visited = new Set<string>([functionId]);
 
-    const analyzeLevel = async (dependencies: FunctionDependency[], depth: number): Promise<void> => {
+    const analyzeLevel = async (
+      dependencies: FunctionDependency[],
+      depth: number,
+    ): Promise<void> => {
       if (depth > 5) return; // Prevent infinite recursion
 
       for (const dependency of dependencies) {
         if (visited.has(dependency.functionId)) continue;
 
         visited.add(dependency.functionId);
-        const nextLevelDeps = await this.getOrAnalyzeDependencies(dependency.functionId);
+        const nextLevelDeps = await this.getOrAnalyzeDependencies(
+          dependency.functionId,
+        );
 
         for (const nextDep of nextLevelDeps) {
-          if (!transitiveDependencies.find(d => d.functionId === nextDep.functionId)) {
+          if (
+            !transitiveDependencies.find(
+              (d) => d.functionId === nextDep.functionId,
+            )
+          ) {
             transitiveDependencies.push({
               ...nextDep,
-              type: DependencyType._TRANSITIVE
+              type: DependencyType._TRANSITIVE,
             });
           }
         }
@@ -618,7 +726,9 @@ export class DependencyTrackerService implements IDependencyTracker {
   /**
    * Find dependents (functions that depend on this function)
    */
-  private async findDependents(functionId: string): Promise<FunctionDependency[]> {
+  private async findDependents(
+    functionId: string,
+  ): Promise<FunctionDependency[]> {
     // This would query all functions to find which ones depend on this function
     // For now, return empty array
     return [];
@@ -627,14 +737,16 @@ export class DependencyTrackerService implements IDependencyTracker {
   /**
    * Detect circular dependencies for a specific function
    */
-  private async detectCircularDependenciesForFunction(functionId: string): Promise<CircularDependency[]> {
+  private async detectCircularDependenciesForFunction(
+    functionId: string,
+  ): Promise<CircularDependency[]> {
     if (!this.circularDependencyCache.has(functionId)) {
       return [];
     }
 
     // Get all circular dependencies and filter for this function
     const allCircular = await this.storage.getCircularDependencies();
-    return allCircular.filter(cycle => cycle.cycle.includes(functionId));
+    return allCircular.filter((cycle) => cycle.cycle.includes(functionId));
   }
 
   /**
@@ -644,29 +756,29 @@ export class DependencyTrackerService implements IDependencyTracker {
     functionId: string,
     directDependencies: FunctionDependency[],
     transitiveDependencies: FunctionDependency[],
-    circularDependencies: CircularDependency[]
+    circularDependencies: CircularDependency[],
   ): Promise<DependencyRiskAssessment> {
     const risks: DependencyRisk[] = [];
 
     // Assess risks from direct dependencies
-    directDependencies.forEach(dep => {
+    directDependencies.forEach((dep) => {
       if (dep.strength === DependencyStrength._CRITICAL) {
         risks.push({
           type: DependencyRiskType._VERSION_MISMATCH,
           description: `Critical dependency on ${dep.functionId}`,
           severity: RiskLevel._HIGH,
-          affectedFunctions: [functionId, dep.functionId]
+          affectedFunctions: [functionId, dep.functionId],
         });
       }
     });
 
     // Assess risks from circular dependencies
-    circularDependencies.forEach(cycle => {
+    circularDependencies.forEach((cycle) => {
       risks.push({
         type: DependencyRiskType._CIRCULAR_DEPENDENCY,
         description: `Circular dependency involving ${cycle.cycle.length} functions`,
         severity: this.mapCircularSeverityToRiskLevel(cycle.severity),
-        affectedFunctions: cycle.cycle
+        affectedFunctions: cycle.cycle,
       });
     });
 
@@ -679,14 +791,16 @@ export class DependencyTrackerService implements IDependencyTracker {
     return {
       overallRisk,
       risks,
-      recommendations
+      recommendations,
     };
   }
 
   /**
    * Map circular dependency severity to risk level
    */
-  private mapCircularSeverityToRiskLevel(severity: CircularDependencySeverity): RiskLevel {
+  private mapCircularSeverityToRiskLevel(
+    severity: CircularDependencySeverity,
+  ): RiskLevel {
     switch (severity) {
       case CircularDependencySeverity._HIGH:
         return RiskLevel._HIGH;
@@ -703,8 +817,10 @@ export class DependencyTrackerService implements IDependencyTracker {
    * Calculate overall risk from individual risks
    */
   private calculateOverallRisk(risks: DependencyRisk[]): RiskLevel {
-    if (risks.some(r => r.severity === RiskLevel._HIGH)) return RiskLevel._HIGH;
-    if (risks.some(r => r.severity === RiskLevel._MEDIUM)) return RiskLevel._MEDIUM;
+    if (risks.some((r) => r.severity === RiskLevel._HIGH))
+      return RiskLevel._HIGH;
+    if (risks.some((r) => r.severity === RiskLevel._MEDIUM))
+      return RiskLevel._MEDIUM;
     if (risks.length > 0) return RiskLevel._LOW;
     return RiskLevel._LOW;
   }
@@ -715,19 +831,21 @@ export class DependencyTrackerService implements IDependencyTracker {
   private generateRiskRecommendations(risks: DependencyRisk[]): string[] {
     const recommendations: string[] = [];
 
-    risks.forEach(risk => {
+    risks.forEach((risk) => {
       switch (risk.type) {
         case DependencyRiskType._CIRCULAR_DEPENDENCY:
-          recommendations.push('Consider refactoring to break circular dependencies');
+          recommendations.push(
+            "Consider refactoring to break circular dependencies",
+          );
           break;
         case DependencyRiskType._VERSION_MISMATCH:
-          recommendations.push('Update dependencies to compatible versions');
+          recommendations.push("Update dependencies to compatible versions");
           break;
         case DependencyRiskType._DEPRECATED_DEPENDENCY:
-          recommendations.push('Replace deprecated dependencies');
+          recommendations.push("Replace deprecated dependencies");
           break;
         case DependencyRiskType._SECURITY_VULNERABILITY:
-          recommendations.push('Update dependencies to secure versions');
+          recommendations.push("Update dependencies to secure versions");
           break;
       }
     });
@@ -738,7 +856,9 @@ export class DependencyTrackerService implements IDependencyTracker {
   /**
    * Build dependency graph
    */
-  private async buildDependencyGraph(functionIds: string[]): Promise<DependencyGraph> {
+  private async buildDependencyGraph(
+    functionIds: string[],
+  ): Promise<DependencyGraph> {
     const nodes: DependencyNode[] = [];
     const edges: DependencyEdge[] = [];
     const nodeMap = new Map<string, DependencyNode>();
@@ -749,13 +869,13 @@ export class DependencyTrackerService implements IDependencyTracker {
       const metadata: NodeMetadata = {
         level: 0, // Will be calculated later
         criticalPath: false,
-        riskScore: this.calculateNodeRiskScore(dependencies)
+        riskScore: this.calculateNodeRiskScore(dependencies),
       };
 
       const node: DependencyNode = {
         id: functionId,
         functionId,
-        metadata
+        metadata,
       };
 
       nodes.push(node);
@@ -772,7 +892,7 @@ export class DependencyTrackerService implements IDependencyTracker {
             source: functionId,
             target: dependency.functionId,
             type: dependency.type,
-            strength: dependency.strength
+            strength: dependency.strength,
           });
         }
       }
@@ -783,13 +903,13 @@ export class DependencyTrackerService implements IDependencyTracker {
       totalNodes: nodes.length,
       totalEdges: edges.length,
       maxDepth: this.calculateGraphDepth(nodes, edges),
-      complexityScore: this.calculateComplexityScore(nodes, edges)
+      complexityScore: this.calculateComplexityScore(nodes, edges),
     };
 
     return {
       nodes,
       edges,
-      metadata
+      metadata,
     };
   }
 
@@ -799,7 +919,7 @@ export class DependencyTrackerService implements IDependencyTracker {
   private calculateNodeRiskScore(dependencies: FunctionDependency[]): number {
     let score = 0;
 
-    dependencies.forEach(dep => {
+    dependencies.forEach((dep) => {
       switch (dep.strength) {
         case DependencyStrength._CRITICAL:
           score += 0.8;
@@ -822,7 +942,10 @@ export class DependencyTrackerService implements IDependencyTracker {
   /**
    * Calculate graph depth
    */
-  private calculateGraphDepth(nodes: DependencyNode[], edges: DependencyEdge[]): number {
+  private calculateGraphDepth(
+    nodes: DependencyNode[],
+    edges: DependencyEdge[],
+  ): number {
     // Simplified depth calculation
     return Math.min(10, Math.max(1, Math.floor(nodes.length / 5)));
   }
@@ -830,7 +953,10 @@ export class DependencyTrackerService implements IDependencyTracker {
   /**
    * Calculate complexity score
    */
-  private calculateComplexityScore(nodes: DependencyNode[], edges: DependencyEdge[]): number {
+  private calculateComplexityScore(
+    nodes: DependencyNode[],
+    edges: DependencyEdge[],
+  ): number {
     if (nodes.length === 0) return 0;
     return edges.length / (nodes.length * nodes.length);
   }
@@ -838,7 +964,9 @@ export class DependencyTrackerService implements IDependencyTracker {
   /**
    * Find strongly connected components (for circular dependency detection)
    */
-  private async findStronglyConnectedComponents(graph: DependencyGraph): Promise<string[][]> {
+  private async findStronglyConnectedComponents(
+    graph: DependencyGraph,
+  ): Promise<string[][]> {
     // Tarjan's algorithm implementation (simplified)
     const visited = new Set<string>();
     const components: string[][] = [];
@@ -850,15 +978,17 @@ export class DependencyTrackerService implements IDependencyTracker {
       component.push(nodeId);
 
       // Find outgoing edges
-      const outgoingEdges = graph.edges.filter(edge => edge.source === nodeId);
-      outgoingEdges.forEach(edge => {
+      const outgoingEdges = graph.edges.filter(
+        (edge) => edge.source === nodeId,
+      );
+      outgoingEdges.forEach((edge) => {
         if (!visited.has(edge.target)) {
           dfs(edge.target, component);
         }
       });
     };
 
-    graph.nodes.forEach(node => {
+    graph.nodes.forEach((node) => {
       if (!visited.has(node.id)) {
         const component: string[] = [];
         dfs(node.id, component);
@@ -874,28 +1004,37 @@ export class DependencyTrackerService implements IDependencyTracker {
   /**
    * Create circular dependency from cycle
    */
-  private createCircularDependency(cycle: string[], graph: DependencyGraph): CircularDependency {
+  private createCircularDependency(
+    cycle: string[],
+    graph: DependencyGraph,
+  ): CircularDependency {
     const severity = this.assessCircularDependencySeverity(cycle, graph);
-    const resolutionSuggestions = this.generateCircularResolutionSuggestions(cycle);
+    const resolutionSuggestions =
+      this.generateCircularResolutionSuggestions(cycle);
 
     return {
       cycle,
       severity,
-      resolutionSuggestions
+      resolutionSuggestions,
     };
   }
 
   /**
    * Assess circular dependency severity
    */
-  private assessCircularDependencySeverity(cycle: string[], graph: DependencyGraph): CircularDependencySeverity {
+  private assessCircularDependencySeverity(
+    cycle: string[],
+    graph: DependencyGraph,
+  ): CircularDependencySeverity {
     // Check for strong dependencies in the cycle
-    const cycleEdges = graph.edges.filter(edge =>
-      cycle.includes(edge.source) && cycle.includes(edge.target)
+    const cycleEdges = graph.edges.filter(
+      (edge) => cycle.includes(edge.source) && cycle.includes(edge.target),
     );
 
-    const hasStrongDependencies = cycleEdges.some(edge =>
-      edge.strength === DependencyStrength._STRONG || edge.strength === DependencyStrength._CRITICAL
+    const hasStrongDependencies = cycleEdges.some(
+      (edge) =>
+        edge.strength === DependencyStrength._STRONG ||
+        edge.strength === DependencyStrength._CRITICAL,
     );
 
     if (hasStrongDependencies || cycle.length > 5) {
@@ -915,12 +1054,14 @@ export class DependencyTrackerService implements IDependencyTracker {
   private generateCircularResolutionSuggestions(cycle: string[]): string[] {
     const suggestions: string[] = [];
 
-    suggestions.push('Introduce an interface or abstraction layer');
-    suggestions.push('Use dependency injection');
-    suggestions.push('Refactor shared functionality to a common module');
+    suggestions.push("Introduce an interface or abstraction layer");
+    suggestions.push("Use dependency injection");
+    suggestions.push("Refactor shared functionality to a common module");
 
     if (cycle.length === 2) {
-      suggestions.push('Consider merging the two functions if they are tightly coupled');
+      suggestions.push(
+        "Consider merging the two functions if they are tightly coupled",
+      );
     }
 
     return suggestions;
@@ -929,11 +1070,13 @@ export class DependencyTrackerService implements IDependencyTracker {
   /**
    * Get affected functions from cycles
    */
-  private getAffectedFunctionsFromCycles(cycles: CircularDependency[]): string[] {
+  private getAffectedFunctionsFromCycles(
+    cycles: CircularDependency[],
+  ): string[] {
     const affected = new Set<string>();
 
-    cycles.forEach(cycle => {
-      cycle.cycle.forEach(functionId => {
+    cycles.forEach((cycle) => {
+      cycle.cycle.forEach((functionId) => {
         affected.add(functionId);
       });
     });
@@ -945,7 +1088,7 @@ export class DependencyTrackerService implements IDependencyTracker {
    * Generate circular dependency resolution plan
    */
   private async generateCircularDependencyResolutionPlan(
-    cycles: CircularDependency[]
+    cycles: CircularDependency[],
   ): Promise<CircularDependencyResolutionPlan> {
     const strategies: ResolutionStrategy[] = [];
 
@@ -954,7 +1097,7 @@ export class DependencyTrackerService implements IDependencyTracker {
         name: `Resolve cycle ${index + 1}`,
         description: `Break circular dependency involving ${cycle.cycle.length} functions`,
         steps: cycle.resolutionSuggestions,
-        impact: this.mapSeverityToImpactLevel(cycle.severity)
+        impact: this.mapSeverityToImpactLevel(cycle.severity),
       });
     });
 
@@ -971,23 +1114,27 @@ export class DependencyTrackerService implements IDependencyTracker {
       }
     }, 0);
 
-    const riskLevel = cycles.some(c => c.severity === CircularDependencySeverity._HIGH)
+    const riskLevel = cycles.some(
+      (c) => c.severity === CircularDependencySeverity._HIGH,
+    )
       ? RiskLevel._HIGH
-      : cycles.some(c => c.severity === CircularDependencySeverity._MEDIUM)
-      ? RiskLevel._MEDIUM
-      : RiskLevel._LOW;
+      : cycles.some((c) => c.severity === CircularDependencySeverity._MEDIUM)
+        ? RiskLevel._MEDIUM
+        : RiskLevel._LOW;
 
     return {
       strategies,
       estimatedEffort,
-      riskLevel
+      riskLevel,
     };
   }
 
   /**
    * Map severity to impact level
    */
-  private mapSeverityToImpactLevel(severity: CircularDependencySeverity): ImpactLevel {
+  private mapSeverityToImpactLevel(
+    severity: CircularDependencySeverity,
+  ): ImpactLevel {
     switch (severity) {
       case CircularDependencySeverity._HIGH:
         return ImpactLevel._HIGH;
@@ -1003,11 +1150,13 @@ export class DependencyTrackerService implements IDependencyTracker {
   /**
    * Get highest circular dependency severity
    */
-  private getHighestCircularDependencySeverity(cycles: CircularDependency[]): CircularDependencySeverity {
-    if (cycles.some(c => c.severity === CircularDependencySeverity._HIGH)) {
+  private getHighestCircularDependencySeverity(
+    cycles: CircularDependency[],
+  ): CircularDependencySeverity {
+    if (cycles.some((c) => c.severity === CircularDependencySeverity._HIGH)) {
       return CircularDependencySeverity._HIGH;
     }
-    if (cycles.some(c => c.severity === CircularDependencySeverity._MEDIUM)) {
+    if (cycles.some((c) => c.severity === CircularDependencySeverity._MEDIUM)) {
       return CircularDependencySeverity._MEDIUM;
     }
     return CircularDependencySeverity._LOW;
@@ -1019,12 +1168,15 @@ export class DependencyTrackerService implements IDependencyTracker {
   private async propagateImpact(
     functionId: string,
     changeType: ChangeType,
-    config: ImpactPropagationConfig
+    config: ImpactPropagationConfig,
   ): Promise<string[]> {
     const affected = new Set<string>();
     const visited = new Set<string>();
 
-    const propagate = async (currentId: string, depth: number): Promise<void> => {
+    const propagate = async (
+      currentId: string,
+      depth: number,
+    ): Promise<void> => {
       if (depth > config.maxDepth || visited.has(currentId)) return;
 
       visited.add(currentId);
@@ -1051,11 +1203,12 @@ export class DependencyTrackerService implements IDependencyTracker {
   private assessImpactLevel(
     changeType: ChangeType,
     affectedFunctions: string[],
-    dependencyAnalysis: DependencyAnalysis
+    dependencyAnalysis: DependencyAnalysis,
   ): ImpactLevel {
     const affectedCount = affectedFunctions.length;
     const hasCircularDeps = dependencyAnalysis.circularDependencies.length > 0;
-    const hasHighRisk = dependencyAnalysis.riskAssessment.overallRisk === RiskLevel._HIGH;
+    const hasHighRisk =
+      dependencyAnalysis.riskAssessment.overallRisk === RiskLevel._HIGH;
 
     if (changeType === ChangeType._BREAKING || hasHighRisk) {
       return ImpactLevel._HIGH;
@@ -1078,7 +1231,7 @@ export class DependencyTrackerService implements IDependencyTracker {
   private async identifyRiskFactors(
     functionId: string,
     changeType: ChangeType,
-    affectedFunctions: string[]
+    affectedFunctions: string[],
   ): Promise<RiskFactor[]> {
     const riskFactors: RiskFactor[] = [];
 
@@ -1088,7 +1241,7 @@ export class DependencyTrackerService implements IDependencyTracker {
         category: RiskCategory._TECHNICAL,
         description: `Change affects ${affectedFunctions.length} functions`,
         likelihood: Likelihood._HIGH,
-        impact: ImpactLevel._HIGH
+        impact: ImpactLevel._HIGH,
       });
     }
 
@@ -1096,9 +1249,9 @@ export class DependencyTrackerService implements IDependencyTracker {
     if (changeType === ChangeType._BREAKING) {
       riskFactors.push({
         category: RiskCategory._TECHNICAL,
-        description: 'Breaking change requires careful coordination',
+        description: "Breaking change requires careful coordination",
         likelihood: Likelihood._HIGH,
-        impact: ImpactLevel._HIGH
+        impact: ImpactLevel._HIGH,
       });
     }
 
@@ -1111,24 +1264,26 @@ export class DependencyTrackerService implements IDependencyTracker {
   private generateMitigationStrategies(
     changeType: ChangeType,
     impactLevel: ImpactLevel,
-    riskFactors: RiskFactor[]
+    riskFactors: RiskFactor[],
   ): string[] {
     const strategies: string[] = [];
 
     if (impactLevel === ImpactLevel._HIGH) {
-      strategies.push('Implement change in phases');
-      strategies.push('Use feature flags for gradual rollout');
-      strategies.push('Increase test coverage for affected functions');
+      strategies.push("Implement change in phases");
+      strategies.push("Use feature flags for gradual rollout");
+      strategies.push("Increase test coverage for affected functions");
     }
 
     if (changeType === ChangeType._BREAKING) {
-      strategies.push('Provide migration guide for dependent functions');
-      strategies.push('Maintain backward compatibility during transition period');
+      strategies.push("Provide migration guide for dependent functions");
+      strategies.push(
+        "Maintain backward compatibility during transition period",
+      );
     }
 
-    if (riskFactors.some(f => f.category === RiskCategory._TECHNICAL)) {
-      strategies.push('Perform thorough integration testing');
-      strategies.push('Set up monitoring for affected functions');
+    if (riskFactors.some((f) => f.category === RiskCategory._TECHNICAL)) {
+      strategies.push("Perform thorough integration testing");
+      strategies.push("Set up monitoring for affected functions");
     }
 
     return strategies;
@@ -1141,7 +1296,7 @@ export class DependencyTrackerService implements IDependencyTracker {
 
   // Placeholder implementations for referenced methods
   private generateGraphCacheKey(functionIds: string[]): string {
-    return functionIds.sort().join(',');
+    return functionIds.sort().join(",");
   }
 
   private invalidateGraphCache(): void {
@@ -1150,7 +1305,7 @@ export class DependencyTrackerService implements IDependencyTracker {
 
   private applyDependencyUpdates(
     current: FunctionDependency[],
-    updates: DependencyUpdate
+    updates: DependencyUpdate,
   ): FunctionDependency[] {
     // Apply dependency updates logic
     return [...current, ...updates.added];
@@ -1158,78 +1313,78 @@ export class DependencyTrackerService implements IDependencyTracker {
 
   private async validateDependencyUpdates(
     functionId: string,
-    dependencies: FunctionDependency[]
+    dependencies: FunctionDependency[],
   ): Promise<{ valid: boolean; errors: ValidationError[] }> {
     return { valid: true, errors: [] };
   }
 
   private async detectDependencyConflicts(
     functionId: string,
-    dependencies: FunctionDependency[]
+    dependencies: FunctionDependency[],
   ): Promise<DependencyConflict[]> {
     return [];
   }
 
   private getDependencyIds(dependencies: FunctionDependency[]): string[] {
-    return dependencies.map(d => d.functionId);
+    return dependencies.map((d) => d.functionId);
   }
 
   private async checkMissingDependencies(
     functionIds: string[],
-    inconsistencies: DependencyInconsistency[]
+    inconsistencies: DependencyInconsistency[],
   ): Promise<void> {
     // Implementation for checking missing dependencies
   }
 
   private async checkOrphanedDependencies(
     functionIds: string[],
-    inconsistencies: DependencyInconsistency[]
+    inconsistencies: DependencyInconsistency[],
   ): Promise<void> {
     // Implementation for checking orphaned dependencies
   }
 
   private async checkVersionConflicts(
     functionIds: string[],
-    inconsistencies: DependencyInconsistency[]
+    inconsistencies: DependencyInconsistency[],
   ): Promise<void> {
     // Implementation for checking version conflicts
   }
 
   private async checkCircularReferences(
     functionIds: string[],
-    inconsistencies: DependencyInconsistency[]
+    inconsistencies: DependencyInconsistency[],
   ): Promise<void> {
     // Implementation for checking circular references
   }
 
   private generateConsistencyRecommendations(
-    inconsistencies: DependencyInconsistency[]
+    inconsistencies: DependencyInconsistency[],
   ): string[] {
-    return ['Fix identified inconsistencies', 'Update dependency versions'];
+    return ["Fix identified inconsistencies", "Update dependency versions"];
   }
 
   private async findOptimizationOpportunities(
-    graph: DependencyGraph
+    graph: DependencyGraph,
   ): Promise<Array<{ functionId: string; type: OptimizationType }>> {
     return [];
   }
 
   private async applyOptimization(
     opportunity: { functionId: string; type: OptimizationType },
-    graph: DependencyGraph
+    graph: DependencyGraph,
   ): Promise<OptimizationImprovement | null> {
     return null;
   }
 
   private calculateOptimizationMetrics(
     graph: DependencyGraph,
-    improvements: OptimizationImprovement[]
+    improvements: OptimizationImprovement[],
   ): OptimizationMetrics {
     return {
       performanceGain: 0,
       memoryReduction: 0,
       dependencyReduction: 0,
-      complexityReduction: 0
+      complexityReduction: 0,
     };
   }
 }

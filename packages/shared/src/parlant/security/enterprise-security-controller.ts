@@ -9,8 +9,8 @@
  * @author PARLANT Enterprise Security Team
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Injectable, Logger } from "@nestjs/common";
+import { EventEmitter2 } from "@nestjs/event-emitter";
 import {
   EnterpriseComplianceConfig,
   EnterpriseSecurityMetrics,
@@ -19,7 +19,7 @@ import {
   ParlantSecurityConfig,
   DEFAULT_PARLANT_SECURITY_CONFIG,
   DEFAULT_ENTERPRISE_COMPLIANCE_CONFIG,
-} from './index';
+} from "./index";
 
 /**
  * Enterprise Security Event Types
@@ -27,7 +27,7 @@ import {
 export interface SecurityFrameworkEvent {
   type: string;
   timestamp: Date;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
   source: string;
   data: Record<string, unknown>;
   correlationId?: string;
@@ -54,8 +54,14 @@ export interface SecurityHealthCheck {
  */
 export interface SecurityIncidentContext {
   incidentId: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
-  category: 'authentication' | 'authorization' | 'data_breach' | 'malware' | 'ddos' | 'insider_threat';
+  severity: "low" | "medium" | "high" | "critical";
+  category:
+    | "authentication"
+    | "authorization"
+    | "data_breach"
+    | "malware"
+    | "ddos"
+    | "insider_threat";
   affected_systems: string[];
   timeline: {
     detected: Date;
@@ -63,7 +69,7 @@ export interface SecurityIncidentContext {
     resolved?: Date;
   };
   evidence: Array<{
-    type: 'log' | 'network_capture' | 'file_hash' | 'behavioral_pattern';
+    type: "log" | "network_capture" | "file_hash" | "behavioral_pattern";
     data: unknown;
     integrity_hash: string;
   }>;
@@ -77,26 +83,34 @@ export interface SecurityIncidentContext {
 
 @Injectable()
 export class ParlantEnterpriseSecurityController {
-  private readonly logger = new Logger(ParlantEnterpriseSecurityController.name);
+  private readonly logger = new Logger(
+    ParlantEnterpriseSecurityController.name,
+  );
   private readonly eventEmitter: EventEmitter2;
 
   private readonly securityConfig: ParlantSecurityConfig;
   private readonly complianceConfig: EnterpriseComplianceConfig;
 
-  private currentStatus: SecurityFrameworkStatus = 'initializing';
+  private currentStatus: SecurityFrameworkStatus = "initializing";
   private lastHealthCheck?: SecurityHealthCheck;
   private activeIncidents: Map<string, SecurityIncidentContext> = new Map();
 
   constructor(
     eventEmitter: EventEmitter2,
     securityConfig?: Partial<ParlantSecurityConfig>,
-    complianceConfig?: Partial<EnterpriseComplianceConfig>
+    complianceConfig?: Partial<EnterpriseComplianceConfig>,
   ) {
     this.eventEmitter = eventEmitter;
-    this.securityConfig = { ...DEFAULT_PARLANT_SECURITY_CONFIG, ...securityConfig };
-    this.complianceConfig = { ...DEFAULT_ENTERPRISE_COMPLIANCE_CONFIG, ...complianceConfig };
+    this.securityConfig = {
+      ...DEFAULT_PARLANT_SECURITY_CONFIG,
+      ...securityConfig,
+    };
+    this.complianceConfig = {
+      ...DEFAULT_ENTERPRISE_COMPLIANCE_CONFIG,
+      ...complianceConfig,
+    };
 
-    this.logger.log('Initializing PARLANT Enterprise Security Framework');
+    this.logger.log("Initializing PARLANT Enterprise Security Framework");
     this.initializeSecurityFramework();
   }
 
@@ -105,7 +119,7 @@ export class ParlantEnterpriseSecurityController {
    */
   private async initializeSecurityFramework(): Promise<void> {
     try {
-      this.logger.log('Starting security framework initialization...');
+      this.logger.log("Starting security framework initialization...");
 
       // Initialize core security components
       await this.initializeZeroTrustArchitecture();
@@ -118,27 +132,32 @@ export class ParlantEnterpriseSecurityController {
       const healthCheck = await this.performHealthCheck();
       this.lastHealthCheck = healthCheck;
 
-      if (healthCheck.status === 'active') {
-        this.currentStatus = 'active';
-        this.logger.log('✅ PARLANT Enterprise Security Framework initialized successfully');
+      if (healthCheck.status === "active") {
+        this.currentStatus = "active";
+        this.logger.log(
+          "✅ PARLANT Enterprise Security Framework initialized successfully",
+        );
 
         // Emit framework ready event
         this.emitSecurityEvent({
-          type: 'FRAMEWORK_INITIALIZED',
+          type: "FRAMEWORK_INITIALIZED",
           timestamp: new Date(),
-          severity: 'low',
-          source: 'enterprise-security-controller',
-          data: { status: this.currentStatus, metrics: healthCheck.metrics }
+          severity: "low",
+          source: "enterprise-security-controller",
+          data: { status: this.currentStatus, metrics: healthCheck.metrics },
         });
       } else {
-        this.currentStatus = 'degraded';
-        this.logger.warn('⚠️ Security framework initialized with degraded status');
+        this.currentStatus = "degraded";
+        this.logger.warn(
+          "⚠️ Security framework initialized with degraded status",
+        );
       }
-
     } catch (error) {
-      this.currentStatus = 'error';
-      this.logger.error('❌ Failed to initialize security framework', error);
-      throw new Error(`Security framework initialization failed: ${error.message}`);
+      this.currentStatus = "error";
+      this.logger.error("❌ Failed to initialize security framework", error);
+      throw new Error(
+        `Security framework initialization failed: ${error.message}`,
+      );
     }
   }
 
@@ -146,43 +165,45 @@ export class ParlantEnterpriseSecurityController {
    * Initialize Zero-Trust Architecture components
    */
   private async initializeZeroTrustArchitecture(): Promise<void> {
-    this.logger.log('Initializing Zero-Trust Architecture...');
+    this.logger.log("Initializing Zero-Trust Architecture...");
 
     // Zero-trust components would be initialized here
     // This is a placeholder for the actual zero-trust implementation
 
-    this.logger.log('✅ Zero-Trust Architecture initialized');
+    this.logger.log("✅ Zero-Trust Architecture initialized");
   }
 
   /**
    * Initialize Compliance Monitoring systems
    */
   private async initializeComplianceMonitoring(): Promise<void> {
-    this.logger.log('Initializing Compliance Monitoring...');
+    this.logger.log("Initializing Compliance Monitoring...");
 
     const enabledFrameworks: string[] = [];
 
     if (this.complianceConfig.soc2.enabled) {
-      enabledFrameworks.push('SOC2 Type II');
+      enabledFrameworks.push("SOC2 Type II");
     }
     if (this.complianceConfig.gdpr.enabled) {
-      enabledFrameworks.push('GDPR');
+      enabledFrameworks.push("GDPR");
     }
     if (this.complianceConfig.hipaa.enabled) {
-      enabledFrameworks.push('HIPAA');
+      enabledFrameworks.push("HIPAA");
     }
     if (this.complianceConfig.pciDss.enabled) {
-      enabledFrameworks.push('PCI DSS');
+      enabledFrameworks.push("PCI DSS");
     }
 
-    this.logger.log(`✅ Compliance Monitoring initialized for: ${enabledFrameworks.join(', ')}`);
+    this.logger.log(
+      `✅ Compliance Monitoring initialized for: ${enabledFrameworks.join(", ")}`,
+    );
   }
 
   /**
    * Initialize Threat Detection systems
    */
   private async initializeThreatDetection(): Promise<void> {
-    this.logger.log('Initializing Threat Detection...');
+    this.logger.log("Initializing Threat Detection...");
 
     if (this.securityConfig.threatDetection.enabled) {
       // Initialize ML-based behavioral analytics
@@ -190,32 +211,32 @@ export class ParlantEnterpriseSecurityController {
       // Initialize automated response systems
     }
 
-    this.logger.log('✅ Threat Detection initialized');
+    this.logger.log("✅ Threat Detection initialized");
   }
 
   /**
    * Initialize Immutable Audit Trail system
    */
   private async initializeAuditTrail(): Promise<void> {
-    this.logger.log('Initializing Immutable Audit Trail...');
+    this.logger.log("Initializing Immutable Audit Trail...");
 
     // Initialize cryptographic audit trail
     // Initialize blockchain-based integrity verification
 
-    this.logger.log('✅ Immutable Audit Trail initialized');
+    this.logger.log("✅ Immutable Audit Trail initialized");
   }
 
   /**
    * Initialize Conversational Security components
    */
   private async initializeConversationalSecurity(): Promise<void> {
-    this.logger.log('Initializing Conversational Security...');
+    this.logger.log("Initializing Conversational Security...");
 
     // Initialize NLP security validation
     // Initialize context-aware threat detection
     // Initialize prompt injection protection
 
-    this.logger.log('✅ Conversational Security initialized');
+    this.logger.log("✅ Conversational Security initialized");
   }
 
   /**
@@ -230,7 +251,8 @@ export class ParlantEnterpriseSecurityController {
       const complianceHealth = await this.checkComplianceHealth();
       const threatDetectionHealth = await this.checkThreatDetectionHealth();
       const auditTrailHealth = await this.checkAuditTrailHealth();
-      const conversationalHealth = await this.checkConversationalSecurityHealth();
+      const conversationalHealth =
+        await this.checkConversationalSecurityHealth();
 
       // Calculate overall metrics
       const metrics: EnterpriseSecurityMetrics = {
@@ -239,7 +261,7 @@ export class ParlantEnterpriseSecurityController {
         auditTrailIntegrity: auditTrailHealth.integrity,
         zeroTrustCoverage: 0.95, // Placeholder
         incidentResponseTime: 300, // 5 minutes in seconds
-        vulnerabilityRemediationTime: 86400 // 24 hours in seconds
+        vulnerabilityRemediationTime: 86400, // 24 hours in seconds
       };
 
       // Determine overall status
@@ -248,14 +270,14 @@ export class ParlantEnterpriseSecurityController {
         complianceHealth.status,
         threatDetectionHealth.status,
         auditTrailHealth.status,
-        conversationalHealth.status
+        conversationalHealth.status,
       ];
 
-      let overallStatus: SecurityFrameworkStatus = 'active';
-      if (componentStatuses.some(status => status === 'error')) {
-        overallStatus = 'error';
-      } else if (componentStatuses.some(status => status === 'degraded')) {
-        overallStatus = 'degraded';
+      let overallStatus: SecurityFrameworkStatus = "active";
+      if (componentStatuses.some((status) => status === "error")) {
+        overallStatus = "error";
+      } else if (componentStatuses.some((status) => status === "degraded")) {
+        overallStatus = "degraded";
       }
 
       const healthCheck: SecurityHealthCheck = {
@@ -265,21 +287,22 @@ export class ParlantEnterpriseSecurityController {
           compliance: complianceHealth,
           threatDetection: threatDetectionHealth,
           auditTrail: auditTrailHealth,
-          conversational: conversationalHealth
+          conversational: conversationalHealth,
         },
         metrics,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
 
       this.lastHealthCheck = healthCheck;
 
       const duration = Date.now() - startTime;
-      this.logger.log(`Health check completed in ${duration}ms - Status: ${overallStatus}`);
+      this.logger.log(
+        `Health check completed in ${duration}ms - Status: ${overallStatus}`,
+      );
 
       return healthCheck;
-
     } catch (error) {
-      this.logger.error('Health check failed', error);
+      this.logger.error("Health check failed", error);
       throw new Error(`Health check failed: ${error.message}`);
     }
   }
@@ -287,34 +310,38 @@ export class ParlantEnterpriseSecurityController {
   /**
    * Handle security incident
    */
-  public async handleSecurityIncident(incident: Partial<SecurityIncidentContext>): Promise<string> {
+  public async handleSecurityIncident(
+    incident: Partial<SecurityIncidentContext>,
+  ): Promise<string> {
     const incidentId = incident.incidentId || this.generateIncidentId();
 
     const fullIncident: SecurityIncidentContext = {
       incidentId,
-      severity: incident.severity || 'medium',
-      category: incident.category || 'authentication',
+      severity: incident.severity || "medium",
+      category: incident.category || "authentication",
       affected_systems: incident.affected_systems || [],
       timeline: {
         detected: new Date(),
-        ...incident.timeline
+        ...incident.timeline,
       },
       evidence: incident.evidence || [],
-      response_actions: incident.response_actions || []
+      response_actions: incident.response_actions || [],
     };
 
     this.activeIncidents.set(incidentId, fullIncident);
 
-    this.logger.warn(`🚨 Security incident detected: ${incidentId} - Severity: ${fullIncident.severity}`);
+    this.logger.warn(
+      `🚨 Security incident detected: ${incidentId} - Severity: ${fullIncident.severity}`,
+    );
 
     // Emit incident event
     this.emitSecurityEvent({
-      type: 'SECURITY_INCIDENT_DETECTED',
+      type: "SECURITY_INCIDENT_DETECTED",
       timestamp: new Date(),
       severity: fullIncident.severity,
-      source: 'incident-handler',
+      source: "incident-handler",
       data: { incidentId, category: fullIncident.category },
-      correlationId: incidentId
+      correlationId: incidentId,
     });
 
     // Trigger automated response if configured
@@ -336,9 +363,10 @@ export class ParlantEnterpriseSecurityController {
   } {
     return {
       status: this.currentStatus,
-      uptime: Date.now() - (this.lastHealthCheck?.timestamp.getTime() || Date.now()),
+      uptime:
+        Date.now() - (this.lastHealthCheck?.timestamp.getTime() || Date.now()),
       lastHealthCheck: this.lastHealthCheck,
-      activeIncidents: this.activeIncidents.size
+      activeIncidents: this.activeIncidents.size,
     };
   }
 
@@ -362,14 +390,14 @@ export class ParlantEnterpriseSecurityController {
    * Emit security event through event system
    */
   private emitSecurityEvent(event: SecurityFrameworkEvent): void {
-    this.eventEmitter.emit('security.framework.event', event);
+    this.eventEmitter.emit("security.framework.event", event);
 
     // Log based on severity
-    if (event.severity === 'critical') {
+    if (event.severity === "critical") {
       this.logger.error(`🔴 CRITICAL: ${event.type}`, event.data);
-    } else if (event.severity === 'high') {
+    } else if (event.severity === "high") {
       this.logger.warn(`🟠 HIGH: ${event.type}`, event.data);
-    } else if (event.severity === 'medium') {
+    } else if (event.severity === "medium") {
       this.logger.log(`🟡 MEDIUM: ${event.type}`, event.data);
     } else {
       this.logger.debug(`🟢 LOW: ${event.type}`, event.data);
@@ -379,38 +407,48 @@ export class ParlantEnterpriseSecurityController {
   /**
    * Execute automated incident response
    */
-  private async executeAutomatedResponse(incident: SecurityIncidentContext): Promise<void> {
-    const responseActions: Array<{ action: string; timestamp: Date; executor: string; result: string }> = [];
+  private async executeAutomatedResponse(
+    incident: SecurityIncidentContext,
+  ): Promise<void> {
+    const responseActions: Array<{
+      action: string;
+      timestamp: Date;
+      executor: string;
+      result: string;
+    }> = [];
 
     try {
       // Implement automated response logic based on incident type and severity
       switch (incident.category) {
-        case 'authentication':
-          if (incident.severity === 'high' || incident.severity === 'critical') {
+        case "authentication":
+          if (
+            incident.severity === "high" ||
+            incident.severity === "critical"
+          ) {
             responseActions.push({
-              action: 'TEMPORARY_ACCOUNT_SUSPENSION',
+              action: "TEMPORARY_ACCOUNT_SUSPENSION",
               timestamp: new Date(),
-              executor: 'automated-response-system',
-              result: 'SUCCESS'
+              executor: "automated-response-system",
+              result: "SUCCESS",
             });
           }
           break;
 
-        case 'data_breach':
+        case "data_breach":
           responseActions.push({
-            action: 'EMERGENCY_DATA_ISOLATION',
+            action: "EMERGENCY_DATA_ISOLATION",
             timestamp: new Date(),
-            executor: 'automated-response-system',
-            result: 'SUCCESS'
+            executor: "automated-response-system",
+            result: "SUCCESS",
           });
           break;
 
         default:
           responseActions.push({
-            action: 'ENHANCED_MONITORING',
+            action: "ENHANCED_MONITORING",
             timestamp: new Date(),
-            executor: 'automated-response-system',
-            result: 'SUCCESS'
+            executor: "automated-response-system",
+            result: "SUCCESS",
           });
       }
 
@@ -418,31 +456,35 @@ export class ParlantEnterpriseSecurityController {
       incident.response_actions.push(...responseActions);
       this.activeIncidents.set(incident.incidentId, incident);
 
-      this.logger.log(`Automated response executed for incident ${incident.incidentId}`);
-
+      this.logger.log(
+        `Automated response executed for incident ${incident.incidentId}`,
+      );
     } catch (error) {
-      this.logger.error(`Failed to execute automated response for incident ${incident.incidentId}`, error);
+      this.logger.error(
+        `Failed to execute automated response for incident ${incident.incidentId}`,
+        error,
+      );
     }
   }
 
   // Health check methods for each component
   private async checkZeroTrustHealth() {
-    return { status: 'active', latency: 50 };
+    return { status: "active", latency: 50 };
   }
 
   private async checkComplianceHealth() {
-    return { status: 'active', coverage: 0.98 };
+    return { status: "active", coverage: 0.98 };
   }
 
   private async checkThreatDetectionHealth() {
-    return { status: 'active', accuracy: 0.95 };
+    return { status: "active", accuracy: 0.95 };
   }
 
   private async checkAuditTrailHealth() {
-    return { status: 'active', integrity: 1.0 };
+    return { status: "active", integrity: 1.0 };
   }
 
   private async checkConversationalSecurityHealth() {
-    return { status: 'active', validationRate: 0.97 };
+    return { status: "active", validationRate: 0.97 };
   }
 }

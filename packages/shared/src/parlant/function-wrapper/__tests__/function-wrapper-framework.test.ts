@@ -11,8 +11,8 @@
  * @created 2025-09-19
  */
 
-import { Test, TestingModule } from '@nestjs/testing';
-import { Logger } from '@nestjs/common';
+import { Test, TestingModule } from "@nestjs/testing";
+import { Logger } from "@nestjs/common";
 
 // Import framework components
 import {
@@ -24,21 +24,21 @@ import {
   UserContext,
   ValidationResult,
   ConversationState,
-  ErrorCategory
-} from '../interfaces/wrapper-types';
+  ErrorCategory,
+} from "../interfaces/wrapper-types";
 
 import {
   SignaturePreservingWrapper,
   TypeSafeWrapperCreator,
   FunctionSignatureInspector,
-  WrapperStatistics
-} from '../core/signature-preserving-wrapper';
+  WrapperStatistics,
+} from "../core/signature-preserving-wrapper";
 
 import {
   EnterpriseFunctionWrapperFactory,
   WrapperCreationError,
-  ConfigurationUseCase
-} from '../factories/function-wrapper-factory';
+  ConfigurationUseCase,
+} from "../factories/function-wrapper-factory";
 
 import {
   ParameterCaptureValidationService,
@@ -46,23 +46,23 @@ import {
   ParameterTypeAnalyzer,
   ParameterSecurityValidator,
   ParameterPerformanceOptimizer,
-  SecurityRiskLevel as ParamSecurityRiskLevel
-} from '../validation/parameter-capture-validation';
+  SecurityRiskLevel as ParamSecurityRiskLevel,
+} from "../validation/parameter-capture-validation";
 
 import {
   ReturnValueProcessingService,
   ResultAnalyzer,
   ReturnValueSecurityProcessor,
   ResultTransformationEngine,
-  DataValueLevel
-} from '../validation/return-value-processing';
+  DataValueLevel,
+} from "../validation/return-value-processing";
 
 import {
   WrapperRegistryManagementService,
   WrapperPerformanceMonitor,
   WrapperHealthMonitor,
-  WrapperStatus
-} from '../core/wrapper-registry-management';
+  WrapperStatus,
+} from "../core/wrapper-registry-management";
 
 /**
  * Test Data and Utilities
@@ -70,56 +70,64 @@ import {
 class TestUtilities {
   static createMockUserContext(): UserContext {
     return {
-      userId: 'test-user-123',
-      authToken: 'mock-jwt-token',
-      permissions: ['execute', 'access-pii', 'access-credentials'],
+      userId: "test-user-123",
+      authToken: "mock-jwt-token",
+      permissions: ["execute", "access-pii", "access-credentials"],
       sessionMetadata: {
-        sessionId: 'test-session-456',
-        ipAddress: '127.0.0.1',
-        userAgent: 'Test Agent 1.0'
-      }
+        sessionId: "test-session-456",
+        ipAddress: "127.0.0.1",
+        userAgent: "Test Agent 1.0",
+      },
     };
   }
 
-  static createMockValidationResult(approved: boolean = true): ValidationResult {
+  static createMockValidationResult(
+    approved: boolean = true,
+  ): ValidationResult {
     return {
       approved,
-      validationId: 'val_test_123',
-      reason: approved ? 'Test validation approved' : 'Test validation rejected',
+      validationId: "val_test_123",
+      reason: approved
+        ? "Test validation approved"
+        : "Test validation rejected",
       conversationContext: {
-        sessionId: 'conv_test_123',
+        sessionId: "conv_test_123",
         messages: [
           {
-            id: 'msg_1',
-            role: 'system',
-            content: 'Test validation message',
-            timestamp: new Date()
-          }
+            id: "msg_1",
+            role: "system",
+            content: "Test validation message",
+            timestamp: new Date(),
+          },
         ],
-        appliedGuidelines: ['test-guideline'],
-        toolsInvoked: ['test-tool'],
-        state: approved ? ConversationState.APPROVED : ConversationState.REJECTED
+        appliedGuidelines: ["test-guideline"],
+        toolsInvoked: ["test-tool"],
+        state: approved
+          ? ConversationState.APPROVED
+          : ConversationState.REJECTED,
       },
       confidence: 0.95,
       executionTime: 100,
-      metadata: { test: true }
+      metadata: { test: true },
     };
   }
 
-  static createBasicWrapperConfig(functionId: string = 'test-function'): WrapperConfig {
+  static createBasicWrapperConfig(
+    functionId: string = "test-function",
+  ): WrapperConfig {
     return {
       functionId,
-      description: 'Test function for unit testing',
+      description: "Test function for unit testing",
       validationLevel: ValidationLevel.MEDIUM,
       cacheable: true,
       monitoring: true,
       metadata: {
         category: FunctionCategory.UTILITY,
-        domain: 'test',
+        domain: "test",
         dataClassification: DataClassification.INTERNAL,
         dependencies: [],
-        tags: ['test', 'unit-test']
-      }
+        tags: ["test", "unit-test"],
+      },
     };
   }
 
@@ -129,20 +137,23 @@ class TestUtilities {
   }
 
   static async asyncFunction(data: string): Promise<string> {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       setTimeout(() => resolve(`Processed: ${data}`), 10);
     });
   }
 
-  static complexFunction(config: { name: string; options: any[] }): { result: string; count: number } {
+  static complexFunction(config: { name: string; options: any[] }): {
+    result: string;
+    count: number;
+  } {
     return {
       result: `Processed ${config.name}`,
-      count: config.options.length
+      count: config.options.length,
     };
   }
 
   static errorFunction(): never {
-    throw new Error('Test error function');
+    throw new Error("Test error function");
   }
 
   static piiFunction(email: string, ssn: string): { masked: boolean } {
@@ -153,69 +164,92 @@ class TestUtilities {
 /**
  * Function Signature Inspector Tests
  */
-describe('FunctionSignatureInspector', () => {
-  describe('extractSignature', () => {
-    it('should extract signature for simple function', () => {
-      const signature = FunctionSignatureInspector.extractSignature(TestUtilities.simpleFunction);
+describe("FunctionSignatureInspector", () => {
+  describe("extractSignature", () => {
+    it("should extract signature for simple function", () => {
+      const signature = FunctionSignatureInspector.extractSignature(
+        TestUtilities.simpleFunction,
+      );
 
-      expect(signature.name).toBe('simpleFunction');
+      expect(signature.name).toBe("simpleFunction");
       expect(signature.parameterCount).toBe(2);
-      expect(signature.parameterNames).toEqual(['a', 'b']);
+      expect(signature.parameterNames).toEqual(["a", "b"]);
       expect(signature.isAsync).toBe(false);
-      expect(signature.returnTypeHint).toBe('unknown');
+      expect(signature.returnTypeHint).toBe("unknown");
     });
 
-    it('should extract signature for async function', () => {
-      const signature = FunctionSignatureInspector.extractSignature(TestUtilities.asyncFunction);
+    it("should extract signature for async function", () => {
+      const signature = FunctionSignatureInspector.extractSignature(
+        TestUtilities.asyncFunction,
+      );
 
-      expect(signature.name).toBe('asyncFunction');
+      expect(signature.name).toBe("asyncFunction");
       expect(signature.parameterCount).toBe(1);
       expect(signature.isAsync).toBe(true);
       expect(signature.originalFunction).toBe(TestUtilities.asyncFunction);
     });
 
-    it('should extract signature for complex function', () => {
-      const signature = FunctionSignatureInspector.extractSignature(TestUtilities.complexFunction);
+    it("should extract signature for complex function", () => {
+      const signature = FunctionSignatureInspector.extractSignature(
+        TestUtilities.complexFunction,
+      );
 
-      expect(signature.name).toBe('complexFunction');
+      expect(signature.name).toBe("complexFunction");
       expect(signature.parameterCount).toBe(1);
-      expect(signature.parameterNames).toEqual(['config']);
+      expect(signature.parameterNames).toEqual(["config"]);
     });
 
-    it('should handle anonymous functions', () => {
+    it("should handle anonymous functions", () => {
       const anonymousFunc = (x: number) => x * 2;
-      const signature = FunctionSignatureInspector.extractSignature(anonymousFunc);
+      const signature =
+        FunctionSignatureInspector.extractSignature(anonymousFunc);
 
-      expect(signature.name).toBe('');
+      expect(signature.name).toBe("");
       expect(signature.parameterCount).toBe(1);
     });
   });
 
-  describe('validateCompatibility', () => {
-    it('should validate compatible function', () => {
-      const result = FunctionSignatureInspector.validateCompatibility(TestUtilities.simpleFunction);
+  describe("validateCompatibility", () => {
+    it("should validate compatible function", () => {
+      const result = FunctionSignatureInspector.validateCompatibility(
+        TestUtilities.simpleFunction,
+      );
 
       expect(result.compatible).toBe(true);
       expect(result.issues).toHaveLength(0);
-      expect(result.signature.name).toBe('simpleFunction');
+      expect(result.signature.name).toBe("simpleFunction");
     });
 
-    it('should detect incompatible functions', () => {
-      const evalFunction = new Function('code', 'return eval(code)');
-      const result = FunctionSignatureInspector.validateCompatibility(evalFunction);
+    it("should detect incompatible functions", () => {
+      const evalFunction = new Function("code", "return eval(code)");
+      const result =
+        FunctionSignatureInspector.validateCompatibility(evalFunction);
 
       expect(result.compatible).toBe(false);
       expect(result.issues.length).toBeGreaterThan(0);
-      expect(result.issues[0]).toContain('eval()');
+      expect(result.issues[0]).toContain("eval()");
     });
 
-    it('should provide warnings for high parameter count', () => {
-      const manyParamsFunc = (a: any, b: any, c: any, d: any, e: any, f: any, g: any, h: any, i: any, j: any, k: any) => {};
-      const result = FunctionSignatureInspector.validateCompatibility(manyParamsFunc);
+    it("should provide warnings for high parameter count", () => {
+      const manyParamsFunc = (
+        a: any,
+        b: any,
+        c: any,
+        d: any,
+        e: any,
+        f: any,
+        g: any,
+        h: any,
+        i: any,
+        j: any,
+        k: any,
+      ) => {};
+      const result =
+        FunctionSignatureInspector.validateCompatibility(manyParamsFunc);
 
       expect(result.compatible).toBe(true);
       expect(result.warnings.length).toBeGreaterThan(0);
-      expect(result.warnings[0]).toContain('parameters');
+      expect(result.warnings[0]).toContain("parameters");
     });
   });
 });
@@ -223,21 +257,24 @@ describe('FunctionSignatureInspector', () => {
 /**
  * Signature Preserving Wrapper Tests
  */
-describe('SignaturePreservingWrapper', () => {
+describe("SignaturePreservingWrapper", () => {
   let wrapper: SignaturePreservingWrapper<typeof TestUtilities.simpleFunction>;
   let config: WrapperConfig;
 
   beforeEach(() => {
-    config = TestUtilities.createBasicWrapperConfig('test-simple-function');
-    wrapper = new SignaturePreservingWrapper(TestUtilities.simpleFunction, config);
+    config = TestUtilities.createBasicWrapperConfig("test-simple-function");
+    wrapper = new SignaturePreservingWrapper(
+      TestUtilities.simpleFunction,
+      config,
+    );
   });
 
-  describe('createWrappedFunction', () => {
-    it('should create wrapped function that preserves signature', async () => {
+  describe("createWrappedFunction", () => {
+    it("should create wrapped function that preserves signature", async () => {
       const wrappedFunction = wrapper.createWrappedFunction();
 
-      expect(typeof wrappedFunction).toBe('function');
-      expect(wrappedFunction.name).toBe('wrapped_test-simple-function');
+      expect(typeof wrappedFunction).toBe("function");
+      expect(wrappedFunction.name).toBe("wrapped_test-simple-function");
 
       // Test execution
       const result = await wrappedFunction(5, 3);
@@ -247,40 +284,54 @@ describe('SignaturePreservingWrapper', () => {
       expect(result.metadata.executionId).toBeDefined();
     });
 
-    it('should handle async functions correctly', async () => {
-      const asyncConfig = TestUtilities.createBasicWrapperConfig('test-async-function');
-      const asyncWrapper = new SignaturePreservingWrapper(TestUtilities.asyncFunction, asyncConfig);
+    it("should handle async functions correctly", async () => {
+      const asyncConfig = TestUtilities.createBasicWrapperConfig(
+        "test-async-function",
+      );
+      const asyncWrapper = new SignaturePreservingWrapper(
+        TestUtilities.asyncFunction,
+        asyncConfig,
+      );
       const wrappedFunction = asyncWrapper.createWrappedFunction();
 
-      const result = await wrappedFunction('test data');
+      const result = await wrappedFunction("test data");
       expect(result.success).toBe(true);
-      expect(result.result).toBe('Processed: test data');
+      expect(result.result).toBe("Processed: test data");
     });
 
-    it('should handle function errors gracefully', async () => {
-      const errorConfig = TestUtilities.createBasicWrapperConfig('test-error-function');
-      const errorWrapper = new SignaturePreservingWrapper(TestUtilities.errorFunction, errorConfig);
+    it("should handle function errors gracefully", async () => {
+      const errorConfig = TestUtilities.createBasicWrapperConfig(
+        "test-error-function",
+      );
+      const errorWrapper = new SignaturePreservingWrapper(
+        TestUtilities.errorFunction,
+        errorConfig,
+      );
       const wrappedFunction = errorWrapper.createWrappedFunction();
 
       const result = await wrappedFunction();
       expect(result.success).toBe(false);
       expect(result.error).toBeDefined();
-      expect(result.error?.code).toBe('EXECUTION_ERROR');
+      expect(result.error?.code).toBe("EXECUTION_ERROR");
     });
 
-    it('should generate audit trail', async () => {
+    it("should generate audit trail", async () => {
       const wrappedFunction = wrapper.createWrappedFunction();
       const result = await wrappedFunction(10, 20);
 
       expect(result.metadata.auditTrail).toBeDefined();
-      expect(result.metadata.auditTrail.functionCall.functionName).toBe('test-simple-function');
-      expect(result.metadata.auditTrail.functionCall.parameters).toEqual([10, 20]);
+      expect(result.metadata.auditTrail.functionCall.functionName).toBe(
+        "test-simple-function",
+      );
+      expect(result.metadata.auditTrail.functionCall.parameters).toEqual([
+        10, 20,
+      ]);
       expect(result.metadata.auditTrail.resultSummary.success).toBe(true);
     });
   });
 
-  describe('getStatistics', () => {
-    it('should track wrapper statistics', async () => {
+  describe("getStatistics", () => {
+    it("should track wrapper statistics", async () => {
       const wrappedFunction = wrapper.createWrappedFunction();
 
       // Execute function multiple times
@@ -289,13 +340,13 @@ describe('SignaturePreservingWrapper', () => {
       await wrappedFunction(5, 6);
 
       const stats = wrapper.getStatistics();
-      expect(stats.functionId).toBe('test-simple-function');
+      expect(stats.functionId).toBe("test-simple-function");
       expect(stats.totalExecutions).toBe(3);
       expect(stats.averageExecutionTime).toBeGreaterThan(0);
       expect(stats.validationLevel).toBe(ValidationLevel.MEDIUM);
     });
 
-    it('should reset statistics', async () => {
+    it("should reset statistics", async () => {
       const wrappedFunction = wrapper.createWrappedFunction();
       await wrappedFunction(1, 2);
 
@@ -309,18 +360,22 @@ describe('SignaturePreservingWrapper', () => {
 /**
  * Type Safe Wrapper Creator Tests
  */
-describe('TypeSafeWrapperCreator', () => {
-  describe('createWrapper', () => {
-    it('should create type-safe wrapper', () => {
-      const config = TestUtilities.createBasicWrapperConfig('type-safe-test');
-      const wrappedFunction = TypeSafeWrapperCreator.createWrapper(TestUtilities.simpleFunction, config);
+describe("TypeSafeWrapperCreator", () => {
+  describe("createWrapper", () => {
+    it("should create type-safe wrapper", () => {
+      const config = TestUtilities.createBasicWrapperConfig("type-safe-test");
+      const wrappedFunction = TypeSafeWrapperCreator.createWrapper(
+        TestUtilities.simpleFunction,
+        config,
+      );
 
-      expect(typeof wrappedFunction).toBe('function');
+      expect(typeof wrappedFunction).toBe("function");
     });
 
-    it('should reject incompatible functions', () => {
-      const config = TestUtilities.createBasicWrapperConfig('incompatible-test');
-      const evalFunction = new Function('code', 'return eval(code)');
+    it("should reject incompatible functions", () => {
+      const config =
+        TestUtilities.createBasicWrapperConfig("incompatible-test");
+      const evalFunction = new Function("code", "return eval(code)");
 
       expect(() => {
         TypeSafeWrapperCreator.createWrapper(evalFunction, config);
@@ -328,21 +383,21 @@ describe('TypeSafeWrapperCreator', () => {
     });
   });
 
-  describe('createValidatedWrapper', () => {
-    it('should create wrapper with type validation', () => {
-      const config = TestUtilities.createBasicWrapperConfig('validated-test');
+  describe("createValidatedWrapper", () => {
+    it("should create wrapper with type validation", () => {
+      const config = TestUtilities.createBasicWrapperConfig("validated-test");
       const typeValidator = {
         validateInputs: jest.fn().mockReturnValue({ valid: true, errors: [] }),
-        validateOutput: jest.fn().mockReturnValue({ valid: true, errors: [] })
+        validateOutput: jest.fn().mockReturnValue({ valid: true, errors: [] }),
       };
 
       const wrappedFunction = TypeSafeWrapperCreator.createValidatedWrapper(
         TestUtilities.simpleFunction,
         config,
-        typeValidator
+        typeValidator,
       );
 
-      expect(typeof wrappedFunction).toBe('function');
+      expect(typeof wrappedFunction).toBe("function");
     });
   });
 });
@@ -350,83 +405,98 @@ describe('TypeSafeWrapperCreator', () => {
 /**
  * Enterprise Function Wrapper Factory Tests
  */
-describe('EnterpriseFunctionWrapperFactory', () => {
+describe("EnterpriseFunctionWrapperFactory", () => {
   let factory: EnterpriseFunctionWrapperFactory;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [EnterpriseFunctionWrapperFactory]
+      providers: [EnterpriseFunctionWrapperFactory],
     }).compile();
 
-    factory = module.get<EnterpriseFunctionWrapperFactory>(EnterpriseFunctionWrapperFactory);
+    factory = module.get<EnterpriseFunctionWrapperFactory>(
+      EnterpriseFunctionWrapperFactory,
+    );
   });
 
-  describe('createWrapper', () => {
-    it('should create wrapper successfully', () => {
-      const config = TestUtilities.createBasicWrapperConfig('factory-test');
-      const wrappedFunction = factory.createWrapper(TestUtilities.simpleFunction, config);
+  describe("createWrapper", () => {
+    it("should create wrapper successfully", () => {
+      const config = TestUtilities.createBasicWrapperConfig("factory-test");
+      const wrappedFunction = factory.createWrapper(
+        TestUtilities.simpleFunction,
+        config,
+      );
 
-      expect(typeof wrappedFunction).toBe('function');
+      expect(typeof wrappedFunction).toBe("function");
     });
 
-    it('should validate configuration', () => {
+    it("should validate configuration", () => {
       const invalidConfig = {
-        functionId: '',
-        description: '',
-        validationLevel: 'invalid' as ValidationLevel
+        functionId: "",
+        description: "",
+        validationLevel: "invalid" as ValidationLevel,
       };
 
       expect(() => {
-        factory.createWrapper(TestUtilities.simpleFunction, invalidConfig as WrapperConfig);
+        factory.createWrapper(
+          TestUtilities.simpleFunction,
+          invalidConfig as WrapperConfig,
+        );
       }).toThrow();
     });
 
-    it('should enhance configuration with defaults', () => {
+    it("should enhance configuration with defaults", () => {
       const minimalConfig: WrapperConfig = {
-        functionId: 'minimal-test',
-        description: 'Minimal test configuration',
-        validationLevel: ValidationLevel.LOW
+        functionId: "minimal-test",
+        description: "Minimal test configuration",
+        validationLevel: ValidationLevel.LOW,
       };
 
-      const wrappedFunction = factory.createWrapper(TestUtilities.simpleFunction, minimalConfig);
-      expect(typeof wrappedFunction).toBe('function');
+      const wrappedFunction = factory.createWrapper(
+        TestUtilities.simpleFunction,
+        minimalConfig,
+      );
+      expect(typeof wrappedFunction).toBe("function");
     });
   });
 
-  describe('createBatchWrappers', () => {
-    it('should create multiple wrappers', () => {
+  describe("createBatchWrappers", () => {
+    it("should create multiple wrappers", () => {
       const functions = {
         simpleFunc: TestUtilities.simpleFunction,
         asyncFunc: TestUtilities.asyncFunction,
-        complexFunc: TestUtilities.complexFunction
+        complexFunc: TestUtilities.complexFunction,
       };
 
       const configs = {
-        simpleFunc: TestUtilities.createBasicWrapperConfig('batch-simple'),
-        asyncFunc: TestUtilities.createBasicWrapperConfig('batch-async'),
-        complexFunc: TestUtilities.createBasicWrapperConfig('batch-complex')
+        simpleFunc: TestUtilities.createBasicWrapperConfig("batch-simple"),
+        asyncFunc: TestUtilities.createBasicWrapperConfig("batch-async"),
+        complexFunc: TestUtilities.createBasicWrapperConfig("batch-complex"),
       };
 
       const wrappedFunctions = factory.createBatchWrappers(functions, configs);
 
       expect(Object.keys(wrappedFunctions)).toHaveLength(3);
-      expect(typeof wrappedFunctions.simpleFunc).toBe('function');
-      expect(typeof wrappedFunctions.asyncFunc).toBe('function');
-      expect(typeof wrappedFunctions.complexFunc).toBe('function');
+      expect(typeof wrappedFunctions.simpleFunc).toBe("function");
+      expect(typeof wrappedFunctions.asyncFunc).toBe("function");
+      expect(typeof wrappedFunctions.complexFunc).toBe("function");
     });
   });
 
-  describe('createConfigurationTemplate', () => {
-    it('should create database read template', () => {
-      const template = factory.createConfigurationTemplate(ConfigurationUseCase.DATABASE_READ);
+  describe("createConfigurationTemplate", () => {
+    it("should create database read template", () => {
+      const template = factory.createConfigurationTemplate(
+        ConfigurationUseCase.DATABASE_READ,
+      );
 
       expect(template.cacheable).toBe(true);
       expect(template.metadata?.category).toBe(FunctionCategory.DATABASE_READ);
       expect(template.validationLevel).toBe(ValidationLevel.MEDIUM);
     });
 
-    it('should create authentication template', () => {
-      const template = factory.createConfigurationTemplate(ConfigurationUseCase.AUTHENTICATION);
+    it("should create authentication template", () => {
+      const template = factory.createConfigurationTemplate(
+        ConfigurationUseCase.AUTHENTICATION,
+      );
 
       expect(template.cacheable).toBe(false);
       expect(template.metadata?.category).toBe(FunctionCategory.AUTHENTICATION);
@@ -434,13 +504,13 @@ describe('EnterpriseFunctionWrapperFactory', () => {
     });
   });
 
-  describe('registerValidationRule', () => {
-    it('should register global validation rule', () => {
+  describe("registerValidationRule", () => {
+    it("should register global validation rule", () => {
       const rule = {
-        id: 'test-rule',
-        description: 'Test validation rule',
+        id: "test-rule",
+        description: "Test validation rule",
         validator: jest.fn().mockResolvedValue({ approved: true }),
-        priority: 5
+        priority: 5,
       };
 
       factory.registerValidationRule(rule);
@@ -454,136 +524,144 @@ describe('EnterpriseFunctionWrapperFactory', () => {
 /**
  * Parameter Capture Validation Service Tests
  */
-describe('ParameterCaptureValidationService', () => {
+describe("ParameterCaptureValidationService", () => {
   let service: ParameterCaptureValidationService;
   let userContext: UserContext;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [ParameterCaptureValidationService]
+      providers: [ParameterCaptureValidationService],
     }).compile();
 
-    service = module.get<ParameterCaptureValidationService>(ParameterCaptureValidationService);
+    service = module.get<ParameterCaptureValidationService>(
+      ParameterCaptureValidationService,
+    );
     userContext = TestUtilities.createMockUserContext();
   });
 
-  describe('captureAndValidateParameters', () => {
-    it('should capture and validate simple parameters', async () => {
-      const parameters = [123, 'test string', true];
+  describe("captureAndValidateParameters", () => {
+    it("should capture and validate simple parameters", async () => {
+      const parameters = [123, "test string", true];
       const result = await service.captureAndValidateParameters(
-        'test-function',
+        "test-function",
         parameters,
         userContext,
-        ValidationLevel.MEDIUM
+        ValidationLevel.MEDIUM,
       );
 
       expect(result.validationPassed).toBe(true);
       expect(result.capturedParameters).toHaveLength(3);
-      expect(result.capturedParameters[0].type).toBe('number');
-      expect(result.capturedParameters[1].type).toBe('string');
-      expect(result.capturedParameters[2].type).toBe('boolean');
+      expect(result.capturedParameters[0].type).toBe("number");
+      expect(result.capturedParameters[1].type).toBe("string");
+      expect(result.capturedParameters[2].type).toBe("boolean");
     });
 
-    it('should detect PII in parameters', async () => {
-      const parameters = ['user@example.com', '123-45-6789'];
+    it("should detect PII in parameters", async () => {
+      const parameters = ["user@example.com", "123-45-6789"];
       const result = await service.captureAndValidateParameters(
-        'pii-function',
+        "pii-function",
         parameters,
         userContext,
-        ValidationLevel.HIGH
+        ValidationLevel.HIGH,
       );
 
       expect(result.capturedParameters[0].metadata.containsPII).toBe(true);
       expect(result.capturedParameters[1].metadata.containsPII).toBe(true);
     });
 
-    it('should detect credentials in parameters', async () => {
-      const parameters = [{ password: 'secret123', apiKey: 'abc123' }];
+    it("should detect credentials in parameters", async () => {
+      const parameters = [{ password: "secret123", apiKey: "abc123" }];
       const result = await service.captureAndValidateParameters(
-        'credential-function',
+        "credential-function",
         parameters,
         userContext,
-        ValidationLevel.CRITICAL
+        ValidationLevel.CRITICAL,
       );
 
-      expect(result.capturedParameters[0].metadata.containsCredentials).toBe(true);
+      expect(result.capturedParameters[0].metadata.containsCredentials).toBe(
+        true,
+      );
     });
 
-    it('should handle complex nested objects', async () => {
+    it("should handle complex nested objects", async () => {
       const complexParam = {
         user: {
           id: 123,
           profile: {
-            name: 'John Doe',
-            email: 'john@example.com',
+            name: "John Doe",
+            email: "john@example.com",
             settings: {
-              theme: 'dark',
-              notifications: true
-            }
-          }
+              theme: "dark",
+              notifications: true,
+            },
+          },
         },
         metadata: {
           timestamp: new Date(),
-          source: 'api'
-        }
+          source: "api",
+        },
       };
 
       const result = await service.captureAndValidateParameters(
-        'complex-function',
+        "complex-function",
         [complexParam],
         userContext,
-        ValidationLevel.MEDIUM
+        ValidationLevel.MEDIUM,
       );
 
       expect(result.validationPassed).toBe(true);
-      expect(result.capturedParameters[0].metadata.complexity).toBeGreaterThan(50);
+      expect(result.capturedParameters[0].metadata.complexity).toBeGreaterThan(
+        50,
+      );
       expect(result.typeAnalysis.complexityScore).toBeGreaterThan(30);
     });
   });
 
-  describe('createParameterSummaryForConversation', () => {
-    it('should create human-readable summary', async () => {
-      const parameters = [123, 'test', { key: 'value' }];
+  describe("createParameterSummaryForConversation", () => {
+    it("should create human-readable summary", async () => {
+      const parameters = [123, "test", { key: "value" }];
       const captureResult = await service.captureAndValidateParameters(
-        'summary-test',
+        "summary-test",
         parameters,
         userContext,
-        ValidationLevel.MEDIUM
+        ValidationLevel.MEDIUM,
       );
 
       const summary = service.createParameterSummaryForConversation(
         captureResult.capturedParameters,
-        'summary-test',
-        userContext
+        "summary-test",
+        userContext,
       );
 
-      expect(summary.functionName).toBe('summary-test');
+      expect(summary.functionName).toBe("summary-test");
       expect(summary.parameterCount).toBe(3);
-      expect(summary.humanReadableDescription).toContain('summary-test');
-      expect(summary.humanReadableDescription).toContain('3 parameter');
+      expect(summary.humanReadableDescription).toContain("summary-test");
+      expect(summary.humanReadableDescription).toContain("3 parameter");
     });
   });
 
-  describe('validateParameterChanges', () => {
-    it('should validate parameter modifications', async () => {
-      const originalParams = [1, 'original'];
+  describe("validateParameterChanges", () => {
+    it("should validate parameter modifications", async () => {
+      const originalParams = [1, "original"];
       const originalCaptureResult = await service.captureAndValidateParameters(
-        'change-test',
+        "change-test",
         originalParams,
         userContext,
-        ValidationLevel.MEDIUM
+        ValidationLevel.MEDIUM,
       );
 
-      const modifiedParams = [1, 'modified'];
+      const modifiedParams = [1, "modified"];
       const changeResult = await service.validateParameterChanges(
         originalCaptureResult.capturedParameters,
         modifiedParams,
-        userContext
+        userContext,
       );
 
       expect(changeResult.changeAnalysis.hasChanges).toBe(true);
       expect(changeResult.changeAnalysis.changes).toHaveLength(1);
-      expect(changeResult.changeAnalysis.changes[0].changeType).toBe('modified');
+      expect(changeResult.changeAnalysis.changes[0].changeType).toBe(
+        "modified",
+      );
     });
   });
 });
@@ -591,91 +669,99 @@ describe('ParameterCaptureValidationService', () => {
 /**
  * Return Value Processing Service Tests
  */
-describe('ReturnValueProcessingService', () => {
+describe("ReturnValueProcessingService", () => {
   let service: ReturnValueProcessingService;
   let userContext: UserContext;
   let validationResult: ValidationResult;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [ReturnValueProcessingService]
+      providers: [ReturnValueProcessingService],
     }).compile();
 
-    service = module.get<ReturnValueProcessingService>(ReturnValueProcessingService);
+    service = module.get<ReturnValueProcessingService>(
+      ReturnValueProcessingService,
+    );
     userContext = TestUtilities.createMockUserContext();
     validationResult = TestUtilities.createMockValidationResult();
   });
 
-  describe('processReturnValue', () => {
-    it('should process simple return value', async () => {
-      const returnValue = { result: 'success', count: 42 };
+  describe("processReturnValue", () => {
+    it("should process simple return value", async () => {
+      const returnValue = { result: "success", count: 42 };
       const result = await service.processReturnValue(
-        'test-function',
+        "test-function",
         returnValue,
         userContext,
         ValidationLevel.MEDIUM,
         validationResult,
-        {}
+        {},
       );
 
       expect(result.processingSuccessful).toBe(true);
       expect(result.originalValue).toEqual(returnValue);
-      expect(result.resultAnalysis.resultType).toBe('object');
+      expect(result.resultAnalysis.resultType).toBe("object");
       expect(result.resultAnalysis.size).toBeGreaterThan(0);
     });
 
-    it('should handle return values with PII', async () => {
+    it("should handle return values with PII", async () => {
       const returnValue = {
-        user: 'john@example.com',
-        ssn: '123-45-6789',
-        data: 'some other data'
+        user: "john@example.com",
+        ssn: "123-45-6789",
+        data: "some other data",
       };
 
       const result = await service.processReturnValue(
-        'pii-function',
+        "pii-function",
         returnValue,
         userContext,
         ValidationLevel.HIGH,
         validationResult,
-        {}
+        {},
       );
 
       expect(result.processingSuccessful).toBe(true);
       expect(result.resultAnalysis.contentAnalysis.containsPII).toBe(true);
-      expect(result.resultAnalysis.dataClassification).toBe(DataClassification.CONFIDENTIAL);
+      expect(result.resultAnalysis.dataClassification).toBe(
+        DataClassification.CONFIDENTIAL,
+      );
     });
 
-    it('should handle large return values', async () => {
-      const largeArray = new Array(10000).fill(0).map((_, i) => ({ id: i, data: `item-${i}` }));
+    it("should handle large return values", async () => {
+      const largeArray = new Array(10000)
+        .fill(0)
+        .map((_, i) => ({ id: i, data: `item-${i}` }));
       const result = await service.processReturnValue(
-        'large-data-function',
+        "large-data-function",
         largeArray,
         userContext,
         ValidationLevel.MEDIUM,
         validationResult,
-        {}
+        {},
       );
 
       expect(result.processingSuccessful).toBe(true);
       expect(result.resultAnalysis.structure.isCollection).toBe(true);
       expect(result.resultAnalysis.structure.elementCount).toBe(10000);
-      expect(result.performanceAnalysis.optimizationOpportunities.length).toBeGreaterThan(0);
+      expect(
+        result.performanceAnalysis.optimizationOpportunities.length,
+      ).toBeGreaterThan(0);
     });
 
-    it('should assess business impact', async () => {
+    it("should assess business impact", async () => {
       const criticalResult = {
-        transactionId: 'tx-12345',
+        transactionId: "tx-12345",
         amount: 10000,
-        status: 'completed'
+        status: "completed",
       };
 
       const result = await service.processReturnValue(
-        'payment-processing',
+        "payment-processing",
         criticalResult,
         userContext,
         ValidationLevel.CRITICAL,
         validationResult,
-        {}
+        {},
       );
 
       expect(result.businessImpact.impactLevel).toBeTruthy();
@@ -683,36 +769,44 @@ describe('ReturnValueProcessingService', () => {
     });
   });
 
-  describe('validateReturnValueSchema', () => {
-    it('should validate return value against schema', async () => {
-      const returnValue = { name: 'John', age: 30, active: true };
+  describe("validateReturnValueSchema", () => {
+    it("should validate return value against schema", async () => {
+      const returnValue = { name: "John", age: 30, active: true };
       const schema = {
-        type: 'object',
+        type: "object",
         properties: {
-          name: { type: 'string', required: true },
-          age: { type: 'number', required: true },
-          active: { type: 'boolean', required: false }
-        }
+          name: { type: "string", required: true },
+          age: { type: "number", required: true },
+          active: { type: "boolean", required: false },
+        },
       };
 
-      const result = await service.validateReturnValueSchema(returnValue, schema, 'test-function');
+      const result = await service.validateReturnValueSchema(
+        returnValue,
+        schema,
+        "test-function",
+      );
 
       expect(result.valid).toBe(true);
       expect(result.errors).toHaveLength(0);
       expect(result.compliance).toBe(100);
     });
 
-    it('should detect schema violations', async () => {
-      const returnValue = { name: 'John', age: 'thirty' }; // age should be number
+    it("should detect schema violations", async () => {
+      const returnValue = { name: "John", age: "thirty" }; // age should be number
       const schema = {
-        type: 'object',
+        type: "object",
         properties: {
-          name: { type: 'string', required: true },
-          age: { type: 'number', required: true }
-        }
+          name: { type: "string", required: true },
+          age: { type: "number", required: true },
+        },
       };
 
-      const result = await service.validateReturnValueSchema(returnValue, schema, 'test-function');
+      const result = await service.validateReturnValueSchema(
+        returnValue,
+        schema,
+        "test-function",
+      );
 
       expect(result.valid).toBe(false);
       expect(result.errors.length).toBeGreaterThan(0);
@@ -720,26 +814,29 @@ describe('ReturnValueProcessingService', () => {
     });
   });
 
-  describe('transformReturnValueForTransmission', () => {
-    it('should transform return value for secure transmission', async () => {
+  describe("transformReturnValueForTransmission", () => {
+    it("should transform return value for secure transmission", async () => {
       const returnValue = {
-        user: 'john@example.com',
-        password: 'secret123',
-        data: 'normal data'
+        user: "john@example.com",
+        password: "secret123",
+        data: "normal data",
       };
 
       const options = {
         sanitizePII: true,
         redactCredentials: true,
         compressLargeData: false,
-        normalizeFormat: true
+        normalizeFormat: true,
       };
 
-      const result = await service.transformReturnValueForTransmission(returnValue, options);
+      const result = await service.transformReturnValueForTransmission(
+        returnValue,
+        options,
+      );
 
       expect(result.transformationSuccessful).toBe(true);
-      expect(result.appliedTransformations).toContain('pii_sanitization');
-      expect(result.appliedTransformations).toContain('credential_redaction');
+      expect(result.appliedTransformations).toContain("pii_sanitization");
+      expect(result.appliedTransformations).toContain("credential_redaction");
     });
   });
 });
@@ -747,7 +844,7 @@ describe('ReturnValueProcessingService', () => {
 /**
  * Wrapper Registry Management Service Tests
  */
-describe('WrapperRegistryManagementService', () => {
+describe("WrapperRegistryManagementService", () => {
   let registryService: WrapperRegistryManagementService;
   let factory: EnterpriseFunctionWrapperFactory;
 
@@ -755,11 +852,13 @@ describe('WrapperRegistryManagementService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         WrapperRegistryManagementService,
-        EnterpriseFunctionWrapperFactory
-      ]
+        EnterpriseFunctionWrapperFactory,
+      ],
     }).compile();
 
-    factory = module.get<EnterpriseFunctionWrapperFactory>(EnterpriseFunctionWrapperFactory);
+    factory = module.get<EnterpriseFunctionWrapperFactory>(
+      EnterpriseFunctionWrapperFactory,
+    );
     registryService = new WrapperRegistryManagementService(factory);
 
     await registryService.onModuleInit();
@@ -769,143 +868,152 @@ describe('WrapperRegistryManagementService', () => {
     await registryService.onModuleDestroy();
   });
 
-  describe('registerWrapper', () => {
-    it('should register wrapper successfully', async () => {
-      const config = TestUtilities.createBasicWrapperConfig('registry-test-1');
+  describe("registerWrapper", () => {
+    it("should register wrapper successfully", async () => {
+      const config = TestUtilities.createBasicWrapperConfig("registry-test-1");
       const metadata = {
-        registeredBy: 'test-user',
-        version: '1.0.0',
-        tags: ['test', 'registry'],
-        description: 'Test wrapper registration'
+        registeredBy: "test-user",
+        version: "1.0.0",
+        tags: ["test", "registry"],
+        description: "Test wrapper registration",
       };
 
       const result = await registryService.registerWrapper(
-        'registry-test-1',
+        "registry-test-1",
         TestUtilities.simpleFunction,
         config,
-        metadata
+        metadata,
       );
 
       expect(result.success).toBe(true);
-      expect(result.functionId).toBe('registry-test-1');
+      expect(result.functionId).toBe("registry-test-1");
       expect(result.wrappedFunction).toBeDefined();
       expect(result.registrationTime).toBeGreaterThan(0);
     });
 
-    it('should prevent duplicate registrations', async () => {
-      const config = TestUtilities.createBasicWrapperConfig('registry-test-2');
+    it("should prevent duplicate registrations", async () => {
+      const config = TestUtilities.createBasicWrapperConfig("registry-test-2");
 
       // First registration should succeed
       const result1 = await registryService.registerWrapper(
-        'registry-test-2',
+        "registry-test-2",
         TestUtilities.simpleFunction,
-        config
+        config,
       );
       expect(result1.success).toBe(true);
 
       // Second registration should fail
       const result2 = await registryService.registerWrapper(
-        'registry-test-2',
+        "registry-test-2",
         TestUtilities.simpleFunction,
-        config
+        config,
       );
       expect(result2.success).toBe(false);
       expect(result2.error).toBeDefined();
     });
   });
 
-  describe('unregisterWrapper', () => {
-    it('should unregister wrapper successfully', async () => {
-      const config = TestUtilities.createBasicWrapperConfig('registry-test-3');
+  describe("unregisterWrapper", () => {
+    it("should unregister wrapper successfully", async () => {
+      const config = TestUtilities.createBasicWrapperConfig("registry-test-3");
 
       // Register first
       await registryService.registerWrapper(
-        'registry-test-3',
+        "registry-test-3",
         TestUtilities.simpleFunction,
-        config
+        config,
       );
 
       // Then unregister
-      const result = await registryService.unregisterWrapper('registry-test-3');
+      const result = await registryService.unregisterWrapper("registry-test-3");
 
       expect(result.success).toBe(true);
-      expect(result.functionId).toBe('registry-test-3');
+      expect(result.functionId).toBe("registry-test-3");
       expect(result.finalStatistics).toBeDefined();
     });
 
-    it('should handle unregistering non-existent wrapper', async () => {
-      const result = await registryService.unregisterWrapper('non-existent');
+    it("should handle unregistering non-existent wrapper", async () => {
+      const result = await registryService.unregisterWrapper("non-existent");
 
       expect(result.success).toBe(false);
       expect(result.error).toBeDefined();
     });
   });
 
-  describe('getWrapper', () => {
-    it('should retrieve wrapper information', async () => {
-      const config = TestUtilities.createBasicWrapperConfig('registry-test-4');
+  describe("getWrapper", () => {
+    it("should retrieve wrapper information", async () => {
+      const config = TestUtilities.createBasicWrapperConfig("registry-test-4");
 
       await registryService.registerWrapper(
-        'registry-test-4',
+        "registry-test-4",
         TestUtilities.simpleFunction,
-        config
+        config,
       );
 
-      const wrapperInfo = registryService.getWrapper('registry-test-4');
+      const wrapperInfo = registryService.getWrapper("registry-test-4");
 
       expect(wrapperInfo).toBeDefined();
-      expect(wrapperInfo!.functionId).toBe('registry-test-4');
+      expect(wrapperInfo!.functionId).toBe("registry-test-4");
       expect(wrapperInfo!.config).toEqual(config);
       expect(wrapperInfo!.status).toBe(WrapperStatus.ACTIVE);
     });
 
-    it('should return null for non-existent wrapper', () => {
-      const wrapperInfo = registryService.getWrapper('non-existent');
+    it("should return null for non-existent wrapper", () => {
+      const wrapperInfo = registryService.getWrapper("non-existent");
       expect(wrapperInfo).toBeNull();
     });
   });
 
-  describe('listWrappers', () => {
+  describe("listWrappers", () => {
     beforeEach(async () => {
       // Register multiple wrappers for testing
       const configs = [
-        { ...TestUtilities.createBasicWrapperConfig('list-test-1'), validationLevel: ValidationLevel.LOW },
-        { ...TestUtilities.createBasicWrapperConfig('list-test-2'), validationLevel: ValidationLevel.HIGH },
-        { ...TestUtilities.createBasicWrapperConfig('list-test-3'), validationLevel: ValidationLevel.MEDIUM }
+        {
+          ...TestUtilities.createBasicWrapperConfig("list-test-1"),
+          validationLevel: ValidationLevel.LOW,
+        },
+        {
+          ...TestUtilities.createBasicWrapperConfig("list-test-2"),
+          validationLevel: ValidationLevel.HIGH,
+        },
+        {
+          ...TestUtilities.createBasicWrapperConfig("list-test-3"),
+          validationLevel: ValidationLevel.MEDIUM,
+        },
       ];
 
       for (let i = 0; i < configs.length; i++) {
         await registryService.registerWrapper(
           `list-test-${i + 1}`,
           TestUtilities.simpleFunction,
-          configs[i]
+          configs[i],
         );
       }
     });
 
-    it('should list all wrappers', () => {
+    it("should list all wrappers", () => {
       const wrappers = registryService.listWrappers();
       expect(wrappers.length).toBeGreaterThanOrEqual(3);
     });
 
-    it('should filter by validation level', () => {
+    it("should filter by validation level", () => {
       const highValidationWrappers = registryService.listWrappers({
-        validationLevel: ValidationLevel.HIGH
+        validationLevel: ValidationLevel.HIGH,
       });
 
       expect(highValidationWrappers.length).toBe(1);
-      expect(highValidationWrappers[0].functionId).toBe('list-test-2');
+      expect(highValidationWrappers[0].functionId).toBe("list-test-2");
     });
 
-    it('should filter by category', () => {
+    it("should filter by category", () => {
       const utilityWrappers = registryService.listWrappers({
-        category: FunctionCategory.UTILITY
+        category: FunctionCategory.UTILITY,
       });
 
       expect(utilityWrappers.length).toBeGreaterThanOrEqual(3);
     });
 
-    it('should apply pagination', () => {
+    it("should apply pagination", () => {
       const firstPage = registryService.listWrappers({ limit: 2, offset: 0 });
       const secondPage = registryService.listWrappers({ limit: 2, offset: 2 });
 
@@ -915,12 +1023,18 @@ describe('WrapperRegistryManagementService', () => {
     });
   });
 
-  describe('getRegistryStatistics', () => {
-    it('should provide comprehensive statistics', async () => {
+  describe("getRegistryStatistics", () => {
+    it("should provide comprehensive statistics", async () => {
       // Register a few wrappers
       for (let i = 0; i < 3; i++) {
-        const config = TestUtilities.createBasicWrapperConfig(`stats-test-${i}`);
-        await registryService.registerWrapper(`stats-test-${i}`, TestUtilities.simpleFunction, config);
+        const config = TestUtilities.createBasicWrapperConfig(
+          `stats-test-${i}`,
+        );
+        await registryService.registerWrapper(
+          `stats-test-${i}`,
+          TestUtilities.simpleFunction,
+          config,
+        );
       }
 
       const stats = registryService.getRegistryStatistics();
@@ -934,10 +1048,14 @@ describe('WrapperRegistryManagementService', () => {
     });
   });
 
-  describe('performHealthCheck', () => {
-    it('should perform health check on all wrappers', async () => {
-      const config = TestUtilities.createBasicWrapperConfig('health-test-1');
-      await registryService.registerWrapper('health-test-1', TestUtilities.simpleFunction, config);
+  describe("performHealthCheck", () => {
+    it("should perform health check on all wrappers", async () => {
+      const config = TestUtilities.createBasicWrapperConfig("health-test-1");
+      await registryService.registerWrapper(
+        "health-test-1",
+        TestUtilities.simpleFunction,
+        config,
+      );
 
       const healthResults = await registryService.performHealthCheck();
 
@@ -947,56 +1065,83 @@ describe('WrapperRegistryManagementService', () => {
       expect(healthResults[0].healthScore).toBeDefined();
     });
 
-    it('should perform health check on specific wrapper', async () => {
-      const config = TestUtilities.createBasicWrapperConfig('health-test-2');
-      await registryService.registerWrapper('health-test-2', TestUtilities.simpleFunction, config);
+    it("should perform health check on specific wrapper", async () => {
+      const config = TestUtilities.createBasicWrapperConfig("health-test-2");
+      await registryService.registerWrapper(
+        "health-test-2",
+        TestUtilities.simpleFunction,
+        config,
+      );
 
-      const healthResults = await registryService.performHealthCheck('health-test-2');
+      const healthResults =
+        await registryService.performHealthCheck("health-test-2");
 
       expect(healthResults.length).toBe(1);
-      expect(healthResults[0].functionId).toBe('health-test-2');
+      expect(healthResults[0].functionId).toBe("health-test-2");
     });
   });
 
-  describe('searchWrappers', () => {
+  describe("searchWrappers", () => {
     beforeEach(async () => {
       const searchConfigs = [
-        { ...TestUtilities.createBasicWrapperConfig('search-user-service'), description: 'User management service' },
-        { ...TestUtilities.createBasicWrapperConfig('search-auth-service'), description: 'Authentication service' },
-        { ...TestUtilities.createBasicWrapperConfig('search-data-processor'), description: 'Data processing utility' }
+        {
+          ...TestUtilities.createBasicWrapperConfig("search-user-service"),
+          description: "User management service",
+        },
+        {
+          ...TestUtilities.createBasicWrapperConfig("search-auth-service"),
+          description: "Authentication service",
+        },
+        {
+          ...TestUtilities.createBasicWrapperConfig("search-data-processor"),
+          description: "Data processing utility",
+        },
       ];
 
       for (const config of searchConfigs) {
-        await registryService.registerWrapper(config.functionId, TestUtilities.simpleFunction, config);
+        await registryService.registerWrapper(
+          config.functionId,
+          TestUtilities.simpleFunction,
+          config,
+        );
       }
     });
 
-    it('should search by function ID', () => {
-      const results = registryService.searchWrappers({ functionId: 'user' });
+    it("should search by function ID", () => {
+      const results = registryService.searchWrappers({ functionId: "user" });
 
       expect(results.length).toBe(1);
-      expect(results[0].functionId).toBe('search-user-service');
-      expect(results[0].matches).toContain('functionId');
+      expect(results[0].functionId).toBe("search-user-service");
+      expect(results[0].matches).toContain("functionId");
     });
 
-    it('should search by description', () => {
-      const results = registryService.searchWrappers({ description: 'service' });
+    it("should search by description", () => {
+      const results = registryService.searchWrappers({
+        description: "service",
+      });
 
       expect(results.length).toBe(2);
-      expect(results[0].matches).toContain('description');
+      expect(results[0].matches).toContain("description");
     });
 
-    it('should limit search results', () => {
-      const results = registryService.searchWrappers({ description: 'service', limit: 1 });
+    it("should limit search results", () => {
+      const results = registryService.searchWrappers({
+        description: "service",
+        limit: 1,
+      });
 
       expect(results.length).toBe(1);
     });
   });
 
-  describe('exportWrapperConfigurations', () => {
-    it('should export all wrapper configurations', async () => {
-      const config = TestUtilities.createBasicWrapperConfig('export-test-1');
-      await registryService.registerWrapper('export-test-1', TestUtilities.simpleFunction, config);
+  describe("exportWrapperConfigurations", () => {
+    it("should export all wrapper configurations", async () => {
+      const config = TestUtilities.createBasicWrapperConfig("export-test-1");
+      await registryService.registerWrapper(
+        "export-test-1",
+        TestUtilities.simpleFunction,
+        config,
+      );
 
       const exportData = registryService.exportWrapperConfigurations();
 
@@ -1006,17 +1151,27 @@ describe('WrapperRegistryManagementService', () => {
       expect(exportData.registryVersion).toBeDefined();
     });
 
-    it('should export specific wrapper configurations', async () => {
-      const config1 = TestUtilities.createBasicWrapperConfig('export-test-2');
-      const config2 = TestUtilities.createBasicWrapperConfig('export-test-3');
+    it("should export specific wrapper configurations", async () => {
+      const config1 = TestUtilities.createBasicWrapperConfig("export-test-2");
+      const config2 = TestUtilities.createBasicWrapperConfig("export-test-3");
 
-      await registryService.registerWrapper('export-test-2', TestUtilities.simpleFunction, config1);
-      await registryService.registerWrapper('export-test-3', TestUtilities.simpleFunction, config2);
+      await registryService.registerWrapper(
+        "export-test-2",
+        TestUtilities.simpleFunction,
+        config1,
+      );
+      await registryService.registerWrapper(
+        "export-test-3",
+        TestUtilities.simpleFunction,
+        config2,
+      );
 
-      const exportData = registryService.exportWrapperConfigurations(['export-test-2']);
+      const exportData = registryService.exportWrapperConfigurations([
+        "export-test-2",
+      ]);
 
       expect(exportData.totalConfigurations).toBe(1);
-      expect(exportData.configurations[0].functionId).toBe('export-test-2');
+      expect(exportData.configurations[0].functionId).toBe("export-test-2");
     });
   });
 });
@@ -1024,7 +1179,7 @@ describe('WrapperRegistryManagementService', () => {
 /**
  * Integration Tests
  */
-describe('Function Wrapper Framework Integration', () => {
+describe("Function Wrapper Framework Integration", () => {
   let factory: EnterpriseFunctionWrapperFactory;
   let registry: WrapperRegistryManagementService;
   let parameterService: ParameterCaptureValidationService;
@@ -1035,13 +1190,19 @@ describe('Function Wrapper Framework Integration', () => {
       providers: [
         EnterpriseFunctionWrapperFactory,
         ParameterCaptureValidationService,
-        ReturnValueProcessingService
-      ]
+        ReturnValueProcessingService,
+      ],
     }).compile();
 
-    factory = module.get<EnterpriseFunctionWrapperFactory>(EnterpriseFunctionWrapperFactory);
-    parameterService = module.get<ParameterCaptureValidationService>(ParameterCaptureValidationService);
-    returnValueService = module.get<ReturnValueProcessingService>(ReturnValueProcessingService);
+    factory = module.get<EnterpriseFunctionWrapperFactory>(
+      EnterpriseFunctionWrapperFactory,
+    );
+    parameterService = module.get<ParameterCaptureValidationService>(
+      ParameterCaptureValidationService,
+    );
+    returnValueService = module.get<ReturnValueProcessingService>(
+      ReturnValueProcessingService,
+    );
     registry = new WrapperRegistryManagementService(factory);
 
     await registry.onModuleInit();
@@ -1051,56 +1212,56 @@ describe('Function Wrapper Framework Integration', () => {
     await registry.onModuleDestroy();
   });
 
-  describe('End-to-End Wrapper Lifecycle', () => {
-    it('should handle complete wrapper lifecycle', async () => {
+  describe("End-to-End Wrapper Lifecycle", () => {
+    it("should handle complete wrapper lifecycle", async () => {
       // 1. Create wrapper configuration
-      const config = TestUtilities.createBasicWrapperConfig('e2e-test');
+      const config = TestUtilities.createBasicWrapperConfig("e2e-test");
 
       // 2. Register wrapper
       const registrationResult = await registry.registerWrapper(
-        'e2e-test',
+        "e2e-test",
         TestUtilities.complexFunction,
         config,
-        { registeredBy: 'integration-test' }
+        { registeredBy: "integration-test" },
       );
 
       expect(registrationResult.success).toBe(true);
 
       // 3. Get wrapper and execute
-      const wrapperInfo = registry.getWrapper('e2e-test');
+      const wrapperInfo = registry.getWrapper("e2e-test");
       expect(wrapperInfo).toBeDefined();
 
       // 4. Execute wrapped function
-      const testInput = { name: 'test', options: ['a', 'b', 'c'] };
+      const testInput = { name: "test", options: ["a", "b", "c"] };
       const result = await registrationResult.wrappedFunction!(testInput);
 
       expect(result.success).toBe(true);
-      expect(result.result).toEqual({ result: 'Processed test', count: 3 });
+      expect(result.result).toEqual({ result: "Processed test", count: 3 });
 
       // 5. Check statistics
       const stats = registry.getRegistryStatistics();
       expect(stats.totalWrappers).toBeGreaterThanOrEqual(1);
 
       // 6. Perform health check
-      const healthCheck = await registry.performHealthCheck('e2e-test');
+      const healthCheck = await registry.performHealthCheck("e2e-test");
       expect(healthCheck[0].healthy).toBe(true);
 
       // 7. Unregister wrapper
-      const unregistrationResult = await registry.unregisterWrapper('e2e-test');
+      const unregistrationResult = await registry.unregisterWrapper("e2e-test");
       expect(unregistrationResult.success).toBe(true);
 
       // 8. Verify wrapper is removed
-      const removedWrapper = registry.getWrapper('e2e-test');
+      const removedWrapper = registry.getWrapper("e2e-test");
       expect(removedWrapper).toBeNull();
     });
 
-    it('should handle wrapper errors gracefully', async () => {
-      const config = TestUtilities.createBasicWrapperConfig('error-test');
+    it("should handle wrapper errors gracefully", async () => {
+      const config = TestUtilities.createBasicWrapperConfig("error-test");
 
       const registrationResult = await registry.registerWrapper(
-        'error-test',
+        "error-test",
         TestUtilities.errorFunction,
-        config
+        config,
       );
 
       expect(registrationResult.success).toBe(true);
@@ -1113,21 +1274,21 @@ describe('Function Wrapper Framework Integration', () => {
       expect(result.error?.category).toBe(ErrorCategory.SYSTEM_ERROR);
     });
 
-    it('should validate parameters and return values in integrated workflow', async () => {
-      const config = TestUtilities.createBasicWrapperConfig('validation-test');
+    it("should validate parameters and return values in integrated workflow", async () => {
+      const config = TestUtilities.createBasicWrapperConfig("validation-test");
       config.validationLevel = ValidationLevel.HIGH;
 
       const registrationResult = await registry.registerWrapper(
-        'validation-test',
+        "validation-test",
         TestUtilities.piiFunction,
-        config
+        config,
       );
 
       expect(registrationResult.success).toBe(true);
 
       // Test with PII data
-      const email = 'user@example.com';
-      const ssn = '123-45-6789';
+      const email = "user@example.com";
+      const ssn = "123-45-6789";
       const result = await registrationResult.wrappedFunction!(email, ssn);
 
       expect(result.success).toBe(true);
@@ -1135,21 +1296,21 @@ describe('Function Wrapper Framework Integration', () => {
     });
   });
 
-  describe('Performance and Scalability', () => {
-    it('should handle multiple concurrent wrapper executions', async () => {
-      const config = TestUtilities.createBasicWrapperConfig('concurrent-test');
+  describe("Performance and Scalability", () => {
+    it("should handle multiple concurrent wrapper executions", async () => {
+      const config = TestUtilities.createBasicWrapperConfig("concurrent-test");
 
       const registrationResult = await registry.registerWrapper(
-        'concurrent-test',
+        "concurrent-test",
         TestUtilities.asyncFunction,
-        config
+        config,
       );
 
       expect(registrationResult.success).toBe(true);
 
       // Execute multiple concurrent operations
       const promises = Array.from({ length: 10 }, (_, i) =>
-        registrationResult.wrappedFunction!(`test-data-${i}`)
+        registrationResult.wrappedFunction!(`test-data-${i}`),
       );
 
       const results = await Promise.all(promises);
@@ -1161,13 +1322,13 @@ describe('Function Wrapper Framework Integration', () => {
       });
     });
 
-    it('should maintain performance with large datasets', async () => {
-      const config = TestUtilities.createBasicWrapperConfig('performance-test');
+    it("should maintain performance with large datasets", async () => {
+      const config = TestUtilities.createBasicWrapperConfig("performance-test");
 
       const registrationResult = await registry.registerWrapper(
-        'performance-test',
+        "performance-test",
         (data: any[]) => data.length,
-        config
+        config,
       );
 
       expect(registrationResult.success).toBe(true);
@@ -1185,14 +1346,14 @@ describe('Function Wrapper Framework Integration', () => {
     });
   });
 
-  describe('Error Recovery and Resilience', () => {
-    it('should recover from validation service failures', async () => {
-      const config = TestUtilities.createBasicWrapperConfig('resilience-test');
+  describe("Error Recovery and Resilience", () => {
+    it("should recover from validation service failures", async () => {
+      const config = TestUtilities.createBasicWrapperConfig("resilience-test");
 
       const registrationResult = await registry.registerWrapper(
-        'resilience-test',
+        "resilience-test",
         TestUtilities.simpleFunction,
-        config
+        config,
       );
 
       expect(registrationResult.success).toBe(true);
@@ -1204,22 +1365,26 @@ describe('Function Wrapper Framework Integration', () => {
       expect(result.result).toBe(15);
     });
 
-    it('should maintain wrapper registry integrity during failures', async () => {
+    it("should maintain wrapper registry integrity during failures", async () => {
       const configs = Array.from({ length: 5 }, (_, i) =>
-        TestUtilities.createBasicWrapperConfig(`integrity-test-${i}`)
+        TestUtilities.createBasicWrapperConfig(`integrity-test-${i}`),
       );
 
       // Register multiple wrappers
       const registrationPromises = configs.map((config, i) =>
-        registry.registerWrapper(`integrity-test-${i}`, TestUtilities.simpleFunction, config)
+        registry.registerWrapper(
+          `integrity-test-${i}`,
+          TestUtilities.simpleFunction,
+          config,
+        ),
       );
 
       const results = await Promise.allSettled(registrationPromises);
 
       // All registrations should succeed
-      results.forEach(result => {
-        expect(result.status).toBe('fulfilled');
-        if (result.status === 'fulfilled') {
+      results.forEach((result) => {
+        expect(result.status).toBe("fulfilled");
+        if (result.status === "fulfilled") {
           expect(result.value.success).toBe(true);
         }
       });
@@ -1234,144 +1399,154 @@ describe('Function Wrapper Framework Integration', () => {
 /**
  * Component-Specific Edge Cases
  */
-describe('Edge Cases and Error Handling', () => {
-  describe('Parameter Edge Cases', () => {
+describe("Edge Cases and Error Handling", () => {
+  describe("Parameter Edge Cases", () => {
     let service: ParameterCaptureValidationService;
 
     beforeEach(async () => {
       const module: TestingModule = await Test.createTestingModule({
-        providers: [ParameterCaptureValidationService]
+        providers: [ParameterCaptureValidationService],
       }).compile();
 
-      service = module.get<ParameterCaptureValidationService>(ParameterCaptureValidationService);
+      service = module.get<ParameterCaptureValidationService>(
+        ParameterCaptureValidationService,
+      );
     });
 
-    it('should handle null and undefined parameters', async () => {
-      const parameters = [null, undefined, 0, '', false];
+    it("should handle null and undefined parameters", async () => {
+      const parameters = [null, undefined, 0, "", false];
       const userContext = TestUtilities.createMockUserContext();
 
       const result = await service.captureAndValidateParameters(
-        'edge-case-test',
+        "edge-case-test",
         parameters,
         userContext,
-        ValidationLevel.MEDIUM
+        ValidationLevel.MEDIUM,
       );
 
       expect(result.validationPassed).toBe(true);
       expect(result.capturedParameters).toHaveLength(5);
     });
 
-    it('should handle circular references in parameters', async () => {
-      const obj: any = { name: 'test' };
+    it("should handle circular references in parameters", async () => {
+      const obj: any = { name: "test" };
       obj.self = obj; // Create circular reference
 
       const parameters = [obj];
       const userContext = TestUtilities.createMockUserContext();
 
       const result = await service.captureAndValidateParameters(
-        'circular-test',
+        "circular-test",
         parameters,
         userContext,
-        ValidationLevel.MEDIUM
+        ValidationLevel.MEDIUM,
       );
 
       expect(result.validationPassed).toBe(true);
-      expect(result.capturedParameters[0].serializedValue).toContain('Circular Reference');
+      expect(result.capturedParameters[0].serializedValue).toContain(
+        "Circular Reference",
+      );
     });
 
-    it('should handle very large parameters', async () => {
-      const largeString = 'x'.repeat(1000000); // 1MB string
+    it("should handle very large parameters", async () => {
+      const largeString = "x".repeat(1000000); // 1MB string
       const parameters = [largeString];
       const userContext = TestUtilities.createMockUserContext();
 
       const result = await service.captureAndValidateParameters(
-        'large-param-test',
+        "large-param-test",
         parameters,
         userContext,
-        ValidationLevel.MEDIUM
+        ValidationLevel.MEDIUM,
       );
 
       expect(result.validationPassed).toBe(true);
-      expect(result.capturedParameters[0].metadata.size).toBeGreaterThan(999999);
+      expect(result.capturedParameters[0].metadata.size).toBeGreaterThan(
+        999999,
+      );
     });
   });
 
-  describe('Return Value Edge Cases', () => {
+  describe("Return Value Edge Cases", () => {
     let service: ReturnValueProcessingService;
 
     beforeEach(async () => {
       const module: TestingModule = await Test.createTestingModule({
-        providers: [ReturnValueProcessingService]
+        providers: [ReturnValueProcessingService],
       }).compile();
 
-      service = module.get<ReturnValueProcessingService>(ReturnValueProcessingService);
+      service = module.get<ReturnValueProcessingService>(
+        ReturnValueProcessingService,
+      );
     });
 
-    it('should handle null return values', async () => {
+    it("should handle null return values", async () => {
       const userContext = TestUtilities.createMockUserContext();
       const validationResult = TestUtilities.createMockValidationResult();
 
       const result = await service.processReturnValue(
-        'null-return-test',
+        "null-return-test",
         null,
         userContext,
         ValidationLevel.MEDIUM,
         validationResult,
-        {}
+        {},
       );
 
       expect(result.processingSuccessful).toBe(true);
       expect(result.originalValue).toBeNull();
-      expect(result.resultAnalysis.resultType).toBe('null');
+      expect(result.resultAnalysis.resultType).toBe("null");
     });
 
-    it('should handle functions as return values', async () => {
-      const returnFunction = () => 'test';
+    it("should handle functions as return values", async () => {
+      const returnFunction = () => "test";
       const userContext = TestUtilities.createMockUserContext();
       const validationResult = TestUtilities.createMockValidationResult();
 
       const result = await service.processReturnValue(
-        'function-return-test',
+        "function-return-test",
         returnFunction,
         userContext,
         ValidationLevel.MEDIUM,
         validationResult,
-        {}
+        {},
       );
 
       expect(result.processingSuccessful).toBe(true);
-      expect(result.resultAnalysis.resultType).toBe('function');
+      expect(result.resultAnalysis.resultType).toBe("function");
     });
 
-    it('should handle error objects as return values', async () => {
-      const errorObj = new Error('Test error');
+    it("should handle error objects as return values", async () => {
+      const errorObj = new Error("Test error");
       const userContext = TestUtilities.createMockUserContext();
       const validationResult = TestUtilities.createMockValidationResult();
 
       const result = await service.processReturnValue(
-        'error-return-test',
+        "error-return-test",
         errorObj,
         userContext,
         ValidationLevel.MEDIUM,
         validationResult,
-        {}
+        {},
       );
 
       expect(result.processingSuccessful).toBe(true);
-      expect(result.resultAnalysis.resultType).toBe('error');
+      expect(result.resultAnalysis.resultType).toBe("error");
     });
   });
 
-  describe('Registry Edge Cases', () => {
+  describe("Registry Edge Cases", () => {
     let registry: WrapperRegistryManagementService;
     let factory: EnterpriseFunctionWrapperFactory;
 
     beforeEach(async () => {
       const module: TestingModule = await Test.createTestingModule({
-        providers: [EnterpriseFunctionWrapperFactory]
+        providers: [EnterpriseFunctionWrapperFactory],
       }).compile();
 
-      factory = module.get<EnterpriseFunctionWrapperFactory>(EnterpriseFunctionWrapperFactory);
+      factory = module.get<EnterpriseFunctionWrapperFactory>(
+        EnterpriseFunctionWrapperFactory,
+      );
       registry = new WrapperRegistryManagementService(factory);
       await registry.onModuleInit();
     });
@@ -1380,30 +1555,30 @@ describe('Edge Cases and Error Handling', () => {
       await registry.onModuleDestroy();
     });
 
-    it('should handle invalid function IDs', async () => {
-      const config = TestUtilities.createBasicWrapperConfig('invalid@id#test');
+    it("should handle invalid function IDs", async () => {
+      const config = TestUtilities.createBasicWrapperConfig("invalid@id#test");
 
       const result = await registry.registerWrapper(
-        'invalid@id#test',
+        "invalid@id#test",
         TestUtilities.simpleFunction,
-        config
+        config,
       );
 
       expect(result.success).toBe(false);
       expect(result.error).toBeDefined();
     });
 
-    it('should handle empty configurations', async () => {
+    it("should handle empty configurations", async () => {
       const emptyConfig = {
-        functionId: '',
-        description: '',
-        validationLevel: ValidationLevel.MEDIUM
+        functionId: "",
+        description: "",
+        validationLevel: ValidationLevel.MEDIUM,
       };
 
       const result = await registry.registerWrapper(
-        'empty-config-test',
+        "empty-config-test",
         TestUtilities.simpleFunction,
-        emptyConfig as WrapperConfig
+        emptyConfig as WrapperConfig,
       );
 
       expect(result.success).toBe(false);
@@ -1415,21 +1590,27 @@ describe('Edge Cases and Error Handling', () => {
 /**
  * Performance Benchmarks
  */
-describe('Performance Benchmarks', () => {
-  it('should create wrapper within performance threshold', () => {
-    const config = TestUtilities.createBasicWrapperConfig('perf-test');
+describe("Performance Benchmarks", () => {
+  it("should create wrapper within performance threshold", () => {
+    const config = TestUtilities.createBasicWrapperConfig("perf-test");
     const startTime = Date.now();
 
-    const wrappedFunction = TypeSafeWrapperCreator.createWrapper(TestUtilities.simpleFunction, config);
+    const wrappedFunction = TypeSafeWrapperCreator.createWrapper(
+      TestUtilities.simpleFunction,
+      config,
+    );
     const creationTime = Date.now() - startTime;
 
-    expect(typeof wrappedFunction).toBe('function');
+    expect(typeof wrappedFunction).toBe("function");
     expect(creationTime).toBeLessThan(100); // Should create within 100ms
   });
 
-  it('should execute wrapped function within performance threshold', async () => {
-    const config = TestUtilities.createBasicWrapperConfig('exec-perf-test');
-    const wrappedFunction = TypeSafeWrapperCreator.createWrapper(TestUtilities.simpleFunction, config);
+  it("should execute wrapped function within performance threshold", async () => {
+    const config = TestUtilities.createBasicWrapperConfig("exec-perf-test");
+    const wrappedFunction = TypeSafeWrapperCreator.createWrapper(
+      TestUtilities.simpleFunction,
+      config,
+    );
 
     const startTime = Date.now();
     const result = await wrappedFunction(10, 20);
@@ -1440,14 +1621,16 @@ describe('Performance Benchmarks', () => {
     expect(executionTime).toBeLessThan(1000); // Should execute within 1 second
   });
 
-  it('should handle batch wrapper creation efficiently', () => {
+  it("should handle batch wrapper creation efficiently", () => {
     const functions = {};
     const configs = {};
 
     // Create 100 test functions and configs
     for (let i = 0; i < 100; i++) {
       functions[`func${i}`] = (x: number) => x * i;
-      configs[`func${i}`] = TestUtilities.createBasicWrapperConfig(`batch-perf-${i}`);
+      configs[`func${i}`] = TestUtilities.createBasicWrapperConfig(
+        `batch-perf-${i}`,
+      );
     }
 
     const factory = new EnterpriseFunctionWrapperFactory();
@@ -1464,63 +1647,70 @@ describe('Performance Benchmarks', () => {
 /**
  * Security Tests
  */
-describe('Security Validation', () => {
-  describe('Parameter Security', () => {
+describe("Security Validation", () => {
+  describe("Parameter Security", () => {
     let service: ParameterCaptureValidationService;
 
     beforeEach(async () => {
       const module: TestingModule = await Test.createTestingModule({
-        providers: [ParameterCaptureValidationService]
+        providers: [ParameterCaptureValidationService],
       }).compile();
 
-      service = module.get<ParameterCaptureValidationService>(ParameterCaptureValidationService);
+      service = module.get<ParameterCaptureValidationService>(
+        ParameterCaptureValidationService,
+      );
     });
 
-    it('should detect and handle SQL injection attempts', async () => {
-      const maliciousParams = ["'; DROP TABLE users; --", 'normal data'];
+    it("should detect and handle SQL injection attempts", async () => {
+      const maliciousParams = ["'; DROP TABLE users; --", "normal data"];
       const userContext = TestUtilities.createMockUserContext();
 
       const result = await service.captureAndValidateParameters(
-        'sql-injection-test',
+        "sql-injection-test",
         maliciousParams,
         userContext,
-        ValidationLevel.HIGH
+        ValidationLevel.HIGH,
       );
 
       expect(result.validationPassed).toBe(true);
-      expect(result.sanitizedParameters[0].serializedValue).not.toContain('DROP TABLE');
+      expect(result.sanitizedParameters[0].serializedValue).not.toContain(
+        "DROP TABLE",
+      );
     });
 
-    it('should detect JWT tokens in parameters', async () => {
-      const jwtToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
+    it("should detect JWT tokens in parameters", async () => {
+      const jwtToken =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
       const params = [{ authorization: `Bearer ${jwtToken}` }];
       const userContext = TestUtilities.createMockUserContext();
 
       const result = await service.captureAndValidateParameters(
-        'jwt-test',
+        "jwt-test",
         params,
         userContext,
-        ValidationLevel.CRITICAL
+        ValidationLevel.CRITICAL,
       );
 
-      expect(result.capturedParameters[0].metadata.containsCredentials).toBe(true);
+      expect(result.capturedParameters[0].metadata.containsCredentials).toBe(
+        true,
+      );
     });
 
-    it('should enforce permission requirements', async () => {
+    it("should enforce permission requirements", async () => {
       const restrictedUserContext: UserContext = {
-        userId: 'restricted-user',
-        authToken: 'limited-token',
+        userId: "restricted-user",
+        authToken: "limited-token",
         permissions: [], // No permissions
-        sessionMetadata: { sessionId: 'restricted-session' }
+        sessionMetadata: { sessionId: "restricted-session" },
       };
 
-      const piiParams = ['user@example.com'];
+      const piiParams = ["user@example.com"];
 
       const result = await service.captureAndValidateParameters(
-        'permission-test',
+        "permission-test",
         piiParams,
         restrictedUserContext,
-        ValidationLevel.HIGH
+        ValidationLevel.HIGH,
       );
 
       expect(result.validationPassed).toBe(false);
@@ -1528,40 +1718,45 @@ describe('Security Validation', () => {
     });
   });
 
-  describe('Return Value Security', () => {
+  describe("Return Value Security", () => {
     let service: ReturnValueProcessingService;
 
     beforeEach(async () => {
       const module: TestingModule = await Test.createTestingModule({
-        providers: [ReturnValueProcessingService]
+        providers: [ReturnValueProcessingService],
       }).compile();
 
-      service = module.get<ReturnValueProcessingService>(ReturnValueProcessingService);
+      service = module.get<ReturnValueProcessingService>(
+        ReturnValueProcessingService,
+      );
     });
 
-    it('should sanitize PII in return values', async () => {
+    it("should sanitize PII in return values", async () => {
       const piiReturnValue = {
         users: [
-          { email: 'user1@example.com', ssn: '123-45-6789' },
-          { email: 'user2@example.com', ssn: '987-65-4321' }
-        ]
+          { email: "user1@example.com", ssn: "123-45-6789" },
+          { email: "user2@example.com", ssn: "987-65-4321" },
+        ],
       };
 
       const options = {
         sanitizePII: true,
         redactCredentials: false,
         compressLargeData: false,
-        normalizeFormat: false
+        normalizeFormat: false,
       };
 
-      const result = await service.transformReturnValueForTransmission(piiReturnValue, options);
+      const result = await service.transformReturnValueForTransmission(
+        piiReturnValue,
+        options,
+      );
 
       expect(result.transformationSuccessful).toBe(true);
-      expect(result.appliedTransformations).toContain('pii_sanitization');
+      expect(result.appliedTransformations).toContain("pii_sanitization");
 
       const transformedString = JSON.stringify(result.transformedValue);
-      expect(transformedString).not.toContain('user1@example.com');
-      expect(transformedString).not.toContain('123-45-6789');
+      expect(transformedString).not.toContain("user1@example.com");
+      expect(transformedString).not.toContain("123-45-6789");
     });
   });
 });

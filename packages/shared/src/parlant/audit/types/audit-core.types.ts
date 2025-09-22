@@ -33,17 +33,13 @@ import {
   ValidationResult,
   ErrorDetails,
   PerformanceMetrics,
-} from '../../../types/parlant.types';
+} from "../../../types/parlant.types";
 
 // Import types from compliance-forensic for early usage
-import {
-  ComplianceMetadata,
-} from './compliance-forensic.types';
+import { ComplianceMetadata } from "./compliance-forensic.types";
 
 // Import types from audit-extended for early usage
-import {
-  AuditParlantResponse,
-} from './audit-extended.types';
+import { AuditParlantResponse } from "./audit-extended.types";
 
 // Re-export types needed by other modules
 export { RiskLevel };
@@ -135,95 +131,95 @@ export type ForensicEvidenceId = string & { __forensicEvidenceId: never };
  */
 export enum AuditEventType {
   // Function Execution Events
-  FUNCTION_EXECUTION_STARTED = 'function_execution_started',
-  FUNCTION_EXECUTION_COMPLETED = 'function_execution_completed',
-  FUNCTION_EXECUTION_FAILED = 'function_execution_failed',
-  FUNCTION_PARAMETER_CAPTURED = 'function_parameter_captured',
-  FUNCTION_RETURN_VALUE_CAPTURED = 'function_return_value_captured',
+  FUNCTION_EXECUTION_STARTED = "function_execution_started",
+  FUNCTION_EXECUTION_COMPLETED = "function_execution_completed",
+  FUNCTION_EXECUTION_FAILED = "function_execution_failed",
+  FUNCTION_PARAMETER_CAPTURED = "function_parameter_captured",
+  FUNCTION_RETURN_VALUE_CAPTURED = "function_return_value_captured",
 
   // PARLANT Validation Events
-  PARLANT_VALIDATION_REQUESTED = 'parlant_validation_requested',
-  PARLANT_VALIDATION_RECEIVED = 'parlant_validation_received',
-  PARLANT_VALIDATION_APPROVED = 'parlant_validation_approved',
-  PARLANT_VALIDATION_DENIED = 'parlant_validation_denied',
-  PARLANT_VALIDATION_BYPASSED = 'parlant_validation_bypassed',
-  PARLANT_VALIDATION_TIMEOUT = 'parlant_validation_timeout',
-  PARLANT_VALIDATION_ERROR = 'parlant_validation_error',
+  PARLANT_VALIDATION_REQUESTED = "parlant_validation_requested",
+  PARLANT_VALIDATION_RECEIVED = "parlant_validation_received",
+  PARLANT_VALIDATION_APPROVED = "parlant_validation_approved",
+  PARLANT_VALIDATION_DENIED = "parlant_validation_denied",
+  PARLANT_VALIDATION_BYPASSED = "parlant_validation_bypassed",
+  PARLANT_VALIDATION_TIMEOUT = "parlant_validation_timeout",
+  PARLANT_VALIDATION_ERROR = "parlant_validation_error",
 
   // Database Operation Events
-  DATABASE_OPERATION_INITIATED = 'database_operation_initiated',
-  DATABASE_OPERATION_EXECUTED = 'database_operation_executed',
-  DATABASE_OPERATION_ROLLED_BACK = 'database_operation_rolled_back',
-  DATABASE_TRANSACTION_STARTED = 'database_transaction_started',
-  DATABASE_TRANSACTION_COMMITTED = 'database_transaction_committed',
-  DATABASE_TRANSACTION_ABORTED = 'database_transaction_aborted',
+  DATABASE_OPERATION_INITIATED = "database_operation_initiated",
+  DATABASE_OPERATION_EXECUTED = "database_operation_executed",
+  DATABASE_OPERATION_ROLLED_BACK = "database_operation_rolled_back",
+  DATABASE_TRANSACTION_STARTED = "database_transaction_started",
+  DATABASE_TRANSACTION_COMMITTED = "database_transaction_committed",
+  DATABASE_TRANSACTION_ABORTED = "database_transaction_aborted",
 
   // User Context and Authorization Events
-  USER_AUTHENTICATION_SUCCESS = 'user_authentication_success',
-  USER_AUTHENTICATION_FAILED = 'user_authentication_failed',
-  USER_AUTHORIZATION_GRANTED = 'user_authorization_granted',
-  USER_AUTHORIZATION_DENIED = 'user_authorization_denied',
-  USER_PERMISSION_ESCALATED = 'user_permission_escalated',
-  USER_SESSION_CREATED = 'user_session_created',
-  USER_SESSION_EXPIRED = 'user_session_expired',
+  USER_AUTHENTICATION_SUCCESS = "user_authentication_success",
+  USER_AUTHENTICATION_FAILED = "user_authentication_failed",
+  USER_AUTHORIZATION_GRANTED = "user_authorization_granted",
+  USER_AUTHORIZATION_DENIED = "user_authorization_denied",
+  USER_PERMISSION_ESCALATED = "user_permission_escalated",
+  USER_SESSION_CREATED = "user_session_created",
+  USER_SESSION_EXPIRED = "user_session_expired",
 
   // Security Events
-  SECURITY_VIOLATION_DETECTED = 'security_violation_detected',
-  SECURITY_ANOMALY_DETECTED = 'security_anomaly_detected',
-  SECURITY_POLICY_ENFORCED = 'security_policy_enforced',
-  SECURITY_BYPASS_ATTEMPTED = 'security_bypass_attempted',
-  SECURITY_ENCRYPTION_APPLIED = 'security_encryption_applied',
-  SECURITY_INTEGRITY_VERIFIED = 'security_integrity_verified',
+  SECURITY_VIOLATION_DETECTED = "security_violation_detected",
+  SECURITY_ANOMALY_DETECTED = "security_anomaly_detected",
+  SECURITY_POLICY_ENFORCED = "security_policy_enforced",
+  SECURITY_BYPASS_ATTEMPTED = "security_bypass_attempted",
+  SECURITY_ENCRYPTION_APPLIED = "security_encryption_applied",
+  SECURITY_INTEGRITY_VERIFIED = "security_integrity_verified",
 
   // Performance and System Events
-  PERFORMANCE_THRESHOLD_EXCEEDED = 'performance_threshold_exceeded',
-  PERFORMANCE_OPTIMIZATION_APPLIED = 'performance_optimization_applied',
-  SYSTEM_RESOURCE_EXHAUSTED = 'system_resource_exhausted',
-  SYSTEM_ERROR_OCCURRED = 'system_error_occurred',
-  SYSTEM_RECOVERY_INITIATED = 'system_recovery_initiated',
+  PERFORMANCE_THRESHOLD_EXCEEDED = "performance_threshold_exceeded",
+  PERFORMANCE_OPTIMIZATION_APPLIED = "performance_optimization_applied",
+  SYSTEM_RESOURCE_EXHAUSTED = "system_resource_exhausted",
+  SYSTEM_ERROR_OCCURRED = "system_error_occurred",
+  SYSTEM_RECOVERY_INITIATED = "system_recovery_initiated",
 
   // Compliance Events
-  COMPLIANCE_RULE_APPLIED = 'compliance_rule_applied',
-  COMPLIANCE_VIOLATION_DETECTED = 'compliance_violation_detected',
-  COMPLIANCE_AUDIT_STARTED = 'compliance_audit_started',
-  COMPLIANCE_AUDIT_COMPLETED = 'compliance_audit_completed',
-  COMPLIANCE_REPORT_GENERATED = 'compliance_report_generated',
+  COMPLIANCE_RULE_APPLIED = "compliance_rule_applied",
+  COMPLIANCE_VIOLATION_DETECTED = "compliance_violation_detected",
+  COMPLIANCE_AUDIT_STARTED = "compliance_audit_started",
+  COMPLIANCE_AUDIT_COMPLETED = "compliance_audit_completed",
+  COMPLIANCE_REPORT_GENERATED = "compliance_report_generated",
 
   // Administrative Events
-  ADMIN_CONFIGURATION_CHANGED = 'admin_configuration_changed',
-  ADMIN_POLICY_UPDATED = 'admin_policy_updated',
-  ADMIN_USER_CREATED = 'admin_user_created',
-  ADMIN_USER_MODIFIED = 'admin_user_modified',
-  ADMIN_USER_DELETED = 'admin_user_deleted',
-  ADMIN_AUDIT_ACCESSED = 'admin_audit_accessed',
+  ADMIN_CONFIGURATION_CHANGED = "admin_configuration_changed",
+  ADMIN_POLICY_UPDATED = "admin_policy_updated",
+  ADMIN_USER_CREATED = "admin_user_created",
+  ADMIN_USER_MODIFIED = "admin_user_modified",
+  ADMIN_USER_DELETED = "admin_user_deleted",
+  ADMIN_AUDIT_ACCESSED = "admin_audit_accessed",
 }
 
 /**
  * Audit event severity levels for classification and alerting
  */
 export enum AuditEventSeverity {
-  TRACE = 'trace',           // Detailed tracing information
-  DEBUG = 'debug',           // Debug-level information
-  INFO = 'info',             // Informational events
-  NOTICE = 'notice',         // Normal but significant events
-  WARNING = 'warning',       // Warning conditions
-  ERROR = 'error',           // Error conditions
-  CRITICAL = 'critical',     // Critical conditions
-  ALERT = 'alert',           // Action must be taken immediately
-  EMERGENCY = 'emergency',   // System is unusable
+  TRACE = "trace", // Detailed tracing information
+  DEBUG = "debug", // Debug-level information
+  INFO = "info", // Informational events
+  NOTICE = "notice", // Normal but significant events
+  WARNING = "warning", // Warning conditions
+  ERROR = "error", // Error conditions
+  CRITICAL = "critical", // Critical conditions
+  ALERT = "alert", // Action must be taken immediately
+  EMERGENCY = "emergency", // System is unusable
 }
 
 /**
  * Audit event status for tracking event lifecycle
  */
 export enum AuditEventStatus {
-  INITIATED = 'initiated',     // Event initiated but not complete
-  IN_PROGRESS = 'in_progress', // Event currently being processed
-  COMPLETED = 'completed',     // Event successfully completed
-  FAILED = 'failed',           // Event failed to complete
-  CANCELLED = 'cancelled',     // Event was cancelled
-  TIMEOUT = 'timeout',         // Event timed out
-  CORRUPTED = 'corrupted',     // Event data corrupted
+  INITIATED = "initiated", // Event initiated but not complete
+  IN_PROGRESS = "in_progress", // Event currently being processed
+  COMPLETED = "completed", // Event successfully completed
+  FAILED = "failed", // Event failed to complete
+  CANCELLED = "cancelled", // Event was cancelled
+  TIMEOUT = "timeout", // Event timed out
+  CORRUPTED = "corrupted", // Event data corrupted
 }
 
 // ===========================
@@ -568,16 +564,16 @@ export interface ParameterMetadata {
  * Sensitive data type classification
  */
 export enum SensitiveDataType {
-  PII = 'pii',                    // Personally Identifiable Information
-  PHI = 'phi',                    // Protected Health Information
-  FINANCIAL = 'financial',        // Financial data
-  PAYMENT_CARD = 'payment_card',  // Payment card data
-  CREDENTIALS = 'credentials',    // Authentication credentials
-  API_KEYS = 'api_keys',         // API keys and tokens
-  BIOMETRIC = 'biometric',       // Biometric data
-  GENETIC = 'genetic',           // Genetic information
-  BEHAVIORAL = 'behavioral',     // Behavioral data
-  LOCATION = 'location',         // Location data
+  PII = "pii", // Personally Identifiable Information
+  PHI = "phi", // Protected Health Information
+  FINANCIAL = "financial", // Financial data
+  PAYMENT_CARD = "payment_card", // Payment card data
+  CREDENTIALS = "credentials", // Authentication credentials
+  API_KEYS = "api_keys", // API keys and tokens
+  BIOMETRIC = "biometric", // Biometric data
+  GENETIC = "genetic", // Genetic information
+  BEHAVIORAL = "behavioral", // Behavioral data
+  LOCATION = "location", // Location data
 }
 
 /**
@@ -633,14 +629,14 @@ export interface SanitizationInfo {
  * Sanitization types for data protection
  */
 export enum SanitizationType {
-  REDACTION = 'redaction',           // Data redacted with placeholders
-  MASKING = 'masking',               // Data masked with patterns
-  TOKENIZATION = 'tokenization',     // Data replaced with tokens
-  ENCRYPTION = 'encryption',         // Data encrypted
-  HASHING = 'hashing',              // Data hashed
-  PSEUDONYMIZATION = 'pseudonymization', // Data pseudonymized
-  ANONYMIZATION = 'anonymization',   // Data anonymized
-  TRUNCATION = 'truncation',         // Data truncated
+  REDACTION = "redaction", // Data redacted with placeholders
+  MASKING = "masking", // Data masked with patterns
+  TOKENIZATION = "tokenization", // Data replaced with tokens
+  ENCRYPTION = "encryption", // Data encrypted
+  HASHING = "hashing", // Data hashed
+  PSEUDONYMIZATION = "pseudonymization", // Data pseudonymized
+  ANONYMIZATION = "anonymization", // Data anonymized
+  TRUNCATION = "truncation", // Data truncated
 }
 
 /**
@@ -744,13 +740,13 @@ export interface DataLeakageAssessment {
  * Data leakage types
  */
 export enum DataLeakageType {
-  UNINTENTIONAL_PII_EXPOSURE = 'unintentional_pii_exposure',
-  EXCESSIVE_DATA_RETURN = 'excessive_data_return',
-  UNAUTHORIZED_DATA_ACCESS = 'unauthorized_data_access',
-  CROSS_TENANT_DATA_LEAK = 'cross_tenant_data_leak',
-  PRIVILEGE_ESCALATION_DATA = 'privilege_escalation_data',
-  DEBUG_INFORMATION_LEAK = 'debug_information_leak',
-  SYSTEM_METADATA_EXPOSURE = 'system_metadata_exposure',
+  UNINTENTIONAL_PII_EXPOSURE = "unintentional_pii_exposure",
+  EXCESSIVE_DATA_RETURN = "excessive_data_return",
+  UNAUTHORIZED_DATA_ACCESS = "unauthorized_data_access",
+  CROSS_TENANT_DATA_LEAK = "cross_tenant_data_leak",
+  PRIVILEGE_ESCALATION_DATA = "privilege_escalation_data",
+  DEBUG_INFORMATION_LEAK = "debug_information_leak",
+  SYSTEM_METADATA_EXPOSURE = "system_metadata_exposure",
 }
 
 /**
@@ -847,16 +843,16 @@ export interface SecurityViolation {
  * Security violation types
  */
 export enum SecurityViolationType {
-  UNAUTHORIZED_ACCESS = 'unauthorized_access',
-  PRIVILEGE_ESCALATION = 'privilege_escalation',
-  INPUT_INJECTION = 'input_injection',
-  OUTPUT_INFORMATION_LEAK = 'output_information_leak',
-  AUTHENTICATION_BYPASS = 'authentication_bypass',
-  AUTHORIZATION_BYPASS = 'authorization_bypass',
-  INSECURE_CONFIGURATION = 'insecure_configuration',
-  CRYPTOGRAPHIC_WEAKNESS = 'cryptographic_weakness',
-  DATA_INTEGRITY_VIOLATION = 'data_integrity_violation',
-  DENIAL_OF_SERVICE = 'denial_of_service',
+  UNAUTHORIZED_ACCESS = "unauthorized_access",
+  PRIVILEGE_ESCALATION = "privilege_escalation",
+  INPUT_INJECTION = "input_injection",
+  OUTPUT_INFORMATION_LEAK = "output_information_leak",
+  AUTHENTICATION_BYPASS = "authentication_bypass",
+  AUTHORIZATION_BYPASS = "authorization_bypass",
+  INSECURE_CONFIGURATION = "insecure_configuration",
+  CRYPTOGRAPHIC_WEAKNESS = "cryptographic_weakness",
+  DATA_INTEGRITY_VIOLATION = "data_integrity_violation",
+  DENIAL_OF_SERVICE = "denial_of_service",
 }
 
 /**
@@ -889,25 +885,25 @@ export interface AuthorizationCheck {
  * Authorization check types
  */
 export enum AuthorizationCheckType {
-  ROLE_BASED = 'role_based',
-  PERMISSION_BASED = 'permission_based',
-  ATTRIBUTE_BASED = 'attribute_based',
-  RULE_BASED = 'rule_based',
-  CONTEXT_BASED = 'context_based',
-  TIME_BASED = 'time_based',
-  LOCATION_BASED = 'location_based',
+  ROLE_BASED = "role_based",
+  PERMISSION_BASED = "permission_based",
+  ATTRIBUTE_BASED = "attribute_based",
+  RULE_BASED = "rule_based",
+  CONTEXT_BASED = "context_based",
+  TIME_BASED = "time_based",
+  LOCATION_BASED = "location_based",
 }
 
 /**
  * Authorization check results
  */
 export enum AuthorizationResult {
-  GRANTED = 'granted',
-  DENIED = 'denied',
-  CONDITIONAL = 'conditional',
-  ESCALATION_REQUIRED = 'escalation_required',
-  INSUFFICIENT_INFORMATION = 'insufficient_information',
-  ERROR = 'error',
+  GRANTED = "granted",
+  DENIED = "denied",
+  CONDITIONAL = "conditional",
+  ESCALATION_REQUIRED = "escalation_required",
+  INSUFFICIENT_INFORMATION = "insufficient_information",
+  ERROR = "error",
 }
 
 /**
@@ -960,11 +956,11 @@ export interface OutputValidationResult {
  * Validation result types
  */
 export enum ValidationResultType {
-  PASSED = 'passed',
-  FAILED = 'failed',
-  WARNING = 'warning',
-  SKIPPED = 'skipped',
-  ERROR = 'error',
+  PASSED = "passed",
+  FAILED = "failed",
+  WARNING = "warning",
+  SKIPPED = "skipped",
+  ERROR = "error",
 }
 
 // ===========================
@@ -1121,12 +1117,12 @@ export interface RiskFactor {
  * Risk factor categories
  */
 export enum RiskFactorCategory {
-  SECURITY = 'security',
-  COMPLIANCE = 'compliance',
-  OPERATIONAL = 'operational',
-  BUSINESS = 'business',
-  TECHNICAL = 'technical',
-  REGULATORY = 'regulatory',
+  SECURITY = "security",
+  COMPLIANCE = "compliance",
+  OPERATIONAL = "operational",
+  BUSINESS = "business",
+  TECHNICAL = "technical",
+  REGULATORY = "regulatory",
 }
 
 /**
@@ -1324,25 +1320,25 @@ export interface SecurityCheck {
  * Security check types
  */
 export enum SecurityCheckType {
-  AUTHENTICATION = 'authentication',
-  AUTHORIZATION = 'authorization',
-  INPUT_SANITIZATION = 'input_sanitization',
-  OUTPUT_ENCODING = 'output_encoding',
-  CRYPTOGRAPHIC_VALIDATION = 'cryptographic_validation',
-  CERTIFICATE_VALIDATION = 'certificate_validation',
-  TOKEN_VALIDATION = 'token_validation',
-  SESSION_VALIDATION = 'session_validation',
+  AUTHENTICATION = "authentication",
+  AUTHORIZATION = "authorization",
+  INPUT_SANITIZATION = "input_sanitization",
+  OUTPUT_ENCODING = "output_encoding",
+  CRYPTOGRAPHIC_VALIDATION = "cryptographic_validation",
+  CERTIFICATE_VALIDATION = "certificate_validation",
+  TOKEN_VALIDATION = "token_validation",
+  SESSION_VALIDATION = "session_validation",
 }
 
 /**
  * Security check results
  */
 export enum SecurityCheckResult {
-  PASSED = 'passed',
-  FAILED = 'failed',
-  WARNING = 'warning',
-  NOT_APPLICABLE = 'not_applicable',
-  ERROR = 'error',
+  PASSED = "passed",
+  FAILED = "failed",
+  WARNING = "warning",
+  NOT_APPLICABLE = "not_applicable",
+  ERROR = "error",
 }
 
 /**
@@ -1361,7 +1357,6 @@ export interface ComplianceValidationResult {
   /** Compliance score */
   complianceScore: number;
 }
-
 
 /**
  * Compliance check details
@@ -1390,25 +1385,25 @@ export interface ComplianceCheck {
  * Compliance frameworks
  */
 export enum ComplianceFramework {
-  GDPR = 'gdpr',
-  SOX = 'sox',
-  HIPAA = 'hipaa',
-  PCI_DSS = 'pci_dss',
-  ISO_27001 = 'iso_27001',
-  NIST = 'nist',
-  FedRAMP = 'fedramp',
-  SOC2 = 'soc2',
+  GDPR = "gdpr",
+  SOX = "sox",
+  HIPAA = "hipaa",
+  PCI_DSS = "pci_dss",
+  ISO_27001 = "iso_27001",
+  NIST = "nist",
+  FedRAMP = "fedramp",
+  SOC2 = "soc2",
 }
 
 /**
  * Compliance check results
  */
 export enum ComplianceCheckResult {
-  PASSED = 'passed',
-  FAILED = 'failed',
-  WARNING = 'warning',
-  NOT_APPLICABLE = 'not_applicable',
-  REQUIRES_MANUAL_REVIEW = 'requires_manual_review',
+  PASSED = "passed",
+  FAILED = "failed",
+  WARNING = "warning",
+  NOT_APPLICABLE = "not_applicable",
+  REQUIRES_MANUAL_REVIEW = "requires_manual_review",
 }
 
 /**
@@ -1444,25 +1439,25 @@ export interface ComplianceViolation {
  * Compliance violation types
  */
 export enum ComplianceViolationType {
-  DATA_PROTECTION = 'data_protection',
-  PRIVACY = 'privacy',
-  FINANCIAL_REPORTING = 'financial_reporting',
-  ACCESS_CONTROL = 'access_control',
-  AUDIT_TRAIL = 'audit_trail',
-  DATA_RETENTION = 'data_retention',
-  ENCRYPTION = 'encryption',
-  INCIDENT_RESPONSE = 'incident_response',
+  DATA_PROTECTION = "data_protection",
+  PRIVACY = "privacy",
+  FINANCIAL_REPORTING = "financial_reporting",
+  ACCESS_CONTROL = "access_control",
+  AUDIT_TRAIL = "audit_trail",
+  DATA_RETENTION = "data_retention",
+  ENCRYPTION = "encryption",
+  INCIDENT_RESPONSE = "incident_response",
 }
 
 /**
  * Compliance violation severity
  */
 export enum ComplianceViolationSeverity {
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  CRITICAL = 'critical',
-  SEVERE = 'severe',
+  LOW = "low",
+  MEDIUM = "medium",
+  HIGH = "high",
+  CRITICAL = "critical",
+  SEVERE = "severe",
 }
 
 // ===========================
@@ -1744,10 +1739,17 @@ export interface ForensicMetadata {
   timestampAuthority: string | null;
 
   /** Legal hold status */
-  legalHold: boolean | { status: boolean; reason: string; startDate: Date; endDate?: Date };
+  legalHold:
+    | boolean
+    | { status: boolean; reason: string; startDate: Date; endDate?: Date };
 
   /** Expert witness assignment */
-  expertWitness: { name: string; credentials: string; contact: string; assignmentDate: Date } | null;
+  expertWitness: {
+    name: string;
+    credentials: string;
+    contact: string;
+    assignmentDate: Date;
+  } | null;
 }
 
 /**
@@ -1777,14 +1779,14 @@ export interface ChainOfCustodyEntry {
  * Custody actions
  */
 export enum CustodyAction {
-  CREATED = 'created',
-  ACCESSED = 'accessed',
-  MODIFIED = 'modified',
-  COPIED = 'copied',
-  TRANSFERRED = 'transferred',
-  ANALYZED = 'analyzed',
-  ARCHIVED = 'archived',
-  DESTROYED = 'destroyed',
+  CREATED = "created",
+  ACCESSED = "accessed",
+  MODIFIED = "modified",
+  COPIED = "copied",
+  TRANSFERRED = "transferred",
+  ANALYZED = "analyzed",
+  ARCHIVED = "archived",
+  DESTROYED = "destroyed",
 }
 
 /**
@@ -1828,20 +1830,20 @@ export interface EvidenceClassification {
  * Classification levels
  */
 export enum ClassificationLevel {
-  UNCLASSIFIED = 'unclassified',
-  CONFIDENTIAL = 'confidential',
-  SECRET = 'secret',
-  TOP_SECRET = 'top_secret',
+  UNCLASSIFIED = "unclassified",
+  CONFIDENTIAL = "confidential",
+  SECRET = "secret",
+  TOP_SECRET = "top_secret",
 }
 
 /**
  * Sensitivity levels
  */
 export enum SensitivityLevel {
-  PUBLIC = 'public',
-  INTERNAL = 'internal',
-  RESTRICTED = 'restricted',
-  HIGHLY_RESTRICTED = 'highly_restricted',
+  PUBLIC = "public",
+  INTERNAL = "internal",
+  RESTRICTED = "restricted",
+  HIGHLY_RESTRICTED = "highly_restricted",
 }
 
 /**
@@ -1865,10 +1867,10 @@ export interface PreservationRequirement {
  * Preservation requirement types
  */
 export enum PreservationRequirementType {
-  LEGAL_HOLD = 'legal_hold',
-  REGULATORY_REQUIREMENT = 'regulatory_requirement',
-  BUSINESS_REQUIREMENT = 'business_requirement',
-  FORENSIC_REQUIREMENT = 'forensic_requirement',
+  LEGAL_HOLD = "legal_hold",
+  REGULATORY_REQUIREMENT = "regulatory_requirement",
+  BUSINESS_REQUIREMENT = "business_requirement",
+  FORENSIC_REQUIREMENT = "forensic_requirement",
 }
 
 /**
@@ -1909,11 +1911,11 @@ export interface LegalPrivilege {
  * Privilege types
  */
 export enum PrivilegeType {
-  ATTORNEY_CLIENT = 'attorney_client',
-  WORK_PRODUCT = 'work_product',
-  EXECUTIVE = 'executive',
-  MEDICAL = 'medical',
-  CONFIDENTIAL_COMMUNICATIONS = 'confidential_communications',
+  ATTORNEY_CLIENT = "attorney_client",
+  WORK_PRODUCT = "work_product",
+  EXECUTIVE = "executive",
+  MEDICAL = "medical",
+  CONFIDENTIAL_COMMUNICATIONS = "confidential_communications",
 }
 
 // ===========================
@@ -1965,13 +1967,13 @@ export interface EventCorrelationData {
  * Correlation types
  */
 export enum CorrelationType {
-  TEMPORAL = 'temporal',
-  CAUSAL = 'causal',
-  FUNCTIONAL = 'functional',
-  SYSTEMIC = 'systemic',
-  USER_BASED = 'user_based',
-  SESSION_BASED = 'session_based',
-  TRANSACTION_BASED = 'transaction_based',
+  TEMPORAL = "temporal",
+  CAUSAL = "causal",
+  FUNCTIONAL = "functional",
+  SYSTEMIC = "systemic",
+  USER_BASED = "user_based",
+  SESSION_BASED = "session_based",
+  TRANSACTION_BASED = "transaction_based",
 }
 
 /**
@@ -2027,11 +2029,11 @@ export interface CausalRelationship {
  * Causal relationship types
  */
 export enum CausalRelationshipType {
-  DIRECT_CAUSE = 'direct_cause',
-  INDIRECT_CAUSE = 'indirect_cause',
-  CONTRIBUTING_FACTOR = 'contributing_factor',
-  TRIGGERING_EVENT = 'triggering_event',
-  CONSEQUENCE = 'consequence',
+  DIRECT_CAUSE = "direct_cause",
+  INDIRECT_CAUSE = "indirect_cause",
+  CONTRIBUTING_FACTOR = "contributing_factor",
+  TRIGGERING_EVENT = "triggering_event",
+  CONSEQUENCE = "consequence",
 }
 
 // ===========================
@@ -2070,13 +2072,21 @@ export interface IntegrityVerification {
   digitalSignature: DigitalSignature | null;
 
   /** Timestamp token */
-  timestampToken: string | { token: string; authority: string; timestamp: Date } | null;
+  timestampToken:
+    | string
+    | { token: string; authority: string; timestamp: Date }
+    | null;
 
   /** Merkle proof */
   merkleProof: string[] | { path: string[]; root: string; leaf: string } | null;
 
   /** Blockchain notarization */
-  blockchainNotarization: { transactionHash: string; blockNumber: number; network: string; timestamp: Date } | null;
+  blockchainNotarization: {
+    transactionHash: string;
+    blockNumber: number;
+    network: string;
+    timestamp: Date;
+  } | null;
 
   /** Integrity level */
   integrityLevel: string;
@@ -2094,23 +2104,23 @@ export interface IntegrityVerification {
  * Integrity verification methods
  */
 export enum IntegrityVerificationMethod {
-  HASH_VERIFICATION = 'hash_verification',
-  DIGITAL_SIGNATURE = 'digital_signature',
-  BLOCKCHAIN_VERIFICATION = 'blockchain_verification',
-  MERKLE_TREE = 'merkle_tree',
-  TIMESTAMP_VERIFICATION = 'timestamp_verification',
-  CRYPTOGRAPHIC_PROOF = 'cryptographic_proof',
+  HASH_VERIFICATION = "hash_verification",
+  DIGITAL_SIGNATURE = "digital_signature",
+  BLOCKCHAIN_VERIFICATION = "blockchain_verification",
+  MERKLE_TREE = "merkle_tree",
+  TIMESTAMP_VERIFICATION = "timestamp_verification",
+  CRYPTOGRAPHIC_PROOF = "cryptographic_proof",
 }
 
 /**
  * Integrity verification results
  */
 export enum IntegrityVerificationResult {
-  VERIFIED = 'verified',
-  FAILED = 'failed',
-  PARTIAL = 'partial',
-  UNKNOWN = 'unknown',
-  ERROR = 'error',
+  VERIFIED = "verified",
+  FAILED = "failed",
+  PARTIAL = "partial",
+  UNKNOWN = "unknown",
+  ERROR = "error",
 }
 
 /**
@@ -2278,21 +2288,21 @@ export interface DatabaseTransactionContext {
  * Database transaction types
  */
 export enum DatabaseTransactionType {
-  READ_ONLY = 'read_only',
-  READ_WRITE = 'read_write',
-  DISTRIBUTED = 'distributed',
-  NESTED = 'nested',
+  READ_ONLY = "read_only",
+  READ_WRITE = "read_write",
+  DISTRIBUTED = "distributed",
+  NESTED = "nested",
 }
 
 /**
  * Database transaction status
  */
 export enum DatabaseTransactionStatus {
-  ACTIVE = 'active',
-  COMMITTED = 'committed',
-  ROLLED_BACK = 'rolled_back',
-  PREPARED = 'prepared',
-  UNKNOWN = 'unknown',
+  ACTIVE = "active",
+  COMMITTED = "committed",
+  ROLLED_BACK = "rolled_back",
+  PREPARED = "prepared",
+  UNKNOWN = "unknown",
 }
 
 /**
@@ -2319,14 +2329,14 @@ export interface DatabaseQueryContext {
  * Database query types
  */
 export enum DatabaseQueryType {
-  SELECT = 'select',
-  INSERT = 'insert',
-  UPDATE = 'update',
-  DELETE = 'delete',
-  CREATE = 'create',
-  DROP = 'drop',
-  ALTER = 'alter',
-  STORED_PROCEDURE = 'stored_procedure',
+  SELECT = "select",
+  INSERT = "insert",
+  UPDATE = "update",
+  DELETE = "delete",
+  CREATE = "create",
+  DROP = "drop",
+  ALTER = "alter",
+  STORED_PROCEDURE = "stored_procedure",
 }
 
 /**
@@ -2382,12 +2392,12 @@ export interface AuditSecurityContext {
  * Threat levels
  */
 export enum ThreatLevel {
-  MINIMAL = 'minimal',
-  LOW = 'low',
-  MODERATE = 'moderate',
-  HIGH = 'high',
-  SEVERE = 'severe',
-  CRITICAL = 'critical',
+  MINIMAL = "minimal",
+  LOW = "low",
+  MODERATE = "moderate",
+  HIGH = "high",
+  SEVERE = "severe",
+  CRITICAL = "critical",
 }
 
 /**
@@ -2414,12 +2424,12 @@ export interface SecurityControl {
  * Security control types
  */
 export enum SecurityControlType {
-  PREVENTIVE = 'preventive',
-  DETECTIVE = 'detective',
-  CORRECTIVE = 'corrective',
-  DETERRENT = 'deterrent',
-  RECOVERY = 'recovery',
-  COMPENSATING = 'compensating',
+  PREVENTIVE = "preventive",
+  DETECTIVE = "detective",
+  CORRECTIVE = "corrective",
+  DETERRENT = "deterrent",
+  RECOVERY = "recovery",
+  COMPENSATING = "compensating",
 }
 
 /**
@@ -2470,12 +2480,12 @@ export interface SecurityRiskFactor {
  * Compliance status enumeration
  */
 export enum ComplianceStatus {
-  COMPLIANT = 'compliant',
-  NON_COMPLIANT = 'non_compliant',
-  PARTIALLY_COMPLIANT = 'partially_compliant',
-  UNDER_REVIEW = 'under_review',
-  EXEMPTED = 'exempted',
-  PENDING_ASSESSMENT = 'pending_assessment',
+  COMPLIANT = "compliant",
+  NON_COMPLIANT = "non_compliant",
+  PARTIALLY_COMPLIANT = "partially_compliant",
+  UNDER_REVIEW = "under_review",
+  EXEMPTED = "exempted",
+  PENDING_ASSESSMENT = "pending_assessment",
 }
 
 /**
@@ -2525,12 +2535,12 @@ export interface ComplianceImpactAssessment {
  * Impact levels
  */
 export enum ImpactLevel {
-  NEGLIGIBLE = 'negligible',
-  MINOR = 'minor',
-  MODERATE = 'moderate',
-  MAJOR = 'major',
-  SEVERE = 'severe',
-  CATASTROPHIC = 'catastrophic',
+  NEGLIGIBLE = "negligible",
+  MINOR = "minor",
+  MODERATE = "moderate",
+  MAJOR = "major",
+  SEVERE = "severe",
+  CATASTROPHIC = "catastrophic",
 }
 
 /**
@@ -2571,11 +2581,11 @@ export interface TrendAnalysis {
  * Trend directions
  */
 export enum TrendDirection {
-  INCREASING = 'increasing',
-  DECREASING = 'decreasing',
-  STABLE = 'stable',
-  VOLATILE = 'volatile',
-  CYCLICAL = 'cyclical',
+  INCREASING = "increasing",
+  DECREASING = "decreasing",
+  STABLE = "stable",
+  VOLATILE = "volatile",
+  CYCLICAL = "cyclical",
 }
 
 /**
@@ -2602,13 +2612,13 @@ export interface ComplianceDocumentation {
  * Compliance documentation types
  */
 export enum ComplianceDocumentationType {
-  POLICY = 'policy',
-  PROCEDURE = 'procedure',
-  GUIDELINE = 'guideline',
-  STANDARD = 'standard',
-  EVIDENCE = 'evidence',
-  ASSESSMENT = 'assessment',
-  AUDIT_REPORT = 'audit_report',
+  POLICY = "policy",
+  PROCEDURE = "procedure",
+  GUIDELINE = "guideline",
+  STANDARD = "standard",
+  EVIDENCE = "evidence",
+  ASSESSMENT = "assessment",
+  AUDIT_REPORT = "audit_report",
 }
 
 /**
@@ -2722,12 +2732,12 @@ export interface BypassStatus {
  * Bypass types
  */
 export enum BypassType {
-  EMERGENCY = 'emergency',
-  MAINTENANCE = 'maintenance',
-  TESTING = 'testing',
-  AUTHORIZED = 'authorized',
-  TEMPORARY = 'temporary',
-  PERMANENT = 'permanent',
+  EMERGENCY = "emergency",
+  MAINTENANCE = "maintenance",
+  TESTING = "testing",
+  AUTHORIZED = "authorized",
+  TEMPORARY = "temporary",
+  PERMANENT = "permanent",
 }
 
 /**
@@ -2781,10 +2791,10 @@ export interface EncryptionPerformanceSettings {
  * Performance optimization modes
  */
 export enum PerformanceOptimizationMode {
-  THROUGHPUT = 'throughput',
-  LATENCY = 'latency',
-  BALANCED = 'balanced',
-  MEMORY_OPTIMIZED = 'memory_optimized',
+  THROUGHPUT = "throughput",
+  LATENCY = "latency",
+  BALANCED = "balanced",
+  MEMORY_OPTIMIZED = "memory_optimized",
 }
 
 /**
@@ -2814,12 +2824,12 @@ export interface EncryptionComplianceSettings {
  * Encryption standards
  */
 export enum EncryptionStandard {
-  FIPS_140_2 = 'fips_140_2',
-  COMMON_CRITERIA = 'common_criteria',
-  NSA_SUITE_B = 'nsa_suite_b',
-  NIST_SP_800_57 = 'nist_sp_800_57',
-  ISO_27001 = 'iso_27001',
-  PKCS_11 = 'pkcs_11',
+  FIPS_140_2 = "fips_140_2",
+  COMMON_CRITERIA = "common_criteria",
+  NSA_SUITE_B = "nsa_suite_b",
+  NIST_SP_800_57 = "nist_sp_800_57",
+  ISO_27001 = "iso_27001",
+  PKCS_11 = "pkcs_11",
 }
 
 /**
@@ -2843,10 +2853,10 @@ export interface GeographicRestriction {
  * Restriction types
  */
 export enum RestrictionType {
-  EXPORT_CONTROL = 'export_control',
-  IMPORT_RESTRICTION = 'import_restriction',
-  USE_RESTRICTION = 'use_restriction',
-  ALGORITHM_RESTRICTION = 'algorithm_restriction',
+  EXPORT_CONTROL = "export_control",
+  IMPORT_RESTRICTION = "import_restriction",
+  USE_RESTRICTION = "use_restriction",
+  ALGORITHM_RESTRICTION = "algorithm_restriction",
 }
 
 /**
@@ -2893,13 +2903,13 @@ export interface HsmConfig {
  * HSM providers
  */
 export enum HsmProvider {
-  AWS_CLOUDHSM = 'aws_cloudhsm',
-  AZURE_DEDICATED_HSM = 'azure_dedicated_hsm',
-  THALES_LUNA = 'thales_luna',
-  SAFENET = 'safenet',
-  UTIMACO = 'utimaco',
-  YUBICO = 'yubico',
-  SOFTWARE_HSM = 'software_hsm',
+  AWS_CLOUDHSM = "aws_cloudhsm",
+  AZURE_DEDICATED_HSM = "azure_dedicated_hsm",
+  THALES_LUNA = "thales_luna",
+  SAFENET = "safenet",
+  UTIMACO = "utimaco",
+  YUBICO = "yubico",
+  SOFTWARE_HSM = "software_hsm",
 }
 
 /**
@@ -2980,12 +2990,12 @@ export interface HsmAuthentication {
  * HSM authentication methods
  */
 export enum HsmAuthMethod {
-  PASSWORD = 'password',
-  CERTIFICATE = 'certificate',
-  TOKEN = 'token',
-  BIOMETRIC = 'biometric',
-  SMART_CARD = 'smart_card',
-  OAUTH2 = 'oauth2',
+  PASSWORD = "password",
+  CERTIFICATE = "certificate",
+  TOKEN = "token",
+  BIOMETRIC = "biometric",
+  SMART_CARD = "smart_card",
+  OAUTH2 = "oauth2",
 }
 
 /**
@@ -3154,10 +3164,10 @@ export interface HardwareFeatures {
  * Tamper resistance levels
  */
 export enum TamperResistanceLevel {
-  LEVEL_1 = 'level_1',
-  LEVEL_2 = 'level_2',
-  LEVEL_3 = 'level_3',
-  LEVEL_4 = 'level_4',
+  LEVEL_1 = "level_1",
+  LEVEL_2 = "level_2",
+  LEVEL_3 = "level_3",
+  LEVEL_4 = "level_4",
 }
 
 /**
@@ -3240,10 +3250,10 @@ export interface HsmFailoverConfig {
  * Failover strategies
  */
 export enum FailoverStrategy {
-  ACTIVE_PASSIVE = 'active_passive',
-  ACTIVE_ACTIVE = 'active_active',
-  ROUND_ROBIN = 'round_robin',
-  LOAD_BALANCED = 'load_balanced',
+  ACTIVE_PASSIVE = "active_passive",
+  ACTIVE_ACTIVE = "active_active",
+  ROUND_ROBIN = "round_robin",
+  LOAD_BALANCED = "load_balanced",
 }
 
 /**
@@ -3267,10 +3277,10 @@ export interface HealthCheckConfig {
  * Health check methods
  */
 export enum HealthCheckMethod {
-  PING = 'ping',
-  STATUS_CHECK = 'status_check',
-  OPERATION_TEST = 'operation_test',
-  CERTIFICATE_VALIDATION = 'certificate_validation',
+  PING = "ping",
+  STATUS_CHECK = "status_check",
+  OPERATION_TEST = "operation_test",
+  CERTIFICATE_VALIDATION = "certificate_validation",
 }
 
 /**
@@ -3294,20 +3304,20 @@ export interface DataSynchronizationConfig {
  * Synchronization methods
  */
 export enum SynchronizationMethod {
-  REAL_TIME = 'real_time',
-  BATCH = 'batch',
-  SCHEDULED = 'scheduled',
-  ON_DEMAND = 'on_demand',
+  REAL_TIME = "real_time",
+  BATCH = "batch",
+  SCHEDULED = "scheduled",
+  ON_DEMAND = "on_demand",
 }
 
 /**
  * Conflict resolution strategies
  */
 export enum ConflictResolutionStrategy {
-  LAST_WRITE_WINS = 'last_write_wins',
-  MANUAL_RESOLUTION = 'manual_resolution',
-  AUTOMATIC_MERGE = 'automatic_merge',
-  VERSION_CONTROL = 'version_control',
+  LAST_WRITE_WINS = "last_write_wins",
+  MANUAL_RESOLUTION = "manual_resolution",
+  AUTOMATIC_MERGE = "automatic_merge",
+  VERSION_CONTROL = "version_control",
 }
 
 /**
@@ -3405,10 +3415,10 @@ export interface CachingSettings {
  * Cache invalidation strategies
  */
 export enum CacheInvalidationStrategy {
-  TTL_BASED = 'ttl_based',
-  USAGE_BASED = 'usage_based',
-  EVENT_BASED = 'event_based',
-  MANUAL = 'manual',
+  TTL_BASED = "ttl_based",
+  USAGE_BASED = "usage_based",
+  EVENT_BASED = "event_based",
+  MANUAL = "manual",
 }
 
 /**
@@ -3466,12 +3476,12 @@ export interface LoggingConfiguration {
  * Log levels
  */
 export enum LogLevel {
-  TRACE = 'trace',
-  DEBUG = 'debug',
-  INFO = 'info',
-  WARN = 'warn',
-  ERROR = 'error',
-  FATAL = 'fatal',
+  TRACE = "trace",
+  DEBUG = "debug",
+  INFO = "info",
+  WARN = "warn",
+  ERROR = "error",
+  FATAL = "fatal",
 }
 
 /**
@@ -3495,11 +3505,11 @@ export interface LogRotationSettings {
  * Log destinations
  */
 export enum LogDestination {
-  FILE = 'file',
-  CONSOLE = 'console',
-  SYSLOG = 'syslog',
-  ELASTICSEARCH = 'elasticsearch',
-  SPLUNK = 'splunk',
+  FILE = "file",
+  CONSOLE = "console",
+  SYSLOG = "syslog",
+  ELASTICSEARCH = "elasticsearch",
+  SPLUNK = "splunk",
 }
 
 /**
@@ -3526,13 +3536,13 @@ export interface QuantumResistantSettings {
  * Quantum-resistant algorithms
  */
 export enum QuantumResistantAlgorithm {
-  KYBER = 'kyber',
-  DILITHIUM = 'dilithium',
-  FALCON = 'falcon',
-  SPHINCS_PLUS = 'sphincs_plus',
-  CLASSIC_MCELIECE = 'classic_mceliece',
-  BIKE = 'bike',
-  HQC = 'hqc',
+  KYBER = "kyber",
+  DILITHIUM = "dilithium",
+  FALCON = "falcon",
+  SPHINCS_PLUS = "sphincs_plus",
+  CLASSIC_MCELIECE = "classic_mceliece",
+  BIKE = "bike",
+  HQC = "hqc",
 }
 
 /**
@@ -3610,10 +3620,10 @@ export interface HybridModeSettings {
  * Hybrid combination strategies
  */
 export enum HybridCombinationStrategy {
-  PARALLEL = 'parallel',
-  CASCADED = 'cascaded',
-  REDUNDANT = 'redundant',
-  ADAPTIVE = 'adaptive',
+  PARALLEL = "parallel",
+  CASCADED = "cascaded",
+  REDUNDANT = "redundant",
+  ADAPTIVE = "adaptive",
 }
 
 /**
@@ -3671,11 +3681,11 @@ export interface QuantumThreatAssessment {
  * Quantum threat levels
  */
 export enum QuantumThreatLevel {
-  THEORETICAL = 'theoretical',
-  RESEARCH = 'research',
-  EXPERIMENTAL = 'experimental',
-  NEAR_TERM = 'near_term',
-  IMMEDIATE = 'immediate',
+  THEORETICAL = "theoretical",
+  RESEARCH = "research",
+  EXPERIMENTAL = "experimental",
+  NEAR_TERM = "near_term",
+  IMMEDIATE = "immediate",
 }
 
 /**
@@ -3716,36 +3726,36 @@ export interface QuantumImpactAnalysis {
  * Business impact levels
  */
 export enum BusinessImpactLevel {
-  MINIMAL = 'minimal',
-  LOW = 'low',
-  MODERATE = 'moderate',
-  HIGH = 'high',
-  SEVERE = 'severe',
-  CRITICAL = 'critical',
+  MINIMAL = "minimal",
+  LOW = "low",
+  MODERATE = "moderate",
+  HIGH = "high",
+  SEVERE = "severe",
+  CRITICAL = "critical",
 }
 
 /**
  * Technical impact levels
  */
 export enum TechnicalImpactLevel {
-  MINIMAL = 'minimal',
-  LOW = 'low',
-  MODERATE = 'moderate',
-  HIGH = 'high',
-  SEVERE = 'severe',
-  CRITICAL = 'critical',
+  MINIMAL = "minimal",
+  LOW = "low",
+  MODERATE = "moderate",
+  HIGH = "high",
+  SEVERE = "severe",
+  CRITICAL = "critical",
 }
 
 /**
  * Regulatory impact levels
  */
 export enum RegulatoryImpactLevel {
-  MINIMAL = 'minimal',
-  LOW = 'low',
-  MODERATE = 'moderate',
-  HIGH = 'high',
-  SEVERE = 'severe',
-  CRITICAL = 'critical',
+  MINIMAL = "minimal",
+  LOW = "low",
+  MODERATE = "moderate",
+  HIGH = "high",
+  SEVERE = "severe",
+  CRITICAL = "critical",
 }
 
 /**
@@ -3810,12 +3820,12 @@ export interface StorageBackend {
  * Storage backend types
  */
 export enum StorageBackendType {
-  FILE_SYSTEM = 'file_system',
-  DATABASE = 'database',
-  OBJECT_STORAGE = 'object_storage',
-  BLOCKCHAIN = 'blockchain',
-  DISTRIBUTED_LEDGER = 'distributed_ledger',
-  CLOUD_STORAGE = 'cloud_storage',
+  FILE_SYSTEM = "file_system",
+  DATABASE = "database",
+  OBJECT_STORAGE = "object_storage",
+  BLOCKCHAIN = "blockchain",
+  DISTRIBUTED_LEDGER = "distributed_ledger",
+  CLOUD_STORAGE = "cloud_storage",
 }
 
 /**
@@ -3853,12 +3863,12 @@ export interface StorageAuthentication {
  * Storage authentication types
  */
 export enum StorageAuthenticationType {
-  USERNAME_PASSWORD = 'username_password',
-  API_KEY = 'api_key',
-  CERTIFICATE = 'certificate',
-  OAUTH2 = 'oauth2',
-  IAM_ROLE = 'iam_role',
-  KERBEROS = 'kerberos',
+  USERNAME_PASSWORD = "username_password",
+  API_KEY = "api_key",
+  CERTIFICATE = "certificate",
+  OAUTH2 = "oauth2",
+  IAM_ROLE = "iam_role",
+  KERBEROS = "kerberos",
 }
 
 /**
@@ -3979,11 +3989,11 @@ export interface CompressionSettings {
  * Compression algorithms
  */
 export enum CompressionAlgorithm {
-  GZIP = 'gzip',
-  DEFLATE = 'deflate',
-  BROTLI = 'brotli',
-  LZ4 = 'lz4',
-  ZSTD = 'zstd',
+  GZIP = "gzip",
+  DEFLATE = "deflate",
+  BROTLI = "brotli",
+  LZ4 = "lz4",
+  ZSTD = "zstd",
 }
 
 /**
@@ -4007,11 +4017,11 @@ export interface IndexingSettings {
  * Index types
  */
 export enum IndexType {
-  BTREE = 'btree',
-  HASH = 'hash',
-  BITMAP = 'bitmap',
-  FULLTEXT = 'fulltext',
-  SPATIAL = 'spatial',
+  BTREE = "btree",
+  HASH = "hash",
+  BITMAP = "bitmap",
+  FULLTEXT = "fulltext",
+  SPATIAL = "spatial",
 }
 
 /**
@@ -4055,11 +4065,11 @@ export interface PartitioningSettings {
  * Partitioning strategies
  */
 export enum PartitioningStrategy {
-  RANGE = 'range',
-  HASH = 'hash',
-  LIST = 'list',
-  COMPOSITE = 'composite',
-  TIME_BASED = 'time_based',
+  RANGE = "range",
+  HASH = "hash",
+  LIST = "list",
+  COMPOSITE = "composite",
+  TIME_BASED = "time_based",
 }
 
 /**
@@ -4134,11 +4144,11 @@ export interface BackupSettings {
  * Backup frequencies
  */
 export enum BackupFrequency {
-  CONTINUOUS = 'continuous',
-  HOURLY = 'hourly',
-  DAILY = 'daily',
-  WEEKLY = 'weekly',
-  MONTHLY = 'monthly',
+  CONTINUOUS = "continuous",
+  HOURLY = "hourly",
+  DAILY = "daily",
+  WEEKLY = "weekly",
+  MONTHLY = "monthly",
 }
 
 /**
@@ -4196,21 +4206,21 @@ export interface CloudBackupSettings {
  * Cloud providers
  */
 export enum CloudProvider {
-  AWS = 'aws',
-  AZURE = 'azure',
-  GCP = 'gcp',
-  IBM = 'ibm',
-  ORACLE = 'oracle',
+  AWS = "aws",
+  AZURE = "azure",
+  GCP = "gcp",
+  IBM = "ibm",
+  ORACLE = "oracle",
 }
 
 /**
  * Cloud storage classes
  */
 export enum CloudStorageClass {
-  STANDARD = 'standard',
-  COLD = 'cold',
-  ARCHIVE = 'archive',
-  DEEP_ARCHIVE = 'deep_archive',
+  STANDARD = "standard",
+  COLD = "cold",
+  ARCHIVE = "archive",
+  DEEP_ARCHIVE = "deep_archive",
 }
 
 /**
@@ -4248,10 +4258,10 @@ export interface BackupKeyManagement {
  * Key providers
  */
 export enum KeyProvider {
-  INTERNAL = 'internal',
-  HSM = 'hsm',
-  KMS = 'kms',
-  THIRD_PARTY = 'third_party',
+  INTERNAL = "internal",
+  HSM = "hsm",
+  KMS = "kms",
+  THIRD_PARTY = "third_party",
 }
 
 /**
@@ -4306,10 +4316,10 @@ export interface EscrowVerificationSettings {
  * Escrow verification methods
  */
 export enum EscrowVerificationMethod {
-  AUTOMATED = 'automated',
-  MANUAL = 'manual',
-  THIRD_PARTY = 'third_party',
-  HYBRID = 'hybrid',
+  AUTOMATED = "automated",
+  MANUAL = "manual",
+  THIRD_PARTY = "third_party",
+  HYBRID = "hybrid",
 }
 
 /**
@@ -4350,10 +4360,10 @@ export interface RecoveryTestingSettings {
  * Recovery testing scopes
  */
 export enum RecoveryTestingScope {
-  FULL = 'full',
-  PARTIAL = 'partial',
-  METADATA_ONLY = 'metadata_only',
-  SAMPLE_DATA = 'sample_data',
+  FULL = "full",
+  PARTIAL = "partial",
+  METADATA_ONLY = "metadata_only",
+  SAMPLE_DATA = "sample_data",
 }
 
 /**
@@ -4411,12 +4421,12 @@ export interface NotificationSettings {
  * Notification channels
  */
 export enum NotificationChannel {
-  EMAIL = 'email',
-  SMS = 'sms',
-  SLACK = 'slack',
-  WEBHOOK = 'webhook',
-  PAGER_DUTY = 'pager_duty',
-  MICROSOFT_TEAMS = 'microsoft_teams',
+  EMAIL = "email",
+  SMS = "sms",
+  SLACK = "slack",
+  WEBHOOK = "webhook",
+  PAGER_DUTY = "pager_duty",
+  MICROSOFT_TEAMS = "microsoft_teams",
 }
 
 /**
@@ -4440,10 +4450,10 @@ export interface NotificationTemplate {
  * Notification formats
  */
 export enum NotificationFormat {
-  PLAIN_TEXT = 'plain_text',
-  HTML = 'html',
-  MARKDOWN = 'markdown',
-  JSON = 'json',
+  PLAIN_TEXT = "plain_text",
+  HTML = "html",
+  MARKDOWN = "markdown",
+  JSON = "json",
 }
 
 /**
@@ -4507,10 +4517,10 @@ export interface RecoverySite {
  * Recovery site types
  */
 export enum RecoverySiteType {
-  HOT_SITE = 'hot_site',
-  WARM_SITE = 'warm_site',
-  COLD_SITE = 'cold_site',
-  CLOUD_SITE = 'cloud_site',
+  HOT_SITE = "hot_site",
+  WARM_SITE = "warm_site",
+  COLD_SITE = "cold_site",
+  CLOUD_SITE = "cloud_site",
 }
 
 /**
@@ -4534,10 +4544,10 @@ export interface RecoverySiteCapacity {
  * Recovery site readiness levels
  */
 export enum RecoverySiteReadiness {
-  IMMEDIATE = 'immediate',
-  WITHIN_HOURS = 'within_hours',
-  WITHIN_DAYS = 'within_days',
-  WITHIN_WEEKS = 'within_weeks',
+  IMMEDIATE = "immediate",
+  WITHIN_HOURS = "within_hours",
+  WITHIN_DAYS = "within_days",
+  WITHIN_WEEKS = "within_weeks",
 }
 
 /**
@@ -4768,11 +4778,11 @@ export interface StorageAccessControlSettings {
  * Authorization models
  */
 export enum AuthorizationModel {
-  RBAC = 'rbac',
-  ABAC = 'abac',
-  DAC = 'dac',
-  MAC = 'mac',
-  HYBRID = 'hybrid',
+  RBAC = "rbac",
+  ABAC = "abac",
+  DAC = "dac",
+  MAC = "mac",
+  HYBRID = "hybrid",
 }
 
 /**
@@ -4864,10 +4874,10 @@ export interface Attribute {
  * Attribute types
  */
 export enum AttributeType {
-  SUBJECT = 'subject',
-  OBJECT = 'object',
-  ENVIRONMENT = 'environment',
-  ACTION = 'action',
+  SUBJECT = "subject",
+  OBJECT = "object",
+  ENVIRONMENT = "environment",
+  ACTION = "action",
 }
 
 /**
@@ -4908,10 +4918,10 @@ export interface PolicyRule {
  * Policy effects
  */
 export enum PolicyEffect {
-  PERMIT = 'permit',
-  DENY = 'deny',
-  NOT_APPLICABLE = 'not_applicable',
-  INDETERMINATE = 'indeterminate',
+  PERMIT = "permit",
+  DENY = "deny",
+  NOT_APPLICABLE = "not_applicable",
+  INDETERMINATE = "indeterminate",
 }
 
 /**
@@ -4935,11 +4945,11 @@ export interface PolicyEvaluationSettings {
  * Combining algorithms
  */
 export enum CombiningAlgorithm {
-  DENY_OVERRIDES = 'deny_overrides',
-  PERMIT_OVERRIDES = 'permit_overrides',
-  FIRST_APPLICABLE = 'first_applicable',
-  DENY_UNLESS_PERMIT = 'deny_unless_permit',
-  PERMIT_UNLESS_DENY = 'permit_unless_deny',
+  DENY_OVERRIDES = "deny_overrides",
+  PERMIT_OVERRIDES = "permit_overrides",
+  FIRST_APPLICABLE = "first_applicable",
+  DENY_UNLESS_PERMIT = "deny_unless_permit",
+  PERMIT_UNLESS_DENY = "permit_unless_deny",
 }
 
 /**
@@ -5014,11 +5024,11 @@ export interface TrustRelationship {
  * Trust levels
  */
 export enum TrustLevel {
-  NONE = 'none',
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  FULL = 'full',
+  NONE = "none",
+  LOW = "low",
+  MEDIUM = "medium",
+  HIGH = "high",
+  FULL = "full",
 }
 
 /**
@@ -5062,11 +5072,11 @@ export interface StorageAuditLoggingSettings {
  * Audit log formats
  */
 export enum AuditLogFormat {
-  JSON = 'json',
-  XML = 'xml',
-  CEF = 'cef',
-  SYSLOG = 'syslog',
-  CUSTOM = 'custom',
+  JSON = "json",
+  XML = "xml",
+  CEF = "cef",
+  SYSLOG = "syslog",
+  CUSTOM = "custom",
 }
 
 /**
@@ -5127,11 +5137,11 @@ export interface ValidationEngine {
  * Validation engine types
  */
 export enum ValidationEngineType {
-  RULES_ENGINE = 'rules_engine',
-  SCHEMA_VALIDATOR = 'schema_validator',
-  BUSINESS_RULES = 'business_rules',
-  MACHINE_LEARNING = 'machine_learning',
-  HYBRID = 'hybrid',
+  RULES_ENGINE = "rules_engine",
+  SCHEMA_VALIDATOR = "schema_validator",
+  BUSINESS_RULES = "business_rules",
+  MACHINE_LEARNING = "machine_learning",
+  HYBRID = "hybrid",
 }
 
 /**
@@ -5167,23 +5177,23 @@ export interface ValidationRule {
  * Validation rule types
  */
 export enum ValidationRuleType {
-  SYNTAX = 'syntax',
-  SEMANTIC = 'semantic',
-  BUSINESS = 'business',
-  SECURITY = 'security',
-  COMPLIANCE = 'compliance',
-  PERFORMANCE = 'performance',
+  SYNTAX = "syntax",
+  SEMANTIC = "semantic",
+  BUSINESS = "business",
+  SECURITY = "security",
+  COMPLIANCE = "compliance",
+  PERFORMANCE = "performance",
 }
 
 /**
  * Validation rule actions
  */
 export enum ValidationRuleAction {
-  ACCEPT = 'accept',
-  REJECT = 'reject',
-  WARN = 'warn',
-  TRANSFORM = 'transform',
-  ESCALATE = 'escalate',
+  ACCEPT = "accept",
+  REJECT = "reject",
+  WARN = "warn",
+  TRANSFORM = "transform",
+  ESCALATE = "escalate",
 }
 
 /**
@@ -5210,21 +5220,21 @@ export interface RuleExecutionSettings {
  * Rule execution modes
  */
 export enum RuleExecutionMode {
-  SEQUENTIAL = 'sequential',
-  PARALLEL = 'parallel',
-  CONDITIONAL = 'conditional',
-  PRIORITY_BASED = 'priority_based',
+  SEQUENTIAL = "sequential",
+  PARALLEL = "parallel",
+  CONDITIONAL = "conditional",
+  PRIORITY_BASED = "priority_based",
 }
 
 /**
  * Rule ordering strategies
  */
 export enum RuleOrderingStrategy {
-  PRIORITY = 'priority',
-  DEPENDENCY = 'dependency',
-  ALPHABETICAL = 'alphabetical',
-  PERFORMANCE = 'performance',
-  CUSTOM = 'custom',
+  PRIORITY = "priority",
+  DEPENDENCY = "dependency",
+  ALPHABETICAL = "alphabetical",
+  PERFORMANCE = "performance",
+  CUSTOM = "custom",
 }
 
 /**
@@ -5248,10 +5258,10 @@ export interface RuleDependency {
  * Rule dependency types
  */
 export enum RuleDependencyType {
-  PREREQUISITE = 'prerequisite',
-  MUTEX = 'mutex',
-  CONDITIONAL = 'conditional',
-  SEQUENTIAL = 'sequential',
+  PREREQUISITE = "prerequisite",
+  MUTEX = "mutex",
+  CONDITIONAL = "conditional",
+  SEQUENTIAL = "sequential",
 }
 
 /**
@@ -5292,10 +5302,10 @@ export interface ValidationTimeoutSettings {
  * Timeout actions
  */
 export enum TimeoutAction {
-  FAIL = 'fail',
-  WARN = 'warn',
-  SKIP = 'skip',
-  DEFAULT_VALUE = 'default_value',
+  FAIL = "fail",
+  WARN = "warn",
+  SKIP = "skip",
+  DEFAULT_VALUE = "default_value",
 }
 
 /**
@@ -5319,10 +5329,10 @@ export interface TimeoutRetrySettings {
  * Backoff strategies
  */
 export enum BackoffStrategy {
-  FIXED = 'fixed',
-  LINEAR = 'linear',
-  EXPONENTIAL = 'exponential',
-  JITTERED = 'jittered',
+  FIXED = "fixed",
+  LINEAR = "linear",
+  EXPONENTIAL = "exponential",
+  JITTERED = "jittered",
 }
 
 /**
@@ -5349,10 +5359,10 @@ export interface ValidationCachingSettings {
  * Cache key strategies
  */
 export enum CacheKeyStrategy {
-  HASH_BASED = 'hash_based',
-  RULE_BASED = 'rule_based',
-  CONTENT_BASED = 'content_based',
-  COMPOSITE = 'composite',
+  HASH_BASED = "hash_based",
+  RULE_BASED = "rule_based",
+  CONTENT_BASED = "content_based",
+  COMPOSITE = "composite",
 }
 
 /**
@@ -5433,22 +5443,22 @@ export interface AlgorithmOptimizationSettings {
  * Optimization levels
  */
 export enum OptimizationLevel {
-  NONE = 'none',
-  BASIC = 'basic',
-  STANDARD = 'standard',
-  AGGRESSIVE = 'aggressive',
-  CUSTOM = 'custom',
+  NONE = "none",
+  BASIC = "basic",
+  STANDARD = "standard",
+  AGGRESSIVE = "aggressive",
+  CUSTOM = "custom",
 }
 
 /**
  * Optimization targets
  */
 export enum OptimizationTarget {
-  SPEED = 'speed',
-  MEMORY = 'memory',
-  ACCURACY = 'accuracy',
-  THROUGHPUT = 'throughput',
-  LATENCY = 'latency',
+  SPEED = "speed",
+  MEMORY = "memory",
+  ACCURACY = "accuracy",
+  THROUGHPUT = "throughput",
+  LATENCY = "latency",
 }
 
 /**
@@ -5472,11 +5482,11 @@ export interface OptimizationConstraint {
  * Constraint types
  */
 export enum ConstraintType {
-  MAX_MEMORY = 'max_memory',
-  MAX_CPU = 'max_cpu',
-  MAX_TIME = 'max_time',
-  MAX_DISK = 'max_disk',
-  MAX_NETWORK = 'max_network',
+  MAX_MEMORY = "max_memory",
+  MAX_CPU = "max_cpu",
+  MAX_TIME = "max_time",
+  MAX_DISK = "max_disk",
+  MAX_NETWORK = "max_network",
 }
 
 /**
@@ -5500,11 +5510,11 @@ export interface ValidationErrorHandlingSettings {
  * Error handling strategies
  */
 export enum ErrorHandlingStrategy {
-  FAIL_FAST = 'fail_fast',
-  COLLECT_ALL_ERRORS = 'collect_all_errors',
-  CONTINUE_ON_ERROR = 'continue_on_error',
-  RETRY_ON_ERROR = 'retry_on_error',
-  FALLBACK_ON_ERROR = 'fallback_on_error',
+  FAIL_FAST = "fail_fast",
+  COLLECT_ALL_ERRORS = "collect_all_errors",
+  CONTINUE_ON_ERROR = "continue_on_error",
+  RETRY_ON_ERROR = "retry_on_error",
+  FALLBACK_ON_ERROR = "fallback_on_error",
 }
 
 /**
@@ -5565,11 +5575,11 @@ export interface ErrorRecoverySettings {
  * Recovery strategies
  */
 export enum RecoveryStrategy {
-  RETRY = 'retry',
-  FALLBACK = 'fallback',
-  IGNORE = 'ignore',
-  DEFAULT_VALUE = 'default_value',
-  MANUAL_INTERVENTION = 'manual_intervention',
+  RETRY = "retry",
+  FALLBACK = "fallback",
+  IGNORE = "ignore",
+  DEFAULT_VALUE = "default_value",
+  MANUAL_INTERVENTION = "manual_intervention",
 }
 
 /**
@@ -5815,11 +5825,11 @@ export interface ComplianceClassification {
  * Compliance classification levels
  */
 export enum ComplianceLevel {
-  PUBLIC = 'public',
-  INTERNAL = 'internal',
-  CONFIDENTIAL = 'confidential',
-  RESTRICTED = 'restricted',
-  TOP_SECRET = 'top_secret',
+  PUBLIC = "public",
+  INTERNAL = "internal",
+  CONFIDENTIAL = "confidential",
+  RESTRICTED = "restricted",
+  TOP_SECRET = "top_secret",
 }
 
 /**
@@ -5840,10 +5850,10 @@ export interface RetentionRequirement {
  * Data disposal methods
  */
 export enum DisposalMethod {
-  SECURE_DELETE = 'secure_delete',
-  PHYSICAL_DESTRUCTION = 'physical_destruction',
-  CRYPTOGRAPHIC_ERASURE = 'cryptographic_erasure',
-  DEGAUSSING = 'degaussing',
+  SECURE_DELETE = "secure_delete",
+  PHYSICAL_DESTRUCTION = "physical_destruction",
+  CRYPTOGRAPHIC_ERASURE = "cryptographic_erasure",
+  DEGAUSSING = "degaussing",
 }
 
 /**
@@ -5924,10 +5934,10 @@ export interface SentimentAnalysis {
  * Sentiment types
  */
 export enum SentimentType {
-  POSITIVE = 'positive',
-  NEGATIVE = 'negative',
-  NEUTRAL = 'neutral',
-  MIXED = 'mixed',
+  POSITIVE = "positive",
+  NEGATIVE = "negative",
+  NEUTRAL = "neutral",
+  MIXED = "mixed",
 }
 
 /**
@@ -5962,11 +5972,11 @@ export interface RiskIndicator {
  * Conversation risk types
  */
 export enum ConversationRiskType {
-  POLICY_VIOLATION = 'policy_violation',
-  SECURITY_THREAT = 'security_threat',
-  COMPLIANCE_RISK = 'compliance_risk',
-  INAPPROPRIATE_CONTENT = 'inappropriate_content',
-  DATA_BREACH_RISK = 'data_breach_risk',
+  POLICY_VIOLATION = "policy_violation",
+  SECURITY_THREAT = "security_threat",
+  COMPLIANCE_RISK = "compliance_risk",
+  INAPPROPRIATE_CONTENT = "inappropriate_content",
+  DATA_BREACH_RISK = "data_breach_risk",
 }
 
 /**
@@ -5993,11 +6003,11 @@ export interface DecisionReasoning {
  * Validation decision types
  */
 export enum ValidationDecision {
-  APPROVE = 'approve',
-  DENY = 'deny',
-  REQUIRE_REVIEW = 'require_review',
-  REQUEST_ADDITIONAL_INFO = 'request_additional_info',
-  ESCALATE = 'escalate',
+  APPROVE = "approve",
+  DENY = "deny",
+  REQUIRE_REVIEW = "require_review",
+  REQUEST_ADDITIONAL_INFO = "request_additional_info",
+  ESCALATE = "escalate",
 }
 
 /**
@@ -6038,14 +6048,14 @@ export interface DecisionEvidence {
  * Evidence types for audit trail
  */
 export enum EvidenceType {
-  USER_INPUT = 'user_input',
-  SYSTEM_LOG = 'system_log',
-  VALIDATION_RESULT = 'validation_result',
-  POLICY_RULE = 'policy_rule',
-  HISTORICAL_DATA = 'historical_data',
-  EXTERNAL_SOURCE = 'external_source',
-  BIOMETRIC_DATA = 'biometric_data',
-  CRYPTOGRAPHIC_PROOF = 'cryptographic_proof',
+  USER_INPUT = "user_input",
+  SYSTEM_LOG = "system_log",
+  VALIDATION_RESULT = "validation_result",
+  POLICY_RULE = "policy_rule",
+  HISTORICAL_DATA = "historical_data",
+  EXTERNAL_SOURCE = "external_source",
+  BIOMETRIC_DATA = "biometric_data",
+  CRYPTOGRAPHIC_PROOF = "cryptographic_proof",
 }
 
 /**
@@ -6089,11 +6099,11 @@ export interface BypassInfo {
  * Bypass types
  */
 export enum BypassType {
-  EMERGENCY_OVERRIDE = 'emergency_override',
-  ADMINISTRATIVE_BYPASS = 'administrative_bypass',
-  MAINTENANCE_BYPASS = 'maintenance_bypass',
-  TESTING_BYPASS = 'testing_bypass',
-  COMPLIANCE_EXCEPTION = 'compliance_exception',
+  EMERGENCY_OVERRIDE = "emergency_override",
+  ADMINISTRATIVE_BYPASS = "administrative_bypass",
+  MAINTENANCE_BYPASS = "maintenance_bypass",
+  TESTING_BYPASS = "testing_bypass",
+  COMPLIANCE_EXCEPTION = "compliance_exception",
 }
 
 /**
@@ -6120,11 +6130,11 @@ export interface BypassAuthorization {
  * Authorization levels
  */
 export enum AuthorizationLevel {
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  CRITICAL = 'critical',
-  EMERGENCY = 'emergency',
+  LOW = "low",
+  MEDIUM = "medium",
+  HIGH = "high",
+  CRITICAL = "critical",
+  EMERGENCY = "emergency",
 }
 
 /**
@@ -6151,24 +6161,24 @@ export interface ApproverInfo {
  * Implementation status for audit controls
  */
 export enum ImplementationStatus {
-  NOT_IMPLEMENTED = 'not_implemented',
-  PLANNED = 'planned',
-  IN_PROGRESS = 'in_progress',
-  IMPLEMENTED = 'implemented',
-  PARTIALLY_IMPLEMENTED = 'partially_implemented',
-  DEFERRED = 'deferred',
-  CANCELLED = 'cancelled',
+  NOT_IMPLEMENTED = "not_implemented",
+  PLANNED = "planned",
+  IN_PROGRESS = "in_progress",
+  IMPLEMENTED = "implemented",
+  PARTIALLY_IMPLEMENTED = "partially_implemented",
+  DEFERRED = "deferred",
+  CANCELLED = "cancelled",
 }
 
 /**
  * Effectiveness rating for controls
  */
 export enum EffectivenessRating {
-  INEFFECTIVE = 'ineffective',
-  PARTIALLY_EFFECTIVE = 'partially_effective',
-  LARGELY_EFFECTIVE = 'largely_effective',
-  EFFECTIVE = 'effective',
-  HIGHLY_EFFECTIVE = 'highly_effective',
+  INEFFECTIVE = "ineffective",
+  PARTIALLY_EFFECTIVE = "partially_effective",
+  LARGELY_EFFECTIVE = "largely_effective",
+  EFFECTIVE = "effective",
+  HIGHLY_EFFECTIVE = "highly_effective",
 }
 
 /**
@@ -6198,11 +6208,11 @@ export interface RiskMitigation {
  * Mitigation strategies
  */
 export enum MitigationStrategy {
-  AVOID = 'avoid',
-  MITIGATE = 'mitigate',
-  TRANSFER = 'transfer',
-  ACCEPT = 'accept',
-  MONITOR = 'monitor',
+  AVOID = "avoid",
+  MITIGATE = "mitigate",
+  TRANSFER = "transfer",
+  ACCEPT = "accept",
+  MONITOR = "monitor",
 }
 
 /**
@@ -6266,11 +6276,11 @@ export interface ResourceRequirement {
  * Resource types
  */
 export enum ResourceType {
-  PERSONNEL = 'personnel',
-  TECHNOLOGY = 'technology',
-  BUDGET = 'budget',
-  TIME = 'time',
-  INFRASTRUCTURE = 'infrastructure',
+  PERSONNEL = "personnel",
+  TECHNOLOGY = "technology",
+  BUDGET = "budget",
+  TIME = "time",
+  INFRASTRUCTURE = "infrastructure",
 }
 
 /**
@@ -6308,4 +6318,4 @@ export interface TimelineMilestone {
 }
 
 // Export additional types from compliance-forensic.types
-export * from './compliance-forensic.types';
+export * from "./compliance-forensic.types";

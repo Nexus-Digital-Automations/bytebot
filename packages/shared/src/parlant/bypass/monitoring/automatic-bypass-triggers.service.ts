@@ -9,8 +9,8 @@
  * @compliance GDPR, SOX, HIPAA, SOC2
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { EventEmitter } from 'events';
+import { Injectable, Logger } from "@nestjs/common";
+import { EventEmitter } from "events";
 import {
   BypassOperationType,
   BypassAuthorizationLevel,
@@ -21,8 +21,8 @@ import {
   ServiceStatus,
   EmergencyBypassRequest,
   BypassRequestStatus,
-  WorkflowStatus
-} from '../types/bypass-core.types';
+  WorkflowStatus,
+} from "../types/bypass-core.types";
 
 /**
  * System health metrics
@@ -144,24 +144,24 @@ export interface TriggerCondition {
  * Trigger condition types
  */
 export enum TriggerConditionType {
-  SYSTEM_HEALTH = 'system_health',
-  SERVICE_AVAILABILITY = 'service_availability',
-  ERROR_RATE = 'error_rate',
-  RESPONSE_TIME = 'response_time',
-  RESOURCE_UTILIZATION = 'resource_utilization',
-  CONSECUTIVE_FAILURES = 'consecutive_failures'
+  SYSTEM_HEALTH = "system_health",
+  SERVICE_AVAILABILITY = "service_availability",
+  ERROR_RATE = "error_rate",
+  RESPONSE_TIME = "response_time",
+  RESOURCE_UTILIZATION = "resource_utilization",
+  CONSECUTIVE_FAILURES = "consecutive_failures",
 }
 
 /**
  * Comparison operators
  */
 export enum ComparisonOperator {
-  GREATER_THAN = 'gt',
-  GREATER_THAN_EQUAL = 'gte',
-  LESS_THAN = 'lt',
-  LESS_THAN_EQUAL = 'lte',
-  EQUAL = 'eq',
-  NOT_EQUAL = 'ne'
+  GREATER_THAN = "gt",
+  GREATER_THAN_EQUAL = "gte",
+  LESS_THAN = "lt",
+  LESS_THAN_EQUAL = "lte",
+  EQUAL = "eq",
+  NOT_EQUAL = "ne",
 }
 
 /**
@@ -197,11 +197,11 @@ export interface BypassTriggerEvent {
  * Event severity levels
  */
 export enum EventSeverity {
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  CRITICAL = 'critical',
-  EMERGENCY = 'emergency'
+  LOW = "low",
+  MEDIUM = "medium",
+  HIGH = "high",
+  CRITICAL = "critical",
+  EMERGENCY = "emergency",
 }
 
 /**
@@ -235,13 +235,18 @@ export class AutomaticBypassTriggersService extends EventEmitter {
    */
   async registerTrigger(config: BypassTriggerConfig): Promise<void> {
     this.triggerConfigs.set(config.name, config);
-    this.logger.warn(`Bypass trigger registered: ${config.name} for ${config.operationType}`);
+    this.logger.warn(
+      `Bypass trigger registered: ${config.name} for ${config.operationType}`,
+    );
   }
 
   /**
    * Update trigger configuration
    */
-  async updateTrigger(name: string, updates: Partial<BypassTriggerConfig>): Promise<void> {
+  async updateTrigger(
+    name: string,
+    updates: Partial<BypassTriggerConfig>,
+  ): Promise<void> {
     const existing = this.triggerConfigs.get(name);
     if (!existing) {
       throw new Error(`Trigger not found: ${name}`);
@@ -262,7 +267,9 @@ export class AutomaticBypassTriggersService extends EventEmitter {
     }
 
     trigger.enabled = enabled;
-    this.logger.warn(`Bypass trigger ${name} ${enabled ? 'enabled' : 'disabled'}`);
+    this.logger.warn(
+      `Bypass trigger ${name} ${enabled ? "enabled" : "disabled"}`,
+    );
   }
 
   /**
@@ -276,7 +283,10 @@ export class AutomaticBypassTriggersService extends EventEmitter {
    * Get current system health metrics
    */
   async getCurrentSystemHealth(): Promise<SystemHealthMetrics> {
-    return this.systemMetrics[this.systemMetrics.length - 1] || this.createEmptyMetrics();
+    return (
+      this.systemMetrics[this.systemMetrics.length - 1] ||
+      this.createEmptyMetrics()
+    );
   }
 
   /**
@@ -289,19 +299,28 @@ export class AutomaticBypassTriggersService extends EventEmitter {
   /**
    * Update service health status
    */
-  async updateServiceHealth(serviceName: string, status: ServiceStatus, responseTime: number, error?: string): Promise<void> {
+  async updateServiceHealth(
+    serviceName: string,
+    status: ServiceStatus,
+    responseTime: number,
+    error?: string,
+  ): Promise<void> {
     const existing = this.serviceHealth.get(serviceName);
-    const consecutiveFailures = status === ServiceStatus.OPERATIONAL
-      ? 0
-      : (existing?.consecutiveFailures || 0) + 1;
+    const consecutiveFailures =
+      status === ServiceStatus.OPERATIONAL
+        ? 0
+        : (existing?.consecutiveFailures || 0) + 1;
 
     const healthInfo: ServiceHealthInfo = {
       serviceName,
       status,
       responseTime,
-      lastSuccessfulPing: status === ServiceStatus.OPERATIONAL ? new Date() : existing?.lastSuccessfulPing || new Date(),
+      lastSuccessfulPing:
+        status === ServiceStatus.OPERATIONAL
+          ? new Date()
+          : existing?.lastSuccessfulPing || new Date(),
       consecutiveFailures,
-      lastError: error
+      lastError: error,
     };
 
     this.serviceHealth.set(serviceName, healthInfo);
@@ -325,11 +344,14 @@ export class AutomaticBypassTriggersService extends EventEmitter {
 
     return {
       totalTriggers: triggers.length,
-      enabledTriggers: triggers.filter(t => t.enabled).length,
+      enabledTriggers: triggers.filter((t) => t.enabled).length,
       triggersToday: this.getTriggersInPeriod(24 * 60 * 60 * 1000), // 24 hours
       triggersByType: this.groupTriggersByType(),
-      lastTriggerTime: Math.max(...Array.from(this.lastTriggerTime.values()).map(d => d.getTime())) || 0,
-      averageResponseTime: this.calculateAverageResponseTime()
+      lastTriggerTime:
+        Math.max(
+          ...Array.from(this.lastTriggerTime.values()).map((d) => d.getTime()),
+        ) || 0,
+      averageResponseTime: this.calculateAverageResponseTime(),
     };
   }
 
@@ -343,27 +365,28 @@ export class AutomaticBypassTriggersService extends EventEmitter {
   private initializeDefaultTriggers(): void {
     // Critical database operations trigger
     this.registerTrigger({
-      name: 'database_critical_outage',
-      description: 'Automatic bypass for critical database operations during PARLANT outage',
+      name: "database_critical_outage",
+      description:
+        "Automatic bypass for critical database operations during PARLANT outage",
       operationType: BypassOperationType.DATABASE_CRITICAL,
-      targetFunctions: ['*'], // All database functions
+      targetFunctions: ["*"], // All database functions
       conditions: [
         {
           type: TriggerConditionType.SERVICE_AVAILABILITY,
-          metric: 'parlant_service',
+          metric: "parlant_service",
           operator: ComparisonOperator.NOT_EQUAL,
           threshold: ServiceStatus.OPERATIONAL as any,
           durationSeconds: 60,
-          weight: 1.0
+          weight: 1.0,
         },
         {
           type: TriggerConditionType.CONSECUTIVE_FAILURES,
-          metric: 'parlant_consecutive_failures',
+          metric: "parlant_consecutive_failures",
           operator: ComparisonOperator.GREATER_THAN_EQUAL,
           threshold: 3,
           durationSeconds: 30,
-          weight: 0.8
-        }
+          weight: 0.8,
+        },
       ],
       authorizationLevel: BypassAuthorizationLevel.SYSTEM_CRITICAL,
       priority: BypassPriority.CRITICAL,
@@ -371,32 +394,33 @@ export class AutomaticBypassTriggersService extends EventEmitter {
       maxDurationMinutes: 30,
       maxOperations: 50,
       enabled: true,
-      cooldownMinutes: 5
+      cooldownMinutes: 5,
     });
 
     // Authentication critical operations trigger
     this.registerTrigger({
-      name: 'auth_critical_failure',
-      description: 'Automatic bypass for authentication operations during system failure',
+      name: "auth_critical_failure",
+      description:
+        "Automatic bypass for authentication operations during system failure",
       operationType: BypassOperationType.AUTH_CRITICAL,
-      targetFunctions: ['authenticateUser', 'validateToken', 'refreshToken'],
+      targetFunctions: ["authenticateUser", "validateToken", "refreshToken"],
       conditions: [
         {
           type: TriggerConditionType.ERROR_RATE,
-          metric: 'auth_error_rate',
+          metric: "auth_error_rate",
           operator: ComparisonOperator.GREATER_THAN,
           threshold: 50, // 50% error rate
           durationSeconds: 120,
-          weight: 1.0
+          weight: 1.0,
         },
         {
           type: TriggerConditionType.RESPONSE_TIME,
-          metric: 'auth_response_time',
+          metric: "auth_response_time",
           operator: ComparisonOperator.GREATER_THAN,
           threshold: 5000, // 5 seconds
           durationSeconds: 60,
-          weight: 0.7
-        }
+          weight: 0.7,
+        },
       ],
       authorizationLevel: BypassAuthorizationLevel.EMERGENCY_SINGLE,
       priority: BypassPriority.HIGH,
@@ -404,24 +428,24 @@ export class AutomaticBypassTriggersService extends EventEmitter {
       maxDurationMinutes: 15,
       maxOperations: 100,
       enabled: true,
-      cooldownMinutes: 2
+      cooldownMinutes: 2,
     });
 
     // Security incident response trigger
     this.registerTrigger({
-      name: 'security_incident_auto_response',
-      description: 'Automatic bypass for security incident response operations',
+      name: "security_incident_auto_response",
+      description: "Automatic bypass for security incident response operations",
       operationType: BypassOperationType.SECURITY_INCIDENT,
-      targetFunctions: ['blockUser', 'revokeTokens', 'emergencyLockdown'],
+      targetFunctions: ["blockUser", "revokeTokens", "emergencyLockdown"],
       conditions: [
         {
           type: TriggerConditionType.SYSTEM_HEALTH,
-          metric: 'security_threat_level',
+          metric: "security_threat_level",
           operator: ComparisonOperator.GREATER_THAN_EQUAL,
           threshold: 80, // High threat level
           durationSeconds: 30,
-          weight: 1.0
-        }
+          weight: 1.0,
+        },
       ],
       authorizationLevel: BypassAuthorizationLevel.SYSTEM_CRITICAL,
       priority: BypassPriority.CRITICAL,
@@ -429,24 +453,29 @@ export class AutomaticBypassTriggersService extends EventEmitter {
       maxDurationMinutes: 60,
       maxOperations: 20,
       enabled: true,
-      cooldownMinutes: 1
+      cooldownMinutes: 1,
     });
 
     // System maintenance trigger
     this.registerTrigger({
-      name: 'maintenance_auto_bypass',
-      description: 'Automatic bypass for maintenance operations during planned downtime',
+      name: "maintenance_auto_bypass",
+      description:
+        "Automatic bypass for maintenance operations during planned downtime",
       operationType: BypassOperationType.MAINTENANCE,
-      targetFunctions: ['updateConfiguration', 'restartService', 'deployUpdate'],
+      targetFunctions: [
+        "updateConfiguration",
+        "restartService",
+        "deployUpdate",
+      ],
       conditions: [
         {
           type: TriggerConditionType.SERVICE_AVAILABILITY,
-          metric: 'maintenance_mode',
+          metric: "maintenance_mode",
           operator: ComparisonOperator.EQUAL,
           threshold: 1, // Maintenance mode active
           durationSeconds: 0,
-          weight: 1.0
-        }
+          weight: 1.0,
+        },
       ],
       authorizationLevel: BypassAuthorizationLevel.EMERGENCY_SINGLE,
       priority: BypassPriority.MEDIUM,
@@ -454,10 +483,10 @@ export class AutomaticBypassTriggersService extends EventEmitter {
       maxDurationMinutes: 120,
       maxOperations: 10,
       enabled: true,
-      cooldownMinutes: 30
+      cooldownMinutes: 30,
     });
 
-    this.logger.warn('Default bypass triggers initialized');
+    this.logger.warn("Default bypass triggers initialized");
   }
 
   /**
@@ -470,7 +499,7 @@ export class AutomaticBypassTriggersService extends EventEmitter {
       await this.checkTriggers();
     }, this.monitoringInterval);
 
-    this.logger.warn('System monitoring started');
+    this.logger.warn("System monitoring started");
   }
 
   /**
@@ -486,7 +515,7 @@ export class AutomaticBypassTriggersService extends EventEmitter {
       databaseResponseTime: Math.random() * 1000 + 50,
       activeConnections: Math.floor(Math.random() * 1000) + 100,
       errorRate: Math.random() * 10,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     this.systemMetrics.push(metrics);
@@ -520,12 +549,15 @@ export class AutomaticBypassTriggersService extends EventEmitter {
       // Evaluate trigger conditions
       const evaluationResult = await this.evaluateTriggerConditions(config);
       if (evaluationResult.shouldTrigger) {
-        const event = await this.createTriggerEvent(config, evaluationResult.metConditions);
+        const event = await this.createTriggerEvent(
+          config,
+          evaluationResult.metConditions,
+        );
         triggeredEvents.push(event);
         this.lastTriggerTime.set(name, new Date());
 
         // Emit event
-        this.emit('bypass-triggered', event);
+        this.emit("bypass-triggered", event);
       }
     }
 
@@ -535,7 +567,9 @@ export class AutomaticBypassTriggersService extends EventEmitter {
   /**
    * Evaluate trigger conditions
    */
-  private async evaluateTriggerConditions(config: BypassTriggerConfig): Promise<TriggerEvaluationResult> {
+  private async evaluateTriggerConditions(
+    config: BypassTriggerConfig,
+  ): Promise<TriggerEvaluationResult> {
     const metConditions: TriggerCondition[] = [];
     let totalWeight = 0;
     let metWeight = 0;
@@ -551,20 +585,22 @@ export class AutomaticBypassTriggersService extends EventEmitter {
     }
 
     // Require at least 70% of weighted conditions to be met
-    const shouldTrigger = (metWeight / totalWeight) >= 0.7;
+    const shouldTrigger = metWeight / totalWeight >= 0.7;
 
     return {
       shouldTrigger,
       metConditions,
       totalWeight,
-      metWeight
+      metWeight,
     };
   }
 
   /**
    * Evaluate individual condition
    */
-  private async evaluateCondition(condition: TriggerCondition): Promise<boolean> {
+  private async evaluateCondition(
+    condition: TriggerCondition,
+  ): Promise<boolean> {
     let currentValue: number;
 
     switch (condition.type) {
@@ -573,7 +609,9 @@ export class AutomaticBypassTriggersService extends EventEmitter {
         break;
 
       case TriggerConditionType.SERVICE_AVAILABILITY:
-        currentValue = await this.getServiceAvailabilityMetric(condition.metric);
+        currentValue = await this.getServiceAvailabilityMetric(
+          condition.metric,
+        );
         break;
 
       case TriggerConditionType.ERROR_RATE:
@@ -585,24 +623,36 @@ export class AutomaticBypassTriggersService extends EventEmitter {
         break;
 
       case TriggerConditionType.RESOURCE_UTILIZATION:
-        currentValue = await this.getResourceUtilizationMetric(condition.metric);
+        currentValue = await this.getResourceUtilizationMetric(
+          condition.metric,
+        );
         break;
 
       case TriggerConditionType.CONSECUTIVE_FAILURES:
-        currentValue = await this.getConsecutiveFailuresMetric(condition.metric);
+        currentValue = await this.getConsecutiveFailuresMetric(
+          condition.metric,
+        );
         break;
 
       default:
         return false;
     }
 
-    return this.compareValues(currentValue, condition.operator, condition.threshold);
+    return this.compareValues(
+      currentValue,
+      condition.operator,
+      condition.threshold,
+    );
   }
 
   /**
    * Compare values based on operator
    */
-  private compareValues(actual: number, operator: ComparisonOperator, threshold: number): boolean {
+  private compareValues(
+    actual: number,
+    operator: ComparisonOperator,
+    threshold: number,
+  ): boolean {
     switch (operator) {
       case ComparisonOperator.GREATER_THAN:
         return actual > threshold;
@@ -629,19 +679,19 @@ export class AutomaticBypassTriggersService extends EventEmitter {
     if (!latest) return 0;
 
     switch (metric) {
-      case 'cpu_utilization':
+      case "cpu_utilization":
         return latest.cpuUtilization;
-      case 'memory_utilization':
+      case "memory_utilization":
         return latest.memoryUtilization;
-      case 'disk_utilization':
+      case "disk_utilization":
         return latest.diskUtilization;
-      case 'network_latency':
+      case "network_latency":
         return latest.networkLatency;
-      case 'database_response_time':
+      case "database_response_time":
         return latest.databaseResponseTime;
-      case 'active_connections':
+      case "active_connections":
         return latest.activeConnections;
-      case 'security_threat_level':
+      case "security_threat_level":
         return Math.random() * 100; // Mock threat level
       default:
         return 0;
@@ -672,12 +722,14 @@ export class AutomaticBypassTriggersService extends EventEmitter {
    * Get service availability metric
    */
   private async getServiceAvailabilityMetric(metric: string): Promise<number> {
-    if (metric === 'parlant_service') {
-      const health = this.serviceHealth.get('parlant');
-      return health ? this.serviceStatusToNumber(health.status) : this.serviceStatusToNumber(ServiceStatus.MAJOR_OUTAGE);
+    if (metric === "parlant_service") {
+      const health = this.serviceHealth.get("parlant");
+      return health
+        ? this.serviceStatusToNumber(health.status)
+        : this.serviceStatusToNumber(ServiceStatus.MAJOR_OUTAGE);
     }
 
-    if (metric === 'maintenance_mode') {
+    if (metric === "maintenance_mode") {
       // Mock maintenance mode check
       return 0; // 0 = not in maintenance, 1 = in maintenance
     }
@@ -692,7 +744,7 @@ export class AutomaticBypassTriggersService extends EventEmitter {
     const latest = this.systemMetrics[this.systemMetrics.length - 1];
     if (!latest) return 0;
 
-    if (metric === 'auth_error_rate') {
+    if (metric === "auth_error_rate") {
       // Mock authentication error rate
       return Math.random() * 20; // 0-20% error rate
     }
@@ -704,7 +756,7 @@ export class AutomaticBypassTriggersService extends EventEmitter {
    * Get response time metric
    */
   private async getResponseTimeMetric(metric: string): Promise<number> {
-    if (metric === 'auth_response_time') {
+    if (metric === "auth_response_time") {
       // Mock authentication response time
       return Math.random() * 2000 + 100; // 100-2100ms
     }
@@ -721,11 +773,11 @@ export class AutomaticBypassTriggersService extends EventEmitter {
     if (!latest) return 0;
 
     switch (metric) {
-      case 'cpu':
+      case "cpu":
         return latest.cpuUtilization;
-      case 'memory':
+      case "memory":
         return latest.memoryUtilization;
-      case 'disk':
+      case "disk":
         return latest.diskUtilization;
       default:
         return 0;
@@ -736,8 +788,8 @@ export class AutomaticBypassTriggersService extends EventEmitter {
    * Get consecutive failures metric
    */
   private async getConsecutiveFailuresMetric(metric: string): Promise<number> {
-    if (metric === 'parlant_consecutive_failures') {
-      const health = this.serviceHealth.get('parlant');
+    if (metric === "parlant_consecutive_failures") {
+      const health = this.serviceHealth.get("parlant");
       return health?.consecutiveFailures || 0;
     }
 
@@ -749,7 +801,7 @@ export class AutomaticBypassTriggersService extends EventEmitter {
    */
   private async createTriggerEvent(
     config: BypassTriggerConfig,
-    metConditions: TriggerCondition[]
+    metConditions: TriggerCondition[],
   ): Promise<BypassTriggerEvent> {
     const eventId = `trigger_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const timestamp = new Date();
@@ -757,14 +809,14 @@ export class AutomaticBypassTriggersService extends EventEmitter {
     // Create emergency bypass request
     const bypassRequest: EmergencyBypassRequest = {
       requestId: `auto_${eventId}`,
-      requestedBy: 'system_automatic_trigger',
+      requestedBy: "system_automatic_trigger",
       userRole: BypassRole.EMERGENCY_ADMIN,
       requestedAt: timestamp,
       operationType: config.operationType,
-      functionName: config.targetFunctions[0] || 'automatic_bypass',
+      functionName: config.targetFunctions[0] || "automatic_bypass",
       functionArguments: {},
       reason: `Automatic bypass triggered by ${config.name}`,
-      justification: `System conditions met trigger thresholds: ${metConditions.map(c => c.metric).join(', ')}`,
+      justification: `System conditions met trigger thresholds: ${metConditions.map((c) => c.metric).join(", ")}`,
       requestedAuthLevel: config.authorizationLevel,
       durationMinutes: config.maxDurationMinutes,
       priority: config.priority,
@@ -775,8 +827,8 @@ export class AutomaticBypassTriggersService extends EventEmitter {
         businessImpact: config.businessImpact,
         technicalDetails: {
           triggerName: config.name,
-          metConditions: metConditions.map(c => c.metric)
-        }
+          metConditions: metConditions.map((c) => c.metric),
+        },
       },
       status: BypassRequestStatus.APPROVED,
       approvalWorkflow: {
@@ -791,9 +843,9 @@ export class AutomaticBypassTriggersService extends EventEmitter {
           completedAt: timestamp,
           totalTimeLimit: 0,
           escalationRules: [],
-          notifications: []
-        }
-      }
+          notifications: [],
+        },
+      },
     };
 
     const event: BypassTriggerEvent = {
@@ -804,10 +856,12 @@ export class AutomaticBypassTriggersService extends EventEmitter {
       serviceStatus: await this.getServiceHealth(),
       metConditions,
       bypassRequest,
-      severity: this.calculateEventSeverity(config, metConditions)
+      severity: this.calculateEventSeverity(config, metConditions),
     };
 
-    this.logger.error(`Automatic bypass triggered: ${config.name} (Event: ${eventId})`);
+    this.logger.error(
+      `Automatic bypass triggered: ${config.name} (Event: ${eventId})`,
+    );
 
     return event;
   }
@@ -815,7 +869,10 @@ export class AutomaticBypassTriggersService extends EventEmitter {
   /**
    * Calculate event severity
    */
-  private calculateEventSeverity(config: BypassTriggerConfig, metConditions: TriggerCondition[]): EventSeverity {
+  private calculateEventSeverity(
+    config: BypassTriggerConfig,
+    metConditions: TriggerCondition[],
+  ): EventSeverity {
     if (config.priority === BypassPriority.CRITICAL) {
       return EventSeverity.CRITICAL;
     } else if (config.businessImpact === BusinessImpactLevel.CRITICAL) {
@@ -841,7 +898,7 @@ export class AutomaticBypassTriggersService extends EventEmitter {
       databaseResponseTime: 0,
       activeConnections: 0,
       errorRate: 0,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   }
 
@@ -851,7 +908,7 @@ export class AutomaticBypassTriggersService extends EventEmitter {
   private getTriggersInPeriod(milliseconds: number): number {
     const cutoff = Date.now() - milliseconds;
     return Array.from(this.lastTriggerTime.values()).filter(
-      time => time.getTime() > cutoff
+      (time) => time.getTime() > cutoff,
     ).length;
   }
 
@@ -876,7 +933,10 @@ export class AutomaticBypassTriggersService extends EventEmitter {
     const services = Array.from(this.serviceHealth.values());
     if (services.length === 0) return 0;
 
-    const total = services.reduce((sum, service) => sum + service.responseTime, 0);
+    const total = services.reduce(
+      (sum, service) => sum + service.responseTime,
+      0,
+    );
     return total / services.length;
   }
 }

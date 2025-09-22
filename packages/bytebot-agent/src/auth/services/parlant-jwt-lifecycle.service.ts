@@ -32,10 +32,8 @@ import {
   ParlantConversationContext,
   ParlantValidationRequest,
   ParlantValidationResponse,
-  ConversationalValidationError,
 } from '@bytebot/shared/src/parlant/parlant-integration.service';
 import {
-  SecurityClassification,
   RiskLevel,
   SecurityLevel,
   UserRole,
@@ -1072,7 +1070,7 @@ export class ParlantJWTLifecycleService {
 
   private async detectTokenUsageAnomalies(
     trackedToken: EnhancedTokenData,
-    context: any,
+    _context: any,
   ): Promise<TokenAnomalyDetection[]> {
     const anomalies: TokenAnomalyDetection[] = [];
 

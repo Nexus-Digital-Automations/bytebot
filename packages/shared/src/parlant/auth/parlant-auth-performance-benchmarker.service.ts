@@ -22,12 +22,20 @@
  * @created 2025-09-20
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { EventEmitter } from 'events';
-import { performance } from 'perf_hooks';
-import { ParlantJWTBridgeService, ParlantContext, JWTBridgeMetrics } from './parlant-jwt-bridge.service';
-import { ParlantSessionManager, ParlantSession, SessionMetrics } from './parlant-session-manager.service';
-import { ParlantSecurityValidator } from './parlant-security-validator.service';
+import { Injectable, Logger } from "@nestjs/common";
+import { EventEmitter } from "events";
+import { performance } from "perf_hooks";
+import {
+  ParlantJWTBridgeService,
+  ParlantContext,
+  JWTBridgeMetrics,
+} from "./parlant-jwt-bridge.service";
+import {
+  ParlantSessionManager,
+  ParlantSession,
+  SessionMetrics,
+} from "./parlant-session-manager.service";
+import { ParlantSecurityValidator } from "./parlant-security-validator.service";
 
 /**
  * Performance benchmark configuration
@@ -140,12 +148,12 @@ export interface BenchmarkResult {
  */
 export interface OptimizationRecommendation {
   id: string;
-  category: 'cache' | 'memory' | 'concurrency' | 'algorithm' | 'configuration';
-  priority: 'critical' | 'high' | 'medium' | 'low';
+  category: "cache" | "memory" | "concurrency" | "algorithm" | "configuration";
+  priority: "critical" | "high" | "medium" | "low";
   title: string;
   description: string;
   expectedImprovement: string;
-  implementationComplexity: 'low' | 'medium' | 'high';
+  implementationComplexity: "low" | "medium" | "high";
   estimatedEffort: string;
   affectedComponents: string[];
   implementationSteps: string[];
@@ -159,8 +167,13 @@ export interface OptimizationRecommendation {
  */
 export interface RegressionAnalysis {
   detectionTimestamp: Date;
-  regressionType: 'response_time' | 'throughput' | 'error_rate' | 'memory' | 'cache';
-  severity: 'critical' | 'high' | 'medium' | 'low';
+  regressionType:
+    | "response_time"
+    | "throughput"
+    | "error_rate"
+    | "memory"
+    | "cache";
+  severity: "critical" | "high" | "medium" | "low";
   description: string;
   baselineValue: number;
   currentValue: number;
@@ -188,7 +201,7 @@ export interface ComplianceReport {
     totalBenchmarks: number;
     compliantBenchmarks: number;
     criticalViolations: number;
-    complianceGrade: 'A' | 'B' | 'C' | 'D' | 'F';
+    complianceGrade: "A" | "B" | "C" | "D" | "F";
   };
 
   /** Performance target compliance */
@@ -202,10 +215,10 @@ export interface ComplianceReport {
 
   /** Trend analysis */
   performanceTrends: {
-    responseTimeTrend: 'improving' | 'stable' | 'degrading';
-    throughputTrend: 'improving' | 'stable' | 'degrading';
-    errorRateTrend: 'improving' | 'stable' | 'degrading';
-    cachePerformanceTrend: 'improving' | 'stable' | 'degrading';
+    responseTimeTrend: "improving" | "stable" | "degrading";
+    throughputTrend: "improving" | "stable" | "degrading";
+    errorRateTrend: "improving" | "stable" | "degrading";
+    cachePerformanceTrend: "improving" | "stable" | "degrading";
   };
 
   /** Critical findings */
@@ -213,7 +226,7 @@ export interface ComplianceReport {
     finding: string;
     impact: string;
     recommendation: string;
-    urgency: 'immediate' | 'short_term' | 'medium_term' | 'long_term';
+    urgency: "immediate" | "short_term" | "medium_term" | "long_term";
   }>;
 
   /** Recommendations */
@@ -233,7 +246,8 @@ export class ParlantAuthPerformanceBenchmarker extends EventEmitter {
   private readonly config: PerformanceBenchmarkConfig;
   private readonly benchmarkHistory: BenchmarkResult[] = [];
   private readonly regressionHistory: RegressionAnalysis[] = [];
-  private readonly optimizationRecommendations: OptimizationRecommendation[] = [];
+  private readonly optimizationRecommendations: OptimizationRecommendation[] =
+    [];
 
   // Monitoring intervals
   private continuousBenchmarkInterval?: NodeJS.Timeout;
@@ -250,7 +264,7 @@ export class ParlantAuthPerformanceBenchmarker extends EventEmitter {
     jwtBridgeService: ParlantJWTBridgeService,
     sessionManager: ParlantSessionManager,
     securityValidator: ParlantSecurityValidator,
-    config?: Partial<PerformanceBenchmarkConfig>
+    config?: Partial<PerformanceBenchmarkConfig>,
   ) {
     super();
 
@@ -259,7 +273,9 @@ export class ParlantAuthPerformanceBenchmarker extends EventEmitter {
     this.securityValidator = securityValidator;
     this.config = this.createDefaultConfig(config);
 
-    this.logger.log('PARLANT Authentication Performance Benchmarker initialized');
+    this.logger.log(
+      "PARLANT Authentication Performance Benchmarker initialized",
+    );
   }
 
   /**
@@ -267,11 +283,13 @@ export class ParlantAuthPerformanceBenchmarker extends EventEmitter {
    */
   async startBenchmarking(): Promise<void> {
     if (this.isBenchmarking) {
-      this.logger.warn('Performance benchmarking is already running');
+      this.logger.warn("Performance benchmarking is already running");
       return;
     }
 
-    this.logger.log('🚀 Starting PARLANT Authentication Performance Benchmarking');
+    this.logger.log(
+      "🚀 Starting PARLANT Authentication Performance Benchmarking",
+    );
 
     try {
       // Establish baseline metrics
@@ -280,33 +298,33 @@ export class ParlantAuthPerformanceBenchmarker extends EventEmitter {
       // Start continuous benchmarking
       this.continuousBenchmarkInterval = setInterval(
         () => this.executeContinuousBenchmark(),
-        this.config.intervals.continuousBenchmark
+        this.config.intervals.continuousBenchmark,
       );
 
       // Start compliance monitoring
       this.complianceCheckInterval = setInterval(
         () => this.executeComplianceCheck(),
-        this.config.intervals.complianceCheck
+        this.config.intervals.complianceCheck,
       );
 
       // Start regression detection
       this.regressionDetectionInterval = setInterval(
         () => this.executeRegressionDetection(),
-        this.config.intervals.regressionDetection
+        this.config.intervals.regressionDetection,
       );
 
       // Start optimization analysis
       this.optimizationAnalysisInterval = setInterval(
         () => this.executeOptimizationAnalysis(),
-        this.config.intervals.optimizationAnalysis
+        this.config.intervals.optimizationAnalysis,
       );
 
       this.isBenchmarking = true;
-      this.emit('benchmarking.started');
+      this.emit("benchmarking.started");
 
-      this.logger.log('✅ Performance benchmarking started successfully');
+      this.logger.log("✅ Performance benchmarking started successfully");
     } catch (error) {
-      this.logger.error('❌ Failed to start performance benchmarking:', error);
+      this.logger.error("❌ Failed to start performance benchmarking:", error);
       throw error;
     }
   }
@@ -316,11 +334,13 @@ export class ParlantAuthPerformanceBenchmarker extends EventEmitter {
    */
   async stopBenchmarking(): Promise<void> {
     if (!this.isBenchmarking) {
-      this.logger.warn('Performance benchmarking is not running');
+      this.logger.warn("Performance benchmarking is not running");
       return;
     }
 
-    this.logger.log('🛑 Stopping PARLANT Authentication Performance Benchmarking');
+    this.logger.log(
+      "🛑 Stopping PARLANT Authentication Performance Benchmarking",
+    );
 
     // Clear all intervals
     if (this.continuousBenchmarkInterval) {
@@ -344,16 +364,18 @@ export class ParlantAuthPerformanceBenchmarker extends EventEmitter {
     }
 
     this.isBenchmarking = false;
-    this.emit('benchmarking.stopped');
+    this.emit("benchmarking.stopped");
 
-    this.logger.log('✅ Performance benchmarking stopped successfully');
+    this.logger.log("✅ Performance benchmarking stopped successfully");
   }
 
   /**
    * Execute comprehensive benchmark suite
    */
-  async executeBenchmarkSuite(includeStressTesting: boolean = false): Promise<BenchmarkResult[]> {
-    this.logger.log('📊 Executing comprehensive benchmark suite');
+  async executeBenchmarkSuite(
+    includeStressTesting: boolean = false,
+  ): Promise<BenchmarkResult[]> {
+    this.logger.log("📊 Executing comprehensive benchmark suite");
 
     const results: BenchmarkResult[] = [];
 
@@ -396,12 +418,14 @@ export class ParlantAuthPerformanceBenchmarker extends EventEmitter {
         this.benchmarkHistory.splice(0, this.benchmarkHistory.length - 1000);
       }
 
-      this.emit('benchmark.suite.completed', results);
-      this.logger.log(`✅ Benchmark suite completed with ${results.length} results`);
+      this.emit("benchmark.suite.completed", results);
+      this.logger.log(
+        `✅ Benchmark suite completed with ${results.length} results`,
+      );
 
       return results;
     } catch (error) {
-      this.logger.error('❌ Benchmark suite execution failed:', error);
+      this.logger.error("❌ Benchmark suite execution failed:", error);
       throw error;
     }
   }
@@ -410,20 +434,25 @@ export class ParlantAuthPerformanceBenchmarker extends EventEmitter {
    * Generate enterprise compliance report
    */
   async generateComplianceReport(
-    periodDays: number = 7
+    periodDays: number = 7,
   ): Promise<ComplianceReport> {
     this.logger.log(`📋 Generating compliance report for ${periodDays} days`);
 
     const endDate = new Date();
-    const startDate = new Date(endDate.getTime() - (periodDays * 24 * 60 * 60 * 1000));
+    const startDate = new Date(
+      endDate.getTime() - periodDays * 24 * 60 * 60 * 1000,
+    );
 
     // Filter benchmark history for reporting period
     const periodBenchmarks = this.benchmarkHistory.filter(
-      benchmark => benchmark.timestamp >= startDate && benchmark.timestamp <= endDate
+      (benchmark) =>
+        benchmark.timestamp >= startDate && benchmark.timestamp <= endDate,
     );
 
     if (periodBenchmarks.length === 0) {
-      throw new Error('Insufficient benchmark data for compliance report generation');
+      throw new Error(
+        "Insufficient benchmark data for compliance report generation",
+      );
     }
 
     // Calculate compliance metrics
@@ -431,7 +460,8 @@ export class ParlantAuthPerformanceBenchmarker extends EventEmitter {
     const targetCompliance = this.calculateTargetCompliance(periodBenchmarks);
     const performanceTrends = this.analyzePerformanceTrends(periodBenchmarks);
     const criticalFindings = this.identifyCriticalFindings(periodBenchmarks);
-    const recommendations = this.generateComplianceRecommendations(periodBenchmarks);
+    const recommendations =
+      this.generateComplianceRecommendations(periodBenchmarks);
 
     const report: ComplianceReport = {
       reportId: `compliance_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -445,9 +475,11 @@ export class ParlantAuthPerformanceBenchmarker extends EventEmitter {
     };
 
     this.lastComplianceReport = report;
-    this.emit('compliance.report.generated', report);
+    this.emit("compliance.report.generated", report);
 
-    this.logger.log(`✅ Compliance report generated with ${complianceSummary.overallScore}% overall score`);
+    this.logger.log(
+      `✅ Compliance report generated with ${complianceSummary.overallScore}% overall score`,
+    );
 
     return report;
   }
@@ -459,14 +491,15 @@ export class ParlantAuthPerformanceBenchmarker extends EventEmitter {
     isCompliant: boolean;
     lastBenchmark: BenchmarkResult | null;
     recentTrends: {
-      responseTime: 'improving' | 'stable' | 'degrading';
-      throughput: 'improving' | 'stable' | 'degrading';
-      errorRate: 'improving' | 'stable' | 'degrading';
+      responseTime: "improving" | "stable" | "degrading";
+      throughput: "improving" | "stable" | "degrading";
+      errorRate: "improving" | "stable" | "degrading";
     };
     activeRecommendations: OptimizationRecommendation[];
     criticalIssues: string[];
   } {
-    const lastBenchmark = this.benchmarkHistory[this.benchmarkHistory.length - 1] || null;
+    const lastBenchmark =
+      this.benchmarkHistory[this.benchmarkHistory.length - 1] || null;
     const recentBenchmarks = this.benchmarkHistory.slice(-10); // Last 10 benchmarks
 
     const recentTrends = this.analyzeRecentTrends(recentBenchmarks);
@@ -499,7 +532,9 @@ export class ParlantAuthPerformanceBenchmarker extends EventEmitter {
   /**
    * Create default configuration
    */
-  private createDefaultConfig(overrides?: Partial<PerformanceBenchmarkConfig>): PerformanceBenchmarkConfig {
+  private createDefaultConfig(
+    overrides?: Partial<PerformanceBenchmarkConfig>,
+  ): PerformanceBenchmarkConfig {
     const defaultConfig: PerformanceBenchmarkConfig = {
       intervals: {
         continuousBenchmark: 5 * 60 * 1000, // 5 minutes
@@ -537,7 +572,7 @@ export class ParlantAuthPerformanceBenchmarker extends EventEmitter {
    * Establish baseline performance metrics
    */
   private async establishBaseline(): Promise<void> {
-    this.logger.log('📊 Establishing performance baseline...');
+    this.logger.log("📊 Establishing performance baseline...");
 
     try {
       // Execute warmup to stabilize performance
@@ -547,13 +582,16 @@ export class ParlantAuthPerformanceBenchmarker extends EventEmitter {
       const baselineResults = await this.executeBenchmarkSuite(false);
 
       // Use token exchange as primary baseline
-      this.baselineMetrics = baselineResults.find(
-        result => result.responseTimeMetrics.operation === 'token_exchange'
-      ) || baselineResults[0];
+      this.baselineMetrics =
+        baselineResults.find(
+          (result) => result.responseTimeMetrics.operation === "token_exchange",
+        ) || baselineResults[0];
 
-      this.logger.log(`✅ Baseline established: P95=${this.baselineMetrics.responseTimeMetrics.p95.toFixed(2)}ms`);
+      this.logger.log(
+        `✅ Baseline established: P95=${this.baselineMetrics.responseTimeMetrics.p95.toFixed(2)}ms`,
+      );
     } catch (error) {
-      this.logger.error('❌ Failed to establish baseline:', error);
+      this.logger.error("❌ Failed to establish baseline:", error);
       throw error;
     }
   }
@@ -572,7 +610,7 @@ export class ParlantAuthPerformanceBenchmarker extends EventEmitter {
         await this.jwtBridgeService.exchangeTokens(token, context);
 
         if (i % 10 === 0) {
-          await new Promise(resolve => setTimeout(resolve, 10));
+          await new Promise((resolve) => setTimeout(resolve, 10));
         }
       } catch (error) {
         // Ignore warmup errors
@@ -590,11 +628,13 @@ export class ParlantAuthPerformanceBenchmarker extends EventEmitter {
 
       // Check for immediate compliance issues
       if (!tokenExchangeResult.complianceStatus.overallCompliance) {
-        this.emit('compliance.violation', tokenExchangeResult);
-        this.logger.warn('⚠️ Compliance violation detected in continuous benchmark');
+        this.emit("compliance.violation", tokenExchangeResult);
+        this.logger.warn(
+          "⚠️ Compliance violation detected in continuous benchmark",
+        );
       }
     } catch (error) {
-      this.logger.error('❌ Continuous benchmark failed:', error);
+      this.logger.error("❌ Continuous benchmark failed:", error);
     }
   }
 
@@ -606,16 +646,23 @@ export class ParlantAuthPerformanceBenchmarker extends EventEmitter {
       const recentBenchmarks = this.benchmarkHistory.slice(-10);
       if (recentBenchmarks.length === 0) return;
 
-      const complianceRate = recentBenchmarks.filter(
-        benchmark => benchmark.complianceStatus.overallCompliance
-      ).length / recentBenchmarks.length;
+      const complianceRate =
+        recentBenchmarks.filter(
+          (benchmark) => benchmark.complianceStatus.overallCompliance,
+        ).length / recentBenchmarks.length;
 
-      if (complianceRate < 0.9) { // Less than 90% compliance
-        this.logger.warn(`⚠️ Compliance rate dropped to ${(complianceRate * 100).toFixed(1)}%`);
-        this.emit('compliance.degradation', { complianceRate, recentBenchmarks });
+      if (complianceRate < 0.9) {
+        // Less than 90% compliance
+        this.logger.warn(
+          `⚠️ Compliance rate dropped to ${(complianceRate * 100).toFixed(1)}%`,
+        );
+        this.emit("compliance.degradation", {
+          complianceRate,
+          recentBenchmarks,
+        });
       }
     } catch (error) {
-      this.logger.error('❌ Compliance check failed:', error);
+      this.logger.error("❌ Compliance check failed:", error);
     }
   }
 
@@ -627,49 +674,54 @@ export class ParlantAuthPerformanceBenchmarker extends EventEmitter {
       if (!this.baselineMetrics || this.benchmarkHistory.length < 5) return;
 
       const recentBenchmarks = this.benchmarkHistory.slice(-5);
-      const avgRecentP95 = recentBenchmarks.reduce(
-        (sum, benchmark) => sum + benchmark.responseTimeMetrics.p95, 0
-      ) / recentBenchmarks.length;
+      const avgRecentP95 =
+        recentBenchmarks.reduce(
+          (sum, benchmark) => sum + benchmark.responseTimeMetrics.p95,
+          0,
+        ) / recentBenchmarks.length;
 
       const regressionThreshold = 0.2; // 20% degradation
-      const regressionPercentage = (avgRecentP95 - this.baselineMetrics.responseTimeMetrics.p95) /
-                                  this.baselineMetrics.responseTimeMetrics.p95;
+      const regressionPercentage =
+        (avgRecentP95 - this.baselineMetrics.responseTimeMetrics.p95) /
+        this.baselineMetrics.responseTimeMetrics.p95;
 
       if (regressionPercentage > regressionThreshold) {
         const regression: RegressionAnalysis = {
           detectionTimestamp: new Date(),
-          regressionType: 'response_time',
-          severity: regressionPercentage > 0.5 ? 'critical' : 'high',
+          regressionType: "response_time",
+          severity: regressionPercentage > 0.5 ? "critical" : "high",
           description: `Response time regression detected: ${(regressionPercentage * 100).toFixed(1)}% increase`,
           baselineValue: this.baselineMetrics.responseTimeMetrics.p95,
           currentValue: avgRecentP95,
           regressionPercentage: regressionPercentage * 100,
-          affectedOperations: ['token_exchange'],
+          affectedOperations: ["token_exchange"],
           potentialCauses: [
-            'Increased system load',
-            'Memory pressure',
-            'Database performance degradation',
-            'Network latency increase',
+            "Increased system load",
+            "Memory pressure",
+            "Database performance degradation",
+            "Network latency increase",
           ],
           remediationSteps: [
-            'Review system resource utilization',
-            'Analyze recent configuration changes',
-            'Check database performance metrics',
-            'Validate cache performance',
+            "Review system resource utilization",
+            "Analyze recent configuration changes",
+            "Check database performance metrics",
+            "Validate cache performance",
           ],
           monitoringRecommendations: [
-            'Increase benchmark frequency',
-            'Enable detailed performance tracing',
-            'Monitor system resources continuously',
+            "Increase benchmark frequency",
+            "Enable detailed performance tracing",
+            "Monitor system resources continuously",
           ],
         };
 
         this.regressionHistory.push(regression);
-        this.emit('regression.detected', regression);
-        this.logger.error(`🚨 Performance regression detected: ${regression.description}`);
+        this.emit("regression.detected", regression);
+        this.logger.error(
+          `🚨 Performance regression detected: ${regression.description}`,
+        );
       }
     } catch (error) {
-      this.logger.error('❌ Regression detection failed:', error);
+      this.logger.error("❌ Regression detection failed:", error);
     }
   }
 
@@ -681,18 +733,20 @@ export class ParlantAuthPerformanceBenchmarker extends EventEmitter {
       const recentBenchmarks = this.benchmarkHistory.slice(-20);
       if (recentBenchmarks.length < 5) return;
 
-      const newRecommendations = this.analyzeOptimizationOpportunities(recentBenchmarks);
+      const newRecommendations =
+        this.analyzeOptimizationOpportunities(recentBenchmarks);
 
       // Add new recommendations, avoiding duplicates
       for (const recommendation of newRecommendations) {
         const exists = this.optimizationRecommendations.some(
-          existing => existing.title === recommendation.title &&
-                     existing.category === recommendation.category
+          (existing) =>
+            existing.title === recommendation.title &&
+            existing.category === recommendation.category,
         );
 
         if (!exists) {
           this.optimizationRecommendations.push(recommendation);
-          this.emit('optimization.recommendation', recommendation);
+          this.emit("optimization.recommendation", recommendation);
         }
       }
 
@@ -700,10 +754,12 @@ export class ParlantAuthPerformanceBenchmarker extends EventEmitter {
       const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
       this.optimizationRecommendations.splice(
         0,
-        this.optimizationRecommendations.findIndex(rec => rec.timestamp >= oneWeekAgo)
+        this.optimizationRecommendations.findIndex(
+          (rec) => rec.timestamp >= oneWeekAgo,
+        ),
       );
     } catch (error) {
-      this.logger.error('❌ Optimization analysis failed:', error);
+      this.logger.error("❌ Optimization analysis failed:", error);
     }
   }
 
@@ -741,13 +797,13 @@ export class ParlantAuthPerformanceBenchmarker extends EventEmitter {
     const totalDuration = endTime - startTime;
 
     return this.createBenchmarkResult(
-      'token_exchange',
+      "token_exchange",
       responseTimes,
       errors,
       totalOperations,
       totalDuration,
       memoryBefore,
-      memoryAfter
+      memoryAfter,
     );
   }
 
@@ -791,13 +847,13 @@ export class ParlantAuthPerformanceBenchmarker extends EventEmitter {
     const totalDuration = endTime - startTime;
 
     return this.createBenchmarkResult(
-      'session_management',
+      "session_management",
       responseTimes,
       errors,
       totalOperations,
       totalDuration,
       memoryBefore,
-      memoryAfter
+      memoryAfter,
     );
   }
 
@@ -836,13 +892,13 @@ export class ParlantAuthPerformanceBenchmarker extends EventEmitter {
     const totalDuration = endTime - startTime;
 
     return this.createBenchmarkResult(
-      'security_validation',
+      "security_validation",
       responseTimes,
       errors,
       totalOperations,
       totalDuration,
       memoryBefore,
-      memoryAfter
+      memoryAfter,
     );
   }
 
@@ -882,7 +938,10 @@ export class ParlantAuthPerformanceBenchmarker extends EventEmitter {
           ? this.generateTestContext(i % 50)
           : this.generateTestContext(i + 50);
 
-        const result = await this.jwtBridgeService.exchangeTokens(token, context);
+        const result = await this.jwtBridgeService.exchangeTokens(
+          token,
+          context,
+        );
 
         // Mock cache hit detection based on metrics
         const metrics = this.jwtBridgeService.getPerformanceMetrics();
@@ -903,19 +962,19 @@ export class ParlantAuthPerformanceBenchmarker extends EventEmitter {
     const totalDuration = endTime - startTime;
 
     const result = this.createBenchmarkResult(
-      'cache_performance',
+      "cache_performance",
       responseTimes,
       errors,
       totalOperations,
       totalDuration,
       memoryBefore,
-      memoryAfter
+      memoryAfter,
     );
 
     // Override cache metrics with actual values
     result.cacheMetrics = {
       hitRate: cacheHits / totalOperations,
-      missRate: 1 - (cacheHits / totalOperations),
+      missRate: 1 - cacheHits / totalOperations,
       averageLookupTime: result.responseTimeMetrics.mean,
       cacheEfficiency: (cacheHits / totalOperations) * 100,
     };
@@ -957,12 +1016,12 @@ export class ParlantAuthPerformanceBenchmarker extends EventEmitter {
         }
 
         // Small delay to prevent overwhelming
-        await new Promise(resolve => setTimeout(resolve, 1));
+        await new Promise((resolve) => setTimeout(resolve, 1));
       }
     });
 
     // Run for specified duration
-    await new Promise(resolve => setTimeout(resolve, duration));
+    await new Promise((resolve) => setTimeout(resolve, duration));
     isRunning = false;
 
     // Wait for all workers to complete
@@ -973,13 +1032,13 @@ export class ParlantAuthPerformanceBenchmarker extends EventEmitter {
     const totalDuration = endTime - startTime;
 
     return this.createBenchmarkResult(
-      'concurrent_load',
+      "concurrent_load",
       responseTimes,
       errors,
       totalOperations,
       totalDuration,
       memoryBefore,
-      memoryAfter
+      memoryAfter,
     );
   }
 
@@ -1025,19 +1084,20 @@ export class ParlantAuthPerformanceBenchmarker extends EventEmitter {
     const totalDuration = endTime - startTime;
 
     const result = this.createBenchmarkResult(
-      'memory_performance',
+      "memory_performance",
       responseTimes,
       errors,
       totalOperations,
       totalDuration,
       memoryBefore,
-      memoryAfter
+      memoryAfter,
     );
 
     // Add memory analysis
     if (memorySnapshots.length > 1) {
-      const memoryGrowthRate = (memorySnapshots[memorySnapshots.length - 1] - memorySnapshots[0]) /
-                              (memorySnapshots.length * 50); // Growth per 50 operations
+      const memoryGrowthRate =
+        (memorySnapshots[memorySnapshots.length - 1] - memorySnapshots[0]) /
+        (memorySnapshots.length * 50); // Growth per 50 operations
 
       result.resourceMetrics.heapUtilization = memoryGrowthRate / 1024 / 1024; // MB
     }
@@ -1052,7 +1112,9 @@ export class ParlantAuthPerformanceBenchmarker extends EventEmitter {
     const results: BenchmarkResult[] = [];
 
     for (const concurrency of this.config.loadTesting.stressTestConcurrency) {
-      this.logger.log(`🔥 Executing stress test with ${concurrency} concurrent users`);
+      this.logger.log(
+        `🔥 Executing stress test with ${concurrency} concurrent users`,
+      );
 
       const responseTimes: number[] = [];
       const errors: Error[] = [];
@@ -1081,12 +1143,14 @@ export class ParlantAuthPerformanceBenchmarker extends EventEmitter {
           }
 
           // Small delay to prevent overwhelming
-          await new Promise(resolve => setTimeout(resolve, 1));
+          await new Promise((resolve) => setTimeout(resolve, 1));
         }
       });
 
       // Run for test duration
-      await new Promise(resolve => setTimeout(resolve, this.config.loadTesting.testDuration));
+      await new Promise((resolve) =>
+        setTimeout(resolve, this.config.loadTesting.testDuration),
+      );
       isRunning = false;
 
       // Wait for all workers to complete
@@ -1103,7 +1167,7 @@ export class ParlantAuthPerformanceBenchmarker extends EventEmitter {
         totalOperations,
         totalDuration,
         memoryBefore,
-        memoryAfter
+        memoryAfter,
       );
 
       results.push(result);
@@ -1122,11 +1186,14 @@ export class ParlantAuthPerformanceBenchmarker extends EventEmitter {
     totalOperations: number,
     totalDuration: number,
     memoryBefore: NodeJS.MemoryUsage,
-    memoryAfter: NodeJS.MemoryUsage
+    memoryAfter: NodeJS.MemoryUsage,
   ): BenchmarkResult {
     const sortedTimes = [...responseTimes].sort((a, b) => a - b);
-    const mean = responseTimes.length > 0 ?
-      responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length : 0;
+    const mean =
+      responseTimes.length > 0
+        ? responseTimes.reduce((sum, time) => sum + time, 0) /
+          responseTimes.length
+        : 0;
 
     const responseTimeMetrics = {
       operation,
@@ -1148,7 +1215,8 @@ export class ParlantAuthPerformanceBenchmarker extends EventEmitter {
       totalOperations,
     };
 
-    const memoryDelta = (memoryAfter.heapUsed - memoryBefore.heapUsed) / 1024 / 1024; // MB
+    const memoryDelta =
+      (memoryAfter.heapUsed - memoryBefore.heapUsed) / 1024 / 1024; // MB
     const resourceMetrics = {
       memoryUsage: memoryAfter.heapUsed / 1024 / 1024, // MB
       memoryGrowth: memoryDelta,
@@ -1157,8 +1225,8 @@ export class ParlantAuthPerformanceBenchmarker extends EventEmitter {
     };
 
     const errorsByType: Record<string, number> = {};
-    errors.forEach(error => {
-      const errorType = error.name || 'Unknown';
+    errors.forEach((error) => {
+      const errorType = error.name || "Unknown";
       errorsByType[errorType] = (errorsByType[errorType] || 0) + 1;
     });
 
@@ -1166,7 +1234,8 @@ export class ParlantAuthPerformanceBenchmarker extends EventEmitter {
       totalErrors: errors.length,
       errorRate: errors.length / totalOperations,
       errorsByType,
-      criticalErrors: errors.filter(e => e.message.includes('critical')).length,
+      criticalErrors: errors.filter((e) => e.message.includes("critical"))
+        .length,
     };
 
     const cacheMetrics = {
@@ -1177,11 +1246,16 @@ export class ParlantAuthPerformanceBenchmarker extends EventEmitter {
     };
 
     const complianceStatus = {
-      meetsP95Target: responseTimeMetrics.p95 < this.getTargetForOperation(operation, 'p95'),
-      meetsP99Target: responseTimeMetrics.p99 < this.getTargetForOperation(operation, 'p99'),
-      meetsThroughputTarget: throughputMetrics.averageRps >= this.config.targets.minThroughput,
-      meetsErrorRateTarget: errorMetrics.errorRate <= this.config.targets.maxErrorRate,
-      meetsCacheTarget: cacheMetrics.hitRate >= this.config.targets.cacheHitRate,
+      meetsP95Target:
+        responseTimeMetrics.p95 < this.getTargetForOperation(operation, "p95"),
+      meetsP99Target:
+        responseTimeMetrics.p99 < this.getTargetForOperation(operation, "p99"),
+      meetsThroughputTarget:
+        throughputMetrics.averageRps >= this.config.targets.minThroughput,
+      meetsErrorRateTarget:
+        errorMetrics.errorRate <= this.config.targets.maxErrorRate,
+      meetsCacheTarget:
+        cacheMetrics.hitRate >= this.config.targets.cacheHitRate,
       overallCompliance: false, // Will be calculated below
     };
 
@@ -1207,20 +1281,24 @@ export class ParlantAuthPerformanceBenchmarker extends EventEmitter {
   /**
    * Get performance target for operation and metric type
    */
-  private getTargetForOperation(operation: string, metricType: 'p95' | 'p99'): number {
-    const baseTarget = metricType === 'p95' ?
-      this.config.targets.tokenExchangeP95 :
-      this.config.targets.tokenExchangeP99;
+  private getTargetForOperation(
+    operation: string,
+    metricType: "p95" | "p99",
+  ): number {
+    const baseTarget =
+      metricType === "p95"
+        ? this.config.targets.tokenExchangeP95
+        : this.config.targets.tokenExchangeP99;
 
     switch (operation) {
-      case 'token_exchange':
+      case "token_exchange":
         return baseTarget;
-      case 'session_management':
-      case 'session_creation':
+      case "session_management":
+      case "session_creation":
         return this.config.targets.sessionCreationP95;
-      case 'session_validation':
+      case "session_validation":
         return this.config.targets.sessionValidationP95;
-      case 'security_validation':
+      case "security_validation":
         return this.config.targets.securityValidationP95;
       default:
         return baseTarget;
@@ -1238,12 +1316,14 @@ export class ParlantAuthPerformanceBenchmarker extends EventEmitter {
   /**
    * Generate test context for benchmarking
    */
-  private generateTestContext(index: number = Math.floor(Math.random() * 1000)): ParlantContext {
+  private generateTestContext(
+    index: number = Math.floor(Math.random() * 1000),
+  ): ParlantContext {
     return {
       conversationId: `bench_conv_${Date.now()}_${index}`,
       sessionId: `bench_session_${Date.now()}_${index}`,
       userId: `bench_user_${Date.now()}_${index}`,
-      securityLevel: 'MODERATE',
+      securityLevel: "MODERATE",
       timestamp: new Date(),
       metadata: {
         benchmarkIteration: index,
@@ -1255,7 +1335,10 @@ export class ParlantAuthPerformanceBenchmarker extends EventEmitter {
   /**
    * Calculate percentile from sorted array
    */
-  private calculatePercentile(sortedArray: number[], percentile: number): number {
+  private calculatePercentile(
+    sortedArray: number[],
+    percentile: number,
+  ): number {
     if (sortedArray.length === 0) return 0;
 
     const index = (percentile / 100) * (sortedArray.length - 1);
@@ -1274,8 +1357,9 @@ export class ParlantAuthPerformanceBenchmarker extends EventEmitter {
   private calculateStandardDeviation(values: number[], mean: number): number {
     if (values.length <= 1) return 0;
 
-    const squaredDiffs = values.map(value => Math.pow(value - mean, 2));
-    const variance = squaredDiffs.reduce((sum, diff) => sum + diff, 0) / values.length;
+    const squaredDiffs = values.map((value) => Math.pow(value - mean, 2));
+    const variance =
+      squaredDiffs.reduce((sum, diff) => sum + diff, 0) / values.length;
 
     return Math.sqrt(variance);
   }
@@ -1283,21 +1367,25 @@ export class ParlantAuthPerformanceBenchmarker extends EventEmitter {
   // Additional helper methods for compliance reporting, trend analysis, etc.
   // Implementation continues with similar comprehensive patterns...
 
-  private calculateComplianceSummary(benchmarks: BenchmarkResult[]): ComplianceReport['complianceSummary'] {
-    const compliantBenchmarks = benchmarks.filter(b => b.complianceStatus.overallCompliance).length;
-    const criticalViolations = benchmarks.filter(b =>
-      !b.complianceStatus.meetsP95Target ||
-      b.errorMetrics.errorRate > 0.05
+  private calculateComplianceSummary(
+    benchmarks: BenchmarkResult[],
+  ): ComplianceReport["complianceSummary"] {
+    const compliantBenchmarks = benchmarks.filter(
+      (b) => b.complianceStatus.overallCompliance,
+    ).length;
+    const criticalViolations = benchmarks.filter(
+      (b) =>
+        !b.complianceStatus.meetsP95Target || b.errorMetrics.errorRate > 0.05,
     ).length;
 
     const overallScore = (compliantBenchmarks / benchmarks.length) * 100;
 
-    let complianceGrade: 'A' | 'B' | 'C' | 'D' | 'F';
-    if (overallScore >= 95) complianceGrade = 'A';
-    else if (overallScore >= 85) complianceGrade = 'B';
-    else if (overallScore >= 75) complianceGrade = 'C';
-    else if (overallScore >= 65) complianceGrade = 'D';
-    else complianceGrade = 'F';
+    let complianceGrade: "A" | "B" | "C" | "D" | "F";
+    if (overallScore >= 95) complianceGrade = "A";
+    else if (overallScore >= 85) complianceGrade = "B";
+    else if (overallScore >= 75) complianceGrade = "C";
+    else if (overallScore >= 65) complianceGrade = "D";
+    else complianceGrade = "F";
 
     return {
       overallScore,
@@ -1308,13 +1396,25 @@ export class ParlantAuthPerformanceBenchmarker extends EventEmitter {
     };
   }
 
-  private calculateTargetCompliance(benchmarks: BenchmarkResult[]): ComplianceReport['targetCompliance'] {
-    const responseTimeCompliant = benchmarks.filter(b => b.complianceStatus.meetsP95Target).length;
-    const throughputCompliant = benchmarks.filter(b => b.complianceStatus.meetsThroughputTarget).length;
-    const errorRateCompliant = benchmarks.filter(b => b.complianceStatus.meetsErrorRateTarget).length;
-    const cacheCompliant = benchmarks.filter(b => b.complianceStatus.meetsCacheTarget).length;
-    const resourceCompliant = benchmarks.filter(b =>
-      b.resourceMetrics.memoryUsage < this.config.resourceMonitoring.memoryThreshold
+  private calculateTargetCompliance(
+    benchmarks: BenchmarkResult[],
+  ): ComplianceReport["targetCompliance"] {
+    const responseTimeCompliant = benchmarks.filter(
+      (b) => b.complianceStatus.meetsP95Target,
+    ).length;
+    const throughputCompliant = benchmarks.filter(
+      (b) => b.complianceStatus.meetsThroughputTarget,
+    ).length;
+    const errorRateCompliant = benchmarks.filter(
+      (b) => b.complianceStatus.meetsErrorRateTarget,
+    ).length;
+    const cacheCompliant = benchmarks.filter(
+      (b) => b.complianceStatus.meetsCacheTarget,
+    ).length;
+    const resourceCompliant = benchmarks.filter(
+      (b) =>
+        b.resourceMetrics.memoryUsage <
+        this.config.resourceMonitoring.memoryThreshold,
     ).length;
 
     return {
@@ -1322,11 +1422,14 @@ export class ParlantAuthPerformanceBenchmarker extends EventEmitter {
       throughputCompliance: (throughputCompliant / benchmarks.length) * 100,
       errorRateCompliance: (errorRateCompliant / benchmarks.length) * 100,
       cachePerformanceCompliance: (cacheCompliant / benchmarks.length) * 100,
-      resourceUtilizationCompliance: (resourceCompliant / benchmarks.length) * 100,
+      resourceUtilizationCompliance:
+        (resourceCompliant / benchmarks.length) * 100,
     };
   }
 
-  private analyzePerformanceTrends(benchmarks: BenchmarkResult[]): ComplianceReport['performanceTrends'] {
+  private analyzePerformanceTrends(
+    benchmarks: BenchmarkResult[],
+  ): ComplianceReport["performanceTrends"] {
     // Simplified trend analysis - would implement more sophisticated analysis in production
     const recentBenchmarks = benchmarks.slice(-10);
     const olderBenchmarks = benchmarks.slice(-20, -10);
@@ -1337,50 +1440,61 @@ export class ParlantAuthPerformanceBenchmarker extends EventEmitter {
     const recentAvgResponseTime = getAvgResponseTime(recentBenchmarks);
     const olderAvgResponseTime = getAvgResponseTime(olderBenchmarks);
 
-    const responseTimeTrend = recentAvgResponseTime < olderAvgResponseTime * 0.95 ? 'improving' :
-                             recentAvgResponseTime > olderAvgResponseTime * 1.05 ? 'degrading' : 'stable';
+    const responseTimeTrend =
+      recentAvgResponseTime < olderAvgResponseTime * 0.95
+        ? "improving"
+        : recentAvgResponseTime > olderAvgResponseTime * 1.05
+          ? "degrading"
+          : "stable";
 
     return {
       responseTimeTrend,
-      throughputTrend: 'stable', // Simplified
-      errorRateTrend: 'stable', // Simplified
-      cachePerformanceTrend: 'stable', // Simplified
+      throughputTrend: "stable", // Simplified
+      errorRateTrend: "stable", // Simplified
+      cachePerformanceTrend: "stable", // Simplified
     };
   }
 
-  private identifyCriticalFindings(benchmarks: BenchmarkResult[]): ComplianceReport['criticalFindings'] {
-    const findings: ComplianceReport['criticalFindings'] = [];
+  private identifyCriticalFindings(
+    benchmarks: BenchmarkResult[],
+  ): ComplianceReport["criticalFindings"] {
+    const findings: ComplianceReport["criticalFindings"] = [];
 
     const recentBenchmarks = benchmarks.slice(-5);
-    const avgP95 = recentBenchmarks.reduce((sum, b) => sum + b.responseTimeMetrics.p95, 0) / recentBenchmarks.length;
+    const avgP95 =
+      recentBenchmarks.reduce((sum, b) => sum + b.responseTimeMetrics.p95, 0) /
+      recentBenchmarks.length;
 
     if (avgP95 > this.config.targets.tokenExchangeP95) {
       findings.push({
         finding: `P95 response time (${avgP95.toFixed(2)}ms) exceeds target (${this.config.targets.tokenExchangeP95}ms)`,
-        impact: 'User experience degradation and potential SLA violations',
-        recommendation: 'Investigate performance bottlenecks and implement optimization strategies',
-        urgency: 'immediate',
+        impact: "User experience degradation and potential SLA violations",
+        recommendation:
+          "Investigate performance bottlenecks and implement optimization strategies",
+        urgency: "immediate",
       });
     }
 
     return findings;
   }
 
-  private generateComplianceRecommendations(benchmarks: BenchmarkResult[]): OptimizationRecommendation[] {
+  private generateComplianceRecommendations(
+    benchmarks: BenchmarkResult[],
+  ): OptimizationRecommendation[] {
     // Generate basic recommendations based on benchmark results
     return this.analyzeOptimizationOpportunities(benchmarks);
   }
 
   private analyzeRecentTrends(benchmarks: BenchmarkResult[]): {
-    responseTime: 'improving' | 'stable' | 'degrading';
-    throughput: 'improving' | 'stable' | 'degrading';
-    errorRate: 'improving' | 'stable' | 'degrading';
+    responseTime: "improving" | "stable" | "degrading";
+    throughput: "improving" | "stable" | "degrading";
+    errorRate: "improving" | "stable" | "degrading";
   } {
     // Simplified trend analysis
     return {
-      responseTime: 'stable',
-      throughput: 'stable',
-      errorRate: 'stable',
+      responseTime: "stable",
+      throughput: "stable",
+      errorRate: "stable",
     };
   }
 
@@ -1391,42 +1505,47 @@ export class ParlantAuthPerformanceBenchmarker extends EventEmitter {
   private identifyCurrentCriticalIssues(): string[] {
     const issues: string[] = [];
 
-    const lastBenchmark = this.benchmarkHistory[this.benchmarkHistory.length - 1];
+    const lastBenchmark =
+      this.benchmarkHistory[this.benchmarkHistory.length - 1];
     if (lastBenchmark && !lastBenchmark.complianceStatus.overallCompliance) {
-      issues.push('Performance targets not being met');
+      issues.push("Performance targets not being met");
     }
 
     return issues;
   }
 
-  private analyzeOptimizationOpportunities(benchmarks: BenchmarkResult[]): OptimizationRecommendation[] {
+  private analyzeOptimizationOpportunities(
+    benchmarks: BenchmarkResult[],
+  ): OptimizationRecommendation[] {
     const recommendations: OptimizationRecommendation[] = [];
 
     // Analyze response time patterns
-    const avgP95 = benchmarks.reduce((sum, b) => sum + b.responseTimeMetrics.p95, 0) / benchmarks.length;
+    const avgP95 =
+      benchmarks.reduce((sum, b) => sum + b.responseTimeMetrics.p95, 0) /
+      benchmarks.length;
     if (avgP95 > this.config.targets.tokenExchangeP95 * 0.8) {
       recommendations.push({
         id: `opt_cache_${Date.now()}`,
-        category: 'cache',
-        priority: 'high',
-        title: 'Optimize Response Caching Strategy',
-        description: 'Implement intelligent caching to reduce response times',
-        expectedImprovement: '20-30% reduction in P95 response time',
-        implementationComplexity: 'medium',
-        estimatedEffort: '2-3 days',
-        affectedComponents: ['JWT Bridge Service', 'Cache Layer'],
+        category: "cache",
+        priority: "high",
+        title: "Optimize Response Caching Strategy",
+        description: "Implement intelligent caching to reduce response times",
+        expectedImprovement: "20-30% reduction in P95 response time",
+        implementationComplexity: "medium",
+        estimatedEffort: "2-3 days",
+        affectedComponents: ["JWT Bridge Service", "Cache Layer"],
         implementationSteps: [
-          'Analyze current cache hit patterns',
-          'Implement adaptive TTL based on data volatility',
-          'Add cache warming for frequently accessed data',
-          'Monitor cache performance improvements',
+          "Analyze current cache hit patterns",
+          "Implement adaptive TTL based on data volatility",
+          "Add cache warming for frequently accessed data",
+          "Monitor cache performance improvements",
         ],
         validationCriteria: [
-          'P95 response time reduced by 20%',
-          'Cache hit rate increased to >90%',
-          'No increase in error rate',
+          "P95 response time reduced by 20%",
+          "Cache hit rate increased to >90%",
+          "No increase in error rate",
         ],
-        riskAssessment: 'Low risk - caching improvements are reversible',
+        riskAssessment: "Low risk - caching improvements are reversible",
         timestamp: new Date(),
       });
     }

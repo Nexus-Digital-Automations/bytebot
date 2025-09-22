@@ -5,7 +5,7 @@
  * classification, recovery strategies, and comprehensive audit capabilities.
  */
 
-import { RiskLevel, SecurityLevel } from '../parlant-validation.decorator';
+import { RiskLevel, SecurityLevel } from "../parlant-validation.decorator";
 
 // ===== CORE ERROR INTERFACES =====
 
@@ -13,13 +13,13 @@ import { RiskLevel, SecurityLevel } from '../parlant-validation.decorator';
  * Enhanced error severity levels with enterprise classification
  */
 export enum EnterpriseErrorSeverity {
-  TRACE = 'TRACE',
-  DEBUG = 'DEBUG',
-  INFO = 'INFO',
-  WARNING = 'WARNING',
-  ERROR = 'ERROR',
-  CRITICAL = 'CRITICAL',
-  FATAL = 'FATAL'
+  TRACE = "TRACE",
+  DEBUG = "DEBUG",
+  INFO = "INFO",
+  WARNING = "WARNING",
+  ERROR = "ERROR",
+  CRITICAL = "CRITICAL",
+  FATAL = "FATAL",
 }
 
 /**
@@ -27,63 +27,63 @@ export enum EnterpriseErrorSeverity {
  */
 export enum EnterpriseErrorCategory {
   // Technical Categories
-  VALIDATION = 'VALIDATION',
-  AUTHENTICATION = 'AUTHENTICATION',
-  AUTHORIZATION = 'AUTHORIZATION',
-  BUSINESS_LOGIC = 'BUSINESS_LOGIC',
-  SYSTEM = 'SYSTEM',
-  INTEGRATION = 'INTEGRATION',
-  PERFORMANCE = 'PERFORMANCE',
-  SECURITY = 'SECURITY',
+  VALIDATION = "VALIDATION",
+  AUTHENTICATION = "AUTHENTICATION",
+  AUTHORIZATION = "AUTHORIZATION",
+  BUSINESS_LOGIC = "BUSINESS_LOGIC",
+  SYSTEM = "SYSTEM",
+  INTEGRATION = "INTEGRATION",
+  PERFORMANCE = "PERFORMANCE",
+  SECURITY = "SECURITY",
 
   // Enterprise Categories
-  COMPLIANCE = 'COMPLIANCE',
-  DATA_GOVERNANCE = 'DATA_GOVERNANCE',
-  AUDIT = 'AUDIT',
-  INFRASTRUCTURE = 'INFRASTRUCTURE',
-  MONITORING = 'MONITORING',
-  BACKUP_RECOVERY = 'BACKUP_RECOVERY',
-  CAPACITY = 'CAPACITY',
-  CONFIGURATION = 'CONFIGURATION',
-  DEPLOYMENT = 'DEPLOYMENT',
-  THIRD_PARTY = 'THIRD_PARTY'
+  COMPLIANCE = "COMPLIANCE",
+  DATA_GOVERNANCE = "DATA_GOVERNANCE",
+  AUDIT = "AUDIT",
+  INFRASTRUCTURE = "INFRASTRUCTURE",
+  MONITORING = "MONITORING",
+  BACKUP_RECOVERY = "BACKUP_RECOVERY",
+  CAPACITY = "CAPACITY",
+  CONFIGURATION = "CONFIGURATION",
+  DEPLOYMENT = "DEPLOYMENT",
+  THIRD_PARTY = "THIRD_PARTY",
 }
 
 /**
  * Error impact assessment levels
  */
 export enum ErrorImpactLevel {
-  NO_IMPACT = 'NO_IMPACT',
-  MINIMAL_IMPACT = 'MINIMAL_IMPACT',
-  LOW_IMPACT = 'LOW_IMPACT',
-  MODERATE_IMPACT = 'MODERATE_IMPACT',
-  HIGH_IMPACT = 'HIGH_IMPACT',
-  CRITICAL_IMPACT = 'CRITICAL_IMPACT',
-  CATASTROPHIC_IMPACT = 'CATASTROPHIC_IMPACT'
+  NO_IMPACT = "NO_IMPACT",
+  MINIMAL_IMPACT = "MINIMAL_IMPACT",
+  LOW_IMPACT = "LOW_IMPACT",
+  MODERATE_IMPACT = "MODERATE_IMPACT",
+  HIGH_IMPACT = "HIGH_IMPACT",
+  CRITICAL_IMPACT = "CRITICAL_IMPACT",
+  CATASTROPHIC_IMPACT = "CATASTROPHIC_IMPACT",
 }
 
 /**
  * Error urgency levels for prioritization
  */
 export enum ErrorUrgency {
-  LOW = 'LOW',
-  MEDIUM = 'MEDIUM',
-  HIGH = 'HIGH',
-  URGENT = 'URGENT',
-  EMERGENCY = 'EMERGENCY'
+  LOW = "LOW",
+  MEDIUM = "MEDIUM",
+  HIGH = "HIGH",
+  URGENT = "URGENT",
+  EMERGENCY = "EMERGENCY",
 }
 
 /**
  * Error resolution status tracking
  */
 export enum ErrorResolutionStatus {
-  UNRESOLVED = 'UNRESOLVED',
-  INVESTIGATING = 'INVESTIGATING',
-  IN_PROGRESS = 'IN_PROGRESS',
-  RESOLVED = 'RESOLVED',
-  CLOSED = 'CLOSED',
-  REOPENED = 'REOPENED',
-  ESCALATED = 'ESCALATED'
+  UNRESOLVED = "UNRESOLVED",
+  INVESTIGATING = "INVESTIGATING",
+  IN_PROGRESS = "IN_PROGRESS",
+  RESOLVED = "RESOLVED",
+  CLOSED = "CLOSED",
+  REOPENED = "REOPENED",
+  ESCALATED = "ESCALATED",
 }
 
 /**
@@ -91,38 +91,38 @@ export enum ErrorResolutionStatus {
  */
 export enum EnterpriseRecoveryStrategy {
   // Basic Strategies
-  RETRY = 'RETRY',
-  FALLBACK = 'FALLBACK',
-  ESCALATE = 'ESCALATE',
-  IGNORE = 'IGNORE',
-  MANUAL_INTERVENTION = 'MANUAL_INTERVENTION',
+  RETRY = "RETRY",
+  FALLBACK = "FALLBACK",
+  ESCALATE = "ESCALATE",
+  IGNORE = "IGNORE",
+  MANUAL_INTERVENTION = "MANUAL_INTERVENTION",
 
   // Advanced Strategies
-  CIRCUIT_BREAKER = 'CIRCUIT_BREAKER',
-  BULKHEAD = 'BULKHEAD',
-  TIMEOUT = 'TIMEOUT',
-  RATE_LIMITING = 'RATE_LIMITING',
-  LOAD_SHEDDING = 'LOAD_SHEDDING',
-  GRACEFUL_DEGRADATION = 'GRACEFUL_DEGRADATION',
-  FAILOVER = 'FAILOVER',
-  ROLLBACK = 'ROLLBACK',
+  CIRCUIT_BREAKER = "CIRCUIT_BREAKER",
+  BULKHEAD = "BULKHEAD",
+  TIMEOUT = "TIMEOUT",
+  RATE_LIMITING = "RATE_LIMITING",
+  LOAD_SHEDDING = "LOAD_SHEDDING",
+  GRACEFUL_DEGRADATION = "GRACEFUL_DEGRADATION",
+  FAILOVER = "FAILOVER",
+  ROLLBACK = "ROLLBACK",
 
   // Enterprise Strategies
-  BUSINESS_CONTINUITY = 'BUSINESS_CONTINUITY',
-  DISASTER_RECOVERY = 'DISASTER_RECOVERY',
-  AUTO_SCALING = 'AUTO_SCALING',
-  RESOURCE_REBALANCING = 'RESOURCE_REBALANCING'
+  BUSINESS_CONTINUITY = "BUSINESS_CONTINUITY",
+  DISASTER_RECOVERY = "DISASTER_RECOVERY",
+  AUTO_SCALING = "AUTO_SCALING",
+  RESOURCE_REBALANCING = "RESOURCE_REBALANCING",
 }
 
 /**
  * Error notification urgency levels
  */
 export enum NotificationUrgency {
-  LOW = 'LOW',
-  MEDIUM = 'MEDIUM',
-  HIGH = 'HIGH',
-  CRITICAL = 'CRITICAL',
-  EMERGENCY = 'EMERGENCY'
+  LOW = "LOW",
+  MEDIUM = "MEDIUM",
+  HIGH = "HIGH",
+  CRITICAL = "CRITICAL",
+  EMERGENCY = "EMERGENCY",
 }
 
 // ===== CORE ERROR CONTEXT =====
@@ -164,7 +164,7 @@ export interface EnterpriseErrorContext {
 
   /** Environment context */
   environment: {
-    stage: 'development' | 'testing' | 'staging' | 'production';
+    stage: "development" | "testing" | "staging" | "production";
     region: string;
     availability_zone?: string;
     instance_id?: string;
@@ -243,7 +243,14 @@ export interface EnterpriseErrorContext {
  */
 export interface ErrorEvidence {
   /** Evidence type */
-  type: 'LOG' | 'METRIC' | 'TRACE' | 'SCREENSHOT' | 'DOCUMENT' | 'DATABASE_DUMP' | 'MEMORY_DUMP';
+  type:
+    | "LOG"
+    | "METRIC"
+    | "TRACE"
+    | "SCREENSHOT"
+    | "DOCUMENT"
+    | "DATABASE_DUMP"
+    | "MEMORY_DUMP";
 
   /** Evidence content or reference */
   content?: string;
@@ -265,9 +272,9 @@ export interface ErrorEvidence {
 
   /** Evidence classification */
   classification: {
-    confidentiality: 'PUBLIC' | 'INTERNAL' | 'CONFIDENTIAL' | 'RESTRICTED';
-    integrity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-    availability: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+    confidentiality: "PUBLIC" | "INTERNAL" | "CONFIDENTIAL" | "RESTRICTED";
+    integrity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+    availability: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
   };
 }
 
@@ -350,7 +357,7 @@ export interface ErrorResolution {
     timestamp: Date;
     action: string;
     performer: string;
-    result: 'SUCCESS' | 'FAILURE' | 'PARTIAL';
+    result: "SUCCESS" | "FAILURE" | "PARTIAL";
     notes?: string;
   }>;
 
@@ -382,7 +389,7 @@ export interface ErrorPredictionModel {
   modelId: string;
 
   /** Model type */
-  type: 'CLASSIFICATION' | 'REGRESSION' | 'CLUSTERING' | 'ANOMALY_DETECTION';
+  type: "CLASSIFICATION" | "REGRESSION" | "CLUSTERING" | "ANOMALY_DETECTION";
 
   /** Model configuration */
   config: {
@@ -421,7 +428,7 @@ export interface ErrorInsights {
   insightId: string;
 
   /** Insight type */
-  type: 'PREDICTION' | 'RECOMMENDATION' | 'ANOMALY' | 'TREND' | 'ROOT_CAUSE';
+  type: "PREDICTION" | "RECOMMENDATION" | "ANOMALY" | "TREND" | "ROOT_CAUSE";
 
   /** Insight content */
   content: {
@@ -508,9 +515,9 @@ export interface ErrorMetrics {
 
   /** Trending data */
   trends: {
-    errorTrend: 'INCREASING' | 'DECREASING' | 'STABLE';
-    severityTrend: 'ESCALATING' | 'IMPROVING' | 'STABLE';
-    resolutionTrend: 'IMPROVING' | 'DEGRADING' | 'STABLE';
+    errorTrend: "INCREASING" | "DECREASING" | "STABLE";
+    severityTrend: "ESCALATING" | "IMPROVING" | "STABLE";
+    resolutionTrend: "IMPROVING" | "DEGRADING" | "STABLE";
     predictions: Array<{
       metric: string;
       prediction: number;
@@ -522,13 +529,16 @@ export interface ErrorMetrics {
 
 // ===== EXPORT TYPES =====
 
-export type ErrorContextFilter = Partial<Pick<EnterpriseErrorContext,
-  'classification' | 'source' | 'environment' | 'user' | 'security'
->>;
+export type ErrorContextFilter = Partial<
+  Pick<
+    EnterpriseErrorContext,
+    "classification" | "source" | "environment" | "user" | "security"
+  >
+>;
 
 export type ErrorMetricsQuery = {
   timeRange: { start: Date; end: Date };
   filters?: ErrorContextFilter;
   groupBy?: Array<keyof EnterpriseErrorContext>;
-  aggregations?: Array<'COUNT' | 'RATE' | 'AVERAGE' | 'MEDIAN' | 'PERCENTILE'>;
+  aggregations?: Array<"COUNT" | "RATE" | "AVERAGE" | "MEDIAN" | "PERCENTILE">;
 };

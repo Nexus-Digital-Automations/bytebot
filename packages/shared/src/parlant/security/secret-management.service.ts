@@ -20,11 +20,17 @@
  * @author Claude Code - Secret Management Specialist
  */
 
-import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { Cron, CronExpression } from '@nestjs/schedule';
-import { createHash, randomBytes, createCipher, createDecipher, pbkdf2Sync } from 'crypto';
+import { Injectable, Logger, OnApplicationShutdown } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { EventEmitter2 } from "@nestjs/event-emitter";
+import { Cron, CronExpression } from "@nestjs/schedule";
+import {
+  createHash,
+  randomBytes,
+  createCipher,
+  createDecipher,
+  pbkdf2Sync,
+} from "crypto";
 
 // ===========================
 // SECRET MANAGEMENT TYPES
@@ -34,63 +40,63 @@ import { createHash, randomBytes, createCipher, createDecipher, pbkdf2Sync } fro
  * Secret types
  */
 export enum SecretType {
-  API_KEY = 'api_key',
-  DATABASE_PASSWORD = 'database_password',
-  JWT_SECRET = 'jwt_secret',
-  ENCRYPTION_KEY = 'encryption_key',
-  CERTIFICATE = 'certificate',
-  PRIVATE_KEY = 'private_key',
-  OAUTH_TOKEN = 'oauth_token',
-  WEBHOOK_SECRET = 'webhook_secret',
-  SIGNING_KEY = 'signing_key',
-  SERVICE_ACCOUNT_KEY = 'service_account_key',
+  API_KEY = "api_key",
+  DATABASE_PASSWORD = "database_password",
+  JWT_SECRET = "jwt_secret",
+  ENCRYPTION_KEY = "encryption_key",
+  CERTIFICATE = "certificate",
+  PRIVATE_KEY = "private_key",
+  OAUTH_TOKEN = "oauth_token",
+  WEBHOOK_SECRET = "webhook_secret",
+  SIGNING_KEY = "signing_key",
+  SERVICE_ACCOUNT_KEY = "service_account_key",
 }
 
 /**
  * Secret status
  */
 export enum SecretStatus {
-  ACTIVE = 'active',
-  PENDING_ROTATION = 'pending_rotation',
-  ROTATING = 'rotating',
-  DEPRECATED = 'deprecated',
-  REVOKED = 'revoked',
-  EXPIRED = 'expired',
-  COMPROMISED = 'compromised',
+  ACTIVE = "active",
+  PENDING_ROTATION = "pending_rotation",
+  ROTATING = "rotating",
+  DEPRECATED = "deprecated",
+  REVOKED = "revoked",
+  EXPIRED = "expired",
+  COMPROMISED = "compromised",
 }
 
 /**
  * Secret storage providers
  */
 export enum SecretProvider {
-  HASHICORP_VAULT = 'hashicorp_vault',
-  AWS_SECRETS_MANAGER = 'aws_secrets_manager',
-  AZURE_KEY_VAULT = 'azure_key_vault',
-  GOOGLE_SECRET_MANAGER = 'google_secret_manager',
-  KUBERNETES_SECRETS = 'kubernetes_secrets',
-  LOCAL_ENCRYPTED = 'local_encrypted',
+  HASHICORP_VAULT = "hashicorp_vault",
+  AWS_SECRETS_MANAGER = "aws_secrets_manager",
+  AZURE_KEY_VAULT = "azure_key_vault",
+  GOOGLE_SECRET_MANAGER = "google_secret_manager",
+  KUBERNETES_SECRETS = "kubernetes_secrets",
+  LOCAL_ENCRYPTED = "local_encrypted",
 }
 
 /**
  * Rotation strategies
  */
 export enum RotationStrategy {
-  TIME_BASED = 'time_based',
-  USAGE_BASED = 'usage_based',
-  RISK_BASED = 'risk_based',
-  MANUAL = 'manual',
-  EMERGENCY = 'emergency',
+  TIME_BASED = "time_based",
+  USAGE_BASED = "usage_based",
+  RISK_BASED = "risk_based",
+  MANUAL = "manual",
+  EMERGENCY = "emergency",
 }
 
 /**
  * Access patterns
  */
 export enum AccessPattern {
-  DIRECT_ACCESS = 'direct_access',
-  JUST_IN_TIME = 'just_in_time',
-  BREAK_GLASS = 'break_glass',
-  SERVICE_ACCOUNT = 'service_account',
-  TEMPORARY_GRANT = 'temporary_grant',
+  DIRECT_ACCESS = "direct_access",
+  JUST_IN_TIME = "just_in_time",
+  BREAK_GLASS = "break_glass",
+  SERVICE_ACCOUNT = "service_account",
+  TEMPORARY_GRANT = "temporary_grant",
 }
 
 // ===========================
@@ -177,10 +183,10 @@ export interface SecretOwner {
  * Owner types
  */
 export enum OwnerType {
-  USER = 'user',
-  SERVICE_ACCOUNT = 'service_account',
-  TEAM = 'team',
-  SYSTEM = 'system',
+  USER = "user",
+  SERVICE_ACCOUNT = "service_account",
+  TEAM = "team",
+  SYSTEM = "system",
 }
 
 /**
@@ -207,10 +213,10 @@ export interface ComplianceRequirement {
  * Compliance status
  */
 export enum ComplianceStatus {
-  COMPLIANT = 'compliant',
-  NON_COMPLIANT = 'non_compliant',
-  PARTIALLY_COMPLIANT = 'partially_compliant',
-  NOT_APPLICABLE = 'not_applicable',
+  COMPLIANT = "compliant",
+  NON_COMPLIANT = "non_compliant",
+  PARTIALLY_COMPLIANT = "partially_compliant",
+  NOT_APPLICABLE = "not_applicable",
 }
 
 /**
@@ -272,22 +278,22 @@ export interface RotationNotification {
  * Notification types
  */
 export enum NotificationType {
-  EMAIL = 'email',
-  SLACK = 'slack',
-  WEBHOOK = 'webhook',
-  SMS = 'sms',
-  PAGERDUTY = 'pagerduty',
+  EMAIL = "email",
+  SLACK = "slack",
+  WEBHOOK = "webhook",
+  SMS = "sms",
+  PAGERDUTY = "pagerduty",
 }
 
 /**
  * Notification triggers
  */
 export enum NotificationTrigger {
-  BEFORE_ROTATION = 'before_rotation',
-  DURING_ROTATION = 'during_rotation',
-  AFTER_ROTATION = 'after_rotation',
-  ROTATION_FAILED = 'rotation_failed',
-  EXPIRY_WARNING = 'expiry_warning',
+  BEFORE_ROTATION = "before_rotation",
+  DURING_ROTATION = "during_rotation",
+  AFTER_ROTATION = "after_rotation",
+  ROTATION_FAILED = "rotation_failed",
+  EXPIRY_WARNING = "expiry_warning",
 }
 
 /**
@@ -385,12 +391,12 @@ export interface AccessRestriction {
  * Restriction types
  */
 export enum RestrictionType {
-  TIME_BASED = 'time_based',
-  LOCATION_BASED = 'location_based',
-  IP_BASED = 'ip_based',
-  DEVICE_BASED = 'device_based',
-  MFA_REQUIRED = 'mfa_required',
-  VPN_REQUIRED = 'vpn_required',
+  TIME_BASED = "time_based",
+  LOCATION_BASED = "location_based",
+  IP_BASED = "ip_based",
+  DEVICE_BASED = "device_based",
+  MFA_REQUIRED = "mfa_required",
+  VPN_REQUIRED = "vpn_required",
 }
 
 /**
@@ -477,11 +483,11 @@ export interface BackupConfiguration {
  * Backup frequency
  */
 export enum BackupFrequency {
-  REAL_TIME = 'real_time',
-  HOURLY = 'hourly',
-  DAILY = 'daily',
-  WEEKLY = 'weekly',
-  MONTHLY = 'monthly',
+  REAL_TIME = "real_time",
+  HOURLY = "hourly",
+  DAILY = "daily",
+  WEEKLY = "weekly",
+  MONTHLY = "monthly",
 }
 
 /**
@@ -516,11 +522,11 @@ export interface BackupStorage {
  * Storage types
  */
 export enum StorageType {
-  LOCAL_ENCRYPTED = 'local_encrypted',
-  S3_ENCRYPTED = 's3_encrypted',
-  AZURE_BLOB = 'azure_blob',
-  GOOGLE_CLOUD_STORAGE = 'google_cloud_storage',
-  TAPE_BACKUP = 'tape_backup',
+  LOCAL_ENCRYPTED = "local_encrypted",
+  S3_ENCRYPTED = "s3_encrypted",
+  AZURE_BLOB = "azure_blob",
+  GOOGLE_CLOUD_STORAGE = "google_cloud_storage",
+  TAPE_BACKUP = "tape_backup",
 }
 
 /**
@@ -575,11 +581,11 @@ export interface RecoveryTestNotification {
  * Recovery test events
  */
 export enum RecoveryTestEvent {
-  TEST_STARTED = 'test_started',
-  TEST_COMPLETED = 'test_completed',
-  TEST_FAILED = 'test_failed',
-  RECOVERY_SUCCESSFUL = 'recovery_successful',
-  RECOVERY_FAILED = 'recovery_failed',
+  TEST_STARTED = "test_started",
+  TEST_COMPLETED = "test_completed",
+  TEST_FAILED = "test_failed",
+  RECOVERY_SUCCESSFUL = "recovery_successful",
+  RECOVERY_FAILED = "recovery_failed",
 }
 
 /**
@@ -687,10 +693,10 @@ export interface SecretRequester {
  * Requester types
  */
 export enum RequesterType {
-  USER = 'user',
-  SERVICE = 'service',
-  CI_CD_SYSTEM = 'ci_cd_system',
-  AUTOMATED_SYSTEM = 'automated_system',
+  USER = "user",
+  SERVICE = "service",
+  CI_CD_SYSTEM = "ci_cd_system",
+  AUTOMATED_SYSTEM = "automated_system",
 }
 
 /**
@@ -717,12 +723,12 @@ export interface GeoLocation {
  * Access request status
  */
 export enum AccessRequestStatus {
-  PENDING = 'pending',
-  APPROVED = 'approved',
-  DENIED = 'denied',
-  EXPIRED = 'expired',
-  CANCELLED = 'cancelled',
-  FULFILLED = 'fulfilled',
+  PENDING = "pending",
+  APPROVED = "approved",
+  DENIED = "denied",
+  EXPIRED = "expired",
+  CANCELLED = "cancelled",
+  FULFILLED = "fulfilled",
 }
 
 /**
@@ -769,21 +775,21 @@ export interface SecretApprover {
  * Authority levels
  */
 export enum AuthorityLevel {
-  BASIC = 'basic',
-  SENIOR = 'senior',
-  MANAGER = 'manager',
-  EXECUTIVE = 'executive',
-  EMERGENCY = 'emergency',
+  BASIC = "basic",
+  SENIOR = "senior",
+  MANAGER = "manager",
+  EXECUTIVE = "executive",
+  EMERGENCY = "emergency",
 }
 
 /**
  * Approval decisions
  */
 export enum ApprovalDecision {
-  APPROVE = 'approve',
-  DENY = 'deny',
-  CONDITIONAL_APPROVE = 'conditional_approve',
-  ESCALATE = 'escalate',
+  APPROVE = "approve",
+  DENY = "deny",
+  CONDITIONAL_APPROVE = "conditional_approve",
+  ESCALATE = "escalate",
 }
 
 /**
@@ -804,11 +810,11 @@ export interface ApprovalCondition {
  * Condition types
  */
 export enum ConditionType {
-  TIME_LIMITED = 'time_limited',
-  USAGE_LIMITED = 'usage_limited',
-  MONITORING_REQUIRED = 'monitoring_required',
-  ADDITIONAL_APPROVAL = 'additional_approval',
-  EMERGENCY_ONLY = 'emergency_only',
+  TIME_LIMITED = "time_limited",
+  USAGE_LIMITED = "usage_limited",
+  MONITORING_REQUIRED = "monitoring_required",
+  ADDITIONAL_APPROVAL = "additional_approval",
+  EMERGENCY_ONLY = "emergency_only",
 }
 
 /**
@@ -841,15 +847,15 @@ export interface AccessAuditEvent {
  * Audit event types
  */
 export enum AuditEventType {
-  ACCESS_REQUESTED = 'access_requested',
-  ACCESS_APPROVED = 'access_approved',
-  ACCESS_DENIED = 'access_denied',
-  SECRET_ACCESSED = 'secret_accessed',
-  SECRET_MODIFIED = 'secret_modified',
-  SECRET_ROTATED = 'secret_rotated',
-  SECRET_DELETED = 'secret_deleted',
-  EMERGENCY_ACCESS = 'emergency_access',
-  POLICY_VIOLATION = 'policy_violation',
+  ACCESS_REQUESTED = "access_requested",
+  ACCESS_APPROVED = "access_approved",
+  ACCESS_DENIED = "access_denied",
+  SECRET_ACCESSED = "secret_accessed",
+  SECRET_MODIFIED = "secret_modified",
+  SECRET_ROTATED = "secret_rotated",
+  SECRET_DELETED = "secret_deleted",
+  EMERGENCY_ACCESS = "emergency_access",
+  POLICY_VIOLATION = "policy_violation",
 }
 
 /**
@@ -891,11 +897,11 @@ export interface RotationResult {
  * Rotation status
  */
 export enum RotationStatus {
-  SUCCESS = 'success',
-  FAILED = 'failed',
-  PARTIAL = 'partial',
-  ROLLED_BACK = 'rolled_back',
-  IN_PROGRESS = 'in_progress',
+  SUCCESS = "success",
+  FAILED = "failed",
+  PARTIAL = "partial",
+  ROLLED_BACK = "rolled_back",
+  IN_PROGRESS = "in_progress",
 }
 
 /**
@@ -936,21 +942,21 @@ export interface ValidationResult {
  * Validation types
  */
 export enum ValidationType {
-  CONNECTIVITY = 'connectivity',
-  AUTHENTICATION = 'authentication',
-  AUTHORIZATION = 'authorization',
-  FUNCTIONALITY = 'functionality',
-  PERFORMANCE = 'performance',
+  CONNECTIVITY = "connectivity",
+  AUTHENTICATION = "authentication",
+  AUTHORIZATION = "authorization",
+  FUNCTIONALITY = "functionality",
+  PERFORMANCE = "performance",
 }
 
 /**
  * Validation result status
  */
 export enum ValidationResultStatus {
-  PASS = 'pass',
-  FAIL = 'fail',
-  WARNING = 'warning',
-  SKIP = 'skip',
+  PASS = "pass",
+  FAIL = "fail",
+  WARNING = "warning",
+  SKIP = "skip",
 }
 
 /**
@@ -1072,11 +1078,11 @@ export interface MasterKeyConfig {
  * Key sources
  */
 export enum KeySource {
-  ENVIRONMENT = 'environment',
-  FILE = 'file',
-  HSM = 'hsm',
-  KMS = 'kms',
-  VAULT = 'vault',
+  ENVIRONMENT = "environment",
+  FILE = "file",
+  HSM = "hsm",
+  KMS = "kms",
+  VAULT = "vault",
 }
 
 /**
@@ -1229,10 +1235,10 @@ export interface EmergencyNotificationRequirement {
  * Emergency notification triggers
  */
 export enum EmergencyNotificationTrigger {
-  BREAK_GLASS_INITIATED = 'break_glass_initiated',
-  EMERGENCY_ACCESS_GRANTED = 'emergency_access_granted',
-  EMERGENCY_ACCESS_USED = 'emergency_access_used',
-  EMERGENCY_ACCESS_EXPIRED = 'emergency_access_expired',
+  BREAK_GLASS_INITIATED = "break_glass_initiated",
+  EMERGENCY_ACCESS_GRANTED = "emergency_access_granted",
+  EMERGENCY_ACCESS_USED = "emergency_access_used",
+  EMERGENCY_ACCESS_EXPIRED = "emergency_access_expired",
 }
 
 /**
@@ -1287,12 +1293,12 @@ export interface MetricsCollectionConfig {
  * Metric types
  */
 export enum MetricType {
-  ACCESS_COUNT = 'access_count',
-  ROTATION_COUNT = 'rotation_count',
-  FAILURE_COUNT = 'failure_count',
-  RESPONSE_TIME = 'response_time',
-  ACTIVE_SESSIONS = 'active_sessions',
-  SECRET_AGE = 'secret_age',
+  ACCESS_COUNT = "access_count",
+  ROTATION_COUNT = "rotation_count",
+  FAILURE_COUNT = "failure_count",
+  RESPONSE_TIME = "response_time",
+  ACTIVE_SESSIONS = "active_sessions",
+  SECRET_AGE = "secret_age",
 }
 
 /**
@@ -1313,10 +1319,10 @@ export interface MetricsStorageConfig {
  * Metrics storage types
  */
 export enum MetricsStorageType {
-  PROMETHEUS = 'prometheus',
-  INFLUXDB = 'influxdb',
-  CLOUDWATCH = 'cloudwatch',
-  DATADOG = 'datadog',
+  PROMETHEUS = "prometheus",
+  INFLUXDB = "influxdb",
+  CLOUDWATCH = "cloudwatch",
+  DATADOG = "datadog",
 }
 
 /**
@@ -1360,10 +1366,10 @@ export interface AlertRule {
  * Alert severities
  */
 export enum AlertSeverity {
-  INFO = 'info',
-  WARNING = 'warning',
-  ERROR = 'error',
-  CRITICAL = 'critical',
+  INFO = "info",
+  WARNING = "warning",
+  ERROR = "error",
+  CRITICAL = "critical",
 }
 
 /**
@@ -1384,11 +1390,11 @@ export interface AlertChannel {
  * Alert channel types
  */
 export enum AlertChannelType {
-  EMAIL = 'email',
-  SLACK = 'slack',
-  WEBHOOK = 'webhook',
-  PAGERDUTY = 'pagerduty',
-  OPSGENIE = 'opsgenie',
+  EMAIL = "email",
+  SLACK = "slack",
+  WEBHOOK = "webhook",
+  PAGERDUTY = "pagerduty",
+  OPSGENIE = "opsgenie",
 }
 
 /**
@@ -1437,20 +1443,20 @@ export interface AnomalyDetectionConfig {
  * Anomaly detection algorithms
  */
 export enum AnomalyDetectionAlgorithm {
-  STATISTICAL = 'statistical',
-  MACHINE_LEARNING = 'machine_learning',
-  RULE_BASED = 'rule_based',
-  BEHAVIOR_ANALYSIS = 'behavior_analysis',
+  STATISTICAL = "statistical",
+  MACHINE_LEARNING = "machine_learning",
+  RULE_BASED = "rule_based",
+  BEHAVIOR_ANALYSIS = "behavior_analysis",
 }
 
 /**
  * Sensitivity levels
  */
 export enum SensitivityLevel {
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  VERY_HIGH = 'very_high',
+  LOW = "low",
+  MEDIUM = "medium",
+  HIGH = "high",
+  VERY_HIGH = "very_high",
 }
 
 /**
@@ -1538,10 +1544,10 @@ export class SecretManagementService implements OnApplicationShutdown {
    */
   private async initializeSecretManagement(): Promise<void> {
     try {
-      this.logger.log('🔧 Initializing secret management service');
+      this.logger.log("🔧 Initializing secret management service");
 
       if (!this.config.enabled) {
-        this.logger.warn('⚠️ Secret management is disabled');
+        this.logger.warn("⚠️ Secret management is disabled");
         return;
       }
 
@@ -1559,17 +1565,19 @@ export class SecretManagementService implements OnApplicationShutdown {
       // Start access monitoring
       await this.startAccessMonitoring();
 
-      this.logger.log('✅ Secret management service initialized successfully');
+      this.logger.log("✅ Secret management service initialized successfully");
 
       // Emit initialization event
-      this.eventEmitter.emit('secret.management.initialized', {
+      this.eventEmitter.emit("secret.management.initialized", {
         timestamp: new Date(),
         providers: Object.keys(this.config.providers),
         secretCount: this.secretCache.size,
       });
-
     } catch (error) {
-      this.logger.error('❌ Failed to initialize secret management service', error);
+      this.logger.error(
+        "❌ Failed to initialize secret management service",
+        error,
+      );
       throw error;
     }
   }
@@ -1606,8 +1614,10 @@ export class SecretManagementService implements OnApplicationShutdown {
         owner: secretData.owner,
         tags: secretData.tags || {},
         complianceRequirements: secretData.complianceRequirements || [],
-        rotationConfig: secretData.rotationConfig || this.getDefaultRotationConfig(),
-        accessControl: secretData.accessControl || this.getDefaultAccessControlConfig(),
+        rotationConfig:
+          secretData.rotationConfig || this.getDefaultRotationConfig(),
+        accessControl:
+          secretData.accessControl || this.getDefaultAccessControlConfig(),
         backupConfig: secretData.backupConfig || this.getDefaultBackupConfig(),
       };
 
@@ -1630,7 +1640,7 @@ export class SecretManagementService implements OnApplicationShutdown {
       this.logger.log(`✅ Secret created successfully: ${secretId}`);
 
       // Emit creation event
-      this.eventEmitter.emit('secret.created', {
+      this.eventEmitter.emit("secret.created", {
         secretId,
         type: metadata.type,
         provider: metadata.provider,
@@ -1638,7 +1648,6 @@ export class SecretManagementService implements OnApplicationShutdown {
       });
 
       return metadata;
-
     } catch (error) {
       this.logger.error(`❌ Failed to create secret: ${secretId}`, error);
       throw error;
@@ -1673,14 +1682,16 @@ export class SecretManagementService implements OnApplicationShutdown {
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours default
         status: AccessRequestStatus.PENDING,
         approvals: [],
-        auditTrail: [{
-          eventId: this.generateEventId(),
-          type: AuditEventType.ACCESS_REQUESTED,
-          timestamp: new Date(),
-          actor: request.requester.id,
-          details: { justification: request.justification },
-          ipAddress: request.requester.ipAddress,
-        }],
+        auditTrail: [
+          {
+            eventId: this.generateEventId(),
+            type: AuditEventType.ACCESS_REQUESTED,
+            timestamp: new Date(),
+            actor: request.requester.id,
+            details: { justification: request.justification },
+            ipAddress: request.requester.ipAddress,
+          },
+        ],
       };
 
       // Check if automatic approval is possible
@@ -1696,7 +1707,7 @@ export class SecretManagementService implements OnApplicationShutdown {
       this.accessRequestCache.set(requestId, accessRequest);
 
       // Emit access request event
-      this.eventEmitter.emit('secret.access.requested', {
+      this.eventEmitter.emit("secret.access.requested", {
         requestId,
         secretId: request.secretId,
         requester: request.requester.id,
@@ -1705,9 +1716,11 @@ export class SecretManagementService implements OnApplicationShutdown {
       });
 
       return accessRequest;
-
     } catch (error) {
-      this.logger.error(`❌ Failed to process access request: ${requestId}`, error);
+      this.logger.error(
+        `❌ Failed to process access request: ${requestId}`,
+        error,
+      );
       throw error;
     }
   }
@@ -1730,7 +1743,7 @@ export class SecretManagementService implements OnApplicationShutdown {
 
       // Verify requester
       if (accessRequest.requester.id !== requester.id) {
-        throw new Error('Unauthorized access attempt');
+        throw new Error("Unauthorized access attempt");
       }
 
       // Check if access is approved
@@ -1740,7 +1753,7 @@ export class SecretManagementService implements OnApplicationShutdown {
 
       // Check if request is still valid
       if (accessRequest.expiresAt < new Date()) {
-        throw new Error('Access request expired');
+        throw new Error("Access request expired");
       }
 
       // Get secret metadata
@@ -1750,7 +1763,8 @@ export class SecretManagementService implements OnApplicationShutdown {
       }
 
       // Retrieve encrypted value from provider
-      const encryptedValue = await this.retrieveSecretFromProvider(secretMetadata);
+      const encryptedValue =
+        await this.retrieveSecretFromProvider(secretMetadata);
 
       // Decrypt value
       const decryptedValue = await this.decryptValue(encryptedValue);
@@ -1772,7 +1786,7 @@ export class SecretManagementService implements OnApplicationShutdown {
       this.logger.log(`✅ Secret value retrieved successfully: ${requestId}`);
 
       // Emit access event
-      this.eventEmitter.emit('secret.accessed', {
+      this.eventEmitter.emit("secret.accessed", {
         secretId: accessRequest.secretId,
         requester: requester.id,
         requestId,
@@ -1780,9 +1794,11 @@ export class SecretManagementService implements OnApplicationShutdown {
       });
 
       return decryptedValue;
-
     } catch (error) {
-      this.logger.error(`❌ Failed to retrieve secret value: ${requestId}`, error);
+      this.logger.error(
+        `❌ Failed to retrieve secret value: ${requestId}`,
+        error,
+      );
       throw error;
     }
   }
@@ -1794,7 +1810,9 @@ export class SecretManagementService implements OnApplicationShutdown {
     const rotationId = this.generateRotationId();
 
     try {
-      this.logger.log(`🔄 Starting secret rotation: ${secretId} (${rotationId})`);
+      this.logger.log(
+        `🔄 Starting secret rotation: ${secretId} (${rotationId})`,
+      );
 
       // Get secret metadata
       const secretMetadata = this.secretCache.get(secretId);
@@ -1825,12 +1843,20 @@ export class SecretManagementService implements OnApplicationShutdown {
       }
 
       // Store new version
-      const newVersion = await this.storeNewSecretVersion(secretMetadata, encryptedNewValue);
+      const newVersion = await this.storeNewSecretVersion(
+        secretMetadata,
+        encryptedNewValue,
+      );
 
       // Post-rotation verification
       const validationResults: ValidationResult[] = [];
       if (secretMetadata.rotationConfig.postRotationVerification) {
-        validationResults.push(...await this.performPostRotationVerification(secretMetadata, newVersion));
+        validationResults.push(
+          ...(await this.performPostRotationVerification(
+            secretMetadata,
+            newVersion,
+          )),
+        );
       }
 
       // Update metadata
@@ -1850,10 +1876,12 @@ export class SecretManagementService implements OnApplicationShutdown {
         validationResults,
       };
 
-      this.logger.log(`✅ Secret rotation completed successfully: ${secretId} (${rotationId})`);
+      this.logger.log(
+        `✅ Secret rotation completed successfully: ${secretId} (${rotationId})`,
+      );
 
       // Emit rotation event
-      this.eventEmitter.emit('secret.rotated', {
+      this.eventEmitter.emit("secret.rotated", {
         secretId,
         rotationId,
         newVersion,
@@ -1862,9 +1890,11 @@ export class SecretManagementService implements OnApplicationShutdown {
       });
 
       return rotationResult;
-
     } catch (error) {
-      this.logger.error(`❌ Secret rotation failed: ${secretId} (${rotationId})`, error);
+      this.logger.error(
+        `❌ Secret rotation failed: ${secretId} (${rotationId})`,
+        error,
+      );
 
       // Handle rotation failure
       await this.handleRotationFailure(secretId, rotationId, error);
@@ -1897,7 +1927,8 @@ export class SecretManagementService implements OnApplicationShutdown {
       await this.triggerEmergencyNotifications(request, emergencyId);
 
       // Retrieve and decrypt secret
-      const encryptedValue = await this.retrieveSecretFromProvider(secretMetadata);
+      const encryptedValue =
+        await this.retrieveSecretFromProvider(secretMetadata);
       const decryptedValue = await this.decryptValue(encryptedValue);
 
       // Log emergency access
@@ -1906,7 +1937,7 @@ export class SecretManagementService implements OnApplicationShutdown {
       this.logger.warn(`🚨 Emergency access granted: ${emergencyId}`);
 
       // Emit emergency access event
-      this.eventEmitter.emit('secret.emergency.access', {
+      this.eventEmitter.emit("secret.emergency.access", {
         secretId: request.secretId,
         requester: request.requester.id,
         emergencyId,
@@ -1915,7 +1946,6 @@ export class SecretManagementService implements OnApplicationShutdown {
       });
 
       return decryptedValue;
-
     } catch (error) {
       this.logger.error(`❌ Emergency access failed: ${emergencyId}`, error);
       throw error;
@@ -1932,7 +1962,7 @@ export class SecretManagementService implements OnApplicationShutdown {
     }
 
     try {
-      this.logger.log('🔄 Monitoring secret rotations');
+      this.logger.log("🔄 Monitoring secret rotations");
       this.isRotationRunning = true;
 
       const now = new Date();
@@ -1947,10 +1977,9 @@ export class SecretManagementService implements OnApplicationShutdown {
       // Process rotation queue
       await this.processRotationQueue();
 
-      this.logger.log('✅ Secret rotation monitoring completed');
-
+      this.logger.log("✅ Secret rotation monitoring completed");
     } catch (error) {
-      this.logger.error('❌ Secret rotation monitoring failed', error);
+      this.logger.error("❌ Secret rotation monitoring failed", error);
     } finally {
       this.isRotationRunning = false;
     }
@@ -1960,13 +1989,21 @@ export class SecretManagementService implements OnApplicationShutdown {
    * Derive master key for encryption
    */
   private deriveMasterKey(): Buffer {
-    const masterKeySource = this.configService.get<string>('secret.management.master.key');
+    const masterKeySource = this.configService.get<string>(
+      "secret.management.master.key",
+    );
     if (!masterKeySource) {
-      throw new Error('Master key not configured');
+      throw new Error("Master key not configured");
     }
 
     // In production, this would use a more secure key derivation method
-    return pbkdf2Sync(masterKeySource, 'parlant-secret-salt', 100000, 32, 'sha256');
+    return pbkdf2Sync(
+      masterKeySource,
+      "parlant-secret-salt",
+      100000,
+      32,
+      "sha256",
+    );
   }
 
   /**
@@ -1983,28 +2020,28 @@ export class SecretManagementService implements OnApplicationShutdown {
       salt,
       this.config.encryption.keyDerivation.iterations,
       this.config.encryption.keyDerivation.keyLength,
-      'sha256',
+      "sha256",
     );
 
     // Encrypt value
     const cipher = createCipher(algorithm, derivedKey);
-    let encrypted = cipher.update(value, 'utf8', 'hex');
-    encrypted += cipher.final('hex');
+    let encrypted = cipher.update(value, "utf8", "hex");
+    encrypted += cipher.final("hex");
 
     // Calculate integrity hash
-    const integrityHash = createHash('sha256')
-      .update(encrypted + iv.toString('hex') + salt.toString('hex'))
-      .digest('hex');
+    const integrityHash = createHash("sha256")
+      .update(encrypted + iv.toString("hex") + salt.toString("hex"))
+      .digest("hex");
 
     return {
       encryptedValue: encrypted,
       algorithm,
-      iv: iv.toString('hex'),
+      iv: iv.toString("hex"),
       keyDerivation: {
-        salt: salt.toString('hex'),
+        salt: salt.toString("hex"),
         iterations: this.config.encryption.keyDerivation.iterations,
         keyLength: this.config.encryption.keyDerivation.keyLength,
-        algorithm: 'pbkdf2',
+        algorithm: "pbkdf2",
       },
       integrityHash,
       version: 1,
@@ -2016,27 +2053,31 @@ export class SecretManagementService implements OnApplicationShutdown {
    */
   private async decryptValue(secretValue: SecretValue): Promise<string> {
     // Verify integrity
-    const calculatedHash = createHash('sha256')
-      .update(secretValue.encryptedValue + secretValue.iv + secretValue.keyDerivation.salt)
-      .digest('hex');
+    const calculatedHash = createHash("sha256")
+      .update(
+        secretValue.encryptedValue +
+          secretValue.iv +
+          secretValue.keyDerivation.salt,
+      )
+      .digest("hex");
 
     if (calculatedHash !== secretValue.integrityHash) {
-      throw new Error('Secret integrity verification failed');
+      throw new Error("Secret integrity verification failed");
     }
 
     // Derive decryption key
     const derivedKey = pbkdf2Sync(
       this.masterKey,
-      Buffer.from(secretValue.keyDerivation.salt, 'hex'),
+      Buffer.from(secretValue.keyDerivation.salt, "hex"),
       secretValue.keyDerivation.iterations,
       secretValue.keyDerivation.keyLength,
-      'sha256',
+      "sha256",
     );
 
     // Decrypt value
     const decipher = createDecipher(secretValue.algorithm, derivedKey);
-    let decrypted = decipher.update(secretValue.encryptedValue, 'hex', 'utf8');
-    decrypted += decipher.final('utf8');
+    let decrypted = decipher.update(secretValue.encryptedValue, "hex", "utf8");
+    decrypted += decipher.final("utf8");
 
     return decrypted;
   }
@@ -2046,7 +2087,7 @@ export class SecretManagementService implements OnApplicationShutdown {
    */
   private async initializeProviders(): Promise<void> {
     // Implementation for provider initialization
-    this.logger.log('🔧 Initializing secret storage providers');
+    this.logger.log("🔧 Initializing secret storage providers");
   }
 
   /**
@@ -2054,7 +2095,7 @@ export class SecretManagementService implements OnApplicationShutdown {
    */
   private async loadSecretsMetadata(): Promise<void> {
     // Implementation for loading existing secrets
-    this.logger.log('📚 Loading existing secrets metadata');
+    this.logger.log("📚 Loading existing secrets metadata");
   }
 
   /**
@@ -2071,22 +2112,24 @@ export class SecretManagementService implements OnApplicationShutdown {
   /**
    * Retrieve secret from provider
    */
-  private async retrieveSecretFromProvider(metadata: SecretMetadata): Promise<SecretValue> {
+  private async retrieveSecretFromProvider(
+    metadata: SecretMetadata,
+  ): Promise<SecretValue> {
     // Implementation for retrieving secret from configured provider
     this.logger.debug(`Retrieving secret from provider: ${metadata.provider}`);
 
     // Mock encrypted value for demonstration
     return {
-      encryptedValue: 'mock_encrypted_value',
-      algorithm: 'aes-256-cbc',
-      iv: 'mock_iv',
+      encryptedValue: "mock_encrypted_value",
+      algorithm: "aes-256-cbc",
+      iv: "mock_iv",
       keyDerivation: {
-        salt: 'mock_salt',
+        salt: "mock_salt",
         iterations: 100000,
         keyLength: 32,
-        algorithm: 'pbkdf2',
+        algorithm: "pbkdf2",
       },
-      integrityHash: 'mock_hash',
+      integrityHash: "mock_hash",
       version: 1,
     };
   }
@@ -2095,46 +2138,98 @@ export class SecretManagementService implements OnApplicationShutdown {
    * Generate utility methods
    */
   private generateSecretId(): string {
-    return `secret_${Date.now()}_${randomBytes(8).toString('hex')}`;
+    return `secret_${Date.now()}_${randomBytes(8).toString("hex")}`;
   }
 
   private generateRequestId(): string {
-    return `request_${Date.now()}_${randomBytes(6).toString('hex')}`;
+    return `request_${Date.now()}_${randomBytes(6).toString("hex")}`;
   }
 
   private generateRotationId(): string {
-    return `rotation_${Date.now()}_${randomBytes(6).toString('hex')}`;
+    return `rotation_${Date.now()}_${randomBytes(6).toString("hex")}`;
   }
 
   private generateEmergencyId(): string {
-    return `emergency_${Date.now()}_${randomBytes(6).toString('hex')}`;
+    return `emergency_${Date.now()}_${randomBytes(6).toString("hex")}`;
   }
 
   private generateEventId(): string {
-    return `event_${Date.now()}_${randomBytes(4).toString('hex')}`;
+    return `event_${Date.now()}_${randomBytes(4).toString("hex")}`;
   }
 
   /**
    * Additional helper methods (stubs for implementation)
    */
   private async validateSecretData(data: any): Promise<void> {}
-  private getDefaultRotationConfig(): RotationConfiguration { return {} as any; }
-  private getDefaultAccessControlConfig(): AccessControlConfiguration { return {} as any; }
-  private getDefaultBackupConfig(): BackupConfiguration { return {} as any; }
-  private async createSecretBackup(metadata: SecretMetadata, value: SecretValue): Promise<void> {}
+  private getDefaultRotationConfig(): RotationConfiguration {
+    return {} as any;
+  }
+  private getDefaultAccessControlConfig(): AccessControlConfiguration {
+    return {} as any;
+  }
+  private getDefaultBackupConfig(): BackupConfiguration {
+    return {} as any;
+  }
+  private async createSecretBackup(
+    metadata: SecretMetadata,
+    value: SecretValue,
+  ): Promise<void> {}
   private async scheduleRotation(secretId: string): Promise<void> {}
-  private async canAutoApprove(request: SecretAccessRequest, metadata: SecretMetadata): Promise<boolean> { return false; }
-  private async processApprovalWorkflow(request: SecretAccessRequest, metadata: SecretMetadata): Promise<void> {}
-  private async trackSecretAccess(metadata: SecretMetadata, requester: SecretRequester): Promise<void> {}
-  private async generateNewSecretValue(metadata: SecretMetadata): Promise<string> { return 'new_secret_value'; }
-  private async performPreRotationValidation(metadata: SecretMetadata): Promise<void> {}
-  private async storeNewSecretVersion(metadata: SecretMetadata, value: SecretValue): Promise<number> { return 2; }
-  private async performPostRotationVerification(metadata: SecretMetadata, version: number): Promise<ValidationResult[]> { return []; }
-  private async handleRotationFailure(secretId: string, rotationId: string, error: any): Promise<void> {}
+  private async canAutoApprove(
+    request: SecretAccessRequest,
+    metadata: SecretMetadata,
+  ): Promise<boolean> {
+    return false;
+  }
+  private async processApprovalWorkflow(
+    request: SecretAccessRequest,
+    metadata: SecretMetadata,
+  ): Promise<void> {}
+  private async trackSecretAccess(
+    metadata: SecretMetadata,
+    requester: SecretRequester,
+  ): Promise<void> {}
+  private async generateNewSecretValue(
+    metadata: SecretMetadata,
+  ): Promise<string> {
+    return "new_secret_value";
+  }
+  private async performPreRotationValidation(
+    metadata: SecretMetadata,
+  ): Promise<void> {}
+  private async storeNewSecretVersion(
+    metadata: SecretMetadata,
+    value: SecretValue,
+  ): Promise<number> {
+    return 2;
+  }
+  private async performPostRotationVerification(
+    metadata: SecretMetadata,
+    version: number,
+  ): Promise<ValidationResult[]> {
+    return [];
+  }
+  private async handleRotationFailure(
+    secretId: string,
+    rotationId: string,
+    error: any,
+  ): Promise<void> {}
   private async validateEmergencyAccess(request: any): Promise<void> {}
-  private async triggerEmergencyNotifications(request: any, emergencyId: string): Promise<void> {}
-  private async logEmergencyAccess(request: any, emergencyId: string, metadata: SecretMetadata): Promise<void> {}
-  private async shouldRotateSecret(metadata: SecretMetadata, now: Date): Promise<boolean> { return false; }
+  private async triggerEmergencyNotifications(
+    request: any,
+    emergencyId: string,
+  ): Promise<void> {}
+  private async logEmergencyAccess(
+    request: any,
+    emergencyId: string,
+    metadata: SecretMetadata,
+  ): Promise<void> {}
+  private async shouldRotateSecret(
+    metadata: SecretMetadata,
+    now: Date,
+  ): Promise<boolean> {
+    return false;
+  }
   private async processRotationQueue(): Promise<void> {}
   private async startRotationMonitoring(): Promise<void> {}
   private async startAccessMonitoring(): Promise<void> {}
@@ -2144,20 +2239,23 @@ export class SecretManagementService implements OnApplicationShutdown {
    */
   private loadConfiguration(): SecretManagementConfig {
     return {
-      enabled: this.configService.get<boolean>('secret.management.enabled', true),
+      enabled: this.configService.get<boolean>(
+        "secret.management.enabled",
+        true,
+      ),
       defaultProvider: SecretProvider.LOCAL_ENCRYPTED,
       providers: {},
       encryption: {
-        defaultAlgorithm: 'aes-256-cbc',
+        defaultAlgorithm: "aes-256-cbc",
         keyDerivation: {
-          algorithm: 'pbkdf2',
+          algorithm: "pbkdf2",
           iterations: 100000,
           saltLength: 32,
           keyLength: 32,
         },
         masterKey: {
           source: KeySource.ENVIRONMENT,
-          rotationFrequency: '1y',
+          rotationFrequency: "1y",
           backup: true,
         },
       },
@@ -2169,7 +2267,7 @@ export class SecretManagementService implements OnApplicationShutdown {
           startHour: 2,
           endHour: 6,
           allowedDays: [DayOfWeek.SUNDAY, DayOfWeek.SATURDAY],
-          timezone: 'UTC',
+          timezone: "UTC",
         },
         concurrentRotationLimit: 5,
       },
@@ -2179,7 +2277,7 @@ export class SecretManagementService implements OnApplicationShutdown {
         defaultSessionDuration: 60,
         emergencyAccess: {
           enabled: true,
-          emergencyRoles: ['security_admin', 'incident_commander'],
+          emergencyRoles: ["security_admin", "incident_commander"],
           breakGlassProcedures: [],
           notificationRequirements: [],
         },
@@ -2213,7 +2311,7 @@ export class SecretManagementService implements OnApplicationShutdown {
         storage: [],
         recoveryTesting: {
           enabled: true,
-          schedule: '0 2 * * 0', // Weekly
+          schedule: "0 2 * * 0", // Weekly
           testCoveragePercentage: 10,
           notifications: [],
         },
@@ -2225,7 +2323,9 @@ export class SecretManagementService implements OnApplicationShutdown {
    * Application shutdown cleanup
    */
   async onApplicationShutdown(signal?: string): Promise<void> {
-    this.logger.log(`🔄 Shutting down secret management service (signal: ${signal})`);
+    this.logger.log(
+      `🔄 Shutting down secret management service (signal: ${signal})`,
+    );
     this.secretCache.clear();
     this.accessRequestCache.clear();
     this.rotationQueue = [];

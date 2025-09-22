@@ -132,9 +132,7 @@ export class UserConversationalRepositoryService extends BaseConversationalRepos
         passwordData.password &&
         context?.requirePasswordValidation !== false
       ) {
-        const passwordValidation = this.validatePassword(
-          passwordData.password,
-        );
+        const passwordValidation = this.validatePassword(passwordData.password);
         if (!passwordValidation.valid) {
           result.errors.push(...passwordValidation.errors);
           result.valid = false;

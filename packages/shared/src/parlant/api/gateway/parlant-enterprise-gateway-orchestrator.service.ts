@@ -11,7 +11,12 @@
  * @since 2025-09-21
  */
 
-import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from "@nestjs/common";
+import {
+  Injectable,
+  Logger,
+  OnModuleInit,
+  OnModuleDestroy,
+} from "@nestjs/common";
 import { EventEmitter } from "events";
 import { v4 as uuidv4 } from "uuid";
 import {
@@ -50,7 +55,11 @@ export interface OrchestrationContext {
 }
 
 export interface RequestOrigin {
-  sourceType: "EXTERNAL_API" | "INTERNAL_SERVICE" | "BATCH_PROCESSING" | "MONITORING";
+  sourceType:
+    | "EXTERNAL_API"
+    | "INTERNAL_SERVICE"
+    | "BATCH_PROCESSING"
+    | "MONITORING";
   sourceIdentifier: string;
   sourceLocation: string;
   sourceCredentials: any;
@@ -210,7 +219,11 @@ export interface DataEnrichment {
 }
 
 export interface DataSanitization {
-  sanitizationType: "PII_REMOVAL" | "SQL_INJECTION" | "XSS_PREVENTION" | "FORMAT_CLEANUP";
+  sanitizationType:
+    | "PII_REMOVAL"
+    | "SQL_INJECTION"
+    | "XSS_PREVENTION"
+    | "FORMAT_CLEANUP";
   sanitizationRules: string[];
   preserveFormat: boolean;
 }
@@ -231,7 +244,12 @@ export interface ApplicableRegulation {
 }
 
 export interface AuditRequirement {
-  auditType: "ACCESS" | "MODIFICATION" | "SECURITY" | "PERFORMANCE" | "COMPLIANCE";
+  auditType:
+    | "ACCESS"
+    | "MODIFICATION"
+    | "SECURITY"
+    | "PERFORMANCE"
+    | "COMPLIANCE";
   auditFrequency: "REAL_TIME" | "BATCH" | "ON_DEMAND";
   auditScope: string[];
   retentionPeriod: number;
@@ -302,7 +320,11 @@ export interface RetryConfiguration {
 
 export interface FallbackConfiguration {
   fallbackEnabled: boolean;
-  fallbackStrategy: "CACHED_RESPONSE" | "DEFAULT_VALUE" | "SKIP_STAGE" | "ALTERNATIVE_SERVICE";
+  fallbackStrategy:
+    | "CACHED_RESPONSE"
+    | "DEFAULT_VALUE"
+    | "SKIP_STAGE"
+    | "ALTERNATIVE_SERVICE";
   fallbackTimeout: number;
   fallbackQuality: "FULL" | "DEGRADED" | "MINIMAL";
 }
@@ -748,14 +770,23 @@ export interface BottleneckAnalysis {
 }
 
 export interface Bottleneck {
-  bottleneckType: "CPU" | "MEMORY" | "NETWORK" | "STORAGE" | "EXTERNAL_DEPENDENCY";
+  bottleneckType:
+    | "CPU"
+    | "MEMORY"
+    | "NETWORK"
+    | "STORAGE"
+    | "EXTERNAL_DEPENDENCY";
   severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
   impactAssessment: string;
   resolutionStrategies: string[];
 }
 
 export interface OptimizationRecommendation {
-  recommendationType: "INFRASTRUCTURE" | "CONFIGURATION" | "ALGORITHM" | "ARCHITECTURE";
+  recommendationType:
+    | "INFRASTRUCTURE"
+    | "CONFIGURATION"
+    | "ALGORITHM"
+    | "ARCHITECTURE";
   description: string;
   expectedImprovement: number;
   implementationEffort: "LOW" | "MEDIUM" | "HIGH";
@@ -822,10 +853,17 @@ export interface OrchestrationAuditEntry {
  * - Business impact assessment and ROI analysis for all optimization recommendations
  */
 @Injectable()
-export class ParlantEnterpriseGatewayOrchestratorService implements OnModuleInit, OnModuleDestroy {
-  private readonly logger = new Logger(ParlantEnterpriseGatewayOrchestratorService.name);
+export class ParlantEnterpriseGatewayOrchestratorService
+  implements OnModuleInit, OnModuleDestroy
+{
+  private readonly logger = new Logger(
+    ParlantEnterpriseGatewayOrchestratorService.name,
+  );
   private readonly orchestrationEventEmitter = new EventEmitter();
-  private readonly activeOrchestrations = new Map<string, GatewayOrchestrationRequest>();
+  private readonly activeOrchestrations = new Map<
+    string,
+    GatewayOrchestrationRequest
+  >();
   private readonly performanceCache = new Map<string, any>();
   private readonly orchestrationMetrics = new Map<string, any>();
 
@@ -870,7 +908,7 @@ export class ParlantEnterpriseGatewayOrchestratorService implements OnModuleInit
    */
   async orchestrateAPIRequest(
     apiRequest: APIRequest,
-    orchestrationContext?: Partial<OrchestrationContext>
+    orchestrationContext?: Partial<OrchestrationContext>,
   ): Promise<GatewayOrchestrationResponse> {
     const orchestrationStartTime = performance.now();
     const requestId = apiRequest.id || uuidv4();
@@ -888,19 +926,19 @@ export class ParlantEnterpriseGatewayOrchestratorService implements OnModuleInit
       // Step 1: Build comprehensive orchestration context
       const fullOrchestrationContext = await this.buildOrchestrationContext(
         apiRequest,
-        orchestrationContext
+        orchestrationContext,
       );
 
       // Step 2: Design processing pipeline based on request characteristics
       const processingPipeline = await this.designProcessingPipeline(
         apiRequest,
-        fullOrchestrationContext
+        fullOrchestrationContext,
       );
 
       // Step 3: Determine quality of service requirements
       const qosRequirements = await this.determineQualityOfServiceRequirements(
         apiRequest,
-        fullOrchestrationContext
+        fullOrchestrationContext,
       );
 
       // Step 4: Create orchestration request
@@ -918,34 +956,35 @@ export class ParlantEnterpriseGatewayOrchestratorService implements OnModuleInit
       // Step 6: Execute processing pipeline with comprehensive monitoring
       const pipelineResult = await this.executeProcessingPipeline(
         orchestrationRequest,
-        orchestrationId
+        orchestrationId,
       );
 
       // Step 7: Generate conversational summary and insights
       const conversationalSummary = await this.generateConversationalSummary(
         orchestrationRequest,
-        pipelineResult
+        pipelineResult,
       );
 
       // Step 8: Collect and analyze performance metrics
-      const performanceMetrics = await this.collectOrchestrationPerformanceMetrics(
-        orchestrationRequest,
-        pipelineResult,
-        orchestrationStartTime
-      );
+      const performanceMetrics =
+        await this.collectOrchestrationPerformanceMetrics(
+          orchestrationRequest,
+          pipelineResult,
+          orchestrationStartTime,
+        );
 
       // Step 9: Assess overall quality and compliance
       const qualityAssessment = await this.assessOrchestrationQuality(
         orchestrationRequest,
         pipelineResult,
-        performanceMetrics
+        performanceMetrics,
       );
 
       // Step 10: Generate comprehensive audit trail
       const auditTrail = await this.generateOrchestrationAuditTrail(
         orchestrationRequest,
         pipelineResult,
-        performanceMetrics
+        performanceMetrics,
       );
 
       const orchestrationResponse: GatewayOrchestrationResponse = {
@@ -967,34 +1006,40 @@ export class ParlantEnterpriseGatewayOrchestratorService implements OnModuleInit
 
       const totalOrchestrationTime = performance.now() - orchestrationStartTime;
 
-      this.logger.log(`API request orchestration completed: ${orchestrationId}`, {
-        requestId: requestId,
-        success: pipelineResult.orchestrationResult.success,
-        totalTime: totalOrchestrationTime,
-        qualityScore: qualityAssessment.overallQualityScore,
-        performanceGrade: performanceMetrics.overallPerformance.performanceGrade,
-      });
+      this.logger.log(
+        `API request orchestration completed: ${orchestrationId}`,
+        {
+          requestId: requestId,
+          success: pipelineResult.orchestrationResult.success,
+          totalTime: totalOrchestrationTime,
+          qualityScore: qualityAssessment.overallQualityScore,
+          performanceGrade:
+            performanceMetrics.overallPerformance.performanceGrade,
+        },
+      );
 
       return orchestrationResponse;
-
     } catch (error) {
       const totalOrchestrationTime = performance.now() - orchestrationStartTime;
 
       // Clean up on error
       this.activeOrchestrations.delete(orchestrationId);
 
-      this.logger.error(`API request orchestration failed: ${orchestrationId}`, {
-        error: error instanceof Error ? error.message : String(error),
-        requestId: requestId,
-        orchestrationTime: totalOrchestrationTime,
-      });
+      this.logger.error(
+        `API request orchestration failed: ${orchestrationId}`,
+        {
+          error: error instanceof Error ? error.message : String(error),
+          requestId: requestId,
+          orchestrationTime: totalOrchestrationTime,
+        },
+      );
 
       // Return error orchestration response
       return this.createErrorOrchestrationResponse(
         orchestrationId,
         requestId,
         error,
-        totalOrchestrationTime
+        totalOrchestrationTime,
       );
     }
   }
@@ -1004,7 +1049,7 @@ export class ParlantEnterpriseGatewayOrchestratorService implements OnModuleInit
    */
   private async executeProcessingPipeline(
     orchestrationRequest: GatewayOrchestrationRequest,
-    orchestrationId: string
+    orchestrationId: string,
   ): Promise<PipelineExecutionResult> {
     const pipelineStartTime = performance.now();
     const pipeline = orchestrationRequest.processingPipeline;
@@ -1012,7 +1057,8 @@ export class ParlantEnterpriseGatewayOrchestratorService implements OnModuleInit
     this.logger.debug(`Executing processing pipeline: ${pipeline.pipelineId}`, {
       orchestrationId: orchestrationId,
       stagesCount: pipeline.stages.length,
-      parallelProcessingEnabled: pipeline.parallelProcessingConfig.maxConcurrency > 1,
+      parallelProcessingEnabled:
+        pipeline.parallelProcessingConfig.maxConcurrency > 1,
     });
 
     try {
@@ -1025,7 +1071,7 @@ export class ParlantEnterpriseGatewayOrchestratorService implements OnModuleInit
         const parallelResults = await this.executeParallelStages(
           pipeline,
           orchestrationRequest,
-          orchestrationId
+          orchestrationId,
         );
         stageResults.push(...parallelResults.stageResults);
         parallelExecutionMetrics = parallelResults.parallelMetrics;
@@ -1034,7 +1080,7 @@ export class ParlantEnterpriseGatewayOrchestratorService implements OnModuleInit
         const sequentialResults = await this.executeSequentialStages(
           pipeline,
           orchestrationRequest,
-          orchestrationId
+          orchestrationId,
         );
         stageResults.push(...sequentialResults.stageResults);
         parallelExecutionMetrics = sequentialResults.parallelMetrics;
@@ -1043,7 +1089,7 @@ export class ParlantEnterpriseGatewayOrchestratorService implements OnModuleInit
       // Determine overall orchestration result
       const orchestrationResult = this.determineOrchestrationResult(
         stageResults,
-        orchestrationRequest
+        orchestrationRequest,
       );
 
       const pipelineExecutionTime = performance.now() - pipelineStartTime;
@@ -1058,35 +1104,52 @@ export class ParlantEnterpriseGatewayOrchestratorService implements OnModuleInit
         stageResults: stageResults,
         parallelExecutionMetrics: parallelExecutionMetrics,
         orchestrationResult: awaitedOrchestrationResult,
-        success: stageResults.every(stage => stage.success),
-        errors: stageResults.filter(stage => !stage.success).map(stage => stage.errorDetails?.errorMessage || 'Unknown error'),
+        success: stageResults.every((stage) => stage.success),
+        errors: stageResults
+          .filter((stage) => !stage.success)
+          .map((stage) => stage.errorDetails?.errorMessage || "Unknown error"),
         warnings: [],
         orchestrationSummary: {
           stagesExecuted: stageResults.length,
-          stagesSuccessful: stageResults.filter(stage => stage.success).length,
-          stagesFailed: stageResults.filter(stage => !stage.success).length,
+          stagesSuccessful: stageResults.filter((stage) => stage.success)
+            .length,
+          stagesFailed: stageResults.filter((stage) => !stage.success).length,
           totalProcessingTime: pipelineExecutionTime,
-          overallStatus: stageResults.every(stage => stage.success) ? "SUCCESS" : "PARTIAL_FAILURE",
-          criticalErrors: stageResults.filter(stage => !stage.success && stage.errorDetails?.severity === "HIGH").map(stage => stage.errorDetails?.errorMessage || 'Critical error'),
+          overallStatus: stageResults.every((stage) => stage.success)
+            ? "SUCCESS"
+            : "PARTIAL_FAILURE",
+          criticalErrors: stageResults
+            .filter(
+              (stage) =>
+                !stage.success && stage.errorDetails?.severity === "HIGH",
+            )
+            .map(
+              (stage) => stage.errorDetails?.errorMessage || "Critical error",
+            ),
           performanceSummary: `Executed ${stageResults.length} stages in ${pipelineExecutionTime.toFixed(2)}ms`,
         },
       };
 
-      this.logger.debug(`Processing pipeline executed: ${pipeline.pipelineId}`, {
-        orchestrationId: orchestrationId,
-        success: awaitedOrchestrationResult.success,
-        executionTime: pipelineExecutionTime,
-        stagesExecuted: stageResults.length,
-      });
+      this.logger.debug(
+        `Processing pipeline executed: ${pipeline.pipelineId}`,
+        {
+          orchestrationId: orchestrationId,
+          success: awaitedOrchestrationResult.success,
+          executionTime: pipelineExecutionTime,
+          stagesExecuted: stageResults.length,
+        },
+      );
 
       return pipelineResult;
-
     } catch (error) {
-      this.logger.error(`Processing pipeline execution failed: ${pipeline.pipelineId}`, {
-        error: error instanceof Error ? error.message : String(error),
-        orchestrationId: orchestrationId,
-        executionTime: performance.now() - pipelineStartTime,
-      });
+      this.logger.error(
+        `Processing pipeline execution failed: ${pipeline.pipelineId}`,
+        {
+          error: error instanceof Error ? error.message : String(error),
+          orchestrationId: orchestrationId,
+          executionTime: performance.now() - pipelineStartTime,
+        },
+      );
 
       throw error;
     }
@@ -1098,8 +1161,11 @@ export class ParlantEnterpriseGatewayOrchestratorService implements OnModuleInit
   private async executeParallelStages(
     pipeline: ProcessingPipeline,
     orchestrationRequest: GatewayOrchestrationRequest,
-    orchestrationId: string
-  ): Promise<{ stageResults: StageExecutionResult[]; parallelMetrics: ParallelExecutionMetrics }> {
+    orchestrationId: string,
+  ): Promise<{
+    stageResults: StageExecutionResult[];
+    parallelMetrics: ParallelExecutionMetrics;
+  }> {
     const parallelStartTime = performance.now();
 
     this.logger.debug(`Executing parallel stages`, {
@@ -1112,9 +1178,10 @@ export class ParlantEnterpriseGatewayOrchestratorService implements OnModuleInit
     const executorMetrics: LoadDistribution[] = [];
 
     // Process each group of parallel stages
-    for (const parallelGroup of pipeline.parallelProcessingConfig.parallelStages) {
+    for (const parallelGroup of pipeline.parallelProcessingConfig
+      .parallelStages) {
       const groupPromises = parallelGroup.map(async (stageId) => {
-        const stage = pipeline.stages.find(s => s.stageId === stageId);
+        const stage = pipeline.stages.find((s) => s.stageId === stageId);
         if (!stage) {
           throw new Error(`Stage not found: ${stageId}`);
         }
@@ -1126,7 +1193,7 @@ export class ParlantEnterpriseGatewayOrchestratorService implements OnModuleInit
           const stageResult = await this.executeStage(
             stage,
             orchestrationRequest,
-            orchestrationId
+            orchestrationId,
           );
 
           const stageExecutionTime = performance.now() - stageStartTime;
@@ -1140,7 +1207,6 @@ export class ParlantEnterpriseGatewayOrchestratorService implements OnModuleInit
           });
 
           return stageResult;
-
         } catch (error) {
           const stageExecutionTime = performance.now() - stageStartTime;
 
@@ -1161,14 +1227,20 @@ export class ParlantEnterpriseGatewayOrchestratorService implements OnModuleInit
       stageResults.push(...groupResults);
 
       // Check synchronization points
-      for (const syncPoint of pipeline.parallelProcessingConfig.synchronizationPoints) {
-        if (syncPoint.requiredStages.every(stageId =>
-          stageResults.some(result => result.stageId === stageId)
-        )) {
-          this.logger.debug(`Synchronization point reached: ${syncPoint.pointId}`, {
-            orchestrationId: orchestrationId,
-            requiredStages: syncPoint.requiredStages,
-          });
+      for (const syncPoint of pipeline.parallelProcessingConfig
+        .synchronizationPoints) {
+        if (
+          syncPoint.requiredStages.every((stageId) =>
+            stageResults.some((result) => result.stageId === stageId),
+          )
+        ) {
+          this.logger.debug(
+            `Synchronization point reached: ${syncPoint.pointId}`,
+            {
+              orchestrationId: orchestrationId,
+              requiredStages: syncPoint.requiredStages,
+            },
+          );
         }
       }
     }
@@ -1177,11 +1249,15 @@ export class ParlantEnterpriseGatewayOrchestratorService implements OnModuleInit
 
     const parallelMetrics: ParallelExecutionMetrics = {
       maxConcurrency: pipeline.parallelProcessingConfig.maxConcurrency,
-      actualConcurrency: Math.max(...pipeline.parallelProcessingConfig.parallelStages.map(g => g.length)),
+      actualConcurrency: Math.max(
+        ...pipeline.parallelProcessingConfig.parallelStages.map(
+          (g) => g.length,
+        ),
+      ),
       loadDistribution: executorMetrics,
       synchronizationEfficiency: this.calculateSynchronizationEfficiency(
         pipeline.parallelProcessingConfig.synchronizationPoints,
-        stageResults
+        stageResults,
       ),
     };
 
@@ -1201,8 +1277,11 @@ export class ParlantEnterpriseGatewayOrchestratorService implements OnModuleInit
   private async executeSequentialStages(
     pipeline: ProcessingPipeline,
     orchestrationRequest: GatewayOrchestrationRequest,
-    orchestrationId: string
-  ): Promise<{ stageResults: StageExecutionResult[]; parallelMetrics: ParallelExecutionMetrics }> {
+    orchestrationId: string,
+  ): Promise<{
+    stageResults: StageExecutionResult[];
+    parallelMetrics: ParallelExecutionMetrics;
+  }> {
     const sequentialStartTime = performance.now();
 
     this.logger.debug(`Executing sequential stages`, {
@@ -1219,20 +1298,25 @@ export class ParlantEnterpriseGatewayOrchestratorService implements OnModuleInit
         const stageResult = await this.executeStage(
           stage,
           orchestrationRequest,
-          orchestrationId
+          orchestrationId,
         );
 
         stageResults.push(stageResult);
 
         // Check if stage failed and error handling is required
-        if (!stageResult.success && stage.failureHandling.immediateActions.includes('HALT_PIPELINE')) {
-          this.logger.warn(`Pipeline halted due to stage failure: ${stage.stageName}`, {
-            orchestrationId: orchestrationId,
-            stageId: stage.stageId,
-          });
+        if (
+          !stageResult.success &&
+          stage.failureHandling.immediateActions.includes("HALT_PIPELINE")
+        ) {
+          this.logger.warn(
+            `Pipeline halted due to stage failure: ${stage.stageName}`,
+            {
+              orchestrationId: orchestrationId,
+              stageId: stage.stageId,
+            },
+          );
           break;
         }
-
       } catch (error) {
         const stageExecutionTime = performance.now() - stageStartTime;
 
@@ -1244,7 +1328,11 @@ export class ParlantEnterpriseGatewayOrchestratorService implements OnModuleInit
         });
 
         // Add error stage result
-        const errorStageResult = this.createErrorStageResult(stage, error, stageExecutionTime);
+        const errorStageResult = this.createErrorStageResult(
+          stage,
+          error,
+          stageExecutionTime,
+        );
         stageResults.push(errorStageResult);
 
         // Apply error handling strategy
@@ -1252,12 +1340,15 @@ export class ParlantEnterpriseGatewayOrchestratorService implements OnModuleInit
           stage,
           error,
           pipeline.errorHandlingStrategy,
-          orchestrationId
+          orchestrationId,
         );
 
         // Check if pipeline should continue
-        if (pipeline.errorHandlingStrategy.errorClassification
-          .some(ec => ec.errorType === 'CRITICAL' && !ec.recoverable)) {
+        if (
+          pipeline.errorHandlingStrategy.errorClassification.some(
+            (ec) => ec.errorType === "CRITICAL" && !ec.recoverable,
+          )
+        ) {
           break;
         }
       }
@@ -1268,12 +1359,15 @@ export class ParlantEnterpriseGatewayOrchestratorService implements OnModuleInit
     const parallelMetrics: ParallelExecutionMetrics = {
       maxConcurrency: 1,
       actualConcurrency: 1,
-      loadDistribution: [{
-        executorId: 'sequential_executor',
-        tasksExecuted: stageResults.length,
-        averageExecutionTime: sequentialExecutionTime / stageResults.length,
-        resourceEfficiency: this.calculateAverageResourceEfficiency(stageResults),
-      }],
+      loadDistribution: [
+        {
+          executorId: "sequential_executor",
+          tasksExecuted: stageResults.length,
+          averageExecutionTime: sequentialExecutionTime / stageResults.length,
+          resourceEfficiency:
+            this.calculateAverageResourceEfficiency(stageResults),
+        },
+      ],
       synchronizationEfficiency: 100, // Perfect synchronization in sequential execution
     };
 
@@ -1281,7 +1375,7 @@ export class ParlantEnterpriseGatewayOrchestratorService implements OnModuleInit
       orchestrationId: orchestrationId,
       executionTime: sequentialExecutionTime,
       stagesCompleted: stageResults.length,
-      successfulStages: stageResults.filter(r => r.success).length,
+      successfulStages: stageResults.filter((r) => r.success).length,
     });
 
     return { stageResults, parallelMetrics };
@@ -1293,7 +1387,7 @@ export class ParlantEnterpriseGatewayOrchestratorService implements OnModuleInit
   private async executeStage(
     stage: ProcessingStage,
     orchestrationRequest: GatewayOrchestrationRequest,
-    orchestrationId: string
+    orchestrationId: string,
   ): Promise<StageExecutionResult> {
     const stageStartTime = performance.now();
 
@@ -1309,22 +1403,24 @@ export class ParlantEnterpriseGatewayOrchestratorService implements OnModuleInit
       // Execute stage based on type
       switch (stage.stageType) {
         case ProcessingStageType.VALIDATION:
-          stageResult = await this.gatewayMiddleware.processConversationalValidation(
-            orchestrationRequest.apiRequest
-          );
+          stageResult =
+            await this.gatewayMiddleware.processConversationalValidation(
+              orchestrationRequest.apiRequest,
+            );
           break;
 
         case ProcessingStageType.SECURITY_SCAN:
-          stageResult = await this.securityAuthentication.validateSecurityWithConversation(
-            orchestrationRequest.apiRequest
-          );
+          stageResult =
+            await this.securityAuthentication.validateSecurityWithConversation(
+              orchestrationRequest.apiRequest,
+            );
           break;
 
         case ProcessingStageType.AUTHENTICATION:
           // Implement authentication stage
           stageResult = await this.executeAuthenticationStage(
             orchestrationRequest,
-            stage
+            stage,
           );
           break;
 
@@ -1332,22 +1428,23 @@ export class ParlantEnterpriseGatewayOrchestratorService implements OnModuleInit
           // Implement authorization stage
           stageResult = await this.executeAuthorizationStage(
             orchestrationRequest,
-            stage
+            stage,
           );
           break;
 
         case ProcessingStageType.RATE_LIMITING:
-          stageResult = await this.gatewayMiddleware.processRateLimitingWithNegotiation(
-            orchestrationRequest.apiRequest,
-            orchestrationRequest.apiRequest.userContext!
-          );
+          stageResult =
+            await this.gatewayMiddleware.processRateLimitingWithNegotiation(
+              orchestrationRequest.apiRequest,
+              orchestrationRequest.apiRequest.userContext!,
+            );
           break;
 
         case ProcessingStageType.ROUTING:
           // Implement routing stage
           stageResult = await this.executeRoutingStage(
             orchestrationRequest,
-            stage
+            stage,
           );
           break;
 
@@ -1355,7 +1452,7 @@ export class ParlantEnterpriseGatewayOrchestratorService implements OnModuleInit
           // Implement analytics stage
           stageResult = await this.executeAnalyticsStage(
             orchestrationRequest,
-            stage
+            stage,
           );
           break;
 
@@ -1363,7 +1460,7 @@ export class ParlantEnterpriseGatewayOrchestratorService implements OnModuleInit
           // Implement audit stage
           stageResult = await this.executeAuditStage(
             orchestrationRequest,
-            stage
+            stage,
           );
           break;
 
@@ -1379,7 +1476,7 @@ export class ParlantEnterpriseGatewayOrchestratorService implements OnModuleInit
       // Calculate resource utilization
       const resourceUtilization = this.calculateStageResourceUtilization(
         stageResult,
-        stageExecutionTime
+        stageExecutionTime,
       );
 
       const stageExecutionResult: StageExecutionResult = {
@@ -1399,7 +1496,6 @@ export class ParlantEnterpriseGatewayOrchestratorService implements OnModuleInit
       });
 
       return stageExecutionResult;
-
     } catch (error) {
       const stageExecutionTime = performance.now() - stageStartTime;
 
@@ -1420,22 +1516,24 @@ export class ParlantEnterpriseGatewayOrchestratorService implements OnModuleInit
     this.logger.log(`Initializing PARLANT Enterprise Gateway Orchestrator`);
 
     // Set up orchestration event listeners
-    this.orchestrationEventEmitter.on('orchestration_completed', (data) => {
+    this.orchestrationEventEmitter.on("orchestration_completed", (data) => {
       this.updateOrchestrationMetrics(data);
     });
 
-    this.orchestrationEventEmitter.on('stage_executed', (stageData) => {
+    this.orchestrationEventEmitter.on("stage_executed", (stageData) => {
       this.trackStageExecution(stageData);
     });
 
-    this.orchestrationEventEmitter.on('error_occurred', (errorData) => {
+    this.orchestrationEventEmitter.on("error_occurred", (errorData) => {
       this.handleOrchestrationError(errorData);
     });
 
     // Start background monitoring processes
     this.startBackgroundMonitoring();
 
-    this.logger.log(`PARLANT Enterprise Gateway Orchestrator initialized successfully`);
+    this.logger.log(
+      `PARLANT Enterprise Gateway Orchestrator initialized successfully`,
+    );
   }
 
   private async shutdownOrchestrator(): Promise<void> {
@@ -1443,18 +1541,25 @@ export class ParlantEnterpriseGatewayOrchestratorService implements OnModuleInit
 
     // Wait for active orchestrations to complete
     if (this.activeOrchestrations.size > 0) {
-      this.logger.log(`Waiting for ${this.activeOrchestrations.size} active orchestrations to complete`);
+      this.logger.log(
+        `Waiting for ${this.activeOrchestrations.size} active orchestrations to complete`,
+      );
 
       // Implement graceful shutdown logic
       const shutdownTimeout = 30000; // 30 seconds
       const startTime = Date.now();
 
-      while (this.activeOrchestrations.size > 0 && (Date.now() - startTime) < shutdownTimeout) {
-        await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second
+      while (
+        this.activeOrchestrations.size > 0 &&
+        Date.now() - startTime < shutdownTimeout
+      ) {
+        await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait 1 second
       }
 
       if (this.activeOrchestrations.size > 0) {
-        this.logger.warn(`Forcefully terminating ${this.activeOrchestrations.size} remaining orchestrations`);
+        this.logger.warn(
+          `Forcefully terminating ${this.activeOrchestrations.size} remaining orchestrations`,
+        );
       }
     }
 
@@ -1462,14 +1567,16 @@ export class ParlantEnterpriseGatewayOrchestratorService implements OnModuleInit
     this.performanceCache.clear();
     this.orchestrationMetrics.clear();
 
-    this.logger.log(`PARLANT Enterprise Gateway Orchestrator shutdown completed`);
+    this.logger.log(
+      `PARLANT Enterprise Gateway Orchestrator shutdown completed`,
+    );
   }
 
   // Mock implementations for demonstration - replace with actual stage implementations
 
   private async buildOrchestrationContext(
     apiRequest: APIRequest,
-    partialContext?: Partial<OrchestrationContext>
+    partialContext?: Partial<OrchestrationContext>,
   ): Promise<OrchestrationContext> {
     // Build comprehensive orchestration context
     const sessionId = apiRequest.userContext?.sessionId || uuidv4();
@@ -1569,7 +1676,7 @@ export class ParlantEnterpriseGatewayOrchestratorService implements OnModuleInit
 
   private async designProcessingPipeline(
     apiRequest: APIRequest,
-    orchestrationContext: OrchestrationContext
+    orchestrationContext: OrchestrationContext,
   ): Promise<ProcessingPipeline> {
     // Design processing pipeline based on request characteristics
     const pipelineId = uuidv4();
@@ -1764,22 +1871,28 @@ export class ParlantEnterpriseGatewayOrchestratorService implements OnModuleInit
    */
   private async determineQualityOfServiceRequirements(
     apiRequest: APIRequest,
-    orchestrationContext: OrchestrationContext
+    orchestrationContext: OrchestrationContext,
   ): Promise<QualityOfServiceRequirements> {
     const businessContext = orchestrationContext.businessContext;
     const technicalContext = orchestrationContext.technicalContext;
 
     return {
-      responseTimeRequirement: businessContext.serviceLevelAgreement.responseTimeTarget,
-      throughputRequirement: businessContext.serviceLevelAgreement.throughputTarget,
-      availabilityRequirement: businessContext.serviceLevelAgreement.availabilityTarget,
-      errorRateRequirement: businessContext.serviceLevelAgreement.errorRateTarget,
+      responseTimeRequirement:
+        businessContext.serviceLevelAgreement.responseTimeTarget,
+      throughputRequirement:
+        businessContext.serviceLevelAgreement.throughputTarget,
+      availabilityRequirement:
+        businessContext.serviceLevelAgreement.availabilityTarget,
+      errorRateRequirement:
+        businessContext.serviceLevelAgreement.errorRateTarget,
       performanceTargets: technicalContext.performanceTargets,
       businessCriticality: businessContext.criticalityLevel,
-      complianceRequirements: orchestrationContext.complianceContext.regulatoryCompliance,
+      complianceRequirements:
+        orchestrationContext.complianceContext.regulatoryCompliance,
       securityLevel: orchestrationContext.complianceContext.securityLevel,
       qualityGates: [],
-      escalationProcedures: businessContext.serviceLevelAgreement.escalationProcedures,
+      escalationProcedures:
+        businessContext.serviceLevelAgreement.escalationProcedures,
     };
   }
 
@@ -1788,11 +1901,13 @@ export class ParlantEnterpriseGatewayOrchestratorService implements OnModuleInit
    */
   private async generateConversationalSummary(
     orchestrationRequest: GatewayOrchestrationRequest,
-    pipelineResult: PipelineExecutionResult
+    pipelineResult: PipelineExecutionResult,
   ): Promise<ConversationalSummary> {
     const processingTime = pipelineResult.totalExecutionTime;
     const stageCount = pipelineResult.stageResults.length;
-    const successfulStages = pipelineResult.stageResults.filter(stage => stage.success).length;
+    const successfulStages = pipelineResult.stageResults.filter(
+      (stage) => stage.success,
+    ).length;
 
     return {
       summaryId: uuidv4(),
@@ -1800,14 +1915,18 @@ export class ParlantEnterpriseGatewayOrchestratorService implements OnModuleInit
       keyInsights: [
         `Processing completed in ${processingTime}ms`,
         `${successfulStages} of ${stageCount} stages succeeded`,
-        `Performance grade: ${pipelineResult.success ? 'A' : 'C'}`,
+        `Performance grade: ${pipelineResult.success ? "A" : "C"}`,
       ],
-      recommendedActions: pipelineResult.success ? [] : [
-        "Review failed stages for optimization opportunities",
-        "Consider adjusting performance targets",
-      ],
-      userFriendlyStatus: pipelineResult.success ? "SUCCESS" : "PARTIAL_SUCCESS",
-      detailedBreakdown: pipelineResult.stageResults.map(stage => ({
+      recommendedActions: pipelineResult.success
+        ? []
+        : [
+            "Review failed stages for optimization opportunities",
+            "Consider adjusting performance targets",
+          ],
+      userFriendlyStatus: pipelineResult.success
+        ? "SUCCESS"
+        : "PARTIAL_SUCCESS",
+      detailedBreakdown: pipelineResult.stageResults.map((stage) => ({
         stageName: stage.stageId,
         status: stage.success ? "completed" : "failed",
         duration: stage.executionTime,
@@ -1829,17 +1948,18 @@ export class ParlantEnterpriseGatewayOrchestratorService implements OnModuleInit
   private async collectOrchestrationPerformanceMetrics(
     orchestrationRequest: GatewayOrchestrationRequest,
     pipelineResult: PipelineExecutionResult,
-    orchestrationStartTime: number
+    orchestrationStartTime: number,
   ): Promise<OrchestrationPerformanceMetrics> {
     const totalTime = performance.now() - orchestrationStartTime;
-    const stagePerformances: StagePerformance[] = pipelineResult.stageResults.map(stage => ({
-      stageId: stage.stageId,
-      processingTime: stage.executionTime,
-      throughput: 1000 / stage.executionTime, // requests per second
-      errorRate: stage.success ? 0 : 1,
-      resourceEfficiency: stage.success ? 0.85 : 0.5,
-      bottleneckScore: stage.executionTime > 100 ? 0.8 : 0.2,
-    }));
+    const stagePerformances: StagePerformance[] =
+      pipelineResult.stageResults.map((stage) => ({
+        stageId: stage.stageId,
+        processingTime: stage.executionTime,
+        throughput: 1000 / stage.executionTime, // requests per second
+        errorRate: stage.success ? 0 : 1,
+        resourceEfficiency: stage.success ? 0.85 : 0.5,
+        bottleneckScore: stage.executionTime > 100 ? 0.8 : 0.2,
+      }));
 
     return {
       orchestrationId: orchestrationRequest.requestId,
@@ -1869,11 +1989,14 @@ export class ParlantEnterpriseGatewayOrchestratorService implements OnModuleInit
   private async assessOrchestrationQuality(
     orchestrationRequest: GatewayOrchestrationRequest,
     pipelineResult: PipelineExecutionResult,
-    performanceMetrics: OrchestrationPerformanceMetrics
+    performanceMetrics: OrchestrationPerformanceMetrics,
   ): Promise<QualityAssessment> {
-    const qualityScore = pipelineResult.success ?
-      Math.min(90, performanceMetrics.overallPerformance.performanceGrade) :
-      Math.max(40, performanceMetrics.overallPerformance.performanceGrade - 20);
+    const qualityScore = pipelineResult.success
+      ? Math.min(90, performanceMetrics.overallPerformance.performanceGrade)
+      : Math.max(
+          40,
+          performanceMetrics.overallPerformance.performanceGrade - 20,
+        );
 
     return {
       overallQualityScore: qualityScore,
@@ -1883,13 +2006,16 @@ export class ParlantEnterpriseGatewayOrchestratorService implements OnModuleInit
           score: performanceMetrics.overallPerformance.performanceGrade,
           weight: 0.4,
           assessment: "Good performance metrics achieved",
-          meetsCriteria: performanceMetrics.overallPerformance.performanceGrade >= 70,
+          meetsCriteria:
+            performanceMetrics.overallPerformance.performanceGrade >= 70,
         },
         {
           dimensionName: "Reliability",
           score: pipelineResult.success ? 90 : 50,
           weight: 0.3,
-          assessment: pipelineResult.success ? "All stages completed successfully" : "Some stages failed",
+          assessment: pipelineResult.success
+            ? "All stages completed successfully"
+            : "Some stages failed",
           meetsCriteria: pipelineResult.success,
         },
         {
@@ -1900,15 +2026,17 @@ export class ParlantEnterpriseGatewayOrchestratorService implements OnModuleInit
           meetsCriteria: true,
         },
       ],
-      qualityIssues: pipelineResult.success ? [] : [
-        {
-          issueType: "STAGE_FAILURE",
-          severity: "MEDIUM",
-          description: "One or more stages failed during execution",
-          impactAssessment: "May affect overall request processing",
-          resolutionPriority: 2,
-        },
-      ],
+      qualityIssues: pipelineResult.success
+        ? []
+        : [
+            {
+              issueType: "STAGE_FAILURE",
+              severity: "MEDIUM",
+              description: "One or more stages failed during execution",
+              impactAssessment: "May affect overall request processing",
+              resolutionPriority: 2,
+            },
+          ],
       improvementRecommendations: [],
     };
   }
@@ -1919,7 +2047,7 @@ export class ParlantEnterpriseGatewayOrchestratorService implements OnModuleInit
   private async generateOrchestrationAuditTrail(
     orchestrationRequest: GatewayOrchestrationRequest,
     pipelineResult: PipelineExecutionResult,
-    performanceMetrics: OrchestrationPerformanceMetrics
+    performanceMetrics: OrchestrationPerformanceMetrics,
   ): Promise<OrchestrationAuditEntry[]> {
     const auditEntries: OrchestrationAuditEntry[] = [
       {
@@ -1959,7 +2087,9 @@ export class ParlantEnterpriseGatewayOrchestratorService implements OnModuleInit
   /**
    * Emit Orchestration Metrics
    */
-  private async emitOrchestrationMetrics(orchestrationResponse: GatewayOrchestrationResponse): Promise<void> {
+  private async emitOrchestrationMetrics(
+    orchestrationResponse: GatewayOrchestrationResponse,
+  ): Promise<void> {
     const metrics = {
       orchestrationId: orchestrationResponse.responseId,
       requestId: orchestrationResponse.requestId,
@@ -1970,9 +2100,12 @@ export class ParlantEnterpriseGatewayOrchestratorService implements OnModuleInit
     };
 
     this.orchestrationMetrics.set(orchestrationResponse.responseId, metrics);
-    this.orchestrationEventEmitter.emit('orchestration_completed', metrics);
+    this.orchestrationEventEmitter.emit("orchestration_completed", metrics);
 
-    this.logger.log(`Orchestration metrics emitted for ${orchestrationResponse.responseId}`, metrics);
+    this.logger.log(
+      `Orchestration metrics emitted for ${orchestrationResponse.responseId}`,
+      metrics,
+    );
   }
 
   /**
@@ -1982,7 +2115,7 @@ export class ParlantEnterpriseGatewayOrchestratorService implements OnModuleInit
     orchestrationId: string,
     requestId: string,
     error: Error,
-    totalOrchestrationTime?: number
+    totalOrchestrationTime?: number,
   ): GatewayOrchestrationResponse {
     const errorPipelineResult: PipelineExecutionResult = {
       pipelineId: uuidv4(),
@@ -2014,7 +2147,10 @@ export class ParlantEnterpriseGatewayOrchestratorService implements OnModuleInit
       conversationalSummary: {
         summaryId: uuidv4(),
         explanation: `Request processing failed: ${error.message}`,
-        keyInsights: ["Processing encountered an error", "No stages were completed"],
+        keyInsights: [
+          "Processing encountered an error",
+          "No stages were completed",
+        ],
         recommendedActions: ["Review error details", "Check request format"],
         userFriendlyStatus: "ERROR",
         detailedBreakdown: [],
@@ -2080,14 +2216,16 @@ export class ParlantEnterpriseGatewayOrchestratorService implements OnModuleInit
    */
   private async determineOrchestrationResult(
     stageResults: any[],
-    orchestrationRequest?: any
+    orchestrationRequest?: any,
   ): Promise<any> {
-    const success = stageResults.every(stage => stage.success);
-    const errors = stageResults.filter(stage => !stage.success).map(stage => stage.errorDetails?.errorMessage || 'Unknown error');
+    const success = stageResults.every((stage) => stage.success);
+    const errors = stageResults
+      .filter((stage) => !stage.success)
+      .map((stage) => stage.errorDetails?.errorMessage || "Unknown error");
 
     return {
       success: success,
-      errorDetails: success ? null : errors.join(', '),
+      errorDetails: success ? null : errors.join(", "),
       timestamp: new Date(),
       resultData: success ? "Processing completed successfully" : null,
     };
@@ -2141,7 +2279,10 @@ export class ParlantEnterpriseGatewayOrchestratorService implements OnModuleInit
         errorCode: "STAGE_EXECUTION_FAILED",
         errorMessage: error.message || String(error),
         severity: "HIGH",
-        recommendedActions: ["Review stage configuration", "Check dependencies"],
+        recommendedActions: [
+          "Review stage configuration",
+          "Check dependencies",
+        ],
       },
     };
   }
@@ -2174,7 +2315,10 @@ export class ParlantEnterpriseGatewayOrchestratorService implements OnModuleInit
   /**
    * Execute Authentication Stage
    */
-  private async executeAuthenticationStage(request: any, context: any): Promise<any> {
+  private async executeAuthenticationStage(
+    request: any,
+    context: any,
+  ): Promise<any> {
     return {
       stageId: "authentication",
       stageName: "Authentication",
@@ -2197,7 +2341,10 @@ export class ParlantEnterpriseGatewayOrchestratorService implements OnModuleInit
   /**
    * Execute Authorization Stage
    */
-  private async executeAuthorizationStage(request: any, context: any): Promise<any> {
+  private async executeAuthorizationStage(
+    request: any,
+    context: any,
+  ): Promise<any> {
     return {
       stageId: "authorization",
       stageName: "Authorization",
@@ -2243,7 +2390,10 @@ export class ParlantEnterpriseGatewayOrchestratorService implements OnModuleInit
   /**
    * Execute Analytics Stage
    */
-  private async executeAnalyticsStage(request: any, context: any): Promise<any> {
+  private async executeAnalyticsStage(
+    request: any,
+    context: any,
+  ): Promise<any> {
     return {
       stageId: "analytics",
       stageName: "Analytics",
@@ -2300,7 +2450,10 @@ export class ParlantEnterpriseGatewayOrchestratorService implements OnModuleInit
   /**
    * Calculate Stage Resource Utilization
    */
-  private calculateStageResourceUtilization(stageResult: any, executionTime: number): any {
+  private calculateStageResourceUtilization(
+    stageResult: any,
+    executionTime: number,
+  ): any {
     return {
       cpuUsage: 0.3,
       memoryUsage: 0.2,

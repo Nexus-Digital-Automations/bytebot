@@ -18,16 +18,19 @@
  * @author AIgent PARLANT Integration Team
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from "@nestjs/common";
 import {
   UserContext,
   ThreatType,
   ThreatIndicator,
   SecurityViolation,
   SecurityViolationType,
-  SanitizationType
-} from './parameter-validation.service';
-import { SecurityLevel, RiskLevel } from '../../validation/types/validation-layer.types';
+  SanitizationType,
+} from "./parameter-validation.service";
+import {
+  SecurityLevel,
+  RiskLevel,
+} from "../../validation/types/validation-layer.types";
 
 // ===== SECURITY INTEGRATION TYPES =====
 
@@ -78,14 +81,14 @@ export interface SecurityRule {
 }
 
 export enum SecurityRuleType {
-  INJECTION_PREVENTION = 'injection_prevention',
-  ACCESS_CONTROL = 'access_control',
-  DATA_CLASSIFICATION = 'data_classification',
-  ENCRYPTION_REQUIREMENT = 'encryption_requirement',
-  AUDIT_REQUIREMENT = 'audit_requirement',
-  RATE_LIMITING = 'rate_limiting',
-  GEOGRAPHICAL_RESTRICTION = 'geographical_restriction',
-  TIME_BASED_RESTRICTION = 'time_based_restriction'
+  INJECTION_PREVENTION = "injection_prevention",
+  ACCESS_CONTROL = "access_control",
+  DATA_CLASSIFICATION = "data_classification",
+  ENCRYPTION_REQUIREMENT = "encryption_requirement",
+  AUDIT_REQUIREMENT = "audit_requirement",
+  RATE_LIMITING = "rate_limiting",
+  GEOGRAPHICAL_RESTRICTION = "geographical_restriction",
+  TIME_BASED_RESTRICTION = "time_based_restriction",
 }
 
 export interface SecurityCondition {
@@ -100,24 +103,24 @@ export interface SecurityCondition {
 }
 
 export enum ConditionType {
-  PARAMETER_VALUE = 'parameter_value',
-  USER_ROLE = 'user_role',
-  IP_ADDRESS = 'ip_address',
-  TIME_OF_DAY = 'time_of_day',
-  DEVICE_TYPE = 'device_type',
-  LOCATION = 'location',
-  RISK_SCORE = 'risk_score'
+  PARAMETER_VALUE = "parameter_value",
+  USER_ROLE = "user_role",
+  IP_ADDRESS = "ip_address",
+  TIME_OF_DAY = "time_of_day",
+  DEVICE_TYPE = "device_type",
+  LOCATION = "location",
+  RISK_SCORE = "risk_score",
 }
 
 export enum ConditionLogic {
-  EQUALS = 'equals',
-  NOT_EQUALS = 'not_equals',
-  CONTAINS = 'contains',
-  NOT_CONTAINS = 'not_contains',
-  REGEX_MATCH = 'regex_match',
-  GREATER_THAN = 'greater_than',
-  LESS_THAN = 'less_than',
-  IN_RANGE = 'in_range'
+  EQUALS = "equals",
+  NOT_EQUALS = "not_equals",
+  CONTAINS = "contains",
+  NOT_CONTAINS = "not_contains",
+  REGEX_MATCH = "regex_match",
+  GREATER_THAN = "greater_than",
+  LESS_THAN = "less_than",
+  IN_RANGE = "in_range",
 }
 
 export interface SecurityAction {
@@ -135,21 +138,21 @@ export interface SecurityAction {
 }
 
 export enum SecurityActionType {
-  BLOCK = 'block',
-  SANITIZE = 'sanitize',
-  ENCRYPT = 'encrypt',
-  AUDIT = 'audit',
-  ALERT = 'alert',
-  QUARANTINE = 'quarantine',
-  REDIRECT = 'redirect',
-  REQUIRE_MFA = 'require_mfa'
+  BLOCK = "block",
+  SANITIZE = "sanitize",
+  ENCRYPT = "encrypt",
+  AUDIT = "audit",
+  ALERT = "alert",
+  QUARANTINE = "quarantine",
+  REDIRECT = "redirect",
+  REQUIRE_MFA = "require_mfa",
 }
 
 export enum EnforcementLevel {
-  ADVISORY = 'advisory',
-  WARNING = 'warning',
-  BLOCKING = 'blocking',
-  STRICT = 'strict'
+  ADVISORY = "advisory",
+  WARNING = "warning",
+  BLOCKING = "blocking",
+  STRICT = "strict",
 }
 
 export interface ValidityPeriod {
@@ -167,13 +170,13 @@ export interface ValidityPeriod {
 }
 
 export enum ComplianceFramework {
-  GDPR = 'gdpr',
-  HIPAA = 'hipaa',
-  SOX = 'sox',
-  PCI_DSS = 'pci_dss',
-  ISO_27001 = 'iso_27001',
-  NIST = 'nist',
-  CCPA = 'ccpa'
+  GDPR = "gdpr",
+  HIPAA = "hipaa",
+  SOX = "sox",
+  PCI_DSS = "pci_dss",
+  ISO_27001 = "iso_27001",
+  NIST = "nist",
+  CCPA = "ccpa",
 }
 
 // ===== THREAT DETECTION TYPES =====
@@ -213,20 +216,20 @@ export interface ThreatDetectionCapability {
 }
 
 export enum DetectionMethod {
-  PATTERN_MATCHING = 'pattern_matching',
-  MACHINE_LEARNING = 'machine_learning',
-  HEURISTIC_ANALYSIS = 'heuristic_analysis',
-  SIGNATURE_BASED = 'signature_based',
-  BEHAVIORAL_ANALYSIS = 'behavioral_analysis',
-  STATISTICAL_ANALYSIS = 'statistical_analysis'
+  PATTERN_MATCHING = "pattern_matching",
+  MACHINE_LEARNING = "machine_learning",
+  HEURISTIC_ANALYSIS = "heuristic_analysis",
+  SIGNATURE_BASED = "signature_based",
+  BEHAVIORAL_ANALYSIS = "behavioral_analysis",
+  STATISTICAL_ANALYSIS = "statistical_analysis",
 }
 
 export enum PerformanceImpact {
-  MINIMAL = 'minimal',
-  LOW = 'low',
-  MODERATE = 'moderate',
-  HIGH = 'high',
-  SEVERE = 'severe'
+  MINIMAL = "minimal",
+  LOW = "low",
+  MODERATE = "moderate",
+  HIGH = "high",
+  SEVERE = "severe",
 }
 
 export interface ThreatDetectionConfig {
@@ -244,10 +247,10 @@ export interface ThreatDetectionConfig {
 }
 
 export enum SensitivityLevel {
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  PARANOID = 'paranoid'
+  LOW = "low",
+  MEDIUM = "medium",
+  HIGH = "high",
+  PARANOID = "paranoid",
 }
 
 export interface DetectionThreshold {
@@ -265,11 +268,11 @@ export interface DetectionThreshold {
 }
 
 export enum UpdateFrequency {
-  REAL_TIME = 'real_time',
-  HOURLY = 'hourly',
-  DAILY = 'daily',
-  WEEKLY = 'weekly',
-  MANUAL = 'manual'
+  REAL_TIME = "real_time",
+  HOURLY = "hourly",
+  DAILY = "daily",
+  WEEKLY = "weekly",
+  MANUAL = "manual",
 }
 
 export interface MLSettings {
@@ -287,11 +290,11 @@ export interface MLSettings {
 }
 
 export enum MLModelType {
-  NEURAL_NETWORK = 'neural_network',
-  RANDOM_FOREST = 'random_forest',
-  SVM = 'svm',
-  NAIVE_BAYES = 'naive_bayes',
-  ENSEMBLE = 'ensemble'
+  NEURAL_NETWORK = "neural_network",
+  RANDOM_FOREST = "random_forest",
+  SVM = "svm",
+  NAIVE_BAYES = "naive_bayes",
+  ENSEMBLE = "ensemble",
 }
 
 export interface FeatureExtractionConfig {
@@ -306,27 +309,27 @@ export interface FeatureExtractionConfig {
 }
 
 export enum TextFeatureType {
-  CHARACTER_FREQUENCY = 'character_frequency',
-  N_GRAM_ANALYSIS = 'n_gram_analysis',
-  ENTROPY_ANALYSIS = 'entropy_analysis',
-  REGEX_PATTERNS = 'regex_patterns',
-  SEMANTIC_ANALYSIS = 'semantic_analysis'
+  CHARACTER_FREQUENCY = "character_frequency",
+  N_GRAM_ANALYSIS = "n_gram_analysis",
+  ENTROPY_ANALYSIS = "entropy_analysis",
+  REGEX_PATTERNS = "regex_patterns",
+  SEMANTIC_ANALYSIS = "semantic_analysis",
 }
 
 export enum BehavioralFeatureType {
-  INPUT_SPEED = 'input_speed',
-  PATTERN_REPETITION = 'pattern_repetition',
-  SESSION_BEHAVIOR = 'session_behavior',
-  ERROR_PATTERNS = 'error_patterns',
-  RETRY_BEHAVIOR = 'retry_behavior'
+  INPUT_SPEED = "input_speed",
+  PATTERN_REPETITION = "pattern_repetition",
+  SESSION_BEHAVIOR = "session_behavior",
+  ERROR_PATTERNS = "error_patterns",
+  RETRY_BEHAVIOR = "retry_behavior",
 }
 
 export enum ContextFeatureType {
-  USER_HISTORY = 'user_history',
-  IP_REPUTATION = 'ip_reputation',
-  DEVICE_FINGERPRINT = 'device_fingerprint',
-  GEOLOCATION = 'geolocation',
-  TIME_PATTERNS = 'time_patterns'
+  USER_HISTORY = "user_history",
+  IP_REPUTATION = "ip_reputation",
+  DEVICE_FINGERPRINT = "device_fingerprint",
+  GEOLOCATION = "geolocation",
+  TIME_PATTERNS = "time_patterns",
 }
 
 export interface ThreatDetectionPerformance {
@@ -401,12 +404,12 @@ export interface SecurityAuditLog {
 }
 
 export enum SecurityEventType {
-  PARAMETER_VALIDATION = 'parameter_validation',
-  THREAT_DETECTED = 'threat_detected',
-  SANITIZATION_APPLIED = 'sanitization_applied',
-  ACCESS_DENIED = 'access_denied',
-  POLICY_VIOLATION = 'policy_violation',
-  SECURITY_EXCEPTION = 'security_exception'
+  PARAMETER_VALIDATION = "parameter_validation",
+  THREAT_DETECTED = "threat_detected",
+  SANITIZATION_APPLIED = "sanitization_applied",
+  ACCESS_DENIED = "access_denied",
+  POLICY_VIOLATION = "policy_violation",
+  SECURITY_EXCEPTION = "security_exception",
 }
 
 export interface ParameterAuditDetails {
@@ -441,10 +444,10 @@ export interface ProcessingStep {
 }
 
 export enum ProcessingStepResult {
-  SUCCESS = 'success',
-  WARNING = 'warning',
-  ERROR = 'error',
-  BLOCKED = 'blocked'
+  SUCCESS = "success",
+  WARNING = "warning",
+  ERROR = "error",
+  BLOCKED = "blocked",
 }
 
 export interface SecurityDecision {
@@ -465,11 +468,11 @@ export interface SecurityDecision {
 }
 
 export enum SecurityDecisionType {
-  ALLOW = 'allow',
-  ALLOW_WITH_SANITIZATION = 'allow_with_sanitization',
-  DENY = 'deny',
-  QUARANTINE = 'quarantine',
-  ESCALATE = 'escalate'
+  ALLOW = "allow",
+  ALLOW_WITH_SANITIZATION = "allow_with_sanitization",
+  DENY = "deny",
+  QUARANTINE = "quarantine",
+  ESCALATE = "escalate",
 }
 
 export interface RiskAssessmentResult {
@@ -501,12 +504,12 @@ export interface RiskFactor {
 }
 
 export enum RiskFactorType {
-  INJECTION_PATTERNS = 'injection_patterns',
-  UNUSUAL_BEHAVIOR = 'unusual_behavior',
-  HIGH_PRIVILEGE_REQUEST = 'high_privilege_request',
-  SUSPICIOUS_TIMING = 'suspicious_timing',
-  ANOMALOUS_SOURCE = 'anomalous_source',
-  COMPLIANCE_VIOLATION = 'compliance_violation'
+  INJECTION_PATTERNS = "injection_patterns",
+  UNUSUAL_BEHAVIOR = "unusual_behavior",
+  HIGH_PRIVILEGE_REQUEST = "high_privilege_request",
+  SUSPICIOUS_TIMING = "suspicious_timing",
+  ANOMALOUS_SOURCE = "anomalous_source",
+  COMPLIANCE_VIOLATION = "compliance_violation",
 }
 
 export interface ThreatAnalysisResult {
@@ -561,10 +564,10 @@ export interface ComplianceAuditInfo {
 }
 
 export enum ComplianceStatus {
-  COMPLIANT = 'compliant',
-  NON_COMPLIANT = 'non_compliant',
-  PARTIALLY_COMPLIANT = 'partially_compliant',
-  UNDER_REVIEW = 'under_review'
+  COMPLIANT = "compliant",
+  NON_COMPLIANT = "non_compliant",
+  PARTIALLY_COMPLIANT = "partially_compliant",
+  UNDER_REVIEW = "under_review",
 }
 
 // ===== ENCRYPTION AND SECURE STORAGE TYPES =====
@@ -584,26 +587,26 @@ export interface ParameterEncryptionConfig {
 }
 
 export enum EncryptionAlgorithm {
-  AES_256_GCM = 'aes_256_gcm',
-  AES_256_CBC = 'aes_256_cbc',
-  CHACHA20_POLY1305 = 'chacha20_poly1305',
-  RSA_4096 = 'rsa_4096',
-  ECDSA_P256 = 'ecdsa_p256'
+  AES_256_GCM = "aes_256_gcm",
+  AES_256_CBC = "aes_256_cbc",
+  CHACHA20_POLY1305 = "chacha20_poly1305",
+  RSA_4096 = "rsa_4096",
+  ECDSA_P256 = "ecdsa_p256",
 }
 
 export enum KeyRotationFrequency {
-  DAILY = 'daily',
-  WEEKLY = 'weekly',
-  MONTHLY = 'monthly',
-  QUARTERLY = 'quarterly',
-  ANNUALLY = 'annually'
+  DAILY = "daily",
+  WEEKLY = "weekly",
+  MONTHLY = "monthly",
+  QUARTERLY = "quarterly",
+  ANNUALLY = "annually",
 }
 
 export enum EncryptionScope {
-  SENSITIVE_ONLY = 'sensitive_only',
-  ALL_PARAMETERS = 'all_parameters',
-  RESTRICTED_AND_ABOVE = 'restricted_and_above',
-  CONFIDENTIAL_AND_ABOVE = 'confidential_and_above'
+  SENSITIVE_ONLY = "sensitive_only",
+  ALL_PARAMETERS = "all_parameters",
+  RESTRICTED_AND_ABOVE = "restricted_and_above",
+  CONFIDENTIAL_AND_ABOVE = "confidential_and_above",
 }
 
 export interface SecureParameterStorage {
@@ -621,10 +624,10 @@ export interface SecureParameterStorage {
 }
 
 export enum StorageBackend {
-  ENCRYPTED_DATABASE = 'encrypted_database',
-  SECURE_VAULT = 'secure_vault',
-  HSM = 'hsm',
-  MEMORY_ONLY = 'memory_only'
+  ENCRYPTED_DATABASE = "encrypted_database",
+  SECURE_VAULT = "secure_vault",
+  HSM = "hsm",
+  MEMORY_ONLY = "memory_only",
 }
 
 export interface StorageAccessControl {
@@ -642,19 +645,19 @@ export interface StorageAccessControl {
 }
 
 export enum PrincipalType {
-  USER = 'user',
-  ROLE = 'role',
-  SERVICE = 'service',
-  SYSTEM = 'system'
+  USER = "user",
+  ROLE = "role",
+  SERVICE = "service",
+  SYSTEM = "system",
 }
 
 export enum StoragePermission {
-  READ = 'read',
-  WRITE = 'write',
-  DELETE = 'delete',
-  ENCRYPT = 'encrypt',
-  DECRYPT = 'decrypt',
-  AUDIT = 'audit'
+  READ = "read",
+  WRITE = "write",
+  DELETE = "delete",
+  ENCRYPT = "encrypt",
+  DECRYPT = "decrypt",
+  AUDIT = "audit",
 }
 
 export interface AccessCondition {
@@ -669,20 +672,20 @@ export interface AccessCondition {
 }
 
 export enum AccessConditionType {
-  TIME_RANGE = 'time_range',
-  IP_ADDRESS = 'ip_address',
-  DEVICE_TYPE = 'device_type',
-  LOCATION = 'location',
-  RISK_LEVEL = 'risk_level'
+  TIME_RANGE = "time_range",
+  IP_ADDRESS = "ip_address",
+  DEVICE_TYPE = "device_type",
+  LOCATION = "location",
+  RISK_LEVEL = "risk_level",
 }
 
 export enum ConditionOperator {
-  EQUALS = 'equals',
-  NOT_EQUALS = 'not_equals',
-  IN = 'in',
-  NOT_IN = 'not_in',
-  GREATER_THAN = 'greater_than',
-  LESS_THAN = 'less_than'
+  EQUALS = "equals",
+  NOT_EQUALS = "not_equals",
+  IN = "in",
+  NOT_IN = "not_in",
+  GREATER_THAN = "greater_than",
+  LESS_THAN = "less_than",
 }
 
 export interface RetentionPolicy {
@@ -706,7 +709,8 @@ export class SecurityIntegrationService {
   private readonly logger = new Logger(SecurityIntegrationService.name);
 
   private readonly securityPolicies: Map<string, SecurityPolicy> = new Map();
-  private readonly threatDetectionEngines: Map<string, ThreatDetectionEngine> = new Map();
+  private readonly threatDetectionEngines: Map<string, ThreatDetectionEngine> =
+    new Map();
   private readonly auditLogs: SecurityAuditLog[] = [];
 
   constructor() {
@@ -721,7 +725,7 @@ export class SecurityIntegrationService {
     parameterName: string,
     value: any,
     securityLevel: SecurityLevel,
-    userContext: UserContext
+    userContext: UserContext,
   ): Promise<{
     isSecure: boolean;
     threatIndicators: ThreatIndicator[];
@@ -730,7 +734,9 @@ export class SecurityIntegrationService {
     auditLogId: string;
   }> {
     const startTime = Date.now();
-    this.logger.log(`Starting security validation for parameter: ${parameterName}`);
+    this.logger.log(
+      `Starting security validation for parameter: ${parameterName}`,
+    );
 
     try {
       // 1. Apply security policies
@@ -738,21 +744,21 @@ export class SecurityIntegrationService {
         parameterName,
         value,
         securityLevel,
-        userContext
+        userContext,
       );
 
       // 2. Detect threats
       const threatResults = await this.detectThreats(
         parameterName,
         value,
-        userContext
+        userContext,
       );
 
       // 3. Assess risks
       const riskAssessment = await this.assessRisks(
         threatResults.threats,
         policyResults.violations,
-        userContext
+        userContext,
       );
 
       // 4. Apply sanitization if needed
@@ -760,7 +766,7 @@ export class SecurityIntegrationService {
         value,
         threatResults.threats,
         policyResults.recommendedSanitization,
-        userContext
+        userContext,
       );
 
       // 5. Make security decision
@@ -768,7 +774,7 @@ export class SecurityIntegrationService {
         riskAssessment,
         threatResults,
         policyResults,
-        sanitizationResults
+        sanitizationResults,
       );
 
       // 6. Create audit log
@@ -780,23 +786,29 @@ export class SecurityIntegrationService {
         threatResults,
         policyResults,
         securityDecision,
-        processingTime: Date.now() - startTime
+        processingTime: Date.now() - startTime,
       });
 
       const result = {
-        isSecure: securityDecision.decision === SecurityDecisionType.ALLOW ||
-                  securityDecision.decision === SecurityDecisionType.ALLOW_WITH_SANITIZATION,
+        isSecure:
+          securityDecision.decision === SecurityDecisionType.ALLOW ||
+          securityDecision.decision ===
+            SecurityDecisionType.ALLOW_WITH_SANITIZATION,
         threatIndicators: threatResults.threats,
         securityViolations: policyResults.violations,
         sanitizedValue: sanitizationResults.sanitizedValue,
-        auditLogId
+        auditLogId,
       };
 
-      this.logger.log(`Security validation completed for ${parameterName} in ${Date.now() - startTime}ms`);
+      this.logger.log(
+        `Security validation completed for ${parameterName} in ${Date.now() - startTime}ms`,
+      );
       return result;
-
     } catch (error) {
-      this.logger.error(`Security validation failed for ${parameterName}:`, error);
+      this.logger.error(
+        `Security validation failed for ${parameterName}:`,
+        error,
+      );
       throw new Error(`Security validation failed: ${error.message}`);
     }
   }
@@ -807,8 +819,11 @@ export class SecurityIntegrationService {
   async detectThreats(
     parameterName: string,
     value: any,
-    userContext: UserContext
-  ): Promise<{ threats: ThreatIndicator[]; analysisResult: ThreatAnalysisResult }> {
+    userContext: UserContext,
+  ): Promise<{
+    threats: ThreatIndicator[];
+    analysisResult: ThreatAnalysisResult;
+  }> {
     const threats: ThreatIndicator[] = [];
     const analysisStartTime = Date.now();
 
@@ -832,7 +847,7 @@ export class SecurityIntegrationService {
     const behavioralThreats = await this.detectBehavioralAnomalies(
       parameterName,
       value,
-      userContext
+      userContext,
     );
     threats.push(...behavioralThreats);
 
@@ -844,11 +859,11 @@ export class SecurityIntegrationService {
       analysisMethod: [
         DetectionMethod.PATTERN_MATCHING,
         DetectionMethod.HEURISTIC_ANALYSIS,
-        DetectionMethod.BEHAVIORAL_ANALYSIS
+        DetectionMethod.BEHAVIORAL_ANALYSIS,
       ],
       analysisDuration,
       confidenceScore,
-      falsePositiveProbability: this.calculateFalsePositiveProbability(threats)
+      falsePositiveProbability: this.calculateFalsePositiveProbability(threats),
     };
 
     return { threats, analysisResult };
@@ -861,7 +876,7 @@ export class SecurityIntegrationService {
     value: any,
     threats: ThreatIndicator[],
     sanitizationRules: SanitizationType[],
-    userContext: UserContext
+    userContext: UserContext,
   ): Promise<{
     sanitizedValue: any;
     sanitizationApplied: boolean;
@@ -875,7 +890,7 @@ export class SecurityIntegrationService {
     for (const threat of threats) {
       const threatSanitization = await this.appleThreatSpecificSanitization(
         sanitizedValue,
-        threat
+        threat,
       );
 
       if (threatSanitization.modified) {
@@ -889,7 +904,7 @@ export class SecurityIntegrationService {
     for (const rule of sanitizationRules) {
       const ruleSanitization = await this.applyGeneralSanitization(
         sanitizedValue,
-        rule
+        rule,
       );
 
       if (ruleSanitization.modified) {
@@ -902,7 +917,7 @@ export class SecurityIntegrationService {
     return {
       sanitizedValue,
       sanitizationApplied,
-      sanitizationActions
+      sanitizationActions,
     };
   }
 
@@ -929,12 +944,12 @@ export class SecurityIntegrationService {
         originalValueHash: this.hashValue(logData.originalValue),
         finalValueHash: this.hashValue(logData.finalValue),
         dataClassification: SecurityLevel.CONFIDENTIAL, // Would be determined based on parameter
-        processingSteps: this.createProcessingSteps(logData)
+        processingSteps: this.createProcessingSteps(logData),
       },
       securityDecision: logData.securityDecision,
       threatAnalysis: logData.threatResults.analysisResult,
       actionsTaken: this.extractSecurityActions(logData),
-      complianceInfo: await this.generateComplianceInfo(logData)
+      complianceInfo: await this.generateComplianceInfo(logData),
     };
 
     this.auditLogs.push(auditLog);
@@ -957,20 +972,30 @@ export class SecurityIntegrationService {
 
     if (filter) {
       if (filter.startDate) {
-        filteredLogs = filteredLogs.filter(log => log.timestamp >= filter.startDate!);
+        filteredLogs = filteredLogs.filter(
+          (log) => log.timestamp >= filter.startDate!,
+        );
       }
       if (filter.endDate) {
-        filteredLogs = filteredLogs.filter(log => log.timestamp <= filter.endDate!);
+        filteredLogs = filteredLogs.filter(
+          (log) => log.timestamp <= filter.endDate!,
+        );
       }
       if (filter.eventType) {
-        filteredLogs = filteredLogs.filter(log => log.eventType === filter.eventType);
+        filteredLogs = filteredLogs.filter(
+          (log) => log.eventType === filter.eventType,
+        );
       }
       if (filter.userId) {
-        filteredLogs = filteredLogs.filter(log => log.userContext.userId === filter.userId);
+        filteredLogs = filteredLogs.filter(
+          (log) => log.userContext.userId === filter.userId,
+        );
       }
       if (filter.threatType) {
-        filteredLogs = filteredLogs.filter(log =>
-          log.threatAnalysis.threatsDetected.some(threat => threat.type === filter.threatType)
+        filteredLogs = filteredLogs.filter((log) =>
+          log.threatAnalysis.threatsDetected.some(
+            (threat) => threat.type === filter.threatType,
+          ),
         );
       }
     }
@@ -985,40 +1010,48 @@ export class SecurityIntegrationService {
    */
   private initializeDefaultSecurityPolicies(): void {
     const injectionPreventionPolicy: SecurityPolicy = {
-      id: 'injection-prevention',
-      name: 'Injection Attack Prevention',
-      description: 'Prevents SQL, XSS, and other injection attacks',
+      id: "injection-prevention",
+      name: "Injection Attack Prevention",
+      description: "Prevents SQL, XSS, and other injection attacks",
       requiredSecurityLevel: SecurityLevel.INTERNAL,
       rules: [
         {
-          id: 'sql-injection-rule',
+          id: "sql-injection-rule",
           type: SecurityRuleType.INJECTION_PREVENTION,
           condition: {
             type: ConditionType.PARAMETER_VALUE,
             parameters: { threatType: ThreatType.SQL_INJECTION },
-            logic: ConditionLogic.CONTAINS
+            logic: ConditionLogic.CONTAINS,
           },
           action: {
             type: SecurityActionType.SANITIZE,
-            parameters: { sanitizationType: SanitizationType.SQL_INJECTION_PREVENTION },
+            parameters: {
+              sanitizationType: SanitizationType.SQL_INJECTION_PREVENTION,
+            },
             priority: 1,
-            timeoutMs: 1000
+            timeoutMs: 1000,
           },
           severity: RiskLevel.HIGH,
-          description: 'Detects and prevents SQL injection attempts'
-        }
+          description: "Detects and prevents SQL injection attempts",
+        },
       ],
-      complianceFrameworks: [ComplianceFramework.SOX, ComplianceFramework.ISO_27001],
+      complianceFrameworks: [
+        ComplianceFramework.SOX,
+        ComplianceFramework.ISO_27001,
+      ],
       enforcementLevel: EnforcementLevel.BLOCKING,
       validityPeriod: {
         startDate: new Date(),
         endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year
         renewalRequired: true,
-        gracePeriodDays: 30
-      }
+        gracePeriodDays: 30,
+      },
     };
 
-    this.securityPolicies.set(injectionPreventionPolicy.id, injectionPreventionPolicy);
+    this.securityPolicies.set(
+      injectionPreventionPolicy.id,
+      injectionPreventionPolicy,
+    );
   }
 
   /**
@@ -1026,23 +1059,23 @@ export class SecurityIntegrationService {
    */
   private initializeThreatDetectionEngines(): void {
     const mainEngine: ThreatDetectionEngine = {
-      name: 'PARLANT-ThreatDetector',
-      version: '1.0.0',
+      name: "PARLANT-ThreatDetector",
+      version: "1.0.0",
       capabilities: [
         {
           threatType: ThreatType.SQL_INJECTION,
           method: DetectionMethod.PATTERN_MATCHING,
           accuracyRate: 0.95,
           falsePositiveRate: 0.02,
-          performanceImpact: PerformanceImpact.LOW
+          performanceImpact: PerformanceImpact.LOW,
         },
         {
           threatType: ThreatType.XSS_ATTACK,
           method: DetectionMethod.HEURISTIC_ANALYSIS,
           accuracyRate: 0.92,
           falsePositiveRate: 0.03,
-          performanceImpact: PerformanceImpact.LOW
-        }
+          performanceImpact: PerformanceImpact.LOW,
+        },
       ],
       config: {
         sensitivityLevel: SensitivityLevel.HIGH,
@@ -1051,8 +1084,8 @@ export class SecurityIntegrationService {
             threatType: ThreatType.SQL_INJECTION,
             threshold: 0.8,
             confidenceRequirement: 0.9,
-            actionTrigger: SecurityActionType.SANITIZE
-          }
+            actionTrigger: SecurityActionType.SANITIZE,
+          },
         ],
         updateFrequency: UpdateFrequency.DAILY,
         mlSettings: {
@@ -1060,11 +1093,14 @@ export class SecurityIntegrationService {
           modelType: MLModelType.ENSEMBLE,
           trainingFrequency: UpdateFrequency.WEEKLY,
           featureExtraction: {
-            textFeatures: [TextFeatureType.CHARACTER_FREQUENCY, TextFeatureType.REGEX_PATTERNS],
+            textFeatures: [
+              TextFeatureType.CHARACTER_FREQUENCY,
+              TextFeatureType.REGEX_PATTERNS,
+            ],
             behavioralFeatures: [BehavioralFeatureType.INPUT_SPEED],
-            contextFeatures: [ContextFeatureType.USER_HISTORY]
-          }
-        }
+            contextFeatures: [ContextFeatureType.USER_HISTORY],
+          },
+        },
       },
       performance: {
         avgDetectionTime: 50, // ms
@@ -1078,9 +1114,9 @@ export class SecurityIntegrationService {
           falseNegativeRate: 0.05,
           precision: 0.97,
           recall: 0.95,
-          f1Score: 0.96
-        }
-      }
+          f1Score: 0.96,
+        },
+      },
     };
 
     this.threatDetectionEngines.set(mainEngine.name, mainEngine);
@@ -1093,7 +1129,7 @@ export class SecurityIntegrationService {
     parameterName: string,
     value: any,
     securityLevel: SecurityLevel,
-    userContext: UserContext
+    userContext: UserContext,
   ): Promise<{
     violations: SecurityViolation[];
     recommendedSanitization: SanitizationType[];
@@ -1109,7 +1145,7 @@ export class SecurityIntegrationService {
           policy,
           parameterName,
           value,
-          userContext
+          userContext,
         );
 
         policyResults.push(policyResult);
@@ -1138,7 +1174,7 @@ export class SecurityIntegrationService {
       /('|(\\')|(;)|(\-\-)|(\|)|(\*)|(%)|(<)|(>)|(\\)|(\/\*)|(\*\/)|(\bUNION\b)|(\bSELECT\b)|(\bINSERT\b)|(\bDELETE\b)|(\bUPDATE\b)|(\bDROP\b)/i,
       /(\bOR\b|\bAND\b)\s+\d+\s*=\s*\d+/i,
       /'.*?(\bOR\b|\bAND\b).*?'/i,
-      /\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|EXECUTE)\b/i
+      /\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|EXECUTE)\b/i,
     ];
 
     for (const pattern of sqlPatterns) {
@@ -1148,7 +1184,7 @@ export class SecurityIntegrationService {
           description: `Potential SQL injection pattern detected in parameter value`,
           severity: RiskLevel.HIGH,
           affectedParameters: [],
-          mitigationApplied: false
+          mitigationApplied: false,
         });
         break; // Only report once per type
       }
@@ -1170,7 +1206,7 @@ export class SecurityIntegrationService {
       /on\w+\s*=/gi,
       /<iframe[^>]*>.*?<\/iframe>/gi,
       /<img[^>]*onerror[^>]*>/gi,
-      /<svg[^>]*onload[^>]*>/gi
+      /<svg[^>]*onload[^>]*>/gi,
     ];
 
     for (const pattern of xssPatterns) {
@@ -1180,7 +1216,7 @@ export class SecurityIntegrationService {
           description: `Potential XSS attack pattern detected in parameter value`,
           severity: RiskLevel.HIGH,
           affectedParameters: [],
-          mitigationApplied: false
+          mitigationApplied: false,
         });
         break;
       }
@@ -1202,7 +1238,7 @@ export class SecurityIntegrationService {
       /%2e%2e%2f/gi,
       /%2e%2e%5c/gi,
       /\.\.%2f/gi,
-      /\.\.%5c/gi
+      /\.\.%5c/gi,
     ];
 
     for (const pattern of pathTraversalPatterns) {
@@ -1212,7 +1248,7 @@ export class SecurityIntegrationService {
           description: `Potential path traversal attack detected in parameter value`,
           severity: RiskLevel.MEDIUM,
           affectedParameters: [],
-          mitigationApplied: false
+          mitigationApplied: false,
         });
         break;
       }
@@ -1233,7 +1269,7 @@ export class SecurityIntegrationService {
       /\b(cat|ls|pwd|whoami|id|uname|wget|curl|nc|netcat|telnet|ssh)\b/i,
       /\$\([^)]+\)/,
       /`[^`]+`/,
-      /\|\s*(cat|ls|grep|awk|sed)/i
+      /\|\s*(cat|ls|grep|awk|sed)/i,
     ];
 
     for (const pattern of commandPatterns) {
@@ -1243,7 +1279,7 @@ export class SecurityIntegrationService {
           description: `Potential command injection pattern detected in parameter value`,
           severity: RiskLevel.HIGH,
           affectedParameters: [],
-          mitigationApplied: false
+          mitigationApplied: false,
         });
         break;
       }
@@ -1258,7 +1294,7 @@ export class SecurityIntegrationService {
   private async detectBehavioralAnomalies(
     parameterName: string,
     value: any,
-    userContext: UserContext
+    userContext: UserContext,
   ): Promise<ThreatIndicator[]> {
     const threats: ThreatIndicator[] = [];
 
@@ -1273,45 +1309,47 @@ export class SecurityIntegrationService {
    */
   private async appleThreatSpecificSanitization(
     value: any,
-    threat: ThreatIndicator
+    threat: ThreatIndicator,
   ): Promise<{ modified: boolean; sanitizedValue: any; action: string }> {
     const stringValue = String(value);
 
     switch (threat.type) {
       case ThreatType.SQL_INJECTION:
-        const sqlSanitized = stringValue.replace(/['"\\]/g, '\\$&');
+        const sqlSanitized = stringValue.replace(/['"\\]/g, "\\$&");
         return {
           modified: sqlSanitized !== stringValue,
           sanitizedValue: sqlSanitized,
-          action: 'SQL injection characters escaped'
+          action: "SQL injection characters escaped",
         };
 
       case ThreatType.XSS_ATTACK:
         const xssSanitized = stringValue
-          .replace(/</g, '&lt;')
-          .replace(/>/g, '&gt;')
-          .replace(/"/g, '&quot;')
-          .replace(/'/g, '&#x27;')
-          .replace(/&/g, '&amp;');
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#x27;")
+          .replace(/&/g, "&amp;");
         return {
           modified: xssSanitized !== stringValue,
           sanitizedValue: xssSanitized,
-          action: 'HTML entities escaped for XSS prevention'
+          action: "HTML entities escaped for XSS prevention",
         };
 
       case ThreatType.PATH_TRAVERSAL:
-        const pathSanitized = stringValue.replace(/\.\./g, '').replace(/[\/\\]/g, '');
+        const pathSanitized = stringValue
+          .replace(/\.\./g, "")
+          .replace(/[\/\\]/g, "");
         return {
           modified: pathSanitized !== stringValue,
           sanitizedValue: pathSanitized,
-          action: 'Path traversal sequences removed'
+          action: "Path traversal sequences removed",
         };
 
       default:
         return {
           modified: false,
           sanitizedValue: value,
-          action: 'No sanitization applied'
+          action: "No sanitization applied",
         };
     }
   }
@@ -1321,7 +1359,7 @@ export class SecurityIntegrationService {
    */
   private async applyGeneralSanitization(
     value: any,
-    rule: SanitizationType
+    rule: SanitizationType,
   ): Promise<{ modified: boolean; sanitizedValue: any; action: string }> {
     const stringValue = String(value);
 
@@ -1331,22 +1369,22 @@ export class SecurityIntegrationService {
         return {
           modified: trimmed !== stringValue,
           sanitizedValue: trimmed,
-          action: 'Whitespace trimmed'
+          action: "Whitespace trimmed",
         };
 
       case SanitizationType.NORMALIZE_UNICODE:
-        const normalized = stringValue.normalize('NFC');
+        const normalized = stringValue.normalize("NFC");
         return {
           modified: normalized !== stringValue,
           sanitizedValue: normalized,
-          action: 'Unicode normalized'
+          action: "Unicode normalized",
         };
 
       default:
         return {
           modified: false,
           sanitizedValue: value,
-          action: 'No sanitization applied'
+          action: "No sanitization applied",
         };
     }
   }
@@ -1356,7 +1394,7 @@ export class SecurityIntegrationService {
   private isPolicyApplicable(
     policy: SecurityPolicy,
     securityLevel: SecurityLevel,
-    userContext: UserContext
+    userContext: UserContext,
   ): boolean {
     // Simple check - in real implementation would be more sophisticated
     return policy.requiredSecurityLevel <= securityLevel;
@@ -1366,7 +1404,7 @@ export class SecurityIntegrationService {
     policy: SecurityPolicy,
     parameterName: string,
     value: any,
-    userContext: UserContext
+    userContext: UserContext,
   ): Promise<{
     violations: SecurityViolation[];
     recommendedSanitization: SanitizationType[];
@@ -1374,14 +1412,14 @@ export class SecurityIntegrationService {
     // Simplified policy evaluation
     return {
       violations: [],
-      recommendedSanitization: []
+      recommendedSanitization: [],
     };
   }
 
   private async assessRisks(
     threats: ThreatIndicator[],
     violations: SecurityViolation[],
-    userContext: UserContext
+    userContext: UserContext,
   ): Promise<RiskAssessmentResult> {
     const riskFactors: RiskFactor[] = [];
     let overallRiskScore = 0;
@@ -1394,7 +1432,7 @@ export class SecurityIntegrationService {
         type: RiskFactorType.INJECTION_PATTERNS,
         weight,
         description: threat.description,
-        impact: threat.severity
+        impact: threat.severity,
       });
     }
 
@@ -1406,7 +1444,7 @@ export class SecurityIntegrationService {
         type: RiskFactorType.COMPLIANCE_VIOLATION,
         weight,
         description: violation.description,
-        impact: violation.riskLevel
+        impact: violation.riskLevel,
       });
     }
 
@@ -1414,7 +1452,7 @@ export class SecurityIntegrationService {
       overallRiskScore: Math.min(overallRiskScore, 100),
       riskFactors,
       mitigationStrategies: this.generateMitigationStrategies(riskFactors),
-      residualRisk: Math.max(0, overallRiskScore - 50) // Assume 50% risk reduction through mitigation
+      residualRisk: Math.max(0, overallRiskScore - 50), // Assume 50% risk reduction through mitigation
     };
   }
 
@@ -1422,7 +1460,7 @@ export class SecurityIntegrationService {
     riskAssessment: RiskAssessmentResult,
     threatResults: any,
     policyResults: any,
-    sanitizationResults: any
+    sanitizationResults: any,
   ): Promise<SecurityDecision> {
     let decision: SecurityDecisionType;
     let confidence = 0.8;
@@ -1443,7 +1481,7 @@ export class SecurityIntegrationService {
       confidence,
       reasoning: this.generateDecisionReasoning(decision, riskAssessment),
       riskAssessment,
-      recommendations: this.generateRecommendations(decision, riskAssessment)
+      recommendations: this.generateRecommendations(decision, riskAssessment),
     };
   }
 
@@ -1452,32 +1490,43 @@ export class SecurityIntegrationService {
     return threats.reduce((sum, threat) => sum + 0.8, 0) / threats.length; // Assume 0.8 confidence per threat
   }
 
-  private calculateFalsePositiveProbability(threats: ThreatIndicator[]): number {
+  private calculateFalsePositiveProbability(
+    threats: ThreatIndicator[],
+  ): number {
     if (threats.length === 0) return 0;
     return Math.min(0.1, threats.length * 0.02); // 2% per threat, max 10%
   }
 
   private getRiskWeight(severity: RiskLevel): number {
     switch (severity) {
-      case RiskLevel.CRITICAL: return 25;
-      case RiskLevel.HIGH: return 15;
-      case RiskLevel.MEDIUM: return 10;
-      case RiskLevel.LOW: return 5;
-      default: return 1;
+      case RiskLevel.CRITICAL:
+        return 25;
+      case RiskLevel.HIGH:
+        return 15;
+      case RiskLevel.MEDIUM:
+        return 10;
+      case RiskLevel.LOW:
+        return 5;
+      default:
+        return 1;
     }
   }
 
   private generateMitigationStrategies(riskFactors: RiskFactor[]): string[] {
     const strategies: string[] = [];
 
-    if (riskFactors.some(rf => rf.type === RiskFactorType.INJECTION_PATTERNS)) {
-      strategies.push('Apply input sanitization');
-      strategies.push('Use parameterized queries');
+    if (
+      riskFactors.some((rf) => rf.type === RiskFactorType.INJECTION_PATTERNS)
+    ) {
+      strategies.push("Apply input sanitization");
+      strategies.push("Use parameterized queries");
     }
 
-    if (riskFactors.some(rf => rf.type === RiskFactorType.COMPLIANCE_VIOLATION)) {
-      strategies.push('Implement compliance controls');
-      strategies.push('Enhanced audit logging');
+    if (
+      riskFactors.some((rf) => rf.type === RiskFactorType.COMPLIANCE_VIOLATION)
+    ) {
+      strategies.push("Implement compliance controls");
+      strategies.push("Enhanced audit logging");
     }
 
     return strategies;
@@ -1485,7 +1534,7 @@ export class SecurityIntegrationService {
 
   private generateDecisionReasoning(
     decision: SecurityDecisionType,
-    riskAssessment: RiskAssessmentResult
+    riskAssessment: RiskAssessmentResult,
   ): string {
     switch (decision) {
       case SecurityDecisionType.ALLOW:
@@ -1495,24 +1544,24 @@ export class SecurityIntegrationService {
       case SecurityDecisionType.DENY:
         return `High risk score (${riskAssessment.overallRiskScore}) requires blocking`;
       default:
-        return 'Security decision based on risk assessment';
+        return "Security decision based on risk assessment";
     }
   }
 
   private generateRecommendations(
     decision: SecurityDecisionType,
-    riskAssessment: RiskAssessmentResult
+    riskAssessment: RiskAssessmentResult,
   ): string[] {
     const recommendations: string[] = [];
 
     if (decision === SecurityDecisionType.DENY) {
-      recommendations.push('Review parameter value for malicious content');
-      recommendations.push('Consider alternative input methods');
+      recommendations.push("Review parameter value for malicious content");
+      recommendations.push("Consider alternative input methods");
     }
 
     if (riskAssessment.overallRiskScore > 50) {
-      recommendations.push('Implement additional security monitoring');
-      recommendations.push('Consider user training on secure input practices');
+      recommendations.push("Implement additional security monitoring");
+      recommendations.push("Consider user training on secure input practices");
     }
 
     return recommendations;
@@ -1530,23 +1579,23 @@ export class SecurityIntegrationService {
   private createProcessingSteps(logData: any): ProcessingStep[] {
     return [
       {
-        stepName: 'threat-detection',
+        stepName: "threat-detection",
         timestamp: new Date(),
         result: ProcessingStepResult.SUCCESS,
-        modifications: []
+        modifications: [],
       },
       {
-        stepName: 'policy-evaluation',
+        stepName: "policy-evaluation",
         timestamp: new Date(),
         result: ProcessingStepResult.SUCCESS,
-        modifications: []
+        modifications: [],
       },
       {
-        stepName: 'sanitization',
+        stepName: "sanitization",
         timestamp: new Date(),
         result: ProcessingStepResult.SUCCESS,
-        modifications: []
-      }
+        modifications: [],
+      },
     ];
   }
 
@@ -1555,20 +1604,25 @@ export class SecurityIntegrationService {
       {
         actionType: SecurityActionType.AUDIT,
         success: true,
-        details: 'Security audit completed',
+        details: "Security audit completed",
         executionTime: 50,
-        sideEffects: []
-      }
+        sideEffects: [],
+      },
     ];
   }
 
-  private async generateComplianceInfo(logData: any): Promise<ComplianceAuditInfo> {
+  private async generateComplianceInfo(
+    logData: any,
+  ): Promise<ComplianceAuditInfo> {
     return {
-      applicableFrameworks: [ComplianceFramework.GDPR, ComplianceFramework.ISO_27001],
+      applicableFrameworks: [
+        ComplianceFramework.GDPR,
+        ComplianceFramework.ISO_27001,
+      ],
       complianceStatus: ComplianceStatus.COMPLIANT,
-      requirementsMet: ['Data protection', 'Audit trail'],
+      requirementsMet: ["Data protection", "Audit trail"],
       requirementsNotMet: [],
-      remediationRequired: false
+      remediationRequired: false,
     };
   }
 
@@ -1576,12 +1630,17 @@ export class SecurityIntegrationService {
     value: any,
     threats: ThreatIndicator[],
     recommendedSanitization: SanitizationType[],
-    userContext: UserContext
+    userContext: UserContext,
   ): Promise<{
     sanitizedValue: any;
     sanitizationApplied: boolean;
     sanitizationActions: string[];
   }> {
-    return this.sanitizeParameter(value, threats, recommendedSanitization, userContext);
+    return this.sanitizeParameter(
+      value,
+      threats,
+      recommendedSanitization,
+      userContext,
+    );
   }
 }

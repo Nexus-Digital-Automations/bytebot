@@ -168,9 +168,18 @@ export interface ComprehensiveReport {
   performance: {
     overview: PerformanceStats | null;
     trends: {
-      responseTime: { trend: "improving" | "stable" | "degrading"; change: number };
-      throughput: { trend: "improving" | "stable" | "degrading"; change: number };
-      errorRate: { trend: "improving" | "stable" | "degrading"; change: number };
+      responseTime: {
+        trend: "improving" | "stable" | "degrading";
+        change: number;
+      };
+      throughput: {
+        trend: "improving" | "stable" | "degrading";
+        change: number;
+      };
+      errorRate: {
+        trend: "improving" | "stable" | "degrading";
+        change: number;
+      };
     };
     bottlenecks: string[];
     optimizations: string[];
@@ -309,7 +318,9 @@ export class ComprehensiveMonitoringSystem extends EventEmitter {
    */
   async initialize(): Promise<void> {
     if (this.isInitialized) {
-      this.logger.warn("Comprehensive Monitoring System is already initialized");
+      this.logger.warn(
+        "Comprehensive Monitoring System is already initialized",
+      );
       return;
     }
 
@@ -327,9 +338,14 @@ export class ComprehensiveMonitoringSystem extends EventEmitter {
 
       this.isInitialized = true;
       this.emit("system.initialized", this.config);
-      this.logger.log("Comprehensive Monitoring System initialized successfully");
+      this.logger.log(
+        "Comprehensive Monitoring System initialized successfully",
+      );
     } catch (error) {
-      this.logger.error("Failed to initialize Comprehensive Monitoring System:", error);
+      this.logger.error(
+        "Failed to initialize Comprehensive Monitoring System:",
+        error,
+      );
       throw error;
     }
   }
@@ -360,7 +376,10 @@ export class ComprehensiveMonitoringSystem extends EventEmitter {
       this.emit("system.started");
       this.logger.log("Comprehensive Monitoring System started successfully");
     } catch (error) {
-      this.logger.error("Failed to start Comprehensive Monitoring System:", error);
+      this.logger.error(
+        "Failed to start Comprehensive Monitoring System:",
+        error,
+      );
       throw error;
     }
   }
@@ -387,7 +406,10 @@ export class ComprehensiveMonitoringSystem extends EventEmitter {
       this.emit("system.stopped");
       this.logger.log("Comprehensive Monitoring System stopped successfully");
     } catch (error) {
-      this.logger.error("Failed to stop Comprehensive Monitoring System:", error);
+      this.logger.error(
+        "Failed to stop Comprehensive Monitoring System:",
+        error,
+      );
       throw error;
     }
   }
@@ -416,20 +438,22 @@ export class ComprehensiveMonitoringSystem extends EventEmitter {
 
       // Record in predictive analytics
       if (this.predictiveAnalytics && data.function) {
-        this.predictiveAnalytics.addTrainingData("execution_time", [{
-          timestamp: new Date(data.function.startTime),
-          value: data.function.executionTime,
-          features: {
-            cached: data.function.cached ? 1 : 0,
-            parlantTime: data.function.parlantTime,
-            overheadTime: data.function.overheadTime,
+        this.predictiveAnalytics.addTrainingData("execution_time", [
+          {
+            timestamp: new Date(data.function.startTime),
+            value: data.function.executionTime,
+            features: {
+              cached: data.function.cached ? 1 : 0,
+              parlantTime: data.function.parlantTime,
+              overheadTime: data.function.overheadTime,
+            },
+            quality: {
+              confidence: 1.0,
+              outlier: false,
+              interpolated: false,
+            },
           },
-          quality: {
-            confidence: 1.0,
-            outlier: false,
-            interpolated: false,
-          },
-        }]);
+        ]);
       }
 
       this.emit("performance.recorded", data);
@@ -453,7 +477,9 @@ export class ComprehensiveMonitoringSystem extends EventEmitter {
   /**
    * Generate performance forecast
    */
-  async generatePerformanceForecast(horizon: number = 3600000): Promise<PerformanceForecast | null> {
+  async generatePerformanceForecast(
+    horizon: number = 3600000,
+  ): Promise<PerformanceForecast | null> {
     if (!this.predictiveAnalytics) {
       this.logger.warn("Predictive Analytics is not enabled");
       return null;
@@ -499,7 +525,7 @@ export class ComprehensiveMonitoringSystem extends EventEmitter {
   async generateComprehensiveReport(
     type: ComprehensiveReport["metadata"]["type"] = "operational",
     format: ComprehensiveReport["metadata"]["format"] = "json",
-    period?: { start: Date; end: Date }
+    period?: { start: Date; end: Date },
   ): Promise<ComprehensiveReport> {
     const reportPeriod = period || {
       start: new Date(Date.now() - 24 * 60 * 60 * 1000), // Last 24 hours
@@ -528,7 +554,9 @@ export class ComprehensiveMonitoringSystem extends EventEmitter {
   /**
    * Correlate alerts across components
    */
-  async correlateAlerts(timeWindow: number = 300000): Promise<AlertCorrelation[]> {
+  async correlateAlerts(
+    timeWindow: number = 300000,
+  ): Promise<AlertCorrelation[]> {
     const cutoffTime = new Date(Date.now() - timeWindow);
     const correlations: AlertCorrelation[] = [];
 
@@ -536,7 +564,9 @@ export class ComprehensiveMonitoringSystem extends EventEmitter {
     const allAlerts: PerformanceAlert[] = [];
 
     if (this.performanceMonitoring) {
-      const perfAlerts = this.performanceMonitoring.getComponents().alertManager.getActiveAlerts();
+      const perfAlerts = this.performanceMonitoring
+        .getComponents()
+        .alertManager.getActiveAlerts();
       allAlerts.push(...perfAlerts);
     }
 
@@ -560,12 +590,19 @@ export class ComprehensiveMonitoringSystem extends EventEmitter {
    * Apply optimization recommendation
    */
   async applyOptimization(recommendationId: string): Promise<boolean> {
-    const recommendation = this.optimizationRecommendations.find(r => r.id === recommendationId);
+    const recommendation = this.optimizationRecommendations.find(
+      (r) => r.id === recommendationId,
+    );
     if (!recommendation) {
-      throw new Error(`Optimization recommendation not found: ${recommendationId}`);
+      throw new Error(
+        `Optimization recommendation not found: ${recommendationId}`,
+      );
     }
 
-    if (recommendation.approval.required && recommendation.approval.status !== "approved") {
+    if (
+      recommendation.approval.required &&
+      recommendation.approval.status !== "approved"
+    ) {
       throw new Error("Optimization requires approval before implementation");
     }
 
@@ -578,7 +615,10 @@ export class ComprehensiveMonitoringSystem extends EventEmitter {
 
       return true;
     } catch (error) {
-      this.logger.error(`Failed to apply optimization ${recommendationId}:`, error);
+      this.logger.error(
+        `Failed to apply optimization ${recommendationId}:`,
+        error,
+      );
       return false;
     }
   }
@@ -603,7 +643,9 @@ export class ComprehensiveMonitoringSystem extends EventEmitter {
 
   // ===== PRIVATE IMPLEMENTATION METHODS =====
 
-  private mergeConfig(userConfig: Partial<ComprehensiveMonitoringConfig>): ComprehensiveMonitoringConfig {
+  private mergeConfig(
+    userConfig: Partial<ComprehensiveMonitoringConfig>,
+  ): ComprehensiveMonitoringConfig {
     const defaultConfig: ComprehensiveMonitoringConfig = {
       systemId: "parlant-monitoring-system",
       environment: "production",
@@ -707,25 +749,33 @@ export class ComprehensiveMonitoringSystem extends EventEmitter {
     if (!this.performanceMonitoring) return;
 
     // Forward performance data to other components
-    this.performanceMonitoring.on("function.executed", (data: FunctionPerformanceData) => {
-      if (this.dashboard) {
-        this.dashboard.updateMetrics([{
-          id: `func-${Date.now()}`,
-          timestamp: new Date(),
-          category: "FUNCTION_EXECUTION",
-          metricName: "execution_time",
-          value: data.executionTime,
-          unit: "ms",
-          tags: { functionName: data.functionName },
-          context: data,
-        }]);
-      }
-    });
+    this.performanceMonitoring.on(
+      "function.executed",
+      (data: FunctionPerformanceData) => {
+        if (this.dashboard) {
+          this.dashboard.updateMetrics([
+            {
+              id: `func-${Date.now()}`,
+              timestamp: new Date(),
+              category: "FUNCTION_EXECUTION",
+              metricName: "execution_time",
+              value: data.executionTime,
+              unit: "ms",
+              tags: { functionName: data.functionName },
+              context: data,
+            },
+          ]);
+        }
+      },
+    );
 
-    this.performanceMonitoring.on("alert.created", (alert: PerformanceAlert) => {
-      this.emit("unified.alert", alert);
-      this.correlateAlerts(300000); // 5 minute window
-    });
+    this.performanceMonitoring.on(
+      "alert.created",
+      (alert: PerformanceAlert) => {
+        this.emit("unified.alert", alert);
+        this.correlateAlerts(300000); // 5 minute window
+      },
+    );
   }
 
   private setupDashboardIntegration(): void {
@@ -740,10 +790,13 @@ export class ComprehensiveMonitoringSystem extends EventEmitter {
   private setupPredictiveIntegration(): void {
     if (!this.predictiveAnalytics) return;
 
-    this.predictiveAnalytics.on("anomaly.detected", (anomaly: AnomalyDetection) => {
-      this.emit("unified.anomaly", anomaly);
-      this.generateOptimizationRecommendations();
-    });
+    this.predictiveAnalytics.on(
+      "anomaly.detected",
+      (anomaly: AnomalyDetection) => {
+        this.emit("unified.anomaly", anomaly);
+        this.generateOptimizationRecommendations();
+      },
+    );
 
     this.predictiveAnalytics.on("prediction.generated", () => {
       this.generateOptimizationRecommendations();
@@ -844,7 +897,9 @@ export class ComprehensiveMonitoringSystem extends EventEmitter {
     // Synchronize data between components
     try {
       if (this.performanceMonitoring && this.dashboard) {
-        const perfStats = this.performanceMonitoring.getComponents().performanceMonitor.getCurrentStats();
+        const perfStats = this.performanceMonitoring
+          .getComponents()
+          .performanceMonitor.getCurrentStats();
         // Update dashboard would happen here
       }
 
@@ -881,7 +936,9 @@ export class ComprehensiveMonitoringSystem extends EventEmitter {
 
     // Calculate overall health score
     const componentCount = Object.keys(health.components).length;
-    const upComponents = Object.values(health.components).filter(s => s === "up").length;
+    const upComponents = Object.values(health.components).filter(
+      (s) => s === "up",
+    ).length;
     health.score = (upComponents / componentCount) * 100;
 
     if (health.score < 50) health.overall = "critical";
@@ -898,8 +955,13 @@ export class ComprehensiveMonitoringSystem extends EventEmitter {
 
     // Performance-based recommendations
     if (this.performanceMonitoring) {
-      const perfStats = this.performanceMonitoring.getComponents().performanceMonitor.getCurrentStats();
-      if (perfStats && perfStats.p95 > this.config.globalThresholds.responseTime) {
+      const perfStats = this.performanceMonitoring
+        .getComponents()
+        .performanceMonitor.getCurrentStats();
+      if (
+        perfStats &&
+        perfStats.p95 > this.config.globalThresholds.responseTime
+      ) {
         recommendations.push({
           id: `perf-opt-${Date.now()}`,
           type: "performance",
@@ -932,7 +994,8 @@ export class ComprehensiveMonitoringSystem extends EventEmitter {
     // Capacity-based recommendations
     if (this.predictiveAnalytics) {
       try {
-        const capacityPrediction = await this.predictiveAnalytics.generateCapacityPrediction("cpu");
+        const capacityPrediction =
+          await this.predictiveAnalytics.generateCapacityPrediction("cpu");
         if (capacityPrediction.timeToThreshold.warning) {
           recommendations.push({
             id: `capacity-opt-${Date.now()}`,
@@ -1012,9 +1075,14 @@ export class ComprehensiveMonitoringSystem extends EventEmitter {
     }
   }
 
-  private groupAlertsByProximity(alerts: PerformanceAlert[], timeWindow: number): PerformanceAlert[][] {
+  private groupAlertsByProximity(
+    alerts: PerformanceAlert[],
+    timeWindow: number,
+  ): PerformanceAlert[][] {
     const groups: PerformanceAlert[][] = [];
-    const sortedAlerts = alerts.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+    const sortedAlerts = alerts.sort(
+      (a, b) => a.timestamp.getTime() - b.timestamp.getTime(),
+    );
 
     let currentGroup: PerformanceAlert[] = [];
     let groupStartTime = 0;
@@ -1022,7 +1090,10 @@ export class ComprehensiveMonitoringSystem extends EventEmitter {
     for (const alert of sortedAlerts) {
       const alertTime = alert.timestamp.getTime();
 
-      if (currentGroup.length === 0 || alertTime - groupStartTime <= timeWindow) {
+      if (
+        currentGroup.length === 0 ||
+        alertTime - groupStartTime <= timeWindow
+      ) {
         if (currentGroup.length === 0) {
           groupStartTime = alertTime;
         }
@@ -1043,7 +1114,9 @@ export class ComprehensiveMonitoringSystem extends EventEmitter {
     return groups;
   }
 
-  private async analyzeAlertCorrelation(alerts: PerformanceAlert[]): Promise<AlertCorrelation> {
+  private async analyzeAlertCorrelation(
+    alerts: PerformanceAlert[],
+  ): Promise<AlertCorrelation> {
     // Simplified correlation analysis
     const correlation: AlertCorrelation = {
       id: `correlation-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -1052,8 +1125,9 @@ export class ComprehensiveMonitoringSystem extends EventEmitter {
       rootCause: {
         component: "cache_layer",
         cause: "Cache performance degradation affecting response times",
-        evidence: alerts.map(a => a.message),
-        recommendation: "Investigate cache configuration and optimize TTL settings",
+        evidence: alerts.map((a) => a.message),
+        recommendation:
+          "Investigate cache configuration and optimize TTL settings",
       },
       impact: {
         scope: "regional",
@@ -1067,7 +1141,9 @@ export class ComprehensiveMonitoringSystem extends EventEmitter {
     return correlation;
   }
 
-  private async executeOptimization(recommendation: OptimizationRecommendation): Promise<void> {
+  private async executeOptimization(
+    recommendation: OptimizationRecommendation,
+  ): Promise<void> {
     this.logger.log(`Executing optimization: ${recommendation.title}`);
 
     // Implementation would depend on optimization type
@@ -1086,22 +1162,30 @@ export class ComprehensiveMonitoringSystem extends EventEmitter {
     }
   }
 
-  private async executePerformanceOptimization(recommendation: OptimizationRecommendation): Promise<void> {
+  private async executePerformanceOptimization(
+    recommendation: OptimizationRecommendation,
+  ): Promise<void> {
     // Performance optimization implementation
     this.logger.log("Executing performance optimization");
   }
 
-  private async executeCapacityOptimization(recommendation: OptimizationRecommendation): Promise<void> {
+  private async executeCapacityOptimization(
+    recommendation: OptimizationRecommendation,
+  ): Promise<void> {
     // Capacity optimization implementation
     this.logger.log("Executing capacity optimization");
   }
 
-  private async executeReliabilityOptimization(recommendation: OptimizationRecommendation): Promise<void> {
+  private async executeReliabilityOptimization(
+    recommendation: OptimizationRecommendation,
+  ): Promise<void> {
     // Reliability optimization implementation
     this.logger.log("Executing reliability optimization");
   }
 
-  private async generateExecutiveSummary(): Promise<ComprehensiveReport["executiveSummary"]> {
+  private async generateExecutiveSummary(): Promise<
+    ComprehensiveReport["executiveSummary"]
+  > {
     return {
       systemHealth: this.getSystemHealth(),
       keyMetrics: {
@@ -1127,8 +1211,12 @@ export class ComprehensiveMonitoringSystem extends EventEmitter {
     };
   }
 
-  private async generatePerformanceAnalysis(): Promise<ComprehensiveReport["performance"]> {
-    const perfStats = this.performanceMonitoring?.getComponents().performanceMonitor.getCurrentStats();
+  private async generatePerformanceAnalysis(): Promise<
+    ComprehensiveReport["performance"]
+  > {
+    const perfStats = this.performanceMonitoring
+      ?.getComponents()
+      .performanceMonitor.getCurrentStats();
 
     return {
       overview: perfStats || null,
@@ -1150,7 +1238,9 @@ export class ComprehensiveMonitoringSystem extends EventEmitter {
     };
   }
 
-  private async generateSLAAnalysis(): Promise<ComprehensiveReport["slaCompliance"]> {
+  private async generateSLAAnalysis(): Promise<
+    ComprehensiveReport["slaCompliance"]
+  > {
     const slaData = this.slaMonitor?.getDashboardData();
 
     return {
@@ -1162,10 +1252,14 @@ export class ComprehensiveMonitoringSystem extends EventEmitter {
     };
   }
 
-  private async generatePredictiveInsights(): Promise<ComprehensiveReport["predictions"]> {
+  private async generatePredictiveInsights(): Promise<
+    ComprehensiveReport["predictions"]
+  > {
     const forecast = await this.generatePerformanceForecast();
     const cpuCapacity = this.predictiveAnalytics
-      ? await this.predictiveAnalytics.generateCapacityPrediction("cpu").catch(() => null)
+      ? await this.predictiveAnalytics
+          .generateCapacityPrediction("cpu")
+          .catch(() => null)
       : null;
 
     return {
@@ -1187,7 +1281,9 @@ export class ComprehensiveMonitoringSystem extends EventEmitter {
     };
   }
 
-  private async calculateFinancialImpact(): Promise<ComprehensiveReport["financialImpact"]> {
+  private async calculateFinancialImpact(): Promise<
+    ComprehensiveReport["financialImpact"]
+  > {
     return {
       costSavings: "$12,500 saved through optimization",
       efficiency: "18% improvement in resource utilization",
@@ -1199,7 +1295,10 @@ export class ComprehensiveMonitoringSystem extends EventEmitter {
   private async generateAutomatedReports(): Promise<void> {
     try {
       for (const schedule of this.config.reporting.reportSchedule) {
-        const report = await this.generateComprehensiveReport("operational", "json");
+        const report = await this.generateComprehensiveReport(
+          "operational",
+          "json",
+        );
         this.emit("automated.report.generated", { schedule, report });
       }
     } catch (error) {
@@ -1211,15 +1310,18 @@ export class ComprehensiveMonitoringSystem extends EventEmitter {
 /**
  * Default comprehensive monitoring system instance
  */
-export const comprehensiveMonitoringSystem = new ComprehensiveMonitoringSystem();
+export const comprehensiveMonitoringSystem =
+  new ComprehensiveMonitoringSystem();
 
 /**
  * Start comprehensive monitoring with configuration
  */
 export async function startComprehensiveMonitoring(
-  config?: Partial<ComprehensiveMonitoringConfig>
+  config?: Partial<ComprehensiveMonitoringConfig>,
 ): Promise<ComprehensiveMonitoringSystem> {
-  const system = config ? new ComprehensiveMonitoringSystem(config) : comprehensiveMonitoringSystem;
+  const system = config
+    ? new ComprehensiveMonitoringSystem(config)
+    : comprehensiveMonitoringSystem;
   await system.start();
   return system;
 }

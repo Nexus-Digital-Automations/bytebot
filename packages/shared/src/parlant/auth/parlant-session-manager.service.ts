@@ -10,8 +10,8 @@
  * @priority HIGH - Core session management for Parlant integration
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { ParlantContext } from './parlant-jwt-bridge.service';
+import { Injectable, Logger } from "@nestjs/common";
+import { ParlantContext } from "./parlant-jwt-bridge.service";
 
 export interface ParlantSession {
   sessionId: string;
@@ -53,11 +53,13 @@ export class ParlantSessionManager {
     sessionTimeout: 3600000, // 1 hour
     cleanupInterval: 300000, // 5 minutes
     geolocationTracking: true,
-    deviceFingerprinting: true
+    deviceFingerprinting: true,
   };
 
   constructor() {
-    this.logger.log('PARLANT Session Manager initialized with enterprise configuration');
+    this.logger.log(
+      "PARLANT Session Manager initialized with enterprise configuration",
+    );
     this.startSessionCleanup();
   }
 
@@ -71,7 +73,7 @@ export class ParlantSessionManager {
       ipAddress?: string;
       userAgent?: string;
       location?: any;
-    }
+    },
   ): Promise<ParlantSession> {
     const sessionId = context.sessionId || this.generateSessionId();
 
@@ -92,10 +94,10 @@ export class ParlantSessionManager {
       expiresAt: new Date(Date.now() + this.config.sessionTimeout),
       isActive: true,
       metadata: {
-        bridgeVersion: '1.0.0',
+        bridgeVersion: "1.0.0",
         parlantIntegration: true,
-        ...context.metadata
-      }
+        ...context.metadata,
+      },
     };
 
     // Store session
@@ -107,7 +109,9 @@ export class ParlantSessionManager {
     }
     this.userSessions.get(context.userId)!.add(sessionId);
 
-    this.logger.debug(`Created session ${sessionId} for user ${context.userId} in conversation ${context.conversationId}`);
+    this.logger.debug(
+      `Created session ${sessionId} for user ${context.userId} in conversation ${context.conversationId}`,
+    );
 
     return session;
   }
@@ -198,7 +202,9 @@ export class ParlantSessionManager {
       }
     }
 
-    this.logger.debug(`Terminated session ${sessionId} for user ${session.userId}`);
+    this.logger.debug(
+      `Terminated session ${sessionId} for user ${session.userId}`,
+    );
     return true;
   }
 
@@ -221,7 +227,9 @@ export class ParlantSessionManager {
       }
     }
 
-    this.logger.log(`Terminated ${terminatedCount} sessions for user ${userId}`);
+    this.logger.log(
+      `Terminated ${terminatedCount} sessions for user ${userId}`,
+    );
     return terminatedCount;
   }
 
@@ -231,7 +239,10 @@ export class ParlantSessionManager {
   private async enforceSessionLimits(userId: string): Promise<void> {
     const userSessionIds = this.userSessions.get(userId);
 
-    if (!userSessionIds || userSessionIds.size < this.config.maxConcurrentSessions) {
+    if (
+      !userSessionIds ||
+      userSessionIds.size < this.config.maxConcurrentSessions
+    ) {
       return;
     }
 
@@ -251,7 +262,9 @@ export class ParlantSessionManager {
 
     if (oldestSessionId) {
       await this.terminateSession(oldestSessionId);
-      this.logger.warn(`Terminated oldest session ${oldestSessionId} for user ${userId} due to session limit`);
+      this.logger.warn(
+        `Terminated oldest session ${oldestSessionId} for user ${userId} due to session limit`,
+      );
     }
   }
 
@@ -272,7 +285,9 @@ export class ParlantSessionManager {
       this.cleanupExpiredSessions();
     }, this.config.cleanupInterval);
 
-    this.logger.debug(`Session cleanup scheduled every ${this.config.cleanupInterval}ms`);
+    this.logger.debug(
+      `Session cleanup scheduled every ${this.config.cleanupInterval}ms`,
+    );
   }
 
   /**
@@ -299,13 +314,16 @@ export class ParlantSessionManager {
    * Get session metrics for monitoring
    */
   getSessionMetrics(): SessionMetrics {
-    const activeSessions = Array.from(this.sessions.values()).filter(s => s.isActive);
+    const activeSessions = Array.from(this.sessions.values()).filter(
+      (s) => s.isActive,
+    );
     const userSessionCounts: Record<string, number> = {};
     const deviceCounts: Record<string, number> = {};
 
-    activeSessions.forEach(session => {
+    activeSessions.forEach((session) => {
       // Count sessions per user
-      userSessionCounts[session.userId] = (userSessionCounts[session.userId] || 0) + 1;
+      userSessionCounts[session.userId] =
+        (userSessionCounts[session.userId] || 0) + 1;
 
       // Count sessions per device type
       if (session.userAgent) {
@@ -321,9 +339,10 @@ export class ParlantSessionManager {
     return {
       totalSessions: this.sessions.size,
       activeSessions: activeSessions.length,
-      averageSessionDuration: activeSessions.length > 0 ? totalDuration / activeSessions.length : 0,
+      averageSessionDuration:
+        activeSessions.length > 0 ? totalDuration / activeSessions.length : 0,
       concurrentSessionsPerUser: userSessionCounts,
-      deviceDistribution: deviceCounts
+      deviceDistribution: deviceCounts,
     };
   }
 
@@ -332,30 +351,33 @@ export class ParlantSessionManager {
    */
   private extractDeviceType(userAgent: string): string {
     if (/Mobile|Android|iPhone|iPad/.test(userAgent)) {
-      return 'mobile';
+      return "mobile";
     } else if (/Tablet/.test(userAgent)) {
-      return 'tablet';
+      return "tablet";
     } else {
-      return 'desktop';
+      return "desktop";
     }
   }
 
   /**
    * Health check for session manager
    */
-  async healthCheck(): Promise<{ status: 'healthy' | 'degraded' | 'unhealthy'; metrics: SessionMetrics }> {
+  async healthCheck(): Promise<{
+    status: "healthy" | "degraded" | "unhealthy";
+    metrics: SessionMetrics;
+  }> {
     try {
       const metrics = this.getSessionMetrics();
 
       // Check if we have too many sessions (potential memory issue)
-      const status = metrics.totalSessions > 10000 ? 'degraded' : 'healthy';
+      const status = metrics.totalSessions > 10000 ? "degraded" : "healthy";
 
       return { status, metrics };
     } catch (error) {
-      this.logger.error('Session Manager health check failed', error);
+      this.logger.error("Session Manager health check failed", error);
       return {
-        status: 'unhealthy',
-        metrics: this.getSessionMetrics()
+        status: "unhealthy",
+        metrics: this.getSessionMetrics(),
       };
     }
   }

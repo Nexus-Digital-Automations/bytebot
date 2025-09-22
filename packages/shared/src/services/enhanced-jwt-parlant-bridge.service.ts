@@ -1063,7 +1063,7 @@ export class EnhancedJwtParlantBridgeService
     // Token parsing implementation
     try {
       const decoded = jwt.decode(token);
-      if (typeof decoded === 'string' || decoded === null) {
+      if (typeof decoded === "string" || decoded === null) {
         throw new UnauthorizedException("Invalid token payload type");
       }
       return decoded as Record<string, unknown>;
@@ -1278,13 +1278,15 @@ export class EnhancedJwtParlantBridgeService
   private async generateComplianceFindings(
     _reportType: string,
     _auditAnalysis: Record<string, unknown>,
-  ): Promise<Array<{
-    category: string;
-    severity: "low" | "medium" | "high" | "critical";
-    description: string;
-    evidence: string[];
-    remediation: string[];
-  }>> {
+  ): Promise<
+    Array<{
+      category: string;
+      severity: "low" | "medium" | "high" | "critical";
+      description: string;
+      evidence: string[];
+      remediation: string[];
+    }>
+  > {
     // Compliance findings generation
     return [];
   }

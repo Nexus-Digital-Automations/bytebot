@@ -9,9 +9,19 @@
  * @compliance GDPR, SOX, HIPAA, SOC2
  */
 
-import { Injectable, Logger, ForbiddenException, BadRequestException } from '@nestjs/common';
-import { createHash, randomBytes, createCipheriv, createDecipheriv } from 'crypto';
-import { v4 as uuidv4 } from 'uuid';
+import {
+  Injectable,
+  Logger,
+  ForbiddenException,
+  BadRequestException,
+} from "@nestjs/common";
+import {
+  createHash,
+  randomBytes,
+  createCipheriv,
+  createDecipheriv,
+} from "crypto";
+import { v4 as uuidv4 } from "uuid";
 import {
   EmergencyBypassToken,
   EmergencyTokenStatus,
@@ -22,8 +32,8 @@ import {
   ApprovalDecision,
   SecurityFlag,
   TokenSecurityMetadata,
-  EmergencyBypassTokenSchema
-} from '../types/bypass-core.types';
+  EmergencyBypassTokenSchema,
+} from "../types/bypass-core.types";
 
 /**
  * Emergency token creation request
@@ -146,19 +156,26 @@ export class EmergencyTokenManagerService {
   private readonly logger = new Logger(EmergencyTokenManagerService.name);
   private readonly tokenStore = new Map<string, EmergencyBypassToken>();
   private readonly encryptionKey: Buffer;
-  private readonly encryptionAlgorithm = 'aes-256-gcm';
+  private readonly encryptionAlgorithm = "aes-256-gcm";
 
   constructor() {
     // Initialize encryption key (should be loaded from secure configuration)
-    this.encryptionKey = Buffer.from(process.env.BYPASS_ENCRYPTION_KEY || this.generateDefaultKey(), 'hex');
+    this.encryptionKey = Buffer.from(
+      process.env.BYPASS_ENCRYPTION_KEY || this.generateDefaultKey(),
+      "hex",
+    );
     this.startTokenCleanupTimer();
   }
 
   /**
    * Create emergency bypass token with security validation
    */
-  async createEmergencyToken(request: CreateEmergencyTokenRequest): Promise<EmergencyBypassToken> {
-    this.logger.warn(`Emergency token requested by ${request.requestedBy} for ${request.reason}`);
+  async createEmergencyToken(
+    request: CreateEmergencyTokenRequest,
+  ): Promise<EmergencyBypassToken> {
+    this.logger.warn(
+      `Emergency token requested by ${request.requestedBy} for ${request.reason}`,
+    );
 
     // Validate request
     await this.validateTokenRequest(request);
@@ -178,7 +195,7 @@ export class EmergencyTokenManagerService {
       riskScore,
       securityFlags: await this.detectSecurityFlags(request),
       encryptionAlgorithm: this.encryptionAlgorithm,
-      tokenHash
+      tokenHash,
     };
 
     // Create token
@@ -194,23 +211,27 @@ export class EmergencyTokenManagerService {
       allowedFunctions: request.allowedFunctions,
       maxOperations: request.maxOperations,
       operationsPerformed: 0,
-      status: this.requiresApproval(request.authorizationLevel) ? EmergencyTokenStatus.PENDING : EmergencyTokenStatus.ACTIVE,
+      status: this.requiresApproval(request.authorizationLevel)
+        ? EmergencyTokenStatus.PENDING
+        : EmergencyTokenStatus.ACTIVE,
       approvals: [],
       reason: request.reason,
-      securityMetadata
+      securityMetadata,
     };
 
     // Validate token structure
     const validationResult = EmergencyBypassTokenSchema.safeParse(token);
     if (!validationResult.success) {
-      throw new BadRequestException('Invalid token structure');
+      throw new BadRequestException("Invalid token structure");
     }
 
     // Store token
     this.tokenStore.set(token.tokenId, token);
 
     // Log token creation
-    this.logger.warn(`Emergency token ${token.tokenId} created for ${request.requestedBy} with ${request.authorizationLevel} authorization`);
+    this.logger.warn(
+      `Emergency token ${token.tokenId} created for ${request.requestedBy} with ${request.authorizationLevel} authorization`,
+    );
 
     // Trigger approval workflow if required
     if (this.requiresApproval(request.authorizationLevel)) {
@@ -220,27 +241,30 @@ export class EmergencyTokenManagerService {
     // Return token with unencrypted value for immediate use
     return {
       ...token,
-      tokenValue // Return unencrypted for initial response
+      tokenValue, // Return unencrypted for initial response
     };
   }
 
   /**
    * Approve emergency token
    */
-  async approveToken(tokenId: string, approval: Omit<TokenApproval, 'signature'>): Promise<EmergencyBypassToken> {
+  async approveToken(
+    tokenId: string,
+    approval: Omit<TokenApproval, "signature">,
+  ): Promise<EmergencyBypassToken> {
     const token = this.tokenStore.get(tokenId);
     if (!token) {
-      throw new BadRequestException('Token not found');
+      throw new BadRequestException("Token not found");
     }
 
     if (token.status !== EmergencyTokenStatus.PENDING) {
-      throw new BadRequestException('Token is not pending approval');
+      throw new BadRequestException("Token is not pending approval");
     }
 
     // Create approval with signature
     const approvalWithSignature: TokenApproval = {
       ...approval,
-      signature: this.createApprovalSignature(tokenId, approval)
+      signature: this.createApprovalSignature(tokenId, approval),
     };
 
     // Add approval
@@ -259,29 +283,37 @@ export class EmergencyTokenManagerService {
   /**
    * Validate emergency token for operation
    */
-  async validateToken(request: ValidateTokenRequest): Promise<TokenValidationResult> {
+  async validateToken(
+    request: ValidateTokenRequest,
+  ): Promise<TokenValidationResult> {
     try {
       // Find token by value hash
       const tokenHash = this.hashToken(request.tokenValue);
       const token = Array.from(this.tokenStore.values()).find(
-        t => t.securityMetadata.tokenHash === tokenHash
+        (t) => t.securityMetadata.tokenHash === tokenHash,
       );
 
       if (!token) {
         return {
           valid: false,
-          error: 'Token not found'
+          error: "Token not found",
         };
       }
 
       // Basic validation checks
-      const validationChecks = await this.performBasicValidation(token, request);
+      const validationChecks = await this.performBasicValidation(
+        token,
+        request,
+      );
       if (!validationChecks.valid) {
         return validationChecks;
       }
 
       // Security validation
-      const securityValidation = await this.performSecurityValidation(token, request);
+      const securityValidation = await this.performSecurityValidation(
+        token,
+        request,
+      );
       if (!securityValidation.valid) {
         return securityValidation;
       }
@@ -292,25 +324,28 @@ export class EmergencyTokenManagerService {
       // Check if token is exhausted
       if (token.operationsPerformed >= token.maxOperations) {
         token.status = EmergencyTokenStatus.EXHAUSTED;
-        this.logger.warn(`Emergency token ${token.tokenId} exhausted after ${token.operationsPerformed} operations`);
+        this.logger.warn(
+          `Emergency token ${token.tokenId} exhausted after ${token.operationsPerformed} operations`,
+        );
       }
 
       this.tokenStore.set(token.tokenId, token);
 
-      this.logger.warn(`Emergency token ${token.tokenId} used for ${request.functionName} (operation ${token.operationsPerformed}/${token.maxOperations})`);
+      this.logger.warn(
+        `Emergency token ${token.tokenId} used for ${request.functionName} (operation ${token.operationsPerformed}/${token.maxOperations})`,
+      );
 
       return {
         valid: true,
         token,
         updatedToken: token,
-        warnings: securityValidation.warnings
+        warnings: securityValidation.warnings,
       };
-
     } catch (error) {
-      this.logger.error('Token validation error', error);
+      this.logger.error("Token validation error", error);
       return {
         valid: false,
-        error: 'Token validation failed'
+        error: "Token validation failed",
       };
     }
   }
@@ -318,28 +353,36 @@ export class EmergencyTokenManagerService {
   /**
    * Revoke emergency token
    */
-  async revokeToken(tokenId: string, reason: string, revokedBy: string): Promise<void> {
+  async revokeToken(
+    tokenId: string,
+    reason: string,
+    revokedBy: string,
+  ): Promise<void> {
     const token = this.tokenStore.get(tokenId);
     if (!token) {
-      throw new BadRequestException('Token not found');
+      throw new BadRequestException("Token not found");
     }
 
     token.status = EmergencyTokenStatus.REVOKED;
     this.tokenStore.set(tokenId, token);
 
-    this.logger.warn(`Emergency token ${tokenId} revoked by ${revokedBy}: ${reason}`);
+    this.logger.warn(
+      `Emergency token ${tokenId} revoked by ${revokedBy}: ${reason}`,
+    );
   }
 
   /**
    * List active emergency tokens
    */
-  async listActiveTokens(userRole?: BypassRole): Promise<EmergencyBypassToken[]> {
+  async listActiveTokens(
+    userRole?: BypassRole,
+  ): Promise<EmergencyBypassToken[]> {
     const activeTokens = Array.from(this.tokenStore.values()).filter(
-      token => token.status === EmergencyTokenStatus.ACTIVE
+      (token) => token.status === EmergencyTokenStatus.ACTIVE,
     );
 
     if (userRole) {
-      return activeTokens.filter(token => this.canViewToken(token, userRole));
+      return activeTokens.filter((token) => this.canViewToken(token, userRole));
     }
 
     return activeTokens;
@@ -353,14 +396,27 @@ export class EmergencyTokenManagerService {
 
     return {
       total: tokens.length,
-      active: tokens.filter(t => t.status === EmergencyTokenStatus.ACTIVE).length,
-      pending: tokens.filter(t => t.status === EmergencyTokenStatus.PENDING).length,
-      expired: tokens.filter(t => t.status === EmergencyTokenStatus.EXPIRED).length,
-      revoked: tokens.filter(t => t.status === EmergencyTokenStatus.REVOKED).length,
-      exhausted: tokens.filter(t => t.status === EmergencyTokenStatus.EXHAUSTED).length,
-      suspended: tokens.filter(t => t.status === EmergencyTokenStatus.SUSPENDED).length,
-      totalOperations: tokens.reduce((sum, t) => sum + t.operationsPerformed, 0),
-      averageRiskScore: tokens.reduce((sum, t) => sum + t.securityMetadata.riskScore, 0) / tokens.length || 0
+      active: tokens.filter((t) => t.status === EmergencyTokenStatus.ACTIVE)
+        .length,
+      pending: tokens.filter((t) => t.status === EmergencyTokenStatus.PENDING)
+        .length,
+      expired: tokens.filter((t) => t.status === EmergencyTokenStatus.EXPIRED)
+        .length,
+      revoked: tokens.filter((t) => t.status === EmergencyTokenStatus.REVOKED)
+        .length,
+      exhausted: tokens.filter(
+        (t) => t.status === EmergencyTokenStatus.EXHAUSTED,
+      ).length,
+      suspended: tokens.filter(
+        (t) => t.status === EmergencyTokenStatus.SUSPENDED,
+      ).length,
+      totalOperations: tokens.reduce(
+        (sum, t) => sum + t.operationsPerformed,
+        0,
+      ),
+      averageRiskScore:
+        tokens.reduce((sum, t) => sum + t.securityMetadata.riskScore, 0) /
+          tokens.length || 0,
     };
   }
 
@@ -371,37 +427,46 @@ export class EmergencyTokenManagerService {
   /**
    * Validate token creation request
    */
-  private async validateTokenRequest(request: CreateEmergencyTokenRequest): Promise<void> {
+  private async validateTokenRequest(
+    request: CreateEmergencyTokenRequest,
+  ): Promise<void> {
     // Validate duration
     if (request.durationMinutes < 5 || request.durationMinutes > 1440) {
-      throw new BadRequestException('Token duration must be between 5 minutes and 24 hours');
+      throw new BadRequestException(
+        "Token duration must be between 5 minutes and 24 hours",
+      );
     }
 
     // Validate max operations
     if (request.maxOperations < 1 || request.maxOperations > 1000) {
-      throw new BadRequestException('Max operations must be between 1 and 1000');
+      throw new BadRequestException(
+        "Max operations must be between 1 and 1000",
+      );
     }
 
     // Validate reason length
     if (request.reason.length < 10) {
-      throw new BadRequestException('Reason must be at least 10 characters');
+      throw new BadRequestException("Reason must be at least 10 characters");
     }
 
     // Check for existing active tokens
     const existingTokens = Array.from(this.tokenStore.values()).filter(
-      token => token.requestedBy === request.requestedBy &&
-               token.status === EmergencyTokenStatus.ACTIVE
+      (token) =>
+        token.requestedBy === request.requestedBy &&
+        token.status === EmergencyTokenStatus.ACTIVE,
     );
 
     if (existingTokens.length >= 3) {
-      throw new ForbiddenException('Maximum of 3 active tokens per user');
+      throw new ForbiddenException("Maximum of 3 active tokens per user");
     }
   }
 
   /**
    * Calculate risk score for token request
    */
-  private async calculateRiskScore(request: CreateEmergencyTokenRequest): Promise<number> {
+  private async calculateRiskScore(
+    request: CreateEmergencyTokenRequest,
+  ): Promise<number> {
     let riskScore = 0;
 
     // Base risk by authorization level
@@ -424,10 +489,14 @@ export class EmergencyTokenManagerService {
     }
 
     // Risk by operation types
-    if (request.allowedOperations.includes(BypassOperationType.DATABASE_CRITICAL)) {
+    if (
+      request.allowedOperations.includes(BypassOperationType.DATABASE_CRITICAL)
+    ) {
       riskScore += 20;
     }
-    if (request.allowedOperations.includes(BypassOperationType.SECURITY_INCIDENT)) {
+    if (
+      request.allowedOperations.includes(BypassOperationType.SECURITY_INCIDENT)
+    ) {
       riskScore += 15;
     }
 
@@ -457,21 +526,26 @@ export class EmergencyTokenManagerService {
   /**
    * Detect security flags
    */
-  private async detectSecurityFlags(request: CreateEmergencyTokenRequest): Promise<SecurityFlag[]> {
+  private async detectSecurityFlags(
+    request: CreateEmergencyTokenRequest,
+  ): Promise<SecurityFlag[]> {
     const flags: SecurityFlag[] = [];
 
     // Check for high-risk authorization levels
-    if ([
-      BypassAuthorizationLevel.BOARD_APPROVAL,
-      BypassAuthorizationLevel.COMMITTEE_APPROVAL
-    ].includes(request.authorizationLevel)) {
+    if (
+      [
+        BypassAuthorizationLevel.BOARD_APPROVAL,
+        BypassAuthorizationLevel.COMMITTEE_APPROVAL,
+      ].includes(request.authorizationLevel)
+    ) {
       flags.push(SecurityFlag.ESCALATED_PRIVILEGES);
     }
 
     // Check for multiple recent requests (mock implementation)
     const recentTokens = Array.from(this.tokenStore.values()).filter(
-      token => token.requestedBy === request.requestedBy &&
-               Date.now() - token.createdAt.getTime() < 3600000 // 1 hour
+      (token) =>
+        token.requestedBy === request.requestedBy &&
+        Date.now() - token.createdAt.getTime() < 3600000, // 1 hour
     );
 
     if (recentTokens.length > 2) {
@@ -491,14 +565,14 @@ export class EmergencyTokenManagerService {
    * Generate secure token value
    */
   private generateSecureToken(): string {
-    return randomBytes(32).toString('hex');
+    return randomBytes(32).toString("hex");
   }
 
   /**
    * Hash token for secure storage
    */
   private hashToken(tokenValue: string): string {
-    return createHash('sha256').update(tokenValue).digest('hex');
+    return createHash("sha256").update(tokenValue).digest("hex");
   }
 
   /**
@@ -506,34 +580,42 @@ export class EmergencyTokenManagerService {
    */
   private encryptToken(tokenValue: string): string {
     const iv = randomBytes(16);
-    const cipher = createCipheriv(this.encryptionAlgorithm, this.encryptionKey, iv);
+    const cipher = createCipheriv(
+      this.encryptionAlgorithm,
+      this.encryptionKey,
+      iv,
+    );
 
-    let encrypted = cipher.update(tokenValue, 'utf8', 'hex');
-    encrypted += cipher.final('hex');
+    let encrypted = cipher.update(tokenValue, "utf8", "hex");
+    encrypted += cipher.final("hex");
 
     const authTag = cipher.getAuthTag();
 
-    return iv.toString('hex') + ':' + authTag.toString('hex') + ':' + encrypted;
+    return iv.toString("hex") + ":" + authTag.toString("hex") + ":" + encrypted;
   }
 
   /**
    * Decrypt token value
    */
   private decryptToken(encryptedToken: string): string {
-    const parts = encryptedToken.split(':');
+    const parts = encryptedToken.split(":");
     if (parts.length !== 3) {
-      throw new Error('Invalid encrypted token format');
+      throw new Error("Invalid encrypted token format");
     }
 
-    const iv = Buffer.from(parts[0], 'hex');
-    const authTag = Buffer.from(parts[1], 'hex');
+    const iv = Buffer.from(parts[0], "hex");
+    const authTag = Buffer.from(parts[1], "hex");
     const encrypted = parts[2];
 
-    const decipher = createDecipheriv(this.encryptionAlgorithm, this.encryptionKey, iv);
+    const decipher = createDecipheriv(
+      this.encryptionAlgorithm,
+      this.encryptionKey,
+      iv,
+    );
     decipher.setAuthTag(authTag);
 
-    let decrypted = decipher.update(encrypted, 'hex', 'utf8');
-    decrypted += decipher.final('utf8');
+    let decrypted = decipher.update(encrypted, "hex", "utf8");
+    decrypted += decipher.final("utf8");
 
     return decrypted;
   }
@@ -545,23 +627,28 @@ export class EmergencyTokenManagerService {
     return [
       BypassAuthorizationLevel.EMERGENCY_DUAL,
       BypassAuthorizationLevel.COMMITTEE_APPROVAL,
-      BypassAuthorizationLevel.BOARD_APPROVAL
+      BypassAuthorizationLevel.BOARD_APPROVAL,
     ].includes(authLevel);
   }
 
   /**
    * Create approval signature
    */
-  private createApprovalSignature(tokenId: string, approval: Omit<TokenApproval, 'signature'>): string {
+  private createApprovalSignature(
+    tokenId: string,
+    approval: Omit<TokenApproval, "signature">,
+  ): string {
     const data = `${tokenId}:${approval.approverId}:${approval.decision}:${approval.approvedAt.toISOString()}`;
-    return createHash('sha256').update(data).digest('hex');
+    return createHash("sha256").update(data).digest("hex");
   }
 
   /**
    * Check if token has sufficient approvals
    */
   private hassufficientApprovals(token: EmergencyBypassToken): boolean {
-    const approvedCount = token.approvals.filter(a => a.decision === ApprovalDecision.APPROVED).length;
+    const approvedCount = token.approvals.filter(
+      (a) => a.decision === ApprovalDecision.APPROVED,
+    ).length;
 
     switch (token.authorizationLevel) {
       case BypassAuthorizationLevel.EMERGENCY_DUAL:
@@ -580,13 +667,13 @@ export class EmergencyTokenManagerService {
    */
   private async performBasicValidation(
     token: EmergencyBypassToken,
-    request: ValidateTokenRequest
+    request: ValidateTokenRequest,
   ): Promise<TokenValidationResult> {
     // Check token status
     if (token.status !== EmergencyTokenStatus.ACTIVE) {
       return {
         valid: false,
-        error: `Token is ${token.status}`
+        error: `Token is ${token.status}`,
       };
     }
 
@@ -595,7 +682,7 @@ export class EmergencyTokenManagerService {
       token.status = EmergencyTokenStatus.EXPIRED;
       return {
         valid: false,
-        error: 'Token has expired'
+        error: "Token has expired",
       };
     }
 
@@ -604,7 +691,7 @@ export class EmergencyTokenManagerService {
       token.status = EmergencyTokenStatus.EXHAUSTED;
       return {
         valid: false,
-        error: 'Token operation limit exceeded'
+        error: "Token operation limit exceeded",
       };
     }
 
@@ -612,15 +699,18 @@ export class EmergencyTokenManagerService {
     if (!token.allowedOperations.includes(request.operationType)) {
       return {
         valid: false,
-        error: 'Operation type not allowed'
+        error: "Operation type not allowed",
       };
     }
 
     // Check allowed functions
-    if (token.allowedFunctions.length > 0 && !token.allowedFunctions.includes(request.functionName)) {
+    if (
+      token.allowedFunctions.length > 0 &&
+      !token.allowedFunctions.includes(request.functionName)
+    ) {
       return {
         valid: false,
-        error: 'Function not allowed'
+        error: "Function not allowed",
       };
     }
 
@@ -632,24 +722,27 @@ export class EmergencyTokenManagerService {
    */
   private async performSecurityValidation(
     token: EmergencyBypassToken,
-    request: ValidateTokenRequest
+    request: ValidateTokenRequest,
   ): Promise<TokenValidationResult & { warnings?: string[] }> {
     const warnings: string[] = [];
 
     // IP address validation
-    if (token.securityMetadata.requestedFromIp !== request.userContext.ipAddress) {
-      warnings.push('IP address mismatch detected');
+    if (
+      token.securityMetadata.requestedFromIp !== request.userContext.ipAddress
+    ) {
+      warnings.push("IP address mismatch detected");
     }
 
     // User agent validation
     if (token.securityMetadata.userAgent !== request.userContext.userAgent) {
-      warnings.push('User agent mismatch detected');
+      warnings.push("User agent mismatch detected");
     }
 
     // Time-based validation
     const timeSinceCreation = Date.now() - token.createdAt.getTime();
-    if (timeSinceCreation > 4 * 60 * 60 * 1000) { // 4 hours
-      warnings.push('Token used after extended period');
+    if (timeSinceCreation > 4 * 60 * 60 * 1000) {
+      // 4 hours
+      warnings.push("Token used after extended period");
     }
 
     return { valid: true, warnings };
@@ -658,9 +751,18 @@ export class EmergencyTokenManagerService {
   /**
    * Check if user can view token details
    */
-  private canViewToken(token: EmergencyBypassToken, userRole: BypassRole): boolean {
+  private canViewToken(
+    token: EmergencyBypassToken,
+    userRole: BypassRole,
+  ): boolean {
     // Admins can view all tokens
-    if ([BypassRole.EMERGENCY_ADMIN, BypassRole.SECURITY_ADMIN, BypassRole.AUDIT_ADMIN].includes(userRole)) {
+    if (
+      [
+        BypassRole.EMERGENCY_ADMIN,
+        BypassRole.SECURITY_ADMIN,
+        BypassRole.AUDIT_ADMIN,
+      ].includes(userRole)
+    ) {
       return true;
     }
 
@@ -672,8 +774,10 @@ export class EmergencyTokenManagerService {
    * Generate default encryption key (for development only)
    */
   private generateDefaultKey(): string {
-    this.logger.warn('Using default encryption key - configure BYPASS_ENCRYPTION_KEY in production');
-    return randomBytes(32).toString('hex');
+    this.logger.warn(
+      "Using default encryption key - configure BYPASS_ENCRYPTION_KEY in production",
+    );
+    return randomBytes(32).toString("hex");
   }
 
   /**
@@ -693,13 +797,16 @@ export class EmergencyTokenManagerService {
     const tokensToCleanup: string[] = [];
 
     this.tokenStore.forEach((token, tokenId) => {
-      if (token.status === EmergencyTokenStatus.EXPIRED &&
-          now.getTime() - token.expiresAt.getTime() > 24 * 60 * 60 * 1000) { // 24 hours after expiration
+      if (
+        token.status === EmergencyTokenStatus.EXPIRED &&
+        now.getTime() - token.expiresAt.getTime() > 24 * 60 * 60 * 1000
+      ) {
+        // 24 hours after expiration
         tokensToCleanup.push(tokenId);
       }
     });
 
-    tokensToCleanup.forEach(tokenId => {
+    tokensToCleanup.forEach((tokenId) => {
       this.tokenStore.delete(tokenId);
     });
 
@@ -711,9 +818,13 @@ export class EmergencyTokenManagerService {
   /**
    * Initiate approval workflow
    */
-  private async initiateApprovalWorkflow(token: EmergencyBypassToken): Promise<void> {
+  private async initiateApprovalWorkflow(
+    token: EmergencyBypassToken,
+  ): Promise<void> {
     // This would integrate with the approval workflow system
-    this.logger.warn(`Approval workflow initiated for token ${token.tokenId} with ${token.authorizationLevel} level`);
+    this.logger.warn(
+      `Approval workflow initiated for token ${token.tokenId} with ${token.authorizationLevel} level`,
+    );
 
     // In a real implementation, this would:
     // 1. Create approval workflow

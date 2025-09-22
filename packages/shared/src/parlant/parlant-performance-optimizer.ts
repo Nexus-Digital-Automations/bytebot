@@ -24,15 +24,15 @@ import {
   Injectable,
   Logger,
   OnApplicationShutdown,
-  OnModuleInit
-} from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+  OnModuleInit,
+} from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 import {
   ParlantValidationRequest,
   ParlantValidationResponse,
   SecurityLevel,
-  RiskLevel
-} from './parlant-validation.decorator';
+  RiskLevel,
+} from "./parlant-validation.decorator";
 
 // ===== PERFORMANCE OPTIMIZATION INTERFACES =====
 
@@ -154,7 +154,7 @@ export interface PerformanceMetrics {
 
   /** System health */
   health: {
-    status: 'HEALTHY' | 'DEGRADED' | 'UNHEALTHY';
+    status: "HEALTHY" | "DEGRADED" | "UNHEALTHY";
     uptime: number;
     lastFailure?: Date;
     errorRate: number;
@@ -205,10 +205,15 @@ export interface OptimizationStrategy {
  */
 export interface PerformanceAlert {
   /** Alert type */
-  type: 'RESPONSE_TIME' | 'ERROR_RATE' | 'CACHE_MISS' | 'RESOURCE_USAGE' | 'AVAILABILITY';
+  type:
+    | "RESPONSE_TIME"
+    | "ERROR_RATE"
+    | "CACHE_MISS"
+    | "RESOURCE_USAGE"
+    | "AVAILABILITY";
 
   /** Alert severity */
-  severity: 'INFO' | 'WARNING' | 'CRITICAL';
+  severity: "INFO" | "WARNING" | "CRITICAL";
 
   /** Threshold value */
   threshold: number;
@@ -226,19 +231,24 @@ export interface PerformanceAlert {
 // ===== PERFORMANCE OPTIMIZER SERVICE =====
 
 @Injectable()
-export class ParlantPerformanceOptimizer implements OnModuleInit, OnApplicationShutdown {
+export class ParlantPerformanceOptimizer
+  implements OnModuleInit, OnApplicationShutdown
+{
   private readonly logger = new Logger(ParlantPerformanceOptimizer.name);
 
   // Performance configuration
   private config: PerformanceConfig;
 
   // Multi-level cache system
-  private memoryCache = new Map<string, {
-    response: ParlantValidationResponse;
-    timestamp: Date;
-    accessCount: number;
-    size: number;
-  }>();
+  private memoryCache = new Map<
+    string,
+    {
+      response: ParlantValidationResponse;
+      timestamp: Date;
+      accessCount: number;
+      size: number;
+    }
+  >();
 
   private redisCache?: any; // Redis client would be injected
   private predictionCache = new Map<string, Date>(); // Predictive pre-loading
@@ -246,10 +256,24 @@ export class ParlantPerformanceOptimizer implements OnModuleInit, OnApplicationS
   // Performance metrics
   private metrics: PerformanceMetrics = {
     requests: { total: 0, successful: 0, failed: 0, cached: 0, parallel: 0 },
-    responseTimes: { current: 0, average: 0, p50: 0, p90: 0, p95: 0, p99: 0, min: 0, max: 0 },
+    responseTimes: {
+      current: 0,
+      average: 0,
+      p50: 0,
+      p90: 0,
+      p95: 0,
+      p99: 0,
+      min: 0,
+      max: 0,
+    },
     cache: { hits: 0, misses: 0, hitRate: 0, size: 0, memoryUsage: 0 },
-    resources: { cpuUsage: 0, memoryUsage: 0, networkLatency: 0, activeConnections: 0 },
-    health: { status: 'HEALTHY', uptime: 0, errorRate: 0 }
+    resources: {
+      cpuUsage: 0,
+      memoryUsage: 0,
+      networkLatency: 0,
+      activeConnections: 0,
+    },
+    health: { status: "HEALTHY", uptime: 0, errorRate: 0 },
   };
 
   // Response time tracking
@@ -257,7 +281,7 @@ export class ParlantPerformanceOptimizer implements OnModuleInit, OnApplicationS
   private readonly maxHistorySize = 10000;
 
   // Circuit breaker state
-  private circuitBreakerState: 'CLOSED' | 'OPEN' | 'HALF_OPEN' = 'CLOSED';
+  private circuitBreakerState: "CLOSED" | "OPEN" | "HALF_OPEN" = "CLOSED";
   private circuitBreakerFailures = 0;
   private circuitBreakerLastFailure?: Date;
 
@@ -274,38 +298,41 @@ export class ParlantPerformanceOptimizer implements OnModuleInit, OnApplicationS
   // Optimization strategies
   private optimizationStrategies: OptimizationStrategy[] = [
     {
-      id: 'read_only_fast',
-      name: 'Read-Only Fast Track',
+      id: "read_only_fast",
+      name: "Read-Only Fast Track",
       securityLevels: [SecurityLevel.LOW, SecurityLevel.MINIMAL],
       riskLevels: [RiskLevel._MINIMAL, RiskLevel._LOW],
       cacheOverride: { ttl: 600000, enabled: true, compression: false }, // 10 minutes
       parallelOverride: { enabled: true, maxConcurrent: 50 },
       timeoutOverride: 2000,
-      preValidationChecks: ['fast_permission_check'],
-      postValidationOptimizations: ['aggressive_cache']
+      preValidationChecks: ["fast_permission_check"],
+      postValidationOptimizations: ["aggressive_cache"],
     },
     {
-      id: 'critical_secure',
-      name: 'Critical Security Validation',
+      id: "critical_secure",
+      name: "Critical Security Validation",
       securityLevels: [SecurityLevel.CRITICAL],
       riskLevels: [RiskLevel._CRITICAL],
       cacheOverride: { ttl: 60000, enabled: false, compression: true }, // 1 minute, no cache
       parallelOverride: { enabled: false, maxConcurrent: 1 },
       timeoutOverride: 10000,
-      preValidationChecks: ['comprehensive_security_check', 'audit_trail_ready'],
-      postValidationOptimizations: ['detailed_logging', 'compliance_tracking']
+      preValidationChecks: [
+        "comprehensive_security_check",
+        "audit_trail_ready",
+      ],
+      postValidationOptimizations: ["detailed_logging", "compliance_tracking"],
     },
     {
-      id: 'medium_balanced',
-      name: 'Medium Risk Balanced',
+      id: "medium_balanced",
+      name: "Medium Risk Balanced",
       securityLevels: [SecurityLevel.MEDIUM, SecurityLevel.HIGH],
       riskLevels: [RiskLevel._MODERATE, RiskLevel._HIGH],
       cacheOverride: { ttl: 300000, enabled: true, compression: true }, // 5 minutes
       parallelOverride: { enabled: true, maxConcurrent: 10 },
       timeoutOverride: 5000,
-      preValidationChecks: ['standard_permission_check'],
-      postValidationOptimizations: ['standard_cache', 'monitoring_update']
-    }
+      preValidationChecks: ["standard_permission_check"],
+      postValidationOptimizations: ["standard_cache", "monitoring_update"],
+    },
   ];
 
   // Auto-scaling state
@@ -314,17 +341,17 @@ export class ParlantPerformanceOptimizer implements OnModuleInit, OnApplicationS
 
   // Performance alerts
   private alertThresholds: Array<{
-    type: PerformanceAlert['type'];
+    type: PerformanceAlert["type"];
     threshold: number;
-    severity: PerformanceAlert['severity'];
+    severity: PerformanceAlert["severity"];
   }> = [
-    { type: 'RESPONSE_TIME', threshold: 500, severity: 'WARNING' },
-    { type: 'RESPONSE_TIME', threshold: 1000, severity: 'CRITICAL' },
-    { type: 'ERROR_RATE', threshold: 5, severity: 'WARNING' },
-    { type: 'ERROR_RATE', threshold: 10, severity: 'CRITICAL' },
-    { type: 'CACHE_MISS', threshold: 80, severity: 'WARNING' },
-    { type: 'RESOURCE_USAGE', threshold: 80, severity: 'WARNING' },
-    { type: 'RESOURCE_USAGE', threshold: 95, severity: 'CRITICAL' }
+    { type: "RESPONSE_TIME", threshold: 500, severity: "WARNING" },
+    { type: "RESPONSE_TIME", threshold: 1000, severity: "CRITICAL" },
+    { type: "ERROR_RATE", threshold: 5, severity: "WARNING" },
+    { type: "ERROR_RATE", threshold: 10, severity: "CRITICAL" },
+    { type: "CACHE_MISS", threshold: 80, severity: "WARNING" },
+    { type: "RESOURCE_USAGE", threshold: 80, severity: "WARNING" },
+    { type: "RESOURCE_USAGE", threshold: 95, severity: "CRITICAL" },
   ];
 
   constructor(private readonly configService: ConfigService) {
@@ -332,7 +359,7 @@ export class ParlantPerformanceOptimizer implements OnModuleInit, OnApplicationS
   }
 
   async onModuleInit(): Promise<void> {
-    this.logger.log('Initializing PARLANT Performance Optimizer');
+    this.logger.log("Initializing PARLANT Performance Optimizer");
 
     // Initialize monitoring
     this.startPerformanceMonitoring();
@@ -348,11 +375,11 @@ export class ParlantPerformanceOptimizer implements OnModuleInit, OnApplicationS
     // Initialize predictive caching
     this.startPredictivePreloading();
 
-    this.logger.log('PARLANT Performance Optimizer initialized', {
+    this.logger.log("PARLANT Performance Optimizer initialized", {
       targetTime: this.config.targetValidationTime,
       cacheEnabled: this.config.cache.maxSize > 0,
       parallelEnabled: this.config.parallel.maxConcurrent > 1,
-      autoScalingEnabled: this.config.autoScaling.enabled
+      autoScalingEnabled: this.config.autoScaling.enabled,
     });
   }
 
@@ -363,7 +390,9 @@ export class ParlantPerformanceOptimizer implements OnModuleInit, OnApplicationS
    */
   async optimizeValidation(
     request: ParlantValidationRequest,
-    validationFunction: (req: ParlantValidationRequest) => Promise<ParlantValidationResponse>
+    validationFunction: (
+      req: ParlantValidationRequest,
+    ) => Promise<ParlantValidationResponse>,
   ): Promise<ParlantValidationResponse> {
     const startTime = Date.now();
     this.metrics.requests.total++;
@@ -374,7 +403,10 @@ export class ParlantPerformanceOptimizer implements OnModuleInit, OnApplicationS
 
       // Step 2: Check cache first
       const cacheKey = this.generateOptimizedCacheKey(request, strategy);
-      const cachedResponse = await this.getFromOptimizedCache(cacheKey, strategy);
+      const cachedResponse = await this.getFromOptimizedCache(
+        cacheKey,
+        strategy,
+      );
 
       if (cachedResponse) {
         this.metrics.requests.cached++;
@@ -382,7 +414,9 @@ export class ParlantPerformanceOptimizer implements OnModuleInit, OnApplicationS
         const responseTime = Date.now() - startTime;
         this.updateResponseTimeMetrics(responseTime);
 
-        this.logger.debug(`Cache hit for validation: ${request.operationId} (${responseTime}ms)`);
+        this.logger.debug(
+          `Cache hit for validation: ${request.operationId} (${responseTime}ms)`,
+        );
         return cachedResponse;
       }
 
@@ -391,13 +425,24 @@ export class ParlantPerformanceOptimizer implements OnModuleInit, OnApplicationS
       // Step 3: Apply optimization strategy
       let response: ParlantValidationResponse;
 
-      if (strategy.parallelOverride?.enabled && this.config.parallel.batchingEnabled) {
+      if (
+        strategy.parallelOverride?.enabled &&
+        this.config.parallel.batchingEnabled
+      ) {
         // Use parallel batch processing
-        response = await this.processBatchValidation(request, validationFunction, strategy);
+        response = await this.processBatchValidation(
+          request,
+          validationFunction,
+          strategy,
+        );
         this.metrics.requests.parallel++;
       } else {
         // Use standard optimized processing
-        response = await this.processOptimizedValidation(request, validationFunction, strategy);
+        response = await this.processOptimizedValidation(
+          request,
+          validationFunction,
+          strategy,
+        );
       }
 
       // Step 4: Cache response if strategy allows
@@ -416,27 +461,32 @@ export class ParlantPerformanceOptimizer implements OnModuleInit, OnApplicationS
       // Step 7: Check performance thresholds and alerts
       this.checkPerformanceThresholds(responseTime);
 
-      this.logger.log(`Optimized validation completed: ${request.operationId} (${responseTime}ms)`, {
-        operationId: request.operationId,
-        strategy: strategy.id,
-        responseTime,
-        cached: false,
-        targetMet: responseTime <= this.config.targetValidationTime
-      });
+      this.logger.log(
+        `Optimized validation completed: ${request.operationId} (${responseTime}ms)`,
+        {
+          operationId: request.operationId,
+          strategy: strategy.id,
+          responseTime,
+          cached: false,
+          targetMet: responseTime <= this.config.targetValidationTime,
+        },
+      );
 
       return response;
-
     } catch (error) {
       const responseTime = Date.now() - startTime;
       this.metrics.requests.failed++;
       this.updateCircuitBreaker(false);
       this.updateResponseTimeMetrics(responseTime);
 
-      this.logger.error(`Optimized validation failed: ${request.operationId} (${responseTime}ms)`, {
-        operationId: request.operationId,
-        error: error instanceof Error ? error.message : String(error),
-        responseTime
-      });
+      this.logger.error(
+        `Optimized validation failed: ${request.operationId} (${responseTime}ms)`,
+        {
+          operationId: request.operationId,
+          error: error instanceof Error ? error.message : String(error),
+          responseTime,
+        },
+      );
 
       throw error;
     }
@@ -445,7 +495,9 @@ export class ParlantPerformanceOptimizer implements OnModuleInit, OnApplicationS
   /**
    * Select the optimal strategy for the request
    */
-  private selectOptimizationStrategy(request: ParlantValidationRequest): OptimizationStrategy {
+  private selectOptimizationStrategy(
+    request: ParlantValidationRequest,
+  ): OptimizationStrategy {
     // Find strategy matching risk levels (since securityLevel is not available in context)
     for (const strategy of this.optimizationStrategies) {
       const riskMatch = strategy.riskLevels.includes(request.riskLevel);
@@ -456,7 +508,10 @@ export class ParlantPerformanceOptimizer implements OnModuleInit, OnApplicationS
     }
 
     // Fallback to default balanced strategy
-    return this.optimizationStrategies.find(s => s.id === 'medium_balanced') || this.optimizationStrategies[0];
+    return (
+      this.optimizationStrategies.find((s) => s.id === "medium_balanced") ||
+      this.optimizationStrategies[0]
+    );
   }
 
   /**
@@ -464,20 +519,23 @@ export class ParlantPerformanceOptimizer implements OnModuleInit, OnApplicationS
    */
   private async processOptimizedValidation(
     request: ParlantValidationRequest,
-    validationFunction: (req: ParlantValidationRequest) => Promise<ParlantValidationResponse>,
-    strategy: OptimizationStrategy
+    validationFunction: (
+      req: ParlantValidationRequest,
+    ) => Promise<ParlantValidationResponse>,
+    strategy: OptimizationStrategy,
   ): Promise<ParlantValidationResponse> {
     // Apply pre-validation checks
     await this.applyPreValidationChecks(request, strategy);
 
     // Apply timeout override if specified
-    const timeout = strategy.timeoutOverride || this.config.targetValidationTime;
+    const timeout =
+      strategy.timeoutOverride || this.config.targetValidationTime;
 
     // Execute validation with timeout
     return await this.executeWithTimeout(
       () => validationFunction(request),
       timeout,
-      `Validation timeout for ${request.operationId}`
+      `Validation timeout for ${request.operationId}`,
     );
   }
 
@@ -486,8 +544,10 @@ export class ParlantPerformanceOptimizer implements OnModuleInit, OnApplicationS
    */
   private async processBatchValidation(
     request: ParlantValidationRequest,
-    validationFunction: (req: ParlantValidationRequest) => Promise<ParlantValidationResponse>,
-    strategy: OptimizationStrategy
+    validationFunction: (
+      req: ParlantValidationRequest,
+    ) => Promise<ParlantValidationResponse>,
+    strategy: OptimizationStrategy,
   ): Promise<ParlantValidationResponse> {
     return new Promise((resolve, reject) => {
       // Add to batch queue
@@ -495,7 +555,7 @@ export class ParlantPerformanceOptimizer implements OnModuleInit, OnApplicationS
         request,
         resolve,
         reject,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       // Trigger batch processing if not already running
@@ -509,8 +569,10 @@ export class ParlantPerformanceOptimizer implements OnModuleInit, OnApplicationS
    * Process validation batch for parallel optimization
    */
   private async processBatch(
-    validationFunction: (req: ParlantValidationRequest) => Promise<ParlantValidationResponse>,
-    strategy: OptimizationStrategy
+    validationFunction: (
+      req: ParlantValidationRequest,
+    ) => Promise<ParlantValidationResponse>,
+    strategy: OptimizationStrategy,
   ): Promise<void> {
     if (this.processingBatch || this.validationQueue.length === 0) {
       return;
@@ -521,8 +583,9 @@ export class ParlantPerformanceOptimizer implements OnModuleInit, OnApplicationS
     try {
       const batchSize = Math.min(
         this.config.parallel.batchSize,
-        strategy.parallelOverride?.maxConcurrent || this.config.parallel.maxConcurrent,
-        this.validationQueue.length
+        strategy.parallelOverride?.maxConcurrent ||
+          this.config.parallel.maxConcurrent,
+        this.validationQueue.length,
       );
 
       const batch = this.validationQueue.splice(0, batchSize);
@@ -533,16 +596,17 @@ export class ParlantPerformanceOptimizer implements OnModuleInit, OnApplicationS
           const response = await validationFunction(item.request);
           item.resolve(response);
         } catch (error) {
-          item.reject(error instanceof Error ? error : new Error(String(error)));
+          item.reject(
+            error instanceof Error ? error : new Error(String(error)),
+          );
         }
       });
 
       await Promise.all(promises);
-
     } catch (error) {
-      this.logger.error('Batch processing failed', {
+      this.logger.error("Batch processing failed", {
         error: error instanceof Error ? error.message : String(error),
-        queueSize: this.validationQueue.length
+        queueSize: this.validationQueue.length,
       });
     } finally {
       this.processingBatch = false;
@@ -559,18 +623,22 @@ export class ParlantPerformanceOptimizer implements OnModuleInit, OnApplicationS
   /**
    * Generate optimized cache key with strategy-specific hashing
    */
-  private generateOptimizedCacheKey(request: ParlantValidationRequest, strategy: OptimizationStrategy): string {
+  private generateOptimizedCacheKey(
+    request: ParlantValidationRequest,
+    strategy: OptimizationStrategy,
+  ): string {
     const keyData = {
       functionName: request.functionName,
       userId: request.context.userId,
       riskLevel: request.riskLevel,
       strategy: strategy.id,
       // Only include parameters for non-critical strategies
-      params: strategy.id !== 'critical_secure' ? request.functionParams : undefined
+      params:
+        strategy.id !== "critical_secure" ? request.functionParams : undefined,
     };
 
     const keyString = JSON.stringify(keyData);
-    return Buffer.from(keyString).toString('base64').substring(0, 64);
+    return Buffer.from(keyString).toString("base64").substring(0, 64);
   }
 
   /**
@@ -578,7 +646,7 @@ export class ParlantPerformanceOptimizer implements OnModuleInit, OnApplicationS
    */
   private async getFromOptimizedCache(
     cacheKey: string,
-    strategy: OptimizationStrategy
+    strategy: OptimizationStrategy,
   ): Promise<ParlantValidationResponse | null> {
     // Check memory cache first
     const memoryCached = this.memoryCache.get(cacheKey);
@@ -600,9 +668,9 @@ export class ParlantPerformanceOptimizer implements OnModuleInit, OnApplicationS
           return response;
         }
       } catch (error) {
-        this.logger.warn('Redis cache read failed', {
+        this.logger.warn("Redis cache read failed", {
           error: error instanceof Error ? error.message : String(error),
-          cacheKey
+          cacheKey,
         });
       }
     }
@@ -616,7 +684,7 @@ export class ParlantPerformanceOptimizer implements OnModuleInit, OnApplicationS
   private async storeInOptimizedCache(
     cacheKey: string,
     response: ParlantValidationResponse,
-    strategy: OptimizationStrategy
+    strategy: OptimizationStrategy,
   ): Promise<void> {
     // Store in memory cache
     this.storeInMemoryCache(cacheKey, response, strategy);
@@ -629,9 +697,9 @@ export class ParlantPerformanceOptimizer implements OnModuleInit, OnApplicationS
 
         await this.redisCache.setex(cacheKey, Math.floor(ttl / 1000), data);
       } catch (error) {
-        this.logger.warn('Redis cache write failed', {
+        this.logger.warn("Redis cache write failed", {
           error: error instanceof Error ? error.message : String(error),
-          cacheKey
+          cacheKey,
         });
       }
     }
@@ -643,7 +711,7 @@ export class ParlantPerformanceOptimizer implements OnModuleInit, OnApplicationS
   private storeInMemoryCache(
     cacheKey: string,
     response: ParlantValidationResponse,
-    strategy: OptimizationStrategy
+    strategy: OptimizationStrategy,
   ): void {
     const size = JSON.stringify(response).length;
 
@@ -656,7 +724,7 @@ export class ParlantPerformanceOptimizer implements OnModuleInit, OnApplicationS
       response,
       timestamp: new Date(),
       accessCount: 1,
-      size
+      size,
     });
 
     this.updateCacheMetrics();
@@ -686,7 +754,7 @@ export class ParlantPerformanceOptimizer implements OnModuleInit, OnApplicationS
    */
   private isCacheEntryValid(
     entry: { timestamp: Date; accessCount: number },
-    strategy: OptimizationStrategy
+    strategy: OptimizationStrategy,
   ): boolean {
     const ttl = strategy.cacheOverride?.ttl || this.config.cache.memoryTtl;
     const age = Date.now() - entry.timestamp.getTime();
@@ -727,12 +795,19 @@ export class ParlantPerformanceOptimizer implements OnModuleInit, OnApplicationS
 
     // Update current metrics
     this.metrics.responseTimes.current = responseTime;
-    this.metrics.responseTimes.min = Math.min(this.metrics.responseTimes.min || responseTime, responseTime);
-    this.metrics.responseTimes.max = Math.max(this.metrics.responseTimes.max, responseTime);
+    this.metrics.responseTimes.min = Math.min(
+      this.metrics.responseTimes.min || responseTime,
+      responseTime,
+    );
+    this.metrics.responseTimes.max = Math.max(
+      this.metrics.responseTimes.max,
+      responseTime,
+    );
 
     // Calculate average
     this.metrics.responseTimes.average =
-      this.responseTimeHistory.reduce((sum, time) => sum + time, 0) / this.responseTimeHistory.length;
+      this.responseTimeHistory.reduce((sum, time) => sum + time, 0) /
+      this.responseTimeHistory.length;
 
     // Calculate percentiles
     if (this.responseTimeHistory.length > 0) {
@@ -768,8 +843,10 @@ export class ParlantPerformanceOptimizer implements OnModuleInit, OnApplicationS
    */
   private updateCacheMetrics(): void {
     this.metrics.cache.size = this.memoryCache.size;
-    this.metrics.cache.hitRate = this.metrics.cache.hits /
-      (this.metrics.cache.hits + this.metrics.cache.misses) * 100;
+    this.metrics.cache.hitRate =
+      (this.metrics.cache.hits /
+        (this.metrics.cache.hits + this.metrics.cache.misses)) *
+      100;
 
     // Calculate memory usage
     let memoryUsage = 0;
@@ -783,18 +860,19 @@ export class ParlantPerformanceOptimizer implements OnModuleInit, OnApplicationS
    * Update overall health status
    */
   private updateHealthStatus(): void {
-    const errorRate = this.metrics.requests.total > 0
-      ? (this.metrics.requests.failed / this.metrics.requests.total) * 100
-      : 0;
+    const errorRate =
+      this.metrics.requests.total > 0
+        ? (this.metrics.requests.failed / this.metrics.requests.total) * 100
+        : 0;
 
     this.metrics.health.errorRate = errorRate;
 
     if (errorRate > 10 || this.metrics.responseTimes.p95 > 1000) {
-      this.metrics.health.status = 'UNHEALTHY';
+      this.metrics.health.status = "UNHEALTHY";
     } else if (errorRate > 5 || this.metrics.responseTimes.p95 > 500) {
-      this.metrics.health.status = 'DEGRADED';
+      this.metrics.health.status = "DEGRADED";
     } else {
-      this.metrics.health.status = 'HEALTHY';
+      this.metrics.health.status = "HEALTHY";
     }
   }
 
@@ -805,12 +883,15 @@ export class ParlantPerformanceOptimizer implements OnModuleInit, OnApplicationS
     // Check response time threshold
     if (currentResponseTime > this.config.targetValidationTime) {
       this.triggerPerformanceAlert({
-        type: 'RESPONSE_TIME',
-        severity: currentResponseTime > 1000 ? 'CRITICAL' : 'WARNING',
+        type: "RESPONSE_TIME",
+        severity: currentResponseTime > 1000 ? "CRITICAL" : "WARNING",
         threshold: this.config.targetValidationTime,
         message: `Response time ${currentResponseTime}ms exceeds target ${this.config.targetValidationTime}ms`,
         timestamp: new Date(),
-        metadata: { currentResponseTime, target: this.config.targetValidationTime }
+        metadata: {
+          currentResponseTime,
+          target: this.config.targetValidationTime,
+        },
       });
     }
   }
@@ -823,17 +904,20 @@ export class ParlantPerformanceOptimizer implements OnModuleInit, OnApplicationS
       let currentValue: number;
 
       switch (threshold.type) {
-        case 'RESPONSE_TIME':
+        case "RESPONSE_TIME":
           currentValue = this.metrics.responseTimes.p95;
           break;
-        case 'ERROR_RATE':
+        case "ERROR_RATE":
           currentValue = this.metrics.health.errorRate;
           break;
-        case 'CACHE_MISS':
+        case "CACHE_MISS":
           currentValue = 100 - this.metrics.cache.hitRate;
           break;
-        case 'RESOURCE_USAGE':
-          currentValue = Math.max(this.metrics.resources.cpuUsage, this.metrics.resources.memoryUsage);
+        case "RESOURCE_USAGE":
+          currentValue = Math.max(
+            this.metrics.resources.cpuUsage,
+            this.metrics.resources.memoryUsage,
+          );
           break;
         default:
           continue;
@@ -846,7 +930,7 @@ export class ParlantPerformanceOptimizer implements OnModuleInit, OnApplicationS
           threshold: threshold.threshold,
           message: `${threshold.type} ${currentValue} exceeds threshold ${threshold.threshold}`,
           timestamp: new Date(),
-          metadata: { currentValue, threshold: threshold.threshold }
+          metadata: { currentValue, threshold: threshold.threshold },
         });
       }
     }
@@ -860,7 +944,7 @@ export class ParlantPerformanceOptimizer implements OnModuleInit, OnApplicationS
       type: alert.type,
       severity: alert.severity,
       threshold: alert.threshold,
-      metadata: alert.metadata
+      metadata: alert.metadata,
     });
 
     // Here you could integrate with alerting systems like PagerDuty, Slack, etc.
@@ -874,7 +958,7 @@ export class ParlantPerformanceOptimizer implements OnModuleInit, OnApplicationS
   private async executeWithTimeout<T>(
     fn: () => Promise<T>,
     timeoutMs: number,
-    errorMessage: string
+    errorMessage: string,
   ): Promise<T> {
     const timeoutPromise = new Promise<never>((_, reject) => {
       setTimeout(() => reject(new Error(errorMessage)), timeoutMs);
@@ -888,19 +972,19 @@ export class ParlantPerformanceOptimizer implements OnModuleInit, OnApplicationS
    */
   private async applyPreValidationChecks(
     request: ParlantValidationRequest,
-    strategy: OptimizationStrategy
+    strategy: OptimizationStrategy,
   ): Promise<void> {
     if (!strategy.preValidationChecks) return;
 
     for (const check of strategy.preValidationChecks) {
       switch (check) {
-        case 'fast_permission_check':
+        case "fast_permission_check":
           // Fast permission validation for low-risk operations
           break;
-        case 'comprehensive_security_check':
+        case "comprehensive_security_check":
           // Comprehensive security validation for critical operations
           break;
-        case 'standard_permission_check':
+        case "standard_permission_check":
           // Standard permission validation
           break;
         default:
@@ -915,29 +999,31 @@ export class ParlantPerformanceOptimizer implements OnModuleInit, OnApplicationS
   private async applyPostValidationOptimizations(
     request: ParlantValidationRequest,
     response: ParlantValidationResponse,
-    strategy: OptimizationStrategy
+    strategy: OptimizationStrategy,
   ): Promise<void> {
     if (!strategy.postValidationOptimizations) return;
 
     for (const optimization of strategy.postValidationOptimizations) {
       switch (optimization) {
-        case 'aggressive_cache':
+        case "aggressive_cache":
           // Implement aggressive caching for frequently accessed validations
           break;
-        case 'detailed_logging':
+        case "detailed_logging":
           // Implement detailed logging for audit trails
           break;
-        case 'compliance_tracking':
+        case "compliance_tracking":
           // Implement compliance tracking for regulatory requirements
           break;
-        case 'standard_cache':
+        case "standard_cache":
           // Implement standard caching strategy
           break;
-        case 'monitoring_update':
+        case "monitoring_update":
           // Update monitoring systems with validation results
           break;
         default:
-          this.logger.warn(`Unknown post-validation optimization: ${optimization}`);
+          this.logger.warn(
+            `Unknown post-validation optimization: ${optimization}`,
+          );
       }
     }
   }
@@ -947,18 +1033,23 @@ export class ParlantPerformanceOptimizer implements OnModuleInit, OnApplicationS
    */
   private updateCircuitBreaker(success: boolean): void {
     if (success) {
-      if (this.circuitBreakerState === 'HALF_OPEN') {
-        this.circuitBreakerState = 'CLOSED';
+      if (this.circuitBreakerState === "HALF_OPEN") {
+        this.circuitBreakerState = "CLOSED";
         this.circuitBreakerFailures = 0;
-        this.logger.log('Circuit breaker closed after successful request');
+        this.logger.log("Circuit breaker closed after successful request");
       }
     } else {
       this.circuitBreakerFailures++;
       this.circuitBreakerLastFailure = new Date();
 
-      if (this.circuitBreakerFailures >= this.config.circuitBreaker.failureThreshold) {
-        this.circuitBreakerState = 'OPEN';
-        this.logger.warn(`Circuit breaker opened after ${this.circuitBreakerFailures} failures`);
+      if (
+        this.circuitBreakerFailures >=
+        this.config.circuitBreaker.failureThreshold
+      ) {
+        this.circuitBreakerState = "OPEN";
+        this.logger.warn(
+          `Circuit breaker opened after ${this.circuitBreakerFailures} failures`,
+        );
       }
     }
   }
@@ -980,7 +1071,7 @@ export class ParlantPerformanceOptimizer implements OnModuleInit, OnApplicationS
    */
   private analyzePredictivePatterns(): void {
     // Mock implementation - would analyze actual usage patterns
-    this.logger.debug('Analyzing predictive caching patterns');
+    this.logger.debug("Analyzing predictive caching patterns");
   }
 
   /**
@@ -990,8 +1081,8 @@ export class ParlantPerformanceOptimizer implements OnModuleInit, OnApplicationS
     // Initialize batch processing timer
     setInterval(() => {
       if (!this.processingBatch && this.validationQueue.length > 0) {
-        this.logger.debug('Triggering scheduled batch processing', {
-          queueSize: this.validationQueue.length
+        this.logger.debug("Triggering scheduled batch processing", {
+          queueSize: this.validationQueue.length,
         });
       }
     }, this.config.parallel.batchTimeout);
@@ -1021,8 +1112,10 @@ export class ParlantPerformanceOptimizer implements OnModuleInit, OnApplicationS
 
     if (shouldScale) {
       const now = new Date();
-      if (!this.lastScalingAction ||
-          now.getTime() - this.lastScalingAction.getTime() > config.coolDownPeriod) {
+      if (
+        !this.lastScalingAction ||
+        now.getTime() - this.lastScalingAction.getTime() > config.coolDownPeriod
+      ) {
         this.triggerAutoScaling();
       }
     }
@@ -1035,16 +1128,16 @@ export class ParlantPerformanceOptimizer implements OnModuleInit, OnApplicationS
     this.autoScalingActive = true;
     this.lastScalingAction = new Date();
 
-    this.logger.log('Auto-scaling triggered', {
+    this.logger.log("Auto-scaling triggered", {
       cpuUsage: this.metrics.resources.cpuUsage,
       memoryUsage: this.metrics.resources.memoryUsage,
-      responseTime: this.metrics.responseTimes.p95
+      responseTime: this.metrics.responseTimes.p95,
     });
 
     // Mock scaling action - would integrate with actual scaling systems
     setTimeout(() => {
       this.autoScalingActive = false;
-      this.logger.log('Auto-scaling completed');
+      this.logger.log("Auto-scaling completed");
     }, 60000); // Simulate 1-minute scaling operation
   }
 
@@ -1056,12 +1149,12 @@ export class ParlantPerformanceOptimizer implements OnModuleInit, OnApplicationS
     this.updateCacheMetrics();
 
     // Log comprehensive metrics
-    this.logger.log('Detailed Performance Metrics', {
+    this.logger.log("Detailed Performance Metrics", {
       requests: this.metrics.requests,
       responseTimes: this.metrics.responseTimes,
       cache: this.metrics.cache,
       resources: this.metrics.resources,
-      health: this.metrics.health
+      health: this.metrics.health,
     });
   }
 
@@ -1071,12 +1164,16 @@ export class ParlantPerformanceOptimizer implements OnModuleInit, OnApplicationS
   private optimizeBasedOnMetrics(): void {
     // Adjust cache sizes based on hit rates
     if (this.metrics.cache.hitRate < 70) {
-      this.logger.log('Low cache hit rate detected, considering cache optimization');
+      this.logger.log(
+        "Low cache hit rate detected, considering cache optimization",
+      );
     }
 
     // Adjust parallel processing based on response times
     if (this.metrics.responseTimes.p95 > this.config.targetValidationTime) {
-      this.logger.log('High response times detected, considering parallel optimization');
+      this.logger.log(
+        "High response times detected, considering parallel optimization",
+      );
     }
   }
 
@@ -1084,14 +1181,15 @@ export class ParlantPerformanceOptimizer implements OnModuleInit, OnApplicationS
    * Log performance metrics
    */
   private logPerformanceMetrics(): void {
-    this.logger.debug('Performance Metrics Update', {
+    this.logger.debug("Performance Metrics Update", {
       requests: this.metrics.requests.total,
       successRate: `${((this.metrics.requests.successful / this.metrics.requests.total) * 100).toFixed(2)}%`,
       cacheHitRate: `${this.metrics.cache.hitRate.toFixed(2)}%`,
       averageResponseTime: `${this.metrics.responseTimes.average.toFixed(2)}ms`,
       p95ResponseTime: `${this.metrics.responseTimes.p95.toFixed(2)}ms`,
-      targetMet: this.metrics.responseTimes.p95 <= this.config.targetValidationTime,
-      health: this.metrics.health.status
+      targetMet:
+        this.metrics.responseTimes.p95 <= this.config.targetValidationTime,
+      health: this.metrics.health.status,
     });
   }
 
@@ -1114,33 +1212,90 @@ export class ParlantPerformanceOptimizer implements OnModuleInit, OnApplicationS
    */
   private loadPerformanceConfig(): PerformanceConfig {
     return {
-      targetValidationTime: this.configService.get<number>('PARLANT_TARGET_VALIDATION_TIME', 500),
+      targetValidationTime: this.configService.get<number>(
+        "PARLANT_TARGET_VALIDATION_TIME",
+        500,
+      ),
       cache: {
-        memoryTtl: this.configService.get<number>('PARLANT_CACHE_MEMORY_TTL', 300000),
-        redisTtl: this.configService.get<number>('PARLANT_CACHE_REDIS_TTL', 600000),
-        maxSize: this.configService.get<number>('PARLANT_CACHE_MAX_SIZE', 10000),
-        compressionEnabled: this.configService.get<boolean>('PARLANT_CACHE_COMPRESSION', true),
-        predictivePreload: this.configService.get<boolean>('PARLANT_CACHE_PREDICTIVE', true)
+        memoryTtl: this.configService.get<number>(
+          "PARLANT_CACHE_MEMORY_TTL",
+          300000,
+        ),
+        redisTtl: this.configService.get<number>(
+          "PARLANT_CACHE_REDIS_TTL",
+          600000,
+        ),
+        maxSize: this.configService.get<number>(
+          "PARLANT_CACHE_MAX_SIZE",
+          10000,
+        ),
+        compressionEnabled: this.configService.get<boolean>(
+          "PARLANT_CACHE_COMPRESSION",
+          true,
+        ),
+        predictivePreload: this.configService.get<boolean>(
+          "PARLANT_CACHE_PREDICTIVE",
+          true,
+        ),
       },
       parallel: {
-        maxConcurrent: this.configService.get<number>('PARLANT_PARALLEL_MAX_CONCURRENT', 20),
-        batchingEnabled: this.configService.get<boolean>('PARLANT_PARALLEL_BATCHING', true),
-        batchSize: this.configService.get<number>('PARLANT_PARALLEL_BATCH_SIZE', 10),
-        batchTimeout: this.configService.get<number>('PARLANT_PARALLEL_BATCH_TIMEOUT', 100)
+        maxConcurrent: this.configService.get<number>(
+          "PARLANT_PARALLEL_MAX_CONCURRENT",
+          20,
+        ),
+        batchingEnabled: this.configService.get<boolean>(
+          "PARLANT_PARALLEL_BATCHING",
+          true,
+        ),
+        batchSize: this.configService.get<number>(
+          "PARLANT_PARALLEL_BATCH_SIZE",
+          10,
+        ),
+        batchTimeout: this.configService.get<number>(
+          "PARLANT_PARALLEL_BATCH_TIMEOUT",
+          100,
+        ),
       },
       circuitBreaker: {
-        failureThreshold: this.configService.get<number>('PARLANT_CIRCUIT_BREAKER_THRESHOLD', 10),
-        timeout: this.configService.get<number>('PARLANT_CIRCUIT_BREAKER_TIMEOUT', 60000),
-        resetTimeout: this.configService.get<number>('PARLANT_CIRCUIT_BREAKER_RESET', 300000),
-        halfOpenRetryLimit: this.configService.get<number>('PARLANT_CIRCUIT_BREAKER_RETRY', 3)
+        failureThreshold: this.configService.get<number>(
+          "PARLANT_CIRCUIT_BREAKER_THRESHOLD",
+          10,
+        ),
+        timeout: this.configService.get<number>(
+          "PARLANT_CIRCUIT_BREAKER_TIMEOUT",
+          60000,
+        ),
+        resetTimeout: this.configService.get<number>(
+          "PARLANT_CIRCUIT_BREAKER_RESET",
+          300000,
+        ),
+        halfOpenRetryLimit: this.configService.get<number>(
+          "PARLANT_CIRCUIT_BREAKER_RETRY",
+          3,
+        ),
       },
       autoScaling: {
-        enabled: this.configService.get<boolean>('PARLANT_AUTO_SCALING_ENABLED', true),
-        cpuThreshold: this.configService.get<number>('PARLANT_AUTO_SCALING_CPU_THRESHOLD', 80),
-        memoryThreshold: this.configService.get<number>('PARLANT_AUTO_SCALING_MEMORY_THRESHOLD', 80),
-        responseTimeThreshold: this.configService.get<number>('PARLANT_AUTO_SCALING_RESPONSE_THRESHOLD', 1000),
-        coolDownPeriod: this.configService.get<number>('PARLANT_AUTO_SCALING_COOLDOWN', 300000)
-      }
+        enabled: this.configService.get<boolean>(
+          "PARLANT_AUTO_SCALING_ENABLED",
+          true,
+        ),
+        cpuThreshold: this.configService.get<number>(
+          "PARLANT_AUTO_SCALING_CPU_THRESHOLD",
+          80,
+        ),
+        memoryThreshold: this.configService.get<number>(
+          "PARLANT_AUTO_SCALING_MEMORY_THRESHOLD",
+          80,
+        ),
+        responseTimeThreshold: this.configService.get<number>(
+          "PARLANT_AUTO_SCALING_RESPONSE_THRESHOLD",
+          1000,
+        ),
+        coolDownPeriod: this.configService.get<number>(
+          "PARLANT_AUTO_SCALING_COOLDOWN",
+          300000,
+        ),
+      },
     };
   }
 
@@ -1148,12 +1303,12 @@ export class ParlantPerformanceOptimizer implements OnModuleInit, OnApplicationS
    * Cleanup on shutdown
    */
   async onApplicationShutdown(): Promise<void> {
-    this.logger.log('Shutting down PARLANT Performance Optimizer');
+    this.logger.log("Shutting down PARLANT Performance Optimizer");
 
     // Clear caches
     this.memoryCache.clear();
 
     // Final metrics log
-    this.logger.log('Final Performance Metrics', this.metrics);
+    this.logger.log("Final Performance Metrics", this.metrics);
   }
 }

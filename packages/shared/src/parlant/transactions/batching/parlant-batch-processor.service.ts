@@ -513,7 +513,8 @@ export class ParlantBatchProcessorService extends EventEmitter {
 
     try {
       const context = this.getActiveBatch(batchId);
-      const { batchMetadata, transactions, performanceMonitor, auditLogger } = context;
+      const { batchMetadata, transactions, performanceMonitor, auditLogger } =
+        context;
 
       // Update batch state
       await this.updateBatchState(
@@ -1670,7 +1671,8 @@ export class ParlantBatchProcessorService extends EventEmitter {
 
     const oldState = context.batchMetadata.state;
     context.batchMetadata.state = newState;
-    (context.batchMetadata as BatchMetadata & { updatedAt?: Date }).updatedAt = new Date();
+    (context.batchMetadata as BatchMetadata & { updatedAt?: Date }).updatedAt =
+      new Date();
 
     context.auditLogger.logBatchStateChange(oldState, newState, reason);
 

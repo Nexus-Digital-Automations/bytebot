@@ -11,10 +11,10 @@
  * @created 2025-09-20
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { EventEmitter } from 'events';
-import { performance } from 'perf_hooks';
-import { cpus, freemem, totalmem } from 'os';
+import { Injectable, Logger } from "@nestjs/common";
+import { EventEmitter } from "events";
+import { performance } from "perf_hooks";
+import { cpus, freemem, totalmem } from "os";
 
 // Type guard utilities for error handling
 function isError(error: unknown): error is Error {
@@ -25,26 +25,26 @@ function getErrorMessage(error: unknown): string {
   if (isError(error)) {
     return getErrorMessage(error);
   }
-  if (typeof error === 'string') {
+  if (typeof error === "string") {
     return error;
   }
-  return 'An unknown error occurred';
+  return "An unknown error occurred";
 }
 import {
   WrapperRegistryManagementService,
   WrapperInfo,
-  WrapperStatus
-} from '../function-wrapper/core/wrapper-registry-management';
+  WrapperStatus,
+} from "../function-wrapper/core/wrapper-registry-management";
 import {
   EnterpriseFunctionWrapperFactory,
-  WrapperStatistics
-} from '../function-wrapper/factories/function-wrapper-factory';
+  WrapperStatistics,
+} from "../function-wrapper/factories/function-wrapper-factory";
 import {
   AnyFunction,
   WrapFunction,
   ValidationLevel,
-  FunctionCategory
-} from '../function-wrapper/interfaces/wrapper-types';
+  FunctionCategory,
+} from "../function-wrapper/interfaces/wrapper-types";
 
 /**
  * Performance Baseline Testing Service
@@ -70,14 +70,14 @@ export class PerformanceBaselineTestingService {
   constructor(
     wrapperRegistry: WrapperRegistryManagementService,
     wrapperFactory: EnterpriseFunctionWrapperFactory,
-    config?: Partial<BaselineTestingConfiguration>
+    config?: Partial<BaselineTestingConfiguration>,
   ) {
     this.wrapperRegistry = wrapperRegistry;
     this.wrapperFactory = wrapperFactory;
     this.testingConfig = this.createDefaultTestingConfiguration(config);
 
     this.setupEventListeners();
-    this.logger.log('Performance Baseline Testing Service initialized');
+    this.logger.log("Performance Baseline Testing Service initialized");
   }
 
   /**
@@ -87,12 +87,14 @@ export class PerformanceBaselineTestingService {
    * @returns Complete baseline testing results
    */
   public async executeBaselineTesting(
-    options: BaselineTestingOptions = {}
+    options: BaselineTestingOptions = {},
   ): Promise<BaselineTestingReport> {
     const sessionId = this.generateSessionId();
     const startTime = Date.now();
 
-    this.logger.log(`Starting comprehensive baseline testing session: ${sessionId}`);
+    this.logger.log(
+      `Starting comprehensive baseline testing session: ${sessionId}`,
+    );
 
     try {
       // Initialize testing session
@@ -100,14 +102,22 @@ export class PerformanceBaselineTestingService {
 
       // Get all registered wrappers
       const allWrappers = this.wrapperRegistry.listWrappers();
-      this.logger.log(`Found ${allWrappers.length} registered function wrappers to test`);
+      this.logger.log(
+        `Found ${allWrappers.length} registered function wrappers to test`,
+      );
 
       // Filter wrappers based on options
-      const wrappersToTest = this.filterWrappersForTesting(allWrappers, options);
-      this.logger.log(`Testing ${wrappersToTest.length} function wrappers after filtering`);
+      const wrappersToTest = this.filterWrappersForTesting(
+        allWrappers,
+        options,
+      );
+      this.logger.log(
+        `Testing ${wrappersToTest.length} function wrappers after filtering`,
+      );
 
       // Capture initial system state
-      const initialSystemSnapshot = await this.captureSystemPerformanceSnapshot();
+      const initialSystemSnapshot =
+        await this.captureSystemPerformanceSnapshot();
       session.systemSnapshots.push(initialSystemSnapshot);
 
       // Execute baseline tests for each wrapper
@@ -117,10 +127,15 @@ export class PerformanceBaselineTestingService {
       for (let i = 0; i < wrappersToTest.length; i += batchSize) {
         const batch = wrappersToTest.slice(i, i + batchSize);
 
-        this.logger.debug(`Testing batch ${Math.floor(i / batchSize) + 1} of ${Math.ceil(wrappersToTest.length / batchSize)}`);
+        this.logger.debug(
+          `Testing batch ${Math.floor(i / batchSize) + 1} of ${Math.ceil(wrappersToTest.length / batchSize)}`,
+        );
 
         // Execute batch testing
-        const batchResults = await this.executeBatchBaselineTesting(batch, session);
+        const batchResults = await this.executeBatchBaselineTesting(
+          batch,
+          session,
+        );
         testResults.push(...batchResults);
 
         // Capture system metrics during testing
@@ -142,7 +157,7 @@ export class PerformanceBaselineTestingService {
         sessionId,
         testResults,
         session,
-        startTime
+        startTime,
       );
 
       // Store session results
@@ -150,16 +165,20 @@ export class PerformanceBaselineTestingService {
       session.testResults = testResults;
       this.testSessions.set(sessionId, session);
 
-      this.logger.log(`Baseline testing completed: ${sessionId}, tested ${testResults.length} functions`);
+      this.logger.log(
+        `Baseline testing completed: ${sessionId}, tested ${testResults.length} functions`,
+      );
 
       return report;
-
     } catch (error) {
       this.logger.error(`Baseline testing failed: ${sessionId}`, error);
-      throw new PerformanceTestingError(`Baseline testing failed: ${getErrorMessage(error)}`, {
-        sessionId,
-        error: getErrorMessage(error)
-      });
+      throw new PerformanceTestingError(
+        `Baseline testing failed: ${getErrorMessage(error)}`,
+        {
+          sessionId,
+          error: getErrorMessage(error),
+        },
+      );
     }
   }
 
@@ -172,12 +191,14 @@ export class PerformanceBaselineTestingService {
    */
   public async executeStressTesting(
     functionId: string,
-    stressConfig: StressTestingConfiguration
+    stressConfig: StressTestingConfiguration,
   ): Promise<StressTestingResult> {
     const testId = this.generateTestId();
     const startTime = Date.now();
 
-    this.logger.log(`Starting stress testing for function: ${functionId}, testId: ${testId}`);
+    this.logger.log(
+      `Starting stress testing for function: ${functionId}, testId: ${testId}`,
+    );
 
     try {
       // Get wrapper information
@@ -200,10 +221,10 @@ export class PerformanceBaselineTestingService {
             concurrentUsers: 1,
             requestsPerUser: stressConfig.warmupRequests,
             duration: stressConfig.warmupDuration,
-            rampUpTime: 0
+            rampUpTime: 0,
           },
           testParameters,
-          'warmup'
+          "warmup",
         );
         results.push(warmupResult);
       }
@@ -214,12 +235,14 @@ export class PerformanceBaselineTestingService {
           functionId,
           phase,
           testParameters,
-          'load'
+          "load",
         );
         results.push(phaseResult);
 
         // Cool-down between phases
-        if (phase !== stressConfig.testPhases[stressConfig.testPhases.length - 1]) {
+        if (
+          phase !== stressConfig.testPhases[stressConfig.testPhases.length - 1]
+        ) {
           await this.waitForCooldown(stressConfig.phaseCooldownMs);
         }
       }
@@ -230,7 +253,7 @@ export class PerformanceBaselineTestingService {
           functionId,
           stressConfig.spikeConfig,
           testParameters,
-          'spike'
+          "spike",
         );
         results.push(spikeResult);
       }
@@ -244,21 +267,34 @@ export class PerformanceBaselineTestingService {
         configuration: stressConfig,
         phaseResults: results,
         overallMetrics: this.calculateOverallStressMetrics(results),
-        performanceInsights: this.generatePerformanceInsights(functionId, results),
-        recommendations: this.generateOptimizationRecommendations(functionId, results)
+        performanceInsights: this.generatePerformanceInsights(
+          functionId,
+          results,
+        ),
+        recommendations: this.generateOptimizationRecommendations(
+          functionId,
+          results,
+        ),
       };
 
-      this.logger.log(`Stress testing completed for function: ${functionId}, testId: ${testId}`);
+      this.logger.log(
+        `Stress testing completed for function: ${functionId}, testId: ${testId}`,
+      );
 
       return overallResult;
-
     } catch (error) {
-      this.logger.error(`Stress testing failed for function: ${functionId}`, error);
-      throw new PerformanceTestingError(`Stress testing failed: ${getErrorMessage(error)}`, {
-        functionId,
-        testId,
-        error: getErrorMessage(error)
-      });
+      this.logger.error(
+        `Stress testing failed for function: ${functionId}`,
+        error,
+      );
+      throw new PerformanceTestingError(
+        `Stress testing failed: ${getErrorMessage(error)}`,
+        {
+          functionId,
+          testId,
+          error: getErrorMessage(error),
+        },
+      );
     }
   }
 
@@ -271,12 +307,14 @@ export class PerformanceBaselineTestingService {
    */
   public async executeMemoryLeakTesting(
     functionId: string,
-    leakConfig: MemoryLeakTestingConfiguration
+    leakConfig: MemoryLeakTestingConfiguration,
   ): Promise<MemoryLeakTestingResult> {
     const testId = this.generateTestId();
     const startTime = Date.now();
 
-    this.logger.log(`Starting memory leak testing for function: ${functionId}, testId: ${testId}`);
+    this.logger.log(
+      `Starting memory leak testing for function: ${functionId}, testId: ${testId}`,
+    );
 
     try {
       const wrapperInfo = this.wrapperRegistry.getWrapper(functionId);
@@ -289,11 +327,15 @@ export class PerformanceBaselineTestingService {
       const executionMetrics: ExecutionMemoryMetrics[] = [];
 
       // Initial memory snapshot
-      const initialSnapshot = await this.captureMemorySnapshot('initial');
+      const initialSnapshot = await this.captureMemorySnapshot("initial");
       memorySnapshots.push(initialSnapshot);
 
       // Execute repeated function calls with memory monitoring
-      for (let iteration = 0; iteration < leakConfig.totalIterations; iteration++) {
+      for (
+        let iteration = 0;
+        iteration < leakConfig.totalIterations;
+        iteration++
+      ) {
         const iterationStart = performance.now();
 
         try {
@@ -301,7 +343,8 @@ export class PerformanceBaselineTestingService {
           const memoryBefore = process.memoryUsage();
 
           // Generate test parameters for this iteration
-          const iterationParameters = this.randomizeTestParameters(testParameters);
+          const iterationParameters =
+            this.randomizeTestParameters(testParameters);
 
           // Execute function (mock execution for baseline)
           await this.executeTestFunction(functionId, iterationParameters);
@@ -320,15 +363,18 @@ export class PerformanceBaselineTestingService {
               heapUsed: memoryAfter.heapUsed - memoryBefore.heapUsed,
               heapTotal: memoryAfter.heapTotal - memoryBefore.heapTotal,
               external: memoryAfter.external - memoryBefore.external,
-              arrayBuffers: memoryAfter.arrayBuffers - memoryBefore.arrayBuffers
-            }
+              arrayBuffers:
+                memoryAfter.arrayBuffers - memoryBefore.arrayBuffers,
+            },
           };
 
           executionMetrics.push(metrics);
 
           // Capture memory snapshot at intervals
           if (iteration % leakConfig.snapshotInterval === 0) {
-            const snapshot = await this.captureMemorySnapshot(`iteration-${iteration}`);
+            const snapshot = await this.captureMemorySnapshot(
+              `iteration-${iteration}`,
+            );
             memorySnapshots.push(snapshot);
           }
 
@@ -338,13 +384,16 @@ export class PerformanceBaselineTestingService {
               global.gc();
 
               // Capture post-GC snapshot
-              const gcSnapshot = await this.captureMemorySnapshot(`post-gc-${iteration}`);
+              const gcSnapshot = await this.captureMemorySnapshot(
+                `post-gc-${iteration}`,
+              );
               memorySnapshots.push(gcSnapshot);
             }
           }
-
         } catch (error) {
-          this.logger.warn(`Error in memory leak test iteration ${iteration}: ${getErrorMessage(error)}`);
+          this.logger.warn(
+            `Error in memory leak test iteration ${iteration}: ${getErrorMessage(error)}`,
+          );
         }
 
         // Small delay between iterations
@@ -354,14 +403,14 @@ export class PerformanceBaselineTestingService {
       }
 
       // Final memory snapshot
-      const finalSnapshot = await this.captureMemorySnapshot('final');
+      const finalSnapshot = await this.captureMemorySnapshot("final");
       memorySnapshots.push(finalSnapshot);
 
       // Analyze memory patterns
       const leakAnalysis = this.analyzeMemoryLeakPatterns(
         memorySnapshots,
         executionMetrics,
-        leakConfig
+        leakConfig,
       );
 
       const result: MemoryLeakTestingResult = {
@@ -373,20 +422,28 @@ export class PerformanceBaselineTestingService {
         memorySnapshots,
         executionMetrics,
         leakAnalysis,
-        recommendations: this.generateMemoryOptimizationRecommendations(leakAnalysis)
+        recommendations:
+          this.generateMemoryOptimizationRecommendations(leakAnalysis),
       };
 
-      this.logger.log(`Memory leak testing completed for function: ${functionId}, testId: ${testId}`);
+      this.logger.log(
+        `Memory leak testing completed for function: ${functionId}, testId: ${testId}`,
+      );
 
       return result;
-
     } catch (error) {
-      this.logger.error(`Memory leak testing failed for function: ${functionId}`, error);
-      throw new PerformanceTestingError(`Memory leak testing failed: ${getErrorMessage(error)}`, {
-        functionId,
-        testId,
-        error: getErrorMessage(error)
-      });
+      this.logger.error(
+        `Memory leak testing failed for function: ${functionId}`,
+        error,
+      );
+      throw new PerformanceTestingError(
+        `Memory leak testing failed: ${getErrorMessage(error)}`,
+        {
+          functionId,
+          testId,
+          error: getErrorMessage(error),
+        },
+      );
     }
   }
 
@@ -397,39 +454,46 @@ export class PerformanceBaselineTestingService {
    * @returns Performance benchmarking report
    */
   public async generatePerformanceBenchmarkReport(
-    timeRange: TimeRange
+    timeRange: TimeRange,
   ): Promise<PerformanceBenchmarkReport> {
-    this.logger.log('Generating comprehensive performance benchmark report');
+    this.logger.log("Generating comprehensive performance benchmark report");
 
     try {
       // Collect all test sessions within time range
       const relevantSessions = this.getTestSessionsInRange(timeRange);
 
       // Aggregate performance metrics
-      const aggregatedMetrics = await this.aggregatePerformanceMetrics(relevantSessions);
+      const aggregatedMetrics =
+        await this.aggregatePerformanceMetrics(relevantSessions);
 
       // Generate function category analysis
-      const categoryAnalysis = await this.analyzeFunctionCategoryPerformance(relevantSessions);
+      const categoryAnalysis =
+        await this.analyzeFunctionCategoryPerformance(relevantSessions);
 
       // Generate validation level analysis
-      const validationAnalysis = await this.analyzeValidationLevelPerformance(relevantSessions);
+      const validationAnalysis =
+        await this.analyzeValidationLevelPerformance(relevantSessions);
 
       // Generate performance trends
-      const performanceTrends = await this.analyzePerformanceTrends(relevantSessions);
+      const performanceTrends =
+        await this.analyzePerformanceTrends(relevantSessions);
 
       // Generate optimization opportunities
-      const optimizationOpportunities = await this.identifyOptimizationOpportunities(
-        aggregatedMetrics
-      );
+      const optimizationOpportunities =
+        await this.identifyOptimizationOpportunities(aggregatedMetrics);
 
       // Generate enterprise compliance analysis
-      const enterpriseAssessment = await this.assessEnterpriseCompliance(aggregatedMetrics);
+      const enterpriseAssessment =
+        await this.assessEnterpriseCompliance(aggregatedMetrics);
       const complianceAnalysis: ComplianceAnalysis = {
         overallComplianceRate: enterpriseAssessment.overallComplianceRate,
-        complianceTrend: enterpriseAssessment.overallComplianceRate >= 0.8 ? 'stable' : 'degrading',
+        complianceTrend:
+          enterpriseAssessment.overallComplianceRate >= 0.8
+            ? "stable"
+            : "degrading",
         criticalViolations: enterpriseAssessment.criticalGaps.length,
         highPriorityViolations: enterpriseAssessment.functionsNonCompliant,
-        complianceByRequirement: enterpriseAssessment.complianceByCategory
+        complianceByRequirement: enterpriseAssessment.complianceByCategory,
       };
 
       const report: PerformanceBenchmarkReport = {
@@ -447,17 +511,23 @@ export class PerformanceBaselineTestingService {
         recommendations: this.generateComprehensiveRecommendations({
           aggregatedMetrics,
           optimizationOpportunities,
-          complianceAnalysis
-        })
+          complianceAnalysis,
+        }),
       };
 
-      this.logger.log(`Performance benchmark report generated: ${report.reportId}`);
+      this.logger.log(
+        `Performance benchmark report generated: ${report.reportId}`,
+      );
 
       return report;
-
     } catch (error) {
-      this.logger.error('Failed to generate performance benchmark report', error);
-      throw new PerformanceTestingError(`Report generation failed: ${getErrorMessage(error)}`);
+      this.logger.error(
+        "Failed to generate performance benchmark report",
+        error,
+      );
+      throw new PerformanceTestingError(
+        `Report generation failed: ${getErrorMessage(error)}`,
+      );
     }
   }
 
@@ -466,7 +536,7 @@ export class PerformanceBaselineTestingService {
    */
   private async initializeTestingSession(
     sessionId: string,
-    options: BaselineTestingOptions
+    options: BaselineTestingOptions,
   ): Promise<BaselineTestSession> {
     const session: BaselineTestSession = {
       sessionId,
@@ -474,7 +544,7 @@ export class PerformanceBaselineTestingService {
       completedAt: null,
       configuration: {
         ...this.testingConfig,
-        ...options.configOverrides
+        ...options.configOverrides,
       },
       options,
       systemSnapshots: [],
@@ -484,8 +554,8 @@ export class PerformanceBaselineTestingService {
         platform: process.platform,
         cpuCount: cpus().length,
         totalMemory: totalmem(),
-        testingFrameworkVersion: '1.0.0'
-      }
+        testingFrameworkVersion: "1.0.0",
+      },
     };
 
     this.testSessions.set(sessionId, session);
@@ -497,33 +567,37 @@ export class PerformanceBaselineTestingService {
    */
   private filterWrappersForTesting(
     allWrappers: WrapperInfo[],
-    options: BaselineTestingOptions
+    options: BaselineTestingOptions,
   ): WrapperInfo[] {
     let filtered = allWrappers;
 
     // Filter by function IDs if specified
     if (options.functionIds && options.functionIds.length > 0) {
-      filtered = filtered.filter(wrapper =>
-        options.functionIds!.includes(wrapper.functionId)
+      filtered = filtered.filter((wrapper) =>
+        options.functionIds!.includes(wrapper.functionId),
       );
     }
 
     // Filter by categories if specified
     if (options.categories && options.categories.length > 0) {
-      filtered = filtered.filter(wrapper =>
-        options.categories!.includes(wrapper.config.metadata?.category || FunctionCategory.UTILITY)
+      filtered = filtered.filter((wrapper) =>
+        options.categories!.includes(
+          wrapper.config.metadata?.category || FunctionCategory.UTILITY,
+        ),
       );
     }
 
     // Filter by validation levels if specified
     if (options.validationLevels && options.validationLevels.length > 0) {
-      filtered = filtered.filter(wrapper =>
-        options.validationLevels!.includes(wrapper.config.validationLevel)
+      filtered = filtered.filter((wrapper) =>
+        options.validationLevels!.includes(wrapper.config.validationLevel),
       );
     }
 
     // Filter by status
-    filtered = filtered.filter(wrapper => wrapper.status === WrapperStatus.ACTIVE);
+    filtered = filtered.filter(
+      (wrapper) => wrapper.status === WrapperStatus.ACTIVE,
+    );
 
     // Apply limit if specified
     if (options.maxFunctions && options.maxFunctions > 0) {
@@ -538,25 +612,33 @@ export class PerformanceBaselineTestingService {
    */
   private async executeBatchBaselineTesting(
     wrappers: WrapperInfo[],
-    session: BaselineTestSession
+    session: BaselineTestSession,
   ): Promise<FunctionBaselineResult[]> {
     const batchResults: FunctionBaselineResult[] = [];
 
     // Execute tests in parallel within the batch
     const testPromises = wrappers.map(async (wrapper) => {
       try {
-        const result = await this.executeIndividualBaselineTest(wrapper, session);
+        const result = await this.executeIndividualBaselineTest(
+          wrapper,
+          session,
+        );
         return result;
       } catch (error) {
-        this.logger.warn(`Baseline test failed for ${wrapper.functionId}: ${getErrorMessage(error)}`);
-        return this.createFailedBaselineResult(wrapper, error instanceof Error ? error : new Error(String(error)));
+        this.logger.warn(
+          `Baseline test failed for ${wrapper.functionId}: ${getErrorMessage(error)}`,
+        );
+        return this.createFailedBaselineResult(
+          wrapper,
+          error instanceof Error ? error : new Error(String(error)),
+        );
       }
     });
 
     const results = await Promise.allSettled(testPromises);
 
     results.forEach((result) => {
-      if (result.status === 'fulfilled' && result.value) {
+      if (result.status === "fulfilled" && result.value) {
         batchResults.push(result.value);
       }
     });
@@ -569,7 +651,7 @@ export class PerformanceBaselineTestingService {
    */
   private async executeIndividualBaselineTest(
     wrapper: WrapperInfo,
-    session: BaselineTestSession
+    session: BaselineTestSession,
   ): Promise<FunctionBaselineResult> {
     const testStartTime = performance.now();
 
@@ -584,7 +666,7 @@ export class PerformanceBaselineTestingService {
       const iterationResult = await this.executeBaselineIteration(
         wrapper,
         testParameters,
-        i
+        i,
       );
       iterations.push(iterationResult);
 
@@ -613,13 +695,13 @@ export class PerformanceBaselineTestingService {
         validationLevel: wrapper.config.validationLevel,
         category: wrapper.config.metadata?.category || FunctionCategory.UTILITY,
         cacheable: wrapper.config.cacheable || false,
-        dependencies: [...(wrapper.config.metadata?.dependencies || [])]
+        dependencies: [...(wrapper.config.metadata?.dependencies || [])],
       },
       systemContext: {
         cpuLoad: await this.getCurrentCpuLoad(),
         memoryUsage: process.memoryUsage(),
-        timestamp: new Date()
-      }
+        timestamp: new Date(),
+      },
     };
 
     // Store result for later analysis
@@ -634,7 +716,7 @@ export class PerformanceBaselineTestingService {
   private async executeBaselineIteration(
     wrapper: WrapperInfo,
     testParameters: any[],
-    iterationIndex: number
+    iterationIndex: number,
   ): Promise<BaselineIteration> {
     const iterationStart = performance.now();
     const memoryBefore = process.memoryUsage();
@@ -643,7 +725,7 @@ export class PerformanceBaselineTestingService {
       // Execute the function with monitoring (mock execution for baseline)
       const executionResult = await this.executeTestFunction(
         wrapper.functionId,
-        testParameters
+        testParameters,
       );
 
       const iterationEnd = performance.now();
@@ -655,13 +737,12 @@ export class PerformanceBaselineTestingService {
         memoryUsage: {
           before: memoryBefore,
           after: memoryAfter,
-          delta: memoryAfter.heapUsed - memoryBefore.heapUsed
+          delta: memoryAfter.heapUsed - memoryBefore.heapUsed,
         },
         success: true,
         result: executionResult,
-        error: null
+        error: null,
       };
-
     } catch (error) {
       const iterationEnd = performance.now();
       const memoryAfter = process.memoryUsage();
@@ -672,11 +753,11 @@ export class PerformanceBaselineTestingService {
         memoryUsage: {
           before: memoryBefore,
           after: memoryAfter,
-          delta: memoryAfter.heapUsed - memoryBefore.heapUsed
+          delta: memoryAfter.heapUsed - memoryBefore.heapUsed,
         },
         success: false,
         result: null,
-        error: getErrorMessage(error)
+        error: getErrorMessage(error),
       };
     }
   }
@@ -684,10 +765,16 @@ export class PerformanceBaselineTestingService {
   /**
    * Calculate baseline metrics from iterations
    */
-  private calculateBaselineMetrics(iterations: BaselineIteration[]): BaselineMetrics {
-    const successfulIterations = iterations.filter(iter => iter.success);
-    const executionTimes = successfulIterations.map(iter => iter.executionTime);
-    const memoryDeltas = successfulIterations.map(iter => iter.memoryUsage.delta);
+  private calculateBaselineMetrics(
+    iterations: BaselineIteration[],
+  ): BaselineMetrics {
+    const successfulIterations = iterations.filter((iter) => iter.success);
+    const executionTimes = successfulIterations.map(
+      (iter) => iter.executionTime,
+    );
+    const memoryDeltas = successfulIterations.map(
+      (iter) => iter.memoryUsage.delta,
+    );
 
     if (executionTimes.length === 0) {
       return {
@@ -702,7 +789,7 @@ export class PerformanceBaselineTestingService {
         maxMemoryDelta: 0,
         successRate: 0,
         totalIterations: iterations.length,
-        errorCount: iterations.length
+        errorCount: iterations.length,
       };
     }
 
@@ -720,38 +807,40 @@ export class PerformanceBaselineTestingService {
       maxMemoryDelta: Math.max(...memoryDeltas),
       successRate: successfulIterations.length / iterations.length,
       totalIterations: iterations.length,
-      errorCount: iterations.length - successfulIterations.length
+      errorCount: iterations.length - successfulIterations.length,
     };
   }
 
   /**
    * Classify performance based on baseline metrics
    */
-  private classifyPerformance(metrics: BaselineMetrics): PerformanceClassification {
+  private classifyPerformance(
+    metrics: BaselineMetrics,
+  ): PerformanceClassification {
     const { averageExecutionTime, p95ExecutionTime, successRate } = metrics;
 
     // Determine performance tier based on execution time
-    let performanceTier: 'excellent' | 'good' | 'acceptable' | 'poor';
+    let performanceTier: "excellent" | "good" | "acceptable" | "poor";
     if (averageExecutionTime < 100) {
-      performanceTier = 'excellent';
+      performanceTier = "excellent";
     } else if (averageExecutionTime < 500) {
-      performanceTier = 'good';
+      performanceTier = "good";
     } else if (averageExecutionTime < 1000) {
-      performanceTier = 'acceptable';
+      performanceTier = "acceptable";
     } else {
-      performanceTier = 'poor';
+      performanceTier = "poor";
     }
 
     // Determine reliability based on success rate
-    let reliabilityTier: 'excellent' | 'good' | 'acceptable' | 'poor';
+    let reliabilityTier: "excellent" | "good" | "acceptable" | "poor";
     if (successRate >= 0.999) {
-      reliabilityTier = 'excellent';
+      reliabilityTier = "excellent";
     } else if (successRate >= 0.99) {
-      reliabilityTier = 'good';
+      reliabilityTier = "good";
     } else if (successRate >= 0.95) {
-      reliabilityTier = 'acceptable';
+      reliabilityTier = "acceptable";
     } else {
-      reliabilityTier = 'poor';
+      reliabilityTier = "poor";
     }
 
     // Check enterprise compliance
@@ -761,11 +850,16 @@ export class PerformanceBaselineTestingService {
     return {
       performanceTier,
       reliabilityTier,
-      meetsEnterpriseStandards: meetsSubSecondRequirement && meetsReliabilityRequirement,
+      meetsEnterpriseStandards:
+        meetsSubSecondRequirement && meetsReliabilityRequirement,
       complianceGaps: [
-        ...(meetsSubSecondRequirement ? [] : ['Sub-1000ms response time requirement']),
-        ...(meetsReliabilityRequirement ? [] : ['99.9% reliability requirement'])
-      ]
+        ...(meetsSubSecondRequirement
+          ? []
+          : ["Sub-1000ms response time requirement"]),
+        ...(meetsReliabilityRequirement
+          ? []
+          : ["99.9% reliability requirement"]),
+      ],
     };
   }
 
@@ -776,7 +870,7 @@ export class PerformanceBaselineTestingService {
     sessionId: string,
     testResults: FunctionBaselineResult[],
     session: BaselineTestSession,
-    startTime: number
+    startTime: number,
   ): Promise<BaselineTestingReport> {
     const endTime = Date.now();
     const totalDuration = endTime - startTime;
@@ -785,7 +879,8 @@ export class PerformanceBaselineTestingService {
     const aggregateStats = this.calculateAggregateStatistics(testResults);
 
     // Analyze performance distribution
-    const performanceDistribution = this.analyzePerformanceDistribution(testResults);
+    const performanceDistribution =
+      this.analyzePerformanceDistribution(testResults);
 
     // Identify performance outliers
     const performanceOutliers = this.identifyPerformanceOutliers(testResults);
@@ -794,36 +889,48 @@ export class PerformanceBaselineTestingService {
     const recommendations = this.generateBaselineRecommendations(
       testResults,
       aggregateStats,
-      performanceOutliers
+      performanceOutliers,
     );
 
     return {
       sessionId,
       executionTime: totalDuration,
       totalFunctionsTested: testResults.length,
-      successfulTests: testResults.filter(r => r.baselineMetrics.successRate > 0).length,
-      failedTests: testResults.filter(r => r.baselineMetrics.successRate === 0).length,
+      successfulTests: testResults.filter(
+        (r) => r.baselineMetrics.successRate > 0,
+      ).length,
+      failedTests: testResults.filter(
+        (r) => r.baselineMetrics.successRate === 0,
+      ).length,
       aggregateStatistics: aggregateStats,
       performanceDistribution,
       performanceOutliers,
       systemPerformance: {
         initialSnapshot: session.systemSnapshots[0] || null,
-        finalSnapshot: session.systemSnapshots[session.systemSnapshots.length - 1] || null,
-        averageSystemLoad: this.calculateAverageSystemLoad(session.systemSnapshots)
+        finalSnapshot:
+          session.systemSnapshots[session.systemSnapshots.length - 1] || null,
+        averageSystemLoad: this.calculateAverageSystemLoad(
+          session.systemSnapshots,
+        ),
       },
       enterpriseCompliance: this.assessEnterpriseCompliance(testResults),
       recommendations,
-      detailedResults: testResults
+      detailedResults: testResults,
     };
   }
 
   // Utility methods for calculations and analysis
 
   private calculateMean(values: number[]): number {
-    return values.length > 0 ? values.reduce((sum, val) => sum + val, 0) / values.length : 0;
+    return values.length > 0
+      ? values.reduce((sum, val) => sum + val, 0) / values.length
+      : 0;
   }
 
-  private calculatePercentile(sortedValues: number[], percentile: number): number {
+  private calculatePercentile(
+    sortedValues: number[],
+    percentile: number,
+  ): number {
     if (sortedValues.length === 0) return 0;
     const index = Math.ceil((percentile / 100) * sortedValues.length) - 1;
     return sortedValues[Math.max(0, Math.min(index, sortedValues.length - 1))];
@@ -832,7 +939,7 @@ export class PerformanceBaselineTestingService {
   private calculateStandardDeviation(values: number[]): number {
     if (values.length === 0) return 0;
     const mean = this.calculateMean(values);
-    const squaredDiffs = values.map(value => Math.pow(value - mean, 2));
+    const squaredDiffs = values.map((value) => Math.pow(value - mean, 2));
     return Math.sqrt(this.calculateMean(squaredDiffs));
   }
 
@@ -844,15 +951,15 @@ export class PerformanceBaselineTestingService {
   private async generateTestParameters(wrapper: WrapperInfo): Promise<any[]> {
     // Generate appropriate test parameters based on function signature
     // This is a mock implementation - real implementation would analyze function signature
-    return ['test-param-1', 42, { test: 'value' }];
+    return ["test-param-1", 42, { test: "value" }];
   }
 
   private randomizeTestParameters(baseParameters: any[]): any[] {
     // Create variations of test parameters for different iterations
-    return baseParameters.map(param => {
-      if (typeof param === 'string') {
+    return baseParameters.map((param) => {
+      if (typeof param === "string") {
         return `${param}-${Math.random().toString(36).substring(2, 8)}`;
-      } else if (typeof param === 'number') {
+      } else if (typeof param === "number") {
         return param + Math.floor(Math.random() * 10);
       } else {
         return { ...param, randomValue: Math.random() };
@@ -860,20 +967,27 @@ export class PerformanceBaselineTestingService {
     });
   }
 
-  private async executeTestFunction(functionId: string, parameters: any[]): Promise<any> {
+  private async executeTestFunction(
+    functionId: string,
+    parameters: any[],
+  ): Promise<any> {
     // Mock function execution - real implementation would call actual wrapped function
     const executionTime = Math.random() * 500 + 50; // 50-550ms
-    await new Promise(resolve => setTimeout(resolve, executionTime));
+    await new Promise((resolve) => setTimeout(resolve, executionTime));
 
     // Simulate occasional errors
-    if (Math.random() < 0.01) { // 1% error rate
+    if (Math.random() < 0.01) {
+      // 1% error rate
       throw new Error(`Simulated error for function ${functionId}`);
     }
 
-    return { success: true, executionTime, result: 'test-result' };
+    return { success: true, executionTime, result: "test-result" };
   }
 
-  private createFailedBaselineResult(wrapper: WrapperInfo, error: Error): FunctionBaselineResult {
+  private createFailedBaselineResult(
+    wrapper: WrapperInfo,
+    error: Error,
+  ): FunctionBaselineResult {
     return {
       functionId: wrapper.functionId,
       testExecutionTime: 0,
@@ -890,30 +1004,30 @@ export class PerformanceBaselineTestingService {
         maxMemoryDelta: 0,
         successRate: 0,
         totalIterations: 0,
-        errorCount: 1
+        errorCount: 1,
       },
       performanceClassification: {
-        performanceTier: 'poor',
-        reliabilityTier: 'poor',
+        performanceTier: "poor",
+        reliabilityTier: "poor",
         meetsEnterpriseStandards: false,
-        complianceGaps: ['Test execution failed']
+        complianceGaps: ["Test execution failed"],
       },
       wrapperInfo: {
         validationLevel: wrapper.config.validationLevel,
         category: wrapper.config.metadata?.category || FunctionCategory.UTILITY,
         cacheable: wrapper.config.cacheable || false,
-        dependencies: [...(wrapper.config.metadata?.dependencies || [])]
+        dependencies: [...(wrapper.config.metadata?.dependencies || [])],
       },
       systemContext: {
         cpuLoad: 0,
         memoryUsage: process.memoryUsage(),
-        timestamp: new Date()
-      }
+        timestamp: new Date(),
+      },
     };
   }
 
   private async waitForCooldown(milliseconds: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, milliseconds));
+    return new Promise((resolve) => setTimeout(resolve, milliseconds));
   }
 
   private generateSessionId(): string {
@@ -935,21 +1049,21 @@ export class PerformanceBaselineTestingService {
   }
 
   private setupEventListeners(): void {
-    this.eventEmitter.on('test-started', (event) => {
+    this.eventEmitter.on("test-started", (event) => {
       this.logger.debug(`Test started: ${event.testId}`);
     });
 
-    this.eventEmitter.on('test-completed', (event) => {
+    this.eventEmitter.on("test-completed", (event) => {
       this.logger.debug(`Test completed: ${event.testId}`);
     });
 
-    this.eventEmitter.on('test-failed', (event) => {
+    this.eventEmitter.on("test-failed", (event) => {
       this.logger.warn(`Test failed: ${event.testId} - ${event.error}`);
     });
   }
 
   private createDefaultTestingConfiguration(
-    overrides?: Partial<BaselineTestingConfiguration>
+    overrides?: Partial<BaselineTestingConfiguration>,
   ): BaselineTestingConfiguration {
     return {
       baselineIterations: 10,
@@ -960,7 +1074,7 @@ export class PerformanceBaselineTestingService {
       enableMemoryProfiling: true,
       enableCpuProfiling: true,
       captureSystemMetrics: true,
-      ...overrides
+      ...overrides,
     };
   }
 
@@ -971,13 +1085,13 @@ export class PerformanceBaselineTestingService {
     functionId: string,
     phase: StressTestPhase,
     testParameters: any[],
-    phaseType: string
+    phaseType: string,
   ): Promise<StressTestPhaseResult> {
     // Mock implementation for stress testing phase
     const startTime = performance.now();
 
     // Simulate stress testing execution
-    await new Promise(resolve => setTimeout(resolve, phase.duration));
+    await new Promise((resolve) => setTimeout(resolve, phase.duration));
 
     const endTime = performance.now();
 
@@ -987,64 +1101,88 @@ export class PerformanceBaselineTestingService {
       startTime: new Date(startTime),
       endTime: new Date(endTime),
       totalRequests: phase.concurrentUsers * phase.requestsPerUser,
-      successfulRequests: Math.floor(phase.concurrentUsers * phase.requestsPerUser * 0.99),
-      failedRequests: Math.floor(phase.concurrentUsers * phase.requestsPerUser * 0.01),
+      successfulRequests: Math.floor(
+        phase.concurrentUsers * phase.requestsPerUser * 0.99,
+      ),
+      failedRequests: Math.floor(
+        phase.concurrentUsers * phase.requestsPerUser * 0.01,
+      ),
       averageResponseTime: Math.random() * 500 + 100,
       p95ResponseTime: Math.random() * 800 + 400,
       p99ResponseTime: Math.random() * 1000 + 800,
-      throughput: (phase.concurrentUsers * phase.requestsPerUser) / (phase.duration / 1000),
+      throughput:
+        (phase.concurrentUsers * phase.requestsPerUser) /
+        (phase.duration / 1000),
       errorRate: 0.01,
       resourceUtilization: {
         cpu: Math.random() * 0.8,
         memory: Math.random() * 0.6,
-        network: Math.random() * 0.4
-      }
+        network: Math.random() * 0.4,
+      },
     };
   }
 
-  private calculateOverallStressMetrics(results: StressTestPhaseResult[]): OverallStressMetrics {
+  private calculateOverallStressMetrics(
+    results: StressTestPhaseResult[],
+  ): OverallStressMetrics {
     // Mock implementation for overall stress metrics calculation
     return {
-      totalRequests: results.reduce((sum, result) => sum + result.totalRequests, 0),
-      totalSuccessfulRequests: results.reduce((sum, result) => sum + result.successfulRequests, 0),
-      totalFailedRequests: results.reduce((sum, result) => sum + result.failedRequests, 0),
+      totalRequests: results.reduce(
+        (sum, result) => sum + result.totalRequests,
+        0,
+      ),
+      totalSuccessfulRequests: results.reduce(
+        (sum, result) => sum + result.successfulRequests,
+        0,
+      ),
+      totalFailedRequests: results.reduce(
+        (sum, result) => sum + result.failedRequests,
+        0,
+      ),
       overallSuccessRate: 0.99,
-      averageResponseTime: this.calculateMean(results.map(r => r.averageResponseTime)),
-      overallThroughput: results.reduce((sum, result) => sum + result.throughput, 0),
-      peakThroughput: Math.max(...results.map(r => r.throughput)),
-      overallErrorRate: 0.01
+      averageResponseTime: this.calculateMean(
+        results.map((r) => r.averageResponseTime),
+      ),
+      overallThroughput: results.reduce(
+        (sum, result) => sum + result.throughput,
+        0,
+      ),
+      peakThroughput: Math.max(...results.map((r) => r.throughput)),
+      overallErrorRate: 0.01,
     };
   }
 
   private generatePerformanceInsights(
     functionId: string,
-    results: StressTestPhaseResult[]
+    results: StressTestPhaseResult[],
   ): PerformanceInsight[] {
     return [
       {
-        category: 'performance',
-        severity: 'info',
-        title: 'Response Time Analysis',
+        category: "performance",
+        severity: "info",
+        title: "Response Time Analysis",
         description: `Function ${functionId} shows consistent response times across test phases`,
-        impact: 'Positive performance characteristics observed',
-        recommendation: 'Monitor for performance regression in production'
-      }
+        impact: "Positive performance characteristics observed",
+        recommendation: "Monitor for performance regression in production",
+      },
     ];
   }
 
   private generateOptimizationRecommendations(
     functionId: string,
-    results: StressTestPhaseResult[]
+    results: StressTestPhaseResult[],
   ): OptimizationRecommendation[] {
     return [
       {
-        category: 'caching',
-        priority: 'high',
-        title: 'Enable Response Caching',
-        description: 'Function shows consistent output patterns suitable for caching',
-        expectedImpact: 'Reduce response time by 50-70%',
-        implementation: 'Configure cache TTL based on data freshness requirements'
-      }
+        category: "caching",
+        priority: "high",
+        title: "Enable Response Caching",
+        description:
+          "Function shows consistent output patterns suitable for caching",
+        expectedImpact: "Reduce response time by 50-70%",
+        implementation:
+          "Configure cache TTL based on data freshness requirements",
+      },
     ];
   }
 
@@ -1057,14 +1195,14 @@ export class PerformanceBaselineTestingService {
       heapTotal: memoryUsage.heapTotal,
       external: memoryUsage.external,
       rss: memoryUsage.rss,
-      arrayBuffers: memoryUsage.arrayBuffers
+      arrayBuffers: memoryUsage.arrayBuffers,
     };
   }
 
   private analyzeMemoryLeakPatterns(
     snapshots: MemorySnapshot[],
     metrics: ExecutionMemoryMetrics[],
-    config: MemoryLeakTestingConfiguration
+    config: MemoryLeakTestingConfiguration,
   ): MemoryLeakAnalysis {
     // Mock implementation for memory leak analysis
     return {
@@ -1073,22 +1211,22 @@ export class PerformanceBaselineTestingService {
       sustainedGrowthPeriods: [],
       gcEffectiveness: 0.95,
       recommendations: [
-        'Memory usage appears stable with no significant leaks detected'
-      ]
+        "Memory usage appears stable with no significant leaks detected",
+      ],
     };
   }
 
   private generateMemoryOptimizationRecommendations(
-    analysis: MemoryLeakAnalysis
+    analysis: MemoryLeakAnalysis,
   ): MemoryOptimizationRecommendation[] {
     return [
       {
-        type: 'general',
-        priority: 'low',
-        title: 'Memory Usage Monitoring',
-        description: 'Continue monitoring memory usage patterns',
-        implementation: 'Set up automated memory usage alerts'
-      }
+        type: "general",
+        priority: "low",
+        title: "Memory Usage Monitoring",
+        description: "Continue monitoring memory usage patterns",
+        implementation: "Set up automated memory usage alerts",
+      },
     ];
   }
 
@@ -1102,102 +1240,138 @@ export class PerformanceBaselineTestingService {
         free: freemem(),
         used: totalmem() - freemem(),
         heapUsed: memoryUsage.heapUsed,
-        heapTotal: memoryUsage.heapTotal
+        heapTotal: memoryUsage.heapTotal,
       },
       loadAverage: [0.5, 0.6, 0.7], // Mock load averages
       activeConnections: Math.floor(Math.random() * 100),
       diskIO: {
         read: Math.random() * 1000,
-        write: Math.random() * 500
-      }
+        write: Math.random() * 500,
+      },
     };
   }
 
-  private calculateAggregateStatistics(results: FunctionBaselineResult[]): AggregateStatistics {
-    const allExecutionTimes = results.map(r => r.baselineMetrics.averageExecutionTime);
-    const allSuccessRates = results.map(r => r.baselineMetrics.successRate);
+  private calculateAggregateStatistics(
+    results: FunctionBaselineResult[],
+  ): AggregateStatistics {
+    const allExecutionTimes = results.map(
+      (r) => r.baselineMetrics.averageExecutionTime,
+    );
+    const allSuccessRates = results.map((r) => r.baselineMetrics.successRate);
 
     return {
       totalFunctions: results.length,
       averageExecutionTime: this.calculateMean(allExecutionTimes),
-      medianExecutionTime: this.calculatePercentile([...allExecutionTimes].sort((a, b) => a - b), 50),
-      p95ExecutionTime: this.calculatePercentile([...allExecutionTimes].sort((a, b) => a - b), 95),
+      medianExecutionTime: this.calculatePercentile(
+        [...allExecutionTimes].sort((a, b) => a - b),
+        50,
+      ),
+      p95ExecutionTime: this.calculatePercentile(
+        [...allExecutionTimes].sort((a, b) => a - b),
+        95,
+      ),
       overallSuccessRate: this.calculateMean(allSuccessRates),
-      functionsUnder100ms: results.filter(r => r.baselineMetrics.averageExecutionTime < 100).length,
-      functionsUnder500ms: results.filter(r => r.baselineMetrics.averageExecutionTime < 500).length,
-      functionsUnder1000ms: results.filter(r => r.baselineMetrics.averageExecutionTime < 1000).length,
-      functionsOver1000ms: results.filter(r => r.baselineMetrics.averageExecutionTime >= 1000).length
+      functionsUnder100ms: results.filter(
+        (r) => r.baselineMetrics.averageExecutionTime < 100,
+      ).length,
+      functionsUnder500ms: results.filter(
+        (r) => r.baselineMetrics.averageExecutionTime < 500,
+      ).length,
+      functionsUnder1000ms: results.filter(
+        (r) => r.baselineMetrics.averageExecutionTime < 1000,
+      ).length,
+      functionsOver1000ms: results.filter(
+        (r) => r.baselineMetrics.averageExecutionTime >= 1000,
+      ).length,
     };
   }
 
-  private analyzePerformanceDistribution(results: FunctionBaselineResult[]): PerformanceDistribution {
+  private analyzePerformanceDistribution(
+    results: FunctionBaselineResult[],
+  ): PerformanceDistribution {
     return {
       byTier: {
-        excellent: results.filter(r => r.performanceClassification.performanceTier === 'excellent').length,
-        good: results.filter(r => r.performanceClassification.performanceTier === 'good').length,
-        acceptable: results.filter(r => r.performanceClassification.performanceTier === 'acceptable').length,
-        poor: results.filter(r => r.performanceClassification.performanceTier === 'poor').length
+        excellent: results.filter(
+          (r) => r.performanceClassification.performanceTier === "excellent",
+        ).length,
+        good: results.filter(
+          (r) => r.performanceClassification.performanceTier === "good",
+        ).length,
+        acceptable: results.filter(
+          (r) => r.performanceClassification.performanceTier === "acceptable",
+        ).length,
+        poor: results.filter(
+          (r) => r.performanceClassification.performanceTier === "poor",
+        ).length,
       },
       byCategory: this.groupByCategory(results),
-      byValidationLevel: this.groupByValidationLevel(results)
+      byValidationLevel: this.groupByValidationLevel(results),
     };
   }
 
-  private identifyPerformanceOutliers(results: FunctionBaselineResult[]): PerformanceOutlier[] {
-    const executionTimes = results.map(r => r.baselineMetrics.averageExecutionTime);
+  private identifyPerformanceOutliers(
+    results: FunctionBaselineResult[],
+  ): PerformanceOutlier[] {
+    const executionTimes = results.map(
+      (r) => r.baselineMetrics.averageExecutionTime,
+    );
     const mean = this.calculateMean(executionTimes);
     const stdDev = this.calculateStandardDeviation(executionTimes);
 
-    const outlierThreshold = mean + (2 * stdDev); // 2 standard deviations
+    const outlierThreshold = mean + 2 * stdDev; // 2 standard deviations
 
     return results
-      .filter(r => r.baselineMetrics.averageExecutionTime > outlierThreshold)
-      .map(r => ({
+      .filter((r) => r.baselineMetrics.averageExecutionTime > outlierThreshold)
+      .map((r) => ({
         functionId: r.functionId,
         averageExecutionTime: r.baselineMetrics.averageExecutionTime,
         deviationFromMean: r.baselineMetrics.averageExecutionTime - mean,
         category: r.wrapperInfo.category,
-        validationLevel: r.wrapperInfo.validationLevel
+        validationLevel: r.wrapperInfo.validationLevel,
       }));
   }
 
   private generateBaselineRecommendations(
     results: FunctionBaselineResult[],
     aggregateStats: AggregateStatistics,
-    outliers: PerformanceOutlier[]
+    outliers: PerformanceOutlier[],
   ): BaselineRecommendation[] {
     const recommendations: BaselineRecommendation[] = [];
 
     if (outliers.length > 0) {
       recommendations.push({
-        type: 'performance',
-        priority: 'high',
-        title: 'Optimize Performance Outliers',
+        type: "performance",
+        priority: "high",
+        title: "Optimize Performance Outliers",
         description: `${outliers.length} functions show significantly higher execution times`,
-        affectedFunctions: outliers.map(o => o.functionId),
-        expectedImpact: 'Improve overall system performance by 20-30%'
+        affectedFunctions: outliers.map((o) => o.functionId),
+        expectedImpact: "Improve overall system performance by 20-30%",
       });
     }
 
     if (aggregateStats.functionsOver1000ms > 0) {
       recommendations.push({
-        type: 'compliance',
-        priority: 'critical',
-        title: 'Address Sub-1000ms Requirement Violations',
+        type: "compliance",
+        priority: "critical",
+        title: "Address Sub-1000ms Requirement Violations",
         description: `${aggregateStats.functionsOver1000ms} functions exceed enterprise response time requirement`,
         affectedFunctions: results
-          .filter(r => r.baselineMetrics.averageExecutionTime >= 1000)
-          .map(r => r.functionId),
-        expectedImpact: 'Achieve enterprise compliance standards'
+          .filter((r) => r.baselineMetrics.averageExecutionTime >= 1000)
+          .map((r) => r.functionId),
+        expectedImpact: "Achieve enterprise compliance standards",
       });
     }
 
     return recommendations;
   }
 
-  private assessEnterpriseCompliance(results: FunctionBaselineResult[]): EnterpriseComplianceAssessment {
+  private assessEnterpriseCompliance(
+    results: FunctionBaselineResult[],
+  ): EnterpriseComplianceAssessment {
     const totalFunctions = results.length;
-    const compliantFunctions = results.filter(r => r.performanceClassification.meetsEnterpriseStandards).length;
+    const compliantFunctions = results.filter(
+      (r) => r.performanceClassification.meetsEnterpriseStandards,
+    ).length;
 
     return {
       overallComplianceRate: compliantFunctions / totalFunctions,
@@ -1205,76 +1379,110 @@ export class PerformanceBaselineTestingService {
       functionsNonCompliant: totalFunctions - compliantFunctions,
       complianceByCategory: this.analyzeComplianceByCategory(results),
       criticalGaps: this.identifyCriticalComplianceGaps(results),
-      estimatedRemediationEffort: this.estimateRemediationEffort(results)
+      estimatedRemediationEffort: this.estimateRemediationEffort(results),
     };
   }
 
-  private groupByCategory(results: FunctionBaselineResult[]): Record<string, number> {
+  private groupByCategory(
+    results: FunctionBaselineResult[],
+  ): Record<string, number> {
     const grouped: Record<string, number> = {};
-    results.forEach(result => {
+    results.forEach((result) => {
       const category = result.wrapperInfo.category;
       grouped[category] = (grouped[category] || 0) + 1;
     });
     return grouped;
   }
 
-  private groupByValidationLevel(results: FunctionBaselineResult[]): Record<string, number> {
+  private groupByValidationLevel(
+    results: FunctionBaselineResult[],
+  ): Record<string, number> {
     const grouped: Record<string, number> = {};
-    results.forEach(result => {
+    results.forEach((result) => {
       const level = result.wrapperInfo.validationLevel;
       grouped[level] = (grouped[level] || 0) + 1;
     });
     return grouped;
   }
 
-  private analyzeComplianceByCategory(results: FunctionBaselineResult[]): Record<string, number> {
+  private analyzeComplianceByCategory(
+    results: FunctionBaselineResult[],
+  ): Record<string, number> {
     const compliance: Record<string, number> = {};
     const categories = Object.values(FunctionCategory);
 
-    categories.forEach(category => {
-      const categoryResults = results.filter(r => r.wrapperInfo.category === category);
-      const compliantCount = categoryResults.filter(r => r.performanceClassification.meetsEnterpriseStandards).length;
-      compliance[category] = categoryResults.length > 0 ? compliantCount / categoryResults.length : 0;
+    categories.forEach((category) => {
+      const categoryResults = results.filter(
+        (r) => r.wrapperInfo.category === category,
+      );
+      const compliantCount = categoryResults.filter(
+        (r) => r.performanceClassification.meetsEnterpriseStandards,
+      ).length;
+      compliance[category] =
+        categoryResults.length > 0
+          ? compliantCount / categoryResults.length
+          : 0;
     });
 
     return compliance;
   }
 
-  private identifyCriticalComplianceGaps(results: FunctionBaselineResult[]): ComplianceGap[] {
+  private identifyCriticalComplianceGaps(
+    results: FunctionBaselineResult[],
+  ): ComplianceGap[] {
     return results
-      .filter(r => !r.performanceClassification.meetsEnterpriseStandards)
-      .map(r => ({
+      .filter((r) => !r.performanceClassification.meetsEnterpriseStandards)
+      .map((r) => ({
         functionId: r.functionId,
         category: r.wrapperInfo.category,
         validationLevel: r.wrapperInfo.validationLevel,
         gaps: r.performanceClassification.complianceGaps,
-        severity: r.baselineMetrics.averageExecutionTime > 2000 ? 'critical' : 'high'
+        severity:
+          r.baselineMetrics.averageExecutionTime > 2000 ? "critical" : "high",
       }));
   }
 
-  private estimateRemediationEffort(results: FunctionBaselineResult[]): RemediationEffort {
-    const nonCompliantResults = results.filter(r => !r.performanceClassification.meetsEnterpriseStandards);
+  private estimateRemediationEffort(
+    results: FunctionBaselineResult[],
+  ): RemediationEffort {
+    const nonCompliantResults = results.filter(
+      (r) => !r.performanceClassification.meetsEnterpriseStandards,
+    );
 
     return {
       totalFunctionsRequiringRemediation: nonCompliantResults.length,
       estimatedDeveloperDays: nonCompliantResults.length * 2, // Estimate 2 days per function
       priorityBreakdown: {
-        critical: nonCompliantResults.filter(r => r.baselineMetrics.averageExecutionTime > 2000).length,
-        high: nonCompliantResults.filter(r => r.baselineMetrics.averageExecutionTime > 1000 && r.baselineMetrics.averageExecutionTime <= 2000).length,
-        medium: nonCompliantResults.filter(r => r.baselineMetrics.averageExecutionTime <= 1000).length
-      }
+        critical: nonCompliantResults.filter(
+          (r) => r.baselineMetrics.averageExecutionTime > 2000,
+        ).length,
+        high: nonCompliantResults.filter(
+          (r) =>
+            r.baselineMetrics.averageExecutionTime > 1000 &&
+            r.baselineMetrics.averageExecutionTime <= 2000,
+        ).length,
+        medium: nonCompliantResults.filter(
+          (r) => r.baselineMetrics.averageExecutionTime <= 1000,
+        ).length,
+      },
     };
   }
 
-  private calculateAverageSystemLoad(snapshots: SystemPerformanceSnapshot[]): SystemLoadAverage {
+  private calculateAverageSystemLoad(
+    snapshots: SystemPerformanceSnapshot[],
+  ): SystemLoadAverage {
     if (snapshots.length === 0) {
       return { cpu: 0, memory: 0, diskIO: 0 };
     }
 
     return {
-      cpu: this.calculateMean(snapshots.map(s => s.cpuUsage)),
-      memory: this.calculateMean(snapshots.map(s => s.memoryUsage.used / s.memoryUsage.total)),
-      diskIO: this.calculateMean(snapshots.map(s => s.diskIO.read + s.diskIO.write))
+      cpu: this.calculateMean(snapshots.map((s) => s.cpuUsage)),
+      memory: this.calculateMean(
+        snapshots.map((s) => s.memoryUsage.used / s.memoryUsage.total),
+      ),
+      diskIO: this.calculateMean(
+        snapshots.map((s) => s.diskIO.read + s.diskIO.write),
+      ),
     };
   }
 
@@ -1283,62 +1491,88 @@ export class PerformanceBaselineTestingService {
   /**
    * Get test sessions within a specific time range
    */
-  private getTestSessionsInRange(timeRange: TimeRange): PerformanceBaselineTestResult[] {
-    return Array.from(this.testResults.values()).filter(session =>
-      session.systemContext.timestamp >= timeRange.startDate && session.systemContext.timestamp <= timeRange.endDate
+  private getTestSessionsInRange(
+    timeRange: TimeRange,
+  ): PerformanceBaselineTestResult[] {
+    return Array.from(this.testResults.values()).filter(
+      (session) =>
+        session.systemContext.timestamp >= timeRange.startDate &&
+        session.systemContext.timestamp <= timeRange.endDate,
     );
   }
 
   /**
    * Aggregate performance metrics from test sessions
    */
-  private async aggregatePerformanceMetrics(sessions: PerformanceBaselineTestResult[]): Promise<any> {
+  private async aggregatePerformanceMetrics(
+    sessions: PerformanceBaselineTestResult[],
+  ): Promise<any> {
     return {
-      averageExecutionTime: sessions.reduce((sum, s) => sum + s.testExecutionTime, 0) / sessions.length,
+      averageExecutionTime:
+        sessions.reduce((sum, s) => sum + s.testExecutionTime, 0) /
+        sessions.length,
       totalSessions: sessions.length,
-      successRate: sessions.filter(s => s.performanceClassification.performanceTier === 'excellent' || s.performanceClassification.performanceTier === 'good' || s.performanceClassification.performanceTier === 'acceptable').length / sessions.length
+      successRate:
+        sessions.filter(
+          (s) =>
+            s.performanceClassification.performanceTier === "excellent" ||
+            s.performanceClassification.performanceTier === "good" ||
+            s.performanceClassification.performanceTier === "acceptable",
+        ).length / sessions.length,
     };
   }
 
   /**
    * Analyze function category performance
    */
-  private async analyzeFunctionCategoryPerformance(sessions: PerformanceBaselineTestResult[]): Promise<any> {
-    return { categoryBreakdown: 'analyzed' };
+  private async analyzeFunctionCategoryPerformance(
+    sessions: PerformanceBaselineTestResult[],
+  ): Promise<any> {
+    return { categoryBreakdown: "analyzed" };
   }
 
   /**
    * Analyze validation level performance
    */
-  private async analyzeValidationLevelPerformance(sessions: PerformanceBaselineTestResult[]): Promise<any> {
-    return { validationBreakdown: 'analyzed' };
+  private async analyzeValidationLevelPerformance(
+    sessions: PerformanceBaselineTestResult[],
+  ): Promise<any> {
+    return { validationBreakdown: "analyzed" };
   }
 
   /**
    * Analyze performance trends
    */
-  private async analyzePerformanceTrends(sessions: PerformanceBaselineTestResult[]): Promise<any> {
-    return { trends: 'analyzed' };
+  private async analyzePerformanceTrends(
+    sessions: PerformanceBaselineTestResult[],
+  ): Promise<any> {
+    return { trends: "analyzed" };
   }
 
   /**
    * Identify optimization opportunities
    */
-  private async identifyOptimizationOpportunities(sessions: PerformanceBaselineTestResult[]): Promise<OptimizationOpportunity[]> {
+  private async identifyOptimizationOpportunities(
+    sessions: PerformanceBaselineTestResult[],
+  ): Promise<OptimizationOpportunity[]> {
     return [];
   }
 
   /**
    * Count unique functions tested
    */
-  private countUniqueFunctionsTested(sessions: PerformanceBaselineTestResult[]): number {
-    return new Set(sessions.map(s => s.functionId)).size;
+  private countUniqueFunctionsTested(
+    sessions: PerformanceBaselineTestResult[],
+  ): number {
+    return new Set(sessions.map((s) => s.functionId)).size;
   }
 
   /**
    * Generate comprehensive recommendations
    */
-  private generateComprehensiveRecommendations(analysis: any): ComprehensiveRecommendation[] {
+  private generateComprehensiveRecommendations(
+    analysis: any,
+  ): ComprehensiveRecommendation[] {
     return [];
   }
 }
@@ -1352,7 +1586,7 @@ export class PerformanceTestingError extends Error {
 
   constructor(message: string, metadata: Record<string, any> = {}) {
     super(message);
-    this.name = 'PerformanceTestingError';
+    this.name = "PerformanceTestingError";
     this.metadata = metadata;
   }
 }
@@ -1437,8 +1671,8 @@ export interface BaselineMetrics {
 }
 
 export interface PerformanceClassification {
-  performanceTier: 'excellent' | 'good' | 'acceptable' | 'poor';
-  reliabilityTier: 'excellent' | 'good' | 'acceptable' | 'poor';
+  performanceTier: "excellent" | "good" | "acceptable" | "poor";
+  reliabilityTier: "excellent" | "good" | "acceptable" | "poor";
   meetsEnterpriseStandards: boolean;
   complianceGaps: string[];
 }
@@ -1512,8 +1746,8 @@ export interface PerformanceOutlier {
 }
 
 export interface BaselineRecommendation {
-  type: 'performance' | 'compliance' | 'optimization' | 'monitoring';
-  priority: 'critical' | 'high' | 'medium' | 'low';
+  type: "performance" | "compliance" | "optimization" | "monitoring";
+  priority: "critical" | "high" | "medium" | "low";
   title: string;
   description: string;
   affectedFunctions: string[];
@@ -1534,7 +1768,7 @@ export interface ComplianceGap {
   category: FunctionCategory;
   validationLevel: ValidationLevel;
   gaps: string[];
-  severity: 'critical' | 'high' | 'medium' | 'low';
+  severity: "critical" | "high" | "medium" | "low";
 }
 
 export interface RemediationEffort {
@@ -1614,8 +1848,8 @@ export interface OverallStressMetrics {
 }
 
 export interface PerformanceInsight {
-  category: 'performance' | 'reliability' | 'scalability' | 'resource_usage';
-  severity: 'info' | 'warning' | 'error' | 'critical';
+  category: "performance" | "reliability" | "scalability" | "resource_usage";
+  severity: "info" | "warning" | "error" | "critical";
   title: string;
   description: string;
   impact: string;
@@ -1623,8 +1857,13 @@ export interface PerformanceInsight {
 }
 
 export interface OptimizationRecommendation {
-  category: 'caching' | 'batching' | 'concurrency' | 'algorithm' | 'infrastructure';
-  priority: 'critical' | 'high' | 'medium' | 'low';
+  category:
+    | "caching"
+    | "batching"
+    | "concurrency"
+    | "algorithm"
+    | "infrastructure";
+  priority: "critical" | "high" | "medium" | "low";
   title: string;
   description: string;
   expectedImpact: string;
@@ -1688,8 +1927,8 @@ export interface MemoryLeakAnalysis {
 }
 
 export interface MemoryOptimizationRecommendation {
-  type: 'leak_fix' | 'optimization' | 'monitoring' | 'general';
-  priority: 'critical' | 'high' | 'medium' | 'low';
+  type: "leak_fix" | "optimization" | "monitoring" | "general";
+  priority: "critical" | "high" | "medium" | "low";
   title: string;
   description: string;
   implementation: string;
@@ -1753,29 +1992,29 @@ export interface PerformanceTrend {
     timestamp: Date;
     value: number;
   }>;
-  trendDirection: 'improving' | 'stable' | 'degrading';
+  trendDirection: "improving" | "stable" | "degrading";
   changeRate: number;
 }
 
 export interface OptimizationOpportunity {
-  type: 'caching' | 'algorithm' | 'infrastructure' | 'concurrency';
-  impact: 'high' | 'medium' | 'low';
+  type: "caching" | "algorithm" | "infrastructure" | "concurrency";
+  impact: "high" | "medium" | "low";
   affectedFunctions: string[];
   estimatedImprovement: string;
-  implementationComplexity: 'low' | 'medium' | 'high';
+  implementationComplexity: "low" | "medium" | "high";
 }
 
 export interface ComplianceAnalysis {
   overallComplianceRate: number;
-  complianceTrend: 'improving' | 'stable' | 'degrading';
+  complianceTrend: "improving" | "stable" | "degrading";
   criticalViolations: number;
   highPriorityViolations: number;
   complianceByRequirement: Record<string, number>;
 }
 
 export interface ComprehensiveRecommendation {
-  category: 'performance' | 'reliability' | 'compliance' | 'optimization';
-  priority: 'critical' | 'high' | 'medium' | 'low';
+  category: "performance" | "reliability" | "compliance" | "optimization";
+  priority: "critical" | "high" | "medium" | "low";
   title: string;
   description: string;
   businessImpact: string;

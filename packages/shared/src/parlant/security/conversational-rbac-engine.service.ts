@@ -64,7 +64,11 @@ export type PermissionEscalationType =
 /**
  * Authorization decision types
  */
-export type AuthorizationDecision = "granted" | "denied" | "conditional" | "escalation_required";
+export type AuthorizationDecision =
+  | "granted"
+  | "denied"
+  | "conditional"
+  | "escalation_required";
 
 /**
  * Context-aware role definition
@@ -253,13 +257,17 @@ export interface PermissionEscalationResult {
  * Main Conversational RBAC Engine Service
  */
 @Injectable()
-export class ConversationalRBACEngineService implements OnModuleInit, OnModuleDestroy {
+export class ConversationalRBACEngineService
+  implements OnModuleInit, OnModuleDestroy
+{
   private readonly logger = new Logger(ConversationalRBACEngineService.name);
   private readonly eventEmitter = new EventEmitter();
   private readonly roleCache = new Map<string, ContextAwareRole>();
   private readonly permissionCache = new Map<string, Permission[]>();
-  private readonly authorizationDecisionEngine = new AuthorizationDecisionEngine();
-  private readonly permissionEscalationEngine = new PermissionEscalationEngine();
+  private readonly authorizationDecisionEngine =
+    new AuthorizationDecisionEngine();
+  private readonly permissionEscalationEngine =
+    new PermissionEscalationEngine();
   private readonly contextAnalyzer = new AuthorizationContextAnalyzer();
   private readonly riskAssessor = new PermissionRiskAssessor();
 
@@ -294,13 +302,18 @@ export class ConversationalRBACEngineService implements OnModuleInit, OnModuleDe
       // Start background optimization tasks
       this.startOptimizationTasks();
 
-      this.logger.log("Conversational RBAC Engine Service initialized successfully");
+      this.logger.log(
+        "Conversational RBAC Engine Service initialized successfully",
+      );
     } catch (error) {
-      this.logger.error("Failed to initialize Conversational RBAC Engine Service", error);
+      this.logger.error(
+        "Failed to initialize Conversational RBAC Engine Service",
+        error,
+      );
       throw new ParlantIntegrationError(
         "Conversational RBAC engine initialization failed",
         "RBAC_ENGINE_INIT_ERROR",
-        { error: error.message }
+        { error: error.message },
       );
     }
   }
@@ -324,7 +337,10 @@ export class ConversationalRBACEngineService implements OnModuleInit, OnModuleDe
 
       this.logger.log("Conversational RBAC Engine Service shutdown complete");
     } catch (error) {
-      this.logger.error("Error during Conversational RBAC Engine Service shutdown", error);
+      this.logger.error(
+        "Error during Conversational RBAC Engine Service shutdown",
+        error,
+      );
     }
   }
 
@@ -334,7 +350,7 @@ export class ConversationalRBACEngineService implements OnModuleInit, OnModuleDe
   async evaluateAccess(
     accessRequest: AccessRequest,
     userContext: UserProfile,
-    conversationContext: ParlantContext
+    conversationContext: ParlantContext,
   ): Promise<AccessDecisionResult> {
     const startTime = performance.now();
     const correlationId = uuidv4();
@@ -344,7 +360,7 @@ export class ConversationalRBACEngineService implements OnModuleInit, OnModuleDe
       userId: userContext.userId,
       resource: accessRequest.resource.resourceId,
       action: accessRequest.action,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
 
     try {
@@ -352,34 +368,34 @@ export class ConversationalRBACEngineService implements OnModuleInit, OnModuleDe
       const requestValidation = await this.validateAccessRequest(accessRequest);
       if (!requestValidation.valid) {
         throw new UnauthorizedException(
-          `Access request validation failed: ${requestValidation.errors.join(", ")}`
+          `Access request validation failed: ${requestValidation.errors.join(", ")}`,
         );
       }
 
       // Step 2: Multi-dimensional access analysis
       const accessAnalysis = await this.performAccessAnalysis(
         accessRequest,
-        userContext
+        userContext,
       );
 
       // Step 3: Context-aware role evaluation
       const activeRoles = await this.evaluateActiveRoles(
         userContext,
-        accessRequest.context
+        accessRequest.context,
       );
 
       // Step 4: Permission resolution with inheritance
       const resolvedPermissions = await this.resolvePermissions(
         activeRoles,
         accessRequest.resource,
-        accessRequest.action
+        accessRequest.action,
       );
 
       // Step 5: Risk-based authorization assessment
       const riskAssessment = await this.assessAuthorizationRisk(
         accessRequest,
         resolvedPermissions,
-        accessAnalysis
+        accessAnalysis,
       );
 
       // Step 6: Conversational validation if required
@@ -391,12 +407,12 @@ export class ConversationalRBACEngineService implements OnModuleInit, OnModuleDe
           businessContext: accessRequest.context.businessContext,
           riskAssessment: riskAssessment,
           potentialImpact: accessAnalysis.impactAssessment,
-          resolvedPermissions: resolvedPermissions
+          resolvedPermissions: resolvedPermissions,
         };
 
         const conversationalDecision = await this.validateAccess(
           validationRequest,
-          conversationContext
+          conversationContext,
         );
 
         // Apply conversational decision
@@ -407,14 +423,14 @@ export class ConversationalRBACEngineService implements OnModuleInit, OnModuleDe
       const authorizationDecision = await this.makeAuthorizationDecision(
         accessAnalysis,
         resolvedPermissions,
-        riskAssessment
+        riskAssessment,
       );
 
       // Step 8: Generate decision explanation and reasoning
       const decisionExplanation = await this.generateDecisionExplanation(
         accessAnalysis,
         authorizationDecision,
-        riskAssessment
+        riskAssessment,
       );
 
       // Step 9: Create comprehensive audit trail
@@ -425,7 +441,7 @@ export class ConversationalRBACEngineService implements OnModuleInit, OnModuleDe
         accessAnalysis,
         authorizationDecision,
         decisionExplanation,
-        duration: performance.now() - startTime
+        duration: performance.now() - startTime,
       });
 
       const totalDuration = performance.now() - startTime;
@@ -435,7 +451,7 @@ export class ConversationalRBACEngineService implements OnModuleInit, OnModuleDe
         granted: authorizationDecision.granted,
         decision: authorizationDecision.decision,
         duration: totalDuration,
-        permissionsGranted: authorizationDecision.grantedPermissions.length
+        permissionsGranted: authorizationDecision.grantedPermissions.length,
       });
 
       // Emit authorization event
@@ -445,7 +461,7 @@ export class ConversationalRBACEngineService implements OnModuleInit, OnModuleDe
         action: accessRequest.action,
         granted: authorizationDecision.granted,
         decision: authorizationDecision.decision,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       return {
@@ -461,11 +477,11 @@ export class ConversationalRBACEngineService implements OnModuleInit, OnModuleDe
           analysisTime: accessAnalysis.processingTime,
           roleEvaluationTime: activeRoles.evaluationTime,
           permissionResolutionTime: resolvedPermissions.resolutionTime,
-          riskAssessmentTime: riskAssessment.processingTime
+          riskAssessmentTime: riskAssessment.processingTime,
         },
-        escalationRecommendations: authorizationDecision.escalationRecommendations
+        escalationRecommendations:
+          authorizationDecision.escalationRecommendations,
       };
-
     } catch (error) {
       const duration = performance.now() - startTime;
 
@@ -474,7 +490,7 @@ export class ConversationalRBACEngineService implements OnModuleInit, OnModuleDe
         error: error.message,
         stack: error.stack,
         duration,
-        userId: userContext.userId
+        userId: userContext.userId,
       });
 
       // Security incident detection
@@ -484,7 +500,7 @@ export class ConversationalRBACEngineService implements OnModuleInit, OnModuleDe
           error,
           accessRequest,
           userContext,
-          duration
+          duration,
         });
       }
 
@@ -498,7 +514,7 @@ export class ConversationalRBACEngineService implements OnModuleInit, OnModuleDe
   async processPermissionEscalation(
     escalationRequest: PermissionEscalationRequest,
     requestingUser: UserProfile,
-    conversationContext: ParlantContext
+    conversationContext: ParlantContext,
   ): Promise<PermissionEscalationResult> {
     const startTime = performance.now();
     const correlationId = uuidv4();
@@ -509,57 +525,60 @@ export class ConversationalRBACEngineService implements OnModuleInit, OnModuleDe
       escalationType: escalationRequest.escalationType,
       urgencyLevel: escalationRequest.urgencyLevel,
       permissionCount: escalationRequest.requestedPermissions.length,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
 
     try {
       // Step 1: Validate escalation request
       const requestValidation = await this.validateEscalationRequest(
         escalationRequest,
-        requestingUser
+        requestingUser,
       );
       if (!requestValidation.valid) {
         throw new UnauthorizedException(
-          `Escalation request validation failed: ${requestValidation.errors.join(", ")}`
+          `Escalation request validation failed: ${requestValidation.errors.join(", ")}`,
         );
       }
 
       // Step 2: Escalation legitimacy analysis
       const legitimacyAnalysis = await this.analyzeEscalationLegitimacy(
         escalationRequest,
-        requestingUser
+        requestingUser,
       );
 
       // Step 3: Business impact assessment
       const impactAssessment = await this.assessBusinessImpact(
         escalationRequest.requestedPermissions,
-        requestingUser.currentPermissions
+        requestingUser.currentPermissions,
       );
 
       // Step 4: Risk analysis for escalation
       const escalationRisk = await this.riskAssessor.assessEscalationRisk(
         escalationRequest,
         legitimacyAnalysis,
-        impactAssessment
+        impactAssessment,
       );
 
       // Step 5: Conversational escalation validation
-      const escalationValidation = await this.validatePermissionEscalation({
-        requestingUser: requestingUser,
-        requestedPermissions: escalationRequest.requestedPermissions,
-        escalationReason: escalationRequest.businessJustification,
-        legitimacyAnalysis: legitimacyAnalysis,
-        impactAssessment: impactAssessment,
-        urgencyLevel: escalationRequest.urgencyLevel,
-        escalationRisk: escalationRisk
-      }, conversationContext);
+      const escalationValidation = await this.validatePermissionEscalation(
+        {
+          requestingUser: requestingUser,
+          requestedPermissions: escalationRequest.requestedPermissions,
+          escalationReason: escalationRequest.businessJustification,
+          legitimacyAnalysis: legitimacyAnalysis,
+          impactAssessment: impactAssessment,
+          urgencyLevel: escalationRequest.urgencyLevel,
+          escalationRisk: escalationRisk,
+        },
+        conversationContext,
+      );
 
       // Step 6: Approval workflow execution
       if (escalationValidation.requiresApproval) {
         const approvalResult = await this.executeApprovalWorkflow(
           escalationValidation.recommendedWorkflow,
           escalationRequest,
-          escalationValidation
+          escalationValidation,
         );
 
         if (!approvalResult.approved) {
@@ -574,8 +593,8 @@ export class ConversationalRBACEngineService implements OnModuleInit, OnModuleDe
               requestingUser,
               escalationValidation,
               approvalResult,
-              duration: performance.now() - startTime
-            })
+              duration: performance.now() - startTime,
+            }),
           };
         }
       }
@@ -584,14 +603,14 @@ export class ConversationalRBACEngineService implements OnModuleInit, OnModuleDe
       const escalatedPermissions = await this.grantEscalatedPermissions(
         requestingUser,
         escalationRequest.requestedPermissions,
-        escalationValidation.grantedScope
+        escalationValidation.grantedScope,
       );
 
       // Step 8: Setup enhanced monitoring
       const monitoringLevel = await this.determineMonitoringLevel(
         escalationRequest,
         escalatedPermissions,
-        escalationRisk
+        escalationRisk,
       );
 
       const totalDuration = performance.now() - startTime;
@@ -602,7 +621,7 @@ export class ConversationalRBACEngineService implements OnModuleInit, OnModuleDe
         permissionsGranted: escalatedPermissions.permissions.length,
         expirationTime: escalatedPermissions.expirationTime,
         monitoringLevel: monitoringLevel.level,
-        duration: totalDuration
+        duration: totalDuration,
       });
 
       // Emit escalation event
@@ -611,7 +630,7 @@ export class ConversationalRBACEngineService implements OnModuleInit, OnModuleDe
         escalationType: escalationRequest.escalationType,
         permissionsGranted: escalatedPermissions.permissions.length,
         urgencyLevel: escalationRequest.urgencyLevel,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       return {
@@ -626,10 +645,9 @@ export class ConversationalRBACEngineService implements OnModuleInit, OnModuleDe
           requestingUser,
           escalationValidation,
           escalatedPermissions,
-          duration: totalDuration
-        })
+          duration: totalDuration,
+        }),
       };
-
     } catch (error) {
       const duration = performance.now() - startTime;
 
@@ -638,7 +656,7 @@ export class ConversationalRBACEngineService implements OnModuleInit, OnModuleDe
         error: error.message,
         stack: error.stack,
         duration,
-        userId: requestingUser.userId
+        userId: requestingUser.userId,
       });
 
       throw error;
@@ -650,7 +668,7 @@ export class ConversationalRBACEngineService implements OnModuleInit, OnModuleDe
    */
   async evaluateActiveRoles(
     userContext: UserProfile,
-    authContext: AuthorizationContext
+    authContext: AuthorizationContext,
   ): Promise<ActiveRolesEvaluation> {
     const startTime = performance.now();
 
@@ -662,7 +680,10 @@ export class ConversationalRBACEngineService implements OnModuleInit, OnModuleDe
       const activeRoles: ContextAwareRole[] = [];
 
       for (const role of assignedRoles) {
-        const roleEvaluation = await this.evaluateRoleActivation(role, authContext);
+        const roleEvaluation = await this.evaluateRoleActivation(
+          role,
+          authContext,
+        );
 
         if (roleEvaluation.activated) {
           activeRoles.push(role);
@@ -670,13 +691,16 @@ export class ConversationalRBACEngineService implements OnModuleInit, OnModuleDe
           this.logger.debug("Role not activated due to constraints", {
             roleId: role.roleId,
             userId: userContext.userId,
-            constraints: roleEvaluation.failedConstraints
+            constraints: roleEvaluation.failedConstraints,
           });
         }
       }
 
       // Resolve role inheritance
-      const inheritedRoles = await this.resolveRoleInheritance(activeRoles, authContext);
+      const inheritedRoles = await this.resolveRoleInheritance(
+        activeRoles,
+        authContext,
+      );
 
       const evaluationTime = performance.now() - startTime;
 
@@ -686,15 +710,17 @@ export class ConversationalRBACEngineService implements OnModuleInit, OnModuleDe
         inheritedRoles,
         evaluationTime,
         contextFactors: await this.extractContextFactors(authContext),
-        constraintEvaluations: await this.getConstraintEvaluations(assignedRoles, authContext)
+        constraintEvaluations: await this.getConstraintEvaluations(
+          assignedRoles,
+          authContext,
+        ),
       };
-
     } catch (error) {
       this.logger.error("Role evaluation failed", error);
       throw new ParlantIntegrationError(
         "Role evaluation failed",
         "ROLE_EVALUATION_ERROR",
-        { error: error.message }
+        { error: error.message },
       );
     }
   }
@@ -705,7 +731,7 @@ export class ConversationalRBACEngineService implements OnModuleInit, OnModuleDe
   async resolvePermissions(
     activeRoles: ActiveRolesEvaluation,
     resource: ResourceIdentifier,
-    action: string
+    action: string,
   ): Promise<ResolvedPermissions> {
     const startTime = performance.now();
 
@@ -719,20 +745,20 @@ export class ConversationalRBACEngineService implements OnModuleInit, OnModuleDe
       }
 
       // Filter permissions by resource and action
-      const relevantPermissions = allPermissions.filter(permission =>
-        this.isPermissionRelevant(permission, resource, action)
+      const relevantPermissions = allPermissions.filter((permission) =>
+        this.isPermissionRelevant(permission, resource, action),
       );
 
       // Apply permission conditions
       const conditionalPermissions = await this.applyPermissionConditions(
         relevantPermissions,
         resource,
-        action
+        action,
       );
 
       // Resolve permission conflicts
       const resolvedPermissions = await this.resolvePermissionConflicts(
-        conditionalPermissions
+        conditionalPermissions,
       );
 
       const resolutionTime = performance.now() - startTime;
@@ -744,15 +770,16 @@ export class ConversationalRBACEngineService implements OnModuleInit, OnModuleDe
         resolvedPermissions,
         resolutionTime,
         permissionSources: await this.getPermissionSources(resolvedPermissions),
-        conflictResolutions: await this.getConflictResolutions(conditionalPermissions)
+        conflictResolutions: await this.getConflictResolutions(
+          conditionalPermissions,
+        ),
       };
-
     } catch (error) {
       this.logger.error("Permission resolution failed", error);
       throw new ParlantIntegrationError(
         "Permission resolution failed",
         "PERMISSION_RESOLUTION_ERROR",
-        { error: error.message }
+        { error: error.message },
       );
     }
   }
@@ -778,7 +805,7 @@ export class ConversationalRBACEngineService implements OnModuleInit, OnModuleDe
     await this.validateRoleHierarchy();
 
     this.logger.debug("Role hierarchy initialized", {
-      roleCount: this.roleCache.size
+      roleCount: this.roleCache.size,
     });
   }
 
@@ -795,7 +822,8 @@ export class ConversationalRBACEngineService implements OnModuleInit, OnModuleDe
     for (const permission of permissionDefinitions) {
       await this.validatePermissionDefinition(permission);
 
-      const resourcePermissions = permissionsByResource.get(permission.resourceType) || [];
+      const resourcePermissions =
+        permissionsByResource.get(permission.resourceType) || [];
       resourcePermissions.push(permission);
       permissionsByResource.set(permission.resourceType, resourcePermissions);
     }
@@ -807,7 +835,7 @@ export class ConversationalRBACEngineService implements OnModuleInit, OnModuleDe
 
     this.logger.debug("Permission definitions initialized", {
       resourceTypeCount: permissionsByResource.size,
-      totalPermissions: permissionDefinitions.length
+      totalPermissions: permissionDefinitions.length,
     });
   }
 
@@ -815,8 +843,14 @@ export class ConversationalRBACEngineService implements OnModuleInit, OnModuleDe
    * Setup event listeners
    */
   private setupEventListeners(): void {
-    this.eventEmitter.on("authorization_evaluated", this.handleAuthorizationEvaluated.bind(this));
-    this.eventEmitter.on("permission_escalated", this.handlePermissionEscalated.bind(this));
+    this.eventEmitter.on(
+      "authorization_evaluated",
+      this.handleAuthorizationEvaluated.bind(this),
+    );
+    this.eventEmitter.on(
+      "permission_escalated",
+      this.handlePermissionEscalated.bind(this),
+    );
     this.eventEmitter.on("role_assigned", this.handleRoleAssigned.bind(this));
     this.eventEmitter.on("role_removed", this.handleRoleRemoved.bind(this));
     this.eventEmitter.on("access_denied", this.handleAccessDenied.bind(this));
@@ -825,12 +859,14 @@ export class ConversationalRBACEngineService implements OnModuleInit, OnModuleDe
   /**
    * Handle authorization evaluated event
    */
-  private async handleAuthorizationEvaluated(event: AuthorizationEvaluatedEvent): Promise<void> {
+  private async handleAuthorizationEvaluated(
+    event: AuthorizationEvaluatedEvent,
+  ): Promise<void> {
     this.logger.debug("Authorization evaluated", {
       userId: event.userId,
       resource: event.resource,
       action: event.action,
-      granted: event.granted
+      granted: event.granted,
     });
 
     // Update authorization statistics
@@ -849,10 +885,10 @@ export class ConversationalRBACEngineService implements OnModuleInit, OnModuleDe
       /authorization.*bypass/i,
       /role.*manipulation/i,
       /permission.*injection/i,
-      /access.*control.*violation/i
+      /access.*control.*violation/i,
     ];
 
-    return incidentPatterns.some(pattern => pattern.test(error.message));
+    return incidentPatterns.some((pattern) => pattern.test(error.message));
   }
 }
 

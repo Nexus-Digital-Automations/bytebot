@@ -26,13 +26,13 @@ import {
   OnModuleInit,
   OnModuleDestroy,
   Inject,
-} from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter } from 'events';
-import * as jwt from 'jsonwebtoken';
-import * as crypto from 'crypto';
-import axios, { AxiosInstance } from 'axios';
-import { JwtPayload as BaseJwtPayload } from 'jsonwebtoken';
+} from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { EventEmitter } from "events";
+import * as jwt from "jsonwebtoken";
+import * as crypto from "crypto";
+import axios, { AxiosInstance } from "axios";
+import { JwtPayload as BaseJwtPayload } from "jsonwebtoken";
 
 /**
  * JWT Bridge configuration interface
@@ -102,9 +102,9 @@ export interface BridgeJwtPayload extends BaseJwtPayload {
   /** User permissions */
   permissions?: string[];
   /** Token type */
-  type?: 'access' | 'refresh' | 'bridge';
+  type?: "access" | "refresh" | "bridge";
   /** Source system */
-  source?: 'aigent' | 'parlant';
+  source?: "aigent" | "parlant";
   /** Bridge metadata */
   bridgeMetadata?: {
     originalToken?: string;
@@ -122,13 +122,13 @@ export interface TokenTranslationResult {
   /** Translated token */
   token: string;
   /** Token type */
-  type: 'access' | 'refresh' | 'bridge';
+  type: "access" | "refresh" | "bridge";
   /** Expiration time */
   expiresAt: Date;
   /** Translation metadata */
   metadata: {
-    sourceSystem: 'aigent' | 'parlant';
-    targetSystem: 'aigent' | 'parlant';
+    sourceSystem: "aigent" | "parlant";
+    targetSystem: "aigent" | "parlant";
     translationTime: number;
     originalPayload: Partial<BridgeJwtPayload>;
     securityChecks: SecurityCheck[];
@@ -140,9 +140,15 @@ export interface TokenTranslationResult {
  */
 export interface SecurityCheck {
   /** Check type */
-  type: 'signature' | 'expiration' | 'audience' | 'issuer' | 'blacklist' | 'rate_limit';
+  type:
+    | "signature"
+    | "expiration"
+    | "audience"
+    | "issuer"
+    | "blacklist"
+    | "rate_limit";
   /** Check status */
-  status: 'passed' | 'failed' | 'warning';
+  status: "passed" | "failed" | "warning";
   /** Check message */
   message: string;
   /** Check timestamp */
@@ -224,7 +230,7 @@ export interface UserIdentityMapping {
   /** Last synchronization time */
   lastSync: Date;
   /** Sync status */
-  syncStatus: 'active' | 'pending' | 'failed' | 'disabled';
+  syncStatus: "active" | "pending" | "failed" | "disabled";
   /** Mapping metadata */
   metadata: Record<string, unknown>;
 }
@@ -267,7 +273,10 @@ export interface BridgeMetrics {
  * performance optimization, and comprehensive monitoring.
  */
 @Injectable()
-export class JwtBridgeService extends EventEmitter implements OnModuleInit, OnModuleDestroy {
+export class JwtBridgeService
+  extends EventEmitter
+  implements OnModuleInit, OnModuleDestroy
+{
   private readonly logger = new Logger(JwtBridgeService.name);
 
   // HTTP clients for external API communication
@@ -306,10 +315,13 @@ export class JwtBridgeService extends EventEmitter implements OnModuleInit, OnMo
 
   constructor(
     private readonly configService: ConfigService,
-    @Inject('JWT_BRIDGE_CONFIG') private readonly bridgeConfig: Partial<JwtBridgeConfig>,
+    @Inject("JWT_BRIDGE_CONFIG")
+    private readonly bridgeConfig: Partial<JwtBridgeConfig>,
   ) {
     super();
-    this.logger.log('🚀 Initializing JWT Bridge Service for AIgent-PARLANT integration');
+    this.logger.log(
+      "🚀 Initializing JWT Bridge Service for AIgent-PARLANT integration",
+    );
   }
 
   /**
@@ -317,7 +329,7 @@ export class JwtBridgeService extends EventEmitter implements OnModuleInit, OnMo
    */
   async onModuleInit(): Promise<void> {
     const startTime = Date.now();
-    this.logger.log('🔄 Starting JWT Bridge Service initialization...');
+    this.logger.log("🔄 Starting JWT Bridge Service initialization...");
 
     try {
       await this.loadConfiguration();
@@ -327,16 +339,20 @@ export class JwtBridgeService extends EventEmitter implements OnModuleInit, OnMo
       await this.loadExistingSessions();
 
       const initTime = Date.now() - startTime;
-      this.logger.log(`✅ JWT Bridge Service initialized successfully (${initTime}ms)`);
+      this.logger.log(
+        `✅ JWT Bridge Service initialized successfully (${initTime}ms)`,
+      );
 
-      this.emit('bridge:initialized', {
+      this.emit("bridge:initialized", {
         timestamp: new Date(),
         initializationTime: initTime,
         configuration: this.sanitizeConfig(this.config),
       });
     } catch (error) {
-      this.logger.error('❌ Failed to initialize JWT Bridge Service', error);
-      throw new Error(`JWT Bridge initialization failed: ${error instanceof Error ? error.message : String(error)}`);
+      this.logger.error("❌ Failed to initialize JWT Bridge Service", error);
+      throw new Error(
+        `JWT Bridge initialization failed: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 
@@ -344,13 +360,13 @@ export class JwtBridgeService extends EventEmitter implements OnModuleInit, OnMo
    * Clean up resources on module destruction
    */
   async onModuleDestroy(): Promise<void> {
-    this.logger.log('🔄 Shutting down JWT Bridge Service...');
+    this.logger.log("🔄 Shutting down JWT Bridge Service...");
 
     await this.stopPeriodicTasks();
     await this.persistSessions();
     await this.clearCache();
 
-    this.logger.log('✅ JWT Bridge Service shutdown complete');
+    this.logger.log("✅ JWT Bridge Service shutdown complete");
   }
 
   /**
@@ -364,23 +380,32 @@ export class JwtBridgeService extends EventEmitter implements OnModuleInit, OnMo
     this.metrics.totalTranslations++;
 
     try {
-      this.logger.debug('🔄 Translating AIgent token to Parlant format');
+      this.logger.debug("🔄 Translating AIgent token to Parlant format");
 
       // Verify AIgent token
       const aigentPayload = await this.verifyAigentToken(aigentToken);
 
       // Perform security checks
-      const securityChecks = await this.performSecurityChecks(aigentPayload, 'aigent');
+      const securityChecks = await this.performSecurityChecks(
+        aigentPayload,
+        "aigent",
+      );
 
       // Check for critical security failures
-      const criticalFailures = securityChecks.filter(check => check.status === 'failed');
+      const criticalFailures = securityChecks.filter(
+        (check) => check.status === "failed",
+      );
       if (criticalFailures.length > 0) {
         this.metrics.securityViolations++;
-        throw new Error(`Security check failed: ${criticalFailures.map(f => f.message).join(', ')}`);
+        throw new Error(
+          `Security check failed: ${criticalFailures.map((f) => f.message).join(", ")}`,
+        );
       }
 
       // Get or create user identity mapping
-      const userMapping = await this.getUserIdentityMapping(aigentPayload.userId || aigentPayload.sub || '');
+      const userMapping = await this.getUserIdentityMapping(
+        aigentPayload.userId || aigentPayload.sub || "",
+      );
 
       // Create Parlant payload
       const parlantPayload: BridgeJwtPayload = {
@@ -389,41 +414,55 @@ export class JwtBridgeService extends EventEmitter implements OnModuleInit, OnMo
         sessionId: aigentPayload.sessionId || this.generateSessionId(),
         roles: userMapping.roles.parlant,
         permissions: userMapping.permissions.parlant,
-        type: 'bridge',
-        source: 'aigent',
+        type: "bridge",
+        source: "aigent",
         iss: this.config.parlant.issuer,
         aud: this.config.parlant.audience,
         iat: Math.floor(Date.now() / 1000),
-        exp: Math.floor((Date.now() + this.parseExpiration(this.config.parlant.tokenExpiration)) / 1000),
+        exp: Math.floor(
+          (Date.now() +
+            this.parseExpiration(this.config.parlant.tokenExpiration)) /
+            1000,
+        ),
         bridgeMetadata: {
           originalToken: this.hashToken(aigentToken),
           translationTime: Date.now(),
-          securityLevel: userMapping.metadata.securityLevel as string || 'MEDIUM',
+          securityLevel:
+            (userMapping.metadata.securityLevel as string) || "MEDIUM",
           deviceId: requestMetadata?.deviceId as string,
           ipAddress: requestMetadata?.ipAddress as string,
         },
       };
 
       // Sign Parlant token
-      const parlantToken = jwt.sign(parlantPayload, this.config.parlant.jwtSecret, {
-        algorithm: this.config.parlant.jwtAlgorithm,
-        issuer: this.config.parlant.issuer,
-        audience: this.config.parlant.audience,
-      });
+      const parlantToken = jwt.sign(
+        parlantPayload,
+        this.config.parlant.jwtSecret,
+        {
+          algorithm: this.config.parlant.jwtAlgorithm,
+          issuer: this.config.parlant.issuer,
+          audience: this.config.parlant.audience,
+        },
+      );
 
       // Create or update session mapping
-      await this.createSessionMapping(aigentPayload, parlantPayload, aigentToken, parlantToken);
+      await this.createSessionMapping(
+        aigentPayload,
+        parlantPayload,
+        aigentToken,
+        parlantToken,
+      );
 
       const translationTime = Date.now() - startTime;
       this.updateTranslationMetrics(translationTime);
 
       const result: TokenTranslationResult = {
         token: parlantToken,
-        type: 'bridge',
+        type: "bridge",
         expiresAt: new Date(parlantPayload.exp! * 1000),
         metadata: {
-          sourceSystem: 'aigent',
-          targetSystem: 'parlant',
+          sourceSystem: "aigent",
+          targetSystem: "parlant",
           translationTime,
           originalPayload: aigentPayload,
           securityChecks,
@@ -432,17 +471,25 @@ export class JwtBridgeService extends EventEmitter implements OnModuleInit, OnMo
 
       // Cache result if caching is enabled
       if (this.config.performance.cacheEnabled) {
-        const cacheKey = this.generateCacheKey(aigentToken, 'aigent-to-parlant');
+        const cacheKey = this.generateCacheKey(
+          aigentToken,
+          "aigent-to-parlant",
+        );
         this.tokenCache.set(cacheKey, result);
       }
 
       this.metrics.successfulTranslations++;
-      this.logger.debug(`✅ AIgent to Parlant translation completed (${translationTime}ms)`);
+      this.logger.debug(
+        `✅ AIgent to Parlant translation completed (${translationTime}ms)`,
+      );
 
       return result;
     } catch (error) {
       this.metrics.failedTranslations++;
-      this.logger.error('❌ Failed to translate AIgent token to Parlant', error);
+      this.logger.error(
+        "❌ Failed to translate AIgent token to Parlant",
+        error,
+      );
       throw error;
     }
   }
@@ -458,23 +505,32 @@ export class JwtBridgeService extends EventEmitter implements OnModuleInit, OnMo
     this.metrics.totalTranslations++;
 
     try {
-      this.logger.debug('🔄 Translating Parlant token to AIgent format');
+      this.logger.debug("🔄 Translating Parlant token to AIgent format");
 
       // Verify Parlant token
       const parlantPayload = await this.verifyParlantToken(parlantToken);
 
       // Perform security checks
-      const securityChecks = await this.performSecurityChecks(parlantPayload, 'parlant');
+      const securityChecks = await this.performSecurityChecks(
+        parlantPayload,
+        "parlant",
+      );
 
       // Check for critical security failures
-      const criticalFailures = securityChecks.filter(check => check.status === 'failed');
+      const criticalFailures = securityChecks.filter(
+        (check) => check.status === "failed",
+      );
       if (criticalFailures.length > 0) {
         this.metrics.securityViolations++;
-        throw new Error(`Security check failed: ${criticalFailures.map(f => f.message).join(', ')}`);
+        throw new Error(
+          `Security check failed: ${criticalFailures.map((f) => f.message).join(", ")}`,
+        );
       }
 
       // Get user identity mapping (reverse lookup)
-      const userMapping = await this.getUserIdentityMappingByParlantId(parlantPayload.userId || parlantPayload.sub || '');
+      const userMapping = await this.getUserIdentityMappingByParlantId(
+        parlantPayload.userId || parlantPayload.sub || "",
+      );
 
       // Create AIgent payload
       const aigentPayload: BridgeJwtPayload = {
@@ -483,41 +539,55 @@ export class JwtBridgeService extends EventEmitter implements OnModuleInit, OnMo
         sessionId: parlantPayload.sessionId || this.generateSessionId(),
         roles: userMapping.roles.aigent,
         permissions: userMapping.permissions.aigent,
-        type: 'bridge',
-        source: 'parlant',
+        type: "bridge",
+        source: "parlant",
         iss: this.config.aigent.issuer,
         aud: this.config.aigent.audience,
         iat: Math.floor(Date.now() / 1000),
-        exp: Math.floor((Date.now() + this.parseExpiration(this.config.aigent.tokenExpiration)) / 1000),
+        exp: Math.floor(
+          (Date.now() +
+            this.parseExpiration(this.config.aigent.tokenExpiration)) /
+            1000,
+        ),
         bridgeMetadata: {
           originalToken: this.hashToken(parlantToken),
           translationTime: Date.now(),
-          securityLevel: userMapping.metadata.securityLevel as string || 'MEDIUM',
+          securityLevel:
+            (userMapping.metadata.securityLevel as string) || "MEDIUM",
           deviceId: requestMetadata?.deviceId as string,
           ipAddress: requestMetadata?.ipAddress as string,
         },
       };
 
       // Sign AIgent token
-      const aigentToken = jwt.sign(aigentPayload, this.config.aigent.jwtSecret, {
-        algorithm: this.config.aigent.jwtAlgorithm,
-        issuer: this.config.aigent.issuer,
-        audience: this.config.aigent.audience,
-      });
+      const aigentToken = jwt.sign(
+        aigentPayload,
+        this.config.aigent.jwtSecret,
+        {
+          algorithm: this.config.aigent.jwtAlgorithm,
+          issuer: this.config.aigent.issuer,
+          audience: this.config.aigent.audience,
+        },
+      );
 
       // Create or update session mapping
-      await this.createSessionMapping(aigentPayload, parlantPayload, aigentToken, parlantToken);
+      await this.createSessionMapping(
+        aigentPayload,
+        parlantPayload,
+        aigentToken,
+        parlantToken,
+      );
 
       const translationTime = Date.now() - startTime;
       this.updateTranslationMetrics(translationTime);
 
       const result: TokenTranslationResult = {
         token: aigentToken,
-        type: 'bridge',
+        type: "bridge",
         expiresAt: new Date(aigentPayload.exp! * 1000),
         metadata: {
-          sourceSystem: 'parlant',
-          targetSystem: 'aigent',
+          sourceSystem: "parlant",
+          targetSystem: "aigent",
           translationTime,
           originalPayload: parlantPayload,
           securityChecks,
@@ -526,17 +596,25 @@ export class JwtBridgeService extends EventEmitter implements OnModuleInit, OnMo
 
       // Cache result if caching is enabled
       if (this.config.performance.cacheEnabled) {
-        const cacheKey = this.generateCacheKey(parlantToken, 'parlant-to-aigent');
+        const cacheKey = this.generateCacheKey(
+          parlantToken,
+          "parlant-to-aigent",
+        );
         this.tokenCache.set(cacheKey, result);
       }
 
       this.metrics.successfulTranslations++;
-      this.logger.debug(`✅ Parlant to AIgent translation completed (${translationTime}ms)`);
+      this.logger.debug(
+        `✅ Parlant to AIgent translation completed (${translationTime}ms)`,
+      );
 
       return result;
     } catch (error) {
       this.metrics.failedTranslations++;
-      this.logger.error('❌ Failed to translate Parlant token to AIgent', error);
+      this.logger.error(
+        "❌ Failed to translate Parlant token to AIgent",
+        error,
+      );
       throw error;
     }
   }
@@ -544,23 +622,26 @@ export class JwtBridgeService extends EventEmitter implements OnModuleInit, OnMo
   /**
    * Validate token from either system
    */
-  async validateToken(token: string, expectedSource?: 'aigent' | 'parlant'): Promise<BridgeJwtPayload> {
+  async validateToken(
+    token: string,
+    expectedSource?: "aigent" | "parlant",
+  ): Promise<BridgeJwtPayload> {
     const startTime = Date.now();
 
     try {
       // Try to decode token to determine source
       const decoded = jwt.decode(token, { complete: true });
-      if (!decoded || typeof decoded === 'string') {
-        throw new Error('Invalid token format');
+      if (!decoded || typeof decoded === "string") {
+        throw new Error("Invalid token format");
       }
 
       const payload = decoded.payload as BridgeJwtPayload;
       const source = payload.source || expectedSource;
 
       // Validate based on source system
-      if (source === 'aigent') {
+      if (source === "aigent") {
         return await this.verifyAigentToken(token);
-      } else if (source === 'parlant') {
+      } else if (source === "parlant") {
         return await this.verifyParlantToken(token);
       } else {
         // Try both systems
@@ -571,7 +652,7 @@ export class JwtBridgeService extends EventEmitter implements OnModuleInit, OnMo
         }
       }
     } catch (error) {
-      this.logger.error('❌ Token validation failed', error);
+      this.logger.error("❌ Token validation failed", error);
       throw error;
     }
   }
@@ -619,25 +700,31 @@ export class JwtBridgeService extends EventEmitter implements OnModuleInit, OnMo
   private async loadConfiguration(): Promise<void> {
     this.config = {
       aigent: {
-        jwtSecret: this.configService.get('JWT_SECRET') || 'default-aigent-secret',
-        jwtAlgorithm: 'HS256',
-        tokenExpiration: '1h',
-        refreshExpiration: '7d',
-        issuer: 'aigent-auth-service',
-        audience: 'aigent-api',
+        jwtSecret:
+          this.configService.get("JWT_SECRET") || "default-aigent-secret",
+        jwtAlgorithm: "HS256",
+        tokenExpiration: "1h",
+        refreshExpiration: "7d",
+        issuer: "aigent-auth-service",
+        audience: "aigent-api",
       },
       parlant: {
-        jwtSecret: this.configService.get('PARLANT_JWT_SECRET') || 'default-parlant-secret',
-        jwtAlgorithm: 'HS256',
-        tokenExpiration: '1h',
-        refreshExpiration: '7d',
-        issuer: 'parlant-auth-service',
-        audience: 'parlant-api',
-        apiUrl: this.configService.get('PARLANT_API_URL') || 'http://localhost:8000',
-        apiKey: this.configService.get('PARLANT_API_KEY') || '',
+        jwtSecret:
+          this.configService.get("PARLANT_JWT_SECRET") ||
+          "default-parlant-secret",
+        jwtAlgorithm: "HS256",
+        tokenExpiration: "1h",
+        refreshExpiration: "7d",
+        issuer: "parlant-auth-service",
+        audience: "parlant-api",
+        apiUrl:
+          this.configService.get("PARLANT_API_URL") || "http://localhost:8000",
+        apiKey: this.configService.get("PARLANT_API_KEY") || "",
       },
       bridge: {
-        encryptionKey: this.configService.get('BRIDGE_ENCRYPTION_KEY') || crypto.randomBytes(32).toString('hex'),
+        encryptionKey:
+          this.configService.get("BRIDGE_ENCRYPTION_KEY") ||
+          crypto.randomBytes(32).toString("hex"),
         sessionTimeout: 3600000, // 1 hour
         maxSessions: 10000,
         cleanupInterval: 300000, // 5 minutes
@@ -663,7 +750,7 @@ export class JwtBridgeService extends EventEmitter implements OnModuleInit, OnMo
       ...this.bridgeConfig,
     };
 
-    this.logger.log('🔐 JWT Bridge configuration loaded');
+    this.logger.log("🔐 JWT Bridge configuration loaded");
   }
 
   private async initializeParlantClient(): Promise<void> {
@@ -672,17 +759,19 @@ export class JwtBridgeService extends EventEmitter implements OnModuleInit, OnMo
       timeout: 5000,
       headers: {
         Authorization: `Bearer ${this.config.parlant.apiKey}`,
-        'Content-Type': 'application/json',
-        'X-Service': 'aigent-jwt-bridge',
+        "Content-Type": "application/json",
+        "X-Service": "aigent-jwt-bridge",
       },
     });
 
     // Test connection
     try {
-      await this.parlantClient.get('/health');
-      this.logger.log('✅ Parlant API connection established');
+      await this.parlantClient.get("/health");
+      this.logger.log("✅ Parlant API connection established");
     } catch (error) {
-      this.logger.warn('⚠️ Could not connect to Parlant API, continuing in offline mode');
+      this.logger.warn(
+        "⚠️ Could not connect to Parlant API, continuing in offline mode",
+      );
     }
   }
 
@@ -705,7 +794,9 @@ export class JwtBridgeService extends EventEmitter implements OnModuleInit, OnMo
 
       return payload;
     } catch (error) {
-      throw new Error(`AIgent token verification failed: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(
+        `AIgent token verification failed: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 
@@ -719,48 +810,59 @@ export class JwtBridgeService extends EventEmitter implements OnModuleInit, OnMo
 
       return payload;
     } catch (error) {
-      throw new Error(`Parlant token verification failed: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(
+        `Parlant token verification failed: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 
-  private async performSecurityChecks(payload: BridgeJwtPayload, source: 'aigent' | 'parlant'): Promise<SecurityCheck[]> {
+  private async performSecurityChecks(
+    payload: BridgeJwtPayload,
+    source: "aigent" | "parlant",
+  ): Promise<SecurityCheck[]> {
     const checks: SecurityCheck[] = [];
     const now = new Date();
 
     // Signature check (already done in verification)
     checks.push({
-      type: 'signature',
-      status: 'passed',
-      message: 'Token signature valid',
+      type: "signature",
+      status: "passed",
+      message: "Token signature valid",
       timestamp: now,
     });
 
     // Expiration check
     const isExpired = payload.exp && payload.exp * 1000 < Date.now();
     checks.push({
-      type: 'expiration',
-      status: isExpired ? 'failed' : 'passed',
-      message: isExpired ? 'Token expired' : 'Token not expired',
+      type: "expiration",
+      status: isExpired ? "failed" : "passed",
+      message: isExpired ? "Token expired" : "Token not expired",
       timestamp: now,
     });
 
     // Audience check
-    const expectedAudience = source === 'aigent' ? this.config.aigent.audience : this.config.parlant.audience;
+    const expectedAudience =
+      source === "aigent"
+        ? this.config.aigent.audience
+        : this.config.parlant.audience;
     const audienceValid = payload.aud === expectedAudience;
     checks.push({
-      type: 'audience',
-      status: audienceValid ? 'passed' : 'failed',
-      message: audienceValid ? 'Audience valid' : 'Invalid audience',
+      type: "audience",
+      status: audienceValid ? "passed" : "failed",
+      message: audienceValid ? "Audience valid" : "Invalid audience",
       timestamp: now,
     });
 
     // Issuer check
-    const expectedIssuer = source === 'aigent' ? this.config.aigent.issuer : this.config.parlant.issuer;
+    const expectedIssuer =
+      source === "aigent"
+        ? this.config.aigent.issuer
+        : this.config.parlant.issuer;
     const issuerValid = payload.iss === expectedIssuer;
     checks.push({
-      type: 'issuer',
-      status: issuerValid ? 'passed' : 'failed',
-      message: issuerValid ? 'Issuer valid' : 'Invalid issuer',
+      type: "issuer",
+      status: issuerValid ? "passed" : "failed",
+      message: issuerValid ? "Issuer valid" : "Invalid issuer",
       timestamp: now,
     });
 
@@ -768,16 +870,18 @@ export class JwtBridgeService extends EventEmitter implements OnModuleInit, OnMo
     const tokenHash = this.hashToken(JSON.stringify(payload));
     const isBlacklisted = this.securityBlacklist.has(tokenHash);
     checks.push({
-      type: 'blacklist',
-      status: isBlacklisted ? 'failed' : 'passed',
-      message: isBlacklisted ? 'Token blacklisted' : 'Token not blacklisted',
+      type: "blacklist",
+      status: isBlacklisted ? "failed" : "passed",
+      message: isBlacklisted ? "Token blacklisted" : "Token not blacklisted",
       timestamp: now,
     });
 
     return checks;
   }
 
-  private async getUserIdentityMapping(aigentUserId: string): Promise<UserIdentityMapping> {
+  private async getUserIdentityMapping(
+    aigentUserId: string,
+  ): Promise<UserIdentityMapping> {
     // Try to find existing mapping
     for (const mapping of this.userIdentityMappings.values()) {
       if (mapping.aigentUserId === aigentUserId) {
@@ -796,9 +900,9 @@ export class JwtBridgeService extends EventEmitter implements OnModuleInit, OnMo
         parlant: `parlant_${aigentUserId}`,
       },
       roles: {
-        aigent: ['user'],
-        parlant: ['user'],
-        mapped: ['user'],
+        aigent: ["user"],
+        parlant: ["user"],
+        mapped: ["user"],
       },
       permissions: {
         aigent: [],
@@ -806,10 +910,10 @@ export class JwtBridgeService extends EventEmitter implements OnModuleInit, OnMo
         mapped: [],
       },
       lastSync: new Date(),
-      syncStatus: 'active',
+      syncStatus: "active",
       metadata: {
-        securityLevel: 'MEDIUM',
-        createdBy: 'jwt-bridge-service',
+        securityLevel: "MEDIUM",
+        createdBy: "jwt-bridge-service",
         autoGenerated: true,
       },
     };
@@ -818,7 +922,9 @@ export class JwtBridgeService extends EventEmitter implements OnModuleInit, OnMo
     return newMapping;
   }
 
-  private async getUserIdentityMappingByParlantId(parlantUserId: string): Promise<UserIdentityMapping> {
+  private async getUserIdentityMappingByParlantId(
+    parlantUserId: string,
+  ): Promise<UserIdentityMapping> {
     // Try to find existing mapping
     for (const mapping of this.userIdentityMappings.values()) {
       if (mapping.parlantUserId === parlantUserId) {
@@ -827,7 +933,7 @@ export class JwtBridgeService extends EventEmitter implements OnModuleInit, OnMo
     }
 
     // Create reverse mapping if not found
-    const aigentUserId = parlantUserId.replace('parlant_', '');
+    const aigentUserId = parlantUserId.replace("parlant_", "");
     return await this.getUserIdentityMapping(aigentUserId);
   }
 
@@ -841,8 +947,8 @@ export class JwtBridgeService extends EventEmitter implements OnModuleInit, OnMo
 
     const sessionMapping: SessionMapping = {
       sessionId,
-      aigentUserId: aigentPayload.userId || aigentPayload.sub || '',
-      parlantUserId: parlantPayload.userId || parlantPayload.sub || '',
+      aigentUserId: aigentPayload.userId || aigentPayload.sub || "",
+      parlantUserId: parlantPayload.userId || parlantPayload.sub || "",
       aigentToken,
       parlantToken,
       createdAt: new Date(),
@@ -851,8 +957,8 @@ export class JwtBridgeService extends EventEmitter implements OnModuleInit, OnMo
       roles: parlantPayload.roles || [],
       permissions: parlantPayload.permissions || [],
       securityMetadata: {
-        securityLevel: 'MEDIUM',
-        authenticationMethod: 'jwt-bridge',
+        securityLevel: "MEDIUM",
+        authenticationMethod: "jwt-bridge",
         mfaCompleted: false,
         threatScore: 0,
         lastSecurityCheck: new Date(),
@@ -865,11 +971,11 @@ export class JwtBridgeService extends EventEmitter implements OnModuleInit, OnMo
   }
 
   private generateSessionId(): string {
-    return `bridge_${Date.now()}_${crypto.randomBytes(16).toString('hex')}`;
+    return `bridge_${Date.now()}_${crypto.randomBytes(16).toString("hex")}`;
   }
 
   private generateMappingId(): string {
-    return `mapping_${Date.now()}_${crypto.randomBytes(8).toString('hex')}`;
+    return `mapping_${Date.now()}_${crypto.randomBytes(8).toString("hex")}`;
   }
 
   private generateCacheKey(token: string, direction: string): string {
@@ -877,7 +983,7 @@ export class JwtBridgeService extends EventEmitter implements OnModuleInit, OnMo
   }
 
   private hashToken(token: string): string {
-    return crypto.createHash('sha256').update(token).digest('hex');
+    return crypto.createHash("sha256").update(token).digest("hex");
   }
 
   private parseExpiration(expiration: string): number {
@@ -903,8 +1009,13 @@ export class JwtBridgeService extends EventEmitter implements OnModuleInit, OnMo
     }
 
     // Update running average
-    const totalTime = this.metrics.averageTranslationTime * (this.metrics.successfulTranslations - 1) + translationTime;
-    this.metrics.averageTranslationTime = Math.round(totalTime / this.metrics.successfulTranslations);
+    const totalTime =
+      this.metrics.averageTranslationTime *
+        (this.metrics.successfulTranslations - 1) +
+      translationTime;
+    this.metrics.averageTranslationTime = Math.round(
+      totalTime / this.metrics.successfulTranslations,
+    );
   }
 
   private cleanupTokenCache(): void {
@@ -919,16 +1030,16 @@ export class JwtBridgeService extends EventEmitter implements OnModuleInit, OnMo
     return {
       aigent: {
         ...config.aigent,
-        jwtSecret: '[REDACTED]',
+        jwtSecret: "[REDACTED]",
       },
       parlant: {
         ...config.parlant,
-        jwtSecret: '[REDACTED]',
-        apiKey: '[REDACTED]',
+        jwtSecret: "[REDACTED]",
+        apiKey: "[REDACTED]",
       },
       bridge: {
         ...config.bridge,
-        encryptionKey: '[REDACTED]',
+        encryptionKey: "[REDACTED]",
       },
       performance: config.performance,
       security: config.security,
@@ -983,9 +1094,9 @@ export class JwtBridgeService extends EventEmitter implements OnModuleInit, OnMo
     // Sync with Parlant API if available
     try {
       // This would sync user mappings, validate sessions, etc.
-      this.logger.debug('🔄 Syncing with external systems...');
+      this.logger.debug("🔄 Syncing with external systems...");
     } catch (error) {
-      this.logger.warn('⚠️ External sync failed', error);
+      this.logger.warn("⚠️ External sync failed", error);
     }
   }
 
@@ -1000,17 +1111,17 @@ export class JwtBridgeService extends EventEmitter implements OnModuleInit, OnMo
   private async performSecurityScan(): Promise<void> {
     // Perform security checks on active sessions
     // This would implement threat detection, anomaly detection, etc.
-    this.logger.debug('🔒 Performing security scan...');
+    this.logger.debug("🔒 Performing security scan...");
   }
 
   private async loadExistingSessions(): Promise<void> {
     // Load sessions from persistent storage if needed
-    this.logger.debug('📥 Loading existing sessions...');
+    this.logger.debug("📥 Loading existing sessions...");
   }
 
   private async persistSessions(): Promise<void> {
     // Persist active sessions to storage
-    this.logger.debug('💾 Persisting active sessions...');
+    this.logger.debug("💾 Persisting active sessions...");
   }
 
   private async clearCache(): Promise<void> {

@@ -9,21 +9,21 @@
  * @author PARLANT Threat Detection Specialist
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Injectable, Logger } from "@nestjs/common";
+import { EventEmitter2 } from "@nestjs/event-emitter";
 
 /**
  * Behavioral Pattern Types
  */
 export enum BehaviorPatternType {
-  ACCESS_PATTERN = 'access_pattern',
-  TIME_PATTERN = 'time_pattern',
-  RESOURCE_USAGE = 'resource_usage',
-  NETWORK_BEHAVIOR = 'network_behavior',
-  APPLICATION_USAGE = 'application_usage',
-  DATA_ACCESS = 'data_access',
-  AUTHENTICATION = 'authentication',
-  GEOGRAPHIC = 'geographic'
+  ACCESS_PATTERN = "access_pattern",
+  TIME_PATTERN = "time_pattern",
+  RESOURCE_USAGE = "resource_usage",
+  NETWORK_BEHAVIOR = "network_behavior",
+  APPLICATION_USAGE = "application_usage",
+  DATA_ACCESS = "data_access",
+  AUTHENTICATION = "authentication",
+  GEOGRAPHIC = "geographic",
 }
 
 /**
@@ -104,7 +104,7 @@ export interface SeasonalPattern {
 
 export interface TrendData {
   period: string;
-  trend: 'increasing' | 'decreasing' | 'stable';
+  trend: "increasing" | "decreasing" | "stable";
   magnitude: number;
 }
 
@@ -125,7 +125,7 @@ export interface TravelPattern {
 }
 
 export interface NetworkPattern {
-  networkType: 'corporate' | 'home' | 'mobile' | 'public';
+  networkType: "corporate" | "home" | "mobile" | "public";
   networkId: string;
   frequency: number;
   riskLevel: number;
@@ -142,7 +142,11 @@ export interface ApplicationUsage {
 }
 
 export interface IntensityPattern {
-  metric: 'session_duration' | 'clicks_per_minute' | 'data_volume' | 'api_calls';
+  metric:
+    | "session_duration"
+    | "clicks_per_minute"
+    | "data_volume"
+    | "api_calls";
   average: number;
   standardDeviation: number;
   percentiles: { p50: number; p90: number; p95: number; p99: number };
@@ -151,7 +155,7 @@ export interface IntensityPattern {
 export interface FeatureUsagePattern {
   featureName: string;
   usageFrequency: number;
-  expertiseLevel: 'novice' | 'intermediate' | 'expert';
+  expertiseLevel: "novice" | "intermediate" | "expert";
   lastUsed: Date;
 }
 
@@ -173,7 +177,7 @@ export interface VolumePattern {
 
 export interface DataTypeUsage {
   dataType: string;
-  classification: 'public' | 'internal' | 'confidential' | 'restricted';
+  classification: "public" | "internal" | "confidential" | "restricted";
   accessFrequency: number;
   volumeAccessed: number;
   lastAccess: Date;
@@ -219,7 +223,7 @@ export interface BehaviorAnomalyResult {
 
   anomalyScore: number; // 0 to 1 scale
   confidence: number; // 0 to 1 scale
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
 
   anomalies: DetectedAnomaly[];
   recommendations: string[];
@@ -243,15 +247,15 @@ export interface DetectedAnomaly {
 }
 
 export interface AnomalyEvidence {
-  evidenceType: 'statistical' | 'pattern' | 'comparison' | 'temporal';
+  evidenceType: "statistical" | "pattern" | "comparison" | "temporal";
   description: string;
   data: Record<string, unknown>;
   weight: number;
 }
 
 export interface RequiredAction {
-  action: 'monitor' | 'alert' | 'challenge' | 'block' | 'investigate';
-  priority: 'low' | 'medium' | 'high' | 'immediate';
+  action: "monitor" | "alert" | "challenge" | "block" | "investigate";
+  priority: "low" | "medium" | "high" | "immediate";
   description: string;
   automatable: boolean;
 }
@@ -294,7 +298,7 @@ export interface PeerComparisonData {
  * ML Model Configuration
  */
 export interface MLModelConfig {
-  modelType: 'isolation_forest' | 'one_class_svm' | 'autoencoder' | 'ensemble';
+  modelType: "isolation_forest" | "one_class_svm" | "autoencoder" | "ensemble";
   features: string[];
   trainingWindow: number; // days
   retrainingInterval: number; // hours
@@ -326,7 +330,7 @@ export class MLBehavioralAnalytics {
     this.eventEmitter = eventEmitter;
     this.initializeMLModels();
     this.startProfileUpdateTimer();
-    this.logger.log('ML Behavioral Analytics Engine initialized');
+    this.logger.log("ML Behavioral Analytics Engine initialized");
   }
 
   /**
@@ -335,56 +339,73 @@ export class MLBehavioralAnalytics {
   private initializeMLModels(): void {
     const defaultModels: Array<{ name: string; config: MLModelConfig }> = [
       {
-        name: 'ACCESS_PATTERN_DETECTOR',
+        name: "ACCESS_PATTERN_DETECTOR",
         config: {
-          modelType: 'isolation_forest',
-          features: ['hour_of_day', 'day_of_week', 'resource_frequency', 'session_duration'],
+          modelType: "isolation_forest",
+          features: [
+            "hour_of_day",
+            "day_of_week",
+            "resource_frequency",
+            "session_duration",
+          ],
           trainingWindow: 30,
           retrainingInterval: 24,
           anomalyThreshold: 0.1,
-          minimumDataPoints: 100
-        }
+          minimumDataPoints: 100,
+        },
       },
       {
-        name: 'GEOGRAPHIC_ANOMALY_DETECTOR',
+        name: "GEOGRAPHIC_ANOMALY_DETECTOR",
         config: {
-          modelType: 'one_class_svm',
-          features: ['latitude', 'longitude', 'travel_distance', 'location_frequency'],
+          modelType: "one_class_svm",
+          features: [
+            "latitude",
+            "longitude",
+            "travel_distance",
+            "location_frequency",
+          ],
           trainingWindow: 60,
           retrainingInterval: 48,
           anomalyThreshold: 0.05,
-          minimumDataPoints: 50
-        }
+          minimumDataPoints: 50,
+        },
       },
       {
-        name: 'DATA_ACCESS_ANALYZER',
+        name: "DATA_ACCESS_ANALYZER",
         config: {
-          modelType: 'autoencoder',
-          features: ['data_volume', 'data_types', 'access_frequency', 'classification_level'],
+          modelType: "autoencoder",
+          features: [
+            "data_volume",
+            "data_types",
+            "access_frequency",
+            "classification_level",
+          ],
           trainingWindow: 14,
           retrainingInterval: 12,
           anomalyThreshold: 0.15,
-          minimumDataPoints: 200
-        }
+          minimumDataPoints: 200,
+        },
       },
       {
-        name: 'BEHAVIORAL_ENSEMBLE',
+        name: "BEHAVIORAL_ENSEMBLE",
         config: {
-          modelType: 'ensemble',
-          features: ['all_behavioral_features'],
+          modelType: "ensemble",
+          features: ["all_behavioral_features"],
           trainingWindow: 45,
           retrainingInterval: 72,
           anomalyThreshold: 0.08,
-          minimumDataPoints: 500
-        }
-      }
+          minimumDataPoints: 500,
+        },
+      },
     ];
 
     defaultModels.forEach(({ name, config }) => {
       this.mlModels.set(name, config);
     });
 
-    this.logger.log(`Initialized ${this.mlModels.size} ML models for behavioral analysis`);
+    this.logger.log(
+      `Initialized ${this.mlModels.size} ML models for behavioral analysis`,
+    );
   }
 
   /**
@@ -393,7 +414,7 @@ export class MLBehavioralAnalytics {
   public async analyzeBehavior(
     userId: string,
     sessionData: SessionContext,
-    contextData?: Record<string, unknown>
+    contextData?: Record<string, unknown>,
   ): Promise<BehaviorAnomalyResult> {
     const startTime = Date.now();
 
@@ -416,14 +437,20 @@ export class MLBehavioralAnalytics {
       const severity = this.determineSeverity(anomalyScore, anomalies);
 
       // Generate recommendations and required actions
-      const recommendations = this.generateRecommendations(anomalies, userProfile);
-      const requiredActions = this.determineRequiredActions(anomalies, severity);
+      const recommendations = this.generateRecommendations(
+        anomalies,
+        userProfile,
+      );
+      const requiredActions = this.determineRequiredActions(
+        anomalies,
+        severity,
+      );
 
       // Create context data
       const contextData_result = {
         currentSession: sessionData,
         historicalBaseline: this.createHistoricalBaseline(userProfile),
-        peerComparison: await this.performPeerComparison(userId, userProfile)
+        peerComparison: await this.performPeerComparison(userId, userProfile),
       };
 
       const result: BehaviorAnomalyResult = {
@@ -436,11 +463,13 @@ export class MLBehavioralAnalytics {
         anomalies,
         recommendations,
         requiredActions,
-        contextData: contextData_result
+        contextData: contextData_result,
       };
 
       const processingTime = Date.now() - startTime;
-      this.logger.debug(`Behavior analysis completed for ${userId} in ${processingTime}ms - Score: ${anomalyScore.toFixed(3)}`);
+      this.logger.debug(
+        `Behavior analysis completed for ${userId} in ${processingTime}ms - Score: ${anomalyScore.toFixed(3)}`,
+      );
 
       // Update statistics
       if (anomalyScore > 0.5) {
@@ -448,27 +477,26 @@ export class MLBehavioralAnalytics {
       }
 
       // Emit behavioral analysis event
-      this.eventEmitter.emit('behavior.analysis.completed', {
+      this.eventEmitter.emit("behavior.analysis.completed", {
         userId,
         detectionId: result.detectionId,
         anomalyScore,
         severity,
-        anomaliesCount: anomalies.length
+        anomaliesCount: anomalies.length,
       });
 
       // Emit high-severity alerts
-      if (severity === 'high' || severity === 'critical') {
-        this.eventEmitter.emit('behavior.anomaly.high_severity', {
+      if (severity === "high" || severity === "critical") {
+        this.eventEmitter.emit("behavior.anomaly.high_severity", {
           userId,
           detectionId: result.detectionId,
           severity,
           anomalyScore,
-          topAnomalies: anomalies.slice(0, 3)
+          topAnomalies: anomalies.slice(0, 3),
         });
       }
 
       return result;
-
     } catch (error) {
       this.logger.error(`Behavioral analysis failed for user ${userId}`, error);
       throw new Error(`Behavioral analysis failed: ${error.message}`);
@@ -506,32 +534,32 @@ export class MLBehavioralAnalytics {
           hourlyDistribution: new Array(24).fill(0),
           peakHours: [],
           variance: 0,
-          confidence: 0
+          confidence: 0,
         },
         weeklyPattern: {
           dailyDistribution: new Array(7).fill(0),
           weekdayVsWeekend: { weekday: 0, weekend: 0 },
           variance: 0,
-          confidence: 0
+          confidence: 0,
         },
         seasonalPattern: {
           monthlyDistribution: new Array(12).fill(0),
           trends: [],
           variance: 0,
-          confidence: 0
-        }
+          confidence: 0,
+        },
       },
 
       locationPatterns: {
         primaryLocations: [],
         travelPatterns: [],
-        networkPatterns: []
+        networkPatterns: [],
       },
 
       applicationPatterns: {
         frequentApplications: [],
         usageIntensity: [],
-        featureUsage: []
+        featureUsage: [],
       },
 
       dataAccessPatterns: {
@@ -541,15 +569,15 @@ export class MLBehavioralAnalytics {
           weeklyAverage: 0,
           monthlyAverage: 0,
           spikeThreashold: 0,
-          variability: 0
+          variability: 0,
         },
-        dataTypes: []
+        dataTypes: [],
       },
 
       securityPatterns: {
         authenticationMethods: [],
         deviceUsage: [],
-        failurePatterns: []
+        failurePatterns: [],
       },
 
       baselineRisk: 0.3, // Default baseline risk
@@ -557,7 +585,7 @@ export class MLBehavioralAnalytics {
       riskFactors: [],
 
       featureVector: [],
-      anomalyThreshold: 0.15
+      anomalyThreshold: 0.15,
     };
   }
 
@@ -566,7 +594,7 @@ export class MLBehavioralAnalytics {
    */
   private async updateUserProfile(
     profile: UserBehaviorProfile,
-    sessionData: SessionContext
+    sessionData: SessionContext,
   ): Promise<void> {
     try {
       const now = new Date();
@@ -594,10 +622,14 @@ export class MLBehavioralAnalytics {
       profile.lastUpdated = now;
       profile.profileVersion++;
 
-      this.logger.debug(`Updated behavioral profile for user: ${profile.userId}`);
-
+      this.logger.debug(
+        `Updated behavioral profile for user: ${profile.userId}`,
+      );
     } catch (error) {
-      this.logger.error(`Failed to update user profile: ${profile.userId}`, error);
+      this.logger.error(
+        `Failed to update user profile: ${profile.userId}`,
+        error,
+      );
     }
   }
 
@@ -606,7 +638,7 @@ export class MLBehavioralAnalytics {
    */
   private async detectAnomalies(
     profile: UserBehaviorProfile,
-    sessionData: SessionContext
+    sessionData: SessionContext,
   ): Promise<DetectedAnomaly[]> {
     const anomalies: DetectedAnomaly[] = [];
 
@@ -617,28 +649,41 @@ export class MLBehavioralAnalytics {
 
       // Location-based anomalies
       if (sessionData.currentLocation) {
-        const locationAnomalies = this.detectLocationAnomalies(profile, sessionData);
+        const locationAnomalies = this.detectLocationAnomalies(
+          profile,
+          sessionData,
+        );
         anomalies.push(...locationAnomalies);
       }
 
       // Application usage anomalies
-      const appAnomalies = this.detectApplicationAnomalies(profile, sessionData);
+      const appAnomalies = this.detectApplicationAnomalies(
+        profile,
+        sessionData,
+      );
       anomalies.push(...appAnomalies);
 
       // Data access anomalies
-      const dataAnomalies = this.detectDataAccessAnomalies(profile, sessionData);
+      const dataAnomalies = this.detectDataAccessAnomalies(
+        profile,
+        sessionData,
+      );
       anomalies.push(...dataAnomalies);
 
       // Volume anomalies
       const volumeAnomalies = this.detectVolumeAnomalies(profile, sessionData);
       anomalies.push(...volumeAnomalies);
 
-      this.logger.debug(`Detected ${anomalies.length} behavioral anomalies for user: ${profile.userId}`);
+      this.logger.debug(
+        `Detected ${anomalies.length} behavioral anomalies for user: ${profile.userId}`,
+      );
 
       return anomalies;
-
     } catch (error) {
-      this.logger.error(`Anomaly detection failed for user: ${profile.userId}`, error);
+      this.logger.error(
+        `Anomaly detection failed for user: ${profile.userId}`,
+        error,
+      );
       return [];
     }
   }
@@ -648,48 +693,74 @@ export class MLBehavioralAnalytics {
    */
   private detectTimeAnomalies(
     profile: UserBehaviorProfile,
-    sessionData: SessionContext
+    sessionData: SessionContext,
   ): DetectedAnomaly[] {
     const anomalies: DetectedAnomaly[] = [];
     const currentHour = sessionData.startTime.getHours();
     const currentDay = sessionData.startTime.getDay();
 
     // Check hourly pattern anomaly
-    const expectedHourlyFrequency = profile.accessPatterns.workingHours.hourlyDistribution[currentHour] || 0;
-    if (expectedHourlyFrequency < 0.1 && profile.accessPatterns.workingHours.confidence > 0.7) {
+    const expectedHourlyFrequency =
+      profile.accessPatterns.workingHours.hourlyDistribution[currentHour] || 0;
+    if (
+      expectedHourlyFrequency < 0.1 &&
+      profile.accessPatterns.workingHours.confidence > 0.7
+    ) {
       anomalies.push({
         type: BehaviorPatternType.TIME_PATTERN,
         description: `Access at unusual hour: ${currentHour}:00`,
         anomalyScore: 0.8,
         deviationMagnitude: 1.0 - expectedHourlyFrequency,
-        expectedValue: 'Low activity hour',
-        actualValue: 'Active session',
-        evidence: [{
-          evidenceType: 'statistical',
-          description: 'Historical hourly access pattern',
-          data: { hourlyDistribution: profile.accessPatterns.workingHours.hourlyDistribution },
-          weight: 0.9
-        }]
+        expectedValue: "Low activity hour",
+        actualValue: "Active session",
+        evidence: [
+          {
+            evidenceType: "statistical",
+            description: "Historical hourly access pattern",
+            data: {
+              hourlyDistribution:
+                profile.accessPatterns.workingHours.hourlyDistribution,
+            },
+            weight: 0.9,
+          },
+        ],
       });
     }
 
     // Check weekly pattern anomaly
-    const expectedDailyFrequency = profile.accessPatterns.weeklyPattern.dailyDistribution[currentDay] || 0;
-    if (expectedDailyFrequency < 0.15 && profile.accessPatterns.weeklyPattern.confidence > 0.7) {
-      const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const expectedDailyFrequency =
+      profile.accessPatterns.weeklyPattern.dailyDistribution[currentDay] || 0;
+    if (
+      expectedDailyFrequency < 0.15 &&
+      profile.accessPatterns.weeklyPattern.confidence > 0.7
+    ) {
+      const dayNames = [
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+      ];
       anomalies.push({
         type: BehaviorPatternType.TIME_PATTERN,
         description: `Access on unusual day: ${dayNames[currentDay]}`,
         anomalyScore: 0.6,
         deviationMagnitude: 1.0 - expectedDailyFrequency,
-        expectedValue: 'Low activity day',
-        actualValue: 'Active session',
-        evidence: [{
-          evidenceType: 'pattern',
-          description: 'Historical weekly access pattern',
-          data: { dailyDistribution: profile.accessPatterns.weeklyPattern.dailyDistribution },
-          weight: 0.8
-        }]
+        expectedValue: "Low activity day",
+        actualValue: "Active session",
+        evidence: [
+          {
+            evidenceType: "pattern",
+            description: "Historical weekly access pattern",
+            data: {
+              dailyDistribution:
+                profile.accessPatterns.weeklyPattern.dailyDistribution,
+            },
+            weight: 0.8,
+          },
+        ],
       });
     }
 
@@ -701,11 +772,14 @@ export class MLBehavioralAnalytics {
    */
   private detectLocationAnomalies(
     profile: UserBehaviorProfile,
-    sessionData: SessionContext
+    sessionData: SessionContext,
   ): DetectedAnomaly[] {
     const anomalies: DetectedAnomaly[] = [];
 
-    if (!sessionData.currentLocation || profile.locationPatterns.primaryLocations.length === 0) {
+    if (
+      !sessionData.currentLocation ||
+      profile.locationPatterns.primaryLocations.length === 0
+    ) {
       return anomalies;
     }
 
@@ -716,8 +790,10 @@ export class MLBehavioralAnalytics {
 
     for (const cluster of profile.locationPatterns.primaryLocations) {
       const distance = this.calculateDistance(
-        latitude, longitude,
-        cluster.centerPoint.latitude, cluster.centerPoint.longitude
+        latitude,
+        longitude,
+        cluster.centerPoint.latitude,
+        cluster.centerPoint.longitude,
       );
 
       minDistance = Math.min(minDistance, distance);
@@ -728,24 +804,29 @@ export class MLBehavioralAnalytics {
       }
     }
 
-    if (!isWithinKnownLocation && profile.locationPatterns.primaryLocations.length > 0) {
+    if (
+      !isWithinKnownLocation &&
+      profile.locationPatterns.primaryLocations.length > 0
+    ) {
       anomalies.push({
         type: BehaviorPatternType.GEOGRAPHIC,
         description: `Access from unknown location`,
         anomalyScore: Math.min(0.9, minDistance / 10000), // Normalize by 10km
         deviationMagnitude: minDistance,
-        expectedValue: 'Known location',
+        expectedValue: "Known location",
         actualValue: `${minDistance.toFixed(0)}m from nearest known location`,
-        evidence: [{
-          evidenceType: 'comparison',
-          description: 'Distance from known locations',
-          data: {
-            currentLocation: sessionData.currentLocation,
-            knownLocations: profile.locationPatterns.primaryLocations,
-            minDistance
+        evidence: [
+          {
+            evidenceType: "comparison",
+            description: "Distance from known locations",
+            data: {
+              currentLocation: sessionData.currentLocation,
+              knownLocations: profile.locationPatterns.primaryLocations,
+              minDistance,
+            },
+            weight: 0.85,
           },
-          weight: 0.85
-        }]
+        ],
       });
     }
 
@@ -757,32 +838,41 @@ export class MLBehavioralAnalytics {
    */
   private detectApplicationAnomalies(
     profile: UserBehaviorProfile,
-    sessionData: SessionContext
+    sessionData: SessionContext,
   ): DetectedAnomaly[] {
     const anomalies: DetectedAnomaly[] = [];
 
     for (const appSession of sessionData.applicationUsage) {
-      const appProfile = profile.applicationPatterns.frequentApplications
-        .find(app => app.applicationId === appSession.applicationId);
+      const appProfile = profile.applicationPatterns.frequentApplications.find(
+        (app) => app.applicationId === appSession.applicationId,
+      );
 
-      if (!appProfile && profile.applicationPatterns.frequentApplications.length > 10) {
+      if (
+        !appProfile &&
+        profile.applicationPatterns.frequentApplications.length > 10
+      ) {
         // User is accessing an unusual application
         anomalies.push({
           type: BehaviorPatternType.APPLICATION_USAGE,
           description: `Access to unusual application: ${appSession.applicationId}`,
           anomalyScore: 0.6,
           deviationMagnitude: 1.0,
-          expectedValue: 'Known application',
-          actualValue: 'New/rare application',
-          evidence: [{
-            evidenceType: 'pattern',
-            description: 'Application usage history',
-            data: {
-              frequentApps: profile.applicationPatterns.frequentApplications.map(a => a.applicationId),
-              newApp: appSession.applicationId
+          expectedValue: "Known application",
+          actualValue: "New/rare application",
+          evidence: [
+            {
+              evidenceType: "pattern",
+              description: "Application usage history",
+              data: {
+                frequentApps:
+                  profile.applicationPatterns.frequentApplications.map(
+                    (a) => a.applicationId,
+                  ),
+                newApp: appSession.applicationId,
+              },
+              weight: 0.7,
             },
-            weight: 0.7
-          }]
+          ],
         });
       }
     }
@@ -795,32 +885,41 @@ export class MLBehavioralAnalytics {
    */
   private detectDataAccessAnomalies(
     profile: UserBehaviorProfile,
-    sessionData: SessionContext
+    sessionData: SessionContext,
   ): DetectedAnomaly[] {
     const anomalies: DetectedAnomaly[] = [];
 
     // Check for access to unusual resources
     for (const resource of sessionData.dataAccessed) {
-      const resourceProfile = profile.dataAccessPatterns.frequentResources
-        .find(r => r.resourceId === resource.resourceId);
+      const resourceProfile = profile.dataAccessPatterns.frequentResources.find(
+        (r) => r.resourceId === resource.resourceId,
+      );
 
-      if (!resourceProfile && profile.dataAccessPatterns.frequentResources.length > 5) {
+      if (
+        !resourceProfile &&
+        profile.dataAccessPatterns.frequentResources.length > 5
+      ) {
         anomalies.push({
           type: BehaviorPatternType.DATA_ACCESS,
           description: `Access to unusual resource: ${resource.resourceType}`,
           anomalyScore: 0.7,
           deviationMagnitude: 1.0,
-          expectedValue: 'Known resource',
-          actualValue: 'New/rare resource',
-          evidence: [{
-            evidenceType: 'comparison',
-            description: 'Resource access history',
-            data: {
-              frequentResources: profile.dataAccessPatterns.frequentResources.map(r => r.resourceId),
-              newResource: resource.resourceId
+          expectedValue: "Known resource",
+          actualValue: "New/rare resource",
+          evidence: [
+            {
+              evidenceType: "comparison",
+              description: "Resource access history",
+              data: {
+                frequentResources:
+                  profile.dataAccessPatterns.frequentResources.map(
+                    (r) => r.resourceId,
+                  ),
+                newResource: resource.resourceId,
+              },
+              weight: 0.75,
             },
-            weight: 0.75
-          }]
+          ],
         });
       }
     }
@@ -833,13 +932,14 @@ export class MLBehavioralAnalytics {
    */
   private detectVolumeAnomalies(
     profile: UserBehaviorProfile,
-    sessionData: SessionContext
+    sessionData: SessionContext,
   ): DetectedAnomaly[] {
     const anomalies: DetectedAnomaly[] = [];
 
     const currentVolume = sessionData.dataAccessed.length;
     const expectedVolume = profile.dataAccessPatterns.accessVolume.dailyAverage;
-    const spikeThreshold = profile.dataAccessPatterns.accessVolume.spikeThreashold;
+    const spikeThreshold =
+      profile.dataAccessPatterns.accessVolume.spikeThreashold;
 
     if (currentVolume > spikeThreshold && spikeThreshold > 0) {
       anomalies.push({
@@ -849,17 +949,22 @@ export class MLBehavioralAnalytics {
         deviationMagnitude: currentVolume - expectedVolume,
         expectedValue: expectedVolume.toFixed(1),
         actualValue: currentVolume.toString(),
-        evidence: [{
-          evidenceType: 'statistical',
-          description: 'Volume compared to historical baseline',
-          data: {
-            currentVolume,
-            expectedVolume,
-            spikeThreshold,
-            percentileRank: this.calculatePercentileRank(currentVolume, expectedVolume)
+        evidence: [
+          {
+            evidenceType: "statistical",
+            description: "Volume compared to historical baseline",
+            data: {
+              currentVolume,
+              expectedVolume,
+              spikeThreshold,
+              percentileRank: this.calculatePercentileRank(
+                currentVolume,
+                expectedVolume,
+              ),
+            },
+            weight: 0.8,
           },
-          weight: 0.8
-        }]
+        ],
       });
     }
 
@@ -871,7 +976,7 @@ export class MLBehavioralAnalytics {
   private updateTemporalPatterns(
     profile: UserBehaviorProfile,
     sessionData: SessionContext,
-    now: Date
+    now: Date,
   ): void {
     const hour = now.getHours();
     const day = now.getDay();
@@ -887,20 +992,35 @@ export class MLBehavioralAnalytics {
     profile.accessPatterns.seasonalPattern.monthlyDistribution[month] += 1;
 
     // Normalize distributions
-    this.normalizeDistribution(profile.accessPatterns.workingHours.hourlyDistribution);
-    this.normalizeDistribution(profile.accessPatterns.weeklyPattern.dailyDistribution);
-    this.normalizeDistribution(profile.accessPatterns.seasonalPattern.monthlyDistribution);
+    this.normalizeDistribution(
+      profile.accessPatterns.workingHours.hourlyDistribution,
+    );
+    this.normalizeDistribution(
+      profile.accessPatterns.weeklyPattern.dailyDistribution,
+    );
+    this.normalizeDistribution(
+      profile.accessPatterns.seasonalPattern.monthlyDistribution,
+    );
 
     // Update confidence based on data points
     const profileAge = now.getTime() - profile.createdAt.getTime();
-    profile.accessPatterns.workingHours.confidence = Math.min(1, profileAge / this.minObservationPeriod);
-    profile.accessPatterns.weeklyPattern.confidence = Math.min(1, profileAge / this.minObservationPeriod);
-    profile.accessPatterns.seasonalPattern.confidence = Math.min(1, profileAge / (this.minObservationPeriod * 4));
+    profile.accessPatterns.workingHours.confidence = Math.min(
+      1,
+      profileAge / this.minObservationPeriod,
+    );
+    profile.accessPatterns.weeklyPattern.confidence = Math.min(
+      1,
+      profileAge / this.minObservationPeriod,
+    );
+    profile.accessPatterns.seasonalPattern.confidence = Math.min(
+      1,
+      profileAge / (this.minObservationPeriod * 4),
+    );
   }
 
   private updateLocationPatterns(
     profile: UserBehaviorProfile,
-    sessionData: SessionContext
+    sessionData: SessionContext,
   ): void {
     if (!sessionData.currentLocation) return;
 
@@ -911,19 +1031,24 @@ export class MLBehavioralAnalytics {
 
     for (const cluster of profile.locationPatterns.primaryLocations) {
       const distance = this.calculateDistance(
-        latitude, longitude,
-        cluster.centerPoint.latitude, cluster.centerPoint.longitude
+        latitude,
+        longitude,
+        cluster.centerPoint.latitude,
+        cluster.centerPoint.longitude,
       );
 
-      if (distance <= cluster.radius * 1.5) { // Allow 50% expansion
+      if (distance <= cluster.radius * 1.5) {
+        // Allow 50% expansion
         // Update existing cluster
         cluster.frequency += 1;
         cluster.confidence = Math.min(1, cluster.frequency / 10);
 
         // Adjust center point (moving average)
         const alpha = 0.1; // Learning rate
-        cluster.centerPoint.latitude = (1 - alpha) * cluster.centerPoint.latitude + alpha * latitude;
-        cluster.centerPoint.longitude = (1 - alpha) * cluster.centerPoint.longitude + alpha * longitude;
+        cluster.centerPoint.latitude =
+          (1 - alpha) * cluster.centerPoint.latitude + alpha * latitude;
+        cluster.centerPoint.longitude =
+          (1 - alpha) * cluster.centerPoint.longitude + alpha * longitude;
 
         foundCluster = true;
         break;
@@ -937,26 +1062,30 @@ export class MLBehavioralAnalytics {
         centerPoint: { latitude, longitude },
         radius: 500, // 500 meters default
         frequency: 1,
-        confidence: 0.1
+        confidence: 0.1,
       };
 
       profile.locationPatterns.primaryLocations.push(newCluster);
 
       // Limit number of clusters
       if (profile.locationPatterns.primaryLocations.length > 10) {
-        profile.locationPatterns.primaryLocations.sort((a, b) => b.frequency - a.frequency);
-        profile.locationPatterns.primaryLocations = profile.locationPatterns.primaryLocations.slice(0, 10);
+        profile.locationPatterns.primaryLocations.sort(
+          (a, b) => b.frequency - a.frequency,
+        );
+        profile.locationPatterns.primaryLocations =
+          profile.locationPatterns.primaryLocations.slice(0, 10);
       }
     }
   }
 
   private updateApplicationPatterns(
     profile: UserBehaviorProfile,
-    sessionData: SessionContext
+    sessionData: SessionContext,
   ): void {
     for (const appSession of sessionData.applicationUsage) {
-      let appUsage = profile.applicationPatterns.frequentApplications
-        .find(app => app.applicationId === appSession.applicationId);
+      let appUsage = profile.applicationPatterns.frequentApplications.find(
+        (app) => app.applicationId === appSession.applicationId,
+      );
 
       if (!appUsage) {
         appUsage = {
@@ -965,7 +1094,7 @@ export class MLBehavioralAnalytics {
           frequency: 0,
           averageSessionDuration: 0,
           peakUsageTimes: [],
-          features: []
+          features: [],
         };
         profile.applicationPatterns.frequentApplications.push(appUsage);
       }
@@ -978,21 +1107,26 @@ export class MLBehavioralAnalytics {
 
       // Update average session duration (moving average)
       const alpha = 0.1;
-      appUsage.averageSessionDuration = (1 - alpha) * appUsage.averageSessionDuration + alpha * sessionDuration;
+      appUsage.averageSessionDuration =
+        (1 - alpha) * appUsage.averageSessionDuration + alpha * sessionDuration;
     }
 
     // Sort by frequency and limit
-    profile.applicationPatterns.frequentApplications.sort((a, b) => b.frequency - a.frequency);
-    profile.applicationPatterns.frequentApplications = profile.applicationPatterns.frequentApplications.slice(0, 20);
+    profile.applicationPatterns.frequentApplications.sort(
+      (a, b) => b.frequency - a.frequency,
+    );
+    profile.applicationPatterns.frequentApplications =
+      profile.applicationPatterns.frequentApplications.slice(0, 20);
   }
 
   private updateDataAccessPatterns(
     profile: UserBehaviorProfile,
-    sessionData: SessionContext
+    sessionData: SessionContext,
   ): void {
     for (const resource of sessionData.dataAccessed) {
-      let resourceAccess = profile.dataAccessPatterns.frequentResources
-        .find(r => r.resourceId === resource.resourceId);
+      let resourceAccess = profile.dataAccessPatterns.frequentResources.find(
+        (r) => r.resourceId === resource.resourceId,
+      );
 
       if (!resourceAccess) {
         resourceAccess = {
@@ -1000,7 +1134,7 @@ export class MLBehavioralAnalytics {
           resourceType: resource.resourceType,
           accessFrequency: 0,
           averageAccessDuration: 0,
-          typicalActions: []
+          typicalActions: [],
         };
         profile.dataAccessPatterns.frequentResources.push(resourceAccess);
       }
@@ -1013,32 +1147,39 @@ export class MLBehavioralAnalytics {
     const alpha = 0.1;
 
     profile.dataAccessPatterns.accessVolume.dailyAverage =
-      (1 - alpha) * profile.dataAccessPatterns.accessVolume.dailyAverage + alpha * currentVolume;
+      (1 - alpha) * profile.dataAccessPatterns.accessVolume.dailyAverage +
+      alpha * currentVolume;
 
     // Update spike threshold (95th percentile approximation)
-    profile.dataAccessPatterns.accessVolume.spikeThreashold =
-      Math.max(profile.dataAccessPatterns.accessVolume.spikeThreashold, currentVolume * 1.5);
+    profile.dataAccessPatterns.accessVolume.spikeThreashold = Math.max(
+      profile.dataAccessPatterns.accessVolume.spikeThreashold,
+      currentVolume * 1.5,
+    );
 
     // Sort by frequency and limit
-    profile.dataAccessPatterns.frequentResources.sort((a, b) => b.accessFrequency - a.accessFrequency);
-    profile.dataAccessPatterns.frequentResources = profile.dataAccessPatterns.frequentResources.slice(0, 50);
+    profile.dataAccessPatterns.frequentResources.sort(
+      (a, b) => b.accessFrequency - a.accessFrequency,
+    );
+    profile.dataAccessPatterns.frequentResources =
+      profile.dataAccessPatterns.frequentResources.slice(0, 50);
   }
 
   private updateSecurityPatterns(
     profile: UserBehaviorProfile,
-    sessionData: SessionContext
+    sessionData: SessionContext,
   ): void {
     // Update device usage patterns
-    let devicePattern = profile.securityPatterns.deviceUsage
-      .find(d => d.deviceId === sessionData.deviceId);
+    let devicePattern = profile.securityPatterns.deviceUsage.find(
+      (d) => d.deviceId === sessionData.deviceId,
+    );
 
     if (!devicePattern) {
       devicePattern = {
         deviceId: sessionData.deviceId,
-        deviceType: 'unknown',
+        deviceType: "unknown",
         frequency: 0,
         typicalUsageHours: [],
-        riskScore: 0.5
+        riskScore: 0.5,
       };
       profile.securityPatterns.deviceUsage.push(devicePattern);
     }
@@ -1047,8 +1188,11 @@ export class MLBehavioralAnalytics {
 
     // Limit device tracking
     if (profile.securityPatterns.deviceUsage.length > 10) {
-      profile.securityPatterns.deviceUsage.sort((a, b) => b.frequency - a.frequency);
-      profile.securityPatterns.deviceUsage = profile.securityPatterns.deviceUsage.slice(0, 10);
+      profile.securityPatterns.deviceUsage.sort(
+        (a, b) => b.frequency - a.frequency,
+      );
+      profile.securityPatterns.deviceUsage =
+        profile.securityPatterns.deviceUsage.slice(0, 10);
     }
   }
 
@@ -1065,9 +1209,13 @@ export class MLBehavioralAnalytics {
 
     // Application features
     features.push(profile.applicationPatterns.frequentApplications.length);
-    const avgAppFreq = profile.applicationPatterns.frequentApplications.length > 0
-      ? profile.applicationPatterns.frequentApplications.reduce((sum, app) => sum + app.frequency, 0) / profile.applicationPatterns.frequentApplications.length
-      : 0;
+    const avgAppFreq =
+      profile.applicationPatterns.frequentApplications.length > 0
+        ? profile.applicationPatterns.frequentApplications.reduce(
+            (sum, app) => sum + app.frequency,
+            0,
+          ) / profile.applicationPatterns.frequentApplications.length
+        : 0;
     features.push(avgAppFreq);
 
     // Data access features
@@ -1085,7 +1233,10 @@ export class MLBehavioralAnalytics {
     if (anomalies.length === 0) return 0;
 
     // Weighted average of anomaly scores
-    const weightedSum = anomalies.reduce((sum, anomaly) => sum + anomaly.anomalyScore, 0);
+    const weightedSum = anomalies.reduce(
+      (sum, anomaly) => sum + anomaly.anomalyScore,
+      0,
+    );
     const maxPossibleScore = anomalies.length;
 
     return Math.min(1, weightedSum / maxPossibleScore);
@@ -1093,44 +1244,48 @@ export class MLBehavioralAnalytics {
 
   private determineSeverity(
     anomalyScore: number,
-    anomalies: DetectedAnomaly[]
-  ): 'low' | 'medium' | 'high' | 'critical' {
+    anomalies: DetectedAnomaly[],
+  ): "low" | "medium" | "high" | "critical" {
     // Check for critical patterns
-    const hasCriticalAnomaly = anomalies.some(a => a.anomalyScore > 0.9);
-    if (hasCriticalAnomaly || anomalyScore > 0.85) return 'critical';
+    const hasCriticalAnomaly = anomalies.some((a) => a.anomalyScore > 0.9);
+    if (hasCriticalAnomaly || anomalyScore > 0.85) return "critical";
 
     // Check for high severity
-    const hasHighAnomaly = anomalies.some(a => a.anomalyScore > 0.7);
-    if (hasHighAnomaly || anomalyScore > 0.65) return 'high';
+    const hasHighAnomaly = anomalies.some((a) => a.anomalyScore > 0.7);
+    if (hasHighAnomaly || anomalyScore > 0.65) return "high";
 
     // Check for medium severity
-    if (anomalyScore > 0.4 || anomalies.length > 3) return 'medium';
+    if (anomalyScore > 0.4 || anomalies.length > 3) return "medium";
 
-    return 'low';
+    return "low";
   }
 
   private generateRecommendations(
     anomalies: DetectedAnomaly[],
-    profile: UserBehaviorProfile
+    profile: UserBehaviorProfile,
   ): string[] {
     const recommendations: string[] = [];
 
     for (const anomaly of anomalies) {
       switch (anomaly.type) {
         case BehaviorPatternType.TIME_PATTERN:
-          recommendations.push('Verify legitimacy of access outside normal hours');
+          recommendations.push(
+            "Verify legitimacy of access outside normal hours",
+          );
           break;
         case BehaviorPatternType.GEOGRAPHIC:
-          recommendations.push('Confirm user location and verify identity');
+          recommendations.push("Confirm user location and verify identity");
           break;
         case BehaviorPatternType.APPLICATION_USAGE:
-          recommendations.push('Review access to new or unusual applications');
+          recommendations.push("Review access to new or unusual applications");
           break;
         case BehaviorPatternType.DATA_ACCESS:
-          recommendations.push('Monitor data access patterns for potential exfiltration');
+          recommendations.push(
+            "Monitor data access patterns for potential exfiltration",
+          );
           break;
         case BehaviorPatternType.RESOURCE_USAGE:
-          recommendations.push('Investigate high volume resource access');
+          recommendations.push("Investigate high volume resource access");
           break;
       }
     }
@@ -1138,7 +1293,9 @@ export class MLBehavioralAnalytics {
     // Add general recommendations based on profile maturity
     const profileAge = Date.now() - profile.createdAt.getTime();
     if (profileAge < this.minObservationPeriod) {
-      recommendations.push('Profile still learning - increased monitoring recommended');
+      recommendations.push(
+        "Profile still learning - increased monitoring recommended",
+      );
     }
 
     return recommendations;
@@ -1146,62 +1303,62 @@ export class MLBehavioralAnalytics {
 
   private determineRequiredActions(
     anomalies: DetectedAnomaly[],
-    severity: string
+    severity: string,
   ): RequiredAction[] {
     const actions: RequiredAction[] = [];
 
     switch (severity) {
-      case 'critical':
+      case "critical":
         actions.push({
-          action: 'block',
-          priority: 'immediate',
-          description: 'Immediately block access pending investigation',
-          automatable: true
+          action: "block",
+          priority: "immediate",
+          description: "Immediately block access pending investigation",
+          automatable: true,
         });
         actions.push({
-          action: 'investigate',
-          priority: 'immediate',
-          description: 'Initiate immediate security investigation',
-          automatable: false
-        });
-        break;
-
-      case 'high':
-        actions.push({
-          action: 'challenge',
-          priority: 'high',
-          description: 'Require additional authentication',
-          automatable: true
-        });
-        actions.push({
-          action: 'alert',
-          priority: 'high',
-          description: 'Alert security team for review',
-          automatable: true
+          action: "investigate",
+          priority: "immediate",
+          description: "Initiate immediate security investigation",
+          automatable: false,
         });
         break;
 
-      case 'medium':
+      case "high":
         actions.push({
-          action: 'monitor',
-          priority: 'medium',
-          description: 'Increase monitoring and logging',
-          automatable: true
+          action: "challenge",
+          priority: "high",
+          description: "Require additional authentication",
+          automatable: true,
         });
         actions.push({
-          action: 'alert',
-          priority: 'medium',
-          description: 'Create security alert for review',
-          automatable: true
+          action: "alert",
+          priority: "high",
+          description: "Alert security team for review",
+          automatable: true,
+        });
+        break;
+
+      case "medium":
+        actions.push({
+          action: "monitor",
+          priority: "medium",
+          description: "Increase monitoring and logging",
+          automatable: true,
+        });
+        actions.push({
+          action: "alert",
+          priority: "medium",
+          description: "Create security alert for review",
+          automatable: true,
         });
         break;
 
       default:
         actions.push({
-          action: 'monitor',
-          priority: 'low',
-          description: 'Continue standard monitoring',
-          automatable: true
+          action: "monitor",
+          priority: "low",
+          description: "Continue standard monitoring",
+          automatable: true,
         });
     }
 
@@ -1210,22 +1367,31 @@ export class MLBehavioralAnalytics {
 
   private calculateConfidence(
     profile: UserBehaviorProfile,
-    anomalies: DetectedAnomaly[]
+    anomalies: DetectedAnomaly[],
   ): number {
     // Base confidence on profile maturity
     const profileAge = Date.now() - profile.createdAt.getTime();
     const maturityFactor = Math.min(1, profileAge / this.minObservationPeriod);
 
     // Adjust for evidence quality
-    const evidenceQuality = anomalies.length > 0
-      ? anomalies.reduce((sum, a) => sum + a.evidence.reduce((eSum, e) => eSum + e.weight, 0), 0) / anomalies.length
-      : 0.5;
+    const evidenceQuality =
+      anomalies.length > 0
+        ? anomalies.reduce(
+            (sum, a) =>
+              sum + a.evidence.reduce((eSum, e) => eSum + e.weight, 0),
+            0,
+          ) / anomalies.length
+        : 0.5;
 
     return Math.min(1, maturityFactor * 0.7 + evidenceQuality * 0.3);
   }
 
-  private createHistoricalBaseline(profile: UserBehaviorProfile): BehavioralBaseline {
-    const profileAge = Math.floor((Date.now() - profile.createdAt.getTime()) / 86400000);
+  private createHistoricalBaseline(
+    profile: UserBehaviorProfile,
+  ): BehavioralBaseline {
+    const profileAge = Math.floor(
+      (Date.now() - profile.createdAt.getTime()) / 86400000,
+    );
 
     return {
       profileAge,
@@ -1233,22 +1399,22 @@ export class MLBehavioralAnalytics {
       lastUpdate: profile.lastUpdated,
       confidence: Math.min(1, profileAge / 7), // 7 days for basic confidence
       stablePatterns: this.identifyStablePatterns(profile),
-      evolvingPatterns: this.identifyEvolvingPatterns(profile)
+      evolvingPatterns: this.identifyEvolvingPatterns(profile),
     };
   }
 
   private async performPeerComparison(
     userId: string,
-    profile: UserBehaviorProfile
+    profile: UserBehaviorProfile,
   ): Promise<PeerComparisonData> {
     // Simplified peer comparison - would use ML clustering in production
     const peerGroupSize = Math.max(10, Math.floor(this.userProfiles.size / 10));
 
     return {
-      peerGroup: 'similar_users',
+      peerGroup: "similar_users",
       peerGroupSize,
       userPercentile: 0.5, // Placeholder
-      significantDeviations: []
+      significantDeviations: [],
     };
   }
 
@@ -1256,13 +1422,13 @@ export class MLBehavioralAnalytics {
     const stable: string[] = [];
 
     if (profile.accessPatterns.workingHours.confidence > 0.8) {
-      stable.push('working_hours');
+      stable.push("working_hours");
     }
     if (profile.accessPatterns.weeklyPattern.confidence > 0.8) {
-      stable.push('weekly_pattern');
+      stable.push("weekly_pattern");
     }
     if (profile.locationPatterns.primaryLocations.length > 0) {
-      stable.push('location_pattern');
+      stable.push("location_pattern");
     }
 
     return stable;
@@ -1272,10 +1438,10 @@ export class MLBehavioralAnalytics {
     const evolving: string[] = [];
 
     if (profile.accessPatterns.workingHours.confidence < 0.6) {
-      evolving.push('working_hours');
+      evolving.push("working_hours");
     }
     if (profile.applicationPatterns.frequentApplications.length < 5) {
-      evolving.push('application_usage');
+      evolving.push("application_usage");
     }
 
     return evolving;
@@ -1291,20 +1457,30 @@ export class MLBehavioralAnalytics {
     }
   }
 
-  private calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  private calculateDistance(
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number,
+  ): number {
     const R = 6371000; // Earth radius in meters
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-              Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLon = ((lon2 - lon1) * Math.PI) / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos((lat1 * Math.PI) / 180) *
+        Math.cos((lat2 * Math.PI) / 180) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   }
 
   private calculatePercentileRank(value: number, mean: number): number {
     // Simplified percentile calculation - would use proper statistical methods in production
-    return value > mean ? Math.min(99, 50 + (value - mean) / mean * 50) : Math.max(1, 50 - (mean - value) / mean * 50);
+    return value > mean
+      ? Math.min(99, 50 + ((value - mean) / mean) * 50)
+      : Math.max(1, 50 - ((mean - value) / mean) * 50);
   }
 
   private generateDetectionId(): string {
@@ -1330,7 +1506,9 @@ export class MLBehavioralAnalytics {
     }
 
     // Log statistics
-    this.logger.debug(`Behavioral analytics status - Profiles: ${this.userProfiles.size}, Anomalies detected: ${this.totalAnomaliesDetected}`);
+    this.logger.debug(
+      `Behavioral analytics status - Profiles: ${this.userProfiles.size}, Anomalies detected: ${this.totalAnomaliesDetected}`,
+    );
   }
 
   /**
@@ -1346,13 +1524,17 @@ export class MLBehavioralAnalytics {
   } {
     const now = Date.now();
     const profiles = Array.from(this.userProfiles.values());
-    const averageProfileAge = profiles.length > 0
-      ? profiles.reduce((sum, p) => sum + (now - p.createdAt.getTime()), 0) / profiles.length / 86400000
-      : 0;
+    const averageProfileAge =
+      profiles.length > 0
+        ? profiles.reduce((sum, p) => sum + (now - p.createdAt.getTime()), 0) /
+          profiles.length /
+          86400000
+        : 0;
 
-    const falsePositiveRate = this.totalAnomaliesDetected > 0
-      ? this.totalFalsePositives / this.totalAnomaliesDetected
-      : 0;
+    const falsePositiveRate =
+      this.totalAnomaliesDetected > 0
+        ? this.totalFalsePositives / this.totalAnomaliesDetected
+        : 0;
 
     return {
       activeProfiles: this.userProfiles.size,
@@ -1360,7 +1542,7 @@ export class MLBehavioralAnalytics {
       totalAnomaliesDetected: this.totalAnomaliesDetected,
       falsePositiveRate,
       averageProfileAge,
-      modelsActive: this.mlModels.size
+      modelsActive: this.mlModels.size,
     };
   }
 }

@@ -11,7 +11,7 @@
  * @priority CRITICAL - Natural language permission management
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from "@nestjs/common";
 
 // Core Permission Interfaces
 export interface NaturalLanguagePermission {
@@ -20,7 +20,7 @@ export interface NaturalLanguagePermission {
   description: string;
   naturalLanguageDescriptions: string[];
   scopePatterns: string[];
-  riskLevel: 'low' | 'medium' | 'high' | 'critical';
+  riskLevel: "low" | "medium" | "high" | "critical";
   conversationalApprovalRequired: boolean;
 }
 
@@ -40,7 +40,7 @@ export interface PermissionRequest {
   conversationId: string;
   userId: string;
   requestText: string;
-  requestType: 'grant' | 'revoke' | 'check' | 'explain';
+  requestType: "grant" | "revoke" | "check" | "explain";
   context: {
     userRole?: string;
     currentPermissions?: string[];
@@ -51,7 +51,7 @@ export interface PermissionRequest {
 
 export interface PermissionResponse {
   success: boolean;
-  action: 'granted' | 'denied' | 'pending' | 'explained';
+  action: "granted" | "denied" | "pending" | "explained";
   permissions?: string[];
   explanation: string;
   conversationalSteps?: ConversationalPermissionStep[];
@@ -61,7 +61,7 @@ export interface PermissionResponse {
 
 export interface ConversationalPermissionStep {
   stepId: string;
-  type: 'explanation' | 'confirmation' | 'justification' | 'approval';
+  type: "explanation" | "confirmation" | "justification" | "approval";
   message: string;
   expectedInput?: string[];
   timeout: number;
@@ -105,46 +105,63 @@ export class NaturalLanguageRBACService {
     naturalLanguageProcessingTime: 0,
     permissionGranted: 0,
     permissionDenied: 0,
-    conversationalInteractions: 0
+    conversationalInteractions: 0,
   };
 
   constructor() {
     this.initializeDefaultPermissions();
     this.initializeDefaultRoles();
-    this.logger.log('🎭 Natural Language RBAC Service initialized with conversational permission management');
+    this.logger.log(
+      "🎭 Natural Language RBAC Service initialized with conversational permission management",
+    );
   }
 
   /**
    * Process natural language permission requests
    */
   async processPermissionRequest(
-    request: PermissionRequest
+    request: PermissionRequest,
   ): Promise<PermissionResponse> {
     const startTime = performance.now();
     this.analyticsMetrics.totalPermissionRequests++;
 
     try {
-      this.logger.debug(`Processing permission request for conversation: ${request.conversationId}`);
+      this.logger.debug(
+        `Processing permission request for conversation: ${request.conversationId}`,
+      );
 
       // Step 1: Parse natural language request
-      const parsedRequest = await this.parseNaturalLanguageRequest(request.requestText);
+      const parsedRequest = await this.parseNaturalLanguageRequest(
+        request.requestText,
+      );
 
       // Step 2: Risk assessment
-      const riskAssessment = await this.assessPermissionRisk(request, parsedRequest);
+      const riskAssessment = await this.assessPermissionRisk(
+        request,
+        parsedRequest,
+      );
 
       // Step 3: Process request based on type
       let response: PermissionResponse;
       switch (request.requestType) {
-        case 'grant':
-          response = await this.processGrantRequest(request, parsedRequest, riskAssessment);
+        case "grant":
+          response = await this.processGrantRequest(
+            request,
+            parsedRequest,
+            riskAssessment,
+          );
           break;
-        case 'revoke':
-          response = await this.processRevokeRequest(request, parsedRequest, riskAssessment);
+        case "revoke":
+          response = await this.processRevokeRequest(
+            request,
+            parsedRequest,
+            riskAssessment,
+          );
           break;
-        case 'check':
+        case "check":
           response = await this.processCheckRequest(request, parsedRequest);
           break;
-        case 'explain':
+        case "explain":
           response = await this.processExplainRequest(request, parsedRequest);
           break;
         default:
@@ -158,11 +175,15 @@ export class NaturalLanguageRBACService {
       const processingTime = performance.now() - startTime;
       this.analyticsMetrics.naturalLanguageProcessingTime = processingTime;
 
-      this.logger.log(`Permission request processed in ${processingTime.toFixed(2)}ms for conversation: ${request.conversationId}`);
+      this.logger.log(
+        `Permission request processed in ${processingTime.toFixed(2)}ms for conversation: ${request.conversationId}`,
+      );
       return response;
-
     } catch (error) {
-      this.logger.error(`Permission request failed for conversation: ${request.conversationId}`, error);
+      this.logger.error(
+        `Permission request failed for conversation: ${request.conversationId}`,
+        error,
+      );
       throw error;
     }
   }
@@ -178,65 +199,89 @@ export class NaturalLanguageRBACService {
   }> {
     const text = requestText.toLowerCase();
     const permissions: string[] = [];
-    let action = 'unknown';
+    let action = "unknown";
     let confidence = 0.5;
     const entities: any[] = [];
 
     // Action detection
-    if (text.includes('give') || text.includes('grant') || text.includes('allow') || text.includes('need')) {
-      action = 'grant';
+    if (
+      text.includes("give") ||
+      text.includes("grant") ||
+      text.includes("allow") ||
+      text.includes("need")
+    ) {
+      action = "grant";
       confidence = 0.9;
-    } else if (text.includes('remove') || text.includes('revoke') || text.includes('deny') || text.includes('take away')) {
-      action = 'revoke';
+    } else if (
+      text.includes("remove") ||
+      text.includes("revoke") ||
+      text.includes("deny") ||
+      text.includes("take away")
+    ) {
+      action = "revoke";
       confidence = 0.9;
-    } else if (text.includes('check') || text.includes('do i have') || text.includes('can i')) {
-      action = 'check';
+    } else if (
+      text.includes("check") ||
+      text.includes("do i have") ||
+      text.includes("can i")
+    ) {
+      action = "check";
       confidence = 0.8;
-    } else if (text.includes('explain') || text.includes('what is') || text.includes('what does')) {
-      action = 'explain';
+    } else if (
+      text.includes("explain") ||
+      text.includes("what is") ||
+      text.includes("what does")
+    ) {
+      action = "explain";
       confidence = 0.8;
     }
 
     // Permission pattern matching
     const permissionPatterns = [
-      { pattern: /read|view|see|access/, permission: 'read' },
-      { pattern: /write|edit|modify|update/, permission: 'write' },
-      { pattern: /delete|remove|destroy/, permission: 'delete' },
-      { pattern: /admin|administrator|manage/, permission: 'admin' },
-      { pattern: /user|users|user.management/, permission: 'user_management' },
-      { pattern: /system|systems|system.config/, permission: 'system_configuration' },
-      { pattern: /api|apis|api.access/, permission: 'api_access' },
-      { pattern: /database|db|data/, permission: 'database_access' },
-      { pattern: /security|secure|security.audit/, permission: 'security_audit' },
-      { pattern: /monitor|monitoring|logs/, permission: 'monitoring' }
+      { pattern: /read|view|see|access/, permission: "read" },
+      { pattern: /write|edit|modify|update/, permission: "write" },
+      { pattern: /delete|remove|destroy/, permission: "delete" },
+      { pattern: /admin|administrator|manage/, permission: "admin" },
+      { pattern: /user|users|user.management/, permission: "user_management" },
+      {
+        pattern: /system|systems|system.config/,
+        permission: "system_configuration",
+      },
+      { pattern: /api|apis|api.access/, permission: "api_access" },
+      { pattern: /database|db|data/, permission: "database_access" },
+      {
+        pattern: /security|secure|security.audit/,
+        permission: "security_audit",
+      },
+      { pattern: /monitor|monitoring|logs/, permission: "monitoring" },
     ];
 
     for (const { pattern, permission } of permissionPatterns) {
       if (pattern.test(text)) {
         permissions.push(permission);
         entities.push({
-          type: 'permission',
+          type: "permission",
           value: permission,
-          confidence: 0.85
+          confidence: 0.85,
         });
       }
     }
 
     // Resource detection
     const resourcePatterns = [
-      { pattern: /file|files|document|documents/, resource: 'files' },
-      { pattern: /user|users|account|accounts/, resource: 'users' },
-      { pattern: /project|projects/, resource: 'projects' },
-      { pattern: /report|reports|analytics/, resource: 'reports' },
-      { pattern: /configuration|config|settings/, resource: 'configuration' }
+      { pattern: /file|files|document|documents/, resource: "files" },
+      { pattern: /user|users|account|accounts/, resource: "users" },
+      { pattern: /project|projects/, resource: "projects" },
+      { pattern: /report|reports|analytics/, resource: "reports" },
+      { pattern: /configuration|config|settings/, resource: "configuration" },
     ];
 
     for (const { pattern, resource } of resourcePatterns) {
       if (pattern.test(text)) {
         entities.push({
-          type: 'resource',
+          type: "resource",
           value: resource,
-          confidence: 0.8
+          confidence: 0.8,
         });
       }
     }
@@ -245,7 +290,7 @@ export class NaturalLanguageRBACService {
       permissions,
       action,
       confidence,
-      entities
+      entities,
     };
   }
 
@@ -254,7 +299,7 @@ export class NaturalLanguageRBACService {
    */
   private async assessPermissionRisk(
     request: PermissionRequest,
-    parsedRequest: any
+    parsedRequest: any,
   ): Promise<PermissionRiskAssessment> {
     let riskScore = 0.0;
     const riskFactors: string[] = [];
@@ -265,21 +310,21 @@ export class NaturalLanguageRBACService {
       const permissionData = this.permissions.get(permission);
       if (permissionData) {
         switch (permissionData.riskLevel) {
-          case 'critical':
+          case "critical":
             riskScore += 0.4;
             riskFactors.push(`Critical permission requested: ${permission}`);
-            recommendedActions.push('Require multi-level approval');
+            recommendedActions.push("Require multi-level approval");
             break;
-          case 'high':
+          case "high":
             riskScore += 0.3;
             riskFactors.push(`High-risk permission requested: ${permission}`);
-            recommendedActions.push('Require manager approval');
+            recommendedActions.push("Require manager approval");
             break;
-          case 'medium':
+          case "medium":
             riskScore += 0.2;
             riskFactors.push(`Medium-risk permission requested: ${permission}`);
             break;
-          case 'low':
+          case "low":
             riskScore += 0.1;
             break;
         }
@@ -289,26 +334,26 @@ export class NaturalLanguageRBACService {
     // Context-based risk factors
     if (!request.context.userRole) {
       riskScore += 0.2;
-      riskFactors.push('No user role context available');
+      riskFactors.push("No user role context available");
     }
 
     if (parsedRequest.confidence < 0.7) {
       riskScore += 0.1;
-      riskFactors.push('Low confidence in natural language parsing');
+      riskFactors.push("Low confidence in natural language parsing");
     }
 
     // Time-based risk assessment
     const currentHour = new Date().getHours();
     if (currentHour < 6 || currentHour > 22) {
       riskScore += 0.1;
-      riskFactors.push('Off-hours permission request');
+      riskFactors.push("Off-hours permission request");
     }
 
     const requiresAdditionalApproval = riskScore >= 0.5;
     const conversationalValidationRequired = riskScore >= 0.3;
 
     if (requiresAdditionalApproval) {
-      recommendedActions.push('Additional approval required');
+      recommendedActions.push("Additional approval required");
     }
 
     return {
@@ -316,7 +361,7 @@ export class NaturalLanguageRBACService {
       riskFactors,
       requiresAdditionalApproval,
       recommendedActions,
-      conversationalValidationRequired
+      conversationalValidationRequired,
     };
   }
 
@@ -326,7 +371,7 @@ export class NaturalLanguageRBACService {
   private async processGrantRequest(
     request: PermissionRequest,
     parsedRequest: any,
-    riskAssessment: PermissionRiskAssessment
+    riskAssessment: PermissionRiskAssessment,
   ): Promise<PermissionResponse> {
     const auditId = `grant-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
@@ -334,48 +379,51 @@ export class NaturalLanguageRBACService {
     if (riskAssessment.conversationalValidationRequired) {
       const conversationalSteps: ConversationalPermissionStep[] = [
         {
-          stepId: 'confirm-grant',
-          type: 'confirmation',
-          message: `I understand you want to grant the following permissions: ${parsedRequest.permissions.join(', ')}. This action has a risk score of ${riskAssessment.riskScore.toFixed(2)}. Do you want to proceed?`,
-          expectedInput: ['yes', 'no', 'proceed', 'cancel'],
-          timeout: 60000
-        }
+          stepId: "confirm-grant",
+          type: "confirmation",
+          message: `I understand you want to grant the following permissions: ${parsedRequest.permissions.join(", ")}. This action has a risk score of ${riskAssessment.riskScore.toFixed(2)}. Do you want to proceed?`,
+          expectedInput: ["yes", "no", "proceed", "cancel"],
+          timeout: 60000,
+        },
       ];
 
       if (riskAssessment.requiresAdditionalApproval) {
         conversationalSteps.push({
-          stepId: 'manager-approval',
-          type: 'approval',
-          message: 'This permission grant requires manager approval. Please wait for approval confirmation.',
+          stepId: "manager-approval",
+          type: "approval",
+          message:
+            "This permission grant requires manager approval. Please wait for approval confirmation.",
           timeout: 300000, // 5 minutes
-          requiredApprover: 'manager'
+          requiredApprover: "manager",
         });
       }
 
       return {
         success: false,
-        action: 'pending',
-        explanation: `Permission grant request is pending conversational validation due to risk factors: ${riskAssessment.riskFactors.join(', ')}`,
+        action: "pending",
+        explanation: `Permission grant request is pending conversational validation due to risk factors: ${riskAssessment.riskFactors.join(", ")}`,
         conversationalSteps,
         riskAssessment,
-        auditId
+        auditId,
       };
     }
 
     // Grant permissions
     const currentPermissions = this.userPermissions.get(request.userId) || [];
-    const newPermissions = [...new Set([...currentPermissions, ...parsedRequest.permissions])];
+    const newPermissions = [
+      ...new Set([...currentPermissions, ...parsedRequest.permissions]),
+    ];
     this.userPermissions.set(request.userId, newPermissions);
 
     this.analyticsMetrics.permissionGranted++;
 
     return {
       success: true,
-      action: 'granted',
+      action: "granted",
       permissions: parsedRequest.permissions,
-      explanation: `Successfully granted permissions: ${parsedRequest.permissions.join(', ')}`,
+      explanation: `Successfully granted permissions: ${parsedRequest.permissions.join(", ")}`,
       riskAssessment,
-      auditId
+      auditId,
     };
   }
 
@@ -385,23 +433,23 @@ export class NaturalLanguageRBACService {
   private async processRevokeRequest(
     request: PermissionRequest,
     parsedRequest: any,
-    riskAssessment: PermissionRiskAssessment
+    riskAssessment: PermissionRiskAssessment,
   ): Promise<PermissionResponse> {
     const auditId = `revoke-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
     const currentPermissions = this.userPermissions.get(request.userId) || [];
     const remainingPermissions = currentPermissions.filter(
-      perm => !parsedRequest.permissions.includes(perm)
+      (perm) => !parsedRequest.permissions.includes(perm),
     );
     this.userPermissions.set(request.userId, remainingPermissions);
 
     return {
       success: true,
-      action: 'granted', // Revoke is considered successful granting of revocation
+      action: "granted", // Revoke is considered successful granting of revocation
       permissions: parsedRequest.permissions,
-      explanation: `Successfully revoked permissions: ${parsedRequest.permissions.join(', ')}`,
+      explanation: `Successfully revoked permissions: ${parsedRequest.permissions.join(", ")}`,
       riskAssessment,
-      auditId
+      auditId,
     };
   }
 
@@ -410,32 +458,32 @@ export class NaturalLanguageRBACService {
    */
   private async processCheckRequest(
     request: PermissionRequest,
-    parsedRequest: any
+    parsedRequest: any,
   ): Promise<PermissionResponse> {
     const auditId = `check-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
     const currentPermissions = this.userPermissions.get(request.userId) || [];
-    const hasPermissions = parsedRequest.permissions.filter(perm =>
-      currentPermissions.includes(perm)
+    const hasPermissions = parsedRequest.permissions.filter((perm) =>
+      currentPermissions.includes(perm),
     );
-    const missingPermissions = parsedRequest.permissions.filter(perm =>
-      !currentPermissions.includes(perm)
+    const missingPermissions = parsedRequest.permissions.filter(
+      (perm) => !currentPermissions.includes(perm),
     );
 
-    let explanation = '';
+    let explanation = "";
     if (hasPermissions.length > 0) {
-      explanation += `You have the following permissions: ${hasPermissions.join(', ')}. `;
+      explanation += `You have the following permissions: ${hasPermissions.join(", ")}. `;
     }
     if (missingPermissions.length > 0) {
-      explanation += `You are missing these permissions: ${missingPermissions.join(', ')}.`;
+      explanation += `You are missing these permissions: ${missingPermissions.join(", ")}.`;
     }
 
     return {
       success: true,
-      action: 'explained',
+      action: "explained",
       permissions: hasPermissions,
       explanation,
-      auditId
+      auditId,
     };
   }
 
@@ -444,26 +492,26 @@ export class NaturalLanguageRBACService {
    */
   private async processExplainRequest(
     request: PermissionRequest,
-    parsedRequest: any
+    parsedRequest: any,
   ): Promise<PermissionResponse> {
     const auditId = `explain-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
-    let explanation = 'Here are the permission explanations:\n';
+    let explanation = "Here are the permission explanations:\n";
 
     for (const permission of parsedRequest.permissions) {
       const permissionData = this.permissions.get(permission);
       if (permissionData) {
         explanation += `• ${permissionData.name}: ${permissionData.description}\n`;
         explanation += `  Risk Level: ${permissionData.riskLevel}\n`;
-        explanation += `  Natural Language: ${permissionData.naturalLanguageDescriptions.join(', ')}\n\n`;
+        explanation += `  Natural Language: ${permissionData.naturalLanguageDescriptions.join(", ")}\n\n`;
       }
     }
 
     return {
       success: true,
-      action: 'explained',
+      action: "explained",
       explanation,
-      auditId
+      auditId,
     };
   }
 
@@ -472,34 +520,39 @@ export class NaturalLanguageRBACService {
    */
   async generateIntelligentRecommendations(
     userId: string,
-    conversationId: string
+    conversationId: string,
   ): Promise<IntelligentPermissionRecommendation> {
-    const conversationHistory = this.conversationHistory.get(conversationId) || [];
+    const conversationHistory =
+      this.conversationHistory.get(conversationId) || [];
     const currentPermissions = this.userPermissions.get(userId) || [];
 
     // Analyze conversation patterns
-    const conversationPatterns = this.analyzeConversationPatterns(conversationHistory);
+    const conversationPatterns =
+      this.analyzeConversationPatterns(conversationHistory);
 
     // Analyze user behavior
-    const userBehaviorAnalysis = this.analyzeUserBehavior(userId, conversationHistory);
+    const userBehaviorAnalysis = this.analyzeUserBehavior(
+      userId,
+      conversationHistory,
+    );
 
     // Generate recommendations based on patterns
     const suggestedPermissions = this.generatePermissionSuggestions(
       conversationPatterns,
       userBehaviorAnalysis,
-      currentPermissions
+      currentPermissions,
     );
 
     return {
       suggestedPermissions,
       confidence: 0.8,
       reasoning: [
-        'Based on conversation patterns showing frequent access requests',
-        'User behavior indicates need for additional permissions',
-        'Role-based recommendations for current user level'
+        "Based on conversation patterns showing frequent access requests",
+        "User behavior indicates need for additional permissions",
+        "Role-based recommendations for current user level",
       ],
       conversationPatterns,
-      userBehaviorAnalysis
+      userBehaviorAnalysis,
     };
   }
 
@@ -516,14 +569,23 @@ export class NaturalLanguageRBACService {
       if (conversation.request && conversation.request.requestText) {
         const text = conversation.request.requestText.toLowerCase();
 
-        if (text.includes('file') || text.includes('document')) {
-          requestCounts.set('file_access', (requestCounts.get('file_access') || 0) + 1);
+        if (text.includes("file") || text.includes("document")) {
+          requestCounts.set(
+            "file_access",
+            (requestCounts.get("file_access") || 0) + 1,
+          );
         }
-        if (text.includes('user') || text.includes('account')) {
-          requestCounts.set('user_management', (requestCounts.get('user_management') || 0) + 1);
+        if (text.includes("user") || text.includes("account")) {
+          requestCounts.set(
+            "user_management",
+            (requestCounts.get("user_management") || 0) + 1,
+          );
         }
-        if (text.includes('admin') || text.includes('manage')) {
-          requestCounts.set('administrative', (requestCounts.get('administrative') || 0) + 1);
+        if (text.includes("admin") || text.includes("manage")) {
+          requestCounts.set(
+            "administrative",
+            (requestCounts.get("administrative") || 0) + 1,
+          );
         }
       }
     }
@@ -541,16 +603,26 @@ export class NaturalLanguageRBACService {
   /**
    * Analyze user behavior for permission recommendations
    */
-  private analyzeUserBehavior(userId: string, conversationHistory: any[]): {
+  private analyzeUserBehavior(
+    userId: string,
+    conversationHistory: any[],
+  ): {
     accessPatterns: string[];
     timePatterns: string[];
     frequentlyUsedFeatures: string[];
   } {
     // Simple behavior analysis (in production, use sophisticated analytics)
     return {
-      accessPatterns: ['Regular working hours access', 'Consistent permission usage'],
-      timePatterns: ['9AM-5PM primary activity', 'Occasional evening access'],
-      frequentlyUsedFeatures: ['File management', 'User administration', 'Report generation']
+      accessPatterns: [
+        "Regular working hours access",
+        "Consistent permission usage",
+      ],
+      timePatterns: ["9AM-5PM primary activity", "Occasional evening access"],
+      frequentlyUsedFeatures: [
+        "File management",
+        "User administration",
+        "Report generation",
+      ],
     };
   }
 
@@ -560,22 +632,25 @@ export class NaturalLanguageRBACService {
   private generatePermissionSuggestions(
     conversationPatterns: string[],
     userBehaviorAnalysis: any,
-    currentPermissions: string[]
+    currentPermissions: string[],
   ): string[] {
     const suggestions: string[] = [];
 
     // Based on conversation patterns
-    if (conversationPatterns.some(p => p.includes('file'))) {
-      if (!currentPermissions.includes('read_files')) suggestions.push('read_files');
-      if (!currentPermissions.includes('write_files')) suggestions.push('write_files');
+    if (conversationPatterns.some((p) => p.includes("file"))) {
+      if (!currentPermissions.includes("read_files"))
+        suggestions.push("read_files");
+      if (!currentPermissions.includes("write_files"))
+        suggestions.push("write_files");
     }
 
-    if (conversationPatterns.some(p => p.includes('user_management'))) {
-      if (!currentPermissions.includes('user_management')) suggestions.push('user_management');
+    if (conversationPatterns.some((p) => p.includes("user_management"))) {
+      if (!currentPermissions.includes("user_management"))
+        suggestions.push("user_management");
     }
 
-    if (conversationPatterns.some(p => p.includes('administrative'))) {
-      if (!currentPermissions.includes('admin')) suggestions.push('admin');
+    if (conversationPatterns.some((p) => p.includes("administrative"))) {
+      if (!currentPermissions.includes("admin")) suggestions.push("admin");
     }
 
     return suggestions;
@@ -587,13 +662,13 @@ export class NaturalLanguageRBACService {
   private updateConversationHistory(
     conversationId: string,
     request: PermissionRequest,
-    response: PermissionResponse
+    response: PermissionResponse,
   ): void {
     const history = this.conversationHistory.get(conversationId) || [];
     history.push({
       timestamp: new Date(),
       request,
-      response
+      response,
     });
     this.conversationHistory.set(conversationId, history);
   }
@@ -604,50 +679,71 @@ export class NaturalLanguageRBACService {
   private initializeDefaultPermissions(): void {
     const defaultPermissions: NaturalLanguagePermission[] = [
       {
-        id: 'read',
-        name: 'Read Access',
-        description: 'Permission to read and view content',
-        naturalLanguageDescriptions: ['read', 'view', 'see', 'access', 'look at'],
-        scopePatterns: ['read.*', 'view.*'],
-        riskLevel: 'low',
-        conversationalApprovalRequired: false
+        id: "read",
+        name: "Read Access",
+        description: "Permission to read and view content",
+        naturalLanguageDescriptions: [
+          "read",
+          "view",
+          "see",
+          "access",
+          "look at",
+        ],
+        scopePatterns: ["read.*", "view.*"],
+        riskLevel: "low",
+        conversationalApprovalRequired: false,
       },
       {
-        id: 'write',
-        name: 'Write Access',
-        description: 'Permission to create and modify content',
-        naturalLanguageDescriptions: ['write', 'edit', 'modify', 'update', 'change'],
-        scopePatterns: ['write.*', 'edit.*', 'modify.*'],
-        riskLevel: 'medium',
-        conversationalApprovalRequired: true
+        id: "write",
+        name: "Write Access",
+        description: "Permission to create and modify content",
+        naturalLanguageDescriptions: [
+          "write",
+          "edit",
+          "modify",
+          "update",
+          "change",
+        ],
+        scopePatterns: ["write.*", "edit.*", "modify.*"],
+        riskLevel: "medium",
+        conversationalApprovalRequired: true,
       },
       {
-        id: 'delete',
-        name: 'Delete Access',
-        description: 'Permission to delete content',
-        naturalLanguageDescriptions: ['delete', 'remove', 'destroy', 'erase'],
-        scopePatterns: ['delete.*', 'remove.*'],
-        riskLevel: 'high',
-        conversationalApprovalRequired: true
+        id: "delete",
+        name: "Delete Access",
+        description: "Permission to delete content",
+        naturalLanguageDescriptions: ["delete", "remove", "destroy", "erase"],
+        scopePatterns: ["delete.*", "remove.*"],
+        riskLevel: "high",
+        conversationalApprovalRequired: true,
       },
       {
-        id: 'admin',
-        name: 'Administrative Access',
-        description: 'Full administrative permissions',
-        naturalLanguageDescriptions: ['admin', 'administrator', 'manage', 'control'],
-        scopePatterns: ['admin.*', 'manage.*'],
-        riskLevel: 'critical',
-        conversationalApprovalRequired: true
+        id: "admin",
+        name: "Administrative Access",
+        description: "Full administrative permissions",
+        naturalLanguageDescriptions: [
+          "admin",
+          "administrator",
+          "manage",
+          "control",
+        ],
+        scopePatterns: ["admin.*", "manage.*"],
+        riskLevel: "critical",
+        conversationalApprovalRequired: true,
       },
       {
-        id: 'user_management',
-        name: 'User Management',
-        description: 'Permission to manage user accounts',
-        naturalLanguageDescriptions: ['user management', 'manage users', 'user admin'],
-        scopePatterns: ['user.*', 'account.*'],
-        riskLevel: 'high',
-        conversationalApprovalRequired: true
-      }
+        id: "user_management",
+        name: "User Management",
+        description: "Permission to manage user accounts",
+        naturalLanguageDescriptions: [
+          "user management",
+          "manage users",
+          "user admin",
+        ],
+        scopePatterns: ["user.*", "account.*"],
+        riskLevel: "high",
+        conversationalApprovalRequired: true,
+      },
     ];
 
     for (const permission of defaultPermissions) {
@@ -661,47 +757,47 @@ export class NaturalLanguageRBACService {
   private initializeDefaultRoles(): void {
     const defaultRoles: ConversationalRole[] = [
       {
-        id: 'viewer',
-        name: 'Viewer',
-        displayName: 'Content Viewer',
-        description: 'Can view and read content',
-        naturalLanguageDescriptions: ['viewer', 'reader', 'observer'],
-        permissions: ['read'],
+        id: "viewer",
+        name: "Viewer",
+        displayName: "Content Viewer",
+        description: "Can view and read content",
+        naturalLanguageDescriptions: ["viewer", "reader", "observer"],
+        permissions: ["read"],
         hierarchyLevel: 1,
         conversationalAssignmentRequired: false,
-        autoAssignmentPatterns: ['I want to view', 'I need to read']
+        autoAssignmentPatterns: ["I want to view", "I need to read"],
       },
       {
-        id: 'editor',
-        name: 'Editor',
-        displayName: 'Content Editor',
-        description: 'Can view, create, and modify content',
-        naturalLanguageDescriptions: ['editor', 'writer', 'contributor'],
-        permissions: ['read', 'write'],
+        id: "editor",
+        name: "Editor",
+        displayName: "Content Editor",
+        description: "Can view, create, and modify content",
+        naturalLanguageDescriptions: ["editor", "writer", "contributor"],
+        permissions: ["read", "write"],
         hierarchyLevel: 2,
         conversationalAssignmentRequired: true,
-        autoAssignmentPatterns: ['I want to edit', 'I need to write']
+        autoAssignmentPatterns: ["I want to edit", "I need to write"],
       },
       {
-        id: 'manager',
-        name: 'Manager',
-        displayName: 'Content Manager',
-        description: 'Can view, create, modify, and delete content',
-        naturalLanguageDescriptions: ['manager', 'supervisor', 'lead'],
-        permissions: ['read', 'write', 'delete'],
+        id: "manager",
+        name: "Manager",
+        displayName: "Content Manager",
+        description: "Can view, create, modify, and delete content",
+        naturalLanguageDescriptions: ["manager", "supervisor", "lead"],
+        permissions: ["read", "write", "delete"],
         hierarchyLevel: 3,
-        conversationalAssignmentRequired: true
+        conversationalAssignmentRequired: true,
       },
       {
-        id: 'admin',
-        name: 'Administrator',
-        displayName: 'System Administrator',
-        description: 'Full system access and control',
-        naturalLanguageDescriptions: ['admin', 'administrator', 'system admin'],
-        permissions: ['read', 'write', 'delete', 'admin', 'user_management'],
+        id: "admin",
+        name: "Administrator",
+        displayName: "System Administrator",
+        description: "Full system access and control",
+        naturalLanguageDescriptions: ["admin", "administrator", "system admin"],
+        permissions: ["read", "write", "delete", "admin", "user_management"],
         hierarchyLevel: 4,
-        conversationalAssignmentRequired: true
-      }
+        conversationalAssignmentRequired: true,
+      },
     ];
 
     for (const role of defaultRoles) {
@@ -728,8 +824,8 @@ export class NaturalLanguageRBACService {
    */
   async healthCheck(): Promise<{ status: string; metrics: any }> {
     return {
-      status: 'healthy',
-      metrics: this.getAnalyticsMetrics()
+      status: "healthy",
+      metrics: this.getAnalyticsMetrics(),
     };
   }
 }

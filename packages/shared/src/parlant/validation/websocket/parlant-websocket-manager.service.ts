@@ -19,15 +19,15 @@
  * @author AIgent Integration Team
  */
 
-import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter } from 'events';
-import { ParlantWebSocketClient } from './parlant-websocket-client.service';
+import { Injectable, Logger, OnApplicationShutdown } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { EventEmitter } from "events";
+import { ParlantWebSocketClient } from "./parlant-websocket-client.service";
 import {
   ValidationRequest,
   ValidationResponse,
   ValidationLayerError,
-} from '../types/validation-layer.types';
+} from "../types/validation-layer.types";
 
 // ===== MANAGER CONFIGURATION =====
 
@@ -67,15 +67,15 @@ interface ConnectionPoolConfig {
   /** Connection idle timeout */
   idleTimeout: number;
   /** Pool growth strategy */
-  growthStrategy: 'eager' | 'lazy' | 'adaptive';
+  growthStrategy: "eager" | "lazy" | "adaptive";
 }
 
 enum LoadBalancingStrategy {
-  ROUND_ROBIN = 'round_robin',
-  LEAST_CONNECTIONS = 'least_connections',
-  WEIGHTED_RANDOM = 'weighted_random',
-  HEALTH_BASED = 'health_based',
-  GEOGRAPHIC = 'geographic',
+  ROUND_ROBIN = "round_robin",
+  LEAST_CONNECTIONS = "least_connections",
+  WEIGHTED_RANDOM = "weighted_random",
+  HEALTH_BASED = "health_based",
+  GEOGRAPHIC = "geographic",
 }
 
 interface HealthCheckConfig {
@@ -101,9 +101,9 @@ interface FailoverConfig {
 }
 
 enum FailoverStrategy {
-  IMMEDIATE = 'immediate',
-  GRACEFUL = 'graceful',
-  CIRCUIT_BREAKER = 'circuit_breaker',
+  IMMEDIATE = "immediate",
+  GRACEFUL = "graceful",
+  CIRCUIT_BREAKER = "circuit_breaker",
 }
 
 interface SessionAffinityConfig {
@@ -116,10 +116,10 @@ interface SessionAffinityConfig {
 }
 
 enum AffinityStrategy {
-  USER_ID = 'user_id',
-  SESSION_ID = 'session_id',
-  IP_HASH = 'ip_hash',
-  NONE = 'none',
+  USER_ID = "user_id",
+  SESSION_ID = "session_id",
+  IP_HASH = "ip_hash",
+  NONE = "none",
 }
 
 // ===== CONNECTION MANAGEMENT =====
@@ -146,12 +146,12 @@ interface ManagedConnection {
 }
 
 enum ConnectionStatus {
-  CONNECTING = 'connecting',
-  CONNECTED = 'connected',
-  DISCONNECTING = 'disconnecting',
-  DISCONNECTED = 'disconnected',
-  ERROR = 'error',
-  IDLE = 'idle',
+  CONNECTING = "connecting",
+  CONNECTED = "connected",
+  DISCONNECTING = "disconnecting",
+  DISCONNECTED = "disconnected",
+  ERROR = "error",
+  IDLE = "idle",
 }
 
 interface SessionContext {
@@ -182,7 +182,10 @@ interface ConnectionMetrics {
 // ===== WEBSOCKET MANAGER SERVICE =====
 
 @Injectable()
-export class ParlantWebSocketManager extends EventEmitter implements OnApplicationShutdown {
+export class ParlantWebSocketManager
+  extends EventEmitter
+  implements OnApplicationShutdown
+{
   private readonly logger = new Logger(ParlantWebSocketManager.name);
   private config!: WebSocketManagerConfig;
   private connectionPool = new Map<string, ManagedConnection>();
@@ -207,32 +210,59 @@ export class ParlantWebSocketManager extends EventEmitter implements OnApplicati
     this.config = {
       servers,
       connectionPool: {
-        minSize: this.configService.get<number>('PARLANT_POOL_MIN_SIZE') || 2,
-        maxSize: this.configService.get<number>('PARLANT_POOL_MAX_SIZE') || 10,
-        idleTimeout: this.configService.get<number>('PARLANT_POOL_IDLE_TIMEOUT') || 300000, // 5 minutes
-        growthStrategy: (this.configService.get<string>('PARLANT_POOL_GROWTH') as 'eager' | 'lazy' | 'adaptive') || 'adaptive',
+        minSize: this.configService.get<number>("PARLANT_POOL_MIN_SIZE") || 2,
+        maxSize: this.configService.get<number>("PARLANT_POOL_MAX_SIZE") || 10,
+        idleTimeout:
+          this.configService.get<number>("PARLANT_POOL_IDLE_TIMEOUT") || 300000, // 5 minutes
+        growthStrategy:
+          (this.configService.get<string>("PARLANT_POOL_GROWTH") as
+            | "eager"
+            | "lazy"
+            | "adaptive") || "adaptive",
       },
-      loadBalancingStrategy: (this.configService.get<string>('PARLANT_LOAD_BALANCE') as LoadBalancingStrategy) || LoadBalancingStrategy.LEAST_CONNECTIONS,
+      loadBalancingStrategy:
+        (this.configService.get<string>(
+          "PARLANT_LOAD_BALANCE",
+        ) as LoadBalancingStrategy) || LoadBalancingStrategy.LEAST_CONNECTIONS,
       healthCheck: {
-        interval: this.configService.get<number>('PARLANT_HEALTH_CHECK_INTERVAL') || 30000,
-        timeout: this.configService.get<number>('PARLANT_HEALTH_CHECK_TIMEOUT') || 5000,
-        failureThreshold: this.configService.get<number>('PARLANT_HEALTH_FAILURE_THRESHOLD') || 3,
-        recoveryThreshold: this.configService.get<number>('PARLANT_HEALTH_RECOVERY_THRESHOLD') || 2,
+        interval:
+          this.configService.get<number>("PARLANT_HEALTH_CHECK_INTERVAL") ||
+          30000,
+        timeout:
+          this.configService.get<number>("PARLANT_HEALTH_CHECK_TIMEOUT") ||
+          5000,
+        failureThreshold:
+          this.configService.get<number>("PARLANT_HEALTH_FAILURE_THRESHOLD") ||
+          3,
+        recoveryThreshold:
+          this.configService.get<number>("PARLANT_HEALTH_RECOVERY_THRESHOLD") ||
+          2,
       },
       failover: {
-        enabled: this.configService.get<boolean>('PARLANT_FAILOVER_ENABLED') !== false,
-        timeout: this.configService.get<number>('PARLANT_FAILOVER_TIMEOUT') || 5000,
-        maxAttempts: this.configService.get<number>('PARLANT_FAILOVER_MAX_ATTEMPTS') || 3,
-        strategy: (this.configService.get<string>('PARLANT_FAILOVER_STRATEGY') as FailoverStrategy) || FailoverStrategy.GRACEFUL,
+        enabled:
+          this.configService.get<boolean>("PARLANT_FAILOVER_ENABLED") !== false,
+        timeout:
+          this.configService.get<number>("PARLANT_FAILOVER_TIMEOUT") || 5000,
+        maxAttempts:
+          this.configService.get<number>("PARLANT_FAILOVER_MAX_ATTEMPTS") || 3,
+        strategy:
+          (this.configService.get<string>(
+            "PARLANT_FAILOVER_STRATEGY",
+          ) as FailoverStrategy) || FailoverStrategy.GRACEFUL,
       },
       sessionAffinity: {
-        enabled: this.configService.get<boolean>('PARLANT_SESSION_AFFINITY') || true,
-        strategy: (this.configService.get<string>('PARLANT_AFFINITY_STRATEGY') as AffinityStrategy) || AffinityStrategy.SESSION_ID,
-        sessionTimeout: this.configService.get<number>('PARLANT_SESSION_TIMEOUT') || 3600000, // 1 hour
+        enabled:
+          this.configService.get<boolean>("PARLANT_SESSION_AFFINITY") || true,
+        strategy:
+          (this.configService.get<string>(
+            "PARLANT_AFFINITY_STRATEGY",
+          ) as AffinityStrategy) || AffinityStrategy.SESSION_ID,
+        sessionTimeout:
+          this.configService.get<number>("PARLANT_SESSION_TIMEOUT") || 3600000, // 1 hour
       },
     };
 
-    this.logger.log('WebSocket manager configuration initialized', {
+    this.logger.log("WebSocket manager configuration initialized", {
       serverCount: this.config.servers.length,
       poolSize: `${this.config.connectionPool.minSize}-${this.config.connectionPool.maxSize}`,
       loadBalancing: this.config.loadBalancingStrategy,
@@ -243,17 +273,21 @@ export class ParlantWebSocketManager extends EventEmitter implements OnApplicati
    * Parse server endpoints from configuration
    */
   private parseServerEndpoints(): ServerEndpoint[] {
-    const serverUrls = this.configService.get<string>('PARLANT_WEBSOCKET_SERVERS') ||
-                      this.configService.get<string>('PARLANT_WEBSOCKET_URL') ||
-                      'ws://localhost:8080/parlant';
+    const serverUrls =
+      this.configService.get<string>("PARLANT_WEBSOCKET_SERVERS") ||
+      this.configService.get<string>("PARLANT_WEBSOCKET_URL") ||
+      "ws://localhost:8080/parlant";
 
-    const urls = serverUrls.split(',').map(url => url.trim());
+    const urls = serverUrls.split(",").map((url) => url.trim());
 
     return urls.map((url, index) => ({
       url,
       priority: index,
-      maxConnections: this.configService.get<number>(`PARLANT_SERVER_${index}_MAX_CONN`) || 5,
-      healthEndpoint: this.configService.get<string>(`PARLANT_SERVER_${index}_HEALTH`),
+      maxConnections:
+        this.configService.get<number>(`PARLANT_SERVER_${index}_MAX_CONN`) || 5,
+      healthEndpoint: this.configService.get<string>(
+        `PARLANT_SERVER_${index}_HEALTH`,
+      ),
       region: this.configService.get<string>(`PARLANT_SERVER_${index}_REGION`),
     }));
   }
@@ -263,7 +297,7 @@ export class ParlantWebSocketManager extends EventEmitter implements OnApplicati
    */
   async initialize(): Promise<void> {
     if (this.isInitialized) {
-      this.logger.warn('WebSocket manager already initialized');
+      this.logger.warn("WebSocket manager already initialized");
       return;
     }
 
@@ -290,10 +324,11 @@ export class ParlantWebSocketManager extends EventEmitter implements OnApplicati
       await this.initializeConnectionPool();
 
       this.isInitialized = true;
-      this.logger.log('WebSocket manager initialized successfully');
-
+      this.logger.log("WebSocket manager initialized successfully");
     } catch (error) {
-      this.logger.error('Failed to initialize WebSocket manager', { error: (error as Error).message });
+      this.logger.error("Failed to initialize WebSocket manager", {
+        error: (error as Error).message,
+      });
       throw error;
     }
   }
@@ -304,32 +339,46 @@ export class ParlantWebSocketManager extends EventEmitter implements OnApplicati
   private async initializeConnectionPool(): Promise<void> {
     const healthyServers = this.getHealthyServers();
     if (healthyServers.length === 0) {
-      this.logger.warn('No healthy servers available for initial pool');
+      this.logger.warn("No healthy servers available for initial pool");
       return;
     }
 
-    const connectionsPerServer = Math.ceil(this.config.connectionPool.minSize / healthyServers.length);
+    const connectionsPerServer = Math.ceil(
+      this.config.connectionPool.minSize / healthyServers.length,
+    );
 
     const connectionPromises: Promise<void>[] = [];
 
     for (const server of healthyServers) {
-      for (let i = 0; i < connectionsPerServer && this.connectionPool.size < this.config.connectionPool.minSize; i++) {
+      for (
+        let i = 0;
+        i < connectionsPerServer &&
+        this.connectionPool.size < this.config.connectionPool.minSize;
+        i++
+      ) {
         connectionPromises.push(this.createConnection(server));
       }
     }
 
     try {
       await Promise.allSettled(connectionPromises);
-      this.logger.log(`Initial connection pool created with ${this.connectionPool.size} connections`);
+      this.logger.log(
+        `Initial connection pool created with ${this.connectionPool.size} connections`,
+      );
     } catch (error) {
-      this.logger.error('Failed to create initial connection pool', { error: (error as Error).message });
+      this.logger.error("Failed to create initial connection pool", {
+        error: (error as Error).message,
+      });
     }
   }
 
   /**
    * Send validation request with automatic connection selection
    */
-  async sendValidationRequest(request: ValidationRequest, sessionContext: SessionContext): Promise<ValidationResponse> {
+  async sendValidationRequest(
+    request: ValidationRequest,
+    sessionContext: SessionContext,
+  ): Promise<ValidationResponse> {
     if (!this.isInitialized) {
       await this.initialize();
     }
@@ -345,8 +394,8 @@ export class ParlantWebSocketManager extends EventEmitter implements OnApplicati
 
         if (!connection) {
           throw new ValidationLayerError(
-            'No available connections',
-            'NO_AVAILABLE_CONNECTIONS'
+            "No available connections",
+            "NO_AVAILABLE_CONNECTIONS",
           );
         }
 
@@ -363,12 +412,14 @@ export class ParlantWebSocketManager extends EventEmitter implements OnApplicati
         this.updateConnectionMetrics(connection, responseTime, true);
 
         return response;
-
       } catch (error) {
         attempts++;
 
         if (connection) {
-          connection.activeRequests = Math.max(0, connection.activeRequests - 1);
+          connection.activeRequests = Math.max(
+            0,
+            connection.activeRequests - 1,
+          );
           this.updateConnectionMetrics(connection, 0, false);
 
           // Mark connection as unhealthy if error is connection-related
@@ -380,8 +431,8 @@ export class ParlantWebSocketManager extends EventEmitter implements OnApplicati
         if (attempts >= maxAttempts) {
           throw new ValidationLayerError(
             `Validation request failed after ${maxAttempts} attempts: ${(error as Error).message}`,
-            'MAX_ATTEMPTS_EXCEEDED',
-            { originalError: error, attempts }
+            "MAX_ATTEMPTS_EXCEEDED",
+            { originalError: error, attempts },
           );
         }
 
@@ -391,15 +442,17 @@ export class ParlantWebSocketManager extends EventEmitter implements OnApplicati
     }
 
     throw new ValidationLayerError(
-      'Unexpected end of retry loop',
-      'RETRY_LOOP_ERROR'
+      "Unexpected end of retry loop",
+      "RETRY_LOOP_ERROR",
     );
   }
 
   /**
    * Select connection based on load balancing strategy
    */
-  private async selectConnection(sessionContext: SessionContext): Promise<ManagedConnection | null> {
+  private async selectConnection(
+    sessionContext: SessionContext,
+  ): Promise<ManagedConnection | null> {
     // Check session affinity first
     if (this.config.sessionAffinity.enabled) {
       const affinityKey = this.getAffinityKey(sessionContext);
@@ -417,8 +470,9 @@ export class ParlantWebSocketManager extends EventEmitter implements OnApplicati
     }
 
     // Select connection based on load balancing strategy
-    const availableConnections = Array.from(this.connectionPool.values())
-      .filter(conn => conn.status === ConnectionStatus.CONNECTED);
+    const availableConnections = Array.from(
+      this.connectionPool.values(),
+    ).filter((conn) => conn.status === ConnectionStatus.CONNECTED);
 
     if (availableConnections.length === 0) {
       // Try to create new connection if pool is not at max
@@ -426,7 +480,10 @@ export class ParlantWebSocketManager extends EventEmitter implements OnApplicati
         const healthyServers = this.getHealthyServers();
         if (healthyServers.length > 0) {
           const server = this.selectServerForNewConnection(healthyServers);
-          const connection = await this.createConnection(server, sessionContext);
+          const connection = await this.createConnection(
+            server,
+            sessionContext,
+          );
           return connection;
         }
       }
@@ -453,7 +510,10 @@ export class ParlantWebSocketManager extends EventEmitter implements OnApplicati
         break;
 
       case LoadBalancingStrategy.GEOGRAPHIC:
-        selectedConnection = this.selectGeographic(availableConnections, sessionContext);
+        selectedConnection = this.selectGeographic(
+          availableConnections,
+          sessionContext,
+        );
         break;
 
       default:
@@ -472,7 +532,9 @@ export class ParlantWebSocketManager extends EventEmitter implements OnApplicati
   /**
    * Round robin connection selection
    */
-  private selectRoundRobin(connections: ManagedConnection[]): ManagedConnection {
+  private selectRoundRobin(
+    connections: ManagedConnection[],
+  ): ManagedConnection {
     const index = this.loadBalancerState.lastUsedIndex % connections.length;
     this.loadBalancerState.lastUsedIndex = (index + 1) % connections.length;
     return connections[index];
@@ -481,17 +543,21 @@ export class ParlantWebSocketManager extends EventEmitter implements OnApplicati
   /**
    * Least connections selection
    */
-  private selectLeastConnections(connections: ManagedConnection[]): ManagedConnection {
+  private selectLeastConnections(
+    connections: ManagedConnection[],
+  ): ManagedConnection {
     return connections.reduce((least, current) =>
-      current.activeRequests < least.activeRequests ? current : least
+      current.activeRequests < least.activeRequests ? current : least,
     );
   }
 
   /**
    * Weighted random selection based on server priority
    */
-  private selectWeightedRandom(connections: ManagedConnection[]): ManagedConnection {
-    const weights = connections.map(conn => 1 / (conn.server.priority + 1));
+  private selectWeightedRandom(
+    connections: ManagedConnection[],
+  ): ManagedConnection {
+    const weights = connections.map((conn) => 1 / (conn.server.priority + 1));
     const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
     const random = Math.random() * totalWeight;
 
@@ -509,7 +575,9 @@ export class ParlantWebSocketManager extends EventEmitter implements OnApplicati
   /**
    * Health-based selection considering server health scores
    */
-  private selectHealthBased(connections: ManagedConnection[]): ManagedConnection {
+  private selectHealthBased(
+    connections: ManagedConnection[],
+  ): ManagedConnection {
     return connections.reduce((best, current) => {
       const bestHealth = this.serverHealth.get(best.server.url);
       const currentHealth = this.serverHealth.get(current.server.url);
@@ -517,8 +585,10 @@ export class ParlantWebSocketManager extends EventEmitter implements OnApplicati
       if (!bestHealth || !currentHealth) return best;
 
       // Prefer connections with better health and lower load
-      const bestScore = this.calculateHealthScore(bestHealth) - (best.activeRequests * 0.1);
-      const currentScore = this.calculateHealthScore(currentHealth) - (current.activeRequests * 0.1);
+      const bestScore =
+        this.calculateHealthScore(bestHealth) - best.activeRequests * 0.1;
+      const currentScore =
+        this.calculateHealthScore(currentHealth) - current.activeRequests * 0.1;
 
       return currentScore > bestScore ? current : best;
     });
@@ -527,7 +597,10 @@ export class ParlantWebSocketManager extends EventEmitter implements OnApplicati
   /**
    * Geographic selection based on server regions
    */
-  private selectGeographic(connections: ManagedConnection[], sessionContext: SessionContext): ManagedConnection {
+  private selectGeographic(
+    connections: ManagedConnection[],
+    sessionContext: SessionContext,
+  ): ManagedConnection {
     // For now, fallback to least connections
     // Could be enhanced with IP geolocation or explicit region preferences
     return this.selectLeastConnections(connections);
@@ -538,7 +611,7 @@ export class ParlantWebSocketManager extends EventEmitter implements OnApplicati
    */
   private calculateHealthScore(health: ServerHealth): number {
     if (health.status === ServerHealthStatus.HEALTHY) {
-      return 1.0 - (health.responseTime / 10000); // Penalty for slow response
+      return 1.0 - health.responseTime / 10000; // Penalty for slow response
     } else if (health.status === ServerHealthStatus.DEGRADED) {
       return 0.5;
     } else {
@@ -549,7 +622,10 @@ export class ParlantWebSocketManager extends EventEmitter implements OnApplicati
   /**
    * Create new connection to specified server
    */
-  private async createConnection(server: ServerEndpoint, sessionContext?: SessionContext): Promise<ManagedConnection> {
+  private async createConnection(
+    server: ServerEndpoint,
+    sessionContext?: SessionContext,
+  ): Promise<ManagedConnection> {
     const connectionId = this.generateConnectionId();
     const client = new ParlantWebSocketClient(this.configService);
 
@@ -574,8 +650,8 @@ export class ParlantWebSocketManager extends EventEmitter implements OnApplicati
       // Connect to server
       const connectSessionContext = sessionContext || {
         sessionId: `mgr_${connectionId}`,
-        userId: 'system',
-        authToken: this.configService.get<string>('PARLANT_AUTH_TOKEN') || '',
+        userId: "system",
+        authToken: this.configService.get<string>("PARLANT_AUTH_TOKEN") || "",
       };
 
       await client.connect(connectSessionContext);
@@ -583,21 +659,20 @@ export class ParlantWebSocketManager extends EventEmitter implements OnApplicati
       connection.status = ConnectionStatus.CONNECTED;
       connection.lastActivity = new Date();
 
-      this.logger.debug('Connection created successfully', {
+      this.logger.debug("Connection created successfully", {
         connectionId,
         server: server.url,
         poolSize: this.connectionPool.size,
       });
 
-      this.emit('connectionCreated', { connectionId, server });
+      this.emit("connectionCreated", { connectionId, server });
 
       return connection;
-
     } catch (error) {
       connection.status = ConnectionStatus.ERROR;
       this.connectionPool.delete(connectionId);
 
-      this.logger.error('Failed to create connection', {
+      this.logger.error("Failed to create connection", {
         connectionId,
         server: server.url,
         error: (error as Error).message,
@@ -613,23 +688,23 @@ export class ParlantWebSocketManager extends EventEmitter implements OnApplicati
   private setupConnectionEventHandlers(connection: ManagedConnection): void {
     const { client, id } = connection;
 
-    client.on('connected', () => {
+    client.on("connected", () => {
       connection.status = ConnectionStatus.CONNECTED;
       connection.lastActivity = new Date();
-      this.logger.debug('Connection established', { connectionId: id });
+      this.logger.debug("Connection established", { connectionId: id });
     });
 
-    client.on('disconnected', () => {
+    client.on("disconnected", () => {
       connection.status = ConnectionStatus.DISCONNECTED;
       this.handleConnectionDisconnect(connection);
     });
 
-    client.on('error', (error) => {
+    client.on("error", (error) => {
       this.handleConnectionError(connection, error);
     });
 
-    client.on('statusUpdate', (status) => {
-      this.emit('connectionStatusUpdate', { connectionId: id, status });
+    client.on("statusUpdate", (status) => {
+      this.emit("connectionStatusUpdate", { connectionId: id, status });
     });
   }
 
@@ -637,7 +712,7 @@ export class ParlantWebSocketManager extends EventEmitter implements OnApplicati
    * Handle connection disconnection
    */
   private handleConnectionDisconnect(connection: ManagedConnection): void {
-    this.logger.warn('Connection disconnected', {
+    this.logger.warn("Connection disconnected", {
       connectionId: connection.id,
       server: connection.server.url,
     });
@@ -652,14 +727,17 @@ export class ParlantWebSocketManager extends EventEmitter implements OnApplicati
       this.scheduleConnectionReplacement(connection.server);
     }
 
-    this.emit('connectionDisconnected', { connectionId: connection.id });
+    this.emit("connectionDisconnected", { connectionId: connection.id });
   }
 
   /**
    * Handle connection errors
    */
-  private async handleConnectionError(connection: ManagedConnection, error: Error): Promise<void> {
-    this.logger.error('Connection error', {
+  private async handleConnectionError(
+    connection: ManagedConnection,
+    error: Error,
+  ): Promise<void> {
+    this.logger.error("Connection error", {
       connectionId: connection.id,
       server: connection.server.url,
       error: error.message,
@@ -674,7 +752,9 @@ export class ParlantWebSocketManager extends EventEmitter implements OnApplicati
       health.consecutiveFailures++;
       health.consecutiveSuccesses = 0;
 
-      if (health.consecutiveFailures >= this.config.healthCheck.failureThreshold) {
+      if (
+        health.consecutiveFailures >= this.config.healthCheck.failureThreshold
+      ) {
         health.status = ServerHealthStatus.UNHEALTHY;
       }
     }
@@ -683,7 +763,7 @@ export class ParlantWebSocketManager extends EventEmitter implements OnApplicati
     this.connectionPool.delete(connection.id);
     this.removeFromAffinity(connection.id);
 
-    this.emit('connectionError', { connectionId: connection.id, error });
+    this.emit("connectionError", { connectionId: connection.id, error });
   }
 
   /**
@@ -694,7 +774,7 @@ export class ParlantWebSocketManager extends EventEmitter implements OnApplicati
       await this.performHealthChecks();
     }, this.config.healthCheck.interval);
 
-    this.logger.debug('Health monitoring started', {
+    this.logger.debug("Health monitoring started", {
       interval: this.config.healthCheck.interval,
     });
   }
@@ -703,8 +783,8 @@ export class ParlantWebSocketManager extends EventEmitter implements OnApplicati
    * Perform health checks on all servers
    */
   private async performHealthChecks(): Promise<void> {
-    const healthPromises = this.config.servers.map(server =>
-      this.performServerHealthCheck(server)
+    const healthPromises = this.config.servers.map((server) =>
+      this.performServerHealthCheck(server),
     );
 
     await Promise.allSettled(healthPromises);
@@ -713,7 +793,9 @@ export class ParlantWebSocketManager extends EventEmitter implements OnApplicati
   /**
    * Perform health check on a specific server
    */
-  private async performServerHealthCheck(server: ServerEndpoint): Promise<void> {
+  private async performServerHealthCheck(
+    server: ServerEndpoint,
+  ): Promise<void> {
     const health = this.serverHealth.get(server.url);
     if (!health) return;
 
@@ -731,24 +813,29 @@ export class ParlantWebSocketManager extends EventEmitter implements OnApplicati
       health.lastCheck = new Date();
 
       // Update status based on consecutive successes
-      if (health.consecutiveSuccesses >= this.config.healthCheck.recoveryThreshold) {
+      if (
+        health.consecutiveSuccesses >= this.config.healthCheck.recoveryThreshold
+      ) {
         if (health.status !== ServerHealthStatus.HEALTHY) {
           health.status = ServerHealthStatus.HEALTHY;
-          this.logger.log('Server recovered to healthy status', { server: server.url });
+          this.logger.log("Server recovered to healthy status", {
+            server: server.url,
+          });
         }
       } else {
         health.status = ServerHealthStatus.DEGRADED;
       }
-
     } catch (error) {
       health.consecutiveFailures++;
       health.consecutiveSuccesses = 0;
       health.lastCheck = new Date();
 
-      if (health.consecutiveFailures >= this.config.healthCheck.failureThreshold) {
+      if (
+        health.consecutiveFailures >= this.config.healthCheck.failureThreshold
+      ) {
         if (health.status !== ServerHealthStatus.UNHEALTHY) {
           health.status = ServerHealthStatus.UNHEALTHY;
-          this.logger.warn('Server marked as unhealthy', {
+          this.logger.warn("Server marked as unhealthy", {
             server: server.url,
             consecutiveFailures: health.consecutiveFailures,
           });
@@ -764,19 +851,19 @@ export class ParlantWebSocketManager extends EventEmitter implements OnApplicati
    */
   private async checkServerHealth(server: ServerEndpoint): Promise<void> {
     return new Promise((resolve, reject) => {
-      const ws = new (require('ws'))(server.url);
+      const ws = new (require("ws"))(server.url);
       const timeout = setTimeout(() => {
         ws.close();
-        reject(new Error('Health check timeout'));
+        reject(new Error("Health check timeout"));
       }, this.config.healthCheck.timeout);
 
-      ws.on('open', () => {
+      ws.on("open", () => {
         clearTimeout(timeout);
         ws.close();
         resolve();
       });
 
-      ws.on('error', (error: Error) => {
+      ws.on("error", (error: Error) => {
         clearTimeout(timeout);
         reject(error);
       });
@@ -791,7 +878,7 @@ export class ParlantWebSocketManager extends EventEmitter implements OnApplicati
       this.performPoolMaintenance();
     }, 60000); // Every minute
 
-    this.logger.debug('Pool maintenance started');
+    this.logger.debug("Pool maintenance started");
   }
 
   /**
@@ -805,9 +892,11 @@ export class ParlantWebSocketManager extends EventEmitter implements OnApplicati
     for (const [id, connection] of this.connectionPool) {
       const idleTime = now - connection.lastActivity.getTime();
 
-      if (idleTime > this.config.connectionPool.idleTimeout &&
-          connection.activeRequests === 0 &&
-          this.connectionPool.size > this.config.connectionPool.minSize) {
+      if (
+        idleTime > this.config.connectionPool.idleTimeout &&
+        connection.activeRequests === 0 &&
+        this.connectionPool.size > this.config.connectionPool.minSize
+      ) {
         idleConnections.push(id);
       }
     }
@@ -827,7 +916,7 @@ export class ParlantWebSocketManager extends EventEmitter implements OnApplicati
     // Clean up stale session affinity
     this.cleanupStaleAffinity();
 
-    this.logger.debug('Pool maintenance completed', {
+    this.logger.debug("Pool maintenance completed", {
       removed: idleConnections.length,
       current: this.connectionPool.size,
       healthy: healthyCount,
@@ -838,7 +927,7 @@ export class ParlantWebSocketManager extends EventEmitter implements OnApplicati
    * Get healthy servers
    */
   private getHealthyServers(): ServerEndpoint[] {
-    return this.config.servers.filter(server => {
+    return this.config.servers.filter((server) => {
       const health = this.serverHealth.get(server.url);
       return health && health.status !== ServerHealthStatus.UNHEALTHY;
     });
@@ -848,14 +937,17 @@ export class ParlantWebSocketManager extends EventEmitter implements OnApplicati
    * Get count of healthy connections
    */
   private getHealthyConnectionCount(): number {
-    return Array.from(this.connectionPool.values())
-      .filter(conn => conn.status === ConnectionStatus.CONNECTED).length;
+    return Array.from(this.connectionPool.values()).filter(
+      (conn) => conn.status === ConnectionStatus.CONNECTED,
+    ).length;
   }
 
   /**
    * Select server for new connection
    */
-  private selectServerForNewConnection(servers: ServerEndpoint[]): ServerEndpoint {
+  private selectServerForNewConnection(
+    servers: ServerEndpoint[],
+  ): ServerEndpoint {
     // Prefer servers with fewer existing connections
     const serverConnections = new Map<string, number>();
 
@@ -885,15 +977,20 @@ export class ParlantWebSocketManager extends EventEmitter implements OnApplicati
 
     const promises: Promise<void>[] = [];
 
-    for (let i = 0; i < needed && this.connectionPool.size < this.config.connectionPool.maxSize; i++) {
+    for (
+      let i = 0;
+      i < needed &&
+      this.connectionPool.size < this.config.connectionPool.maxSize;
+      i++
+    ) {
       const server = this.selectServerForNewConnection(healthyServers);
       promises.push(
-        this.createConnection(server).catch(error => {
-          this.logger.error('Failed to create additional connection', {
+        this.createConnection(server).catch((error) => {
+          this.logger.error("Failed to create additional connection", {
             server: server.url,
             error: error.message,
           });
-        })
+        }),
       );
     }
 
@@ -905,13 +1002,15 @@ export class ParlantWebSocketManager extends EventEmitter implements OnApplicati
    */
   private scheduleConnectionReplacement(failedServer: ServerEndpoint): void {
     setTimeout(async () => {
-      const healthyServers = this.getHealthyServers().filter(s => s.url !== failedServer.url);
+      const healthyServers = this.getHealthyServers().filter(
+        (s) => s.url !== failedServer.url,
+      );
       if (healthyServers.length > 0) {
         const server = this.selectServerForNewConnection(healthyServers);
         try {
           await this.createConnection(server);
         } catch (error) {
-          this.logger.error('Failed to create replacement connection', {
+          this.logger.error("Failed to create replacement connection", {
             failedServer: failedServer.url,
             replacementServer: server.url,
             error: (error as Error).message,
@@ -931,7 +1030,7 @@ export class ParlantWebSocketManager extends EventEmitter implements OnApplicati
     try {
       await connection.client.disconnect();
     } catch (error) {
-      this.logger.error('Error disconnecting connection', {
+      this.logger.error("Error disconnecting connection", {
         connectionId,
         error: (error as Error).message,
       });
@@ -940,7 +1039,7 @@ export class ParlantWebSocketManager extends EventEmitter implements OnApplicati
     this.connectionPool.delete(connectionId);
     this.removeFromAffinity(connectionId);
 
-    this.logger.debug('Connection removed from pool', { connectionId });
+    this.logger.debug("Connection removed from pool", { connectionId });
   }
 
   /**
@@ -1002,7 +1101,11 @@ export class ParlantWebSocketManager extends EventEmitter implements OnApplicati
   /**
    * Update connection metrics
    */
-  private updateConnectionMetrics(connection: ManagedConnection, responseTime: number, success: boolean): void {
+  private updateConnectionMetrics(
+    connection: ManagedConnection,
+    responseTime: number,
+    success: boolean,
+  ): void {
     const metrics = connection.metrics;
 
     metrics.totalRequests++;
@@ -1014,7 +1117,9 @@ export class ParlantWebSocketManager extends EventEmitter implements OnApplicati
 
     // Update average response time
     if (success && responseTime > 0) {
-      const totalTime = metrics.averageResponseTime * (metrics.successfulRequests - 1) + responseTime;
+      const totalTime =
+        metrics.averageResponseTime * (metrics.successfulRequests - 1) +
+        responseTime;
       metrics.averageResponseTime = totalTime / metrics.successfulRequests;
     }
 
@@ -1041,8 +1146,13 @@ export class ParlantWebSocketManager extends EventEmitter implements OnApplicati
    * Check if error is connection-related
    */
   private isConnectionError(error: Error): boolean {
-    const connectionErrorCodes = ['CONNECTION_ERROR', 'CONNECTION_TIMEOUT', 'NOT_CONNECTED', 'CONNECTION_CLOSED'];
-    return connectionErrorCodes.some(code => error.message.includes(code));
+    const connectionErrorCodes = [
+      "CONNECTION_ERROR",
+      "CONNECTION_TIMEOUT",
+      "NOT_CONNECTED",
+      "CONNECTION_CLOSED",
+    ];
+    return connectionErrorCodes.some((code) => error.message.includes(code));
   }
 
   /**
@@ -1056,20 +1166,22 @@ export class ParlantWebSocketManager extends EventEmitter implements OnApplicati
    * Delay utility for retry logic
    */
   private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   /**
    * Get manager status and metrics
    */
   getStatus(): ManagerStatus {
-    const connectionMetrics = Array.from(this.connectionPool.values()).map(conn => ({
-      id: conn.id,
-      server: conn.server.url,
-      status: conn.status,
-      activeRequests: conn.activeRequests,
-      metrics: conn.metrics,
-    }));
+    const connectionMetrics = Array.from(this.connectionPool.values()).map(
+      (conn) => ({
+        id: conn.id,
+        server: conn.server.url,
+        status: conn.status,
+        activeRequests: conn.activeRequests,
+        metrics: conn.metrics,
+      }),
+    );
 
     const serverHealthMap: Record<string, ServerHealth> = {};
     for (const [url, health] of this.serverHealth) {
@@ -1080,8 +1192,10 @@ export class ParlantWebSocketManager extends EventEmitter implements OnApplicati
       initialized: this.isInitialized,
       poolSize: this.connectionPool.size,
       healthyConnections: this.getHealthyConnectionCount(),
-      activeRequests: Array.from(this.connectionPool.values())
-        .reduce((sum, conn) => sum + conn.activeRequests, 0),
+      activeRequests: Array.from(this.connectionPool.values()).reduce(
+        (sum, conn) => sum + conn.activeRequests,
+        0,
+      ),
       connectionMetrics,
       serverHealth: serverHealthMap,
       sessionAffinityEntries: this.sessionAffinity.size,
@@ -1092,7 +1206,7 @@ export class ParlantWebSocketManager extends EventEmitter implements OnApplicati
    * Application shutdown handler
    */
   async onApplicationShutdown(): Promise<void> {
-    this.logger.log('Shutting down WebSocket manager');
+    this.logger.log("Shutting down WebSocket manager");
 
     // Stop timers
     if (this.healthCheckTimer) {
@@ -1103,8 +1217,8 @@ export class ParlantWebSocketManager extends EventEmitter implements OnApplicati
     }
 
     // Disconnect all connections
-    const disconnectPromises = Array.from(this.connectionPool.values()).map(conn =>
-      this.removeConnection(conn.id)
+    const disconnectPromises = Array.from(this.connectionPool.values()).map(
+      (conn) => this.removeConnection(conn.id),
     );
 
     await Promise.allSettled(disconnectPromises);
@@ -1113,7 +1227,7 @@ export class ParlantWebSocketManager extends EventEmitter implements OnApplicati
     this.sessionAffinity.clear();
     this.serverHealth.clear();
 
-    this.logger.log('WebSocket manager shutdown complete');
+    this.logger.log("WebSocket manager shutdown complete");
   }
 }
 
@@ -1129,10 +1243,10 @@ interface ServerHealth {
 }
 
 enum ServerHealthStatus {
-  HEALTHY = 'healthy',
-  DEGRADED = 'degraded',
-  UNHEALTHY = 'unhealthy',
-  UNKNOWN = 'unknown',
+  HEALTHY = "healthy",
+  DEGRADED = "degraded",
+  UNHEALTHY = "unhealthy",
+  UNKNOWN = "unknown",
 }
 
 interface ManagerStatus {

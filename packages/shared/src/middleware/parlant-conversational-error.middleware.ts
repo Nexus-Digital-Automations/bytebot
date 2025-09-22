@@ -37,17 +37,17 @@ import {
   HttpException,
   HttpStatus,
   Inject,
-} from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Request, Response, NextFunction } from 'express';
-import { Cache } from 'cache-manager';
-import { ParlantIntegrationService } from '../services/parlant-integration.service';
+} from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { CACHE_MANAGER } from "@nestjs/cache-manager";
+import { Request, Response, NextFunction } from "express";
+import { Cache } from "cache-manager";
+import { ParlantIntegrationService } from "../services/parlant-integration.service";
 import {
   ConversationPriority,
   ConversationState,
   ParticipantRole,
-} from '../types/parlant.types';
+} from "../types/parlant.types";
 
 // Enhanced error context interfaces
 interface ConversationalErrorContext {
@@ -75,7 +75,7 @@ interface UserErrorContext {
   ipAddress: string;
   userAgent: string;
   previousErrors: ErrorPattern[];
-  experienceLevel: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | 'EXPERT';
+  experienceLevel: "BEGINNER" | "INTERMEDIATE" | "ADVANCED" | "EXPERT";
   preferredLanguage: string;
 }
 
@@ -107,7 +107,7 @@ interface EscalationProtocol {
   shouldEscalate: boolean;
   escalationReason: string;
   targetRoles: string[];
-  urgency: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  urgency: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
   maxResolutionTime: number;
   automatedNotifications: NotificationChannel[];
   requiresHumanIntervention: boolean;
@@ -129,13 +129,13 @@ interface ErrorAuditEntry {
   action: string;
   actor: string;
   details: Record<string, any>;
-  outcome: 'SUCCESS' | 'FAILURE' | 'PARTIAL';
+  outcome: "SUCCESS" | "FAILURE" | "PARTIAL";
 }
 
 interface ConversationErrorContext {
   conversationId: string;
   participants: string[];
-  errorExplanationMode: 'DETAILED' | 'SIMPLIFIED' | 'TECHNICAL';
+  errorExplanationMode: "DETAILED" | "SIMPLIFIED" | "TECHNICAL";
   interactiveResolution: boolean;
   resolutionHistory: ResolutionAttempt[];
 }
@@ -150,7 +150,7 @@ interface ErrorPattern {
 
 interface DependencyStatus {
   service: string;
-  status: 'HEALTHY' | 'DEGRADED' | 'UNAVAILABLE';
+  status: "HEALTHY" | "DEGRADED" | "UNAVAILABLE";
   lastCheck: Date;
   responseTime: number;
 }
@@ -171,61 +171,66 @@ interface ResolutionAttempt {
 }
 
 enum ErrorCategory {
-  VALIDATION_FAILED = 'VALIDATION_FAILED',
-  TIMEOUT_ERROR = 'TIMEOUT_ERROR',
-  PERMISSION_DENIED = 'PERMISSION_DENIED',
-  SYSTEM_ERROR = 'SYSTEM_ERROR',
-  INTEGRATION_ERROR = 'INTEGRATION_ERROR',
-  USER_ERROR = 'USER_ERROR',
-  BUSINESS_LOGIC_ERROR = 'BUSINESS_LOGIC_ERROR',
-  CRITICAL_SYSTEM_FAILURE = 'CRITICAL_SYSTEM_FAILURE',
-  RATE_LIMIT_EXCEEDED = 'RATE_LIMIT_EXCEEDED',
-  RESOURCE_UNAVAILABLE = 'RESOURCE_UNAVAILABLE',
+  VALIDATION_FAILED = "VALIDATION_FAILED",
+  TIMEOUT_ERROR = "TIMEOUT_ERROR",
+  PERMISSION_DENIED = "PERMISSION_DENIED",
+  SYSTEM_ERROR = "SYSTEM_ERROR",
+  INTEGRATION_ERROR = "INTEGRATION_ERROR",
+  USER_ERROR = "USER_ERROR",
+  BUSINESS_LOGIC_ERROR = "BUSINESS_LOGIC_ERROR",
+  CRITICAL_SYSTEM_FAILURE = "CRITICAL_SYSTEM_FAILURE",
+  RATE_LIMIT_EXCEEDED = "RATE_LIMIT_EXCEEDED",
+  RESOURCE_UNAVAILABLE = "RESOURCE_UNAVAILABLE",
 }
 
 enum ErrorSeverity {
-  LOW = 'LOW',
-  MEDIUM = 'MEDIUM',
-  HIGH = 'HIGH',
-  CRITICAL = 'CRITICAL',
-  EMERGENCY = 'EMERGENCY',
+  LOW = "LOW",
+  MEDIUM = "MEDIUM",
+  HIGH = "HIGH",
+  CRITICAL = "CRITICAL",
+  EMERGENCY = "EMERGENCY",
 }
 
 enum EscalationLevel {
-  NONE = 'NONE',
-  SUPERVISOR = 'SUPERVISOR',
-  TECHNICAL_LEAD = 'TECHNICAL_LEAD',
-  SYSTEM_ADMIN = 'SYSTEM_ADMIN',
-  EMERGENCY_RESPONSE = 'EMERGENCY_RESPONSE',
+  NONE = "NONE",
+  SUPERVISOR = "SUPERVISOR",
+  TECHNICAL_LEAD = "TECHNICAL_LEAD",
+  SYSTEM_ADMIN = "SYSTEM_ADMIN",
+  EMERGENCY_RESPONSE = "EMERGENCY_RESPONSE",
 }
 
 enum RecoveryStrategy {
-  AUTOMATIC_RETRY = 'AUTOMATIC_RETRY',
-  USER_GUIDED_RETRY = 'USER_GUIDED_RETRY',
-  ALTERNATIVE_PATH = 'ALTERNATIVE_PATH',
-  DEGRADE_GRACEFULLY = 'DEGRADE_GRACEFULLY',
-  MANUAL_INTERVENTION = 'MANUAL_INTERVENTION',
-  SYSTEM_RESTART = 'SYSTEM_RESTART',
+  AUTOMATIC_RETRY = "AUTOMATIC_RETRY",
+  USER_GUIDED_RETRY = "USER_GUIDED_RETRY",
+  ALTERNATIVE_PATH = "ALTERNATIVE_PATH",
+  DEGRADE_GRACEFULLY = "DEGRADE_GRACEFULLY",
+  MANUAL_INTERVENTION = "MANUAL_INTERVENTION",
+  SYSTEM_RESTART = "SYSTEM_RESTART",
 }
 
 enum NotificationChannel {
-  EMAIL = 'EMAIL',
-  SLACK = 'SLACK',
-  SMS = 'SMS',
-  DASHBOARD_ALERT = 'DASHBOARD_ALERT',
-  PAGER_DUTY = 'PAGER_DUTY',
+  EMAIL = "EMAIL",
+  SLACK = "SLACK",
+  SMS = "SMS",
+  DASHBOARD_ALERT = "DASHBOARD_ALERT",
+  PAGER_DUTY = "PAGER_DUTY",
 }
 
 @Injectable()
 export class ParlantConversationalErrorMiddleware implements NestMiddleware {
-  private readonly logger = new Logger(ParlantConversationalErrorMiddleware.name);
+  private readonly logger = new Logger(
+    ParlantConversationalErrorMiddleware.name,
+  );
   private readonly errorPatterns = new Map<string, ErrorPattern[]>();
-  private readonly activeConversations = new Map<string, ConversationErrorContext>();
+  private readonly activeConversations = new Map<
+    string,
+    ConversationErrorContext
+  >();
 
   // Configuration for conversational error handling
   private readonly errorConfig = {
     enableConversationalMode: true,
-    defaultLanguage: 'en',
+    defaultLanguage: "en",
     maxRecoveryAttempts: 3,
     autoEscalationThreshold: 5,
     conversationTimeout: 300000, // 5 minutes
@@ -263,8 +268,8 @@ export class ParlantConversationalErrorMiddleware implements NestMiddleware {
     private readonly parlantService: ParlantIntegrationService,
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {
-    this.logger.log('PARLANT Conversational Error Middleware initialized', {
-      version: '1.0.0',
+    this.logger.log("PARLANT Conversational Error Middleware initialized", {
+      version: "1.0.0",
       conversationalMode: this.errorConfig.enableConversationalMode,
       supportedLanguages: [this.errorConfig.defaultLanguage],
       maxRecoveryAttempts: this.errorConfig.maxRecoveryAttempts,
@@ -290,7 +295,7 @@ export class ParlantConversationalErrorMiddleware implements NestMiddleware {
     let hasErrorResponse = false;
 
     // Intercept status calls to detect errors
-    res.status = function(code: number) {
+    res.status = function (code: number) {
       statusCode = code;
       if (code >= 400) {
         hasErrorResponse = true;
@@ -300,29 +305,35 @@ export class ParlantConversationalErrorMiddleware implements NestMiddleware {
 
     // Intercept JSON responses for error transformation
     const middlewareInstance = this;
-    res.json = function(body: any): Response {
+    res.json = function (body: any): Response {
       if (hasErrorResponse || statusCode >= 400) {
         // Handle async transformation synchronously by queuing it
-        middlewareInstance.transformErrorResponse(body, req, statusCode).then((transformedBody: any) => {
-          originalJson.call(this, transformedBody);
-        }).catch(() => {
-          originalJson.call(this, body);
-        });
+        middlewareInstance
+          .transformErrorResponse(body, req, statusCode)
+          .then((transformedBody: any) => {
+            originalJson.call(this, transformedBody);
+          })
+          .catch(() => {
+            originalJson.call(this, body);
+          });
         return this;
       }
       return originalJson.call(this, body);
     };
 
     // Intercept send responses for error transformation
-    res.send = function(body: any): Response {
+    res.send = function (body: any): Response {
       if (hasErrorResponse || statusCode >= 400) {
-        if (typeof body === 'object') {
+        if (typeof body === "object") {
           // Handle async transformation synchronously by queuing it
-          middlewareInstance.transformErrorResponse(body, req, statusCode).then((transformedBody: any) => {
-            originalSend.call(this, transformedBody);
-          }).catch(() => {
-            originalSend.call(this, body);
-          });
+          middlewareInstance
+            .transformErrorResponse(body, req, statusCode)
+            .then((transformedBody: any) => {
+              originalSend.call(this, transformedBody);
+            })
+            .catch(() => {
+              originalSend.call(this, body);
+            });
           return this;
         }
       }
@@ -357,13 +368,19 @@ export class ParlantConversationalErrorMiddleware implements NestMiddleware {
 
     try {
       // Create comprehensive error context
-      const errorContext = await this.createErrorContext(error, req, errorId, existingContext);
+      const errorContext = await this.createErrorContext(
+        error,
+        req,
+        errorId,
+        existingContext,
+      );
 
       // Analyze error patterns for this user
       await this.analyzeErrorPatterns(errorContext);
 
       // Generate conversational explanation
-      const conversationalResponse = await this.generateConversationalResponse(errorContext);
+      const conversationalResponse =
+        await this.generateConversationalResponse(errorContext);
 
       // Create or update conversation if needed
       if (this.shouldCreateConversation(errorContext)) {
@@ -382,7 +399,10 @@ export class ParlantConversationalErrorMiddleware implements NestMiddleware {
       await this.storeErrorAnalytics(errorContext);
 
       // Send conversational error response
-      const responseBody = this.formatConversationalErrorResponse(errorContext, conversationalResponse);
+      const responseBody = this.formatConversationalErrorResponse(
+        errorContext,
+        conversationalResponse,
+      );
 
       const processingTime = Date.now() - startTime;
       this.logger.debug(`Conversational error handled in ${processingTime}ms`, {
@@ -393,19 +413,21 @@ export class ParlantConversationalErrorMiddleware implements NestMiddleware {
       });
 
       res.status(errorContext.technicalDetails.httpStatus).json(responseBody);
-
     } catch (handlingError) {
       // Fallback error handling if conversational processing fails
-      this.logger.error('Error in conversational error handling', {
+      this.logger.error("Error in conversational error handling", {
         originalError: error.message,
-        handlingError: handlingError instanceof Error ? handlingError.message : String(handlingError),
+        handlingError:
+          handlingError instanceof Error
+            ? handlingError.message
+            : String(handlingError),
         errorId,
       });
 
       // Send basic error response as fallback
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
         error: true,
-        message: 'An unexpected error occurred',
+        message: "An unexpected error occurred",
         errorId,
         timestamp: new Date().toISOString(),
         conversationalMode: false,
@@ -416,8 +438,12 @@ export class ParlantConversationalErrorMiddleware implements NestMiddleware {
   /**
    * Transform error responses to conversational format
    */
-  private async transformErrorResponse(body: any, req: Request, statusCode: number): Promise<any> {
-    if (!body || typeof body !== 'object') {
+  private async transformErrorResponse(
+    body: any,
+    req: Request,
+    statusCode: number,
+  ): Promise<any> {
+    if (!body || typeof body !== "object") {
       return body;
     }
 
@@ -428,11 +454,12 @@ export class ParlantConversationalErrorMiddleware implements NestMiddleware {
 
     // Create minimal error context for transformation
     const errorId = this.generateErrorId();
-    const error = new Error(body.message || 'Unknown error');
+    const error = new Error(body.message || "Unknown error");
     const errorContext = await this.createErrorContext(error, req, errorId);
 
     // Generate simplified conversational response
-    const conversationalResponse = await this.generateConversationalResponse(errorContext);
+    const conversationalResponse =
+      await this.generateConversationalResponse(errorContext);
 
     return {
       ...body,
@@ -471,8 +498,16 @@ export class ParlantConversationalErrorMiddleware implements NestMiddleware {
       performanceMetrics: this.capturePerformanceMetrics(req),
     };
 
-    const escalationProtocol = this.determineEscalationProtocol(errorType, severity, userContext);
-    const recoveryOptions = this.generateRecoveryOptions(errorType, error, userContext);
+    const escalationProtocol = this.determineEscalationProtocol(
+      errorType,
+      severity,
+      userContext,
+    );
+    const recoveryOptions = this.generateRecoveryOptions(
+      errorType,
+      error,
+      userContext,
+    );
 
     return {
       errorId,
@@ -481,19 +516,21 @@ export class ParlantConversationalErrorMiddleware implements NestMiddleware {
       errorType,
       severity,
       userContext,
-      conversationalExplanation: '',
-      userFriendlyMessage: '',
+      conversationalExplanation: "",
+      userFriendlyMessage: "",
       technicalDetails,
       suggestedActions: [],
       escalationProtocol,
       recoveryOptions,
-      auditTrail: [{
-        timestamp: new Date(),
-        action: 'ERROR_OCCURRED',
-        actor: 'SYSTEM',
-        details: { errorType, severity },
-        outcome: 'FAILURE',
-      }],
+      auditTrail: [
+        {
+          timestamp: new Date(),
+          action: "ERROR_OCCURRED",
+          actor: "SYSTEM",
+          details: { errorType, severity },
+          outcome: "FAILURE",
+        },
+      ],
       conversationContext: existingContext?.conversationContext,
     };
   }
@@ -505,25 +542,32 @@ export class ParlantConversationalErrorMiddleware implements NestMiddleware {
     const message = error.message.toLowerCase();
     const name = error.name.toLowerCase();
 
-    if (message.includes('validation') || message.includes('parlant')) {
+    if (message.includes("validation") || message.includes("parlant")) {
       return ErrorCategory.VALIDATION_FAILED;
     }
-    if (message.includes('timeout') || name.includes('timeout')) {
+    if (message.includes("timeout") || name.includes("timeout")) {
       return ErrorCategory.TIMEOUT_ERROR;
     }
-    if (message.includes('permission') || message.includes('forbidden') || message.includes('unauthorized')) {
+    if (
+      message.includes("permission") ||
+      message.includes("forbidden") ||
+      message.includes("unauthorized")
+    ) {
       return ErrorCategory.PERMISSION_DENIED;
     }
-    if (message.includes('rate limit') || message.includes('too many requests')) {
+    if (
+      message.includes("rate limit") ||
+      message.includes("too many requests")
+    ) {
       return ErrorCategory.RATE_LIMIT_EXCEEDED;
     }
-    if (message.includes('unavailable') || message.includes('service')) {
+    if (message.includes("unavailable") || message.includes("service")) {
       return ErrorCategory.RESOURCE_UNAVAILABLE;
     }
-    if (message.includes('business') || message.includes('invalid')) {
+    if (message.includes("business") || message.includes("invalid")) {
       return ErrorCategory.USER_ERROR;
     }
-    if (name.includes('critical') || message.includes('critical')) {
+    if (name.includes("critical") || message.includes("critical")) {
       return ErrorCategory.CRITICAL_SYSTEM_FAILURE;
     }
 
@@ -533,8 +577,14 @@ export class ParlantConversationalErrorMiddleware implements NestMiddleware {
   /**
    * Determine error severity
    */
-  private determineSeverity(errorType: ErrorCategory, error: Error): ErrorSeverity {
-    const config = this.errorConfig.errorCategories[errorType as keyof typeof this.errorConfig.errorCategories];
+  private determineSeverity(
+    errorType: ErrorCategory,
+    error: Error,
+  ): ErrorSeverity {
+    const config =
+      this.errorConfig.errorCategories[
+        errorType as keyof typeof this.errorConfig.errorCategories
+      ];
     if (config) {
       return config.severity;
     }
@@ -562,12 +612,12 @@ export class ParlantConversationalErrorMiddleware implements NestMiddleware {
   private extractUserContext(req: Request): UserErrorContext {
     const user = (req as any).user;
     return {
-      userId: user?.id || 'anonymous',
+      userId: user?.id || "anonymous",
       username: user?.username,
       roles: user?.roles || [],
       sessionId: this.getSessionId(req),
       ipAddress: this.getClientIp(req),
-      userAgent: req.get('User-Agent') || 'unknown',
+      userAgent: req.get("User-Agent") || "unknown",
       previousErrors: this.getUserErrorHistory(user?.id),
       experienceLevel: this.determineUserExperience(user),
       preferredLanguage: this.extractPreferredLanguage(req),
@@ -577,7 +627,9 @@ export class ParlantConversationalErrorMiddleware implements NestMiddleware {
   /**
    * Generate conversational response
    */
-  private async generateConversationalResponse(context: ConversationalErrorContext): Promise<any> {
+  private async generateConversationalResponse(
+    context: ConversationalErrorContext,
+  ): Promise<any> {
     const explanation = this.generateConversationalExplanation(context);
     const userFriendlyMessage = this.generateUserFriendlyMessage(context);
     const suggestedActions = this.generateSuggestedActions(context);
@@ -596,7 +648,9 @@ export class ParlantConversationalErrorMiddleware implements NestMiddleware {
   /**
    * Generate conversational explanation
    */
-  private generateConversationalExplanation(context: ConversationalErrorContext): string {
+  private generateConversationalExplanation(
+    context: ConversationalErrorContext,
+  ): string {
     const { errorType, severity, userContext, technicalDetails } = context;
 
     let explanation = `I understand you encountered an issue while trying to ${this.describeUserAction(technicalDetails)}. `;
@@ -635,12 +689,15 @@ export class ParlantConversationalErrorMiddleware implements NestMiddleware {
     }
 
     // Add context-specific details
-    if (userContext.experienceLevel === 'BEGINNER') {
+    if (userContext.experienceLevel === "BEGINNER") {
       explanation += `Don't worry - this is a common situation that can usually be resolved quickly. `;
     }
 
     // Add severity context
-    if (severity === ErrorSeverity.CRITICAL || severity === ErrorSeverity.EMERGENCY) {
+    if (
+      severity === ErrorSeverity.CRITICAL ||
+      severity === ErrorSeverity.EMERGENCY
+    ) {
       explanation += `This is a high-priority issue and we're working to resolve it as quickly as possible. `;
     }
 
@@ -650,23 +707,29 @@ export class ParlantConversationalErrorMiddleware implements NestMiddleware {
   /**
    * Generate user-friendly message
    */
-  private generateUserFriendlyMessage(context: ConversationalErrorContext): string {
+  private generateUserFriendlyMessage(
+    context: ConversationalErrorContext,
+  ): string {
     const { errorType, severity } = context;
 
     const messageMap: Record<ErrorCategory, string> = {
-      [ErrorCategory.VALIDATION_FAILED]: 'Security validation required for this operation',
-      [ErrorCategory.TIMEOUT_ERROR]: 'Operation timed out - please try again',
-      [ErrorCategory.PERMISSION_DENIED]: 'Additional permissions needed for this action',
-      [ErrorCategory.RATE_LIMIT_EXCEEDED]: 'Request limit reached - please wait before trying again',
-      [ErrorCategory.RESOURCE_UNAVAILABLE]: 'Service temporarily unavailable',
-      [ErrorCategory.USER_ERROR]: 'Please check your input and try again',
-      [ErrorCategory.CRITICAL_SYSTEM_FAILURE]: 'Critical system issue detected - support has been notified',
-      [ErrorCategory.BUSINESS_LOGIC_ERROR]: 'Business rule validation failed',
-      [ErrorCategory.INTEGRATION_ERROR]: 'External service integration issue',
-      [ErrorCategory.SYSTEM_ERROR]: 'System error occurred - please retry',
+      [ErrorCategory.VALIDATION_FAILED]:
+        "Security validation required for this operation",
+      [ErrorCategory.TIMEOUT_ERROR]: "Operation timed out - please try again",
+      [ErrorCategory.PERMISSION_DENIED]:
+        "Additional permissions needed for this action",
+      [ErrorCategory.RATE_LIMIT_EXCEEDED]:
+        "Request limit reached - please wait before trying again",
+      [ErrorCategory.RESOURCE_UNAVAILABLE]: "Service temporarily unavailable",
+      [ErrorCategory.USER_ERROR]: "Please check your input and try again",
+      [ErrorCategory.CRITICAL_SYSTEM_FAILURE]:
+        "Critical system issue detected - support has been notified",
+      [ErrorCategory.BUSINESS_LOGIC_ERROR]: "Business rule validation failed",
+      [ErrorCategory.INTEGRATION_ERROR]: "External service integration issue",
+      [ErrorCategory.SYSTEM_ERROR]: "System error occurred - please retry",
     };
 
-    let message = messageMap[errorType] || 'An unexpected error occurred';
+    let message = messageMap[errorType] || "An unexpected error occurred";
 
     if (severity === ErrorSeverity.EMERGENCY) {
       message = `🚨 URGENT: ${message}`;
@@ -680,7 +743,9 @@ export class ParlantConversationalErrorMiddleware implements NestMiddleware {
   /**
    * Generate suggested actions
    */
-  private generateSuggestedActions(context: ConversationalErrorContext): ActionableGuidance[] {
+  private generateSuggestedActions(
+    context: ConversationalErrorContext,
+  ): ActionableGuidance[] {
     const actions: ActionableGuidance[] = [];
     const { errorType, severity, userContext, recoveryOptions } = context;
 
@@ -701,57 +766,67 @@ export class ParlantConversationalErrorMiddleware implements NestMiddleware {
     // Add general actions based on error type
     switch (errorType) {
       case ErrorCategory.TIMEOUT_ERROR:
-        actions.push(this.createAction(
-          'Retry the operation',
-          'Wait a moment and try your request again',
-          8,
-          '30 seconds',
-          75,
-        ));
+        actions.push(
+          this.createAction(
+            "Retry the operation",
+            "Wait a moment and try your request again",
+            8,
+            "30 seconds",
+            75,
+          ),
+        );
         break;
 
       case ErrorCategory.PERMISSION_DENIED:
-        actions.push(this.createAction(
-          'Contact your administrator',
-          'Request the necessary permissions for this operation',
-          9,
-          '5-10 minutes',
-          90,
-          true,
-        ));
+        actions.push(
+          this.createAction(
+            "Contact your administrator",
+            "Request the necessary permissions for this operation",
+            9,
+            "5-10 minutes",
+            90,
+            true,
+          ),
+        );
         break;
 
       case ErrorCategory.RATE_LIMIT_EXCEEDED:
-        actions.push(this.createAction(
-          'Wait before retrying',
-          'Wait for the rate limit window to reset',
-          7,
-          '1-5 minutes',
-          95,
-        ));
+        actions.push(
+          this.createAction(
+            "Wait before retrying",
+            "Wait for the rate limit window to reset",
+            7,
+            "1-5 minutes",
+            95,
+          ),
+        );
         break;
     }
 
     // Add universal helpful actions
-    actions.push(this.createAction(
-      'Check system status',
-      'Visit our status page for any known issues',
-      3,
-      '1 minute',
-      100,
-    ));
+    actions.push(
+      this.createAction(
+        "Check system status",
+        "Visit our status page for any known issues",
+        3,
+        "1 minute",
+        100,
+      ),
+    );
 
     if (severity >= ErrorSeverity.HIGH) {
-      actions.push(this.createAction(
-        'Contact support',
-        'Get direct help from our technical support team',
-        6,
-        '2-5 minutes',
-        95,
-        false,
-        false,
-        ['support-contact-guide', 'escalation-procedures'],
-      ));
+      actions.push(
+        this.createAction(
+          "Contact support",
+          "Get direct help from our technical support team",
+          6,
+          "2-5 minutes",
+          95,
+          false,
+          false,
+          ["support-contact-guide", "escalation-procedures"],
+        ),
+      );
     }
 
     return actions.sort((a, b) => b.priority - a.priority).slice(0, 5);
@@ -793,20 +868,20 @@ export class ParlantConversationalErrorMiddleware implements NestMiddleware {
     const method = technicalDetails.requestMethod.toLowerCase();
     const path = technicalDetails.requestPath;
 
-    if (method === 'post' && path.includes('computer-use')) {
-      return 'execute a computer automation task';
+    if (method === "post" && path.includes("computer-use")) {
+      return "execute a computer automation task";
     }
-    if (method === 'get' && path.includes('status')) {
-      return 'check the status of an operation';
+    if (method === "get" && path.includes("status")) {
+      return "check the status of an operation";
     }
-    if (method === 'delete') {
-      return 'delete or remove data';
+    if (method === "delete") {
+      return "delete or remove data";
     }
-    if (method === 'post') {
-      return 'create or submit data';
+    if (method === "post") {
+      return "create or submit data";
     }
-    if (method === 'put' || method === 'patch') {
-      return 'update existing data';
+    if (method === "put" || method === "patch") {
+      return "update existing data";
     }
 
     return `perform a ${method.toUpperCase()} operation`;
@@ -815,21 +890,24 @@ export class ParlantConversationalErrorMiddleware implements NestMiddleware {
   private formatRecoveryAction(recovery: RecoveryOption): string {
     switch (recovery.strategy) {
       case RecoveryStrategy.AUTOMATIC_RETRY:
-        return 'Automatic retry will be attempted';
+        return "Automatic retry will be attempted";
       case RecoveryStrategy.USER_GUIDED_RETRY:
-        return 'Retry the operation with guidance';
+        return "Retry the operation with guidance";
       case RecoveryStrategy.ALTERNATIVE_PATH:
-        return 'Try an alternative approach';
+        return "Try an alternative approach";
       case RecoveryStrategy.DEGRADE_GRACEFULLY:
-        return 'Continue with limited functionality';
+        return "Continue with limited functionality";
       case RecoveryStrategy.MANUAL_INTERVENTION:
-        return 'Manual intervention required';
+        return "Manual intervention required";
       default:
-        return 'Recovery action available';
+        return "Recovery action available";
     }
   }
 
-  private calculateActionPriority(recovery: RecoveryOption, severity: ErrorSeverity): number {
+  private calculateActionPriority(
+    recovery: RecoveryOption,
+    severity: ErrorSeverity,
+  ): number {
     let priority = 5;
 
     // Adjust based on success rate
@@ -851,47 +929,71 @@ export class ParlantConversationalErrorMiddleware implements NestMiddleware {
 
   private getRelatedDocumentation(errorType: ErrorCategory): string[] {
     const docMap: Record<ErrorCategory, string[]> = {
-      [ErrorCategory.VALIDATION_FAILED]: ['parlant-validation-guide', 'security-procedures'],
-      [ErrorCategory.PERMISSION_DENIED]: ['user-permissions', 'role-management'],
-      [ErrorCategory.TIMEOUT_ERROR]: ['performance-optimization', 'system-limits'],
-      [ErrorCategory.RATE_LIMIT_EXCEEDED]: ['api-rate-limits', 'usage-optimization'],
-      [ErrorCategory.USER_ERROR]: ['api-documentation', 'parameter-guide'],
-      [ErrorCategory.SYSTEM_ERROR]: ['troubleshooting-guide', 'system-status'],
-      [ErrorCategory.CRITICAL_SYSTEM_FAILURE]: ['emergency-procedures', 'system-recovery'],
-      [ErrorCategory.INTEGRATION_ERROR]: ['integration-guide', 'dependency-status'],
-      [ErrorCategory.BUSINESS_LOGIC_ERROR]: ['business-rules', 'validation-guide'],
-      [ErrorCategory.RESOURCE_UNAVAILABLE]: ['service-availability', 'capacity-planning'],
+      [ErrorCategory.VALIDATION_FAILED]: [
+        "parlant-validation-guide",
+        "security-procedures",
+      ],
+      [ErrorCategory.PERMISSION_DENIED]: [
+        "user-permissions",
+        "role-management",
+      ],
+      [ErrorCategory.TIMEOUT_ERROR]: [
+        "performance-optimization",
+        "system-limits",
+      ],
+      [ErrorCategory.RATE_LIMIT_EXCEEDED]: [
+        "api-rate-limits",
+        "usage-optimization",
+      ],
+      [ErrorCategory.USER_ERROR]: ["api-documentation", "parameter-guide"],
+      [ErrorCategory.SYSTEM_ERROR]: ["troubleshooting-guide", "system-status"],
+      [ErrorCategory.CRITICAL_SYSTEM_FAILURE]: [
+        "emergency-procedures",
+        "system-recovery",
+      ],
+      [ErrorCategory.INTEGRATION_ERROR]: [
+        "integration-guide",
+        "dependency-status",
+      ],
+      [ErrorCategory.BUSINESS_LOGIC_ERROR]: [
+        "business-rules",
+        "validation-guide",
+      ],
+      [ErrorCategory.RESOURCE_UNAVAILABLE]: [
+        "service-availability",
+        "capacity-planning",
+      ],
     };
 
-    return docMap[errorType] || ['general-help', 'faq'];
+    return docMap[errorType] || ["general-help", "faq"];
   }
 
   private getSupportContactInfo(severity: ErrorSeverity): Record<string, any> {
     const baseContact = {
-      email: 'support@bytebot.ai',
-      documentation: 'https://docs.bytebot.ai',
+      email: "support@bytebot.ai",
+      documentation: "https://docs.bytebot.ai",
     };
 
     if (severity === ErrorSeverity.EMERGENCY) {
       return {
         ...baseContact,
         urgent: true,
-        phone: '+1-555-EMERGENCY',
-        escalation: 'Immediate response team notified',
+        phone: "+1-555-EMERGENCY",
+        escalation: "Immediate response team notified",
       };
     }
 
     if (severity === ErrorSeverity.CRITICAL) {
       return {
         ...baseContact,
-        priority: 'HIGH',
-        expectedResponse: '< 1 hour',
+        priority: "HIGH",
+        expectedResponse: "< 1 hour",
       };
     }
 
     return {
       ...baseContact,
-      expectedResponse: '< 24 hours',
+      expectedResponse: "< 24 hours",
     };
   }
 
@@ -918,24 +1020,24 @@ export class ParlantConversationalErrorMiddleware implements NestMiddleware {
   }
 
   private getRequestId(req: Request): string {
-    return req.headers['x-request-id'] as string || `req_${Date.now()}`;
+    return (req.headers["x-request-id"] as string) || `req_${Date.now()}`;
   }
 
   private getSessionId(req: Request): string {
-    return req.headers['x-session-id'] as string || `session_${Date.now()}`;
+    return (req.headers["x-session-id"] as string) || `session_${Date.now()}`;
   }
 
   private getClientIp(req: Request): string {
     return (
-      (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
-      req.headers['x-real-ip'] as string ||
+      (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() ||
+      (req.headers["x-real-ip"] as string) ||
       req.socket?.remoteAddress ||
-      'unknown'
+      "unknown"
     );
   }
 
   private extractPreferredLanguage(req: Request): string {
-    return req.headers['accept-language']?.split(',')[0]?.split('-')[0] || 'en';
+    return req.headers["accept-language"]?.split(",")[0]?.split("-")[0] || "en";
   }
 
   private getUserErrorHistory(userId?: string): ErrorPattern[] {
@@ -943,11 +1045,13 @@ export class ParlantConversationalErrorMiddleware implements NestMiddleware {
     return this.errorPatterns.get(userId) || [];
   }
 
-  private determineUserExperience(user: any): 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | 'EXPERT' {
-    if (!user) return 'BEGINNER';
-    if (user.roles?.includes('ADMIN')) return 'EXPERT';
-    if (user.roles?.includes('OPERATOR')) return 'ADVANCED';
-    return 'INTERMEDIATE';
+  private determineUserExperience(
+    user: any,
+  ): "BEGINNER" | "INTERMEDIATE" | "ADVANCED" | "EXPERT" {
+    if (!user) return "BEGINNER";
+    if (user.roles?.includes("ADMIN")) return "EXPERT";
+    if (user.roles?.includes("OPERATOR")) return "ADVANCED";
+    return "INTERMEDIATE";
   }
 
   // Infrastructure stubs - would implement with real monitoring
@@ -973,14 +1077,20 @@ export class ParlantConversationalErrorMiddleware implements NestMiddleware {
     };
   }
 
-  private shouldCreateConversation(context: ConversationalErrorContext): boolean {
-    return context.severity >= ErrorSeverity.HIGH ||
-           context.errorType === ErrorCategory.VALIDATION_FAILED;
+  private shouldCreateConversation(
+    context: ConversationalErrorContext,
+  ): boolean {
+    return (
+      context.severity >= ErrorSeverity.HIGH ||
+      context.errorType === ErrorCategory.VALIDATION_FAILED
+    );
   }
 
-  private async initiateErrorConversation(context: ConversationalErrorContext): Promise<void> {
+  private async initiateErrorConversation(
+    context: ConversationalErrorContext,
+  ): Promise<void> {
     // Would integrate with PARLANT conversation system
-    this.logger.debug('Error conversation would be initiated', {
+    this.logger.debug("Error conversation would be initiated", {
       errorId: context.errorId,
       errorType: context.errorType,
       severity: context.severity,
@@ -994,20 +1104,20 @@ export class ParlantConversationalErrorMiddleware implements NestMiddleware {
   ): EscalationProtocol {
     let shouldEscalate = false;
     let level = EscalationLevel.NONE;
-    let urgency: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' = 'LOW';
+    let urgency: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL" = "LOW";
 
     if (severity === ErrorSeverity.EMERGENCY) {
       shouldEscalate = true;
       level = EscalationLevel.EMERGENCY_RESPONSE;
-      urgency = 'CRITICAL';
+      urgency = "CRITICAL";
     } else if (severity === ErrorSeverity.CRITICAL) {
       shouldEscalate = true;
       level = EscalationLevel.SYSTEM_ADMIN;
-      urgency = 'HIGH';
+      urgency = "HIGH";
     } else if (errorType === ErrorCategory.PERMISSION_DENIED) {
       shouldEscalate = true;
       level = EscalationLevel.SUPERVISOR;
-      urgency = 'MEDIUM';
+      urgency = "MEDIUM";
     }
 
     return {
@@ -1034,10 +1144,10 @@ export class ParlantConversationalErrorMiddleware implements NestMiddleware {
       case ErrorCategory.TIMEOUT_ERROR:
         options.push({
           strategy: RecoveryStrategy.AUTOMATIC_RETRY,
-          description: 'Automatically retry the operation with longer timeout',
+          description: "Automatically retry the operation with longer timeout",
           estimatedDuration: 30,
           successRate: 70,
-          risks: ['May timeout again if underlying issue persists'],
+          risks: ["May timeout again if underlying issue persists"],
           prerequisites: [],
           automatedRetry: true,
           userApprovalRequired: false,
@@ -1047,11 +1157,11 @@ export class ParlantConversationalErrorMiddleware implements NestMiddleware {
       case ErrorCategory.VALIDATION_FAILED:
         options.push({
           strategy: RecoveryStrategy.USER_GUIDED_RETRY,
-          description: 'Guide user through validation process',
+          description: "Guide user through validation process",
           estimatedDuration: 120,
           successRate: 85,
-          risks: ['User may need to provide additional information'],
-          prerequisites: ['Valid user session', 'Appropriate permissions'],
+          risks: ["User may need to provide additional information"],
+          prerequisites: ["Valid user session", "Appropriate permissions"],
           automatedRetry: false,
           userApprovalRequired: true,
         });
@@ -1063,17 +1173,23 @@ export class ParlantConversationalErrorMiddleware implements NestMiddleware {
     return options;
   }
 
-  private generateEscalationReason(errorType: ErrorCategory, severity: ErrorSeverity): string {
+  private generateEscalationReason(
+    errorType: ErrorCategory,
+    severity: ErrorSeverity,
+  ): string {
     return `${errorType} with ${severity} severity requires escalation`;
   }
 
   private getEscalationTargets(level: EscalationLevel): string[] {
     const targetMap: Record<EscalationLevel, string[]> = {
       [EscalationLevel.NONE]: [],
-      [EscalationLevel.SUPERVISOR]: ['SUPERVISOR'],
-      [EscalationLevel.TECHNICAL_LEAD]: ['TECHNICAL_LEAD'],
-      [EscalationLevel.SYSTEM_ADMIN]: ['SYSTEM_ADMIN'],
-      [EscalationLevel.EMERGENCY_RESPONSE]: ['EMERGENCY_RESPONSE', 'SYSTEM_ADMIN'],
+      [EscalationLevel.SUPERVISOR]: ["SUPERVISOR"],
+      [EscalationLevel.TECHNICAL_LEAD]: ["TECHNICAL_LEAD"],
+      [EscalationLevel.SYSTEM_ADMIN]: ["SYSTEM_ADMIN"],
+      [EscalationLevel.EMERGENCY_RESPONSE]: [
+        "EMERGENCY_RESPONSE",
+        "SYSTEM_ADMIN",
+      ],
     };
 
     return targetMap[level] || [];
@@ -1091,36 +1207,46 @@ export class ParlantConversationalErrorMiddleware implements NestMiddleware {
   }
 
   private getNotificationChannels(urgency: string): NotificationChannel[] {
-    if (urgency === 'CRITICAL') {
-      return [NotificationChannel.PAGER_DUTY, NotificationChannel.SMS, NotificationChannel.EMAIL];
+    if (urgency === "CRITICAL") {
+      return [
+        NotificationChannel.PAGER_DUTY,
+        NotificationChannel.SMS,
+        NotificationChannel.EMAIL,
+      ];
     }
-    if (urgency === 'HIGH') {
+    if (urgency === "HIGH") {
       return [NotificationChannel.SLACK, NotificationChannel.EMAIL];
     }
     return [NotificationChannel.EMAIL];
   }
 
-  private async analyzeErrorPatterns(context: ConversationalErrorContext): Promise<void> {
+  private async analyzeErrorPatterns(
+    context: ConversationalErrorContext,
+  ): Promise<void> {
     // Would implement error pattern analysis
-    this.logger.debug('Error pattern analysis', {
+    this.logger.debug("Error pattern analysis", {
       errorId: context.errorId,
       errorType: context.errorType,
       userId: context.userContext.userId,
     });
   }
 
-  private async escalateError(context: ConversationalErrorContext): Promise<void> {
+  private async escalateError(
+    context: ConversationalErrorContext,
+  ): Promise<void> {
     // Would implement escalation logic
-    this.logger.warn('Error escalated', {
+    this.logger.warn("Error escalated", {
       errorId: context.errorId,
       escalationLevel: context.escalationProtocol.level,
       urgency: context.escalationProtocol.urgency,
     });
   }
 
-  private async storeErrorAnalytics(context: ConversationalErrorContext): Promise<void> {
+  private async storeErrorAnalytics(
+    context: ConversationalErrorContext,
+  ): Promise<void> {
     // Would store in analytics system
-    this.logger.debug('Error analytics stored', {
+    this.logger.debug("Error analytics stored", {
       errorId: context.errorId,
       errorType: context.errorType,
       severity: context.severity,
@@ -1128,7 +1254,7 @@ export class ParlantConversationalErrorMiddleware implements NestMiddleware {
   }
 
   private logErrorWithContext(context: ConversationalErrorContext): void {
-    this.logger.error('Conversational error handled', {
+    this.logger.error("Conversational error handled", {
       errorId: context.errorId,
       errorType: context.errorType,
       severity: context.severity,
@@ -1168,7 +1294,7 @@ export class ParlantConversationalErrorMiddleware implements NestMiddleware {
 
       // Recovery information
       recovery: {
-        options: context.recoveryOptions.map(opt => ({
+        options: context.recoveryOptions.map((opt) => ({
           strategy: opt.strategy,
           description: opt.description,
           estimatedTime: opt.estimatedDuration,
@@ -1178,11 +1304,13 @@ export class ParlantConversationalErrorMiddleware implements NestMiddleware {
       },
 
       // Conversation context if applicable
-      conversation: context.conversationContext ? {
-        conversationId: context.conversationContext.conversationId,
-        mode: context.conversationContext.errorExplanationMode,
-        interactive: context.conversationContext.interactiveResolution,
-      } : undefined,
+      conversation: context.conversationContext
+        ? {
+            conversationId: context.conversationContext.conversationId,
+            mode: context.conversationContext.errorExplanationMode,
+            interactive: context.conversationContext.interactiveResolution,
+          }
+        : undefined,
     };
   }
 }

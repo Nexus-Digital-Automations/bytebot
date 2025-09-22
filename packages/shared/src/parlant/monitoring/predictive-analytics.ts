@@ -49,7 +49,11 @@ export interface PredictiveAnalyticsConfig {
   /** Model configuration */
   models: {
     forecasting: "arima" | "lstm" | "prophet" | "ensemble";
-    anomalyDetection: "isolation_forest" | "one_class_svm" | "autoencoder" | "ensemble";
+    anomalyDetection:
+      | "isolation_forest"
+      | "one_class_svm"
+      | "autoencoder"
+      | "ensemble";
     clustering: "kmeans" | "dbscan" | "hierarchical";
   };
 }
@@ -143,7 +147,13 @@ export interface CapacityPrediction {
   /** Prediction identifier */
   id: string;
   /** Resource type */
-  resource: "cpu" | "memory" | "disk" | "network" | "connections" | "throughput";
+  resource:
+    | "cpu"
+    | "memory"
+    | "disk"
+    | "network"
+    | "connections"
+    | "throughput";
   /** Current utilization */
   currentUtilization: number;
   /** Predicted utilization */
@@ -335,7 +345,10 @@ export class PredictiveAnalyticsEngine extends EventEmitter {
       this.emit("analytics.initialized");
       this.logger.log("Predictive Analytics Engine initialized successfully");
     } catch (error) {
-      this.logger.error("Failed to initialize Predictive Analytics Engine:", error);
+      this.logger.error(
+        "Failed to initialize Predictive Analytics Engine:",
+        error,
+      );
       throw error;
     }
   }
@@ -380,14 +393,25 @@ export class PredictiveAnalyticsEngine extends EventEmitter {
   /**
    * Generate performance forecast
    */
-  async generateForecast(horizon: number = this.config.predictionHorizon): Promise<PerformanceForecast> {
+  async generateForecast(
+    horizon: number = this.config.predictionHorizon,
+  ): Promise<PerformanceForecast> {
     const forecastId = `forecast-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
     // Generate predictions for key metrics
-    const responseTimePrediction = await this.predictMetric("response_time", horizon);
-    const throughputPrediction = await this.predictMetric("throughput", horizon);
+    const responseTimePrediction = await this.predictMetric(
+      "response_time",
+      horizon,
+    );
+    const throughputPrediction = await this.predictMetric(
+      "throughput",
+      horizon,
+    );
     const errorRatePrediction = await this.predictMetric("error_rate", horizon);
-    const cacheHitRatePrediction = await this.predictMetric("cache_hit_rate", horizon);
+    const cacheHitRatePrediction = await this.predictMetric(
+      "cache_hit_rate",
+      horizon,
+    );
 
     // Calculate business impact
     const businessImpact = this.calculateBusinessImpact([
@@ -426,7 +450,11 @@ export class PredictiveAnalyticsEngine extends EventEmitter {
   /**
    * Detect anomalies in real-time data
    */
-  async detectAnomalies(metric: string, value: number, timestamp: Date = new Date()): Promise<AnomalyDetection[]> {
+  async detectAnomalies(
+    metric: string,
+    value: number,
+    timestamp: Date = new Date(),
+  ): Promise<AnomalyDetection[]> {
     const detectedAnomalies: AnomalyDetection[] = [];
 
     // Get historical data for comparison
@@ -437,8 +465,12 @@ export class PredictiveAnalyticsEngine extends EventEmitter {
 
     // Calculate expected value using trained model
     const expectedValue = await this.predictValue(metric, timestamp);
-    const historicalMean = this.calculateMean(historicalData.map(d => d.value));
-    const historicalStd = this.calculateStandardDeviation(historicalData.map(d => d.value));
+    const historicalMean = this.calculateMean(
+      historicalData.map((d) => d.value),
+    );
+    const historicalStd = this.calculateStandardDeviation(
+      historicalData.map((d) => d.value),
+    );
 
     // Statistical anomaly detection
     const zScore = Math.abs((value - historicalMean) / historicalStd);
@@ -460,7 +492,11 @@ export class PredictiveAnalyticsEngine extends EventEmitter {
           trend: this.checkTrendAnomaly(historicalData, value),
           correlation: this.findCorrelatedAnomalies(metric, timestamp),
         },
-        recommendations: this.generateAnomalyRecommendations(metric, value, expectedValue),
+        recommendations: this.generateAnomalyRecommendations(
+          metric,
+          value,
+          expectedValue,
+        ),
       };
 
       detectedAnomalies.push(anomaly);
@@ -480,7 +516,9 @@ export class PredictiveAnalyticsEngine extends EventEmitter {
   /**
    * Generate capacity predictions
    */
-  async generateCapacityPrediction(resource: CapacityPrediction["resource"]): Promise<CapacityPrediction> {
+  async generateCapacityPrediction(
+    resource: CapacityPrediction["resource"],
+  ): Promise<CapacityPrediction> {
     const currentData = this.trainingData.get(resource) || [];
     if (currentData.length === 0) {
       throw new Error(`No data available for resource: ${resource}`);
@@ -490,10 +528,22 @@ export class PredictiveAnalyticsEngine extends EventEmitter {
 
     // Generate predictions for different time horizons
     const predictions = {
-      nextHour: await this.predictValue(resource, new Date(Date.now() + 3600000)),
-      nextDay: await this.predictValue(resource, new Date(Date.now() + 86400000)),
-      nextWeek: await this.predictValue(resource, new Date(Date.now() + 604800000)),
-      nextMonth: await this.predictValue(resource, new Date(Date.now() + 2592000000)),
+      nextHour: await this.predictValue(
+        resource,
+        new Date(Date.now() + 3600000),
+      ),
+      nextDay: await this.predictValue(
+        resource,
+        new Date(Date.now() + 86400000),
+      ),
+      nextWeek: await this.predictValue(
+        resource,
+        new Date(Date.now() + 604800000),
+      ),
+      nextMonth: await this.predictValue(
+        resource,
+        new Date(Date.now() + 2592000000),
+      ),
     };
 
     // Define capacity thresholds
@@ -504,14 +554,18 @@ export class PredictiveAnalyticsEngine extends EventEmitter {
     };
 
     // Calculate time to threshold breach
-    const timeToThreshold = this.calculateTimeToThreshold(resource, predictions, thresholds);
+    const timeToThreshold = this.calculateTimeToThreshold(
+      resource,
+      predictions,
+      thresholds,
+    );
 
     // Generate scaling recommendations
     const scaling = this.generateScalingRecommendations(
       resource,
       currentUtilization,
       predictions,
-      thresholds
+      thresholds,
     );
 
     const capacityPrediction: CapacityPrediction = {
@@ -558,7 +612,7 @@ export class PredictiveAnalyticsEngine extends EventEmitter {
     // Store patterns
     this.patterns.set(metric, patterns);
 
-    patterns.forEach(pattern => {
+    patterns.forEach((pattern) => {
       this.emit("pattern.detected", pattern);
     });
 
@@ -603,7 +657,9 @@ export class PredictiveAnalyticsEngine extends EventEmitter {
 
   // ===== PRIVATE IMPLEMENTATION METHODS =====
 
-  private mergeConfig(userConfig: Partial<PredictiveAnalyticsConfig>): PredictiveAnalyticsConfig {
+  private mergeConfig(
+    userConfig: Partial<PredictiveAnalyticsConfig>,
+  ): PredictiveAnalyticsConfig {
     const defaultConfig: PredictiveAnalyticsConfig = {
       trainingWindow: 7 * 24 * 60 * 60 * 1000, // 7 days
       minDataPoints: 100,
@@ -638,9 +694,18 @@ export class PredictiveAnalyticsEngine extends EventEmitter {
     this.models.set("prophet", { type: "prophet", trainedAt: new Date() });
 
     // Anomaly detection models
-    this.models.set("isolation_forest", { type: "isolation_forest", trainedAt: new Date() });
-    this.models.set("one_class_svm", { type: "one_class_svm", trainedAt: new Date() });
-    this.models.set("autoencoder", { type: "autoencoder", trainedAt: new Date() });
+    this.models.set("isolation_forest", {
+      type: "isolation_forest",
+      trainedAt: new Date(),
+    });
+    this.models.set("one_class_svm", {
+      type: "one_class_svm",
+      trainedAt: new Date(),
+    });
+    this.models.set("autoencoder", {
+      type: "autoencoder",
+      trainedAt: new Date(),
+    });
 
     this.logger.log("ML models initialized successfully");
   }
@@ -663,10 +728,13 @@ export class PredictiveAnalyticsEngine extends EventEmitter {
     }, 3600000); // Every hour
   }
 
-  private async predictMetric(metric: string, horizon: number): Promise<PredictionResult> {
+  private async predictMetric(
+    metric: string,
+    horizon: number,
+  ): Promise<PredictionResult> {
     // Simplified prediction implementation
     const data = this.trainingData.get(metric) || [];
-    const recentValues = data.slice(-50).map(d => d.value);
+    const recentValues = data.slice(-50).map((d) => d.value);
     const mean = this.calculateMean(recentValues);
     const std = this.calculateStandardDeviation(recentValues);
 
@@ -674,10 +742,10 @@ export class PredictiveAnalyticsEngine extends EventEmitter {
     const trend = this.calculateTrend(recentValues);
     const seasonal = this.calculateSeasonalEffect(new Date(), metric);
 
-    const predictedValue = mean + (trend * horizon / 3600000) + seasonal;
+    const predictedValue = mean + (trend * horizon) / 3600000 + seasonal;
     const confidenceInterval = {
-      lower: predictedValue - (1.96 * std),
-      upper: predictedValue + (1.96 * std),
+      lower: predictedValue - 1.96 * std,
+      upper: predictedValue + 1.96 * std,
       level: this.config.confidenceLevel,
     };
 
@@ -699,21 +767,26 @@ export class PredictiveAnalyticsEngine extends EventEmitter {
     };
   }
 
-  private async predictValue(metric: string, targetTime: Date): Promise<number> {
+  private async predictValue(
+    metric: string,
+    targetTime: Date,
+  ): Promise<number> {
     // Simplified value prediction
     const data = this.trainingData.get(metric) || [];
-    const recentValues = data.slice(-20).map(d => d.value);
+    const recentValues = data.slice(-20).map((d) => d.value);
     const mean = this.calculateMean(recentValues);
     const trend = this.calculateTrend(recentValues);
     const seasonal = this.calculateSeasonalEffect(targetTime, metric);
 
     const horizonHours = (targetTime.getTime() - Date.now()) / 3600000;
-    return mean + (trend * horizonHours) + seasonal;
+    return mean + trend * horizonHours + seasonal;
   }
 
-  private removeDuplicateTimestamps(data: TimeSeriesPoint[]): TimeSeriesPoint[] {
+  private removeDuplicateTimestamps(
+    data: TimeSeriesPoint[],
+  ): TimeSeriesPoint[] {
     const seen = new Set<number>();
-    return data.filter(point => {
+    return data.filter((point) => {
       const timestamp = point.timestamp.getTime();
       if (seen.has(timestamp)) {
         return false;
@@ -746,7 +819,9 @@ export class PredictiveAnalyticsEngine extends EventEmitter {
     // Simplified model retraining
     const data = this.trainingData.get(metric) || [];
 
-    this.logger.log(`Retraining model for metric: ${metric} with ${data.length} data points`);
+    this.logger.log(
+      `Retraining model for metric: ${metric} with ${data.length} data points`,
+    );
 
     // Update model metadata
     const modelId = `${metric}_model`;
@@ -784,19 +859,25 @@ export class PredictiveAnalyticsEngine extends EventEmitter {
 
     // Clean training data
     this.trainingData.forEach((data, metric) => {
-      const filteredData = data.filter(d => d.timestamp.getTime() > cutoffTime);
+      const filteredData = data.filter(
+        (d) => d.timestamp.getTime() > cutoffTime,
+      );
       this.trainingData.set(metric, filteredData);
     });
 
     // Clean predictions
     this.predictions.forEach((predictions, metric) => {
-      const filteredPredictions = predictions.filter(p => p.timestamp.getTime() > cutoffTime);
+      const filteredPredictions = predictions.filter(
+        (p) => p.timestamp.getTime() > cutoffTime,
+      );
       this.predictions.set(metric, filteredPredictions);
     });
 
     // Clean anomalies
     this.anomalies.forEach((anomalies, metric) => {
-      const filteredAnomalies = anomalies.filter(a => a.timestamp.getTime() > cutoffTime);
+      const filteredAnomalies = anomalies.filter(
+        (a) => a.timestamp.getTime() > cutoffTime,
+      );
       this.anomalies.set(metric, filteredAnomalies);
     });
   }
@@ -804,13 +885,15 @@ export class PredictiveAnalyticsEngine extends EventEmitter {
   // ===== STATISTICAL CALCULATION METHODS =====
 
   private calculateMean(values: number[]): number {
-    return values.length > 0 ? values.reduce((sum, val) => sum + val, 0) / values.length : 0;
+    return values.length > 0
+      ? values.reduce((sum, val) => sum + val, 0) / values.length
+      : 0;
   }
 
   private calculateStandardDeviation(values: number[]): number {
     if (values.length <= 1) return 0;
     const mean = this.calculateMean(values);
-    const squaredDiffs = values.map(val => Math.pow(val - mean, 2));
+    const squaredDiffs = values.map((val) => Math.pow(val - mean, 2));
     const variance = this.calculateMean(squaredDiffs);
     return Math.sqrt(variance);
   }
@@ -822,7 +905,7 @@ export class PredictiveAnalyticsEngine extends EventEmitter {
     const n = values.length;
     const sumX = (n * (n - 1)) / 2;
     const sumY = values.reduce((sum, val) => sum + val, 0);
-    const sumXY = values.reduce((sum, val, idx) => sum + (val * idx), 0);
+    const sumXY = values.reduce((sum, val, idx) => sum + val * idx, 0);
     const sumX2 = (n * (n - 1) * (2 * n - 1)) / 6;
 
     return (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
@@ -856,7 +939,10 @@ export class PredictiveAnalyticsEngine extends EventEmitter {
     return 2 + (1 - this.config.anomalySensitivity) * 2;
   }
 
-  private calculateAnomalySeverity(zScore: number, threshold: number): AnomalyDetection["severity"] {
+  private calculateAnomalySeverity(
+    zScore: number,
+    threshold: number,
+  ): AnomalyDetection["severity"] {
     const ratio = zScore / threshold;
     if (ratio > 3) return "critical";
     if (ratio > 2) return "high";
@@ -864,23 +950,33 @@ export class PredictiveAnalyticsEngine extends EventEmitter {
     return "low";
   }
 
-  private checkTemporalAnomaly(data: TimeSeriesPoint[], timestamp: Date): boolean {
+  private checkTemporalAnomaly(
+    data: TimeSeriesPoint[],
+    timestamp: Date,
+  ): boolean {
     // Check if anomaly is related to time of day
     const hour = timestamp.getHours();
-    const similarTimeData = data.filter(d => Math.abs(d.timestamp.getHours() - hour) <= 1);
+    const similarTimeData = data.filter(
+      (d) => Math.abs(d.timestamp.getHours() - hour) <= 1,
+    );
     return similarTimeData.length > 0;
   }
 
-  private checkSeasonalAnomaly(data: TimeSeriesPoint[], timestamp: Date): boolean {
+  private checkSeasonalAnomaly(
+    data: TimeSeriesPoint[],
+    timestamp: Date,
+  ): boolean {
     // Check if anomaly is related to seasonal patterns
     const dayOfWeek = timestamp.getDay();
-    const similarDayData = data.filter(d => d.timestamp.getDay() === dayOfWeek);
+    const similarDayData = data.filter(
+      (d) => d.timestamp.getDay() === dayOfWeek,
+    );
     return similarDayData.length > 0;
   }
 
   private checkTrendAnomaly(data: TimeSeriesPoint[], value: number): boolean {
     // Check if anomaly is against the trend
-    const recentValues = data.slice(-10).map(d => d.value);
+    const recentValues = data.slice(-10).map((d) => d.value);
     const trend = this.calculateTrend(recentValues);
     const lastValue = recentValues[recentValues.length - 1];
 
@@ -898,7 +994,8 @@ export class PredictiveAnalyticsEngine extends EventEmitter {
     this.anomalies.forEach((anomalies, otherMetric) => {
       if (otherMetric !== metric) {
         const recentAnomalies = anomalies.filter(
-          a => Math.abs(a.timestamp.getTime() - timestamp.getTime()) <= timeWindow
+          (a) =>
+            Math.abs(a.timestamp.getTime() - timestamp.getTime()) <= timeWindow,
         );
         if (recentAnomalies.length > 0) {
           correlatedMetrics.push(otherMetric);
@@ -909,13 +1006,19 @@ export class PredictiveAnalyticsEngine extends EventEmitter {
     return correlatedMetrics;
   }
 
-  private generateAnomalyRecommendations(metric: string, actual: number, expected: number): string[] {
+  private generateAnomalyRecommendations(
+    metric: string,
+    actual: number,
+    expected: number,
+  ): string[] {
     const recommendations: string[] = [];
     const deviation = Math.abs((actual - expected) / expected);
 
     if (deviation > 0.5) {
       recommendations.push("Investigate system performance immediately");
-      recommendations.push("Check for recent deployments or configuration changes");
+      recommendations.push(
+        "Check for recent deployments or configuration changes",
+      );
     }
 
     if (metric.includes("response_time")) {
@@ -935,19 +1038,29 @@ export class PredictiveAnalyticsEngine extends EventEmitter {
     return recommendations;
   }
 
-  private calculateBusinessImpact(predictions: PredictionResult[]): PerformanceForecast["businessImpact"] {
+  private calculateBusinessImpact(
+    predictions: PredictionResult[],
+  ): PerformanceForecast["businessImpact"] {
     // Simplified business impact calculation
-    const responseTimePred = predictions.find(p => p.metric === "response_time");
-    const errorRatePred = predictions.find(p => p.metric === "error_rate");
+    const responseTimePred = predictions.find(
+      (p) => p.metric === "response_time",
+    );
+    const errorRatePred = predictions.find((p) => p.metric === "error_rate");
 
     const slaCompliance = {
       availability: 99.5 - (errorRatePred?.predictedValue || 0) * 100,
-      performance: Math.max(0, 100 - (responseTimePred?.predictedValue || 0) / 10),
+      performance: Math.max(
+        0,
+        100 - (responseTimePred?.predictedValue || 0) / 10,
+      ),
       overall: 99.0,
     };
 
     const userExperience = {
-      score: Math.min(100, (slaCompliance.availability + slaCompliance.performance) / 2),
+      score: Math.min(
+        100,
+        (slaCompliance.availability + slaCompliance.performance) / 2,
+      ),
       factors: ["Response time trends", "Error rate patterns"],
     };
 
@@ -960,29 +1073,43 @@ export class PredictiveAnalyticsEngine extends EventEmitter {
     return { slaCompliance, userExperience, costImplications };
   }
 
-  private calculateForecastConfidence(predictions: PredictionResult[]): PerformanceForecast["confidence"] {
-    const confidences = predictions.map(p =>
-      1 - Math.abs(p.confidenceInterval.upper - p.confidenceInterval.lower) / (2 * p.predictedValue)
+  private calculateForecastConfidence(
+    predictions: PredictionResult[],
+  ): PerformanceForecast["confidence"] {
+    const confidences = predictions.map(
+      (p) =>
+        1 -
+        Math.abs(p.confidenceInterval.upper - p.confidenceInterval.lower) /
+          (2 * p.predictedValue),
     );
 
     return {
       overall: this.calculateMean(confidences),
-      byMetric: predictions.reduce((acc, p, idx) => {
-        acc[p.metric] = confidences[idx];
-        return acc;
-      }, {} as Record<string, number>),
-      factors: ["Historical data quality", "Model accuracy", "Seasonal patterns"],
+      byMetric: predictions.reduce(
+        (acc, p, idx) => {
+          acc[p.metric] = confidences[idx];
+          return acc;
+        },
+        {} as Record<string, number>,
+      ),
+      factors: [
+        "Historical data quality",
+        "Model accuracy",
+        "Seasonal patterns",
+      ],
     };
   }
 
-  private detectSeasonalPattern(data: TimeSeriesPoint[]): PatternDetection | null {
+  private detectSeasonalPattern(
+    data: TimeSeriesPoint[],
+  ): PatternDetection | null {
     // Simplified seasonal pattern detection
     if (data.length < 168) return null; // Need at least a week of hourly data
 
     const hourlyAverages = new Array(24).fill(0);
     const hourlyCounts = new Array(24).fill(0);
 
-    data.forEach(point => {
+    data.forEach((point) => {
       const hour = point.timestamp.getHours();
       hourlyAverages[hour] += point.value;
       hourlyCounts[hour]++;
@@ -997,7 +1124,11 @@ export class PredictiveAnalyticsEngine extends EventEmitter {
 
     // Calculate variance to determine if pattern exists
     const overallMean = this.calculateMean(hourlyAverages);
-    const variance = hourlyAverages.reduce((sum, avg) => sum + Math.pow(avg - overallMean, 2), 0) / 24;
+    const variance =
+      hourlyAverages.reduce(
+        (sum, avg) => sum + Math.pow(avg - overallMean, 2),
+        0,
+      ) / 24;
     const strength = Math.min(1, variance / (overallMean * overallMean));
 
     if (strength > 0.1) {
@@ -1005,7 +1136,9 @@ export class PredictiveAnalyticsEngine extends EventEmitter {
         id: `seasonal-${Date.now()}`,
         type: "seasonal",
         description: "Daily seasonal pattern detected",
-        metrics: [data[0]?.features ? Object.keys(data[0].features)[0] : "unknown"],
+        metrics: [
+          data[0]?.features ? Object.keys(data[0].features)[0] : "unknown",
+        ],
         strength,
         frequency: "24 hours",
         duration: 24 * 60 * 60 * 1000,
@@ -1023,7 +1156,7 @@ export class PredictiveAnalyticsEngine extends EventEmitter {
 
   private detectTrendPattern(data: TimeSeriesPoint[]): PatternDetection | null {
     // Simplified trend detection
-    const values = data.map(d => d.value);
+    const values = data.map((d) => d.value);
     const trend = this.calculateTrend(values);
     const trendStrength = Math.abs(trend) / this.calculateMean(values);
 
@@ -1032,13 +1165,16 @@ export class PredictiveAnalyticsEngine extends EventEmitter {
         id: `trend-${Date.now()}`,
         type: "trend",
         description: `${trend > 0 ? "Increasing" : "Decreasing"} trend detected`,
-        metrics: [data[0]?.features ? Object.keys(data[0].features)[0] : "unknown"],
+        metrics: [
+          data[0]?.features ? Object.keys(data[0].features)[0] : "unknown",
+        ],
         strength: Math.min(1, trendStrength * 10),
         duration: data.length * 60000, // Assuming minute intervals
         lastOccurrence: new Date(),
         implications: {
           impact: trend > 0 ? "negative" : "positive",
-          recommendation: trend > 0 ? "Investigation required" : "Monitor for sustainability",
+          recommendation:
+            trend > 0 ? "Investigation required" : "Monitor for sustainability",
           actionRequired: trendStrength > 0.05,
         },
       };
@@ -1060,7 +1196,7 @@ export class PredictiveAnalyticsEngine extends EventEmitter {
   private calculateTimeToThreshold(
     resource: string,
     predictions: CapacityPrediction["predictions"],
-    thresholds: CapacityPrediction["thresholds"]
+    thresholds: CapacityPrediction["thresholds"],
   ): CapacityPrediction["timeToThreshold"] {
     const timeToThreshold: CapacityPrediction["timeToThreshold"] = {};
 
@@ -1090,7 +1226,7 @@ export class PredictiveAnalyticsEngine extends EventEmitter {
     resource: string,
     current: number,
     predictions: CapacityPrediction["predictions"],
-    thresholds: CapacityPrediction["thresholds"]
+    thresholds: CapacityPrediction["thresholds"],
   ): CapacityPrediction["scaling"] {
     const maxPrediction = Math.max(...Object.values(predictions));
 
@@ -1128,9 +1264,11 @@ export const predictiveAnalyticsEngine = new PredictiveAnalyticsEngine();
  * Start predictive analytics with configuration
  */
 export async function startPredictiveAnalytics(
-  config?: Partial<PredictiveAnalyticsConfig>
+  config?: Partial<PredictiveAnalyticsConfig>,
 ): Promise<PredictiveAnalyticsEngine> {
-  const engine = config ? new PredictiveAnalyticsEngine(config) : predictiveAnalyticsEngine;
+  const engine = config
+    ? new PredictiveAnalyticsEngine(config)
+    : predictiveAnalyticsEngine;
   await engine.initialize();
   return engine;
 }

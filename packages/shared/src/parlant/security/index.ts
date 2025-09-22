@@ -15,58 +15,58 @@
 // ===========================
 
 // SOC2 Type II Compliance
-export * from './compliance/soc2-compliance-engine';
-export * from './compliance/gdpr-compliance-engine';
-export * from './compliance/hipaa-compliance-engine';
-export * from './compliance/pci-dss-compliance-engine';
+export * from "./compliance/soc2-compliance-engine";
+export * from "./compliance/gdpr-compliance-engine";
+export * from "./compliance/hipaa-compliance-engine";
+export * from "./compliance/pci-dss-compliance-engine";
 
 // ===========================
 // ZERO-TRUST ARCHITECTURE
 // ===========================
 
-export * from './zero-trust/zero-trust-orchestrator';
-export * from './zero-trust/continuous-verification';
-export * from './zero-trust/adaptive-authentication';
+export * from "./zero-trust/zero-trust-orchestrator";
+export * from "./zero-trust/continuous-verification";
+export * from "./zero-trust/adaptive-authentication";
 
 // ===========================
 // IMMUTABLE AUDIT SYSTEM
 // ===========================
 
-export * from './audit/immutable-audit-trail';
-export * from './audit/cryptographic-integrity';
-export * from './audit/blockchain-audit-chain';
+export * from "./audit/immutable-audit-trail";
+export * from "./audit/cryptographic-integrity";
+export * from "./audit/blockchain-audit-chain";
 
 // ===========================
 // ENTERPRISE THREAT DETECTION
 // ===========================
 
-export * from './threat-detection/ml-behavioral-analytics';
-export * from './threat-detection/predictive-threat-modeling';
-export * from './threat-detection/automated-incident-response';
+export * from "./threat-detection/ml-behavioral-analytics";
+export * from "./threat-detection/predictive-threat-modeling";
+export * from "./threat-detection/automated-incident-response";
 
 // ===========================
 // CONVERSATIONAL SECURITY
 // ===========================
 
-export * from './conversational/nlp-security-validator';
-export * from './conversational/context-aware-validation';
-export * from './conversational/prompt-injection-protection';
+export * from "./conversational/nlp-security-validator";
+export * from "./conversational/context-aware-validation";
+export * from "./conversational/prompt-injection-protection";
 
 // ===========================
 // SECURITY OPERATIONS CENTER
 // ===========================
 
-export * from './soc/real-time-dashboard';
-export * from './soc/automated-alerting';
-export * from './soc/incident-orchestration';
+export * from "./soc/real-time-dashboard";
+export * from "./soc/automated-alerting";
+export * from "./soc/incident-orchestration";
 
 // ===========================
 // ENTERPRISE INTEGRATIONS
 // ===========================
 
-export * from './integration/siem-connectors';
-export * from './integration/identity-providers';
-export * from './integration/vulnerability-scanners';
+export * from "./integration/siem-connectors";
+export * from "./integration/identity-providers";
+export * from "./integration/vulnerability-scanners";
 
 // ===========================
 // EXISTING SECURITY CONTEXT PROPAGATION
@@ -309,7 +309,16 @@ export const DEFAULT_PARLANT_SECURITY_CONFIG: ParlantSecurityConfig = {
 
   authenticationBridge: {
     enabled: true,
-    enabledMethods: ["password", "totp", "sms", "email", "push", "hardware_token", "biometric", "sso"],
+    enabledMethods: [
+      "password",
+      "totp",
+      "sms",
+      "email",
+      "push",
+      "hardware_token",
+      "biometric",
+      "sso",
+    ],
     mfaRequirements: {
       low: [],
       moderate: ["totp", "sms"],
@@ -409,11 +418,18 @@ export class ParlantSecurityUtils {
   /**
    * Calculate security score
    */
-  static calculateSecurityScore(factors: Array<{ weight: number; value: number }>): number {
-    const totalWeightedScore = factors.reduce((sum, factor) => sum + (factor.weight * factor.value), 0);
+  static calculateSecurityScore(
+    factors: Array<{ weight: number; value: number }>,
+  ): number {
+    const totalWeightedScore = factors.reduce(
+      (sum, factor) => sum + factor.weight * factor.value,
+      0,
+    );
     const totalWeight = factors.reduce((sum, factor) => sum + factor.weight, 0);
 
-    return totalWeight > 0 ? Math.min(totalWeightedScore / totalWeight, 1.0) : 0;
+    return totalWeight > 0
+      ? Math.min(totalWeightedScore / totalWeight, 1.0)
+      : 0;
   }
 
   /**
@@ -432,9 +448,11 @@ export class ParlantSecurityUtils {
       const sanitized: any = Array.isArray(data) ? [] : {};
 
       for (const [key, value] of Object.entries(data)) {
-        if (key.toLowerCase().includes("password") ||
-            key.toLowerCase().includes("token") ||
-            key.toLowerCase().includes("secret")) {
+        if (
+          key.toLowerCase().includes("password") ||
+          key.toLowerCase().includes("token") ||
+          key.toLowerCase().includes("secret")
+        ) {
           sanitized[key] = "***";
         } else {
           sanitized[key] = ParlantSecurityUtils.sanitizeForLogging(value);
@@ -450,18 +468,29 @@ export class ParlantSecurityUtils {
   /**
    * Validate security configuration
    */
-  static validateSecurityConfig(config: Partial<ParlantSecurityConfig>): string[] {
+  static validateSecurityConfig(
+    config: Partial<ParlantSecurityConfig>,
+  ): string[] {
     const errors: string[] = [];
 
-    if (config.contextManager?.contextTTL && config.contextManager.contextTTL < 60000) {
+    if (
+      config.contextManager?.contextTTL &&
+      config.contextManager.contextTTL < 60000
+    ) {
       errors.push("Context TTL must be at least 60 seconds");
     }
 
-    if (config.tokenPropagation?.accessTokenTTL && config.tokenPropagation.accessTokenTTL < 300) {
+    if (
+      config.tokenPropagation?.accessTokenTTL &&
+      config.tokenPropagation.accessTokenTTL < 300
+    ) {
       errors.push("Access token TTL must be at least 5 minutes");
     }
 
-    if (config.authorizationEngine?.maxPermissionDepth && config.authorizationEngine.maxPermissionDepth > 20) {
+    if (
+      config.authorizationEngine?.maxPermissionDepth &&
+      config.authorizationEngine.maxPermissionDepth > 20
+    ) {
       errors.push("Maximum permission depth should not exceed 20 levels");
     }
 
@@ -521,7 +550,7 @@ export const PARLANT_SECURITY_CONSTANTS = {
 // ENTERPRISE SECURITY FRAMEWORK CONTROLLER
 // ===========================
 
-export { ParlantEnterpriseSecurityController } from './enterprise-security-controller';
+export { ParlantEnterpriseSecurityController } from "./enterprise-security-controller";
 
 // ===========================
 // COMPLIANCE FRAMEWORK INTEGRATION
@@ -532,7 +561,7 @@ export interface EnterpriseComplianceConfig {
   soc2: {
     enabled: boolean;
     trustServiceCriteria: string[];
-    auditFrequency: 'quarterly' | 'annual';
+    auditFrequency: "quarterly" | "annual";
     evidenceRetention: number;
   };
 
@@ -567,35 +596,42 @@ export interface EnterpriseComplianceConfig {
 /**
  * Default Enterprise Compliance Configuration
  */
-export const DEFAULT_ENTERPRISE_COMPLIANCE_CONFIG: EnterpriseComplianceConfig = {
-  soc2: {
-    enabled: true,
-    trustServiceCriteria: ['security', 'availability', 'processing_integrity', 'confidentiality', 'privacy'],
-    auditFrequency: 'annual',
-    evidenceRetention: 31536000000 // 1 year
-  },
-  gdpr: {
-    enabled: true,
-    dataSubjectRights: true,
-    consentManagement: true,
-    dataMinimization: true,
-    rightToBeForgotten: true
-  },
-  hipaa: {
-    enabled: true,
-    administrativeSafeguards: true,
-    physicalSafeguards: true,
-    technicalSafeguards: true,
-    businessAssociateAgreements: true
-  },
-  pciDss: {
-    enabled: true,
-    cardholderDataProtection: true,
-    vulnerabilityManagement: true,
-    strongAccessControls: true,
-    networkSecurity: true
-  }
-};
+export const DEFAULT_ENTERPRISE_COMPLIANCE_CONFIG: EnterpriseComplianceConfig =
+  {
+    soc2: {
+      enabled: true,
+      trustServiceCriteria: [
+        "security",
+        "availability",
+        "processing_integrity",
+        "confidentiality",
+        "privacy",
+      ],
+      auditFrequency: "annual",
+      evidenceRetention: 31536000000, // 1 year
+    },
+    gdpr: {
+      enabled: true,
+      dataSubjectRights: true,
+      consentManagement: true,
+      dataMinimization: true,
+      rightToBeForgotten: true,
+    },
+    hipaa: {
+      enabled: true,
+      administrativeSafeguards: true,
+      physicalSafeguards: true,
+      technicalSafeguards: true,
+      businessAssociateAgreements: true,
+    },
+    pciDss: {
+      enabled: true,
+      cardholderDataProtection: true,
+      vulnerabilityManagement: true,
+      strongAccessControls: true,
+      networkSecurity: true,
+    },
+  };
 
 /**
  * Enterprise Security Framework Metrics
@@ -612,20 +648,32 @@ export interface EnterpriseSecurityMetrics {
 /**
  * Security Framework Status
  */
-export type SecurityFrameworkStatus = 'initializing' | 'active' | 'degraded' | 'maintenance' | 'error';
+export type SecurityFrameworkStatus =
+  | "initializing"
+  | "active"
+  | "degraded"
+  | "maintenance"
+  | "error";
 
 /**
  * Enterprise Security Framework Version and Metadata
  */
-export const PARLANT_ENTERPRISE_SECURITY_VERSION = '2.0.0';
-export const SUPPORTED_COMPLIANCE_STANDARDS = ['SOC2_TYPE_II', 'GDPR', 'HIPAA', 'PCI_DSS', 'ISO_27001', 'NIST_CSF'] as const;
+export const PARLANT_ENTERPRISE_SECURITY_VERSION = "2.0.0";
+export const SUPPORTED_COMPLIANCE_STANDARDS = [
+  "SOC2_TYPE_II",
+  "GDPR",
+  "HIPAA",
+  "PCI_DSS",
+  "ISO_27001",
+  "NIST_CSF",
+] as const;
 export const SECURITY_CAPABILITIES = [
-  'ZERO_TRUST_ARCHITECTURE',
-  'IMMUTABLE_AUDIT_TRAILS',
-  'ML_THREAT_DETECTION',
-  'CONVERSATIONAL_SECURITY',
-  'REAL_TIME_COMPLIANCE',
-  'AUTOMATED_INCIDENT_RESPONSE',
-  'ENTERPRISE_INTEGRATIONS',
-  'CRYPTOGRAPHIC_INTEGRITY'
+  "ZERO_TRUST_ARCHITECTURE",
+  "IMMUTABLE_AUDIT_TRAILS",
+  "ML_THREAT_DETECTION",
+  "CONVERSATIONAL_SECURITY",
+  "REAL_TIME_COMPLIANCE",
+  "AUTOMATED_INCIDENT_RESPONSE",
+  "ENTERPRISE_INTEGRATIONS",
+  "CRYPTOGRAPHIC_INTEGRITY",
 ] as const;

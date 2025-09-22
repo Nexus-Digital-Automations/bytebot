@@ -12,8 +12,8 @@
  * @created 2025-09-20
  */
 
-import { Logger } from '@nestjs/common';
-import { Injectable } from '@nestjs/common';
+import { Logger } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import {
   RollbackConfiguration,
   RollbackStrategy,
@@ -26,10 +26,17 @@ import {
   RollbackNotificationSettings,
   NotificationChannel,
   RecoveryStepType,
-  RollbackCondition
-} from '../core/quality-gate-types';
-import { QualityGateResult, QualityGateStatus, QualityGatePriority } from '../core/quality-gate-types';
-import { WrapperError, ErrorCategory } from '../../function-wrapper/interfaces/wrapper-types';
+  RollbackCondition,
+} from "../core/quality-gate-types";
+import {
+  QualityGateResult,
+  QualityGateStatus,
+  QualityGatePriority,
+} from "../core/quality-gate-types";
+import {
+  WrapperError,
+  ErrorCategory,
+} from "../../function-wrapper/interfaces/wrapper-types";
 
 /**
  * Rollback Execution Context
@@ -76,7 +83,7 @@ export interface RollbackTriggerInfo {
   readonly source: string;
 
   /** Trigger severity */
-  readonly severity: 'low' | 'medium' | 'high' | 'critical';
+  readonly severity: "low" | "medium" | "high" | "critical";
 
   /** Trigger description */
   readonly description: string;
@@ -93,13 +100,13 @@ export interface RollbackTriggerInfo {
  * Types of events that can trigger rollback
  */
 export enum RollbackTriggerType {
-  QUALITY_GATE_FAILURE = 'quality_gate_failure',
-  PERFORMANCE_DEGRADATION = 'performance_degradation',
-  SECURITY_VIOLATION = 'security_violation',
-  ERROR_RATE_SPIKE = 'error_rate_spike',
-  MANUAL_TRIGGER = 'manual_trigger',
-  HEALTH_CHECK_FAILURE = 'health_check_failure',
-  COMPLIANCE_VIOLATION = 'compliance_violation'
+  QUALITY_GATE_FAILURE = "quality_gate_failure",
+  PERFORMANCE_DEGRADATION = "performance_degradation",
+  SECURITY_VIOLATION = "security_violation",
+  ERROR_RATE_SPIKE = "error_rate_spike",
+  MANUAL_TRIGGER = "manual_trigger",
+  HEALTH_CHECK_FAILURE = "health_check_failure",
+  COMPLIANCE_VIOLATION = "compliance_violation",
 }
 
 /**
@@ -107,12 +114,12 @@ export enum RollbackTriggerType {
  * Current state of rollback process
  */
 export enum RollbackState {
-  INITIATED = 'initiated',
-  EVALUATING = 'evaluating',
-  EXECUTING = 'executing',
-  COMPLETED = 'completed',
-  FAILED = 'failed',
-  CANCELLED = 'cancelled'
+  INITIATED = "initiated",
+  EVALUATING = "evaluating",
+  EXECUTING = "executing",
+  COMPLETED = "completed",
+  FAILED = "failed",
+  CANCELLED = "cancelled",
 }
 
 /**
@@ -148,7 +155,7 @@ export interface RollbackExecutionPlan {
  */
 export interface RollbackRiskAssessment {
   /** Overall risk level */
-  readonly riskLevel: 'low' | 'medium' | 'high' | 'critical';
+  readonly riskLevel: "low" | "medium" | "high" | "critical";
 
   /** Identified risks */
   readonly risks: readonly RollbackRisk[];
@@ -175,7 +182,7 @@ export interface RollbackRisk {
   readonly type: RollbackRiskType;
 
   /** Risk severity */
-  readonly severity: 'low' | 'medium' | 'high' | 'critical';
+  readonly severity: "low" | "medium" | "high" | "critical";
 
   /** Risk description */
   readonly description: string;
@@ -184,7 +191,7 @@ export interface RollbackRisk {
   readonly probability: number;
 
   /** Impact level */
-  readonly impact: 'low' | 'medium' | 'high' | 'critical';
+  readonly impact: "low" | "medium" | "high" | "critical";
 
   /** Mitigation actions */
   readonly mitigation: readonly string[];
@@ -195,12 +202,12 @@ export interface RollbackRisk {
  * Types of rollback risks
  */
 export enum RollbackRiskType {
-  DATA_LOSS = 'data_loss',
-  SERVICE_DISRUPTION = 'service_disruption',
-  DEPENDENCY_FAILURE = 'dependency_failure',
-  CONFIGURATION_CORRUPTION = 'configuration_corruption',
-  STATE_INCONSISTENCY = 'state_inconsistency',
-  ROLLBACK_FAILURE = 'rollback_failure'
+  DATA_LOSS = "data_loss",
+  SERVICE_DISRUPTION = "service_disruption",
+  DEPENDENCY_FAILURE = "dependency_failure",
+  CONFIGURATION_CORRUPTION = "configuration_corruption",
+  STATE_INCONSISTENCY = "state_inconsistency",
+  ROLLBACK_FAILURE = "rollback_failure",
 }
 
 /**
@@ -232,12 +239,12 @@ export interface RollbackValidationStep {
  * Types of rollback validation
  */
 export enum RollbackValidationType {
-  HEALTH_CHECK = 'health_check',
-  PERFORMANCE_CHECK = 'performance_check',
-  FUNCTIONAL_TEST = 'functional_test',
-  DATA_INTEGRITY = 'data_integrity',
-  SECURITY_SCAN = 'security_scan',
-  COMPLIANCE_CHECK = 'compliance_check'
+  HEALTH_CHECK = "health_check",
+  PERFORMANCE_CHECK = "performance_check",
+  FUNCTIONAL_TEST = "functional_test",
+  DATA_INTEGRITY = "data_integrity",
+  SECURITY_SCAN = "security_scan",
+  COMPLIANCE_CHECK = "compliance_check",
 }
 
 /**
@@ -286,9 +293,12 @@ export class RollbackEngine {
    * @param config - Rollback configuration
    * @returns True if rollback should be triggered
    */
-  evaluateRollbackTrigger(gateResults: readonly QualityGateResult[], config: RollbackConfiguration): boolean {
+  evaluateRollbackTrigger(
+    gateResults: readonly QualityGateResult[],
+    config: RollbackConfiguration,
+  ): boolean {
     if (!config.enabled) {
-      this.logger.debug('Rollback is disabled');
+      this.logger.debug("Rollback is disabled");
       return false;
     }
 
@@ -311,7 +321,10 @@ export class RollbackEngine {
    * @param config - Rollback configuration
    * @returns Promise resolving to rollback information
    */
-  async executeRollback(context: RollbackExecutionContext, config: RollbackConfiguration): Promise<RollbackInfo> {
+  async executeRollback(
+    context: RollbackExecutionContext,
+    config: RollbackConfiguration,
+  ): Promise<RollbackInfo> {
     const rollbackId = `rollback-${context.sessionId}-${Date.now()}`;
     const startTime = Date.now();
 
@@ -326,13 +339,20 @@ export class RollbackEngine {
 
       // Check if approval is required
       if (riskAssessment.approvalRequired) {
-        this.logger.log('Rollback requires approval - waiting for authorization');
+        this.logger.log(
+          "Rollback requires approval - waiting for authorization",
+        );
         // In a real implementation, this would trigger approval workflow
         // For now, we'll simulate approval
       }
 
       // Execute rollback according to strategy
-      const execution = new RollbackExecution(rollbackId, plan, context, this.logger);
+      const execution = new RollbackExecution(
+        rollbackId,
+        plan,
+        context,
+        this.logger,
+      );
       this.activeRollbacks.set(rollbackId, execution);
 
       const result = await execution.execute();
@@ -347,10 +367,11 @@ export class RollbackEngine {
       this.activeRollbacks.delete(rollbackId);
 
       const executionTime = Date.now() - startTime;
-      this.logger.log(`Rollback completed: ${rollbackId}, Success: ${result.success}, Time: ${executionTime}ms`);
+      this.logger.log(
+        `Rollback completed: ${rollbackId}, Success: ${result.success}, Time: ${executionTime}ms`,
+      );
 
       return result;
-
     } catch (error) {
       this.logger.error(`Rollback execution failed: ${rollbackId}`, error);
 
@@ -362,13 +383,13 @@ export class RollbackEngine {
         success: false,
         proceduresExecuted: [],
         error: {
-          code: 'ROLLBACK_EXECUTION_ERROR',
+          code: "ROLLBACK_EXECUTION_ERROR",
           message: error instanceof Error ? error.message : String(error),
           originalError: error instanceof Error ? error : undefined,
           category: ErrorCategory.SYSTEM_ERROR,
           metadata: { rollbackId, context },
-          stackTrace: error instanceof Error ? error.stack : undefined
-        }
+          stackTrace: error instanceof Error ? error.stack : undefined,
+        },
       };
 
       // Clean up and notify of failure
@@ -443,7 +464,10 @@ export class RollbackEngine {
    * @param gateResults - Quality gate results
    * @returns True if trigger condition is met
    */
-  private evaluateTriggerCondition(trigger: RollbackTrigger, gateResults: readonly QualityGateResult[]): boolean {
+  private evaluateTriggerCondition(
+    trigger: RollbackTrigger,
+    gateResults: readonly QualityGateResult[],
+  ): boolean {
     switch (trigger.condition) {
       case RollbackCondition.CRITICAL_GATE_FAILURE:
         return this.hasCriticalGateFailure(gateResults);
@@ -471,10 +495,14 @@ export class RollbackEngine {
    * @param gateResults - Quality gate results
    * @returns True if critical failures exist
    */
-  private hasCriticalGateFailure(gateResults: readonly QualityGateResult[]): boolean {
-    return gateResults.some(result =>
-      result.status === QualityGateStatus.FAILED &&
-      result.metadata.additionalMetadata?.priority === QualityGatePriority.CRITICAL
+  private hasCriticalGateFailure(
+    gateResults: readonly QualityGateResult[],
+  ): boolean {
+    return gateResults.some(
+      (result) =>
+        result.status === QualityGateStatus.FAILED &&
+        result.metadata.additionalMetadata?.priority ===
+          QualityGatePriority.CRITICAL,
     );
   }
 
@@ -484,7 +512,10 @@ export class RollbackEngine {
    * @param threshold - Error rate threshold
    * @returns True if threshold exceeded
    */
-  private checkErrorRateThreshold(gateResults: readonly QualityGateResult[], threshold: number): boolean {
+  private checkErrorRateThreshold(
+    gateResults: readonly QualityGateResult[],
+    threshold: number,
+  ): boolean {
     for (const result of gateResults) {
       const errorRate = result.metrics.performance?.errorRate || 0;
       if (errorRate > threshold) {
@@ -500,7 +531,10 @@ export class RollbackEngine {
    * @param threshold - Response time threshold
    * @returns True if threshold exceeded
    */
-  private checkResponseTimeThreshold(gateResults: readonly QualityGateResult[], threshold: number): boolean {
+  private checkResponseTimeThreshold(
+    gateResults: readonly QualityGateResult[],
+    threshold: number,
+  ): boolean {
     for (const result of gateResults) {
       const responseTime = result.metrics.performance?.responseTime || 0;
       if (responseTime > threshold) {
@@ -515,10 +549,13 @@ export class RollbackEngine {
    * @param gateResults - Quality gate results
    * @returns True if security violations exist
    */
-  private hasSecurityViolation(gateResults: readonly QualityGateResult[]): boolean {
-    return gateResults.some(result =>
-      result.status === QualityGateStatus.FAILED &&
-      result.gateId.includes('security')
+  private hasSecurityViolation(
+    gateResults: readonly QualityGateResult[],
+  ): boolean {
+    return gateResults.some(
+      (result) =>
+        result.status === QualityGateStatus.FAILED &&
+        result.gateId.includes("security"),
     );
   }
 
@@ -527,10 +564,13 @@ export class RollbackEngine {
    * @param gateResults - Quality gate results
    * @returns True if health check failures exist
    */
-  private hasHealthCheckFailure(gateResults: readonly QualityGateResult[]): boolean {
-    return gateResults.some(result =>
-      result.status === QualityGateStatus.FAILED &&
-      result.gateId.includes('health')
+  private hasHealthCheckFailure(
+    gateResults: readonly QualityGateResult[],
+  ): boolean {
+    return gateResults.some(
+      (result) =>
+        result.status === QualityGateStatus.FAILED &&
+        result.gateId.includes("health"),
     );
   }
 
@@ -540,20 +580,29 @@ export class RollbackEngine {
    * @param config - Rollback configuration
    * @returns Rollback execution plan
    */
-  private async createRollbackPlan(context: RollbackExecutionContext, config: RollbackConfiguration): Promise<RollbackExecutionPlan> {
+  private async createRollbackPlan(
+    context: RollbackExecutionContext,
+    config: RollbackConfiguration,
+  ): Promise<RollbackExecutionPlan> {
     const planId = `plan-${context.sessionId}-${Date.now()}`;
 
     // Select procedures based on trigger and strategy
     const procedures = this.selectRecoveryProcedures(context, config);
 
     // Determine execution order
-    const executionOrder = this.determineExecutionOrder(procedures, config.strategy);
+    const executionOrder = this.determineExecutionOrder(
+      procedures,
+      config.strategy,
+    );
 
     // Estimate execution time
     const estimatedTime = this.estimateExecutionTime(procedures);
 
     // Assess risks
-    const riskAssessment = await this.assessRollbackRisks({ procedures } as any, context);
+    const riskAssessment = await this.assessRollbackRisks(
+      { procedures } as any,
+      context,
+    );
 
     // Create validation steps
     const validationSteps = this.createValidationSteps(config.strategy);
@@ -565,7 +614,7 @@ export class RollbackEngine {
       executionOrder,
       estimatedTime,
       riskAssessment,
-      validationSteps
+      validationSteps,
     };
   }
 
@@ -575,7 +624,10 @@ export class RollbackEngine {
    * @param config - Rollback configuration
    * @returns Array of recovery procedures
    */
-  private selectRecoveryProcedures(context: RollbackExecutionContext, config: RollbackConfiguration): RecoveryProcedure[] {
+  private selectRecoveryProcedures(
+    context: RollbackExecutionContext,
+    config: RollbackConfiguration,
+  ): RecoveryProcedure[] {
     // In a real implementation, this would select procedures based on:
     // - Failed gate types
     // - Environment
@@ -591,14 +643,17 @@ export class RollbackEngine {
    * @param strategy - Rollback strategy
    * @returns Execution order
    */
-  private determineExecutionOrder(procedures: readonly RecoveryProcedure[], strategy: RollbackStrategy): string[] {
+  private determineExecutionOrder(
+    procedures: readonly RecoveryProcedure[],
+    strategy: RollbackStrategy,
+  ): string[] {
     // Sort procedures by dependencies and strategy requirements
     const sorted = [...procedures].sort((a, b) => {
       // Priority-based sorting for now
       return a.id.localeCompare(b.id);
     });
 
-    return sorted.map(p => p.id);
+    return sorted.map((p) => p.id);
   }
 
   /**
@@ -606,8 +661,13 @@ export class RollbackEngine {
    * @param procedures - Recovery procedures
    * @returns Estimated time in milliseconds
    */
-  private estimateExecutionTime(procedures: readonly RecoveryProcedure[]): number {
-    return procedures.reduce((total, procedure) => total + procedure.timeout, 0);
+  private estimateExecutionTime(
+    procedures: readonly RecoveryProcedure[],
+  ): number {
+    return procedures.reduce(
+      (total, procedure) => total + procedure.timeout,
+      0,
+    );
   }
 
   /**
@@ -616,43 +676,46 @@ export class RollbackEngine {
    * @param context - Rollback context
    * @returns Risk assessment
    */
-  private async assessRollbackRisks(plan: Partial<RollbackExecutionPlan>, context: RollbackExecutionContext): Promise<RollbackRiskAssessment> {
+  private async assessRollbackRisks(
+    plan: Partial<RollbackExecutionPlan>,
+    context: RollbackExecutionContext,
+  ): Promise<RollbackRiskAssessment> {
     const risks: RollbackRisk[] = [];
 
     // Assess data loss risk
-    if (context.environment === 'production') {
+    if (context.environment === "production") {
       risks.push({
-        id: 'data-loss-risk',
+        id: "data-loss-risk",
         type: RollbackRiskType.DATA_LOSS,
-        severity: 'high',
-        description: 'Production rollback may result in data loss',
+        severity: "high",
+        description: "Production rollback may result in data loss",
         probability: 30,
-        impact: 'high',
-        mitigation: ['Create data backup', 'Validate rollback scope']
+        impact: "high",
+        mitigation: ["Create data backup", "Validate rollback scope"],
       });
     }
 
     // Assess service disruption risk
     risks.push({
-      id: 'service-disruption-risk',
+      id: "service-disruption-risk",
       type: RollbackRiskType.SERVICE_DISRUPTION,
-      severity: 'medium',
-      description: 'Rollback may cause temporary service disruption',
+      severity: "medium",
+      description: "Rollback may cause temporary service disruption",
       probability: 70,
-      impact: 'medium',
-      mitigation: ['Use gradual rollback', 'Implement circuit breakers']
+      impact: "medium",
+      mitigation: ["Use gradual rollback", "Implement circuit breakers"],
     });
 
     const riskLevel = this.calculateOverallRiskLevel(risks);
-    const approvalRequired = riskLevel === 'critical' || riskLevel === 'high';
+    const approvalRequired = riskLevel === "critical" || riskLevel === "high";
     const maxDowntime = this.estimateMaxDowntime(plan.procedures || []);
 
     return {
       riskLevel,
       risks,
-      mitigations: risks.flatMap(r => r.mitigation),
+      mitigations: risks.flatMap((r) => r.mitigation),
       approvalRequired,
-      maxDowntime
+      maxDowntime,
     };
   }
 
@@ -661,14 +724,16 @@ export class RollbackEngine {
    * @param risks - Array of risks
    * @returns Overall risk level
    */
-  private calculateOverallRiskLevel(risks: readonly RollbackRisk[]): 'low' | 'medium' | 'high' | 'critical' {
-    const criticalRisks = risks.filter(r => r.severity === 'critical').length;
-    const highRisks = risks.filter(r => r.severity === 'high').length;
+  private calculateOverallRiskLevel(
+    risks: readonly RollbackRisk[],
+  ): "low" | "medium" | "high" | "critical" {
+    const criticalRisks = risks.filter((r) => r.severity === "critical").length;
+    const highRisks = risks.filter((r) => r.severity === "high").length;
 
-    if (criticalRisks > 0) return 'critical';
-    if (highRisks > 1) return 'high';
-    if (highRisks > 0) return 'medium';
-    return 'low';
+    if (criticalRisks > 0) return "critical";
+    if (highRisks > 1) return "high";
+    if (highRisks > 0) return "medium";
+    return "low";
   }
 
   /**
@@ -676,9 +741,14 @@ export class RollbackEngine {
    * @param procedures - Recovery procedures
    * @returns Estimated downtime in milliseconds
    */
-  private estimateMaxDowntime(procedures: readonly RecoveryProcedure[]): number {
+  private estimateMaxDowntime(
+    procedures: readonly RecoveryProcedure[],
+  ): number {
     // Conservative estimate: sum of all procedure timeouts
-    return procedures.reduce((total, procedure) => total + procedure.timeout, 0);
+    return procedures.reduce(
+      (total, procedure) => total + procedure.timeout,
+      0,
+    );
   }
 
   /**
@@ -686,37 +756,39 @@ export class RollbackEngine {
    * @param strategy - Rollback strategy
    * @returns Array of validation steps
    */
-  private createValidationSteps(strategy: RollbackStrategy): RollbackValidationStep[] {
+  private createValidationSteps(
+    strategy: RollbackStrategy,
+  ): RollbackValidationStep[] {
     const steps: RollbackValidationStep[] = [];
 
     // Common validation steps
     steps.push({
-      id: 'health-check',
-      name: 'System Health Check',
+      id: "health-check",
+      name: "System Health Check",
       type: RollbackValidationType.HEALTH_CHECK,
       criteria: { responseTime: 1000, errorRate: 1 },
       required: true,
-      timeout: 30000
+      timeout: 30000,
     });
 
     steps.push({
-      id: 'performance-check',
-      name: 'Performance Validation',
+      id: "performance-check",
+      name: "Performance Validation",
       type: RollbackValidationType.PERFORMANCE_CHECK,
       criteria: { avgResponseTime: 500, maxErrorRate: 0.5 },
       required: true,
-      timeout: 60000
+      timeout: 60000,
     });
 
     // Strategy-specific validation
     if (strategy === RollbackStrategy.BLUE_GREEN) {
       steps.push({
-        id: 'traffic-validation',
-        name: 'Traffic Routing Validation',
+        id: "traffic-validation",
+        name: "Traffic Routing Validation",
         type: RollbackValidationType.FUNCTIONAL_TEST,
-        criteria: { trafficRouting: 'correct' },
+        criteria: { trafficRouting: "correct" },
         required: true,
-        timeout: 30000
+        timeout: 30000,
       });
     }
 
@@ -728,7 +800,10 @@ export class RollbackEngine {
    * @param rollbackInfo - Rollback information
    * @param notificationSettings - Notification settings
    */
-  private async sendRollbackNotifications(rollbackInfo: RollbackInfo, notificationSettings: RollbackNotificationSettings): Promise<void> {
+  private async sendRollbackNotifications(
+    rollbackInfo: RollbackInfo,
+    notificationSettings: RollbackNotificationSettings,
+  ): Promise<void> {
     if (!notificationSettings.enabled) {
       return;
     }
@@ -750,14 +825,16 @@ export class RollbackEngine {
    * @returns Notification message
    */
   private createNotificationMessage(rollbackInfo: RollbackInfo): string {
-    const status = rollbackInfo.success ? 'COMPLETED' : 'FAILED';
+    const status = rollbackInfo.success ? "COMPLETED" : "FAILED";
     const duration = rollbackInfo.executionTime;
 
-    return `Rollback ${status}: ${rollbackInfo.rollbackId}\n` +
-           `Strategy: ${rollbackInfo.strategy}\n` +
-           `Duration: ${duration}ms\n` +
-           `Procedures: ${rollbackInfo.proceduresExecuted.length}\n` +
-           `Trigger: ${rollbackInfo.trigger.condition}`;
+    return (
+      `Rollback ${status}: ${rollbackInfo.rollbackId}\n` +
+      `Strategy: ${rollbackInfo.strategy}\n` +
+      `Duration: ${duration}ms\n` +
+      `Procedures: ${rollbackInfo.proceduresExecuted.length}\n` +
+      `Trigger: ${rollbackInfo.trigger.condition}`
+    );
   }
 
   /**
@@ -766,7 +843,11 @@ export class RollbackEngine {
    * @param message - Message to send
    * @param settings - Notification settings
    */
-  private async sendNotification(channel: NotificationChannel, message: string, settings: RollbackNotificationSettings): Promise<void> {
+  private async sendNotification(
+    channel: NotificationChannel,
+    message: string,
+    settings: RollbackNotificationSettings,
+  ): Promise<void> {
     switch (channel) {
       case NotificationChannel.EMAIL:
         this.logger.log(`EMAIL notification: ${message}`);
@@ -803,7 +884,10 @@ export class RollbackEngine {
    * @param functionId - Function ID
    * @param rollbackInfo - Rollback information
    */
-  private storeRollbackHistory(functionId: string, rollbackInfo: RollbackInfo): void {
+  private storeRollbackHistory(
+    functionId: string,
+    rollbackInfo: RollbackInfo,
+  ): void {
     const history = this.rollbackHistory.get(functionId) || [];
     history.push(rollbackInfo);
 
@@ -820,13 +904,15 @@ export class RollbackEngine {
    * @param context - Rollback context
    * @returns Rollback trigger
    */
-  private createTriggerFromContext(context: RollbackExecutionContext): RollbackTrigger {
+  private createTriggerFromContext(
+    context: RollbackExecutionContext,
+  ): RollbackTrigger {
     return {
       id: context.trigger.type,
       condition: RollbackCondition.CRITICAL_GATE_FAILURE,
       threshold: 0,
       evaluationWindow: 60000,
-      enabled: true
+      enabled: true,
     };
   }
 }
@@ -837,7 +923,7 @@ export class RollbackEngine {
  */
 class RollbackExecution {
   private state: RollbackState = RollbackState.INITIATED;
-  private currentStep = '';
+  private currentStep = "";
   private stepsCompleted = 0;
   private totalSteps = 0;
   private startTime = Date.now();
@@ -847,9 +933,12 @@ class RollbackExecution {
     private readonly rollbackId: string,
     private readonly plan: RollbackExecutionPlan,
     private readonly context: RollbackExecutionContext,
-    private readonly logger: Logger
+    private readonly logger: Logger,
   ) {
-    this.totalSteps = plan.procedures.reduce((total, proc) => total + proc.steps.length, 0);
+    this.totalSteps = plan.procedures.reduce(
+      (total, proc) => total + proc.steps.length,
+      0,
+    );
   }
 
   /**
@@ -870,7 +959,9 @@ class RollbackExecution {
           break;
         }
 
-        const procedure = this.plan.procedures.find(p => p.id === procedureId);
+        const procedure = this.plan.procedures.find(
+          (p) => p.id === procedureId,
+        );
         if (!procedure) {
           this.logger.error(`Procedure not found: ${procedureId}`);
           continue;
@@ -889,7 +980,9 @@ class RollbackExecution {
       // Validate rollback success
       const validationSuccess = await this.validateRollback();
 
-      this.state = validationSuccess ? RollbackState.COMPLETED : RollbackState.FAILED;
+      this.state = validationSuccess
+        ? RollbackState.COMPLETED
+        : RollbackState.FAILED;
       const success = this.state === RollbackState.COMPLETED;
 
       const rollbackInfo: RollbackInfo = {
@@ -898,12 +991,13 @@ class RollbackExecution {
         strategy: this.plan.strategy,
         executionTime: Date.now() - this.startTime,
         success,
-        proceduresExecuted: procedureResults
+        proceduresExecuted: procedureResults,
       };
 
-      this.logger.log(`Rollback execution completed: ${this.rollbackId}, Success: ${success}`);
+      this.logger.log(
+        `Rollback execution completed: ${this.rollbackId}, Success: ${success}`,
+      );
       return rollbackInfo;
-
     } catch (error) {
       this.logger.error(`Rollback execution failed: ${this.rollbackId}`, error);
       this.state = RollbackState.FAILED;
@@ -916,13 +1010,13 @@ class RollbackExecution {
         success: false,
         proceduresExecuted: procedureResults,
         error: {
-          code: 'ROLLBACK_EXECUTION_ERROR',
+          code: "ROLLBACK_EXECUTION_ERROR",
           message: error instanceof Error ? error.message : String(error),
           originalError: error instanceof Error ? error : undefined,
           category: ErrorCategory.SYSTEM_ERROR,
           metadata: { rollbackId: this.rollbackId },
-          stackTrace: error instanceof Error ? error.stack : undefined
-        }
+          stackTrace: error instanceof Error ? error.stack : undefined,
+        },
       };
     }
   }
@@ -943,9 +1037,12 @@ class RollbackExecution {
    */
   getProgress(): RollbackProgressTracker {
     const elapsedTime = Date.now() - this.startTime;
-    const progressPercentage = this.totalSteps > 0 ? (this.stepsCompleted / this.totalSteps) * 100 : 0;
-    const estimatedRemainingTime = progressPercentage > 0 ?
-      (elapsedTime / progressPercentage) * (100 - progressPercentage) : 0;
+    const progressPercentage =
+      this.totalSteps > 0 ? (this.stepsCompleted / this.totalSteps) * 100 : 0;
+    const estimatedRemainingTime =
+      progressPercentage > 0
+        ? (elapsedTime / progressPercentage) * (100 - progressPercentage)
+        : 0;
 
     return {
       state: this.state,
@@ -955,7 +1052,7 @@ class RollbackExecution {
       progressPercentage,
       elapsedTime,
       estimatedRemainingTime,
-      lastUpdate: new Date()
+      lastUpdate: new Date(),
     };
   }
 
@@ -964,7 +1061,9 @@ class RollbackExecution {
    * @param procedure - Recovery procedure to execute
    * @returns Recovery procedure result
    */
-  private async executeProcedure(procedure: RecoveryProcedure): Promise<RecoveryProcedureResult> {
+  private async executeProcedure(
+    procedure: RecoveryProcedure,
+  ): Promise<RecoveryProcedureResult> {
     const startTime = Date.now();
     this.logger.log(`Executing recovery procedure: ${procedure.name}`);
 
@@ -984,15 +1083,16 @@ class RollbackExecution {
       }
 
       const executionTime = Date.now() - startTime;
-      const success = stepResults.every(r => r.success || !r.step?.continueOnFailure);
+      const success = stepResults.every(
+        (r) => r.success || !r.step?.continueOnFailure,
+      );
 
       return {
         procedureId: procedure.id,
         success,
         executionTime,
-        stepResults
+        stepResults,
       };
-
     } catch (error) {
       return {
         procedureId: procedure.id,
@@ -1000,13 +1100,13 @@ class RollbackExecution {
         executionTime: Date.now() - startTime,
         stepResults,
         error: {
-          code: 'PROCEDURE_EXECUTION_ERROR',
+          code: "PROCEDURE_EXECUTION_ERROR",
           message: error instanceof Error ? error.message : String(error),
           originalError: error instanceof Error ? error : undefined,
           category: ErrorCategory.SYSTEM_ERROR,
           metadata: { procedureId: procedure.id },
-          stackTrace: error instanceof Error ? error.stack : undefined
-        }
+          stackTrace: error instanceof Error ? error.stack : undefined,
+        },
       };
     }
   }
@@ -1016,7 +1116,9 @@ class RollbackExecution {
    * @param step - Recovery step to execute
    * @returns Recovery step result
    */
-  private async executeRecoveryStep(step: RecoveryStep): Promise<RecoveryStepResult> {
+  private async executeRecoveryStep(
+    step: RecoveryStep,
+  ): Promise<RecoveryStepResult> {
     const startTime = Date.now();
     this.logger.debug(`Executing recovery step: ${step.name}`);
 
@@ -1028,9 +1130,8 @@ class RollbackExecution {
         stepId: step.id,
         success: true,
         executionTime: Date.now() - startTime,
-        output
+        output,
       };
-
     } catch (error) {
       this.logger.error(`Recovery step failed: ${step.name}`, error);
 
@@ -1040,13 +1141,13 @@ class RollbackExecution {
         executionTime: Date.now() - startTime,
         output: {},
         error: {
-          code: 'STEP_EXECUTION_ERROR',
+          code: "STEP_EXECUTION_ERROR",
           message: error instanceof Error ? error.message : String(error),
           originalError: error instanceof Error ? error : undefined,
           category: ErrorCategory.SYSTEM_ERROR,
           metadata: { stepId: step.id },
-          stackTrace: error instanceof Error ? error.stack : undefined
-        }
+          stackTrace: error instanceof Error ? error.stack : undefined,
+        },
       };
     }
   }
@@ -1056,7 +1157,9 @@ class RollbackExecution {
    * @param step - Recovery step
    * @returns Step output
    */
-  private async executeStepByType(step: RecoveryStep): Promise<Record<string, any>> {
+  private async executeStepByType(
+    step: RecoveryStep,
+  ): Promise<Record<string, any>> {
     switch (step.type) {
       case RecoveryStepType.SCRIPT:
         return this.executeScript(step);
@@ -1086,10 +1189,12 @@ class RollbackExecution {
    * @param step - Recovery step
    * @returns Step output
    */
-  private async executeScript(step: RecoveryStep): Promise<Record<string, any>> {
+  private async executeScript(
+    step: RecoveryStep,
+  ): Promise<Record<string, any>> {
     this.logger.debug(`Executing script: ${step.config.script}`);
     // Mock implementation
-    return { exitCode: 0, output: 'Script executed successfully' };
+    return { exitCode: 0, output: "Script executed successfully" };
   }
 
   /**
@@ -1097,10 +1202,12 @@ class RollbackExecution {
    * @param step - Recovery step
    * @returns Step output
    */
-  private async executeApiCall(step: RecoveryStep): Promise<Record<string, any>> {
+  private async executeApiCall(
+    step: RecoveryStep,
+  ): Promise<Record<string, any>> {
     this.logger.debug(`Making API call to: ${step.config.url}`);
     // Mock implementation
-    return { statusCode: 200, response: 'API call successful' };
+    return { statusCode: 200, response: "API call successful" };
   }
 
   /**
@@ -1108,10 +1215,12 @@ class RollbackExecution {
    * @param step - Recovery step
    * @returns Step output
    */
-  private async executeDatabaseOperation(step: RecoveryStep): Promise<Record<string, any>> {
+  private async executeDatabaseOperation(
+    step: RecoveryStep,
+  ): Promise<Record<string, any>> {
     this.logger.debug(`Executing database operation: ${step.config.operation}`);
     // Mock implementation
-    return { rowsAffected: 1, status: 'success' };
+    return { rowsAffected: 1, status: "success" };
   }
 
   /**
@@ -1119,10 +1228,12 @@ class RollbackExecution {
    * @param step - Recovery step
    * @returns Step output
    */
-  private async restartService(step: RecoveryStep): Promise<Record<string, any>> {
+  private async restartService(
+    step: RecoveryStep,
+  ): Promise<Record<string, any>> {
     this.logger.debug(`Restarting service: ${step.config.service}`);
     // Mock implementation
-    return { status: 'restarted', uptime: Date.now() };
+    return { status: "restarted", uptime: Date.now() };
   }
 
   /**
@@ -1130,7 +1241,9 @@ class RollbackExecution {
    * @param step - Recovery step
    * @returns Step output
    */
-  private async updateConfiguration(step: RecoveryStep): Promise<Record<string, any>> {
+  private async updateConfiguration(
+    step: RecoveryStep,
+  ): Promise<Record<string, any>> {
     this.logger.debug(`Updating configuration: ${step.config.configFile}`);
     // Mock implementation
     return { updated: true, changes: step.config.changes };
@@ -1141,10 +1254,12 @@ class RollbackExecution {
    * @param step - Recovery step
    * @returns Step output
    */
-  private async executeCustomAction(step: RecoveryStep): Promise<Record<string, any>> {
+  private async executeCustomAction(
+    step: RecoveryStep,
+  ): Promise<Record<string, any>> {
     this.logger.debug(`Executing custom action: ${step.config.action}`);
     // Mock implementation
-    return { result: 'custom action completed' };
+    return { result: "custom action completed" };
   }
 
   /**
@@ -1152,7 +1267,7 @@ class RollbackExecution {
    * @returns Promise resolving to true if validation passes
    */
   private async validateRollback(): Promise<boolean> {
-    this.logger.log('Validating rollback success');
+    this.logger.log("Validating rollback success");
 
     for (const validationStep of this.plan.validationSteps) {
       if (this.cancelled) return false;
@@ -1160,11 +1275,16 @@ class RollbackExecution {
       try {
         const isValid = await this.executeValidationStep(validationStep);
         if (!isValid && validationStep.required) {
-          this.logger.error(`Required validation failed: ${validationStep.name}`);
+          this.logger.error(
+            `Required validation failed: ${validationStep.name}`,
+          );
           return false;
         }
       } catch (error) {
-        this.logger.error(`Validation step error: ${validationStep.name}`, error);
+        this.logger.error(
+          `Validation step error: ${validationStep.name}`,
+          error,
+        );
         if (validationStep.required) {
           return false;
         }
@@ -1179,7 +1299,9 @@ class RollbackExecution {
    * @param step - Validation step
    * @returns Promise resolving to true if validation passes
    */
-  private async executeValidationStep(step: RollbackValidationStep): Promise<boolean> {
+  private async executeValidationStep(
+    step: RollbackValidationStep,
+  ): Promise<boolean> {
     this.logger.debug(`Executing validation: ${step.name}`);
 
     // Mock validation implementation
@@ -1208,7 +1330,7 @@ class RollbackExecution {
       condition: RollbackCondition.CRITICAL_GATE_FAILURE,
       threshold: 0,
       evaluationWindow: 60000,
-      enabled: true
+      enabled: true,
     };
   }
 }

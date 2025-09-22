@@ -770,10 +770,7 @@ export class ParlantContextCorrelationService
   /**
    * Complete correlation
    */
-  completeCorrelation(
-    correlationId: string,
-    success = true,
-  ): void {
+  completeCorrelation(correlationId: string, success = true): void {
     try {
       const correlation = this.correlationRecords.get(correlationId);
       if (!correlation) {
@@ -827,9 +824,7 @@ export class ParlantContextCorrelationService
   /**
    * Query correlations
    */
-  queryCorrelations(
-    query: CorrelationQuery,
-  ): ContextCorrelationRecord[] {
+  queryCorrelations(query: CorrelationQuery): ContextCorrelationRecord[] {
     try {
       let results: ContextCorrelationRecord[] = [];
 
@@ -1058,9 +1053,7 @@ export class ParlantContextCorrelationService
     return trends;
   }
 
-  private generateServiceInteractionPatterns():
-    ServiceInteractionPattern[]
-   {
+  private generateServiceInteractionPatterns(): ServiceInteractionPattern[] {
     const patterns = new Map<string, ServiceInteractionPattern>();
 
     for (const [
@@ -1238,9 +1231,7 @@ export class ParlantContextCorrelationService
     this.logger.debug("💾 Saving correlation analytics...");
   }
 
-  private archiveCorrelation(
-    correlation: ContextCorrelationRecord,
-  ): void {
+  private archiveCorrelation(correlation: ContextCorrelationRecord): void {
     // Archive correlation for compliance
     this.logger.debug(`📦 Archiving correlation: ${correlation.correlationId}`);
   }

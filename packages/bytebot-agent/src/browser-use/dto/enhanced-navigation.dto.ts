@@ -41,22 +41,22 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
  * Navigation wait strategies for different scenarios
  */
 export enum NavigationWaitStrategy {
-  LOAD = 'load',                          // Wait for page load event
+  LOAD = 'load', // Wait for page load event
   DOM_CONTENT_LOADED = 'domcontentloaded', // Wait for DOM ready
-  NETWORK_IDLE_0 = 'networkidle0',        // No requests for 500ms
-  NETWORK_IDLE_2 = 'networkidle2',        // Max 2 requests for 500ms
+  NETWORK_IDLE_0 = 'networkidle0', // No requests for 500ms
+  NETWORK_IDLE_2 = 'networkidle2', // Max 2 requests for 500ms
   FIRST_MEANINGFUL_PAINT = 'firstmeaningfulpaint', // Performance metric
   LARGEST_CONTENTFUL_PAINT = 'largestcontentfulpaint', // Performance metric
-  CUSTOM_SELECTOR = 'customselector',      // Wait for specific element
-  JAVASCRIPT_READY = 'javascriptready',    // Wait for JS execution
+  CUSTOM_SELECTOR = 'customselector', // Wait for specific element
+  JAVASCRIPT_READY = 'javascriptready', // Wait for JS execution
 }
 
 /**
  * URL validation severity levels
  */
 export enum URLValidationSeverity {
-  STRICT = 'strict',      // Block any suspicious URLs
-  MODERATE = 'moderate',  // Warn but allow with logging
+  STRICT = 'strict', // Block any suspicious URLs
+  MODERATE = 'moderate', // Warn but allow with logging
   PERMISSIVE = 'permissive', // Log only, minimal blocking
 }
 
@@ -64,7 +64,7 @@ export enum URLValidationSeverity {
  * Navigation timeout strategies
  */
 export enum TimeoutStrategy {
-  FAIL_FAST = 'fail_fast',        // Fail immediately on timeout
+  FAIL_FAST = 'fail_fast', // Fail immediately on timeout
   RETRY_WITH_BACKOFF = 'retry_with_backoff', // Retry with exponential backoff
   GRACEFUL_DEGRADATION = 'graceful_degradation', // Continue with partial load
   CUSTOM_HANDLER = 'custom_handler', // Use custom timeout handling
@@ -81,7 +81,23 @@ export class PerformanceOptimization {
   })
   @IsOptional()
   @IsArray()
-  @IsEnum(['document', 'stylesheet', 'image', 'media', 'font', 'script', 'texttrack', 'xhr', 'fetch', 'websocket', 'manifest', 'other'], { each: true })
+  @IsEnum(
+    [
+      'document',
+      'stylesheet',
+      'image',
+      'media',
+      'font',
+      'script',
+      'texttrack',
+      'xhr',
+      'fetch',
+      'websocket',
+      'manifest',
+      'other',
+    ],
+    { each: true },
+  )
   blockResourceTypes?: string[];
 
   @ApiPropertyOptional({
@@ -145,7 +161,10 @@ export class URLSecurityValidation {
 
   @ApiPropertyOptional({
     description: 'Allowed domain patterns (supports wildcards and regex)',
-    example: ['*.trusted-domain.com', '/^https:\\/\\/api\\.(dev|staging|prod)\\.company\\.com/'],
+    example: [
+      '*.trusted-domain.com',
+      '/^https:\\/\\/api\\.(dev|staging|prod)\\.company\\.com/',
+    ],
     type: [String],
   })
   @IsOptional()
@@ -211,7 +230,10 @@ export class URLSecurityValidation {
 
   @ApiPropertyOptional({
     description: 'Custom security rules (JavaScript expressions)',
-    example: ['url.includes("admin") && !user.isAdmin', 'url.protocol !== "https"'],
+    example: [
+      'url.includes("admin") && !user.isAdmin',
+      'url.protocol !== "https"',
+    ],
     type: [String],
   })
   @IsOptional()
@@ -299,17 +321,20 @@ export class NavigationDto {
     description: 'Target URL with comprehensive validation',
     example: 'https://api.trusted-domain.com/data',
   })
-  @IsUrl({
-    protocols: ['http', 'https'],
-    require_protocol: true,
-    require_host: true,
-    require_valid_protocol: true,
-  }, { message: 'Invalid URL format - must be a valid HTTP/HTTPS URL' })
+  @IsUrl(
+    {
+      protocols: ['http', 'https'],
+      require_protocol: true,
+      require_host: true,
+      require_valid_protocol: true,
+    },
+    { message: 'Invalid URL format - must be a valid HTTP/HTTPS URL' },
+  )
   @MaxLength(4096, { message: 'URL exceeds maximum length of 4096 characters' })
   @Matches(/^https?:\/\/[^\s<>"{}|\\^`\[\]]+$/, {
-    message: 'URL contains invalid characters'
+    message: 'URL contains invalid characters',
   })
-  @Transform(({ value }) => typeof value === 'string' ? value.trim() : value)
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   url!: string;
 
   @ApiPropertyOptional({
@@ -352,7 +377,7 @@ export class NavigationDto {
   @MinLength(1, { message: 'CSS selector cannot be empty' })
   @MaxLength(1000, { message: 'CSS selector too long' })
   @Matches(/^[a-zA-Z0-9\s\-_#.,:[\]()>"'=*+~^$|\\]+$/, {
-    message: 'Invalid CSS selector format'
+    message: 'Invalid CSS selector format',
   })
   waitForSelector?: string;
 

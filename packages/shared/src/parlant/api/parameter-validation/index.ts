@@ -15,10 +15,10 @@
 
 // ===== CORE SERVICES =====
 
-export { ParameterValidationService } from './parameter-validation.service';
-export { NaturalLanguageParameterInterface } from './natural-language-interface.service';
-export { AdvancedValidationFramework } from './advanced-validation-framework.service';
-export { SecurityIntegrationService } from './security-integration.service';
+export { ParameterValidationService } from "./parameter-validation.service";
+export { NaturalLanguageParameterInterface } from "./natural-language-interface.service";
+export { AdvancedValidationFramework } from "./advanced-validation-framework.service";
+export { SecurityIntegrationService } from "./security-integration.service";
 
 // ===== TYPE EXPORTS =====
 
@@ -50,8 +50,8 @@ export type {
   SanitizationAction,
   ValidationWarning,
   TypeConversion,
-  AuditRequirement
-} from './parameter-validation.service';
+  AuditRequirement,
+} from "./parameter-validation.service";
 
 // Natural Language Interface Types
 export type {
@@ -71,8 +71,8 @@ export type {
   NaturalLanguageParseResponse,
   ParseContext,
   ParseOptions,
-  ParseAlternative
-} from './natural-language-interface.service';
+  ParseAlternative,
+} from "./natural-language-interface.service";
 
 // Advanced Validation Framework Types
 export type {
@@ -111,8 +111,8 @@ export type {
   PipelinePerformanceHistory,
   PerformanceDataPoint,
   PerformanceTrend,
-  PerformanceAnomaly
-} from './advanced-validation-framework.service';
+  PerformanceAnomaly,
+} from "./advanced-validation-framework.service";
 
 // Security Integration Service Types
 export type {
@@ -142,8 +142,8 @@ export type {
   SecureParameterStorage,
   StorageAccessControl,
   AccessCondition,
-  RetentionPolicy
-} from './security-integration.service';
+  RetentionPolicy,
+} from "./security-integration.service";
 
 // ===== ENUM EXPORTS =====
 
@@ -163,8 +163,8 @@ export {
   NotificationLevel,
   NotificationChannel,
   LearningScope,
-  PrivacyLevel
-} from './parameter-validation.service';
+  PrivacyLevel,
+} from "./parameter-validation.service";
 
 // Natural Language Interface Enums
 export {
@@ -178,8 +178,8 @@ export {
   ResolutionStrategy,
   PromptType,
   ResponseFormat,
-  CorrectionLevel
-} from './natural-language-interface.service';
+  CorrectionLevel,
+} from "./natural-language-interface.service";
 
 // Advanced Validation Framework Enums
 export {
@@ -199,8 +199,8 @@ export {
   RollbackConditionType,
   TrendType,
   TrendDirection,
-  AnomalyType
-} from './advanced-validation-framework.service';
+  AnomalyType,
+} from "./advanced-validation-framework.service";
 
 // Security Integration Service Enums
 export {
@@ -230,8 +230,8 @@ export {
   PrincipalType,
   StoragePermission,
   AccessConditionType,
-  ConditionOperator
-} from './security-integration.service';
+  ConditionOperator,
+} from "./security-integration.service";
 
 // ===== MODULE CONFIGURATION =====
 
@@ -356,71 +356,72 @@ export interface ParameterValidationComplianceConfig {
 /**
  * Default PARLANT Phase 1 Parameter Validation Configuration
  */
-export const defaultParlantParameterValidationConfig: ParlantParameterValidationConfig = {
-  enableConversationalValidation: true,
-  enableNaturalLanguageInterface: true,
-  enableAdvancedValidation: true,
-  enableSecurityIntegration: true,
+export const defaultParlantParameterValidationConfig: ParlantParameterValidationConfig =
+  {
+    enableConversationalValidation: true,
+    enableNaturalLanguageInterface: true,
+    enableAdvancedValidation: true,
+    enableSecurityIntegration: true,
 
-  performanceRequirements: {
-    targetValidationTime: 200, // 200ms target
-    maxValidationTime: 2000, // 2s timeout
-    enablePerformanceMonitoring: true,
-    cacheConfig: {
-      enabled: true,
-      ttl: 300000, // 5 minutes
-      maxSize: 10000
+    performanceRequirements: {
+      targetValidationTime: 200, // 200ms target
+      maxValidationTime: 2000, // 2s timeout
+      enablePerformanceMonitoring: true,
+      cacheConfig: {
+        enabled: true,
+        ttl: 300000, // 5 minutes
+        maxSize: 10000,
+      },
+      batchConfig: {
+        enabled: true,
+        batchSize: 10,
+        batchTimeout: 100,
+      },
     },
-    batchConfig: {
-      enabled: true,
-      batchSize: 10,
-      batchTimeout: 100
-    }
-  },
 
-  securityConfig: {
-    minimumSecurityLevel: SecurityLevel.INTERNAL,
-    enableThreatDetection: true,
-    enableSanitization: true,
-    auditConfig: {
-      enabled: true,
-      level: 'detailed',
-      retention: 90 // 90 days
+    securityConfig: {
+      minimumSecurityLevel: SecurityLevel.INTERNAL,
+      enableThreatDetection: true,
+      enableSanitization: true,
+      auditConfig: {
+        enabled: true,
+        level: "detailed",
+        retention: 90, // 90 days
+      },
+      encryptionConfig: {
+        enabled: true,
+        algorithm: "AES-256-GCM",
+        keyRotation: "monthly",
+      },
     },
-    encryptionConfig: {
-      enabled: true,
-      algorithm: 'AES-256-GCM',
-      keyRotation: 'monthly'
-    }
-  },
 
-  userExperienceConfig: {
-    defaultInteractionStyle: InteractionStyle.GUIDED,
-    enableSmartSuggestions: true,
-    enableAutoCorrection: true,
-    languageSupport: ['en', 'es', 'fr', 'de'],
-    accessibilityFeatures: {
-      screenReader: true,
-      highContrast: true,
-      largeText: true,
-      voiceControl: false
-    }
-  },
-
-  complianceConfig: {
-    requiredFrameworks: [ComplianceFramework.GDPR, ComplianceFramework.SOX],
-    retentionPolicies: {
-      'parameter_logs': 90,
-      'audit_trails': 2555, // 7 years
-      'security_events': 1095 // 3 years
+    userExperienceConfig: {
+      defaultInteractionStyle: InteractionStyle.GUIDED,
+      enableSmartSuggestions: true,
+      enableAutoCorrection: true,
+      languageSupport: ["en", "es", "fr", "de"],
+      accessibilityFeatures: {
+        screenReader: true,
+        highContrast: true,
+        largeText: true,
+        voiceControl: false,
+      },
     },
-    privacySettings: {
-      dataMinimization: true,
-      consentManagement: true,
-      rightToErasure: true
-    }
-  }
-};
+
+    complianceConfig: {
+      requiredFrameworks: [ComplianceFramework.GDPR, ComplianceFramework.SOX],
+      retentionPolicies: {
+        parameter_logs: 90,
+        audit_trails: 2555, // 7 years
+        security_events: 1095, // 3 years
+      },
+      privacySettings: {
+        dataMinimization: true,
+        consentManagement: true,
+        rightToErasure: true,
+      },
+    },
+  };
 
 // ===== MODULE FACTORY =====
 
@@ -432,9 +433,12 @@ export class ParlantParameterValidationFactory {
    * Create a complete parameter validation system
    */
   static createParameterValidationSystem(
-    config: Partial<ParlantParameterValidationConfig> = {}
+    config: Partial<ParlantParameterValidationConfig> = {},
   ): ParlantParameterValidationSystem {
-    const finalConfig = { ...defaultParlantParameterValidationConfig, ...config };
+    const finalConfig = {
+      ...defaultParlantParameterValidationConfig,
+      ...config,
+    };
 
     return new ParlantParameterValidationSystem(finalConfig);
   }
@@ -444,7 +448,7 @@ export class ParlantParameterValidationFactory {
    */
   static createParameterValidationService(
     validationBridge: any,
-    contextBuilder: any
+    contextBuilder: any,
   ): ParameterValidationService {
     return new ParameterValidationService(validationBridge, contextBuilder);
   }
@@ -453,7 +457,7 @@ export class ParlantParameterValidationFactory {
    * Create natural language interface only
    */
   static createNaturalLanguageInterface(
-    validationBridge: any
+    validationBridge: any,
   ): NaturalLanguageParameterInterface {
     return new NaturalLanguageParameterInterface(validationBridge);
   }
@@ -485,7 +489,7 @@ export class ParlantParameterValidationSystem {
   constructor(
     private readonly config: ParlantParameterValidationConfig,
     private readonly validationBridge?: any,
-    private readonly contextBuilder?: any
+    private readonly contextBuilder?: any,
   ) {
     // Initialize services based on configuration
     if (config.enableSecurityIntegration) {
@@ -497,13 +501,19 @@ export class ParlantParameterValidationSystem {
     }
 
     if (config.enableNaturalLanguageInterface && validationBridge) {
-      this.naturalLanguageInterface = new NaturalLanguageParameterInterface(validationBridge);
+      this.naturalLanguageInterface = new NaturalLanguageParameterInterface(
+        validationBridge,
+      );
     }
 
-    if (config.enableConversationalValidation && validationBridge && contextBuilder) {
+    if (
+      config.enableConversationalValidation &&
+      validationBridge &&
+      contextBuilder
+    ) {
       this.parameterValidationService = new ParameterValidationService(
         validationBridge,
-        contextBuilder
+        contextBuilder,
       );
     }
   }
@@ -518,7 +528,9 @@ export class ParlantParameterValidationSystem {
   /**
    * Update system configuration
    */
-  updateConfiguration(updates: Partial<ParlantParameterValidationConfig>): void {
+  updateConfiguration(
+    updates: Partial<ParlantParameterValidationConfig>,
+  ): void {
     Object.assign(this.config, updates);
   }
 
@@ -530,18 +542,18 @@ export class ParlantParameterValidationSystem {
       parameterValidation: !!this.parameterValidationService,
       naturalLanguageInterface: !!this.naturalLanguageInterface,
       advancedValidation: !!this.advancedValidationFramework,
-      securityIntegration: !!this.securityIntegrationService
+      securityIntegration: !!this.securityIntegrationService,
     };
 
     const enabledServices = Object.values(services).filter(Boolean).length;
     const totalServices = Object.keys(services).length;
 
     return {
-      overall: enabledServices === totalServices ? 'healthy' : 'degraded',
+      overall: enabledServices === totalServices ? "healthy" : "degraded",
       services,
       configuration: this.config,
       timestamp: new Date(),
-      version: '1.0.0'
+      version: "1.0.0",
     };
   }
 
@@ -557,7 +569,7 @@ export class ParlantParameterValidationSystem {
       cacheHitRate: 0.85,
       securityThreatsDetected: 0,
       conversationalInteractions: 0,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   }
 }
@@ -565,7 +577,7 @@ export class ParlantParameterValidationSystem {
 // ===== SUPPORTING INTERFACES =====
 
 export interface ParameterValidationHealthStatus {
-  overall: 'healthy' | 'degraded' | 'unhealthy';
+  overall: "healthy" | "degraded" | "unhealthy";
   services: {
     parameterValidation: boolean;
     naturalLanguageInterface: boolean;
@@ -593,25 +605,32 @@ export interface ParameterValidationSystemMetrics {
  * Validate parameter validation configuration
  */
 export function validateParameterValidationConfig(
-  config: ParlantParameterValidationConfig
+  config: ParlantParameterValidationConfig,
 ): { valid: boolean; errors: string[] } {
   const errors: string[] = [];
 
-  if (config.performanceRequirements.targetValidationTime > config.performanceRequirements.maxValidationTime) {
-    errors.push('Target validation time cannot exceed maximum validation time');
+  if (
+    config.performanceRequirements.targetValidationTime >
+    config.performanceRequirements.maxValidationTime
+  ) {
+    errors.push("Target validation time cannot exceed maximum validation time");
   }
 
   if (config.performanceRequirements.targetValidationTime < 50) {
-    errors.push('Target validation time should be at least 50ms for realistic performance');
+    errors.push(
+      "Target validation time should be at least 50ms for realistic performance",
+    );
   }
 
   if (config.securityConfig.auditConfig.retention < 30) {
-    errors.push('Audit log retention should be at least 30 days for compliance');
+    errors.push(
+      "Audit log retention should be at least 30 days for compliance",
+    );
   }
 
   return {
     valid: errors.length === 0,
-    errors
+    errors,
   };
 }
 
@@ -620,43 +639,43 @@ export function validateParameterValidationConfig(
  */
 export function createDefaultUserContext(): UserContext {
   return {
-    userId: 'test-user',
-    roles: ['user'],
-    permissions: ['parameter-validation'],
-    sessionId: 'test-session',
+    userId: "test-user",
+    roles: ["user"],
+    permissions: ["parameter-validation"],
+    sessionId: "test-session",
     preferences: {
-      validationStyle: 'standard',
+      validationStyle: "standard",
       confirmationPreferences: {
         alwaysConfirmSanitization: false,
         confirmTypeConversions: true,
         confirmDefaultValues: false,
-        enableBatchConfirmation: true
+        enableBatchConfirmation: true,
       },
-      language: 'en',
+      language: "en",
       accessibility: {
         screenReader: false,
         highContrast: false,
         largeText: false,
-        voiceInteraction: false
-      }
+        voiceInteraction: false,
+      },
     },
     securityContext: {
       securityClearance: SecurityLevel.INTERNAL,
       accessRestrictions: [],
-      ipAddress: '127.0.0.1',
+      ipAddress: "127.0.0.1",
       deviceInfo: {
-        deviceType: 'desktop',
-        operatingSystem: 'linux',
-        browserInfo: 'chrome',
-        securityStatus: 'secure'
+        deviceType: "desktop",
+        operatingSystem: "linux",
+        browserInfo: "chrome",
+        securityStatus: "secure",
       },
       riskAssessment: {
         riskLevel: RiskLevel.LOW,
         riskFactors: [],
         trustScore: 85,
-        suspiciousActivity: false
-      }
-    }
+        suspiciousActivity: false,
+      },
+    },
   };
 }
 
@@ -668,73 +687,81 @@ export function createExampleParameterSchema(): ParameterSchema {
     parameters: {
       username: {
         type: ParameterType.STRING,
-        description: 'User login name',
+        description: "User login name",
         validationRules: [
           {
             type: ValidationRuleType.MIN_LENGTH,
             config: { minLength: 3 },
-            errorMessage: 'Username must be at least 3 characters',
-            conversationalExplanation: 'Please provide a username with at least 3 characters'
+            errorMessage: "Username must be at least 3 characters",
+            conversationalExplanation:
+              "Please provide a username with at least 3 characters",
           },
           {
             type: ValidationRuleType.REGEX_PATTERN,
-            config: { pattern: '^[a-zA-Z0-9_]+$' },
-            errorMessage: 'Username can only contain letters, numbers, and underscores',
-            conversationalExplanation: 'Username should only use letters, numbers, and underscores'
-          }
+            config: { pattern: "^[a-zA-Z0-9_]+$" },
+            errorMessage:
+              "Username can only contain letters, numbers, and underscores",
+            conversationalExplanation:
+              "Username should only use letters, numbers, and underscores",
+          },
         ],
         sanitizationRules: [
           {
             type: SanitizationType.TRIM_WHITESPACE,
             config: {},
             requireConfirmation: false,
-            explanation: 'Remove extra spaces from username'
-          }
+            explanation: "Remove extra spaces from username",
+          },
         ],
         securityLevel: SecurityLevel.INTERNAL,
-        examples: ['john_doe', 'user123', 'admin_user']
+        examples: ["john_doe", "user123", "admin_user"],
       },
       email: {
         type: ParameterType.EMAIL,
-        description: 'User email address',
+        description: "User email address",
         validationRules: [
           {
             type: ValidationRuleType.REGEX_PATTERN,
-            config: { pattern: '^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$' },
-            errorMessage: 'Please provide a valid email address',
-            conversationalExplanation: 'Email should be in format: user@domain.com'
-          }
+            config: { pattern: "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$" },
+            errorMessage: "Please provide a valid email address",
+            conversationalExplanation:
+              "Email should be in format: user@domain.com",
+          },
         ],
         sanitizationRules: [
           {
             type: SanitizationType.TRIM_WHITESPACE,
             config: {},
             requireConfirmation: false,
-            explanation: 'Remove extra spaces from email'
-          }
+            explanation: "Remove extra spaces from email",
+          },
         ],
         securityLevel: SecurityLevel.CONFIDENTIAL,
-        examples: ['user@example.com', 'admin@company.org']
-      }
+        examples: ["user@example.com", "admin@company.org"],
+      },
     },
-    required: ['username'],
+    required: ["username"],
     businessRules: [
       {
-        id: 'unique-username',
-        description: 'Username must be unique in the system',
-        condition: 'username not exists in database',
+        id: "unique-username",
+        description: "Username must be unique in the system",
+        condition: "username not exists in database",
         severity: RuleSeverity.ERROR,
-        conversationalExplanation: 'This username is already taken, please choose another'
-      }
+        conversationalExplanation:
+          "This username is already taken, please choose another",
+      },
     ],
     securityConstraints: [
       {
         type: SecurityConstraintType.INJECTION_PREVENTION,
         config: { enableSqlInjectionDetection: true },
         riskLevel: RiskLevel.HIGH,
-        mitigationStrategies: ['parameter sanitization', 'parameterized queries']
-      }
-    ]
+        mitigationStrategies: [
+          "parameter sanitization",
+          "parameterized queries",
+        ],
+      },
+    ],
   };
 }
 
@@ -744,34 +771,38 @@ export function createExampleParameterSchema(): ParameterSchema {
  * PARLANT Phase 1 Parameter Validation Module Metadata
  */
 export const PARLANT_PARAMETER_VALIDATION_MODULE_INFO = {
-  name: 'PARLANT Phase 1 Parameter Validation',
-  version: '1.0.0',
-  description: 'Comprehensive parameter validation enabling conversational parameter verification and sanitization with enterprise-grade security',
-  author: 'AIgent PARLANT Integration Team',
-  license: 'Proprietary',
+  name: "PARLANT Phase 1 Parameter Validation",
+  version: "1.0.0",
+  description:
+    "Comprehensive parameter validation enabling conversational parameter verification and sanitization with enterprise-grade security",
+  author: "AIgent PARLANT Integration Team",
+  license: "Proprietary",
   dependencies: {
-    '@nestjs/common': '^10.0.0',
-    '@nestjs/core': '^10.0.0'
+    "@nestjs/common": "^10.0.0",
+    "@nestjs/core": "^10.0.0",
   },
   features: [
-    'Conversational parameter interpretation and validation',
-    'Multi-layer validation (syntax, semantics, business rules)',
-    'Intelligent sanitization with user confirmation',
-    'Natural language parameter format conversion',
-    'Enterprise-grade security against injection attacks',
-    'Sub-200ms parameter validation response times',
-    'Adaptive validation based on user expertise level',
-    'Comprehensive audit logging and compliance'
+    "Conversational parameter interpretation and validation",
+    "Multi-layer validation (syntax, semantics, business rules)",
+    "Intelligent sanitization with user confirmation",
+    "Natural language parameter format conversion",
+    "Enterprise-grade security against injection attacks",
+    "Sub-200ms parameter validation response times",
+    "Adaptive validation based on user expertise level",
+    "Comprehensive audit logging and compliance",
   ],
   services: {
-    'ParameterValidationService': 'Core parameter validation with conversational AI integration',
-    'NaturalLanguageParameterInterface': 'Conversational parameter collection and guidance',
-    'AdvancedValidationFramework': 'Multi-layer validation with adaptive pipelines',
-    'SecurityIntegrationService': 'Enterprise security and threat detection'
+    ParameterValidationService:
+      "Core parameter validation with conversational AI integration",
+    NaturalLanguageParameterInterface:
+      "Conversational parameter collection and guidance",
+    AdvancedValidationFramework:
+      "Multi-layer validation with adaptive pipelines",
+    SecurityIntegrationService: "Enterprise security and threat detection",
   },
   buildInfo: {
     buildDate: new Date().toISOString(),
-    environment: 'production',
-    optimization: 'enabled'
-  }
+    environment: "production",
+    optimization: "enabled",
+  },
 } as const;

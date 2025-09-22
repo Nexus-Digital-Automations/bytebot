@@ -126,7 +126,13 @@ export interface KeyManagementConfiguration {
  */
 export interface CryptographicOperationRequest {
   /** Operation type */
-  operationType: "encrypt" | "decrypt" | "sign" | "verify" | "keyExchange" | "keyDerivation";
+  operationType:
+    | "encrypt"
+    | "decrypt"
+    | "sign"
+    | "verify"
+    | "keyExchange"
+    | "keyDerivation";
   /** Data to process */
   data: Buffer;
   /** Cryptographic parameters */
@@ -249,8 +255,12 @@ export interface DigitalSignatureResult {
  * Main Cryptographic Security Architecture Service
  */
 @Injectable()
-export class CryptographicSecurityArchitectureService implements OnModuleInit, OnModuleDestroy {
-  private readonly logger = new Logger(CryptographicSecurityArchitectureService.name);
+export class CryptographicSecurityArchitectureService
+  implements OnModuleInit, OnModuleDestroy
+{
+  private readonly logger = new Logger(
+    CryptographicSecurityArchitectureService.name,
+  );
   private readonly eventEmitter = new EventEmitter();
   private readonly keyManager = new QuantumResistantKeyManager();
   private readonly encryptionEngine = new HybridEncryptionEngine();
@@ -293,13 +303,18 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
       // Initialize cryptographic health monitoring
       this.startHealthMonitoring();
 
-      this.logger.log("Cryptographic Security Architecture Service initialized successfully");
+      this.logger.log(
+        "Cryptographic Security Architecture Service initialized successfully",
+      );
     } catch (error) {
-      this.logger.error("Failed to initialize Cryptographic Security Architecture Service", error);
+      this.logger.error(
+        "Failed to initialize Cryptographic Security Architecture Service",
+        error,
+      );
       throw new ParlantIntegrationError(
         "Cryptographic security architecture initialization failed",
         "CRYPTO_ARCH_INIT_ERROR",
-        { error: error.message }
+        { error: error.message },
       );
     }
   }
@@ -308,7 +323,9 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
    * Module cleanup
    */
   async onModuleDestroy(): Promise<void> {
-    this.logger.log("Shutting down Cryptographic Security Architecture Service");
+    this.logger.log(
+      "Shutting down Cryptographic Security Architecture Service",
+    );
 
     try {
       // Stop key rotation scheduler
@@ -323,9 +340,14 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
       // Remove event listeners
       this.eventEmitter.removeAllListeners();
 
-      this.logger.log("Cryptographic Security Architecture Service shutdown complete");
+      this.logger.log(
+        "Cryptographic Security Architecture Service shutdown complete",
+      );
     } catch (error) {
-      this.logger.error("Error during Cryptographic Security Architecture Service shutdown", error);
+      this.logger.error(
+        "Error during Cryptographic Security Architecture Service shutdown",
+        error,
+      );
     }
   }
 
@@ -335,7 +357,7 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
   async encryptData(
     data: Buffer,
     parameters: CryptographicParameters,
-    securityContext: CryptographicSecurityContext
+    securityContext: CryptographicSecurityContext,
   ): Promise<EncryptionResult> {
     const startTime = performance.now();
     const operationId = uuidv4();
@@ -346,7 +368,7 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
       keyId: parameters.keyId,
       dataSize: data.length,
       securityClassification: securityContext.securityClassification,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
 
     try {
@@ -356,7 +378,7 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
       // Step 2: Retrieve and validate encryption key
       const encryptionKey = await this.keyManager.getEncryptionKey(
         parameters.keyId,
-        securityContext
+        securityContext,
       );
 
       // Step 3: Generate cryptographically secure nonce
@@ -369,7 +391,7 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
         algorithm: parameters.algorithm,
         nonce,
         additionalData: parameters.additionalData,
-        securityContext
+        securityContext,
       });
 
       // Step 5: Apply perfect forward secrecy if enabled
@@ -386,14 +408,14 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
         performanceMetrics: {
           encryptionTime: performance.now() - startTime,
           dataSize: data.length,
-          keySize: encryptionKey.keySize
-        }
+          keySize: encryptionKey.keySize,
+        },
       });
 
       // Step 7: Compliance validation
       await this.complianceValidator.validateEncryption(
         encryptionResult,
-        securityContext.complianceRequirements
+        securityContext.complianceRequirements,
       );
 
       const totalTime = performance.now() - startTime;
@@ -403,7 +425,7 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
         algorithm: parameters.algorithm,
         keyId: parameters.keyId,
         encryptedSize: encryptionResult.encryptedData.length,
-        totalTime
+        totalTime,
       });
 
       // Emit encryption event
@@ -413,7 +435,7 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
         keyId: parameters.keyId,
         dataSize: data.length,
         encryptedSize: encryptionResult.encryptedData.length,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       return {
@@ -427,10 +449,9 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
           encryptionTime: totalTime,
           throughput: data.length / (totalTime / 1000), // bytes per second
           memoryUsage: encryptionResult.memoryUsage,
-          cpuUsage: encryptionResult.cpuUsage
-        }
+          cpuUsage: encryptionResult.cpuUsage,
+        },
       };
-
     } catch (error) {
       const totalTime = performance.now() - startTime;
 
@@ -439,7 +460,7 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
         error: error.message,
         stack: error.stack,
         totalTime,
-        algorithm: parameters.algorithm
+        algorithm: parameters.algorithm,
       });
 
       throw new ParlantIntegrationError(
@@ -448,8 +469,8 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
         {
           operationId,
           error: error.message,
-          algorithm: parameters.algorithm
-        }
+          algorithm: parameters.algorithm,
+        },
       );
     }
   }
@@ -457,9 +478,7 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
   /**
    * Decrypt data with quantum-resistant verification
    */
-  async decryptData(
-    decryptionRequest: DecryptionRequest
-  ): Promise<Buffer> {
+  async decryptData(decryptionRequest: DecryptionRequest): Promise<Buffer> {
     const startTime = performance.now();
     const operationId = uuidv4();
 
@@ -468,7 +487,7 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
       algorithm: decryptionRequest.algorithm,
       keyId: decryptionRequest.keyId,
       encryptedSize: decryptionRequest.encryptedData.length,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
 
     try {
@@ -478,7 +497,7 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
       // Step 2: Retrieve and validate decryption key
       const decryptionKey = await this.keyManager.getDecryptionKey(
         decryptionRequest.keyId,
-        decryptionRequest.securityContext
+        decryptionRequest.securityContext,
       );
 
       // Step 3: Verify authentication tag
@@ -486,14 +505,14 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
         encryptedData: decryptionRequest.encryptedData,
         authenticationTag: decryptionRequest.authenticationTag,
         key: decryptionKey,
-        additionalData: decryptionRequest.additionalData
+        additionalData: decryptionRequest.additionalData,
       });
 
       if (!tagVerificationResult.valid) {
         throw new ParlantIntegrationError(
           "Authentication tag verification failed",
           "TAG_VERIFICATION_ERROR",
-          { operationId }
+          { operationId },
         );
       }
 
@@ -505,7 +524,7 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
         iv: decryptionRequest.iv,
         authenticationTag: decryptionRequest.authenticationTag,
         additionalData: decryptionRequest.additionalData,
-        securityContext: decryptionRequest.securityContext
+        securityContext: decryptionRequest.securityContext,
       });
 
       // Step 5: Post-decryption validation
@@ -518,7 +537,7 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
         algorithm: decryptionRequest.algorithm,
         keyId: decryptionRequest.keyId,
         decryptedSize: decryptionResult.length,
-        totalTime
+        totalTime,
       });
 
       // Emit decryption event
@@ -528,11 +547,10 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
         keyId: decryptionRequest.keyId,
         encryptedSize: decryptionRequest.encryptedData.length,
         decryptedSize: decryptionResult.length,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       return decryptionResult;
-
     } catch (error) {
       const totalTime = performance.now() - startTime;
 
@@ -541,7 +559,7 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
         error: error.message,
         stack: error.stack,
         totalTime,
-        algorithm: decryptionRequest.algorithm
+        algorithm: decryptionRequest.algorithm,
       });
 
       throw new ParlantIntegrationError(
@@ -550,8 +568,8 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
         {
           operationId,
           error: error.message,
-          algorithm: decryptionRequest.algorithm
-        }
+          algorithm: decryptionRequest.algorithm,
+        },
       );
     }
   }
@@ -561,7 +579,7 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
    */
   async performKeyExchange(
     keyExchangeParameters: KeyExchangeParameters,
-    securityContext: CryptographicSecurityContext
+    securityContext: CryptographicSecurityContext,
   ): Promise<KeyExchangeResult> {
     const startTime = performance.now();
     const operationId = uuidv4();
@@ -570,40 +588,46 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
       operationId,
       algorithm: keyExchangeParameters.algorithm,
       keySize: keyExchangeParameters.keySize,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
 
     try {
       // Step 1: Validate key exchange parameters
-      await this.validateKeyExchangeParameters(keyExchangeParameters, securityContext);
+      await this.validateKeyExchangeParameters(
+        keyExchangeParameters,
+        securityContext,
+      );
 
       // Step 2: Generate ephemeral key pair
       const ephemeralKeyPair = await this.keyManager.generateEphemeralKeyPair(
         keyExchangeParameters.algorithm,
-        keyExchangeParameters.keySize
+        keyExchangeParameters.keySize,
       );
 
       // Step 3: Perform quantum-resistant key exchange
-      const keyExchangeResult = await this.keyExchangeEngine.performKeyExchange({
-        algorithm: keyExchangeParameters.algorithm,
-        localPrivateKey: ephemeralKeyPair.privateKey,
-        remotePublicKey: keyExchangeParameters.remotePublicKey,
-        keyDerivationParameters: keyExchangeParameters.keyDerivationParameters,
-        securityContext
-      });
+      const keyExchangeResult = await this.keyExchangeEngine.performKeyExchange(
+        {
+          algorithm: keyExchangeParameters.algorithm,
+          localPrivateKey: ephemeralKeyPair.privateKey,
+          remotePublicKey: keyExchangeParameters.remotePublicKey,
+          keyDerivationParameters:
+            keyExchangeParameters.keyDerivationParameters,
+          securityContext,
+        },
+      );
 
       // Step 4: Derive shared secret with perfect forward secrecy
       const sharedSecret = await this.deriveSharedSecret({
         keyMaterial: keyExchangeResult.keyMaterial,
         keyDerivationFunction: keyExchangeParameters.keyDerivationFunction,
         contextInfo: keyExchangeParameters.contextInfo,
-        outputLength: keyExchangeParameters.outputLength
+        outputLength: keyExchangeParameters.outputLength,
       });
 
       // Step 5: Establish perfect forward secrecy
       const pfsResult = await this.establishPerfectForwardSecrecy(
         sharedSecret,
-        ephemeralKeyPair
+        ephemeralKeyPair,
       );
 
       // Step 6: Create key exchange metadata
@@ -614,8 +638,8 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
         keyExchangeResult,
         performanceMetrics: {
           keyExchangeTime: performance.now() - startTime,
-          keySize: keyExchangeParameters.keySize
-        }
+          keySize: keyExchangeParameters.keySize,
+        },
       });
 
       const totalTime = performance.now() - startTime;
@@ -625,7 +649,7 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
         algorithm: keyExchangeParameters.algorithm,
         keySize: keyExchangeParameters.keySize,
         perfectForwardSecrecy: pfsResult.established,
-        totalTime
+        totalTime,
       });
 
       return {
@@ -634,10 +658,9 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
         metadata,
         perfectForwardSecrecy: pfsResult.established,
         quantumResistanceLevel: await this.assessQuantumResistanceLevel(
-          keyExchangeParameters.algorithm
-        )
+          keyExchangeParameters.algorithm,
+        ),
       };
-
     } catch (error) {
       const totalTime = performance.now() - startTime;
 
@@ -646,7 +669,7 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
         error: error.message,
         stack: error.stack,
         totalTime,
-        algorithm: keyExchangeParameters.algorithm
+        algorithm: keyExchangeParameters.algorithm,
       });
 
       throw new ParlantIntegrationError(
@@ -655,8 +678,8 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
         {
           operationId,
           error: error.message,
-          algorithm: keyExchangeParameters.algorithm
-        }
+          algorithm: keyExchangeParameters.algorithm,
+        },
       );
     }
   }
@@ -668,7 +691,7 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
     data: Buffer,
     signingKey: string,
     algorithm: DigitalSignatureAlgorithm,
-    securityContext: CryptographicSecurityContext
+    securityContext: CryptographicSecurityContext,
   ): Promise<DigitalSignatureResult> {
     const startTime = performance.now();
     const operationId = uuidv4();
@@ -678,15 +701,23 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
       algorithm,
       signingKey,
       dataSize: data.length,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
 
     try {
       // Step 1: Validate signing request
-      await this.validateSigningRequest(data, signingKey, algorithm, securityContext);
+      await this.validateSigningRequest(
+        data,
+        signingKey,
+        algorithm,
+        securityContext,
+      );
 
       // Step 2: Retrieve signing key
-      const privateKey = await this.keyManager.getSigningKey(signingKey, securityContext);
+      const privateKey = await this.keyManager.getSigningKey(
+        signingKey,
+        securityContext,
+      );
 
       // Step 3: Create hash of data to sign
       const dataHash = await this.createSecureHash(data, algorithm);
@@ -696,7 +727,7 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
         dataHash,
         privateKey,
         algorithm,
-        securityContext
+        securityContext,
       });
 
       // Step 5: Create signature metadata
@@ -708,8 +739,8 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
         securityContext,
         performanceMetrics: {
           signingTime: performance.now() - startTime,
-          keySize: privateKey.keySize
-        }
+          keySize: privateKey.keySize,
+        },
       });
 
       const totalTime = performance.now() - startTime;
@@ -719,7 +750,7 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
         algorithm,
         signingKey,
         signatureSize: signatureResult.signature.length,
-        totalTime
+        totalTime,
       });
 
       return {
@@ -731,10 +762,9 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
           signingTime: totalTime,
           throughput: data.length / (totalTime / 1000),
           memoryUsage: signatureResult.memoryUsage,
-          cpuUsage: signatureResult.cpuUsage
-        }
+          cpuUsage: signatureResult.cpuUsage,
+        },
       };
-
     } catch (error) {
       const totalTime = performance.now() - startTime;
 
@@ -743,7 +773,7 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
         error: error.message,
         stack: error.stack,
         totalTime,
-        algorithm
+        algorithm,
       });
 
       throw new ParlantIntegrationError(
@@ -752,8 +782,8 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
         {
           operationId,
           error: error.message,
-          algorithm
-        }
+          algorithm,
+        },
       );
     }
   }
@@ -766,7 +796,7 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
     signature: Buffer,
     publicKey: Buffer,
     algorithm: DigitalSignatureAlgorithm,
-    securityContext: CryptographicSecurityContext
+    securityContext: CryptographicSecurityContext,
   ): Promise<SignatureVerificationResult> {
     const startTime = performance.now();
     const operationId = uuidv4();
@@ -776,12 +806,18 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
       algorithm,
       dataSize: data.length,
       signatureSize: signature.length,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
 
     try {
       // Step 1: Validate verification request
-      await this.validateVerificationRequest(data, signature, publicKey, algorithm, securityContext);
+      await this.validateVerificationRequest(
+        data,
+        signature,
+        publicKey,
+        algorithm,
+        securityContext,
+      );
 
       // Step 2: Create hash of data
       const dataHash = await this.createSecureHash(data, algorithm);
@@ -792,7 +828,7 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
         signature,
         publicKey,
         algorithm,
-        securityContext
+        securityContext,
       });
 
       // Step 4: Additional security validations
@@ -802,7 +838,7 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
         publicKey,
         algorithm,
         verificationResult,
-        securityContext
+        securityContext,
       });
 
       const totalTime = performance.now() - startTime;
@@ -812,7 +848,7 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
         algorithm,
         verified: verificationResult.valid,
         securityValidationPassed: securityValidation.passed,
-        totalTime
+        totalTime,
       });
 
       return {
@@ -824,10 +860,9 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
           operationId,
           verificationTime: totalTime,
           algorithm,
-          publicKeyFingerprint: await this.calculateKeyFingerprint(publicKey)
-        }
+          publicKeyFingerprint: await this.calculateKeyFingerprint(publicKey),
+        },
       };
-
     } catch (error) {
       const totalTime = performance.now() - startTime;
 
@@ -836,7 +871,7 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
         error: error.message,
         stack: error.stack,
         totalTime,
-        algorithm
+        algorithm,
       });
 
       throw new ParlantIntegrationError(
@@ -845,8 +880,8 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
         {
           operationId,
           error: error.message,
-          algorithm
-        }
+          algorithm,
+        },
       );
     }
   }
@@ -857,7 +892,7 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
   async generateKeyPair(
     algorithm: QuantumResistantAlgorithm,
     keySize: number,
-    securityContext: CryptographicSecurityContext
+    securityContext: CryptographicSecurityContext,
   ): Promise<KeyPairGenerationResult> {
     const startTime = performance.now();
     const operationId = uuidv4();
@@ -866,26 +901,30 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
       operationId,
       algorithm,
       keySize,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
 
     try {
       // Step 1: Validate key generation parameters
-      await this.validateKeyGenerationParameters(algorithm, keySize, securityContext);
+      await this.validateKeyGenerationParameters(
+        algorithm,
+        keySize,
+        securityContext,
+      );
 
       // Step 2: Generate quantum-resistant key pair
       const keyPair = await this.keyManager.generateKeyPair({
         algorithm,
         keySize,
         securityContext,
-        hsmGeneration: securityContext.securityClassification === "critical"
+        hsmGeneration: securityContext.securityClassification === "critical",
       });
 
       // Step 3: Store keys securely
       const keyStorageResult = await this.keyManager.storeKeyPair(keyPair, {
         securityContext,
         escrowRequired: this.isKeyEscrowRequired(securityContext),
-        thresholdSharing: this.isThresholdSharingRequired(securityContext)
+        thresholdSharing: this.isThresholdSharingRequired(securityContext),
       });
 
       // Step 4: Create key metadata
@@ -897,8 +936,8 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
         keyStorageResult,
         performanceMetrics: {
           generationTime: performance.now() - startTime,
-          keySize
-        }
+          keySize,
+        },
       });
 
       const totalTime = performance.now() - startTime;
@@ -908,7 +947,7 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
         algorithm,
         keySize,
         keyId: keyPair.keyId,
-        totalTime
+        totalTime,
       });
 
       return {
@@ -917,11 +956,11 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
         algorithm,
         keySize,
         metadata,
-        quantumResistanceLevel: await this.assessQuantumResistanceLevel(algorithm),
+        quantumResistanceLevel:
+          await this.assessQuantumResistanceLevel(algorithm),
         escrowStatus: keyStorageResult.escrowStatus,
-        thresholdSharingStatus: keyStorageResult.thresholdSharingStatus
+        thresholdSharingStatus: keyStorageResult.thresholdSharingStatus,
       };
-
     } catch (error) {
       const totalTime = performance.now() - startTime;
 
@@ -930,7 +969,7 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
         error: error.message,
         stack: error.stack,
         totalTime,
-        algorithm
+        algorithm,
       });
 
       throw new ParlantIntegrationError(
@@ -939,8 +978,8 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
         {
           operationId,
           error: error.message,
-          algorithm
-        }
+          algorithm,
+        },
       );
     }
   }
@@ -950,10 +989,13 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
    */
   async getCryptographicMetrics(
     timeRange: TimeRange,
-    filters?: CryptographicMetricsFilters
+    filters?: CryptographicMetricsFilters,
   ): Promise<CryptographicMetricsResult> {
     try {
-      const metrics = await this.calculateCryptographicMetrics(timeRange, filters);
+      const metrics = await this.calculateCryptographicMetrics(
+        timeRange,
+        filters,
+      );
 
       return {
         timeRange,
@@ -967,15 +1009,14 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
         algorithmDistribution: metrics.algorithmDistribution,
         quantumResistanceAdoption: metrics.quantumResistanceAdoption,
         complianceMetrics: metrics.complianceMetrics,
-        errorRates: metrics.errorRates
+        errorRates: metrics.errorRates,
       };
-
     } catch (error) {
       this.logger.error("Failed to get cryptographic metrics", error);
       throw new ParlantIntegrationError(
         "Cryptographic metrics calculation failed",
         "METRICS_ERROR",
-        { error: error.message }
+        { error: error.message },
       );
     }
   }
@@ -990,13 +1031,13 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
   private async validateEncryptionRequest(
     data: Buffer,
     parameters: CryptographicParameters,
-    securityContext: CryptographicSecurityContext
+    securityContext: CryptographicSecurityContext,
   ): Promise<void> {
     if (!data || data.length === 0) {
       throw new ParlantIntegrationError(
         "Data to encrypt cannot be empty",
         "INVALID_ENCRYPTION_DATA",
-        {}
+        {},
       );
     }
 
@@ -1004,7 +1045,7 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
       throw new ParlantIntegrationError(
         "Key ID is required for encryption",
         "MISSING_KEY_ID",
-        {}
+        {},
       );
     }
 
@@ -1028,7 +1069,7 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
       "ChaCha20-Poly1305": 12,
       "XChaCha20-Poly1305": 24,
       "AES-256-CBC": 16,
-      "AES-256-CTR": 16
+      "AES-256-CTR": 16,
     };
 
     return nonceSizes[algorithm] || 12;
@@ -1042,7 +1083,10 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
     this.eventEmitter.on("data_decrypted", this.handleDataDecrypted.bind(this));
     this.eventEmitter.on("key_generated", this.handleKeyGenerated.bind(this));
     this.eventEmitter.on("key_rotated", this.handleKeyRotated.bind(this));
-    this.eventEmitter.on("compliance_violation", this.handleComplianceViolation.bind(this));
+    this.eventEmitter.on(
+      "compliance_violation",
+      this.handleComplianceViolation.bind(this),
+    );
   }
 
   /**
@@ -1050,13 +1094,16 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
    */
   private startKeyRotationScheduler(): void {
     // Key rotation scheduler implementation
-    setInterval(async () => {
-      try {
-        await this.performScheduledKeyRotation();
-      } catch (error) {
-        this.logger.error("Scheduled key rotation failed", error);
-      }
-    }, 24 * 60 * 60 * 1000); // Daily rotation check
+    setInterval(
+      async () => {
+        try {
+          await this.performScheduledKeyRotation();
+        } catch (error) {
+          this.logger.error("Scheduled key rotation failed", error);
+        }
+      },
+      24 * 60 * 60 * 1000,
+    ); // Daily rotation check
   }
 
   /**
@@ -1066,7 +1113,7 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
     this.logger.debug("Data encrypted event", {
       operationId: event.operationId,
       algorithm: event.algorithm,
-      dataSize: event.dataSize
+      dataSize: event.dataSize,
     });
 
     // Update encryption statistics
@@ -1080,7 +1127,7 @@ export class CryptographicSecurityArchitectureService implements OnModuleInit, O
     this.logger.debug("Key generated event", {
       keyId: event.keyId,
       algorithm: event.algorithm,
-      keySize: event.keySize
+      keySize: event.keySize,
     });
 
     // Update key generation statistics

@@ -8,7 +8,7 @@
  * @since 2025-09-22
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from "@nestjs/common";
 import {
   RateLimitConfiguration,
   RateLimitContext,
@@ -24,9 +24,12 @@ import {
   DynamicRateLimitAdjustment,
   EmergencyModeConfig,
   FairQueuingConfig,
-  PriorityManagementConfig
-} from '../types/rate-limiting.types';
-import { SecurityLevel, RiskLevel } from '../../interfaces/conversational-api.interface';
+  PriorityManagementConfig,
+} from "../types/rate-limiting.types";
+import {
+  SecurityLevel,
+  RiskLevel,
+} from "../../interfaces/conversational-api.interface";
 
 /**
  * Multi-tier rate management service providing comprehensive rate limiting
@@ -50,12 +53,12 @@ export class MultiTierRateManagerService {
   // Performance optimization
   private readonly performanceOptimizer: RateManagerPerformanceOptimizer;
 
-  constructor(
-    private readonly configuration: RateLimitConfiguration
-  ) {
+  constructor(private readonly configuration: RateLimitConfiguration) {
     this.userTierManager = new UserTierManager(configuration.userLimits);
     this.apiTierManager = new APITierManager(configuration.apiLimits);
-    this.operationTierManager = new OperationTierManager(configuration.operationLimits);
+    this.operationTierManager = new OperationTierManager(
+      configuration.operationLimits,
+    );
     this.globalTierManager = new GlobalTierManager(configuration.globalLimits);
 
     this.coordinationEngine = new TierCoordinationEngine();
@@ -69,50 +72,62 @@ export class MultiTierRateManagerService {
   /**
    * Evaluate request across all tiers with intelligent coordination
    */
-  async evaluateMultiTierLimits(context: RateLimitContext): Promise<MultiTierEvaluationResult> {
+  async evaluateMultiTierLimits(
+    context: RateLimitContext,
+  ): Promise<MultiTierEvaluationResult> {
     const startTime = Date.now();
 
     try {
       // Parallel evaluation across all tiers for optimal performance
-      const [userResult, apiResult, operationResult, globalResult] = await Promise.all([
-        this.userTierManager.evaluateUserLimits(context),
-        this.apiTierManager.evaluateAPILimits(context),
-        this.operationTierManager.evaluateOperationLimits(context),
-        this.globalTierManager.evaluateGlobalLimits(context)
-      ]);
+      const [userResult, apiResult, operationResult, globalResult] =
+        await Promise.all([
+          this.userTierManager.evaluateUserLimits(context),
+          this.apiTierManager.evaluateAPILimits(context),
+          this.operationTierManager.evaluateOperationLimits(context),
+          this.globalTierManager.evaluateGlobalLimits(context),
+        ]);
 
       // Coordinate results across tiers
-      const coordinatedResult = await this.coordinationEngine.coordinateEvaluations(
-        context,
-        { user: userResult, api: apiResult, operation: operationResult, global: globalResult }
-      );
+      const coordinatedResult =
+        await this.coordinationEngine.coordinateEvaluations(context, {
+          user: userResult,
+          api: apiResult,
+          operation: operationResult,
+          global: globalResult,
+        });
 
       // Apply intelligent burst handling
       const burstAdjustedResult = await this.burstHandler.applyBurstHandling(
         context,
-        coordinatedResult
+        coordinatedResult,
       );
 
       // Apply dynamic adjustments if needed
       const finalResult = await this.dynamicAdjuster.applyDynamicAdjustments(
         context,
-        burstAdjustedResult
+        burstAdjustedResult,
       );
 
       const processingTime = Date.now() - startTime;
-      this.logger.debug(`Multi-tier evaluation completed in ${processingTime}ms for user: ${context.userId}`);
+      this.logger.debug(
+        `Multi-tier evaluation completed in ${processingTime}ms for user: ${context.userId}`,
+      );
 
       return {
         ...finalResult,
         processingTime,
-        tierResults: { user: userResult, api: apiResult, operation: operationResult, global: globalResult },
+        tierResults: {
+          user: userResult,
+          api: apiResult,
+          operation: operationResult,
+          global: globalResult,
+        },
         coordinationApplied: true,
         burstHandlingApplied: true,
-        dynamicAdjustmentsApplied: finalResult !== burstAdjustedResult
+        dynamicAdjustmentsApplied: finalResult !== burstAdjustedResult,
       };
-
     } catch (error) {
-      this.logger.error('Multi-tier evaluation failed', error);
+      this.logger.error("Multi-tier evaluation failed", error);
       return this.createFailSafeEvaluation(context, Date.now() - startTime);
     }
   }
@@ -120,14 +135,17 @@ export class MultiTierRateManagerService {
   /**
    * Update usage metrics across all tiers
    */
-  async updateMultiTierUsage(context: RateLimitContext, allowed: boolean): Promise<void> {
+  async updateMultiTierUsage(
+    context: RateLimitContext,
+    allowed: boolean,
+  ): Promise<void> {
     try {
       // Update all tiers in parallel
       await Promise.all([
         this.userTierManager.updateUsage(context, allowed),
         this.apiTierManager.updateUsage(context, allowed),
         this.operationTierManager.updateUsage(context, allowed),
-        this.globalTierManager.updateUsage(context, allowed)
+        this.globalTierManager.updateUsage(context, allowed),
       ]);
 
       // Update coordination state
@@ -135,9 +153,8 @@ export class MultiTierRateManagerService {
 
       // Trigger dynamic adjustments if thresholds are met
       await this.dynamicAdjuster.checkAdjustmentTriggers(context);
-
     } catch (error) {
-      this.logger.error('Failed to update multi-tier usage', error);
+      this.logger.error("Failed to update multi-tier usage", error);
     }
   }
 
@@ -146,14 +163,16 @@ export class MultiTierRateManagerService {
    */
   async getMultiTierState(context: RateLimitContext): Promise<MultiTierState> {
     try {
-      const [userState, apiState, operationState, globalState] = await Promise.all([
-        this.userTierManager.getState(context),
-        this.apiTierManager.getState(context),
-        this.operationTierManager.getState(context),
-        this.globalTierManager.getState(context)
-      ]);
+      const [userState, apiState, operationState, globalState] =
+        await Promise.all([
+          this.userTierManager.getState(context),
+          this.apiTierManager.getState(context),
+          this.operationTierManager.getState(context),
+          this.globalTierManager.getState(context),
+        ]);
 
-      const coordinationState = await this.coordinationEngine.getCoordinationState(context);
+      const coordinationState =
+        await this.coordinationEngine.getCoordinationState(context);
 
       return {
         user: userState,
@@ -162,11 +181,15 @@ export class MultiTierRateManagerService {
         global: globalState,
         coordination: coordinationState,
         lastUpdated: new Date(),
-        healthStatus: this.calculateOverallHealth(userState, apiState, operationState, globalState)
+        healthStatus: this.calculateOverallHealth(
+          userState,
+          apiState,
+          operationState,
+          globalState,
+        ),
       };
-
     } catch (error) {
-      this.logger.error('Failed to get multi-tier state', error);
+      this.logger.error("Failed to get multi-tier state", error);
       throw error;
     }
   }
@@ -174,8 +197,13 @@ export class MultiTierRateManagerService {
   /**
    * Apply emergency mode across all tiers
    */
-  async activateEmergencyMode(reason: string, severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'): Promise<void> {
-    this.logger.warn(`Activating emergency mode: ${reason} (Severity: ${severity})`);
+  async activateEmergencyMode(
+    reason: string,
+    severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL",
+  ): Promise<void> {
+    this.logger.warn(
+      `Activating emergency mode: ${reason} (Severity: ${severity})`,
+    );
 
     try {
       const emergencyConfig = this.getEmergencyConfiguration(severity);
@@ -184,16 +212,19 @@ export class MultiTierRateManagerService {
         this.userTierManager.activateEmergencyMode(emergencyConfig),
         this.apiTierManager.activateEmergencyMode(emergencyConfig),
         this.operationTierManager.activateEmergencyMode(emergencyConfig),
-        this.globalTierManager.activateEmergencyMode(emergencyConfig)
+        this.globalTierManager.activateEmergencyMode(emergencyConfig),
       ]);
 
       // Update coordination engine for emergency mode
-      await this.coordinationEngine.activateEmergencyCoordination(emergencyConfig);
+      await this.coordinationEngine.activateEmergencyCoordination(
+        emergencyConfig,
+      );
 
-      this.logger.warn('Emergency mode activated successfully across all tiers');
-
+      this.logger.warn(
+        "Emergency mode activated successfully across all tiers",
+      );
     } catch (error) {
-      this.logger.error('Failed to activate emergency mode', error);
+      this.logger.error("Failed to activate emergency mode", error);
       throw error;
     }
   }
@@ -202,22 +233,23 @@ export class MultiTierRateManagerService {
    * Deactivate emergency mode and restore normal operations
    */
   async deactivateEmergencyMode(): Promise<void> {
-    this.logger.log('Deactivating emergency mode and restoring normal operations');
+    this.logger.log(
+      "Deactivating emergency mode and restoring normal operations",
+    );
 
     try {
       await Promise.all([
         this.userTierManager.deactivateEmergencyMode(),
         this.apiTierManager.deactivateEmergencyMode(),
         this.operationTierManager.deactivateEmergencyMode(),
-        this.globalTierManager.deactivateEmergencyMode()
+        this.globalTierManager.deactivateEmergencyMode(),
       ]);
 
       await this.coordinationEngine.deactivateEmergencyCoordination();
 
-      this.logger.log('Emergency mode deactivated successfully');
-
+      this.logger.log("Emergency mode deactivated successfully");
     } catch (error) {
-      this.logger.error('Failed to deactivate emergency mode', error);
+      this.logger.error("Failed to deactivate emergency mode", error);
       throw error;
     }
   }
@@ -233,7 +265,7 @@ export class MultiTierRateManagerService {
    * Initialize the multi-tier framework
    */
   private initializeMultiTierFramework(): void {
-    this.logger.log('Initializing Multi-Tier Rate Management Framework');
+    this.logger.log("Initializing Multi-Tier Rate Management Framework");
 
     // Start performance monitoring
     setInterval(() => {
@@ -250,29 +282,34 @@ export class MultiTierRateManagerService {
       this.dynamicAdjuster.monitorAndAdjust();
     }, 10000); // Monitor every 10 seconds
 
-    this.logger.log('Multi-Tier Rate Management Framework initialized successfully');
+    this.logger.log(
+      "Multi-Tier Rate Management Framework initialized successfully",
+    );
   }
 
   /**
    * Create fail-safe evaluation result
    */
-  private createFailSafeEvaluation(context: RateLimitContext, processingTime: number): MultiTierEvaluationResult {
+  private createFailSafeEvaluation(
+    context: RateLimitContext,
+    processingTime: number,
+  ): MultiTierEvaluationResult {
     return {
-      decision: 'ALLOW',
-      reason: 'Multi-tier evaluation failed - allowing with monitoring',
+      decision: "ALLOW",
+      reason: "Multi-tier evaluation failed - allowing with monitoring",
       confidence: 0.5,
-      riskLevel: 'MEDIUM',
-      recommendedAction: 'ALLOW_WITH_MONITORING',
+      riskLevel: "MEDIUM",
+      recommendedAction: "ALLOW_WITH_MONITORING",
       processingTime,
       tierResults: {
         user: { allowed: true, confidence: 0.5, violations: [] },
         api: { allowed: true, confidence: 0.5, violations: [] },
         operation: { allowed: true, confidence: 0.5, violations: [] },
-        global: { allowed: true, confidence: 0.5, violations: [] }
+        global: { allowed: true, confidence: 0.5, violations: [] },
       },
       coordinationApplied: false,
       burstHandlingApplied: false,
-      dynamicAdjustmentsApplied: false
+      dynamicAdjustmentsApplied: false,
     };
   }
 
@@ -283,32 +320,40 @@ export class MultiTierRateManagerService {
     const baseConfig = this.configuration.globalLimits.emergencyMode;
 
     const severityMultipliers = {
-      'LOW': 0.8,
-      'MEDIUM': 0.6,
-      'HIGH': 0.4,
-      'CRITICAL': 0.2
+      LOW: 0.8,
+      MEDIUM: 0.6,
+      HIGH: 0.4,
+      CRITICAL: 0.2,
     };
 
-    const multiplier = severityMultipliers[severity as keyof typeof severityMultipliers] || 0.5;
+    const multiplier =
+      severityMultipliers[severity as keyof typeof severityMultipliers] || 0.5;
 
     return {
       ...baseConfig,
       restrictionLevel: multiplier,
       durationMinutes: baseConfig.durationMinutes * (2 - multiplier), // Longer for more severe
-      allowedOperations: severity === 'CRITICAL' ? ['health-check', 'emergency'] : baseConfig.allowedOperations
+      allowedOperations:
+        severity === "CRITICAL"
+          ? ["health-check", "emergency"]
+          : baseConfig.allowedOperations,
     };
   }
 
   /**
    * Calculate overall health across all tiers
    */
-  private calculateOverallHealth(...states: any[]): 'HEALTHY' | 'DEGRADED' | 'UNHEALTHY' {
-    const healthyCount = states.filter(state => state.health === 'HEALTHY').length;
+  private calculateOverallHealth(
+    ...states: any[]
+  ): "HEALTHY" | "DEGRADED" | "UNHEALTHY" {
+    const healthyCount = states.filter(
+      (state) => state.health === "HEALTHY",
+    ).length;
     const totalCount = states.length;
 
-    if (healthyCount === totalCount) return 'HEALTHY';
-    if (healthyCount >= totalCount / 2) return 'DEGRADED';
-    return 'UNHEALTHY';
+    if (healthyCount === totalCount) return "HEALTHY";
+    if (healthyCount >= totalCount / 2) return "DEGRADED";
+    return "UNHEALTHY";
   }
 }
 
@@ -321,7 +366,9 @@ class UserTierManager {
 
   constructor(private readonly userLimits: UserRateLimits) {}
 
-  async evaluateUserLimits(context: RateLimitContext): Promise<TierEvaluationResult> {
+  async evaluateUserLimits(
+    context: RateLimitContext,
+  ): Promise<TierEvaluationResult> {
     const userId = context.userId;
     const usage = this.getOrCreateUsageTracking(userId);
 
@@ -333,37 +380,37 @@ class UserTierManager {
 
     if (usage.requestsThisSecond >= effectiveLimits.requestsPerSecond) {
       violations.push({
-        type: 'USER_REQUESTS_PER_SECOND',
+        type: "USER_REQUESTS_PER_SECOND",
         current: usage.requestsThisSecond,
         limit: effectiveLimits.requestsPerSecond,
-        severity: 'MEDIUM'
+        severity: "MEDIUM",
       });
     }
 
     if (usage.requestsThisMinute >= effectiveLimits.requestsPerMinute) {
       violations.push({
-        type: 'USER_REQUESTS_PER_MINUTE',
+        type: "USER_REQUESTS_PER_MINUTE",
         current: usage.requestsThisMinute,
         limit: effectiveLimits.requestsPerMinute,
-        severity: 'HIGH'
+        severity: "HIGH",
       });
     }
 
     if (usage.burstCount >= effectiveLimits.burstLimit) {
       violations.push({
-        type: 'USER_BURST_LIMIT',
+        type: "USER_BURST_LIMIT",
         current: usage.burstCount,
         limit: effectiveLimits.burstLimit,
-        severity: 'HIGH'
+        severity: "HIGH",
       });
     }
 
     if (usage.concurrentConnections >= effectiveLimits.concurrentConnections) {
       violations.push({
-        type: 'USER_CONCURRENT_CONNECTIONS',
+        type: "USER_CONCURRENT_CONNECTIONS",
         current: usage.concurrentConnections,
         limit: effectiveLimits.concurrentConnections,
-        severity: 'CRITICAL'
+        severity: "CRITICAL",
       });
     }
 
@@ -372,12 +419,18 @@ class UserTierManager {
       confidence: this.calculateConfidence(usage, effectiveLimits, violations),
       violations,
       utilization: this.calculateUtilization(usage, effectiveLimits),
-      nextAllowedTime: this.calculateNextAllowedTime(violations, effectiveLimits),
-      recommendedAction: this.getRecommendedAction(violations)
+      nextAllowedTime: this.calculateNextAllowedTime(
+        violations,
+        effectiveLimits,
+      ),
+      recommendedAction: this.getRecommendedAction(violations),
     };
   }
 
-  async updateUsage(context: RateLimitContext, allowed: boolean): Promise<void> {
+  async updateUsage(
+    context: RateLimitContext,
+    allowed: boolean,
+  ): Promise<void> {
     const userId = context.userId;
     const usage = this.getOrCreateUsageTracking(userId);
 
@@ -396,10 +449,13 @@ class UserTierManager {
     this.updateBurstTracking(usage);
 
     // Update concurrent connections
-    if (context.operation === 'connect') {
+    if (context.operation === "connect") {
       usage.concurrentConnections++;
-    } else if (context.operation === 'disconnect') {
-      usage.concurrentConnections = Math.max(0, usage.concurrentConnections - 1);
+    } else if (context.operation === "disconnect") {
+      usage.concurrentConnections = Math.max(
+        0,
+        usage.concurrentConnections - 1,
+      );
     }
   }
 
@@ -411,17 +467,17 @@ class UserTierManager {
       currentUsage: usage,
       limits: this.getEffectiveUserLimits(context),
       health: this.calculateUserHealth(usage),
-      lastActivity: new Date()
+      lastActivity: new Date(),
     };
   }
 
   async activateEmergencyMode(config: EmergencyModeConfig): Promise<void> {
-    this.logger.warn('Activating emergency mode for user tier');
+    this.logger.warn("Activating emergency mode for user tier");
     // Implementation for emergency mode
   }
 
   async deactivateEmergencyMode(): Promise<void> {
-    this.logger.log('Deactivating emergency mode for user tier');
+    this.logger.log("Deactivating emergency mode for user tier");
     // Implementation for deactivating emergency mode
   }
 
@@ -437,13 +493,15 @@ class UserTierManager {
         concurrentConnections: 0,
         successfulRequests: 0,
         rejectedRequests: 0,
-        lastReset: new Date()
+        lastReset: new Date(),
       });
     }
     return this.usageTracking.get(userId)!;
   }
 
-  private getEffectiveUserLimits(context: RateLimitContext): EffectiveUserLimits {
+  private getEffectiveUserLimits(
+    context: RateLimitContext,
+  ): EffectiveUserLimits {
     const baseLimits = this.userLimits;
 
     // Apply role-based limits
@@ -453,72 +511,105 @@ class UserTierManager {
     for (const role of userRoles) {
       if (baseLimits.byRole[role]) {
         const roleLimits = baseLimits.byRole[role];
-        effectiveLimits.requestsPerSecond = Math.max(effectiveLimits.requestsPerSecond, roleLimits.requestsPerSecond);
-        effectiveLimits.requestsPerMinute = Math.max(effectiveLimits.requestsPerMinute, roleLimits.requestsPerMinute);
-        effectiveLimits.burstLimit = Math.max(effectiveLimits.burstLimit, roleLimits.burstLimit);
+        effectiveLimits.requestsPerSecond = Math.max(
+          effectiveLimits.requestsPerSecond,
+          roleLimits.requestsPerSecond,
+        );
+        effectiveLimits.requestsPerMinute = Math.max(
+          effectiveLimits.requestsPerMinute,
+          roleLimits.requestsPerMinute,
+        );
+        effectiveLimits.burstLimit = Math.max(
+          effectiveLimits.burstLimit,
+          roleLimits.burstLimit,
+        );
       }
     }
 
     return effectiveLimits;
   }
 
-  private calculateConfidence(usage: UserUsageTracking, limits: EffectiveUserLimits, violations: LimitViolation[]): number {
+  private calculateConfidence(
+    usage: UserUsageTracking,
+    limits: EffectiveUserLimits,
+    violations: LimitViolation[],
+  ): number {
     if (violations.length === 0) return 1.0;
 
-    const utilizationFactor = Math.min(1.0, (usage.requestsThisMinute / limits.requestsPerMinute));
+    const utilizationFactor = Math.min(
+      1.0,
+      usage.requestsThisMinute / limits.requestsPerMinute,
+    );
     const violationSeverity = violations.reduce((max, v) => {
-      const severityValues = { 'LOW': 0.2, 'MEDIUM': 0.5, 'HIGH': 0.8, 'CRITICAL': 1.0 };
-      return Math.max(max, severityValues[v.severity as keyof typeof severityValues] || 0.5);
+      const severityValues = {
+        LOW: 0.2,
+        MEDIUM: 0.5,
+        HIGH: 0.8,
+        CRITICAL: 1.0,
+      };
+      return Math.max(
+        max,
+        severityValues[v.severity as keyof typeof severityValues] || 0.5,
+      );
     }, 0);
 
-    return Math.max(0.1, 1.0 - (utilizationFactor * violationSeverity));
+    return Math.max(0.1, 1.0 - utilizationFactor * violationSeverity);
   }
 
-  private calculateUtilization(usage: UserUsageTracking, limits: EffectiveUserLimits): number {
+  private calculateUtilization(
+    usage: UserUsageTracking,
+    limits: EffectiveUserLimits,
+  ): number {
     const utilizations = [
       usage.requestsThisSecond / limits.requestsPerSecond,
       usage.requestsThisMinute / limits.requestsPerMinute,
       usage.requestsThisHour / limits.requestsPerHour,
       usage.burstCount / limits.burstLimit,
-      usage.concurrentConnections / limits.concurrentConnections
+      usage.concurrentConnections / limits.concurrentConnections,
     ];
 
     return Math.max(...utilizations) * 100;
   }
 
-  private calculateNextAllowedTime(violations: LimitViolation[], limits: EffectiveUserLimits): Date | null {
+  private calculateNextAllowedTime(
+    violations: LimitViolation[],
+    limits: EffectiveUserLimits,
+  ): Date | null {
     if (violations.length === 0) return null;
 
     // Find the most restrictive violation
     const mostRestrictive = violations.reduce((worst, current) => {
-      const severityOrder = { 'LOW': 1, 'MEDIUM': 2, 'HIGH': 3, 'CRITICAL': 4 };
+      const severityOrder = { LOW: 1, MEDIUM: 2, HIGH: 3, CRITICAL: 4 };
       return severityOrder[current.severity as keyof typeof severityOrder] >
-             severityOrder[worst.severity as keyof typeof severityOrder] ? current : worst;
+        severityOrder[worst.severity as keyof typeof severityOrder]
+        ? current
+        : worst;
     });
 
     // Calculate wait time based on violation type
     const waitTimes = {
-      'USER_REQUESTS_PER_SECOND': 1000,
-      'USER_REQUESTS_PER_MINUTE': 60000,
-      'USER_REQUESTS_PER_HOUR': 3600000,
-      'USER_BURST_LIMIT': 5000,
-      'USER_CONCURRENT_CONNECTIONS': 2000
+      USER_REQUESTS_PER_SECOND: 1000,
+      USER_REQUESTS_PER_MINUTE: 60000,
+      USER_REQUESTS_PER_HOUR: 3600000,
+      USER_BURST_LIMIT: 5000,
+      USER_CONCURRENT_CONNECTIONS: 2000,
     };
 
-    const waitTime = waitTimes[mostRestrictive.type as keyof typeof waitTimes] || 60000;
+    const waitTime =
+      waitTimes[mostRestrictive.type as keyof typeof waitTimes] || 60000;
     return new Date(Date.now() + waitTime);
   }
 
   private getRecommendedAction(violations: LimitViolation[]): string {
-    if (violations.length === 0) return 'ALLOW';
+    if (violations.length === 0) return "ALLOW";
 
-    const hasCritical = violations.some(v => v.severity === 'CRITICAL');
-    if (hasCritical) return 'DENY';
+    const hasCritical = violations.some((v) => v.severity === "CRITICAL");
+    if (hasCritical) return "DENY";
 
-    const hasHigh = violations.some(v => v.severity === 'HIGH');
-    if (hasHigh) return 'THROTTLE';
+    const hasHigh = violations.some((v) => v.severity === "HIGH");
+    if (hasHigh) return "THROTTLE";
 
-    return 'QUEUE';
+    return "QUEUE";
   }
 
   private updateBurstTracking(usage: UserUsageTracking): void {
@@ -531,18 +622,23 @@ class UserTierManager {
       usage.lastReset = new Date(now);
     } else {
       // Increment burst count if requests are coming rapidly
-      if (timeSinceLastReset < 5000) { // Within 5 seconds
+      if (timeSinceLastReset < 5000) {
+        // Within 5 seconds
         usage.burstCount++;
       }
     }
   }
 
-  private calculateUserHealth(usage: UserUsageTracking): 'HEALTHY' | 'DEGRADED' | 'UNHEALTHY' {
-    const successRate = usage.successfulRequests / (usage.successfulRequests + usage.rejectedRequests);
+  private calculateUserHealth(
+    usage: UserUsageTracking,
+  ): "HEALTHY" | "DEGRADED" | "UNHEALTHY" {
+    const successRate =
+      usage.successfulRequests /
+      (usage.successfulRequests + usage.rejectedRequests);
 
-    if (successRate > 0.9) return 'HEALTHY';
-    if (successRate > 0.7) return 'DEGRADED';
-    return 'UNHEALTHY';
+    if (successRate > 0.9) return "HEALTHY";
+    if (successRate > 0.7) return "DEGRADED";
+    return "UNHEALTHY";
   }
 }
 
@@ -555,7 +651,9 @@ class APITierManager {
 
   constructor(private readonly apiLimits: APIRateLimits) {}
 
-  async evaluateAPILimits(context: RateLimitContext): Promise<TierEvaluationResult> {
+  async evaluateAPILimits(
+    context: RateLimitContext,
+  ): Promise<TierEvaluationResult> {
     const endpointKey = `${context.method}:${context.apiEndpoint}`;
     const usage = this.getOrCreateEndpointUsage(endpointKey);
 
@@ -565,43 +663,57 @@ class APITierManager {
     if (endpointLimits) {
       if (usage.requestsThisSecond >= endpointLimits.requestsPerSecond) {
         violations.push({
-          type: 'API_ENDPOINT_REQUESTS_PER_SECOND',
+          type: "API_ENDPOINT_REQUESTS_PER_SECOND",
           current: usage.requestsThisSecond,
           limit: endpointLimits.requestsPerSecond,
-          severity: this.calculateSeverityBasedOnSecurity(endpointLimits.securityLevel)
+          severity: this.calculateSeverityBasedOnSecurity(
+            endpointLimits.securityLevel,
+          ),
         });
       }
 
       if (usage.requestsThisMinute >= endpointLimits.requestsPerMinute) {
         violations.push({
-          type: 'API_ENDPOINT_REQUESTS_PER_MINUTE',
+          type: "API_ENDPOINT_REQUESTS_PER_MINUTE",
           current: usage.requestsThisMinute,
           limit: endpointLimits.requestsPerMinute,
-          severity: this.calculateSeverityBasedOnSecurity(endpointLimits.securityLevel)
+          severity: this.calculateSeverityBasedOnSecurity(
+            endpointLimits.securityLevel,
+          ),
         });
       }
 
       if (usage.burstRequests >= endpointLimits.burstLimit) {
         violations.push({
-          type: 'API_ENDPOINT_BURST_LIMIT',
+          type: "API_ENDPOINT_BURST_LIMIT",
           current: usage.burstRequests,
           limit: endpointLimits.burstLimit,
-          severity: 'HIGH'
+          severity: "HIGH",
         });
       }
     }
 
     return {
       allowed: violations.length === 0,
-      confidence: this.calculateAPIConfidence(usage, endpointLimits, violations),
+      confidence: this.calculateAPIConfidence(
+        usage,
+        endpointLimits,
+        violations,
+      ),
       violations,
       utilization: this.calculateAPIUtilization(usage, endpointLimits),
-      nextAllowedTime: this.calculateAPINextAllowedTime(violations, endpointLimits),
-      recommendedAction: this.getAPIRecommendedAction(violations, context)
+      nextAllowedTime: this.calculateAPINextAllowedTime(
+        violations,
+        endpointLimits,
+      ),
+      recommendedAction: this.getAPIRecommendedAction(violations, context),
     };
   }
 
-  async updateUsage(context: RateLimitContext, allowed: boolean): Promise<void> {
+  async updateUsage(
+    context: RateLimitContext,
+    allowed: boolean,
+  ): Promise<void> {
     const endpointKey = `${context.method}:${context.apiEndpoint}`;
     const usage = this.getOrCreateEndpointUsage(endpointKey);
 
@@ -620,7 +732,9 @@ class APITierManager {
 
     // Update payload size tracking
     usage.totalPayloadSize += context.payloadSize || 0;
-    usage.averagePayloadSize = usage.totalPayloadSize / (usage.successfulRequests + usage.rejectedRequests);
+    usage.averagePayloadSize =
+      usage.totalPayloadSize /
+      (usage.successfulRequests + usage.rejectedRequests);
   }
 
   async getState(context: RateLimitContext): Promise<APITierState> {
@@ -633,17 +747,17 @@ class APITierManager {
       currentUsage: usage,
       limits: this.findMatchingEndpointLimits(context),
       health: this.calculateAPIHealth(usage),
-      lastActivity: new Date()
+      lastActivity: new Date(),
     };
   }
 
   async activateEmergencyMode(config: EmergencyModeConfig): Promise<void> {
-    this.logger.warn('Activating emergency mode for API tier');
+    this.logger.warn("Activating emergency mode for API tier");
     // Implementation for emergency mode
   }
 
   async deactivateEmergencyMode(): Promise<void> {
-    this.logger.log('Deactivating emergency mode for API tier');
+    this.logger.log("Deactivating emergency mode for API tier");
     // Implementation for deactivating emergency mode
   }
 
@@ -659,7 +773,7 @@ class APITierManager {
         rejectedRequests: 0,
         totalPayloadSize: 0,
         averagePayloadSize: 0,
-        lastReset: new Date()
+        lastReset: new Date(),
       });
     }
     return this.endpointUsage.get(endpointKey)!;
@@ -680,7 +794,9 @@ class APITierManager {
 
     // Method-based limits
     if (this.apiLimits.methodLimits[context.method]) {
-      return this.convertMethodLimitsToEndpointLimits(this.apiLimits.methodLimits[context.method]);
+      return this.convertMethodLimitsToEndpointLimits(
+        this.apiLimits.methodLimits[context.method],
+      );
     }
 
     return null;
@@ -691,53 +807,77 @@ class APITierManager {
       requestsPerSecond: methodLimits.requestsPerSecond,
       requestsPerMinute: methodLimits.requestsPerSecond * 60,
       burstLimit: methodLimits.burstLimit,
-      securityLevel: 'MEDIUM' as SecurityLevel
+      securityLevel: "MEDIUM" as SecurityLevel,
     };
   }
 
-  private calculateSeverityBasedOnSecurity(securityLevel: SecurityLevel): string {
+  private calculateSeverityBasedOnSecurity(
+    securityLevel: SecurityLevel,
+  ): string {
     const severityMap = {
-      'LOW': 'LOW',
-      'MEDIUM': 'MEDIUM',
-      'HIGH': 'HIGH',
-      'CRITICAL': 'CRITICAL'
+      LOW: "LOW",
+      MEDIUM: "MEDIUM",
+      HIGH: "HIGH",
+      CRITICAL: "CRITICAL",
     };
-    return severityMap[securityLevel] || 'MEDIUM';
+    return severityMap[securityLevel] || "MEDIUM";
   }
 
-  private calculateAPIConfidence(usage: EndpointUsageTracking, limits: any, violations: LimitViolation[]): number {
+  private calculateAPIConfidence(
+    usage: EndpointUsageTracking,
+    limits: any,
+    violations: LimitViolation[],
+  ): number {
     if (!limits || violations.length === 0) return 1.0;
 
-    const utilizationFactor = Math.min(1.0, usage.requestsThisMinute / limits.requestsPerMinute);
-    const errorRate = usage.rejectedRequests / (usage.successfulRequests + usage.rejectedRequests);
+    const utilizationFactor = Math.min(
+      1.0,
+      usage.requestsThisMinute / limits.requestsPerMinute,
+    );
+    const errorRate =
+      usage.rejectedRequests /
+      (usage.successfulRequests + usage.rejectedRequests);
 
     return Math.max(0.1, 1.0 - (utilizationFactor * 0.7 + errorRate * 0.3));
   }
 
-  private calculateAPIUtilization(usage: EndpointUsageTracking, limits: any): number {
+  private calculateAPIUtilization(
+    usage: EndpointUsageTracking,
+    limits: any,
+  ): number {
     if (!limits) return 0;
 
     return Math.max(
       (usage.requestsThisSecond / limits.requestsPerSecond) * 100,
       (usage.requestsThisMinute / limits.requestsPerMinute) * 100,
-      (usage.burstRequests / limits.burstLimit) * 100
+      (usage.burstRequests / limits.burstLimit) * 100,
     );
   }
 
-  private calculateAPINextAllowedTime(violations: LimitViolation[], limits: any): Date | null {
+  private calculateAPINextAllowedTime(
+    violations: LimitViolation[],
+    limits: any,
+  ): Date | null {
     if (violations.length === 0) return null;
 
-    const waitTime = violations.some(v => v.type.includes('SECOND')) ? 1000 : 60000;
+    const waitTime = violations.some((v) => v.type.includes("SECOND"))
+      ? 1000
+      : 60000;
     return new Date(Date.now() + waitTime);
   }
 
-  private getAPIRecommendedAction(violations: LimitViolation[], context: RateLimitContext): string {
-    if (violations.length === 0) return 'ALLOW';
+  private getAPIRecommendedAction(
+    violations: LimitViolation[],
+    context: RateLimitContext,
+  ): string {
+    if (violations.length === 0) return "ALLOW";
 
-    const hasSecurityViolation = violations.some(v => v.severity === 'CRITICAL');
-    if (hasSecurityViolation) return 'DENY';
+    const hasSecurityViolation = violations.some(
+      (v) => v.severity === "CRITICAL",
+    );
+    if (hasSecurityViolation) return "DENY";
 
-    return 'THROTTLE';
+    return "THROTTLE";
   }
 
   private updateAPIBurstTracking(usage: EndpointUsageTracking): void {
@@ -752,12 +892,16 @@ class APITierManager {
     }
   }
 
-  private calculateAPIHealth(usage: EndpointUsageTracking): 'HEALTHY' | 'DEGRADED' | 'UNHEALTHY' {
-    const successRate = usage.successfulRequests / (usage.successfulRequests + usage.rejectedRequests);
+  private calculateAPIHealth(
+    usage: EndpointUsageTracking,
+  ): "HEALTHY" | "DEGRADED" | "UNHEALTHY" {
+    const successRate =
+      usage.successfulRequests /
+      (usage.successfulRequests + usage.rejectedRequests);
 
-    if (successRate > 0.95) return 'HEALTHY';
-    if (successRate > 0.8) return 'DEGRADED';
-    return 'UNHEALTHY';
+    if (successRate > 0.95) return "HEALTHY";
+    if (successRate > 0.8) return "DEGRADED";
+    return "UNHEALTHY";
   }
 }
 
@@ -770,7 +914,9 @@ class OperationTierManager {
 
   constructor(private readonly operationLimits: OperationRateLimits) {}
 
-  async evaluateOperationLimits(context: RateLimitContext): Promise<TierEvaluationResult> {
+  async evaluateOperationLimits(
+    context: RateLimitContext,
+  ): Promise<TierEvaluationResult> {
     const operationKey = context.operation;
     const usage = this.getOrCreateOperationUsage(operationKey);
 
@@ -779,28 +925,28 @@ class OperationTierManager {
 
     if (usage.requestsThisSecond >= limits.requestsPerSecond) {
       violations.push({
-        type: 'OPERATION_REQUESTS_PER_SECOND',
+        type: "OPERATION_REQUESTS_PER_SECOND",
         current: usage.requestsThisSecond,
         limit: limits.requestsPerSecond,
-        severity: this.calculateOperationSeverity(context)
+        severity: this.calculateOperationSeverity(context),
       });
     }
 
     if (usage.concurrentExecutions >= limits.concurrentExecutions) {
       violations.push({
-        type: 'OPERATION_CONCURRENT_EXECUTIONS',
+        type: "OPERATION_CONCURRENT_EXECUTIONS",
         current: usage.concurrentExecutions,
         limit: limits.concurrentExecutions,
-        severity: 'HIGH'
+        severity: "HIGH",
       });
     }
 
     if (usage.averageExecutionTime > limits.maxExecutionTime) {
       violations.push({
-        type: 'OPERATION_EXECUTION_TIME',
+        type: "OPERATION_EXECUTION_TIME",
         current: usage.averageExecutionTime,
         limit: limits.maxExecutionTime,
-        severity: 'MEDIUM'
+        severity: "MEDIUM",
       });
     }
 
@@ -809,12 +955,21 @@ class OperationTierManager {
       confidence: this.calculateOperationConfidence(usage, limits, violations),
       violations,
       utilization: this.calculateOperationUtilization(usage, limits),
-      nextAllowedTime: this.calculateOperationNextAllowedTime(violations, limits),
-      recommendedAction: this.getOperationRecommendedAction(violations, context)
+      nextAllowedTime: this.calculateOperationNextAllowedTime(
+        violations,
+        limits,
+      ),
+      recommendedAction: this.getOperationRecommendedAction(
+        violations,
+        context,
+      ),
     };
   }
 
-  async updateUsage(context: RateLimitContext, allowed: boolean): Promise<void> {
+  async updateUsage(
+    context: RateLimitContext,
+    allowed: boolean,
+  ): Promise<void> {
     const operationKey = context.operation;
     const usage = this.getOrCreateOperationUsage(operationKey);
 
@@ -823,10 +978,13 @@ class OperationTierManager {
 
     if (allowed) {
       usage.successfulExecutions++;
-      if (context.operation === 'start') {
+      if (context.operation === "start") {
         usage.concurrentExecutions++;
-      } else if (context.operation === 'complete') {
-        usage.concurrentExecutions = Math.max(0, usage.concurrentExecutions - 1);
+      } else if (context.operation === "complete") {
+        usage.concurrentExecutions = Math.max(
+          0,
+          usage.concurrentExecutions - 1,
+        );
       }
     } else {
       usage.rejectedExecutions++;
@@ -835,7 +993,8 @@ class OperationTierManager {
     // Update execution time tracking
     if (context.expectedComplexity) {
       usage.totalExecutionTime += context.expectedComplexity;
-      usage.averageExecutionTime = usage.totalExecutionTime / (usage.successfulExecutions + 1);
+      usage.averageExecutionTime =
+        usage.totalExecutionTime / (usage.successfulExecutions + 1);
     }
   }
 
@@ -848,21 +1007,23 @@ class OperationTierManager {
       currentUsage: usage,
       limits: this.getOperationLimits(context),
       health: this.calculateOperationHealth(usage),
-      lastActivity: new Date()
+      lastActivity: new Date(),
     };
   }
 
   async activateEmergencyMode(config: EmergencyModeConfig): Promise<void> {
-    this.logger.warn('Activating emergency mode for operation tier');
+    this.logger.warn("Activating emergency mode for operation tier");
     // Implementation for emergency mode
   }
 
   async deactivateEmergencyMode(): Promise<void> {
-    this.logger.log('Deactivating emergency mode for operation tier');
+    this.logger.log("Deactivating emergency mode for operation tier");
     // Implementation for deactivating emergency mode
   }
 
-  private getOrCreateOperationUsage(operationKey: string): OperationUsageTracking {
+  private getOrCreateOperationUsage(
+    operationKey: string,
+  ): OperationUsageTracking {
     if (!this.operationUsage.has(operationKey)) {
       this.operationUsage.set(operationKey, {
         operation: operationKey,
@@ -873,7 +1034,7 @@ class OperationTierManager {
         rejectedExecutions: 0,
         totalExecutionTime: 0,
         averageExecutionTime: 0,
-        lastReset: new Date()
+        lastReset: new Date(),
       });
     }
     return this.operationUsage.get(operationKey)!;
@@ -890,60 +1051,100 @@ class OperationTierManager {
     return this.operationLimits.complexityLimits[complexity];
   }
 
-  private determineOperationComplexity(context: RateLimitContext): 'lowComplexity' | 'mediumComplexity' | 'highComplexity' | 'criticalComplexity' {
-    if (context.securityLevel === 'CRITICAL') return 'criticalComplexity';
-    if (context.riskLevel === 'HIGH' || context.riskLevel === 'CRITICAL') return 'highComplexity';
-    if (context.expectedComplexity && context.expectedComplexity > 1000) return 'highComplexity';
-    if (context.expectedComplexity && context.expectedComplexity > 500) return 'mediumComplexity';
-    return 'lowComplexity';
+  private determineOperationComplexity(
+    context: RateLimitContext,
+  ):
+    | "lowComplexity"
+    | "mediumComplexity"
+    | "highComplexity"
+    | "criticalComplexity" {
+    if (context.securityLevel === "CRITICAL") return "criticalComplexity";
+    if (context.riskLevel === "HIGH" || context.riskLevel === "CRITICAL")
+      return "highComplexity";
+    if (context.expectedComplexity && context.expectedComplexity > 1000)
+      return "highComplexity";
+    if (context.expectedComplexity && context.expectedComplexity > 500)
+      return "mediumComplexity";
+    return "lowComplexity";
   }
 
   private calculateOperationSeverity(context: RateLimitContext): string {
-    if (context.riskLevel === 'CRITICAL') return 'CRITICAL';
-    if (context.riskLevel === 'HIGH') return 'HIGH';
-    if (context.securityLevel === 'HIGH' || context.securityLevel === 'CRITICAL') return 'HIGH';
-    return 'MEDIUM';
+    if (context.riskLevel === "CRITICAL") return "CRITICAL";
+    if (context.riskLevel === "HIGH") return "HIGH";
+    if (
+      context.securityLevel === "HIGH" ||
+      context.securityLevel === "CRITICAL"
+    )
+      return "HIGH";
+    return "MEDIUM";
   }
 
-  private calculateOperationConfidence(usage: OperationUsageTracking, limits: any, violations: LimitViolation[]): number {
+  private calculateOperationConfidence(
+    usage: OperationUsageTracking,
+    limits: any,
+    violations: LimitViolation[],
+  ): number {
     if (violations.length === 0) return 1.0;
 
-    const executionSuccessRate = usage.successfulExecutions / (usage.successfulExecutions + usage.rejectedExecutions);
-    const concurrencyUtilization = usage.concurrentExecutions / limits.concurrentExecutions;
+    const executionSuccessRate =
+      usage.successfulExecutions /
+      (usage.successfulExecutions + usage.rejectedExecutions);
+    const concurrencyUtilization =
+      usage.concurrentExecutions / limits.concurrentExecutions;
 
-    return Math.max(0.1, executionSuccessRate * (1 - concurrencyUtilization * 0.5));
-  }
-
-  private calculateOperationUtilization(usage: OperationUsageTracking, limits: any): number {
     return Math.max(
-      (usage.requestsThisSecond / limits.requestsPerSecond) * 100,
-      (usage.concurrentExecutions / limits.concurrentExecutions) * 100
+      0.1,
+      executionSuccessRate * (1 - concurrencyUtilization * 0.5),
     );
   }
 
-  private calculateOperationNextAllowedTime(violations: LimitViolation[], limits: any): Date | null {
+  private calculateOperationUtilization(
+    usage: OperationUsageTracking,
+    limits: any,
+  ): number {
+    return Math.max(
+      (usage.requestsThisSecond / limits.requestsPerSecond) * 100,
+      (usage.concurrentExecutions / limits.concurrentExecutions) * 100,
+    );
+  }
+
+  private calculateOperationNextAllowedTime(
+    violations: LimitViolation[],
+    limits: any,
+  ): Date | null {
     if (violations.length === 0) return null;
 
-    const hasExecutionTimeViolation = violations.some(v => v.type === 'OPERATION_EXECUTION_TIME');
+    const hasExecutionTimeViolation = violations.some(
+      (v) => v.type === "OPERATION_EXECUTION_TIME",
+    );
     const waitTime = hasExecutionTimeViolation ? limits.maxExecutionTime : 5000;
     return new Date(Date.now() + waitTime);
   }
 
-  private getOperationRecommendedAction(violations: LimitViolation[], context: RateLimitContext): string {
-    if (violations.length === 0) return 'ALLOW';
+  private getOperationRecommendedAction(
+    violations: LimitViolation[],
+    context: RateLimitContext,
+  ): string {
+    if (violations.length === 0) return "ALLOW";
 
-    const hasConcurrencyViolation = violations.some(v => v.type === 'OPERATION_CONCURRENT_EXECUTIONS');
-    if (hasConcurrencyViolation) return 'QUEUE';
+    const hasConcurrencyViolation = violations.some(
+      (v) => v.type === "OPERATION_CONCURRENT_EXECUTIONS",
+    );
+    if (hasConcurrencyViolation) return "QUEUE";
 
-    return 'THROTTLE';
+    return "THROTTLE";
   }
 
-  private calculateOperationHealth(usage: OperationUsageTracking): 'HEALTHY' | 'DEGRADED' | 'UNHEALTHY' {
-    const successRate = usage.successfulExecutions / (usage.successfulExecutions + usage.rejectedExecutions);
+  private calculateOperationHealth(
+    usage: OperationUsageTracking,
+  ): "HEALTHY" | "DEGRADED" | "UNHEALTHY" {
+    const successRate =
+      usage.successfulExecutions /
+      (usage.successfulExecutions + usage.rejectedExecutions);
 
-    if (successRate > 0.9) return 'HEALTHY';
-    if (successRate > 0.75) return 'DEGRADED';
-    return 'UNHEALTHY';
+    if (successRate > 0.9) return "HEALTHY";
+    if (successRate > 0.75) return "DEGRADED";
+    return "UNHEALTHY";
   }
 }
 
@@ -962,49 +1163,58 @@ class GlobalTierManager {
       cpuUtilization: 0,
       memoryUtilization: 0,
       emergencyModeActive: false,
-      lastUpdated: new Date()
+      lastUpdated: new Date(),
     };
 
     this.startSystemMonitoring();
   }
 
-  async evaluateGlobalLimits(context: RateLimitContext): Promise<TierEvaluationResult> {
+  async evaluateGlobalLimits(
+    context: RateLimitContext,
+  ): Promise<TierEvaluationResult> {
     const violations: LimitViolation[] = [];
 
-    if (this.systemState.totalRequestsPerSecond >= this.globalLimits.systemWideRequestsPerSecond) {
+    if (
+      this.systemState.totalRequestsPerSecond >=
+      this.globalLimits.systemWideRequestsPerSecond
+    ) {
       violations.push({
-        type: 'GLOBAL_REQUESTS_PER_SECOND',
+        type: "GLOBAL_REQUESTS_PER_SECOND",
         current: this.systemState.totalRequestsPerSecond,
         limit: this.globalLimits.systemWideRequestsPerSecond,
-        severity: 'CRITICAL'
+        severity: "CRITICAL",
       });
     }
 
-    if (this.systemState.totalConcurrentConnections >= this.globalLimits.maxConcurrentConnections) {
+    if (
+      this.systemState.totalConcurrentConnections >=
+      this.globalLimits.maxConcurrentConnections
+    ) {
       violations.push({
-        type: 'GLOBAL_CONCURRENT_CONNECTIONS',
+        type: "GLOBAL_CONCURRENT_CONNECTIONS",
         current: this.systemState.totalConcurrentConnections,
         limit: this.globalLimits.maxConcurrentConnections,
-        severity: 'HIGH'
+        severity: "HIGH",
       });
     }
 
     if (this.systemState.queueSize >= this.globalLimits.maxQueueSize) {
       violations.push({
-        type: 'GLOBAL_QUEUE_SIZE',
+        type: "GLOBAL_QUEUE_SIZE",
         current: this.systemState.queueSize,
         limit: this.globalLimits.maxQueueSize,
-        severity: 'HIGH'
+        severity: "HIGH",
       });
     }
 
-    const systemLoad = this.systemState.cpuUtilization + this.systemState.memoryUtilization;
+    const systemLoad =
+      this.systemState.cpuUtilization + this.systemState.memoryUtilization;
     if (systemLoad >= this.globalLimits.circuitBreakerThreshold) {
       violations.push({
-        type: 'GLOBAL_SYSTEM_OVERLOAD',
+        type: "GLOBAL_SYSTEM_OVERLOAD",
         current: systemLoad,
         limit: this.globalLimits.circuitBreakerThreshold,
-        severity: 'CRITICAL'
+        severity: "CRITICAL",
       });
     }
 
@@ -1014,17 +1224,23 @@ class GlobalTierManager {
       violations,
       utilization: this.calculateGlobalUtilization(),
       nextAllowedTime: this.calculateGlobalNextAllowedTime(violations),
-      recommendedAction: this.getGlobalRecommendedAction(violations)
+      recommendedAction: this.getGlobalRecommendedAction(violations),
     };
   }
 
-  async updateUsage(context: RateLimitContext, allowed: boolean): Promise<void> {
+  async updateUsage(
+    context: RateLimitContext,
+    allowed: boolean,
+  ): Promise<void> {
     this.systemState.totalRequestsPerSecond++;
 
-    if (context.operation === 'connect') {
+    if (context.operation === "connect") {
       this.systemState.totalConcurrentConnections++;
-    } else if (context.operation === 'disconnect') {
-      this.systemState.totalConcurrentConnections = Math.max(0, this.systemState.totalConcurrentConnections - 1);
+    } else if (context.operation === "disconnect") {
+      this.systemState.totalConcurrentConnections = Math.max(
+        0,
+        this.systemState.totalConcurrentConnections - 1,
+      );
     }
 
     if (!allowed) {
@@ -1039,18 +1255,18 @@ class GlobalTierManager {
       systemState: this.systemState,
       limits: this.globalLimits,
       health: this.calculateGlobalHealth(),
-      lastActivity: new Date()
+      lastActivity: new Date(),
     };
   }
 
   async activateEmergencyMode(config: EmergencyModeConfig): Promise<void> {
-    this.logger.warn('Activating emergency mode for global tier');
+    this.logger.warn("Activating emergency mode for global tier");
     this.systemState.emergencyModeActive = true;
     // Additional emergency mode logic
   }
 
   async deactivateEmergencyMode(): Promise<void> {
-    this.logger.log('Deactivating emergency mode for global tier');
+    this.logger.log("Deactivating emergency mode for global tier");
     this.systemState.emergencyModeActive = false;
     // Additional deactivation logic
   }
@@ -1078,44 +1294,63 @@ class GlobalTierManager {
   private calculateGlobalConfidence(violations: LimitViolation[]): number {
     if (violations.length === 0) return 1.0;
 
-    const criticalViolations = violations.filter(v => v.severity === 'CRITICAL').length;
+    const criticalViolations = violations.filter(
+      (v) => v.severity === "CRITICAL",
+    ).length;
     if (criticalViolations > 0) return 0.1;
 
     return Math.max(0.3, 1.0 - violations.length * 0.2);
   }
 
   private calculateGlobalUtilization(): number {
-    const requestUtilization = this.systemState.totalRequestsPerSecond / this.globalLimits.systemWideRequestsPerSecond;
-    const connectionUtilization = this.systemState.totalConcurrentConnections / this.globalLimits.maxConcurrentConnections;
-    const queueUtilization = this.systemState.queueSize / this.globalLimits.maxQueueSize;
-    const systemUtilization = (this.systemState.cpuUtilization + this.systemState.memoryUtilization) / 200;
+    const requestUtilization =
+      this.systemState.totalRequestsPerSecond /
+      this.globalLimits.systemWideRequestsPerSecond;
+    const connectionUtilization =
+      this.systemState.totalConcurrentConnections /
+      this.globalLimits.maxConcurrentConnections;
+    const queueUtilization =
+      this.systemState.queueSize / this.globalLimits.maxQueueSize;
+    const systemUtilization =
+      (this.systemState.cpuUtilization + this.systemState.memoryUtilization) /
+      200;
 
-    return Math.max(requestUtilization, connectionUtilization, queueUtilization, systemUtilization) * 100;
+    return (
+      Math.max(
+        requestUtilization,
+        connectionUtilization,
+        queueUtilization,
+        systemUtilization,
+      ) * 100
+    );
   }
 
-  private calculateGlobalNextAllowedTime(violations: LimitViolation[]): Date | null {
+  private calculateGlobalNextAllowedTime(
+    violations: LimitViolation[],
+  ): Date | null {
     if (violations.length === 0) return null;
 
-    const hasCritical = violations.some(v => v.severity === 'CRITICAL');
+    const hasCritical = violations.some((v) => v.severity === "CRITICAL");
     const waitTime = hasCritical ? 60000 : 10000; // 1 minute for critical, 10 seconds for others
     return new Date(Date.now() + waitTime);
   }
 
   private getGlobalRecommendedAction(violations: LimitViolation[]): string {
-    if (violations.length === 0) return 'ALLOW';
+    if (violations.length === 0) return "ALLOW";
 
-    const hasCritical = violations.some(v => v.severity === 'CRITICAL');
-    if (hasCritical) return 'DENY';
+    const hasCritical = violations.some((v) => v.severity === "CRITICAL");
+    if (hasCritical) return "DENY";
 
-    return 'QUEUE';
+    return "QUEUE";
   }
 
-  private calculateGlobalHealth(): 'HEALTHY' | 'DEGRADED' | 'UNHEALTHY' {
-    const systemLoad = this.systemState.cpuUtilization + this.systemState.memoryUtilization;
+  private calculateGlobalHealth(): "HEALTHY" | "DEGRADED" | "UNHEALTHY" {
+    const systemLoad =
+      this.systemState.cpuUtilization + this.systemState.memoryUtilization;
 
-    if (systemLoad < 120) return 'HEALTHY';
-    if (systemLoad < 160) return 'DEGRADED';
-    return 'UNHEALTHY';
+    if (systemLoad < 120) return "HEALTHY";
+    if (systemLoad < 160) return "DEGRADED";
+    return "UNHEALTHY";
   }
 }
 
@@ -1125,16 +1360,23 @@ class GlobalTierManager {
 class TierCoordinationEngine {
   private readonly logger = new Logger(TierCoordinationEngine.name);
 
-  async coordinateEvaluations(context: RateLimitContext, results: any): Promise<MultiTierEvaluationResult> {
+  async coordinateEvaluations(
+    context: RateLimitContext,
+    results: any,
+  ): Promise<MultiTierEvaluationResult> {
     // Implement intelligent coordination logic
-    const allowedCount = Object.values(results).filter((r: any) => r.allowed).length;
+    const allowedCount = Object.values(results).filter(
+      (r: any) => r.allowed,
+    ).length;
     const totalCount = Object.values(results).length;
 
     const overallAllowed = allowedCount === totalCount;
-    const confidence = Math.min(...Object.values(results).map((r: any) => r.confidence));
+    const confidence = Math.min(
+      ...Object.values(results).map((r: any) => r.confidence),
+    );
 
     return {
-      decision: overallAllowed ? 'ALLOW' : 'DENY',
+      decision: overallAllowed ? "ALLOW" : "DENY",
       reason: `Multi-tier evaluation: ${allowedCount}/${totalCount} tiers passed`,
       confidence,
       riskLevel: this.calculateOverallRiskLevel(results),
@@ -1143,28 +1385,35 @@ class TierCoordinationEngine {
       tierResults: results,
       coordinationApplied: true,
       burstHandlingApplied: false,
-      dynamicAdjustmentsApplied: false
+      dynamicAdjustmentsApplied: false,
     };
   }
 
-  async updateCoordinationState(context: RateLimitContext, allowed: boolean): Promise<void> {
+  async updateCoordinationState(
+    context: RateLimitContext,
+    allowed: boolean,
+  ): Promise<void> {
     // Update coordination state
   }
 
-  async getCoordinationState(context: RateLimitContext): Promise<CoordinationState> {
+  async getCoordinationState(
+    context: RateLimitContext,
+  ): Promise<CoordinationState> {
     return {
       coordinationActive: true,
       lastCoordination: new Date(),
-      coordinationEffectiveness: 0.95
+      coordinationEffectiveness: 0.95,
     };
   }
 
-  async activateEmergencyCoordination(config: EmergencyModeConfig): Promise<void> {
-    this.logger.warn('Activating emergency coordination');
+  async activateEmergencyCoordination(
+    config: EmergencyModeConfig,
+  ): Promise<void> {
+    this.logger.warn("Activating emergency coordination");
   }
 
   async deactivateEmergencyCoordination(): Promise<void> {
-    this.logger.log('Deactivating emergency coordination');
+    this.logger.log("Deactivating emergency coordination");
   }
 
   optimizeCoordination(): void {
@@ -1172,22 +1421,24 @@ class TierCoordinationEngine {
   }
 
   private calculateOverallRiskLevel(results: any): RiskLevel {
-    const riskLevels = Object.values(results).map((r: any) => r.violations.length);
+    const riskLevels = Object.values(results).map(
+      (r: any) => r.violations.length,
+    );
     const maxRisk = Math.max(...riskLevels);
 
-    if (maxRisk >= 3) return 'CRITICAL';
-    if (maxRisk >= 2) return 'HIGH';
-    if (maxRisk >= 1) return 'MEDIUM';
-    return 'LOW';
+    if (maxRisk >= 3) return "CRITICAL";
+    if (maxRisk >= 2) return "HIGH";
+    if (maxRisk >= 1) return "MEDIUM";
+    return "LOW";
   }
 
   private determineCoordinatedAction(results: any): string {
     const actions = Object.values(results).map((r: any) => r.recommendedAction);
 
-    if (actions.includes('DENY')) return 'DENY';
-    if (actions.includes('QUEUE')) return 'QUEUE';
-    if (actions.includes('THROTTLE')) return 'THROTTLE';
-    return 'ALLOW';
+    if (actions.includes("DENY")) return "DENY";
+    if (actions.includes("QUEUE")) return "QUEUE";
+    if (actions.includes("THROTTLE")) return "THROTTLE";
+    return "ALLOW";
   }
 }
 
@@ -1199,7 +1450,10 @@ class IntelligentBurstHandler {
 
   constructor(private readonly configuration: RateLimitConfiguration) {}
 
-  async applyBurstHandling(context: RateLimitContext, result: MultiTierEvaluationResult): Promise<MultiTierEvaluationResult> {
+  async applyBurstHandling(
+    context: RateLimitContext,
+    result: MultiTierEvaluationResult,
+  ): Promise<MultiTierEvaluationResult> {
     // Implement burst handling logic
     return { ...result, burstHandlingApplied: true };
   }
@@ -1213,7 +1467,10 @@ class DynamicRateAdjuster {
 
   constructor(private readonly configuration: RateLimitConfiguration) {}
 
-  async applyDynamicAdjustments(context: RateLimitContext, result: MultiTierEvaluationResult): Promise<MultiTierEvaluationResult> {
+  async applyDynamicAdjustments(
+    context: RateLimitContext,
+    result: MultiTierEvaluationResult,
+  ): Promise<MultiTierEvaluationResult> {
     // Implement dynamic adjustment logic
     return { ...result, dynamicAdjustmentsApplied: true };
   }
@@ -1239,7 +1496,7 @@ class RateManagerPerformanceOptimizer {
       cacheHitRate: 0.85,
       throughput: 9500, // requests/second
       memoryUsage: 0.3,
-      coordinationEfficiency: 0.95
+      coordinationEfficiency: 0.95,
     };
   }
 
@@ -1269,7 +1526,7 @@ interface MultiTierState {
   global: GlobalTierState;
   coordination: CoordinationState;
   lastUpdated: Date;
-  healthStatus: 'HEALTHY' | 'DEGRADED' | 'UNHEALTHY';
+  healthStatus: "HEALTHY" | "DEGRADED" | "UNHEALTHY";
 }
 
 interface MultiTierPerformanceMetrics {
@@ -1356,7 +1613,7 @@ interface UserTierState {
   userId: string;
   currentUsage: UserUsageTracking;
   limits: EffectiveUserLimits;
-  health: 'HEALTHY' | 'DEGRADED' | 'UNHEALTHY';
+  health: "HEALTHY" | "DEGRADED" | "UNHEALTHY";
   lastActivity: Date;
 }
 
@@ -1365,7 +1622,7 @@ interface APITierState {
   method: string;
   currentUsage: EndpointUsageTracking;
   limits: any;
-  health: 'HEALTHY' | 'DEGRADED' | 'UNHEALTHY';
+  health: "HEALTHY" | "DEGRADED" | "UNHEALTHY";
   lastActivity: Date;
 }
 
@@ -1373,14 +1630,14 @@ interface OperationTierState {
   operation: string;
   currentUsage: OperationUsageTracking;
   limits: any;
-  health: 'HEALTHY' | 'DEGRADED' | 'UNHEALTHY';
+  health: "HEALTHY" | "DEGRADED" | "UNHEALTHY";
   lastActivity: Date;
 }
 
 interface GlobalTierState {
   systemState: GlobalSystemState;
   limits: GlobalRateLimits;
-  health: 'HEALTHY' | 'DEGRADED' | 'UNHEALTHY';
+  health: "HEALTHY" | "DEGRADED" | "UNHEALTHY";
   lastActivity: Date;
 }
 

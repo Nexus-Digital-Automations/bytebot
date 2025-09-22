@@ -36,13 +36,13 @@ import {
   Logger,
   HttpException,
   HttpStatus,
-} from '@nestjs/common';
-import { Observable, throwError, of } from 'rxjs';
-import { map, catchError, tap, timeout, retry } from 'rxjs/operators';
-import { Request, Response } from 'express';
-import { performance } from 'perf_hooks';
-import * as crypto from 'crypto';
-import * as zlib from 'zlib';
+} from "@nestjs/common";
+import { Observable, throwError, of } from "rxjs";
+import { map, catchError, tap, timeout, retry } from "rxjs/operators";
+import { Request, Response } from "express";
+import { performance } from "perf_hooks";
+import * as crypto from "crypto";
+import * as zlib from "zlib";
 
 // Import enhanced types
 import {
@@ -50,7 +50,7 @@ import {
   ParlantRequestContext,
   PerformanceMetrics,
   ConversationalErrorContext,
-} from '../core/universal-parlant-middleware';
+} from "../core/universal-parlant-middleware";
 
 // Enhanced interceptor configuration
 export interface ParlantInterceptorConfig {
@@ -84,7 +84,7 @@ export interface ParlantInterceptorConfig {
   enableDetailedLogging: boolean;
   enablePerformanceTracking: boolean;
   enableSecurityAudit: boolean;
-  logLevel: 'debug' | 'info' | 'warn' | 'error';
+  logLevel: "debug" | "info" | "warn" | "error";
 
   // Error handling
   enableConversationalErrors: boolean;
@@ -131,9 +131,14 @@ export interface ProcessingStage {
 }
 
 export interface ThreatDetectionResult {
-  type: 'SQL_INJECTION' | 'XSS' | 'CSRF' | 'SENSITIVE_DATA' | 'MALICIOUS_PAYLOAD';
-  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  location: 'headers' | 'query' | 'body' | 'url';
+  type:
+    | "SQL_INJECTION"
+    | "XSS"
+    | "CSRF"
+    | "SENSITIVE_DATA"
+    | "MALICIOUS_PAYLOAD";
+  severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+  location: "headers" | "query" | "body" | "url";
   pattern: string;
   value: string;
   confidence: number;
@@ -203,10 +208,10 @@ export class ParlantRequestResponseInterceptor implements NestInterceptor {
     enableRequestSanitization: true,
     maxRequestSize: 10 * 1024 * 1024, // 10MB
     allowedContentTypes: [
-      'application/json',
-      'application/x-www-form-urlencoded',
-      'multipart/form-data',
-      'text/plain',
+      "application/json",
+      "application/x-www-form-urlencoded",
+      "multipart/form-data",
+      "text/plain",
     ],
     enableResponseTransformation: true,
     enableResponseSanitization: true,
@@ -224,7 +229,7 @@ export class ParlantRequestResponseInterceptor implements NestInterceptor {
     enableDetailedLogging: false,
     enablePerformanceTracking: true,
     enableSecurityAudit: true,
-    logLevel: 'info',
+    logLevel: "info",
     enableConversationalErrors: true,
     errorTransformationRules: [],
     customErrorHandlers: [],
@@ -239,17 +244,22 @@ export class ParlantRequestResponseInterceptor implements NestInterceptor {
    * Initialize the interceptor with configuration
    */
   private initializeInterceptor(): void {
-    this.logger.log('PARLANT Request/Response Interceptor v2.0.0 initializing...', {
-      version: '2.0.0',
-      config: this.config,
-    });
+    this.logger.log(
+      "PARLANT Request/Response Interceptor v2.0.0 initializing...",
+      {
+        version: "2.0.0",
+        config: this.config,
+      },
+    );
 
     // Start background monitoring
     if (this.config.enablePerformanceTracking) {
       this.startPerformanceMonitoring();
     }
 
-    this.logger.log('PARLANT Request/Response Interceptor initialized successfully');
+    this.logger.log(
+      "PARLANT Request/Response Interceptor initialized successfully",
+    );
   }
 
   /**
@@ -281,25 +291,27 @@ export class ParlantRequestResponseInterceptor implements NestInterceptor {
           timeout(this.config.requestTimeout!),
 
           // Transform response
-          map(data => this.transformResponse(data, request, requestMetrics)),
+          map((data) => this.transformResponse(data, request, requestMetrics)),
 
           // Handle errors
-          catchError(error => this.handleError(error, context, requestMetrics)),
+          catchError((error) =>
+            this.handleError(error, context, requestMetrics),
+          ),
 
           // Log completion
-          tap(data => this.logRequestCompletion(requestMetrics, data)),
+          tap((data) => this.logRequestCompletion(requestMetrics, data)),
 
           // Retry on specific errors
           retry({
             count: 2,
             condition: (error) => this.shouldRetry(error),
             delay: 1000,
-          })
+          }),
         );
       })
-      .catch(error => {
+      .catch((error) => {
         // Request preprocessing failed
-        this.logger.error('Request preprocessing failed', {
+        this.logger.error("Request preprocessing failed", {
           requestId,
           error: error.message,
           stack: error.stack,
@@ -314,26 +326,30 @@ export class ParlantRequestResponseInterceptor implements NestInterceptor {
    */
   private async processRequest(
     request: EnhancedParlantRequest,
-    metrics: RequestProcessingMetrics
+    metrics: RequestProcessingMetrics,
   ): Promise<void> {
     // Stage 1: Request validation
     if (this.config.enableRequestValidation) {
-      await this.executeStage(metrics, 'request_validation', async () => {
+      await this.executeStage(metrics, "request_validation", async () => {
         await this.validateRequest(request);
       });
     }
 
     // Stage 2: Security scanning
     if (this.config.enableThreatDetection) {
-      await this.executeStage(metrics, 'security_scanning', async () => {
+      await this.executeStage(metrics, "security_scanning", async () => {
         const threats = await this.scanForThreats(request);
         metrics.threatDetectionResults = threats;
 
-        if (threats.some(t => t.severity === 'CRITICAL' || t.severity === 'HIGH')) {
+        if (
+          threats.some(
+            (t) => t.severity === "CRITICAL" || t.severity === "HIGH",
+          )
+        ) {
           this.globalStats.securityBlocks++;
           throw new HttpException(
-            'Request blocked due to security policy violation',
-            HttpStatus.FORBIDDEN
+            "Request blocked due to security policy violation",
+            HttpStatus.FORBIDDEN,
           );
         }
       });
@@ -341,14 +357,14 @@ export class ParlantRequestResponseInterceptor implements NestInterceptor {
 
     // Stage 3: Request sanitization
     if (this.config.enableRequestSanitization) {
-      await this.executeStage(metrics, 'request_sanitization', async () => {
+      await this.executeStage(metrics, "request_sanitization", async () => {
         this.sanitizeRequest(request);
       });
     }
 
     // Stage 4: Request transformation
     if (this.config.enableRequestTransformation) {
-      await this.executeStage(metrics, 'request_transformation', async () => {
+      await this.executeStage(metrics, "request_transformation", async () => {
         await this.transformRequest(request);
       });
     }
@@ -359,36 +375,50 @@ export class ParlantRequestResponseInterceptor implements NestInterceptor {
   /**
    * Validate incoming request
    */
-  private async validateRequest(request: EnhancedParlantRequest): Promise<void> {
+  private async validateRequest(
+    request: EnhancedParlantRequest,
+  ): Promise<void> {
     // Size validation
-    const contentLength = parseInt(request.get('content-length') || '0');
+    const contentLength = parseInt(request.get("content-length") || "0");
     if (contentLength > this.config.maxRequestSize!) {
       throw new HttpException(
         `Request size ${contentLength} exceeds maximum allowed size ${this.config.maxRequestSize}`,
-        HttpStatus.PAYLOAD_TOO_LARGE
+        HttpStatus.PAYLOAD_TOO_LARGE,
       );
     }
 
     // Content type validation
-    const contentType = request.get('content-type');
-    if (contentType && !this.config.allowedContentTypes!.some(type =>
-      contentType.includes(type))) {
+    const contentType = request.get("content-type");
+    if (
+      contentType &&
+      !this.config.allowedContentTypes!.some((type) =>
+        contentType.includes(type),
+      )
+    ) {
       throw new HttpException(
         `Content type ${contentType} is not allowed`,
-        HttpStatus.UNSUPPORTED_MEDIA_TYPE
+        HttpStatus.UNSUPPORTED_MEDIA_TYPE,
       );
     }
 
     // Method validation
-    const allowedMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'];
+    const allowedMethods = [
+      "GET",
+      "POST",
+      "PUT",
+      "DELETE",
+      "PATCH",
+      "OPTIONS",
+      "HEAD",
+    ];
     if (!allowedMethods.includes(request.method)) {
       throw new HttpException(
         `HTTP method ${request.method} is not allowed`,
-        HttpStatus.METHOD_NOT_ALLOWED
+        HttpStatus.METHOD_NOT_ALLOWED,
       );
     }
 
-    this.logger.debug('Request validation completed', {
+    this.logger.debug("Request validation completed", {
       requestId: request.requestId,
       method: request.method,
       contentType,
@@ -399,48 +429,50 @@ export class ParlantRequestResponseInterceptor implements NestInterceptor {
   /**
    * Scan request for security threats
    */
-  private async scanForThreats(request: EnhancedParlantRequest): Promise<ThreatDetectionResult[]> {
+  private async scanForThreats(
+    request: EnhancedParlantRequest,
+  ): Promise<ThreatDetectionResult[]> {
     const threats: ThreatDetectionResult[] = [];
 
     // Scan URL
     if (this.config.enableSQLInjectionDetection) {
-      threats.push(...this.scanForSQLInjection(request.url, 'url'));
+      threats.push(...this.scanForSQLInjection(request.url, "url"));
     }
 
     if (this.config.enableXSSDetection) {
-      threats.push(...this.scanForXSS(request.url, 'url'));
+      threats.push(...this.scanForXSS(request.url, "url"));
     }
 
     // Scan query parameters
     if (request.query) {
       const queryString = JSON.stringify(request.query);
-      threats.push(...this.scanForSQLInjection(queryString, 'query'));
-      threats.push(...this.scanForXSS(queryString, 'query'));
-      threats.push(...this.scanForSensitiveData(queryString, 'query'));
+      threats.push(...this.scanForSQLInjection(queryString, "query"));
+      threats.push(...this.scanForXSS(queryString, "query"));
+      threats.push(...this.scanForSensitiveData(queryString, "query"));
     }
 
     // Scan request body
     if (request.body) {
       const bodyString = JSON.stringify(request.body);
-      threats.push(...this.scanForSQLInjection(bodyString, 'body'));
-      threats.push(...this.scanForXSS(bodyString, 'body'));
-      threats.push(...this.scanForSensitiveData(bodyString, 'body'));
+      threats.push(...this.scanForSQLInjection(bodyString, "body"));
+      threats.push(...this.scanForXSS(bodyString, "body"));
+      threats.push(...this.scanForSensitiveData(bodyString, "body"));
     }
 
     // Scan headers
     if (request.headers) {
       const headersString = JSON.stringify(request.headers);
-      threats.push(...this.scanForXSS(headersString, 'headers'));
-      threats.push(...this.scanForSensitiveData(headersString, 'headers'));
+      threats.push(...this.scanForXSS(headersString, "headers"));
+      threats.push(...this.scanForSensitiveData(headersString, "headers"));
     }
 
     // Log threats
     if (threats.length > 0) {
       this.globalStats.threatDetections += threats.length;
-      this.logger.warn('Security threats detected', {
+      this.logger.warn("Security threats detected", {
         requestId: request.requestId,
         threatCount: threats.length,
-        threats: threats.map(t => ({
+        threats: threats.map((t) => ({
           type: t.type,
           severity: t.severity,
           location: t.location,
@@ -455,7 +487,10 @@ export class ParlantRequestResponseInterceptor implements NestInterceptor {
   /**
    * Scan for SQL injection patterns
    */
-  private scanForSQLInjection(content: string, location: string): ThreatDetectionResult[] {
+  private scanForSQLInjection(
+    content: string,
+    location: string,
+  ): ThreatDetectionResult[] {
     const threats: ThreatDetectionResult[] = [];
 
     for (const pattern of this.securityPatterns.sqlInjection) {
@@ -463,8 +498,8 @@ export class ParlantRequestResponseInterceptor implements NestInterceptor {
       if (matches) {
         for (const match of matches) {
           threats.push({
-            type: 'SQL_INJECTION',
-            severity: 'HIGH',
+            type: "SQL_INJECTION",
+            severity: "HIGH",
             location: location as any,
             pattern: pattern.source,
             value: match,
@@ -481,7 +516,10 @@ export class ParlantRequestResponseInterceptor implements NestInterceptor {
   /**
    * Scan for XSS patterns
    */
-  private scanForXSS(content: string, location: string): ThreatDetectionResult[] {
+  private scanForXSS(
+    content: string,
+    location: string,
+  ): ThreatDetectionResult[] {
     const threats: ThreatDetectionResult[] = [];
 
     for (const pattern of this.securityPatterns.xss) {
@@ -489,8 +527,8 @@ export class ParlantRequestResponseInterceptor implements NestInterceptor {
       if (matches) {
         for (const match of matches) {
           threats.push({
-            type: 'XSS',
-            severity: 'HIGH',
+            type: "XSS",
+            severity: "HIGH",
             location: location as any,
             pattern: pattern.source,
             value: match,
@@ -507,7 +545,10 @@ export class ParlantRequestResponseInterceptor implements NestInterceptor {
   /**
    * Scan for sensitive data patterns
    */
-  private scanForSensitiveData(content: string, location: string): ThreatDetectionResult[] {
+  private scanForSensitiveData(
+    content: string,
+    location: string,
+  ): ThreatDetectionResult[] {
     const threats: ThreatDetectionResult[] = [];
 
     for (const pattern of this.config.sensitiveDataPatterns!) {
@@ -515,11 +556,11 @@ export class ParlantRequestResponseInterceptor implements NestInterceptor {
       if (matches) {
         for (const match of matches) {
           threats.push({
-            type: 'SENSITIVE_DATA',
-            severity: 'MEDIUM',
+            type: "SENSITIVE_DATA",
+            severity: "MEDIUM",
             location: location as any,
             pattern: pattern.source,
-            value: match.substring(0, 10) + '***', // Partially mask the value
+            value: match.substring(0, 10) + "***", // Partially mask the value
             confidence: 0.7,
             mitigationApplied: false,
           });
@@ -545,7 +586,7 @@ export class ParlantRequestResponseInterceptor implements NestInterceptor {
     }
 
     // Sanitize headers (certain ones)
-    const sensitiveHeaders = ['x-api-key', 'authorization', 'cookie'];
+    const sensitiveHeaders = ["x-api-key", "authorization", "cookie"];
     for (const header of sensitiveHeaders) {
       if (request.headers[header]) {
         // Don't log sensitive headers, just mark as sanitized
@@ -557,20 +598,22 @@ export class ParlantRequestResponseInterceptor implements NestInterceptor {
   /**
    * Transform request data
    */
-  private async transformRequest(request: EnhancedParlantRequest): Promise<void> {
+  private async transformRequest(
+    request: EnhancedParlantRequest,
+  ): Promise<void> {
     // Add request metadata
     request.metadata = {
       processedAt: new Date(),
       processingTime: performance.now() - (request.startTime || 0),
-      interceptorVersion: '2.0.0',
+      interceptorVersion: "2.0.0",
     };
 
     // Normalize request structure
-    if (request.body && typeof request.body === 'object') {
+    if (request.body && typeof request.body === "object") {
       request.body = this.normalizeObject(request.body);
     }
 
-    this.logger.debug('Request transformation completed', {
+    this.logger.debug("Request transformation completed", {
       requestId: request.requestId,
       hasMetadata: !!request.metadata,
       bodyNormalized: !!request.body,
@@ -583,7 +626,7 @@ export class ParlantRequestResponseInterceptor implements NestInterceptor {
   private transformResponse(
     data: any,
     request: EnhancedParlantRequest,
-    metrics: RequestProcessingMetrics
+    metrics: RequestProcessingMetrics,
   ): any {
     const transformationStartTime = performance.now();
     const originalSize = this.calculateDataSize(data);
@@ -607,35 +650,43 @@ export class ParlantRequestResponseInterceptor implements NestInterceptor {
       if (this.config.enableResponseSanitization) {
         transformedData = this.sanitizeResponse(transformedData);
         context.sanitizationApplied = true;
-        context.transformationRules.push('sanitization');
+        context.transformationRules.push("sanitization");
       }
 
       // Apply response transformation rules
       if (this.config.enableResponseTransformation) {
-        transformedData = this.applyResponseTransformations(transformedData, request);
-        context.transformationRules.push('transformation');
+        transformedData = this.applyResponseTransformations(
+          transformedData,
+          request,
+        );
+        context.transformationRules.push("transformation");
       }
 
       // Apply compression if appropriate
-      if (this.config.enableResponseCompression &&
-          originalSize > this.config.compressionThreshold!) {
+      if (
+        this.config.enableResponseCompression &&
+        originalSize > this.config.compressionThreshold!
+      ) {
         transformedData = this.applyResponseCompression(transformedData);
         context.compressionApplied = true;
-        context.transformationRules.push('compression');
+        context.transformationRules.push("compression");
       }
 
       context.transformedResponse = transformedData;
-      context.performanceMetrics.transformedSize = this.calculateDataSize(transformedData);
-      context.performanceMetrics.transformationTime = performance.now() - transformationStartTime;
+      context.performanceMetrics.transformedSize =
+        this.calculateDataSize(transformedData);
+      context.performanceMetrics.transformationTime =
+        performance.now() - transformationStartTime;
 
       // Calculate compression ratio
       if (context.compressionApplied) {
         context.performanceMetrics.compressionRatio =
-          context.performanceMetrics.originalSize / context.performanceMetrics.transformedSize;
+          context.performanceMetrics.originalSize /
+          context.performanceMetrics.transformedSize;
       }
 
       // Log transformation
-      this.logger.debug('Response transformation completed', {
+      this.logger.debug("Response transformation completed", {
         requestId: request.requestId,
         transformationRules: context.transformationRules,
         originalSize: context.performanceMetrics.originalSize,
@@ -645,9 +696,8 @@ export class ParlantRequestResponseInterceptor implements NestInterceptor {
       });
 
       return transformedData;
-
     } catch (error) {
-      this.logger.error('Response transformation failed', {
+      this.logger.error("Response transformation failed", {
         requestId: request.requestId,
         error: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined,
@@ -664,14 +714,16 @@ export class ParlantRequestResponseInterceptor implements NestInterceptor {
   private handleError(
     error: any,
     context: ExecutionContext,
-    metrics: RequestProcessingMetrics
+    metrics: RequestProcessingMetrics,
   ): Observable<any> {
     this.globalStats.failedRequests++;
 
     const request = context.switchToHttp().getRequest<EnhancedParlantRequest>();
 
     // Apply custom error handlers
-    for (const handler of this.config.customErrorHandlers!.sort((a, b) => b.priority - a.priority)) {
+    for (const handler of this.config.customErrorHandlers!.sort(
+      (a, b) => b.priority - a.priority,
+    )) {
       if (handler.condition(error, context)) {
         this.logger.debug(`Applying custom error handler: ${handler.name}`, {
           requestId: request.requestId,
@@ -684,16 +736,20 @@ export class ParlantRequestResponseInterceptor implements NestInterceptor {
 
     // Apply error transformation rules
     for (const rule of this.config.errorTransformationRules!) {
-      if (error.constructor.name === rule.errorType ||
-          (rule.pattern && rule.pattern.test(error.message))) {
-
+      if (
+        error.constructor.name === rule.errorType ||
+        (rule.pattern && rule.pattern.test(error.message))
+      ) {
         const transformedError = rule.transformation(error, context);
 
-        this.logger.debug(`Applied error transformation rule for ${rule.errorType}`, {
-          requestId: request.requestId,
-          originalError: error.message,
-          transformedError,
-        });
+        this.logger.debug(
+          `Applied error transformation rule for ${rule.errorType}`,
+          {
+            requestId: request.requestId,
+            originalError: error.message,
+            transformedError,
+          },
+        );
 
         // Create conversational error if enabled
         if (this.config.enableConversationalErrors) {
@@ -703,9 +759,9 @@ export class ParlantRequestResponseInterceptor implements NestInterceptor {
             userFriendlyMessage: rule.userFriendlyMessage,
             conversationalExplanation: rule.conversationalExplanation,
             suggestedActions: rule.suggestedActions,
-            escalationLevel: 'MEDIUM',
+            escalationLevel: "MEDIUM",
             requiresHumanIntervention: false,
-            recoveryStrategies: ['retry'],
+            recoveryStrategies: ["retry"],
             supportContext: {
               operationId: request.requestId,
               timestamp: new Date().toISOString(),
@@ -713,7 +769,10 @@ export class ParlantRequestResponseInterceptor implements NestInterceptor {
             },
           };
 
-          return throwError(() => new HttpException(conversationalError, HttpStatus.BAD_REQUEST));
+          return throwError(
+            () =>
+              new HttpException(conversationalError, HttpStatus.BAD_REQUEST),
+          );
         }
 
         return throwError(() => transformedError);
@@ -721,7 +780,7 @@ export class ParlantRequestResponseInterceptor implements NestInterceptor {
     }
 
     // Default error handling
-    this.logger.error('Unhandled error in interceptor', {
+    this.logger.error("Unhandled error in interceptor", {
       requestId: request.requestId,
       error: error.message,
       stack: error.stack,
@@ -734,24 +793,31 @@ export class ParlantRequestResponseInterceptor implements NestInterceptor {
   /**
    * Log request completion
    */
-  private logRequestCompletion(metrics: RequestProcessingMetrics, data: any): void {
+  private logRequestCompletion(
+    metrics: RequestProcessingMetrics,
+    data: any,
+  ): void {
     metrics.endTime = performance.now();
     metrics.totalProcessingTime = metrics.endTime - metrics.startTime;
 
     // Update global stats
     if (this.globalStats.processedRequests > 0) {
       this.globalStats.averageProcessingTime =
-        (this.globalStats.averageProcessingTime * (this.globalStats.processedRequests - 1) +
-         metrics.totalProcessingTime) / this.globalStats.processedRequests;
+        (this.globalStats.averageProcessingTime *
+          (this.globalStats.processedRequests - 1) +
+          metrics.totalProcessingTime) /
+        this.globalStats.processedRequests;
     }
 
     // Log performance warnings
     if (metrics.totalProcessingTime > 1000) {
-      metrics.performanceWarnings.push(`Slow processing: ${metrics.totalProcessingTime.toFixed(2)}ms`);
+      metrics.performanceWarnings.push(
+        `Slow processing: ${metrics.totalProcessingTime.toFixed(2)}ms`,
+      );
     }
 
     // Log completion
-    this.logger.log('Request processing completed', {
+    this.logger.log("Request processing completed", {
       requestId: metrics.requestId,
       totalProcessingTime: metrics.totalProcessingTime,
       stages: metrics.processingStages.length,
@@ -775,7 +841,7 @@ export class ParlantRequestResponseInterceptor implements NestInterceptor {
   private async executeStage(
     metrics: RequestProcessingMetrics,
     stageName: string,
-    stageFunction: () => Promise<void>
+    stageFunction: () => Promise<void>,
   ): Promise<void> {
     const startTime = performance.now();
     const memoryBefore = process.memoryUsage();
@@ -806,29 +872,33 @@ export class ParlantRequestResponseInterceptor implements NestInterceptor {
   }
 
   private sanitizeObject(obj: any): any {
-    if (typeof obj !== 'object' || obj === null) {
+    if (typeof obj !== "object" || obj === null) {
       return obj;
     }
 
     if (Array.isArray(obj)) {
-      return obj.map(item => this.sanitizeObject(item));
+      return obj.map((item) => this.sanitizeObject(item));
     }
 
     const sanitized: any = {};
     for (const [key, value] of Object.entries(obj)) {
       // Skip potentially dangerous properties
-      if (key.startsWith('__') || key === 'constructor' || key === 'prototype') {
+      if (
+        key.startsWith("__") ||
+        key === "constructor" ||
+        key === "prototype"
+      ) {
         continue;
       }
 
-      if (typeof value === 'string') {
+      if (typeof value === "string") {
         // Basic HTML entity encoding
         sanitized[key] = value
-          .replace(/&/g, '&amp;')
-          .replace(/</g, '&lt;')
-          .replace(/>/g, '&gt;')
-          .replace(/"/g, '&quot;')
-          .replace(/'/g, '&#x27;');
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#x27;");
       } else {
         sanitized[key] = this.sanitizeObject(value);
       }
@@ -838,18 +908,20 @@ export class ParlantRequestResponseInterceptor implements NestInterceptor {
   }
 
   private normalizeObject(obj: any): any {
-    if (typeof obj !== 'object' || obj === null) {
+    if (typeof obj !== "object" || obj === null) {
       return obj;
     }
 
     if (Array.isArray(obj)) {
-      return obj.map(item => this.normalizeObject(item));
+      return obj.map((item) => this.normalizeObject(item));
     }
 
     const normalized: any = {};
     for (const [key, value] of Object.entries(obj)) {
       // Convert keys to camelCase
-      const normalizedKey = key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
+      const normalizedKey = key.replace(/_([a-z])/g, (_, letter) =>
+        letter.toUpperCase(),
+      );
       normalized[normalizedKey] = this.normalizeObject(value);
     }
 
@@ -857,12 +929,12 @@ export class ParlantRequestResponseInterceptor implements NestInterceptor {
   }
 
   private sanitizeResponse(data: any): any {
-    if (typeof data !== 'object' || data === null) {
+    if (typeof data !== "object" || data === null) {
       return data;
     }
 
     // Remove sensitive fields
-    const sensitiveFields = ['password', 'token', 'secret', 'key', 'auth'];
+    const sensitiveFields = ["password", "token", "secret", "key", "auth"];
     const sanitized = { ...data };
 
     for (const field of sensitiveFields) {
@@ -874,15 +946,18 @@ export class ParlantRequestResponseInterceptor implements NestInterceptor {
     return sanitized;
   }
 
-  private applyResponseTransformations(data: any, request: EnhancedParlantRequest): any {
+  private applyResponseTransformations(
+    data: any,
+    request: EnhancedParlantRequest,
+  ): any {
     // Add response metadata
-    if (typeof data === 'object' && data !== null) {
+    if (typeof data === "object" && data !== null) {
       return {
         ...data,
         _metadata: {
           requestId: request.requestId,
           processedAt: new Date().toISOString(),
-          interceptorVersion: '2.0.0',
+          interceptorVersion: "2.0.0",
         },
       };
     }
@@ -893,7 +968,7 @@ export class ParlantRequestResponseInterceptor implements NestInterceptor {
   private applyResponseCompression(data: any): any {
     // For JSON responses, this would typically be handled at the HTTP level
     // Here we just mark that compression should be applied
-    if (typeof data === 'object') {
+    if (typeof data === "object") {
       return {
         ...data,
         _compressed: true,
@@ -915,9 +990,11 @@ export class ParlantRequestResponseInterceptor implements NestInterceptor {
 
   private shouldRetry(error: any): boolean {
     // Retry on timeout or service unavailable
-    return error.name === 'TimeoutError' ||
-           error.status === HttpStatus.SERVICE_UNAVAILABLE ||
-           error.status === HttpStatus.TOO_MANY_REQUESTS;
+    return (
+      error.name === "TimeoutError" ||
+      error.status === HttpStatus.SERVICE_UNAVAILABLE ||
+      error.status === HttpStatus.TOO_MANY_REQUESTS
+    );
   }
 
   private startPerformanceMonitoring(): void {
@@ -938,7 +1015,7 @@ export class ParlantRequestResponseInterceptor implements NestInterceptor {
   }
 
   private logPerformanceStats(): void {
-    this.logger.log('Performance statistics', {
+    this.logger.log("Performance statistics", {
       globalStats: this.globalStats,
       activeRequests: this.requestMetrics.size,
       memoryUsage: process.memoryUsage(),

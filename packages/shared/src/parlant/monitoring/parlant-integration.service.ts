@@ -16,7 +16,7 @@
  * @author PARLANT Integration Agent
  */
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from "@nestjs/common";
 import {
   ParlantConversationContext,
   RiskLevel,
@@ -24,19 +24,20 @@ import {
   ConversationPriority,
   ParticipantType,
   ParticipantRole,
-  ParticipantCapability
-} from '../../types/parlant.types';
+  ParticipantCapability,
+} from "../../types/parlant.types";
 import {
   ParlantValidationRequest as ParlantValidationRequestType,
   ParlantValidationResponse as ParlantValidationResponseType,
-  SecurityLevel
-} from '../../types/parlant-integration.types';
+  SecurityLevel,
+} from "../../types/parlant-integration.types";
 
 // Re-export types for external consumption
-export { ParlantConversationContext, RiskLevel } from '../../types/parlant.types';
 export {
-  SecurityLevel
-} from '../../types/parlant-integration.types';
+  ParlantConversationContext,
+  RiskLevel,
+} from "../../types/parlant.types";
+export { SecurityLevel } from "../../types/parlant-integration.types";
 
 // Bridge interfaces for decorator/middleware compatibility
 export interface ParlantValidationRequest {
@@ -92,11 +93,11 @@ export class ConversationalValidationError extends Error {
     suggestedAlternatives: string[] = [],
     confidence: number = 0.0,
     riskLevel: RiskLevel = RiskLevel._MODERATE,
-    code: string = 'VALIDATION_FAILED',
-    details: Record<string, unknown> = {}
+    code: string = "VALIDATION_FAILED",
+    details: Record<string, unknown> = {},
   ) {
     super(reasoning);
-    this.name = 'ConversationalValidationError';
+    this.name = "ConversationalValidationError";
     this.code = code;
     this.details = details;
     this.conversationId = conversationId;
@@ -122,7 +123,7 @@ export class ConversationalValidationError extends Error {
       conversationId: this.conversationId,
       riskLevel: this.riskLevel,
       timestamp: this.timestamp,
-      stack: this.stack
+      stack: this.stack,
     };
   }
 
@@ -131,7 +132,7 @@ export class ConversationalValidationError extends Error {
    */
   static fromValidationResponse(
     response: ParlantValidationResponseType,
-    message?: string
+    message?: string,
   ): ConversationalValidationError {
     return new ConversationalValidationError(
       response.conversationId,
@@ -139,12 +140,12 @@ export class ConversationalValidationError extends Error {
       [],
       response.confidence,
       RiskLevel._MODERATE,
-      'PARLANT_VALIDATION_FAILED',
+      "PARLANT_VALIDATION_FAILED",
       {
         confidence: response.confidence,
         reason: response.reason,
-        metadata: response.metadata
-      }
+        metadata: response.metadata,
+      },
     );
   }
 }
@@ -153,11 +154,23 @@ export class ConversationalValidationError extends Error {
  * PARLANT Integration Service Interface
  */
 export interface IParlantIntegrationService {
-  validateFunction(request: ParlantValidationRequestType): Promise<ParlantValidationResponseType>;
-  validateFunctionExecution(request: ParlantValidationRequest): Promise<ParlantValidationResponse>;
-  getCachedValidation(cacheKey: string): Promise<ParlantValidationResponseType | null>;
-  createConversationContext(userId?: string, sessionId?: string): Promise<ParlantConversationContext>;
-  healthCheck(): Promise<{ status: 'healthy' | 'degraded' | 'unhealthy'; details: Record<string, unknown> }>;
+  validateFunction(
+    request: ParlantValidationRequestType,
+  ): Promise<ParlantValidationResponseType>;
+  validateFunctionExecution(
+    request: ParlantValidationRequest,
+  ): Promise<ParlantValidationResponse>;
+  getCachedValidation(
+    cacheKey: string,
+  ): Promise<ParlantValidationResponseType | null>;
+  createConversationContext(
+    userId?: string,
+    sessionId?: string,
+  ): Promise<ParlantConversationContext>;
+  healthCheck(): Promise<{
+    status: "healthy" | "degraded" | "unhealthy";
+    details: Record<string, unknown>;
+  }>;
 }
 
 /**
@@ -170,20 +183,25 @@ export interface IParlantIntegrationService {
 export class ParlantIntegrationService implements IParlantIntegrationService {
   private readonly logger = new Logger(ParlantIntegrationService.name);
   private readonly cache = new Map<string, ParlantValidationResponseType>();
-  private readonly conversations = new Map<string, ParlantConversationContext>();
+  private readonly conversations = new Map<
+    string,
+    ParlantConversationContext
+  >();
 
   constructor() {
-    this.logger.log('PARLANT Integration Service initialized');
+    this.logger.log("PARLANT Integration Service initialized");
   }
 
   /**
    * Validate function execution through PARLANT conversational AI
    */
-  async validateFunction(request: ParlantValidationRequestType): Promise<ParlantValidationResponseType> {
+  async validateFunction(
+    request: ParlantValidationRequestType,
+  ): Promise<ParlantValidationResponseType> {
     const startTime = Date.now();
     this.logger.debug(`Validating function: ${request.functionName}`, {
       operationId: request.operationId,
-      securityLevel: request.securityLevel
+      securityLevel: request.securityLevel,
     });
 
     try {
@@ -208,11 +226,10 @@ export class ParlantIntegrationService implements IParlantIntegrationService {
       this.logger.debug(`Validation completed: ${request.operationId}`, {
         approved: response.approved,
         confidence: response.confidence,
-        processingTime
+        processingTime,
       });
 
       return response;
-
     } catch (error) {
       this.logger.error(`Validation failed for ${request.operationId}:`, error);
 
@@ -223,11 +240,15 @@ export class ParlantIntegrationService implements IParlantIntegrationService {
       throw new ConversationalValidationError(
         undefined,
         `PARLANT validation service error: ${error instanceof Error ? error.message : String(error)}`,
-        ['Check service connectivity', 'Retry operation', 'Contact system administrator'],
+        [
+          "Check service connectivity",
+          "Retry operation",
+          "Contact system administrator",
+        ],
         0.0,
         RiskLevel._HIGH,
-        'SERVICE_ERROR',
-        { originalError: error, request }
+        "SERVICE_ERROR",
+        { originalError: error, request },
       );
     }
   }
@@ -235,22 +256,24 @@ export class ParlantIntegrationService implements IParlantIntegrationService {
   /**
    * Validate function execution through PARLANT (decorator/middleware interface)
    */
-  async validateFunctionExecution(request: ParlantValidationRequest): Promise<ParlantValidationResponse> {
+  async validateFunctionExecution(
+    request: ParlantValidationRequest,
+  ): Promise<ParlantValidationResponse> {
     // Convert to internal format
     const internalRequest: ParlantValidationRequestType = {
       operationId: request.operationId,
       functionName: request.functionName,
-      packageName: 'shared',
+      packageName: "shared",
       description: request.actionDescription,
       parameters: request.functionParams,
       userContext: {
-        userId: request.context.userId || 'anonymous',
+        userId: request.context.userId || "anonymous",
         roles: [],
-        sessionId: request.context.sessionId || '',
-        ipAddress: 'unknown',
-        metadata: {}
+        sessionId: request.context.sessionId || "",
+        ipAddress: "unknown",
+        metadata: {},
       },
-      securityLevel: this.mapRiskLevelToSecurityLevel(request.riskLevel)
+      securityLevel: this.mapRiskLevelToSecurityLevel(request.riskLevel),
     };
 
     try {
@@ -266,9 +289,12 @@ export class ParlantIntegrationService implements IParlantIntegrationService {
         suggestedAlternatives: [], // Add default
         metadata: {
           ...internalResponse.metadata,
-          cacheStatus: internalResponse.metadata.cacheStatus as 'hit' | 'miss' | 'stale'
+          cacheStatus: internalResponse.metadata.cacheStatus as
+            | "hit"
+            | "miss"
+            | "stale",
         },
-        cacheKey: internalResponse.cacheKey
+        cacheKey: internalResponse.cacheKey,
       };
     } catch (error) {
       if (error instanceof ConversationalValidationError) {
@@ -277,11 +303,11 @@ export class ParlantIntegrationService implements IParlantIntegrationService {
       throw new ConversationalValidationError(
         undefined,
         `Validation execution failed: ${error instanceof Error ? error.message : String(error)}`,
-        ['Retry operation', 'Check system status'],
+        ["Retry operation", "Check system status"],
         0.0,
         request.riskLevel,
-        'EXECUTION_ERROR',
-        { originalError: error }
+        "EXECUTION_ERROR",
+        { originalError: error },
       );
     }
   }
@@ -291,19 +317,27 @@ export class ParlantIntegrationService implements IParlantIntegrationService {
    */
   private mapRiskLevelToSecurityLevel(riskLevel: RiskLevel): SecurityLevel {
     switch (riskLevel) {
-      case RiskLevel._MINIMAL: return SecurityLevel._MINIMAL;
-      case RiskLevel._LOW: return SecurityLevel._LOW;
-      case RiskLevel._MODERATE: return SecurityLevel._MEDIUM;
-      case RiskLevel._HIGH: return SecurityLevel._HIGH;
-      case RiskLevel._CRITICAL: return SecurityLevel._CRITICAL;
-      default: return SecurityLevel._MEDIUM;
+      case RiskLevel._MINIMAL:
+        return SecurityLevel._MINIMAL;
+      case RiskLevel._LOW:
+        return SecurityLevel._LOW;
+      case RiskLevel._MODERATE:
+        return SecurityLevel._MEDIUM;
+      case RiskLevel._HIGH:
+        return SecurityLevel._HIGH;
+      case RiskLevel._CRITICAL:
+        return SecurityLevel._CRITICAL;
+      default:
+        return SecurityLevel._MEDIUM;
     }
   }
 
   /**
    * Get cached validation response
    */
-  async getCachedValidation(cacheKey: string): Promise<ParlantValidationResponseType | null> {
+  async getCachedValidation(
+    cacheKey: string,
+  ): Promise<ParlantValidationResponseType | null> {
     const cached = this.cache.get(cacheKey);
 
     if (!cached) {
@@ -328,7 +362,7 @@ export class ParlantIntegrationService implements IParlantIntegrationService {
    */
   async createConversationContext(
     userId?: string,
-    sessionId?: string
+    sessionId?: string,
   ): Promise<ParlantConversationContext> {
     const conversationId = this.generateConversationId();
     const now = new Date();
@@ -340,22 +374,26 @@ export class ParlantIntegrationService implements IParlantIntegrationService {
       state: ConversationState._ACTIVE,
       metadata: {
         priority: ConversationPriority._NORMAL,
-        tags: ['function-validation'],
+        tags: ["function-validation"],
         properties: {
-          createdBy: userId || 'system'
+          createdBy: userId || "system",
         },
-        history: []
+        history: [],
       },
-      participants: userId ? [{
-        id: userId,
-        type: ParticipantType._HUMAN,
-        name: `User ${userId}`,
-        role: ParticipantRole._REQUESTOR,
-        capabilities: [ParticipantCapability._VALIDATE_FUNCTIONS],
-        joinedAt: now
-      }] : [],
+      participants: userId
+        ? [
+            {
+              id: userId,
+              type: ParticipantType._HUMAN,
+              name: `User ${userId}`,
+              role: ParticipantRole._REQUESTOR,
+              capabilities: [ParticipantCapability._VALIDATE_FUNCTIONS],
+              joinedAt: now,
+            },
+          ]
+        : [],
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     };
 
     this.conversations.set(conversationId, context);
@@ -368,15 +406,16 @@ export class ParlantIntegrationService implements IParlantIntegrationService {
    * Health check for PARLANT integration service
    */
   async healthCheck(): Promise<{
-    status: 'healthy' | 'degraded' | 'unhealthy';
-    details: Record<string, unknown>
+    status: "healthy" | "degraded" | "unhealthy";
+    details: Record<string, unknown>;
   }> {
     try {
       const cacheSize = this.cache.size;
       const conversationCount = this.conversations.size;
 
       // Simple health indicators
-      const status = cacheSize < 1000 && conversationCount < 100 ? 'healthy' : 'degraded';
+      const status =
+        cacheSize < 1000 && conversationCount < 100 ? "healthy" : "degraded";
 
       return {
         status,
@@ -385,17 +424,17 @@ export class ParlantIntegrationService implements IParlantIntegrationService {
           conversationCount,
           uptime: process.uptime(),
           memoryUsage: process.memoryUsage(),
-          timestamp: new Date()
-        }
+          timestamp: new Date(),
+        },
       };
     } catch (error) {
-      this.logger.error('Health check failed:', error);
+      this.logger.error("Health check failed:", error);
       return {
-        status: 'unhealthy',
+        status: "unhealthy",
         details: {
           error: error instanceof Error ? error.message : String(error),
-          timestamp: new Date()
-        }
+          timestamp: new Date(),
+        },
       };
     }
   }
@@ -410,10 +449,12 @@ export class ParlantIntegrationService implements IParlantIntegrationService {
       request.functionName,
       request.packageName,
       request.securityLevel,
-      JSON.stringify(request.parameters)
+      JSON.stringify(request.parameters),
     ];
 
-    return Buffer.from(keyComponents.join('|')).toString('base64').substring(0, 32);
+    return Buffer.from(keyComponents.join("|"))
+      .toString("base64")
+      .substring(0, 32);
   }
 
   /**
@@ -427,10 +468,12 @@ export class ParlantIntegrationService implements IParlantIntegrationService {
    * Perform actual PARLANT validation (stubbed implementation)
    */
   private async performParlantValidation(
-    request: ParlantValidationRequestType
+    request: ParlantValidationRequestType,
   ): Promise<ParlantValidationResponseType> {
     // Simulate validation processing time
-    await new Promise(resolve => setTimeout(resolve, 50 + Math.random() * 100));
+    await new Promise((resolve) =>
+      setTimeout(resolve, 50 + Math.random() * 100),
+    );
 
     const conversationId = this.generateConversationId();
     const now = new Date();
@@ -438,7 +481,7 @@ export class ParlantIntegrationService implements IParlantIntegrationService {
     // Risk-based approval logic (simplified)
     const riskScore = this.calculateRiskScore(request);
     const approved = riskScore < 70; // Approve if risk score is below 70
-    const confidence = Math.max(0.6, 1 - (riskScore / 100));
+    const confidence = Math.max(0.6, 1 - riskScore / 100);
 
     const response: ParlantValidationResponseType = {
       approved,
@@ -451,16 +494,18 @@ export class ParlantIntegrationService implements IParlantIntegrationService {
         startTime: now,
         endTime: new Date(),
         processingTime: 100, // Simulated processing time
-        cacheStatus: 'miss',
-        source: 'parlant',
+        cacheStatus: "miss",
+        source: "parlant",
         riskAssessment: {
           level: this.mapRiskScore(riskScore),
           factors: this.identifyRiskFactors(request),
           score: riskScore,
-          mitigations: approved ? [] : ['Require manual approval', 'Additional authentication']
-        }
+          mitigations: approved
+            ? []
+            : ["Require manual approval", "Additional authentication"],
+        },
       },
-      cacheKey: approved ? this.generateCacheKey(request) : undefined
+      cacheKey: approved ? this.generateCacheKey(request) : undefined,
     };
 
     if (!approved) {
@@ -478,19 +523,35 @@ export class ParlantIntegrationService implements IParlantIntegrationService {
 
     // Base score by security level
     switch (request.securityLevel) {
-      case SecurityLevel._MINIMAL: score += 10; break;
-      case SecurityLevel._LOW: score += 20; break;
-      case SecurityLevel._MEDIUM: score += 40; break;
-      case SecurityLevel._HIGH: score += 60; break;
-      case SecurityLevel._CRITICAL: score += 80; break;
+      case SecurityLevel._MINIMAL:
+        score += 10;
+        break;
+      case SecurityLevel._LOW:
+        score += 20;
+        break;
+      case SecurityLevel._MEDIUM:
+        score += 40;
+        break;
+      case SecurityLevel._HIGH:
+        score += 60;
+        break;
+      case SecurityLevel._CRITICAL:
+        score += 80;
+        break;
     }
 
     // Adjust score based on function characteristics
-    if (request.functionName.includes('delete') || request.functionName.includes('remove')) {
+    if (
+      request.functionName.includes("delete") ||
+      request.functionName.includes("remove")
+    ) {
       score += 20;
     }
 
-    if (request.functionName.includes('admin') || request.functionName.includes('root')) {
+    if (
+      request.functionName.includes("admin") ||
+      request.functionName.includes("root")
+    ) {
       score += 30;
     }
 
@@ -518,20 +579,26 @@ export class ParlantIntegrationService implements IParlantIntegrationService {
   private identifyRiskFactors(request: ParlantValidationRequestType): string[] {
     const factors: string[] = [];
 
-    if (request.securityLevel === SecurityLevel._HIGH || request.securityLevel === SecurityLevel._CRITICAL) {
-      factors.push('High security classification');
+    if (
+      request.securityLevel === SecurityLevel._HIGH ||
+      request.securityLevel === SecurityLevel._CRITICAL
+    ) {
+      factors.push("High security classification");
     }
 
-    if (request.functionName.includes('delete') || request.functionName.includes('remove')) {
-      factors.push('Destructive operation');
+    if (
+      request.functionName.includes("delete") ||
+      request.functionName.includes("remove")
+    ) {
+      factors.push("Destructive operation");
     }
 
-    if (request.functionName.includes('admin')) {
-      factors.push('Administrative function');
+    if (request.functionName.includes("admin")) {
+      factors.push("Administrative function");
     }
 
     if (Object.keys(request.parameters || {}).length > 10) {
-      factors.push('Complex parameter set');
+      factors.push("Complex parameter set");
     }
 
     return factors;

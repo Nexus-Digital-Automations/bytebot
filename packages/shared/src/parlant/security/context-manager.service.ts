@@ -427,10 +427,15 @@ export class ParlantSecurityContextManager
       await this.startPeriodicTasks();
       await this.validateSystemConfiguration();
 
-      this.logger.log("✅ Enhanced Security Context Manager initialized successfully");
+      this.logger.log(
+        "✅ Enhanced Security Context Manager initialized successfully",
+      );
       this.emit("context:manager:initialized");
     } catch (error) {
-      this.logger.error("❌ Failed to initialize Security Context Manager", error);
+      this.logger.error(
+        "❌ Failed to initialize Security Context Manager",
+        error,
+      );
       throw new ParlantIntegrationError(
         "Security Context Manager initialization failed",
         "CONTEXT_MANAGER_INIT_ERROR",
@@ -476,7 +481,10 @@ export class ParlantSecurityContextManager
         : contextId;
 
       // Analyze threats
-      const threatAnalysis = await this.performThreatAnalysis(userContext, operationId);
+      const threatAnalysis = await this.performThreatAnalysis(
+        userContext,
+        operationId,
+      );
 
       // Create enhanced security context
       const securityContext: EnhancedSecurityContext = {
@@ -486,16 +494,19 @@ export class ParlantSecurityContextManager
         userContext: this.cloneUserContext(userContext),
         operationId,
         securityLevel: options.securityLevel || SecurityLevel._MODERATE,
-        metadata: await this.buildContextMetadata(userContext, options.customMetadata),
+        metadata: await this.buildContextMetadata(
+          userContext,
+          options.customMetadata,
+        ),
         lifecycle: this.createLifecycle(),
         securityControls: await this.getApplicableSecurityControls(
-          options.securityLevel || SecurityLevel._MODERATE
+          options.securityLevel || SecurityLevel._MODERATE,
         ),
         integrity: await this.createIntegrityValidation(contextId),
         propagation: this.createPropagationTracking(),
         threatAnalysis,
         compliance: await this.createComplianceTracking(
-          options.complianceRequirements || []
+          options.complianceRequirements || [],
         ),
       };
 
@@ -527,7 +538,7 @@ export class ParlantSecurityContextManager
       });
 
       this.logger.debug(
-        `✅ Enhanced security context created: ${contextId} (${creationTime.toFixed(2)}ms, threat: ${threatAnalysis.overallScore.toFixed(2)})`
+        `✅ Enhanced security context created: ${contextId} (${creationTime.toFixed(2)}ms, threat: ${threatAnalysis.overallScore.toFixed(2)})`,
       );
 
       return securityContext;
@@ -536,7 +547,10 @@ export class ParlantSecurityContextManager
       throw new ParlantIntegrationError(
         "Enhanced security context creation failed",
         "ENHANCED_CONTEXT_CREATE_ERROR",
-        { operationId, error: error instanceof Error ? error.message : String(error) },
+        {
+          operationId,
+          error: error instanceof Error ? error.message : String(error),
+        },
       );
     }
   }
@@ -553,20 +567,29 @@ export class ParlantSecurityContextManager
     try {
       const context = this.activeContexts.get(contextId);
       if (!context) {
-        throw new UnauthorizedException(`Security context not found: ${contextId}`);
+        throw new UnauthorizedException(
+          `Security context not found: ${contextId}`,
+        );
       }
 
       // Check expiration
-      if (options.checkExpiration !== false && context.lifecycle.expiresAt < new Date()) {
+      if (
+        options.checkExpiration !== false &&
+        context.lifecycle.expiresAt < new Date()
+      ) {
         await this.expireContext(contextId);
-        throw new UnauthorizedException(`Security context expired: ${contextId}`);
+        throw new UnauthorizedException(
+          `Security context expired: ${contextId}`,
+        );
       }
 
       // Check integrity
       if (options.checkIntegrity !== false) {
         const integrityValid = await this.validateContextIntegrity(context);
         if (!integrityValid) {
-          throw new ForbiddenException(`Security context integrity compromised: ${contextId}`);
+          throw new ForbiddenException(
+            `Security context integrity compromised: ${contextId}`,
+          );
         }
       }
 
@@ -574,7 +597,9 @@ export class ParlantSecurityContextManager
       if (options.checkThreatAnalysis !== false) {
         if (context.threatAnalysis.overallScore > this.threatThreshold) {
           await this.handleThreatDetection(context);
-          throw new ForbiddenException(`Security threat detected: ${contextId}`);
+          throw new ForbiddenException(
+            `Security threat detected: ${contextId}`,
+          );
         }
       }
 
@@ -595,21 +620,27 @@ export class ParlantSecurityContextManager
       this.updateMetrics("validation", validationTime);
 
       this.logger.debug(
-        `✅ Security context validated: ${contextId} (${validationTime.toFixed(2)}ms)`
+        `✅ Security context validated: ${contextId} (${validationTime.toFixed(2)}ms)`,
       );
 
       return true;
     } catch (error) {
       this.logger.error("❌ Security context validation failed", error);
 
-      if (error instanceof UnauthorizedException || error instanceof ForbiddenException) {
+      if (
+        error instanceof UnauthorizedException ||
+        error instanceof ForbiddenException
+      ) {
         throw error;
       }
 
       throw new ParlantIntegrationError(
         "Security context validation failed",
         "CONTEXT_VALIDATION_ERROR",
-        { contextId, error: error instanceof Error ? error.message : String(error) },
+        {
+          contextId,
+          error: error instanceof Error ? error.message : String(error),
+        },
       );
     }
   }
@@ -700,10 +731,15 @@ export class ParlantSecurityContextManager
   }
 
   private generateEncryptionKey(): string {
-    return process.env.PARLANT_ENHANCED_CONTEXT_KEY || crypto.randomBytes(32).toString("hex");
+    return (
+      process.env.PARLANT_ENHANCED_CONTEXT_KEY ||
+      crypto.randomBytes(32).toString("hex")
+    );
   }
 
-  private cloneUserContext(userContext: ParlantUserContext): ParlantUserContext {
+  private cloneUserContext(
+    userContext: ParlantUserContext,
+  ): ParlantUserContext {
     return {
       ...userContext,
       roles: [...userContext.roles],
@@ -711,11 +747,15 @@ export class ParlantSecurityContextManager
     };
   }
 
-  private cloneContext(context: EnhancedSecurityContext): EnhancedSecurityContext {
+  private cloneContext(
+    context: EnhancedSecurityContext,
+  ): EnhancedSecurityContext {
     return JSON.parse(JSON.stringify(context));
   }
 
-  private async validateUserContext(userContext: ParlantUserContext): Promise<void> {
+  private async validateUserContext(
+    userContext: ParlantUserContext,
+  ): Promise<void> {
     if (!userContext.userId || !userContext.sessionId) {
       throw new UnauthorizedException("Invalid user context");
     }
@@ -726,12 +766,13 @@ export class ParlantSecurityContextManager
   }
 
   private async checkUserContextLimits(userId: string): Promise<void> {
-    const userContexts = Array.from(this.activeContexts.values())
-      .filter(ctx => ctx.userContext.userId === userId);
+    const userContexts = Array.from(this.activeContexts.values()).filter(
+      (ctx) => ctx.userContext.userId === userId,
+    );
 
     if (userContexts.length >= this.maxContextsPerUser) {
       throw new ForbiddenException(
-        `User has reached maximum number of contexts: ${this.maxContextsPerUser}`
+        `User has reached maximum number of contexts: ${this.maxContextsPerUser}`,
       );
     }
   }
@@ -750,7 +791,10 @@ export class ParlantSecurityContextManager
     const riskFactors: RiskFactor[] = [];
 
     // Analyze user patterns
-    if (userContext.ipAddress && this.isKnownMaliciousIP(userContext.ipAddress)) {
+    if (
+      userContext.ipAddress &&
+      this.isKnownMaliciousIP(userContext.ipAddress)
+    ) {
       indicators.push({
         type: "malicious_ip",
         severity: "high",
@@ -762,10 +806,18 @@ export class ParlantSecurityContextManager
     }
 
     // Calculate overall score
-    const overallScore = indicators.reduce((score, indicator) => {
-      const severityWeight = { low: 0.1, medium: 0.3, high: 0.7, critical: 1.0 };
-      return score + (severityWeight[indicator.severity] * indicator.confidence);
-    }, 0) / Math.max(indicators.length, 1);
+    const overallScore =
+      indicators.reduce((score, indicator) => {
+        const severityWeight = {
+          low: 0.1,
+          medium: 0.3,
+          high: 0.7,
+          critical: 1.0,
+        };
+        return (
+          score + severityWeight[indicator.severity] * indicator.confidence
+        );
+      }, 0) / Math.max(indicators.length, 1);
 
     return {
       overallScore,
@@ -789,7 +841,7 @@ export class ParlantSecurityContextManager
     return {
       origin: {
         ipAddress: userContext.ipAddress || "unknown",
-        userAgent: userContext.metadata?.userAgent as string || "unknown",
+        userAgent: (userContext.metadata?.userAgent as string) || "unknown",
         referrer: userContext.metadata?.referrer as string,
         deviceFingerprint: this.generateDeviceFingerprint(userContext),
       },
@@ -828,14 +880,16 @@ export class ParlantSecurityContextManager
       lastAccessed: now,
       expiresAt: new Date(now.getTime() + this.contextTTL),
       status: "active",
-      stateTransitions: [{
-        fromState: "none",
-        toState: "active",
-        timestamp: now,
-        reason: "creation",
-        triggeredBy: "system",
-        metadata: {},
-      }],
+      stateTransitions: [
+        {
+          fromState: "none",
+          toState: "active",
+          timestamp: now,
+          reason: "creation",
+          triggeredBy: "system",
+          metadata: {},
+        },
+      ],
       usageStats: {
         accessCount: 0,
         validationCount: 0,
@@ -847,7 +901,9 @@ export class ParlantSecurityContextManager
     };
   }
 
-  private async getApplicableSecurityControls(securityLevel: SecurityLevel): Promise<SecurityControl[]> {
+  private async getApplicableSecurityControls(
+    securityLevel: SecurityLevel,
+  ): Promise<SecurityControl[]> {
     const controls: SecurityControl[] = [];
 
     controls.push({
@@ -860,7 +916,10 @@ export class ParlantSecurityContextManager
       source: "policy",
     });
 
-    if (securityLevel === SecurityLevel._HIGH || securityLevel === SecurityLevel._CRITICAL) {
+    if (
+      securityLevel === SecurityLevel._HIGH ||
+      securityLevel === SecurityLevel._CRITICAL
+    ) {
       controls.push({
         controlId: "enhanced_monitoring",
         type: "monitoring",
@@ -875,7 +934,9 @@ export class ParlantSecurityContextManager
     return controls;
   }
 
-  private async createIntegrityValidation(contextId: string): Promise<ContextIntegrity> {
+  private async createIntegrityValidation(
+    contextId: string,
+  ): Promise<ContextIntegrity> {
     const hash = crypto.createHash("sha256").update(contextId).digest("hex");
 
     return {
@@ -904,7 +965,9 @@ export class ParlantSecurityContextManager
     };
   }
 
-  private async createComplianceTracking(requirements: string[]): Promise<ComplianceTracking> {
+  private async createComplianceTracking(
+    requirements: string[],
+  ): Promise<ComplianceTracking> {
     return {
       regulations: requirements,
       status: "compliant",
@@ -915,13 +978,18 @@ export class ParlantSecurityContextManager
     };
   }
 
-  private async applySecurityControls(context: EnhancedSecurityContext): Promise<void> {
+  private async applySecurityControls(
+    context: EnhancedSecurityContext,
+  ): Promise<void> {
     for (const control of context.securityControls) {
       try {
         await this.executeSecurityControl(context, control);
         control.status = "active";
       } catch (error) {
-        this.logger.error(`Failed to apply security control: ${control.controlId}`, error);
+        this.logger.error(
+          `Failed to apply security control: ${control.controlId}`,
+          error,
+        );
         control.status = "failed";
       }
     }
@@ -946,17 +1014,23 @@ export class ParlantSecurityContextManager
     }
   }
 
-  private async applyEncryption(context: EnhancedSecurityContext): Promise<void> {
+  private async applyEncryption(
+    context: EnhancedSecurityContext,
+  ): Promise<void> {
     // Apply encryption to sensitive context data
     this.logger.debug(`Applying encryption to context: ${context.contextId}`);
   }
 
-  private async enableMonitoring(context: EnhancedSecurityContext): Promise<void> {
+  private async enableMonitoring(
+    context: EnhancedSecurityContext,
+  ): Promise<void> {
     // Enable enhanced monitoring
     this.logger.debug(`Enabling monitoring for context: ${context.contextId}`);
   }
 
-  private async enableValidation(context: EnhancedSecurityContext): Promise<void> {
+  private async enableValidation(
+    context: EnhancedSecurityContext,
+  ): Promise<void> {
     // Enable enhanced validation
     this.logger.debug(`Enabling validation for context: ${context.contextId}`);
   }
@@ -998,29 +1072,40 @@ export class ParlantSecurityContextManager
     this.metrics.memoryUsage = this.calculateMemoryUsage();
   }
 
-  private updateAverage(currentAverage: number, newValue: number, count: number): number {
+  private updateAverage(
+    currentAverage: number,
+    newValue: number,
+    count: number,
+  ): number {
     return (currentAverage * (count - 1) + newValue) / count;
   }
 
   private calculateMemoryUsage(): number {
-    return (this.activeContexts.size * 1024) + (this.contextHierarchy.size * 512);
+    return this.activeContexts.size * 1024 + this.contextHierarchy.size * 512;
   }
 
-  private async validateContextIntegrity(context: EnhancedSecurityContext): Promise<boolean> {
+  private async validateContextIntegrity(
+    context: EnhancedSecurityContext,
+  ): Promise<boolean> {
     // Validate context integrity
-    const currentHash = crypto.createHash("sha256")
+    const currentHash = crypto
+      .createHash("sha256")
       .update(JSON.stringify(context))
       .digest("hex");
 
     return context.integrity.hash === currentHash;
   }
 
-  private async validateCompliance(context: EnhancedSecurityContext): Promise<boolean> {
+  private async validateCompliance(
+    context: EnhancedSecurityContext,
+  ): Promise<boolean> {
     // Validate compliance requirements
     return context.compliance.status === "compliant";
   }
 
-  private async handleThreatDetection(context: EnhancedSecurityContext): Promise<void> {
+  private async handleThreatDetection(
+    context: EnhancedSecurityContext,
+  ): Promise<void> {
     this.metrics.threatsPrevented++;
 
     this.emit("threat:detected", {
@@ -1030,7 +1115,7 @@ export class ParlantSecurityContextManager
     });
 
     this.logger.warn(
-      `🚨 Threat detected in context: ${context.contextId} (score: ${context.threatAnalysis.overallScore})`
+      `🚨 Threat detected in context: ${context.contextId} (score: ${context.threatAnalysis.overallScore})`,
     );
   }
 
@@ -1050,7 +1135,9 @@ export class ParlantSecurityContextManager
     }
   }
 
-  private async archiveContext(context: EnhancedSecurityContext): Promise<void> {
+  private async archiveContext(
+    context: EnhancedSecurityContext,
+  ): Promise<void> {
     // Archive context for audit purposes
     this.logger.debug(`📦 Archiving context: ${context.contextId}`);
   }
@@ -1075,9 +1162,12 @@ export class ParlantSecurityContextManager
 
   private async startPeriodicTasks(): Promise<void> {
     // Context cleanup every 5 minutes
-    this.cleanupTimer = setInterval(() => {
-      this.performContextCleanup();
-    }, 5 * 60 * 1000);
+    this.cleanupTimer = setInterval(
+      () => {
+        this.performContextCleanup();
+      },
+      5 * 60 * 1000,
+    );
 
     // Metrics update every minute
     this.metricsTimer = setInterval(() => {

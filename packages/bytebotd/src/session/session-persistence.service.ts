@@ -1314,7 +1314,7 @@ export class SessionPersistenceService
       const replicationHealth = await this.assessReplicationHealth();
 
       // Collect performance metrics
-      const performanceMetrics = await this.collectPerformanceMetrics();
+      const performanceMetrics = this.collectPerformanceMetrics();
 
       // Generate capacity report
       const capacityReport = await this.generateCapacityReport();
@@ -1784,7 +1784,7 @@ export class SessionPersistenceService
       replicationThroughput: 0,
     };
   }
-  private async collectPerformanceMetrics(): Promise<PersistencePerformanceMetrics> {
+  private collectPerformanceMetrics(): PersistencePerformanceMetrics {
     return {
       readThroughputMBps: 0,
       writeThroughputMBps: 0,

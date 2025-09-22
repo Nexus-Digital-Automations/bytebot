@@ -41,40 +41,59 @@ describe("EnhancedJwtParlantBridgeService", () => {
         {
           provide: ConfigService,
           useValue: {
-            get: jest.fn((key: string, defaultValue?: string | number | boolean | Record<string, unknown>) => {
-              switch (key) {
-                case "JWT_SECRET":
-                  return mockJwtSecret;
-                case "redis":
-                  return {
-                    host: "localhost",
-                    port: 6379,
-                    password: undefined,
-                    db: 0,
-                  };
-                case "parlant.apiUrl":
-                  return "http://localhost:8000";
-                case "parlant.apiKey":
-                  return "test-api-key";
-                case "parlant.failoverUrls":
-                  return "http://localhost:8001,http://localhost:8002";
-                default:
-                  return defaultValue;
-              }
-            }),
+            get: jest.fn(
+              (
+                key: string,
+                defaultValue?:
+                  | string
+                  | number
+                  | boolean
+                  | Record<string, unknown>,
+              ) => {
+                switch (key) {
+                  case "JWT_SECRET":
+                    return mockJwtSecret;
+                  case "redis":
+                    return {
+                      host: "localhost",
+                      port: 6379,
+                      password: undefined,
+                      db: 0,
+                    };
+                  case "parlant.apiUrl":
+                    return "http://localhost:8000";
+                  case "parlant.apiKey":
+                    return "test-api-key";
+                  case "parlant.failoverUrls":
+                    return "http://localhost:8001,http://localhost:8002";
+                  default:
+                    return defaultValue;
+                }
+              },
+            ),
           },
         },
       ],
     }).compile();
 
-    service = module.get<EnhancedJwtParlantBridgeService>(EnhancedJwtParlantBridgeService);
+    service = module.get<EnhancedJwtParlantBridgeService>(
+      EnhancedJwtParlantBridgeService,
+    );
     configService = module.get<ConfigService>(ConfigService);
 
     // Mock Redis and external API calls
-    jest.spyOn(service as any, "initializeRedisClient").mockResolvedValue(undefined);
-    jest.spyOn(service as any, "initializeParlantClient").mockResolvedValue(undefined);
-    jest.spyOn(service as any, "validateJwtConfiguration").mockResolvedValue(undefined);
-    jest.spyOn(service as any, "startEnhancedPeriodicTasks").mockResolvedValue(undefined);
+    jest
+      .spyOn(service as any, "initializeRedisClient")
+      .mockResolvedValue(undefined);
+    jest
+      .spyOn(service as any, "initializeParlantClient")
+      .mockResolvedValue(undefined);
+    jest
+      .spyOn(service as any, "validateJwtConfiguration")
+      .mockResolvedValue(undefined);
+    jest
+      .spyOn(service as any, "startEnhancedPeriodicTasks")
+      .mockResolvedValue(undefined);
   });
 
   afterEach(async () => {
@@ -89,9 +108,15 @@ describe("EnhancedJwtParlantBridgeService", () => {
     });
 
     it("should initialize enhanced components on module init", async () => {
-      const initializeFailoverSystemsSpy = jest.spyOn(service as any, "initializeFailoverSystems").mockResolvedValue(undefined);
-      const initializeIdentityMappingsSpy = jest.spyOn(service as any, "initializeIdentityMappings").mockResolvedValue(undefined);
-      const initializeSecurityMonitoringSpy = jest.spyOn(service as any, "initializeSecurityMonitoring").mockResolvedValue(undefined);
+      const initializeFailoverSystemsSpy = jest
+        .spyOn(service as any, "initializeFailoverSystems")
+        .mockResolvedValue(undefined);
+      const initializeIdentityMappingsSpy = jest
+        .spyOn(service as any, "initializeIdentityMappings")
+        .mockResolvedValue(undefined);
+      const initializeSecurityMonitoringSpy = jest
+        .spyOn(service as any, "initializeSecurityMonitoring")
+        .mockResolvedValue(undefined);
 
       await service.onModuleInit();
 
@@ -101,9 +126,15 @@ describe("EnhancedJwtParlantBridgeService", () => {
     });
 
     it("should cleanup resources on module destroy", async () => {
-      const stopEnhancedPeriodicTasksSpy = jest.spyOn(service as any, "stopEnhancedPeriodicTasks").mockResolvedValue(undefined);
-      const flushSecurityAlertsSpy = jest.spyOn(service as any, "flushSecurityAlerts").mockResolvedValue(undefined);
-      const savePerformanceMetricsSpy = jest.spyOn(service as any, "savePerformanceMetrics").mockResolvedValue(undefined);
+      const stopEnhancedPeriodicTasksSpy = jest
+        .spyOn(service as any, "stopEnhancedPeriodicTasks")
+        .mockResolvedValue(undefined);
+      const flushSecurityAlertsSpy = jest
+        .spyOn(service as any, "flushSecurityAlerts")
+        .mockResolvedValue(undefined);
+      const savePerformanceMetricsSpy = jest
+        .spyOn(service as any, "savePerformanceMetrics")
+        .mockResolvedValue(undefined);
 
       await service.onModuleDestroy();
 
@@ -132,7 +163,11 @@ describe("EnhancedJwtParlantBridgeService", () => {
           mfaVerified: true,
         },
         mockJwtSecret,
-        { expiresIn: "1h", issuer: "bytebot-auth-service", audience: "bytebot-api" }
+        {
+          expiresIn: "1h",
+          issuer: "bytebot-auth-service",
+          audience: "bytebot-api",
+        },
       );
 
       mockTokenExchangeRequest = {
@@ -150,12 +185,14 @@ describe("EnhancedJwtParlantBridgeService", () => {
 
     it("should successfully exchange AIgent token to PARLANT token", async () => {
       // Mock required methods
-      jest.spyOn(service as any, "validateTokenExchangeSecurity").mockResolvedValue({
-        passed: true,
-        riskScore: 10,
-        threatIndicators: [],
-        validationTime: 50,
-      });
+      jest
+        .spyOn(service as any, "validateTokenExchangeSecurity")
+        .mockResolvedValue({
+          passed: true,
+          riskScore: 10,
+          threatIndicators: [],
+          validationTime: 50,
+        });
 
       jest.spyOn(service as any, "parseSourceToken").mockResolvedValue({
         sub: mockUserId,
@@ -172,8 +209,12 @@ describe("EnhancedJwtParlantBridgeService", () => {
         parlantUserId: `parlant_${mockUserId}`,
       });
 
-      jest.spyOn(service as any, "translateToken").mockResolvedValue("translated-parlant-token");
-      jest.spyOn(service as any, "updatePerformanceMetrics").mockResolvedValue(undefined);
+      jest
+        .spyOn(service as any, "translateToken")
+        .mockResolvedValue("translated-parlant-token");
+      jest
+        .spyOn(service as any, "updatePerformanceMetrics")
+        .mockResolvedValue(undefined);
       jest.spyOn(service as any, "logAuditEvent").mockResolvedValue(undefined);
 
       const result = await service.exchangeToken(mockTokenExchangeRequest);
@@ -187,16 +228,22 @@ describe("EnhancedJwtParlantBridgeService", () => {
 
     it("should handle token exchange failure", async () => {
       // Mock security validation failure
-      jest.spyOn(service as any, "validateTokenExchangeSecurity").mockResolvedValue({
-        passed: false,
-        reason: "High risk score",
-        riskScore: 90,
-        threatIndicators: ["suspicious_ip"],
-        validationTime: 100,
-      });
+      jest
+        .spyOn(service as any, "validateTokenExchangeSecurity")
+        .mockResolvedValue({
+          passed: false,
+          reason: "High risk score",
+          riskScore: 90,
+          threatIndicators: ["suspicious_ip"],
+          validationTime: 100,
+        });
 
-      jest.spyOn(service as any, "updatePerformanceMetrics").mockResolvedValue(undefined);
-      jest.spyOn(service as any, "createSecurityAlert").mockResolvedValue(undefined);
+      jest
+        .spyOn(service as any, "updatePerformanceMetrics")
+        .mockResolvedValue(undefined);
+      jest
+        .spyOn(service as any, "createSecurityAlert")
+        .mockResolvedValue(undefined);
 
       const result = await service.exchangeToken(mockTokenExchangeRequest);
 
@@ -207,20 +254,28 @@ describe("EnhancedJwtParlantBridgeService", () => {
     });
 
     it("should validate security requirements for token exchange", async () => {
-      const validateSecuritySpy = jest.spyOn(service as any, "validateTokenExchangeSecurity");
+      const validateSecuritySpy = jest.spyOn(
+        service as any,
+        "validateTokenExchangeSecurity",
+      );
 
       await service.exchangeToken(mockTokenExchangeRequest);
 
-      expect(validateSecuritySpy).toHaveBeenCalledWith(mockTokenExchangeRequest, expect.any(String));
+      expect(validateSecuritySpy).toHaveBeenCalledWith(
+        mockTokenExchangeRequest,
+        expect.any(String),
+      );
     });
 
     it("should perform identity mapping during token exchange", async () => {
-      jest.spyOn(service as any, "validateTokenExchangeSecurity").mockResolvedValue({
-        passed: true,
-        riskScore: 10,
-        threatIndicators: [],
-        validationTime: 50,
-      });
+      jest
+        .spyOn(service as any, "validateTokenExchangeSecurity")
+        .mockResolvedValue({
+          passed: true,
+          riskScore: 10,
+          threatIndicators: [],
+          validationTime: 50,
+        });
 
       const mockSourcePayload = {
         sub: mockUserId,
@@ -228,17 +283,25 @@ describe("EnhancedJwtParlantBridgeService", () => {
         username: "testuser",
       };
 
-      jest.spyOn(service as any, "parseSourceToken").mockResolvedValue(mockSourcePayload);
+      jest
+        .spyOn(service as any, "parseSourceToken")
+        .mockResolvedValue(mockSourcePayload);
 
-      const performIdentityMappingSpy = jest.spyOn(service as any, "performIdentityMapping").mockResolvedValue({
-        success: true,
-        confidence: 0.95,
-        aigentUserId: mockUserId,
-        parlantUserId: `parlant_${mockUserId}`,
-      });
+      const performIdentityMappingSpy = jest
+        .spyOn(service as any, "performIdentityMapping")
+        .mockResolvedValue({
+          success: true,
+          confidence: 0.95,
+          aigentUserId: mockUserId,
+          parlantUserId: `parlant_${mockUserId}`,
+        });
 
-      jest.spyOn(service as any, "translateToken").mockResolvedValue("translated-token");
-      jest.spyOn(service as any, "updatePerformanceMetrics").mockResolvedValue(undefined);
+      jest
+        .spyOn(service as any, "translateToken")
+        .mockResolvedValue("translated-token");
+      jest
+        .spyOn(service as any, "updatePerformanceMetrics")
+        .mockResolvedValue(undefined);
       jest.spyOn(service as any, "logAuditEvent").mockResolvedValue(undefined);
 
       await service.exchangeToken(mockTokenExchangeRequest);
@@ -246,17 +309,19 @@ describe("EnhancedJwtParlantBridgeService", () => {
       expect(performIdentityMappingSpy).toHaveBeenCalledWith(
         mockSourcePayload,
         Platform.PARLANT,
-        expect.any(String)
+        expect.any(String),
       );
     });
 
     it("should track performance metrics for token exchange", async () => {
-      jest.spyOn(service as any, "validateTokenExchangeSecurity").mockResolvedValue({
-        passed: true,
-        riskScore: 10,
-        threatIndicators: [],
-        validationTime: 50,
-      });
+      jest
+        .spyOn(service as any, "validateTokenExchangeSecurity")
+        .mockResolvedValue({
+          passed: true,
+          riskScore: 10,
+          threatIndicators: [],
+          validationTime: 50,
+        });
 
       jest.spyOn(service as any, "parseSourceToken").mockResolvedValue({});
       jest.spyOn(service as any, "performIdentityMapping").mockResolvedValue({
@@ -265,14 +330,22 @@ describe("EnhancedJwtParlantBridgeService", () => {
         aigentUserId: mockUserId,
         parlantUserId: `parlant_${mockUserId}`,
       });
-      jest.spyOn(service as any, "translateToken").mockResolvedValue("translated-token");
+      jest
+        .spyOn(service as any, "translateToken")
+        .mockResolvedValue("translated-token");
       jest.spyOn(service as any, "logAuditEvent").mockResolvedValue(undefined);
 
-      const updatePerformanceMetricsSpy = jest.spyOn(service as any, "updatePerformanceMetrics").mockResolvedValue(undefined);
+      const updatePerformanceMetricsSpy = jest
+        .spyOn(service as any, "updatePerformanceMetrics")
+        .mockResolvedValue(undefined);
 
       await service.exchangeToken(mockTokenExchangeRequest);
 
-      expect(updatePerformanceMetricsSpy).toHaveBeenCalledWith("exchange", expect.any(Number), true);
+      expect(updatePerformanceMetricsSpy).toHaveBeenCalledWith(
+        "exchange",
+        expect.any(Number),
+        true,
+      );
     });
   });
 
@@ -321,20 +394,28 @@ describe("EnhancedJwtParlantBridgeService", () => {
         success: true,
       });
 
-      const result = await service.manageTokenLifecycle(mockTokenId, "validate");
+      const result = await service.manageTokenLifecycle(
+        mockTokenId,
+        "validate",
+      );
 
       expect(result.success).toBe(true);
     });
 
     it("should handle unsupported lifecycle operation", async () => {
-      const result = await service.manageTokenLifecycle(mockTokenId, "unsupported" as any);
+      const result = await service.manageTokenLifecycle(
+        mockTokenId,
+        "unsupported" as any,
+      );
 
       expect(result.success).toBe(false);
       expect(result.reason).toContain("Unsupported lifecycle operation");
     });
 
     it("should handle lifecycle operation errors gracefully", async () => {
-      jest.spyOn(service as any, "refreshToken").mockRejectedValue(new Error("Refresh failed"));
+      jest
+        .spyOn(service as any, "refreshToken")
+        .mockRejectedValue(new Error("Refresh failed"));
 
       const result = await service.manageTokenLifecycle(mockTokenId, "refresh");
 
@@ -359,11 +440,18 @@ describe("EnhancedJwtParlantBridgeService", () => {
         currentLoad: 50,
       };
 
-      jest.spyOn(service as any, "selectBestFailoverSystem").mockResolvedValue(mockFailoverSystem);
+      jest
+        .spyOn(service as any, "selectBestFailoverSystem")
+        .mockResolvedValue(mockFailoverSystem);
       jest.spyOn(service as any, "migrateActiveSessions").mockResolvedValue(25);
-      jest.spyOn(service as any, "createSecurityAlert").mockResolvedValue(undefined);
+      jest
+        .spyOn(service as any, "createSecurityAlert")
+        .mockResolvedValue(undefined);
 
-      const result = await service.performFailover(mockPrimarySystemId, "health_check_failed");
+      const result = await service.performFailover(
+        mockPrimarySystemId,
+        "health_check_failed",
+      );
 
       expect(result.success).toBe(true);
       expect(result.failoverSystemId).toBe("failover-system-1");
@@ -372,9 +460,14 @@ describe("EnhancedJwtParlantBridgeService", () => {
     });
 
     it("should handle failover when no healthy systems available", async () => {
-      jest.spyOn(service as any, "selectBestFailoverSystem").mockResolvedValue(null);
+      jest
+        .spyOn(service as any, "selectBestFailoverSystem")
+        .mockResolvedValue(null);
 
-      const result = await service.performFailover(mockPrimarySystemId, "health_check_failed");
+      const result = await service.performFailover(
+        mockPrimarySystemId,
+        "health_check_failed",
+      );
 
       expect(result.success).toBe(false);
       expect(result.affectedSessions).toBe(0);
@@ -393,10 +486,14 @@ describe("EnhancedJwtParlantBridgeService", () => {
         currentLoad: 50,
       };
 
-      jest.spyOn(service as any, "selectBestFailoverSystem").mockResolvedValue(mockFailoverSystem);
+      jest
+        .spyOn(service as any, "selectBestFailoverSystem")
+        .mockResolvedValue(mockFailoverSystem);
       jest.spyOn(service as any, "migrateActiveSessions").mockResolvedValue(25);
 
-      const createSecurityAlertSpy = jest.spyOn(service as any, "createSecurityAlert").mockResolvedValue(undefined);
+      const createSecurityAlertSpy = jest
+        .spyOn(service as any, "createSecurityAlert")
+        .mockResolvedValue(undefined);
 
       await service.performFailover(mockPrimarySystemId, "health_check_failed");
 
@@ -406,7 +503,10 @@ describe("EnhancedJwtParlantBridgeService", () => {
         userContext: expect.any(Object),
         details: expect.objectContaining({
           description: expect.stringContaining("System failover"),
-          indicators: expect.arrayContaining(["system_failover", "health_check_failed"]),
+          indicators: expect.arrayContaining([
+            "system_failover",
+            "health_check_failed",
+          ]),
           riskScore: 80,
         }),
       });
@@ -438,10 +538,14 @@ describe("EnhancedJwtParlantBridgeService", () => {
         },
       ];
 
-      jest.spyOn(service as any, "detectSuspiciousAuthPatterns").mockResolvedValue(mockAuthPatternAlerts);
+      jest
+        .spyOn(service as any, "detectSuspiciousAuthPatterns")
+        .mockResolvedValue(mockAuthPatternAlerts);
       jest.spyOn(service as any, "detectTokenAbuse").mockResolvedValue([]);
       jest.spyOn(service as any, "detectSystemAnomalies").mockResolvedValue([]);
-      jest.spyOn(service as any, "getAlertSeverityDistribution").mockReturnValue({ medium: 1 });
+      jest
+        .spyOn(service as any, "getAlertSeverityDistribution")
+        .mockReturnValue({ medium: 1 });
 
       const alerts = await service.monitorSecurityThreats();
 
@@ -472,19 +576,28 @@ describe("EnhancedJwtParlantBridgeService", () => {
         responseStatus: "pending" as const,
       };
 
-      jest.spyOn(service as any, "detectSuspiciousAuthPatterns").mockResolvedValue([]);
-      jest.spyOn(service as any, "detectTokenAbuse").mockResolvedValue([mockAlert]);
+      jest
+        .spyOn(service as any, "detectSuspiciousAuthPatterns")
+        .mockResolvedValue([]);
+      jest
+        .spyOn(service as any, "detectTokenAbuse")
+        .mockResolvedValue([mockAlert]);
       jest.spyOn(service as any, "detectSystemAnomalies").mockResolvedValue([]);
 
       const emitSpy = jest.spyOn(service, "emit");
 
       await service.monitorSecurityThreats();
 
-      expect(emitSpy).toHaveBeenCalledWith("security:threat_detected", mockAlert);
+      expect(emitSpy).toHaveBeenCalledWith(
+        "security:threat_detected",
+        mockAlert,
+      );
     });
 
     it("should handle security monitoring errors gracefully", async () => {
-      jest.spyOn(service as any, "detectSuspiciousAuthPatterns").mockRejectedValue(new Error("Detection failed"));
+      jest
+        .spyOn(service as any, "detectSuspiciousAuthPatterns")
+        .mockRejectedValue(new Error("Detection failed"));
       jest.spyOn(service as any, "detectTokenAbuse").mockResolvedValue([]);
       jest.spyOn(service as any, "detectSystemAnomalies").mockResolvedValue([]);
 
@@ -528,9 +641,15 @@ describe("EnhancedJwtParlantBridgeService", () => {
       (service as any).performanceMetrics = mockCurrentMetrics;
       (service as any).tokenExchangeCache = new Map();
 
-      jest.spyOn(service as any, "optimizeConnectionPools").mockResolvedValue(undefined);
-      jest.spyOn(service as any, "optimizeRedisPerformance").mockResolvedValue(undefined);
-      jest.spyOn(service as any, "optimizeLoadBalancing").mockResolvedValue(undefined);
+      jest
+        .spyOn(service as any, "optimizeConnectionPools")
+        .mockResolvedValue(undefined);
+      jest
+        .spyOn(service as any, "optimizeRedisPerformance")
+        .mockResolvedValue(undefined);
+      jest
+        .spyOn(service as any, "optimizeLoadBalancing")
+        .mockResolvedValue(undefined);
 
       const result = await service.optimizePerformance();
 
@@ -573,9 +692,15 @@ describe("EnhancedJwtParlantBridgeService", () => {
       (service as any).performanceMetrics = mockSlowMetrics;
       (service as any).tokenExchangeCache = new Map();
 
-      jest.spyOn(service as any, "optimizeConnectionPools").mockResolvedValue(undefined);
-      jest.spyOn(service as any, "optimizeRedisPerformance").mockResolvedValue(undefined);
-      jest.spyOn(service as any, "optimizeLoadBalancing").mockResolvedValue(undefined);
+      jest
+        .spyOn(service as any, "optimizeConnectionPools")
+        .mockResolvedValue(undefined);
+      jest
+        .spyOn(service as any, "optimizeRedisPerformance")
+        .mockResolvedValue(undefined);
+      jest
+        .spyOn(service as any, "optimizeLoadBalancing")
+        .mockResolvedValue(undefined);
 
       const result = await service.optimizePerformance();
 
@@ -590,10 +715,18 @@ describe("EnhancedJwtParlantBridgeService", () => {
 
       (service as any).tokenExchangeCache = largeCacheMap;
 
-      const optimizeTokenCacheSpy = jest.spyOn(service as any, "optimizeTokenCache").mockResolvedValue(undefined);
-      jest.spyOn(service as any, "optimizeConnectionPools").mockResolvedValue(undefined);
-      jest.spyOn(service as any, "optimizeRedisPerformance").mockResolvedValue(undefined);
-      jest.spyOn(service as any, "optimizeLoadBalancing").mockResolvedValue(undefined);
+      const optimizeTokenCacheSpy = jest
+        .spyOn(service as any, "optimizeTokenCache")
+        .mockResolvedValue(undefined);
+      jest
+        .spyOn(service as any, "optimizeConnectionPools")
+        .mockResolvedValue(undefined);
+      jest
+        .spyOn(service as any, "optimizeRedisPerformance")
+        .mockResolvedValue(undefined);
+      jest
+        .spyOn(service as any, "optimizeLoadBalancing")
+        .mockResolvedValue(undefined);
 
       const result = await service.optimizePerformance();
 
@@ -624,12 +757,24 @@ describe("EnhancedJwtParlantBridgeService", () => {
         },
       ];
 
-      jest.spyOn(service as any, "analyzeAuditTrail").mockResolvedValue(mockAuditAnalysis);
-      jest.spyOn(service as any, "calculateComplianceScore").mockResolvedValue(95);
-      jest.spyOn(service as any, "generateComplianceFindings").mockResolvedValue(mockFindings);
-      jest.spyOn(service as any, "storeComplianceReport").mockResolvedValue(undefined);
+      jest
+        .spyOn(service as any, "analyzeAuditTrail")
+        .mockResolvedValue(mockAuditAnalysis);
+      jest
+        .spyOn(service as any, "calculateComplianceScore")
+        .mockResolvedValue(95);
+      jest
+        .spyOn(service as any, "generateComplianceFindings")
+        .mockResolvedValue(mockFindings);
+      jest
+        .spyOn(service as any, "storeComplianceReport")
+        .mockResolvedValue(undefined);
 
-      const report = await service.generateComplianceReport(startDate, endDate, "comprehensive");
+      const report = await service.generateComplianceReport(
+        startDate,
+        endDate,
+        "comprehensive",
+      );
 
       expect(report.reportType).toBe("comprehensive");
       expect(report.period.start).toEqual(startDate);
@@ -646,21 +791,33 @@ describe("EnhancedJwtParlantBridgeService", () => {
         authenticationEvents: 4000,
         failoverEvents: 2,
       });
-      jest.spyOn(service as any, "calculateComplianceScore").mockResolvedValue(98);
-      jest.spyOn(service as any, "generateComplianceFindings").mockResolvedValue([]);
-      jest.spyOn(service as any, "storeComplianceReport").mockResolvedValue(undefined);
+      jest
+        .spyOn(service as any, "calculateComplianceScore")
+        .mockResolvedValue(98);
+      jest
+        .spyOn(service as any, "generateComplianceFindings")
+        .mockResolvedValue([]);
+      jest
+        .spyOn(service as any, "storeComplianceReport")
+        .mockResolvedValue(undefined);
 
-      const report = await service.generateComplianceReport(startDate, endDate, "soc2");
+      const report = await service.generateComplianceReport(
+        startDate,
+        endDate,
+        "soc2",
+      );
 
       expect(report.reportType).toBe("soc2");
       expect(report.complianceScore).toBe(98);
     });
 
     it("should handle compliance report generation errors", async () => {
-      jest.spyOn(service as any, "analyzeAuditTrail").mockRejectedValue(new Error("Analysis failed"));
+      jest
+        .spyOn(service as any, "analyzeAuditTrail")
+        .mockRejectedValue(new Error("Analysis failed"));
 
       await expect(
-        service.generateComplianceReport(startDate, endDate, "gdpr")
+        service.generateComplianceReport(startDate, endDate, "gdpr"),
       ).rejects.toThrow("Analysis failed");
     });
 
@@ -671,10 +828,16 @@ describe("EnhancedJwtParlantBridgeService", () => {
         authenticationEvents: 800,
         failoverEvents: 0,
       });
-      jest.spyOn(service as any, "calculateComplianceScore").mockResolvedValue(92);
-      jest.spyOn(service as any, "generateComplianceFindings").mockResolvedValue([]);
+      jest
+        .spyOn(service as any, "calculateComplianceScore")
+        .mockResolvedValue(92);
+      jest
+        .spyOn(service as any, "generateComplianceFindings")
+        .mockResolvedValue([]);
 
-      const storeComplianceReportSpy = jest.spyOn(service as any, "storeComplianceReport").mockResolvedValue(undefined);
+      const storeComplianceReportSpy = jest
+        .spyOn(service as any, "storeComplianceReport")
+        .mockResolvedValue(undefined);
 
       await service.generateComplianceReport(startDate, endDate, "hipaa");
 
@@ -682,16 +845,20 @@ describe("EnhancedJwtParlantBridgeService", () => {
         expect.objectContaining({
           reportType: "hipaa",
           complianceScore: 92,
-        })
+        }),
       );
     });
   });
 
   describe("Error Handling", () => {
     it("should handle initialization errors gracefully", async () => {
-      jest.spyOn(service as any, "initializeFailoverSystems").mockRejectedValue(new Error("Failover init failed"));
+      jest
+        .spyOn(service as any, "initializeFailoverSystems")
+        .mockRejectedValue(new Error("Failover init failed"));
 
-      await expect(service.onModuleInit()).rejects.toThrow("Failover init failed");
+      await expect(service.onModuleInit()).rejects.toThrow(
+        "Failover init failed",
+      );
     });
 
     it("should handle token exchange validation errors", async () => {
@@ -707,9 +874,15 @@ describe("EnhancedJwtParlantBridgeService", () => {
         },
       };
 
-      jest.spyOn(service as any, "validateTokenExchangeSecurity").mockRejectedValue(new Error("Validation error"));
-      jest.spyOn(service as any, "updatePerformanceMetrics").mockResolvedValue(undefined);
-      jest.spyOn(service as any, "createSecurityAlert").mockResolvedValue(undefined);
+      jest
+        .spyOn(service as any, "validateTokenExchangeSecurity")
+        .mockRejectedValue(new Error("Validation error"));
+      jest
+        .spyOn(service as any, "updatePerformanceMetrics")
+        .mockResolvedValue(undefined);
+      jest
+        .spyOn(service as any, "createSecurityAlert")
+        .mockResolvedValue(undefined);
 
       const result = await service.exchangeToken(invalidRequest);
 
@@ -718,7 +891,9 @@ describe("EnhancedJwtParlantBridgeService", () => {
     });
 
     it("should handle performance optimization errors", async () => {
-      jest.spyOn(service as any, "optimizeConnectionPools").mockRejectedValue(new Error("Optimization failed"));
+      jest
+        .spyOn(service as any, "optimizeConnectionPools")
+        .mockRejectedValue(new Error("Optimization failed"));
 
       const result = await service.optimizePerformance();
 

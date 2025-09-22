@@ -20,11 +20,11 @@
  * @author Claude Code - RBAC Security Specialist
  */
 
-import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { Cron, CronExpression } from '@nestjs/schedule';
-import { createHash, randomBytes } from 'crypto';
+import { Injectable, Logger, OnApplicationShutdown } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { EventEmitter2 } from "@nestjs/event-emitter";
+import { Cron, CronExpression } from "@nestjs/schedule";
+import { createHash, randomBytes } from "crypto";
 
 // ===========================
 // RBAC TYPES AND ENUMS
@@ -34,87 +34,87 @@ import { createHash, randomBytes } from 'crypto';
  * Resource types that can be controlled
  */
 export enum ResourceType {
-  PIPELINE = 'pipeline',
-  DEPLOYMENT = 'deployment',
-  ENVIRONMENT = 'environment',
-  SECRET = 'secret',
-  CONFIGURATION = 'configuration',
-  INFRASTRUCTURE = 'infrastructure',
-  MONITORING = 'monitoring',
-  LOGS = 'logs',
-  ARTIFACTS = 'artifacts',
-  SECURITY_SCAN = 'security_scan',
+  PIPELINE = "pipeline",
+  DEPLOYMENT = "deployment",
+  ENVIRONMENT = "environment",
+  SECRET = "secret",
+  CONFIGURATION = "configuration",
+  INFRASTRUCTURE = "infrastructure",
+  MONITORING = "monitoring",
+  LOGS = "logs",
+  ARTIFACTS = "artifacts",
+  SECURITY_SCAN = "security_scan",
 }
 
 /**
  * Actions that can be performed on resources
  */
 export enum Action {
-  READ = 'read',
-  WRITE = 'write',
-  EXECUTE = 'execute',
-  DELETE = 'delete',
-  APPROVE = 'approve',
-  DEPLOY = 'deploy',
-  ROLLBACK = 'rollback',
-  CONFIGURE = 'configure',
-  MONITOR = 'monitor',
-  AUDIT = 'audit',
+  READ = "read",
+  WRITE = "write",
+  EXECUTE = "execute",
+  DELETE = "delete",
+  APPROVE = "approve",
+  DEPLOY = "deploy",
+  ROLLBACK = "rollback",
+  CONFIGURE = "configure",
+  MONITOR = "monitor",
+  AUDIT = "audit",
 }
 
 /**
  * Environment types
  */
 export enum EnvironmentType {
-  DEVELOPMENT = 'development',
-  TESTING = 'testing',
-  STAGING = 'staging',
-  PRODUCTION = 'production',
-  DISASTER_RECOVERY = 'disaster_recovery',
-  SANDBOX = 'sandbox',
+  DEVELOPMENT = "development",
+  TESTING = "testing",
+  STAGING = "staging",
+  PRODUCTION = "production",
+  DISASTER_RECOVERY = "disaster_recovery",
+  SANDBOX = "sandbox",
 }
 
 /**
  * Access decision types
  */
 export enum AccessDecision {
-  ALLOW = 'allow',
-  DENY = 'deny',
-  CONDITIONAL_ALLOW = 'conditional_allow',
-  REQUIRE_APPROVAL = 'require_approval',
-  REQUIRE_MFA = 'require_mfa',
-  REQUIRE_JUSTIFICATION = 'require_justification',
+  ALLOW = "allow",
+  DENY = "deny",
+  CONDITIONAL_ALLOW = "conditional_allow",
+  REQUIRE_APPROVAL = "require_approval",
+  REQUIRE_MFA = "require_mfa",
+  REQUIRE_JUSTIFICATION = "require_justification",
 }
 
 /**
  * Access request status
  */
 export enum AccessRequestStatus {
-  PENDING = 'pending',
-  APPROVED = 'approved',
-  DENIED = 'denied',
-  EXPIRED = 'expired',
-  REVOKED = 'revoked',
-  COMPLETED = 'completed',
+  PENDING = "pending",
+  APPROVED = "approved",
+  DENIED = "denied",
+  EXPIRED = "expired",
+  REVOKED = "revoked",
+  COMPLETED = "completed",
 }
 
 /**
  * Permission effect
  */
 export enum Effect {
-  ALLOW = 'allow',
-  DENY = 'deny',
+  ALLOW = "allow",
+  DENY = "deny",
 }
 
 /**
  * Context types for conditional access
  */
 export enum ContextType {
-  TIME_BASED = 'time_based',
-  LOCATION_BASED = 'location_based',
-  RISK_BASED = 'risk_based',
-  WORKFLOW_BASED = 'workflow_based',
-  EMERGENCY = 'emergency',
+  TIME_BASED = "time_based",
+  LOCATION_BASED = "location_based",
+  RISK_BASED = "risk_based",
+  WORKFLOW_BASED = "workflow_based",
+  EMERGENCY = "emergency",
 }
 
 // ===========================
@@ -166,34 +166,34 @@ export interface Principal {
  * Principal types
  */
 export enum PrincipalType {
-  USER = 'user',
-  SERVICE_ACCOUNT = 'service_account',
-  GROUP = 'group',
-  ROLE = 'role',
-  SYSTEM = 'system',
+  USER = "user",
+  SERVICE_ACCOUNT = "service_account",
+  GROUP = "group",
+  ROLE = "role",
+  SYSTEM = "system",
 }
 
 /**
  * Authentication methods
  */
 export enum AuthenticationMethod {
-  PASSWORD = 'password',
-  MFA = 'mfa',
-  CERTIFICATE = 'certificate',
-  TOKEN = 'token',
-  SAML = 'saml',
-  OAUTH = 'oauth',
+  PASSWORD = "password",
+  MFA = "mfa",
+  CERTIFICATE = "certificate",
+  TOKEN = "token",
+  SAML = "saml",
+  OAUTH = "oauth",
 }
 
 /**
  * Account status
  */
 export enum AccountStatus {
-  ACTIVE = 'active',
-  INACTIVE = 'inactive',
-  SUSPENDED = 'suspended',
-  LOCKED = 'locked',
-  PENDING_ACTIVATION = 'pending_activation',
+  ACTIVE = "active",
+  INACTIVE = "inactive",
+  SUSPENDED = "suspended",
+  LOCKED = "locked",
+  PENDING_ACTIVATION = "pending_activation",
 }
 
 /**
@@ -238,10 +238,10 @@ export interface Role {
  * Role status
  */
 export enum RoleStatus {
-  ACTIVE = 'active',
-  INACTIVE = 'inactive',
-  DEPRECATED = 'deprecated',
-  PENDING_REVIEW = 'pending_review',
+  ACTIVE = "active",
+  INACTIVE = "inactive",
+  DEPRECATED = "deprecated",
+  PENDING_REVIEW = "pending_review",
 }
 
 /**
@@ -303,15 +303,15 @@ export interface Condition {
  * Condition types
  */
 export enum ConditionType {
-  TIME_OF_DAY = 'time_of_day',
-  DAY_OF_WEEK = 'day_of_week',
-  IP_ADDRESS = 'ip_address',
-  GEO_LOCATION = 'geo_location',
-  USER_GROUP = 'user_group',
-  RISK_SCORE = 'risk_score',
-  MFA_REQUIRED = 'mfa_required',
-  APPROVAL_REQUIRED = 'approval_required',
-  CUSTOM = 'custom',
+  TIME_OF_DAY = "time_of_day",
+  DAY_OF_WEEK = "day_of_week",
+  IP_ADDRESS = "ip_address",
+  GEO_LOCATION = "geo_location",
+  USER_GROUP = "user_group",
+  RISK_SCORE = "risk_score",
+  MFA_REQUIRED = "mfa_required",
+  APPROVAL_REQUIRED = "approval_required",
+  CUSTOM = "custom",
 }
 
 /**
@@ -383,12 +383,12 @@ export interface RoleConstraint {
  * Constraint types
  */
 export enum ConstraintType {
-  TIME_BASED = 'time_based',
-  LOCATION_BASED = 'location_based',
-  DEVICE_BASED = 'device_based',
-  SESSION_BASED = 'session_based',
-  CONCURRENT_ACCESS = 'concurrent_access',
-  USAGE_LIMIT = 'usage_limit',
+  TIME_BASED = "time_based",
+  LOCATION_BASED = "location_based",
+  DEVICE_BASED = "device_based",
+  SESSION_BASED = "session_based",
+  CONCURRENT_ACCESS = "concurrent_access",
+  USAGE_LIMIT = "usage_limit",
 }
 
 /**
@@ -432,21 +432,21 @@ export interface ApproverRequirement {
  * Approver types
  */
 export enum ApproverType {
-  USER = 'user',
-  ROLE = 'role',
-  GROUP = 'group',
-  MANAGER = 'manager',
-  SECURITY_TEAM = 'security_team',
+  USER = "user",
+  ROLE = "role",
+  GROUP = "group",
+  MANAGER = "manager",
+  SECURITY_TEAM = "security_team",
 }
 
 /**
  * Approval levels
  */
 export enum ApprovalLevel {
-  BASIC = 'basic',
-  ELEVATED = 'elevated',
-  SENIOR = 'senior',
-  EXECUTIVE = 'executive',
+  BASIC = "basic",
+  ELEVATED = "elevated",
+  SENIOR = "senior",
+  EXECUTIVE = "executive",
 }
 
 /**
@@ -513,10 +513,10 @@ export interface RoleMetadata {
  * Risk levels
  */
 export enum RiskLevel {
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  CRITICAL = 'critical',
+  LOW = "low",
+  MEDIUM = "medium",
+  HIGH = "high",
+  CRITICAL = "critical",
 }
 
 /**
@@ -662,12 +662,12 @@ export interface GeoLocation {
  * Request source
  */
 export enum RequestSource {
-  WEB_CONSOLE = 'web_console',
-  API = 'api',
-  CLI = 'cli',
-  CI_CD_PIPELINE = 'ci_cd_pipeline',
-  AUTOMATED_SYSTEM = 'automated_system',
-  MOBILE_APP = 'mobile_app',
+  WEB_CONSOLE = "web_console",
+  API = "api",
+  CLI = "cli",
+  CI_CD_PIPELINE = "ci_cd_pipeline",
+  AUTOMATED_SYSTEM = "automated_system",
+  MOBILE_APP = "mobile_app",
 }
 
 /**
@@ -708,13 +708,13 @@ export interface RiskFactor {
  * Risk factor types
  */
 export enum RiskFactorType {
-  UNUSUAL_LOCATION = 'unusual_location',
-  UNUSUAL_TIME = 'unusual_time',
-  ELEVATED_PERMISSIONS = 'elevated_permissions',
-  PRODUCTION_ACCESS = 'production_access',
-  BULK_OPERATION = 'bulk_operation',
-  SENSITIVE_RESOURCE = 'sensitive_resource',
-  FAILED_ATTEMPTS = 'failed_attempts',
+  UNUSUAL_LOCATION = "unusual_location",
+  UNUSUAL_TIME = "unusual_time",
+  ELEVATED_PERMISSIONS = "elevated_permissions",
+  PRODUCTION_ACCESS = "production_access",
+  BULK_OPERATION = "bulk_operation",
+  SENSITIVE_RESOURCE = "sensitive_resource",
+  FAILED_ATTEMPTS = "failed_attempts",
 }
 
 /**
@@ -747,11 +747,11 @@ export interface AccessApproval {
  * Approval decision for approval
  */
 export enum ApprovalDecision {
-  APPROVE = 'approve',
-  DENY = 'deny',
-  CONDITIONAL_APPROVE = 'conditional_approve',
-  ESCALATE = 'escalate',
-  DEFER = 'defer',
+  APPROVE = "approve",
+  DENY = "deny",
+  CONDITIONAL_APPROVE = "conditional_approve",
+  ESCALATE = "escalate",
+  DEFER = "defer",
 }
 
 /**
@@ -775,21 +775,21 @@ export interface ApprovalCondition {
  * Approval condition types
  */
 export enum ApprovalConditionType {
-  TIME_LIMITED = 'time_limited',
-  USAGE_LIMITED = 'usage_limited',
-  SUPERVISED_ACCESS = 'supervised_access',
-  ADDITIONAL_MONITORING = 'additional_monitoring',
-  RESTRICTED_SCOPE = 'restricted_scope',
+  TIME_LIMITED = "time_limited",
+  USAGE_LIMITED = "usage_limited",
+  SUPERVISED_ACCESS = "supervised_access",
+  ADDITIONAL_MONITORING = "additional_monitoring",
+  RESTRICTED_SCOPE = "restricted_scope",
 }
 
 /**
  * Approval methods
  */
 export enum ApprovalMethod {
-  MANUAL = 'manual',
-  AUTOMATED = 'automated',
-  DELEGATED = 'delegated',
-  EMERGENCY = 'emergency',
+  MANUAL = "manual",
+  AUTOMATED = "automated",
+  DELEGATED = "delegated",
+  EMERGENCY = "emergency",
 }
 
 /**
@@ -822,10 +822,10 @@ export interface SessionInfo {
  * Session types
  */
 export enum SessionType {
-  INTERACTIVE = 'interactive',
-  PROGRAMMATIC = 'programmatic',
-  TEMPORARY = 'temporary',
-  EMERGENCY = 'emergency',
+  INTERACTIVE = "interactive",
+  PROGRAMMATIC = "programmatic",
+  TEMPORARY = "temporary",
+  EMERGENCY = "emergency",
 }
 
 /**
@@ -870,19 +870,19 @@ export interface AccessAuditEvent {
  * Audit event types
  */
 export enum AuditEventType {
-  ACCESS_GRANTED = 'access_granted',
-  ACCESS_DENIED = 'access_denied',
-  ACCESS_REQUESTED = 'access_requested',
-  APPROVAL_REQUESTED = 'approval_requested',
-  APPROVAL_GRANTED = 'approval_granted',
-  APPROVAL_DENIED = 'approval_denied',
-  ROLE_ASSIGNED = 'role_assigned',
-  ROLE_REVOKED = 'role_revoked',
-  PERMISSION_USED = 'permission_used',
-  POLICY_VIOLATION = 'policy_violation',
-  EMERGENCY_ACCESS = 'emergency_access',
-  SESSION_STARTED = 'session_started',
-  SESSION_ENDED = 'session_ended',
+  ACCESS_GRANTED = "access_granted",
+  ACCESS_DENIED = "access_denied",
+  ACCESS_REQUESTED = "access_requested",
+  APPROVAL_REQUESTED = "approval_requested",
+  APPROVAL_GRANTED = "approval_granted",
+  APPROVAL_DENIED = "approval_denied",
+  ROLE_ASSIGNED = "role_assigned",
+  ROLE_REVOKED = "role_revoked",
+  PERMISSION_USED = "permission_used",
+  POLICY_VIOLATION = "policy_violation",
+  EMERGENCY_ACCESS = "emergency_access",
+  SESSION_STARTED = "session_started",
+  SESSION_ENDED = "session_ended",
 }
 
 /**
@@ -980,10 +980,10 @@ export interface RbacDeploymentConfig {
  * Enforcement modes
  */
 export enum EnforcementMode {
-  STRICT = 'strict',
-  PERMISSIVE = 'permissive',
-  MONITOR_ONLY = 'monitor_only',
-  HYBRID = 'hybrid',
+  STRICT = "strict",
+  PERMISSIVE = "permissive",
+  MONITOR_ONLY = "monitor_only",
+  HYBRID = "hybrid",
 }
 
 /**
@@ -1010,12 +1010,12 @@ export interface IdentityProviderConfig {
  * Identity provider types
  */
 export enum IdentityProviderType {
-  LDAP = 'ldap',
-  ACTIVE_DIRECTORY = 'active_directory',
-  SAML = 'saml',
-  OAUTH = 'oauth',
-  OIDC = 'oidc',
-  LOCAL = 'local',
+  LDAP = "ldap",
+  ACTIVE_DIRECTORY = "active_directory",
+  SAML = "saml",
+  OAUTH = "oauth",
+  OIDC = "oidc",
+  LOCAL = "local",
 }
 
 /**
@@ -1096,11 +1096,11 @@ export interface WorkflowStep {
  * Workflow step types
  */
 export enum WorkflowStepType {
-  APPROVAL = 'approval',
-  NOTIFICATION = 'notification',
-  CONDITION_CHECK = 'condition_check',
-  RISK_ASSESSMENT = 'risk_assessment',
-  AUTOMATED_DECISION = 'automated_decision',
+  APPROVAL = "approval",
+  NOTIFICATION = "notification",
+  CONDITION_CHECK = "condition_check",
+  RISK_ASSESSMENT = "risk_assessment",
+  AUTOMATED_DECISION = "automated_decision",
 }
 
 /**
@@ -1149,10 +1149,10 @@ export interface RiskAssessmentConfig {
  * Risk assessment algorithms
  */
 export enum RiskAssessmentAlgorithm {
-  RULE_BASED = 'rule_based',
-  STATISTICAL = 'statistical',
-  MACHINE_LEARNING = 'machine_learning',
-  BEHAVIOR_ANALYSIS = 'behavior_analysis',
+  RULE_BASED = "rule_based",
+  STATISTICAL = "statistical",
+  MACHINE_LEARNING = "machine_learning",
+  BEHAVIOR_ANALYSIS = "behavior_analysis",
 }
 
 /**
@@ -1173,11 +1173,11 @@ export interface RiskThreshold {
  * Risk actions
  */
 export enum RiskAction {
-  ALLOW = 'allow',
-  REQUIRE_APPROVAL = 'require_approval',
-  REQUIRE_MFA = 'require_mfa',
-  DENY = 'deny',
-  MONITOR = 'monitor',
+  ALLOW = "allow",
+  REQUIRE_APPROVAL = "require_approval",
+  REQUIRE_MFA = "require_mfa",
+  DENY = "deny",
+  MONITOR = "monitor",
 }
 
 /**
@@ -1241,11 +1241,11 @@ export interface AuditStorageConfig {
  * Audit storage types
  */
 export enum AuditStorageType {
-  DATABASE = 'database',
-  FILE_SYSTEM = 'file_system',
-  ELASTICSEARCH = 'elasticsearch',
-  SPLUNK = 'splunk',
-  SIEM = 'siem',
+  DATABASE = "database",
+  FILE_SYSTEM = "file_system",
+  ELASTICSEARCH = "elasticsearch",
+  SPLUNK = "splunk",
+  SIEM = "siem",
 }
 
 /**
@@ -1334,11 +1334,11 @@ export interface EmergencyNotificationConfig {
  * Notification types
  */
 export enum NotificationType {
-  EMAIL = 'email',
-  SMS = 'sms',
-  SLACK = 'slack',
-  WEBHOOK = 'webhook',
-  PAGERDUTY = 'pagerduty',
+  EMAIL = "email",
+  SMS = "sms",
+  SLACK = "slack",
+  WEBHOOK = "webhook",
+  PAGERDUTY = "pagerduty",
 }
 
 /**
@@ -1405,10 +1405,10 @@ export class RbacDeploymentService implements OnApplicationShutdown {
    */
   private async initializeRbacService(): Promise<void> {
     try {
-      this.logger.log('🔧 Initializing RBAC deployment service');
+      this.logger.log("🔧 Initializing RBAC deployment service");
 
       if (!this.config.enabled) {
-        this.logger.warn('⚠️ RBAC is disabled');
+        this.logger.warn("⚠️ RBAC is disabled");
         return;
       }
 
@@ -1423,18 +1423,17 @@ export class RbacDeploymentService implements OnApplicationShutdown {
       // Start session monitoring
       await this.startSessionMonitoring();
 
-      this.logger.log('✅ RBAC deployment service initialized successfully');
+      this.logger.log("✅ RBAC deployment service initialized successfully");
 
       // Emit initialization event
-      this.eventEmitter.emit('rbac.initialized', {
+      this.eventEmitter.emit("rbac.initialized", {
         timestamp: new Date(),
         principals: this.principalCache.size,
         roles: this.roleCache.size,
         enforcementMode: this.config.enforcementMode,
       });
-
     } catch (error) {
-      this.logger.error('❌ Failed to initialize RBAC service', error);
+      this.logger.error("❌ Failed to initialize RBAC service", error);
       throw error;
     }
   }
@@ -1456,16 +1455,32 @@ export class RbacDeploymentService implements OnApplicationShutdown {
       const startTime = Date.now();
 
       // Perform risk assessment
-      const riskAssessment = await this.performRiskAssessment(principal, resource, action, context);
+      const riskAssessment = await this.performRiskAssessment(
+        principal,
+        resource,
+        action,
+        context,
+      );
 
       // Get applicable policies
-      const applicablePolicies = await this.getApplicablePolicies(principal, resource, action);
+      const applicablePolicies = await this.getApplicablePolicies(
+        principal,
+        resource,
+        action,
+      );
 
       // Evaluate policies
-      const policyMatches = await this.evaluatePolicies(applicablePolicies, context);
+      const policyMatches = await this.evaluatePolicies(
+        applicablePolicies,
+        context,
+      );
 
       // Make access decision
-      const decision = await this.makeAccessDecision(policyMatches, riskAssessment, context);
+      const decision = await this.makeAccessDecision(
+        policyMatches,
+        riskAssessment,
+        context,
+      );
 
       // Generate evaluation result
       const result: AccessEvaluationResult = {
@@ -1481,12 +1496,19 @@ export class RbacDeploymentService implements OnApplicationShutdown {
       };
 
       // Log access evaluation
-      await this.logAccessEvaluation(principal, resource, action, result, context);
+      await this.logAccessEvaluation(
+        principal,
+        resource,
+        action,
+        result,
+        context,
+      );
 
-      this.logger.log(`✅ Access evaluation completed: ${requestId} (${result.decision})`);
+      this.logger.log(
+        `✅ Access evaluation completed: ${requestId} (${result.decision})`,
+      );
 
       return result;
-
     } catch (error) {
       this.logger.error(`❌ Access evaluation failed: ${requestId}`, error);
       throw error;
@@ -1521,23 +1543,30 @@ export class RbacDeploymentService implements OnApplicationShutdown {
         status: AccessRequestStatus.PENDING,
         approvals: [],
         grantedPermissions: [],
-        auditTrail: [{
-          eventId: this.generateEventId(),
-          type: AuditEventType.ACCESS_REQUESTED,
-          timestamp: new Date(),
-          principal: principal.id,
-          resource: `${resource.type}:${resource.id}`,
-          action,
-          decision: AccessDecision.REQUIRE_APPROVAL,
-          context: { justification },
-          ipAddress: context.sourceIp,
-          sessionId: context.sessionId,
-          details: { justification },
-        }],
+        auditTrail: [
+          {
+            eventId: this.generateEventId(),
+            type: AuditEventType.ACCESS_REQUESTED,
+            timestamp: new Date(),
+            principal: principal.id,
+            resource: `${resource.type}:${resource.id}`,
+            action,
+            decision: AccessDecision.REQUIRE_APPROVAL,
+            context: { justification },
+            ipAddress: context.sourceIp,
+            sessionId: context.sessionId,
+            details: { justification },
+          },
+        ],
       };
 
       // Check if approval is required
-      const requiresApproval = await this.requiresApproval(principal, resource, action, context);
+      const requiresApproval = await this.requiresApproval(
+        principal,
+        resource,
+        action,
+        context,
+      );
 
       if (!requiresApproval) {
         // Auto-approve if conditions are met
@@ -1547,14 +1576,16 @@ export class RbacDeploymentService implements OnApplicationShutdown {
       } else {
         // Start approval workflow
         await this.startApprovalWorkflow(accessRequest);
-        this.logger.log(`📋 Started approval workflow for request: ${requestId}`);
+        this.logger.log(
+          `📋 Started approval workflow for request: ${requestId}`,
+        );
       }
 
       // Cache request
       this.accessRequestCache.set(requestId, accessRequest);
 
       // Emit access request event
-      this.eventEmitter.emit('rbac.access.requested', {
+      this.eventEmitter.emit("rbac.access.requested", {
         requestId,
         principal: principal.id,
         resource: `${resource.type}:${resource.id}`,
@@ -1564,9 +1595,11 @@ export class RbacDeploymentService implements OnApplicationShutdown {
       });
 
       return accessRequest;
-
     } catch (error) {
-      this.logger.error(`❌ Failed to process access request: ${requestId}`, error);
+      this.logger.error(
+        `❌ Failed to process access request: ${requestId}`,
+        error,
+      );
       throw error;
     }
   }
@@ -1606,12 +1639,18 @@ export class RbacDeploymentService implements OnApplicationShutdown {
       // Update audit trail
       accessRequest.auditTrail.push({
         eventId: this.generateEventId(),
-        type: decision === ApprovalDecision.APPROVE ? AuditEventType.APPROVAL_GRANTED : AuditEventType.APPROVAL_DENIED,
+        type:
+          decision === ApprovalDecision.APPROVE
+            ? AuditEventType.APPROVAL_GRANTED
+            : AuditEventType.APPROVAL_DENIED,
         timestamp: new Date(),
         principal: approver.id,
         resource: `${accessRequest.resource.type}:${accessRequest.resource.id}`,
         action: accessRequest.action,
-        decision: decision === ApprovalDecision.APPROVE ? AccessDecision.ALLOW : AccessDecision.DENY,
+        decision:
+          decision === ApprovalDecision.APPROVE
+            ? AccessDecision.ALLOW
+            : AccessDecision.DENY,
         context: { comments, conditions },
         ipAddress: accessRequest.context.sourceIp,
         sessionId: accessRequest.context.sessionId,
@@ -1624,13 +1663,16 @@ export class RbacDeploymentService implements OnApplicationShutdown {
         accessRequest.decision = AccessDecision.ALLOW;
 
         // Create session if needed
-        const sessionInfo = await this.createAccessSession(accessRequest, conditions);
+        const sessionInfo = await this.createAccessSession(
+          accessRequest,
+          conditions,
+        );
         accessRequest.sessionInfo = sessionInfo;
 
         this.logger.log(`✅ Access granted for request: ${requestId}`);
 
         // Emit access granted event
-        this.eventEmitter.emit('rbac.access.granted', {
+        this.eventEmitter.emit("rbac.access.granted", {
           requestId,
           principal: accessRequest.principal.id,
           approver: approver.id,
@@ -1639,7 +1681,6 @@ export class RbacDeploymentService implements OnApplicationShutdown {
         });
 
         return sessionInfo;
-
       } else {
         // Deny access
         accessRequest.status = AccessRequestStatus.DENIED;
@@ -1649,7 +1690,7 @@ export class RbacDeploymentService implements OnApplicationShutdown {
         this.logger.log(`❌ Access denied for request: ${requestId}`);
 
         // Emit access denied event
-        this.eventEmitter.emit('rbac.access.denied', {
+        this.eventEmitter.emit("rbac.access.denied", {
           requestId,
           principal: accessRequest.principal.id,
           approver: approver.id,
@@ -1659,9 +1700,11 @@ export class RbacDeploymentService implements OnApplicationShutdown {
 
         return null;
       }
-
     } catch (error) {
-      this.logger.error(`❌ Failed to process access approval: ${requestId}`, error);
+      this.logger.error(
+        `❌ Failed to process access approval: ${requestId}`,
+        error,
+      );
       throw error;
     }
   }
@@ -1705,15 +1748,30 @@ export class RbacDeploymentService implements OnApplicationShutdown {
       this.sessionCache.set(sessionInfo.sessionId, sessionInfo);
 
       // Log emergency access
-      await this.logEmergencyAccess(principal, resource, action, justification, emergencyType, sessionInfo);
+      await this.logEmergencyAccess(
+        principal,
+        resource,
+        action,
+        justification,
+        emergencyType,
+        sessionInfo,
+      );
 
       // Trigger emergency notifications
-      await this.triggerEmergencyNotifications(principal, resource, action, emergencyType, emergencyId);
+      await this.triggerEmergencyNotifications(
+        principal,
+        resource,
+        action,
+        emergencyType,
+        emergencyId,
+      );
 
-      this.logger.warn(`🚨 Emergency access granted: ${emergencyId} (Session: ${sessionInfo.sessionId})`);
+      this.logger.warn(
+        `🚨 Emergency access granted: ${emergencyId} (Session: ${sessionInfo.sessionId})`,
+      );
 
       // Emit emergency access event
-      this.eventEmitter.emit('rbac.emergency.access', {
+      this.eventEmitter.emit("rbac.emergency.access", {
         emergencyId,
         principal: principal.id,
         resource: `${resource.type}:${resource.id}`,
@@ -1724,7 +1782,6 @@ export class RbacDeploymentService implements OnApplicationShutdown {
       });
 
       return sessionInfo;
-
     } catch (error) {
       this.logger.error(`❌ Emergency access failed: ${emergencyId}`, error);
       throw error;
@@ -1758,7 +1815,6 @@ export class RbacDeploymentService implements OnApplicationShutdown {
       // In production, this would check against granted permissions
       this.logger.debug(`✅ Session access validated: ${sessionId}`);
       return true;
-
     } catch (error) {
       this.logger.error(`❌ Session validation failed: ${sessionId}`, error);
       return false;
@@ -1777,7 +1833,7 @@ export class RbacDeploymentService implements OnApplicationShutdown {
         this.sessionCache.delete(sessionId);
 
         // Emit session revoked event
-        this.eventEmitter.emit('rbac.session.revoked', {
+        this.eventEmitter.emit("rbac.session.revoked", {
           sessionId,
           reason,
           timestamp: new Date(),
@@ -1785,7 +1841,6 @@ export class RbacDeploymentService implements OnApplicationShutdown {
 
         this.logger.log(`✅ Session revoked: ${sessionId}`);
       }
-
     } catch (error) {
       this.logger.error(`❌ Failed to revoke session: ${sessionId}`, error);
       throw error;
@@ -1810,15 +1865,16 @@ export class RbacDeploymentService implements OnApplicationShutdown {
 
       // Clean up expired sessions
       for (const sessionId of expiredSessions) {
-        await this.revokeSession(sessionId, 'Session expired');
+        await this.revokeSession(sessionId, "Session expired");
       }
 
       if (expiredSessions.length > 0) {
-        this.logger.log(`🧹 Cleaned up ${expiredSessions.length} expired sessions`);
+        this.logger.log(
+          `🧹 Cleaned up ${expiredSessions.length} expired sessions`,
+        );
       }
-
     } catch (error) {
-      this.logger.error('❌ Session monitoring failed', error);
+      this.logger.error("❌ Session monitoring failed", error);
     }
   }
 
@@ -1826,23 +1882,23 @@ export class RbacDeploymentService implements OnApplicationShutdown {
    * Helper methods (stubs for implementation)
    */
   private async loadPrincipals(): Promise<void> {
-    this.logger.log('📚 Loading principals');
+    this.logger.log("📚 Loading principals");
   }
 
   private async loadRoles(): Promise<void> {
-    this.logger.log('📚 Loading roles');
+    this.logger.log("📚 Loading roles");
   }
 
   private async loadPolicies(): Promise<void> {
-    this.logger.log('📚 Loading policies');
+    this.logger.log("📚 Loading policies");
   }
 
   private async initializeIdentityProviders(): Promise<void> {
-    this.logger.log('🔧 Initializing identity providers');
+    this.logger.log("🔧 Initializing identity providers");
   }
 
   private async startSessionMonitoring(): Promise<void> {
-    this.logger.log('🔍 Starting session monitoring');
+    this.logger.log("🔍 Starting session monitoring");
   }
 
   private async performRiskAssessment(
@@ -1881,7 +1937,7 @@ export class RbacDeploymentService implements OnApplicationShutdown {
   ): Promise<any> {
     return {
       decision: AccessDecision.ALLOW,
-      reason: 'Access granted',
+      reason: "Access granted",
     };
   }
 
@@ -1904,7 +1960,9 @@ export class RbacDeploymentService implements OnApplicationShutdown {
     return resource.environment === EnvironmentType.PRODUCTION;
   }
 
-  private async startApprovalWorkflow(accessRequest: AccessRequest): Promise<void> {
+  private async startApprovalWorkflow(
+    accessRequest: AccessRequest,
+  ): Promise<void> {
     // Implementation for approval workflow
   }
 
@@ -1923,7 +1981,10 @@ export class RbacDeploymentService implements OnApplicationShutdown {
     };
   }
 
-  private async validateEmergencyAccess(principal: Principal, emergencyType: string): Promise<void> {
+  private async validateEmergencyAccess(
+    principal: Principal,
+    emergencyType: string,
+  ): Promise<void> {
     // Implementation for emergency access validation
   }
 
@@ -1952,23 +2013,23 @@ export class RbacDeploymentService implements OnApplicationShutdown {
    * ID generation methods
    */
   private generateRequestId(): string {
-    return `req_${Date.now()}_${randomBytes(6).toString('hex')}`;
+    return `req_${Date.now()}_${randomBytes(6).toString("hex")}`;
   }
 
   private generateSessionId(): string {
-    return `sess_${Date.now()}_${randomBytes(8).toString('hex')}`;
+    return `sess_${Date.now()}_${randomBytes(8).toString("hex")}`;
   }
 
   private generateEventId(): string {
-    return `event_${Date.now()}_${randomBytes(4).toString('hex')}`;
+    return `event_${Date.now()}_${randomBytes(4).toString("hex")}`;
   }
 
   private generateApprovalId(): string {
-    return `appr_${Date.now()}_${randomBytes(6).toString('hex')}`;
+    return `appr_${Date.now()}_${randomBytes(6).toString("hex")}`;
   }
 
   private generateEmergencyId(): string {
-    return `emrg_${Date.now()}_${randomBytes(6).toString('hex')}`;
+    return `emrg_${Date.now()}_${randomBytes(6).toString("hex")}`;
   }
 
   /**
@@ -1976,10 +2037,10 @@ export class RbacDeploymentService implements OnApplicationShutdown {
    */
   private loadConfiguration(): RbacDeploymentConfig {
     return {
-      enabled: this.configService.get<boolean>('rbac.enabled', true),
+      enabled: this.configService.get<boolean>("rbac.enabled", true),
       enforcementMode: EnforcementMode.STRICT,
       identityProviders: [],
-      defaultRoles: ['user', 'developer', 'operator'],
+      defaultRoles: ["user", "developer", "operator"],
       sessionManagement: {
         defaultDurationMinutes: 480, // 8 hours
         maxDurationMinutes: 1440, // 24 hours
@@ -1990,7 +2051,7 @@ export class RbacDeploymentService implements OnApplicationShutdown {
       },
       approvalWorkflows: {
         enabled: true,
-        defaultWorkflow: 'standard_approval',
+        defaultWorkflow: "standard_approval",
         workflows: [],
         timeoutSettings: {
           defaultStepTimeoutMinutes: 60,
@@ -2002,8 +2063,16 @@ export class RbacDeploymentService implements OnApplicationShutdown {
         enabled: true,
         algorithms: [RiskAssessmentAlgorithm.RULE_BASED],
         thresholds: [
-          { level: RiskLevel.HIGH, threshold: 80, actions: [RiskAction.REQUIRE_APPROVAL] },
-          { level: RiskLevel.CRITICAL, threshold: 95, actions: [RiskAction.DENY] },
+          {
+            level: RiskLevel.HIGH,
+            threshold: 80,
+            actions: [RiskAction.REQUIRE_APPROVAL],
+          },
+          {
+            level: RiskLevel.CRITICAL,
+            threshold: 95,
+            actions: [RiskAction.DENY],
+          },
         ],
         mitigationStrategies: [],
       },
@@ -2021,12 +2090,12 @@ export class RbacDeploymentService implements OnApplicationShutdown {
         retentionPolicy: {
           retentionPeriodDays: 2555, // 7 years
           archiveAfterDays: 365,
-          complianceRequirements: ['SOX', 'GDPR', 'SOC2'],
+          complianceRequirements: ["SOX", "GDPR", "SOC2"],
         },
       },
       emergencyAccess: {
         enabled: true,
-        emergencyRoles: ['security_admin', 'incident_commander'],
+        emergencyRoles: ["security_admin", "incident_commander"],
         breakGlassProcedures: [],
         notifications: [],
       },
@@ -2048,7 +2117,9 @@ export class RbacDeploymentService implements OnApplicationShutdown {
    * Application shutdown cleanup
    */
   async onApplicationShutdown(signal?: string): Promise<void> {
-    this.logger.log(`🔄 Shutting down RBAC deployment service (signal: ${signal})`);
+    this.logger.log(
+      `🔄 Shutting down RBAC deployment service (signal: ${signal})`,
+    );
     this.principalCache.clear();
     this.roleCache.clear();
     this.accessRequestCache.clear();

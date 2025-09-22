@@ -20,15 +20,15 @@
  * @author PARLANT Phase 1 UX Team
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { Injectable, Logger } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 import {
   PreExecutionValidationRequest,
   UserValidationContext,
   ValidationLevel,
   RiskAssessmentResult,
-  ValidationRequirement
-} from './pre-execution-validation.service';
+  ValidationRequirement,
+} from "./pre-execution-validation.service";
 
 // ===== USER EXPERIENCE TYPES =====
 
@@ -40,13 +40,13 @@ export interface UserExperienceProfile {
   userId: string;
 
   /** Experience level with the system */
-  experienceLevel: 'novice' | 'intermediate' | 'expert' | 'power-user';
+  experienceLevel: "novice" | "intermediate" | "expert" | "power-user";
 
   /** Preferred interaction style */
   interactionStyle: {
-    verbosity: 'minimal' | 'standard' | 'detailed' | 'comprehensive';
-    confirmationStyle: 'quick' | 'standard' | 'thorough' | 'paranoid';
-    helpLevel: 'none' | 'tooltips' | 'guided' | 'tutorial';
+    verbosity: "minimal" | "standard" | "detailed" | "comprehensive";
+    confirmationStyle: "quick" | "standard" | "thorough" | "paranoid";
+    helpLevel: "none" | "tooltips" | "guided" | "tutorial";
     progressIndicators: boolean;
   };
 
@@ -86,7 +86,7 @@ export interface ProgressiveDisclosureConfig {
   enabled: boolean;
 
   /** Initial disclosure level */
-  initialLevel: 'minimal' | 'standard' | 'expanded';
+  initialLevel: "minimal" | "standard" | "expanded";
 
   /** Auto-expand based on complexity */
   autoExpand: {
@@ -235,10 +235,10 @@ export interface OptimizedValidationFlow {
   estimatedCompletionTime: number;
 
   /** Complexity level */
-  complexityLevel: 'simple' | 'moderate' | 'complex' | 'expert';
+  complexityLevel: "simple" | "moderate" | "complex" | "expert";
 
   /** Recommended interaction mode */
-  recommendedMode: 'voice' | 'text' | 'hybrid';
+  recommendedMode: "voice" | "text" | "hybrid";
 
   /** Skip options available */
   skipOptions: string[];
@@ -252,7 +252,7 @@ export interface ValidationFlowStep {
   id: string;
 
   /** Step type */
-  type: 'information' | 'confirmation' | 'input' | 'choice' | 'review';
+  type: "information" | "confirmation" | "input" | "choice" | "review";
 
   /** Step title */
   title: string;
@@ -307,7 +307,7 @@ export interface ContextualHelpContent {
   id: string;
 
   /** Help type */
-  type: 'tooltip' | 'overlay' | 'inline' | 'modal' | 'voice';
+  type: "tooltip" | "overlay" | "inline" | "modal" | "voice";
 
   /** Help trigger */
   trigger: string;
@@ -357,7 +357,7 @@ export interface SuggestedResponse {
   text: string;
 
   /** Response type */
-  type: 'approval' | 'rejection' | 'modification' | 'deferral';
+  type: "approval" | "rejection" | "modification" | "deferral";
 
   /** Confidence score */
   confidence: number;
@@ -389,7 +389,7 @@ export interface QuickAction {
   voiceCommand?: string;
 
   /** Action type */
-  type: 'approve' | 'reject' | 'defer' | 'modify' | 'help';
+  type: "approve" | "reject" | "defer" | "modify" | "help";
 
   /** Confidence score */
   confidence: number;
@@ -482,29 +482,29 @@ export class UserExperienceOptimizer {
     averageOptimizationTime: 0,
     userSatisfactionScore: 0.85,
     helpUsageRate: 0.15,
-    defaultAcceptanceRate: 0.78
+    defaultAcceptanceRate: 0.78,
   };
 
   constructor(private readonly configService: ConfigService) {
     this.config = this.loadConfiguration();
 
-    this.logger.log('UserExperienceOptimizer initialized', {
-      version: '1.0.0',
+    this.logger.log("UserExperienceOptimizer initialized", {
+      version: "1.0.0",
       features: [
-        'progressive_disclosure',
-        'contextual_help',
-        'intelligent_defaults',
-        'accessibility_compliance',
-        'voice_navigation',
-        'keyboard_support',
-        'personalization',
-        'adaptive_complexity'
+        "progressive_disclosure",
+        "contextual_help",
+        "intelligent_defaults",
+        "accessibility_compliance",
+        "voice_navigation",
+        "keyboard_support",
+        "personalization",
+        "adaptive_complexity",
       ],
       config: {
         progressiveDisclosure: this.config.progressiveDisclosure.enabled,
         contextualHelp: this.config.contextualHelp.enabled,
-        intelligentDefaults: this.config.intelligentDefaults.enabled
-      }
+        intelligentDefaults: this.config.intelligentDefaults.enabled,
+      },
     });
   }
 
@@ -519,61 +519,63 @@ export class UserExperienceOptimizer {
   async optimizeUserExperience(
     request: PreExecutionValidationRequest,
     riskAssessment: RiskAssessmentResult,
-    validationRequirements: ValidationRequirement[]
+    validationRequirements: ValidationRequirement[],
   ): Promise<UserExperienceOptimization> {
     const startTime = performance.now();
 
     try {
-      this.logger.debug('Starting user experience optimization', {
+      this.logger.debug("Starting user experience optimization", {
         requestId: request.id,
         userId: request.userContext.userId,
         riskLevel: riskAssessment.riskLevel,
-        validationLevel: riskAssessment.validationLevel
+        validationLevel: riskAssessment.validationLevel,
       });
 
       // Get or create user experience profile
-      const userProfile = await this.getUserExperienceProfile(request.userContext.userId);
+      const userProfile = await this.getUserExperienceProfile(
+        request.userContext.userId,
+      );
 
       // Optimize validation flow
       const validationFlow = this.optimizeValidationFlow(
         request,
         riskAssessment,
         validationRequirements,
-        userProfile
+        userProfile,
       );
 
       // Configure progressive disclosure
       const progressiveDisclosure = this.configureProgressiveDisclosure(
         riskAssessment,
         userProfile,
-        validationRequirements
+        validationRequirements,
       );
 
       // Generate contextual help
       const contextualHelp = this.generateContextualHelp(
         request,
         riskAssessment,
-        userProfile
+        userProfile,
       );
 
       // Generate intelligent defaults
       const intelligentDefaults = await this.generateIntelligentDefaults(
         request,
         riskAssessment,
-        userProfile
+        userProfile,
       );
 
       // Configure accessibility enhancements
       const accessibilityEnhancements = this.configureAccessibilityEnhancements(
         userProfile,
-        validationFlow
+        validationFlow,
       );
 
       // Configure performance optimizations
       const performanceOptimizations = this.configurePerformanceOptimizations(
         request,
         userProfile,
-        validationFlow
+        validationFlow,
       );
 
       const optimization: UserExperienceOptimization = {
@@ -582,7 +584,7 @@ export class UserExperienceOptimizer {
         contextualHelp,
         intelligentDefaults,
         accessibilityEnhancements,
-        performanceOptimizations
+        performanceOptimizations,
       };
 
       // Update user profile based on optimization
@@ -591,25 +593,28 @@ export class UserExperienceOptimizer {
       const optimizationTime = performance.now() - startTime;
       this.updateMetrics(optimizationTime);
 
-      this.logger.debug('User experience optimization completed', {
+      this.logger.debug("User experience optimization completed", {
         requestId: request.id,
         userId: request.userContext.userId,
         optimizationTime,
         flowComplexity: validationFlow.complexityLevel,
-        stepCount: validationFlow.steps.length
+        stepCount: validationFlow.steps.length,
       });
 
       return optimization;
-
     } catch (error) {
-      this.logger.error('User experience optimization failed', {
+      this.logger.error("User experience optimization failed", {
         requestId: request.id,
         error: error.message,
-        stack: error.stack
+        stack: error.stack,
       });
 
       // Return basic optimization on failure
-      return this.getBasicOptimization(request, riskAssessment, validationRequirements);
+      return this.getBasicOptimization(
+        request,
+        riskAssessment,
+        validationRequirements,
+      );
     }
   }
 
@@ -620,7 +625,7 @@ export class UserExperienceOptimizer {
     request: PreExecutionValidationRequest,
     riskAssessment: RiskAssessmentResult,
     validationRequirements: ValidationRequirement[],
-    userProfile: UserExperienceProfile
+    userProfile: UserExperienceProfile,
   ): OptimizedValidationFlow {
     const steps: ValidationFlowStep[] = [];
     let totalEstimatedTime = 0;
@@ -629,35 +634,66 @@ export class UserExperienceOptimizer {
     const complexityLevel = this.determineFlowComplexity(
       riskAssessment,
       validationRequirements,
-      userProfile
+      userProfile,
     );
 
     // Build flow steps based on complexity and user experience
-    if (complexityLevel === 'simple') {
+    if (complexityLevel === "simple") {
       steps.push(...this.buildSimpleFlow(request, riskAssessment, userProfile));
-    } else if (complexityLevel === 'moderate') {
-      steps.push(...this.buildModerateFlow(request, riskAssessment, validationRequirements, userProfile));
-    } else if (complexityLevel === 'complex') {
-      steps.push(...this.buildComplexFlow(request, riskAssessment, validationRequirements, userProfile));
+    } else if (complexityLevel === "moderate") {
+      steps.push(
+        ...this.buildModerateFlow(
+          request,
+          riskAssessment,
+          validationRequirements,
+          userProfile,
+        ),
+      );
+    } else if (complexityLevel === "complex") {
+      steps.push(
+        ...this.buildComplexFlow(
+          request,
+          riskAssessment,
+          validationRequirements,
+          userProfile,
+        ),
+      );
     } else {
-      steps.push(...this.buildExpertFlow(request, riskAssessment, validationRequirements, userProfile));
+      steps.push(
+        ...this.buildExpertFlow(
+          request,
+          riskAssessment,
+          validationRequirements,
+          userProfile,
+        ),
+      );
     }
 
     // Calculate total estimated time
-    totalEstimatedTime = steps.reduce((total, step) => total + step.estimatedTime, 0);
+    totalEstimatedTime = steps.reduce(
+      (total, step) => total + step.estimatedTime,
+      0,
+    );
 
     // Determine recommended interaction mode
-    const recommendedMode = this.determineRecommendedMode(userProfile, complexityLevel);
+    const recommendedMode = this.determineRecommendedMode(
+      userProfile,
+      complexityLevel,
+    );
 
     // Identify skip options for experienced users
-    const skipOptions = this.identifySkipOptions(steps, userProfile, riskAssessment);
+    const skipOptions = this.identifySkipOptions(
+      steps,
+      userProfile,
+      riskAssessment,
+    );
 
     return {
       steps,
       estimatedCompletionTime: totalEstimatedTime,
       complexityLevel,
       recommendedMode,
-      skipOptions
+      skipOptions,
     };
   }
 
@@ -667,40 +703,45 @@ export class UserExperienceOptimizer {
   private configureProgressiveDisclosure(
     riskAssessment: RiskAssessmentResult,
     userProfile: UserExperienceProfile,
-    validationRequirements: ValidationRequirement[]
+    validationRequirements: ValidationRequirement[],
   ): ProgressiveDisclosureSettings {
     const config = this.config.progressiveDisclosure;
 
     if (!config.enabled) {
       return {
-        currentLevel: 'comprehensive',
-        availableLevels: ['comprehensive'],
+        currentLevel: "comprehensive",
+        availableLevels: ["comprehensive"],
         autoExpansionTriggers: [],
-        hiddenContentSummary: '',
-        showMoreOptions: false
+        hiddenContentSummary: "",
+        showMoreOptions: false,
       };
     }
 
     // Determine initial level based on user experience and complexity
     let currentLevel = config.initialLevel;
 
-    if (userProfile.experienceLevel === 'expert' || userProfile.experienceLevel === 'power-user') {
-      currentLevel = 'minimal';
-    } else if (userProfile.experienceLevel === 'novice') {
-      currentLevel = 'expanded';
+    if (
+      userProfile.experienceLevel === "expert" ||
+      userProfile.experienceLevel === "power-user"
+    ) {
+      currentLevel = "minimal";
+    } else if (userProfile.experienceLevel === "novice") {
+      currentLevel = "expanded";
     }
 
     // Auto-expand for high risk operations
     const autoExpansionTriggers: string[] = [];
     if (config.autoExpand.enabled) {
       if (riskAssessment.riskScore >= config.autoExpand.riskThreshold) {
-        autoExpansionTriggers.push('high_risk');
-        currentLevel = 'expanded';
+        autoExpansionTriggers.push("high_risk");
+        currentLevel = "expanded";
       }
 
-      if (validationRequirements.length >= config.autoExpand.complexityThreshold) {
-        autoExpansionTriggers.push('complex_requirements');
-        currentLevel = 'expanded';
+      if (
+        validationRequirements.length >= config.autoExpand.complexityThreshold
+      ) {
+        autoExpansionTriggers.push("complex_requirements");
+        currentLevel = "expanded";
       }
     }
 
@@ -708,7 +749,7 @@ export class UserExperienceOptimizer {
     const hiddenContentSummary = this.generateHiddenContentSummary(
       currentLevel,
       riskAssessment,
-      validationRequirements
+      validationRequirements,
     );
 
     return {
@@ -716,7 +757,7 @@ export class UserExperienceOptimizer {
       availableLevels: Object.keys(config.levels),
       autoExpansionTriggers,
       hiddenContentSummary,
-      showMoreOptions: config.levels[currentLevel]?.enableShowMore || false
+      showMoreOptions: config.levels[currentLevel]?.enableShowMore || false,
     };
   }
 
@@ -726,73 +767,75 @@ export class UserExperienceOptimizer {
   private generateContextualHelp(
     request: PreExecutionValidationRequest,
     riskAssessment: RiskAssessmentResult,
-    userProfile: UserExperienceProfile
+    userProfile: UserExperienceProfile,
   ): ContextualHelpContent[] {
     const helpContent: ContextualHelpContent[] = [];
     const config = this.config.contextualHelp;
 
-    if (!config.enabled || userProfile.interactionStyle.helpLevel === 'none') {
+    if (!config.enabled || userProfile.interactionStyle.helpLevel === "none") {
       return helpContent;
     }
 
     // Generate help based on operation type
     helpContent.push({
-      id: 'operation-overview',
-      type: 'tooltip',
-      trigger: 'hover',
-      title: 'Operation Overview',
+      id: "operation-overview",
+      type: "tooltip",
+      trigger: "hover",
+      title: "Operation Overview",
       content: `This operation will ${request.naturalLanguageIntent}. Risk level: ${riskAssessment.riskLevel}`,
-      priority: 1
+      priority: 1,
     });
 
     // Risk assessment help
     if (riskAssessment.riskScore > 50) {
       helpContent.push({
-        id: 'risk-explanation',
-        type: 'overlay',
-        trigger: 'click',
-        title: 'Risk Assessment Details',
+        id: "risk-explanation",
+        type: "overlay",
+        trigger: "click",
+        title: "Risk Assessment Details",
         content: this.generateRiskExplanation(riskAssessment),
-        priority: 2
+        priority: 2,
       });
     }
 
     // Validation requirements help
     if (riskAssessment.validationRequirements.length > 0) {
       helpContent.push({
-        id: 'validation-requirements',
-        type: 'inline',
-        trigger: 'focus',
-        title: 'Validation Requirements',
-        content: 'These steps ensure the operation is safe and compliant.',
-        priority: 3
+        id: "validation-requirements",
+        type: "inline",
+        trigger: "focus",
+        title: "Validation Requirements",
+        content: "These steps ensure the operation is safe and compliant.",
+        priority: 3,
       });
     }
 
     // Novice user guidance
-    if (userProfile.experienceLevel === 'novice') {
+    if (userProfile.experienceLevel === "novice") {
       helpContent.push({
-        id: 'beginner-guide',
-        type: 'modal',
-        trigger: 'onload',
-        title: 'Getting Started',
-        content: 'This validation process helps ensure your operation is safe. We\'ll guide you through each step.',
+        id: "beginner-guide",
+        type: "modal",
+        trigger: "onload",
+        title: "Getting Started",
+        content:
+          "This validation process helps ensure your operation is safe. We'll guide you through each step.",
         priority: 0,
         multimedia: {
-          videos: ['validation-intro.mp4']
-        }
+          videos: ["validation-intro.mp4"],
+        },
       });
     }
 
     // Voice control help
     if (userProfile.accessibilityPreferences.voiceControl) {
       helpContent.push({
-        id: 'voice-commands',
-        type: 'voice',
-        trigger: 'voice_help',
-        title: 'Voice Commands',
-        content: 'Say "approve" to confirm, "reject" to deny, or "help" for assistance.',
-        priority: 4
+        id: "voice-commands",
+        type: "voice",
+        trigger: "voice_help",
+        title: "Voice Commands",
+        content:
+          'Say "approve" to confirm, "reject" to deny, or "help" for assistance.',
+        priority: 4,
       });
     }
 
@@ -805,7 +848,7 @@ export class UserExperienceOptimizer {
   private async generateIntelligentDefaults(
     request: PreExecutionValidationRequest,
     riskAssessment: RiskAssessmentResult,
-    userProfile: UserExperienceProfile
+    userProfile: UserExperienceProfile,
   ): Promise<IntelligentDefaults> {
     const config = this.config.intelligentDefaults;
 
@@ -815,7 +858,7 @@ export class UserExperienceOptimizer {
         autoCompleteSuggestions: [],
         quickActions: [],
         learnedPreferences: {},
-        confidenceScores: {}
+        confidenceScores: {},
       };
     }
 
@@ -823,20 +866,17 @@ export class UserExperienceOptimizer {
     const suggestedResponses = this.generateSuggestedResponses(
       request,
       riskAssessment,
-      userProfile
+      userProfile,
     );
 
     // Generate auto-complete suggestions
     const autoCompleteSuggestions = this.generateAutoCompleteSuggestions(
       request,
-      userProfile
+      userProfile,
     );
 
     // Generate quick actions
-    const quickActions = this.generateQuickActions(
-      riskAssessment,
-      userProfile
-    );
+    const quickActions = this.generateQuickActions(riskAssessment, userProfile);
 
     // Extract learned preferences
     const learnedPreferences = this.extractLearnedPreferences(userProfile);
@@ -845,7 +885,7 @@ export class UserExperienceOptimizer {
     const confidenceScores = this.calculateConfidenceScores(
       suggestedResponses,
       autoCompleteSuggestions,
-      quickActions
+      quickActions,
     );
 
     return {
@@ -853,7 +893,7 @@ export class UserExperienceOptimizer {
       autoCompleteSuggestions,
       quickActions,
       learnedPreferences,
-      confidenceScores
+      confidenceScores,
     };
   }
 
@@ -862,7 +902,7 @@ export class UserExperienceOptimizer {
    */
   private configureAccessibilityEnhancements(
     userProfile: UserExperienceProfile,
-    validationFlow: OptimizedValidationFlow
+    validationFlow: OptimizedValidationFlow,
   ): AccessibilityEnhancements {
     const preferences = userProfile.accessibilityPreferences;
 
@@ -871,14 +911,14 @@ export class UserExperienceOptimizer {
       ariaLabels: this.generateAriaLabels(validationFlow),
       announcements: this.generateAnnouncements(validationFlow),
       landmarks: this.generateLandmarks(validationFlow),
-      headingStructure: this.generateHeadingStructure(validationFlow)
+      headingStructure: this.generateHeadingStructure(validationFlow),
     };
 
     // Keyboard navigation
     const keyboardNavigation = {
       shortcuts: this.generateKeyboardShortcuts(validationFlow, userProfile),
       tabOrder: this.generateTabOrder(validationFlow),
-      focusManagement: this.generateFocusManagement(validationFlow)
+      focusManagement: this.generateFocusManagement(validationFlow),
     };
 
     // Visual enhancements
@@ -886,21 +926,21 @@ export class UserExperienceOptimizer {
       highContrast: preferences.highContrast,
       largeText: preferences.largeText,
       colorBlindSupport: true, // Always enabled
-      reducedMotion: preferences.reducedMotion
+      reducedMotion: preferences.reducedMotion,
     };
 
     // Voice control
     const voiceControl = {
       commands: this.generateVoiceCommands(validationFlow),
       speechSynthesis: preferences.voiceControl ? {} : null,
-      speechRecognition: preferences.voiceControl ? {} : null
+      speechRecognition: preferences.voiceControl ? {} : null,
     };
 
     return {
       screenReaderOptimizations,
       keyboardNavigation,
       visualEnhancements,
-      voiceControl
+      voiceControl,
     };
   }
 
@@ -910,21 +950,21 @@ export class UserExperienceOptimizer {
   private configurePerformanceOptimizations(
     request: PreExecutionValidationRequest,
     userProfile: UserExperienceProfile,
-    validationFlow: OptimizedValidationFlow
+    validationFlow: OptimizedValidationFlow,
   ): PerformanceOptimizations {
     // Preloading strategies
     const preloading = {
       predictedContent: this.predictNextContent(userProfile, validationFlow),
       cacheableResponses: this.identifyCacheableResponses(userProfile),
-      precomputedDefaults: this.precomputeDefaults(userProfile, request)
+      precomputedDefaults: this.precomputeDefaults(userProfile, request),
     };
 
     // Rendering optimizations
     const rendering = {
       virtualScrolling: validationFlow.steps.length > 10,
       lazyLoading: true,
-      componentCaching: userProfile.experienceLevel === 'expert',
-      minimizedReflows: true
+      componentCaching: userProfile.experienceLevel === "expert",
+      minimizedReflows: true,
     };
 
     // Network optimizations
@@ -932,31 +972,33 @@ export class UserExperienceOptimizer {
       requestBatching: true,
       responseCompression: true,
       connectionPooling: true,
-      offlineSupport: userProfile.learningMetrics.validationSpeed > 10000 // Slow connections
+      offlineSupport: userProfile.learningMetrics.validationSpeed > 10000, // Slow connections
     };
 
     return {
       preloading,
       rendering,
-      network
+      network,
     };
   }
 
   // ===== UTILITY METHODS =====
 
-  private async getUserExperienceProfile(userId: string): Promise<UserExperienceProfile> {
+  private async getUserExperienceProfile(
+    userId: string,
+  ): Promise<UserExperienceProfile> {
     let profile = this.userProfiles.get(userId);
 
     if (!profile) {
       // Create new profile with intelligent defaults
       profile = {
         userId,
-        experienceLevel: 'intermediate', // Conservative default
+        experienceLevel: "intermediate", // Conservative default
         interactionStyle: {
-          verbosity: 'standard',
-          confirmationStyle: 'thorough',
-          helpLevel: 'tooltips',
-          progressIndicators: true
+          verbosity: "standard",
+          confirmationStyle: "thorough",
+          helpLevel: "tooltips",
+          progressIndicators: true,
         },
         accessibilityPreferences: {
           screenReader: false,
@@ -964,21 +1006,21 @@ export class UserExperienceOptimizer {
           largeText: false,
           keyboardNavigation: false,
           voiceControl: false,
-          reducedMotion: false
+          reducedMotion: false,
         },
         learningMetrics: {
           validationSpeed: 8000, // 8 seconds average
           errorRate: 0.05,
           helpUsage: 0.2,
           complexityComfort: 0.5,
-          lastAdaptation: new Date()
+          lastAdaptation: new Date(),
         },
         personalization: {
           favoriteOperations: [],
           customShortcuts: {},
           savedResponses: {},
-          quickApprovalPatterns: []
-        }
+          quickApprovalPatterns: [],
+        },
       };
 
       this.userProfiles.set(userId, profile);
@@ -990,16 +1032,16 @@ export class UserExperienceOptimizer {
   private determineFlowComplexity(
     riskAssessment: RiskAssessmentResult,
     validationRequirements: ValidationRequirement[],
-    userProfile: UserExperienceProfile
-  ): 'simple' | 'moderate' | 'complex' | 'expert' {
+    userProfile: UserExperienceProfile,
+  ): "simple" | "moderate" | "complex" | "expert" {
     let complexityScore = 0;
 
     // Risk level complexity
     const riskComplexity = {
-      'LOW': 0,
-      'MEDIUM': 25,
-      'HIGH': 50,
-      'CRITICAL': 75
+      LOW: 0,
+      MEDIUM: 25,
+      HIGH: 50,
+      CRITICAL: 75,
     };
     complexityScore += riskComplexity[riskAssessment.riskLevel] || 0;
 
@@ -1008,50 +1050,50 @@ export class UserExperienceOptimizer {
 
     // User experience adjustment
     const experienceAdjustment = {
-      'novice': 20,
-      'intermediate': 0,
-      'expert': -20,
-      'power-user': -30
+      novice: 20,
+      intermediate: 0,
+      expert: -20,
+      "power-user": -30,
     };
     complexityScore += experienceAdjustment[userProfile.experienceLevel] || 0;
 
     // Determine complexity level
     if (complexityScore <= 25) {
-      return 'simple';
+      return "simple";
     } else if (complexityScore <= 50) {
-      return 'moderate';
+      return "moderate";
     } else if (complexityScore <= 75) {
-      return 'complex';
+      return "complex";
     } else {
-      return 'expert';
+      return "expert";
     }
   }
 
   private buildSimpleFlow(
     request: PreExecutionValidationRequest,
     riskAssessment: RiskAssessmentResult,
-    userProfile: UserExperienceProfile
+    userProfile: UserExperienceProfile,
   ): ValidationFlowStep[] {
     return [
       {
-        id: 'quick-overview',
-        type: 'information',
-        title: 'Quick Confirmation',
+        id: "quick-overview",
+        type: "information",
+        title: "Quick Confirmation",
         description: `Confirm ${request.naturalLanguageIntent}`,
         required: true,
         complexity: 1,
         estimatedTime: 3000,
-        defaultValue: 'approve'
+        defaultValue: "approve",
       },
       {
-        id: 'simple-approve',
-        type: 'confirmation',
-        title: 'Approve Operation',
-        description: 'Click to approve this operation',
+        id: "simple-approve",
+        type: "confirmation",
+        title: "Approve Operation",
+        description: "Click to approve this operation",
         required: true,
         complexity: 1,
-        estimatedTime: 2000
-      }
+        estimatedTime: 2000,
+      },
     ];
   }
 
@@ -1059,39 +1101,44 @@ export class UserExperienceOptimizer {
     request: PreExecutionValidationRequest,
     riskAssessment: RiskAssessmentResult,
     validationRequirements: ValidationRequirement[],
-    userProfile: UserExperienceProfile
+    userProfile: UserExperienceProfile,
   ): ValidationFlowStep[] {
     return [
       {
-        id: 'operation-summary',
-        type: 'information',
-        title: 'Operation Summary',
-        description: request.naturalLanguageIntent || 'Operation details',
+        id: "operation-summary",
+        type: "information",
+        title: "Operation Summary",
+        description: request.naturalLanguageIntent || "Operation details",
         required: true,
         complexity: 2,
         estimatedTime: 5000,
-        helpContent: 'This shows what the operation will do'
+        helpContent: "This shows what the operation will do",
       },
       {
-        id: 'risk-review',
-        type: 'information',
-        title: 'Risk Assessment',
+        id: "risk-review",
+        type: "information",
+        title: "Risk Assessment",
         description: `Risk level: ${riskAssessment.riskLevel} (Score: ${riskAssessment.riskScore})`,
         required: true,
         complexity: 3,
         estimatedTime: 8000,
-        helpContent: 'Review the assessed risk level for this operation'
+        helpContent: "Review the assessed risk level for this operation",
       },
       {
-        id: 'confirmation',
-        type: 'confirmation',
-        title: 'Confirm Operation',
-        description: 'Do you want to proceed with this operation?',
+        id: "confirmation",
+        type: "confirmation",
+        title: "Confirm Operation",
+        description: "Do you want to proceed with this operation?",
         required: true,
         complexity: 2,
         estimatedTime: 5000,
-        defaultValue: userProfile.personalization.quickApprovalPatterns.includes(request.functionName) ? 'approve' : null
-      }
+        defaultValue:
+          userProfile.personalization.quickApprovalPatterns.includes(
+            request.functionName,
+          )
+            ? "approve"
+            : null,
+      },
     ];
   }
 
@@ -1099,53 +1146,53 @@ export class UserExperienceOptimizer {
     request: PreExecutionValidationRequest,
     riskAssessment: RiskAssessmentResult,
     validationRequirements: ValidationRequirement[],
-    userProfile: UserExperienceProfile
+    userProfile: UserExperienceProfile,
   ): ValidationFlowStep[] {
     const steps: ValidationFlowStep[] = [
       {
-        id: 'detailed-overview',
-        type: 'information',
-        title: 'Operation Details',
+        id: "detailed-overview",
+        type: "information",
+        title: "Operation Details",
         description: `Detailed review of ${request.naturalLanguageIntent}`,
         required: true,
         complexity: 4,
         estimatedTime: 10000,
-        helpContent: 'Comprehensive operation overview and impact analysis'
+        helpContent: "Comprehensive operation overview and impact analysis",
       },
       {
-        id: 'risk-analysis',
-        type: 'information',
-        title: 'Risk Analysis',
-        description: 'Comprehensive risk assessment and mitigation strategies',
+        id: "risk-analysis",
+        type: "information",
+        title: "Risk Analysis",
+        description: "Comprehensive risk assessment and mitigation strategies",
         required: true,
         complexity: 5,
         estimatedTime: 15000,
-        helpContent: 'Detailed risk factors and recommended mitigations'
-      }
+        helpContent: "Detailed risk factors and recommended mitigations",
+      },
     ];
 
     // Add requirement-specific steps
     validationRequirements.forEach((req, index) => {
       steps.push({
         id: `requirement-${index}`,
-        type: 'choice',
+        type: "choice",
         title: req.description,
         description: `Requirement: ${req.description}`,
         required: req.mandatory,
         complexity: 4,
         estimatedTime: req.estimatedTimeMs || 10000,
-        helpContent: `This requirement ensures: ${req.description}`
+        helpContent: `This requirement ensures: ${req.description}`,
       });
     });
 
     steps.push({
-      id: 'final-confirmation',
-      type: 'confirmation',
-      title: 'Final Confirmation',
-      description: 'Confirm all requirements have been reviewed and approved',
+      id: "final-confirmation",
+      type: "confirmation",
+      title: "Final Confirmation",
+      description: "Confirm all requirements have been reviewed and approved",
       required: true,
       complexity: 3,
-      estimatedTime: 8000
+      estimatedTime: 8000,
     });
 
     return steps;
@@ -1155,71 +1202,77 @@ export class UserExperienceOptimizer {
     request: PreExecutionValidationRequest,
     riskAssessment: RiskAssessmentResult,
     validationRequirements: ValidationRequirement[],
-    userProfile: UserExperienceProfile
+    userProfile: UserExperienceProfile,
   ): ValidationFlowStep[] {
     return [
       {
-        id: 'expert-summary',
-        type: 'information',
-        title: 'Technical Summary',
-        description: 'Comprehensive technical details and full context',
+        id: "expert-summary",
+        type: "information",
+        title: "Technical Summary",
+        description: "Comprehensive technical details and full context",
         required: true,
         complexity: 5,
         estimatedTime: 12000,
-        helpContent: 'Complete technical context for expert review'
+        helpContent: "Complete technical context for expert review",
       },
       {
-        id: 'batch-approval',
-        type: 'choice',
-        title: 'Expert Approval Options',
-        description: 'Choose approval method and additional configurations',
+        id: "batch-approval",
+        type: "choice",
+        title: "Expert Approval Options",
+        description: "Choose approval method and additional configurations",
         required: true,
         complexity: 5,
         estimatedTime: 15000,
-        defaultValue: 'batch_approve'
-      }
+        defaultValue: "batch_approve",
+      },
     ];
   }
 
   private determineRecommendedMode(
     userProfile: UserExperienceProfile,
-    complexityLevel: string
-  ): 'voice' | 'text' | 'hybrid' {
+    complexityLevel: string,
+  ): "voice" | "text" | "hybrid" {
     if (userProfile.accessibilityPreferences.voiceControl) {
-      return 'voice';
+      return "voice";
     }
 
-    if (complexityLevel === 'simple' && userProfile.learningMetrics.validationSpeed < 5000) {
-      return 'voice'; // Quick operations benefit from voice
+    if (
+      complexityLevel === "simple" &&
+      userProfile.learningMetrics.validationSpeed < 5000
+    ) {
+      return "voice"; // Quick operations benefit from voice
     }
 
-    if (complexityLevel === 'complex' || complexityLevel === 'expert') {
-      return 'hybrid'; // Complex operations benefit from mixed interaction
+    if (complexityLevel === "complex" || complexityLevel === "expert") {
+      return "hybrid"; // Complex operations benefit from mixed interaction
     }
 
-    return 'text';
+    return "text";
   }
 
   private identifySkipOptions(
     steps: ValidationFlowStep[],
     userProfile: UserExperienceProfile,
-    riskAssessment: RiskAssessmentResult
+    riskAssessment: RiskAssessmentResult,
   ): string[] {
     const skipOptions: string[] = [];
 
     // Expert users can skip basic steps
-    if (userProfile.experienceLevel === 'expert' || userProfile.experienceLevel === 'power-user') {
-      skipOptions.push('basic-information');
+    if (
+      userProfile.experienceLevel === "expert" ||
+      userProfile.experienceLevel === "power-user"
+    ) {
+      skipOptions.push("basic-information");
 
-      if (riskAssessment.riskLevel === 'LOW') {
-        skipOptions.push('risk-review');
+      if (riskAssessment.riskLevel === "LOW") {
+        skipOptions.push("risk-review");
       }
     }
 
     // Users with high success rates can skip tutorials
     if (userProfile.learningMetrics.errorRate < 0.02) {
-      skipOptions.push('help-content');
-      skipOptions.push('tutorial-steps');
+      skipOptions.push("help-content");
+      skipOptions.push("tutorial-steps");
     }
 
     return skipOptions;
@@ -1228,180 +1281,206 @@ export class UserExperienceOptimizer {
   private generateHiddenContentSummary(
     currentLevel: string,
     riskAssessment: RiskAssessmentResult,
-    validationRequirements: ValidationRequirement[]
+    validationRequirements: ValidationRequirement[],
   ): string {
     const hiddenItems: string[] = [];
 
-    if (currentLevel === 'minimal') {
-      hiddenItems.push('Risk details', 'Technical parameters', 'Compliance information');
-    } else if (currentLevel === 'standard') {
-      hiddenItems.push('Technical parameters', 'Advanced options');
+    if (currentLevel === "minimal") {
+      hiddenItems.push(
+        "Risk details",
+        "Technical parameters",
+        "Compliance information",
+      );
+    } else if (currentLevel === "standard") {
+      hiddenItems.push("Technical parameters", "Advanced options");
     }
 
     if (hiddenItems.length === 0) {
-      return '';
+      return "";
     }
 
-    return `${hiddenItems.length} additional details available: ${hiddenItems.join(', ')}`;
+    return `${hiddenItems.length} additional details available: ${hiddenItems.join(", ")}`;
   }
 
-  private generateRiskExplanation(riskAssessment: RiskAssessmentResult): string {
+  private generateRiskExplanation(
+    riskAssessment: RiskAssessmentResult,
+  ): string {
     const factors = Object.entries(riskAssessment.riskFactors)
       .filter(([_, score]) => score > 30)
       .map(([factor, score]) => `${factor}: ${score}`)
-      .join(', ');
+      .join(", ");
 
-    return `Risk score: ${riskAssessment.riskScore}/100. Key factors: ${factors}. ${
-      riskAssessment.mitigationRecommendations.slice(0, 2).join(' ')
-    }`;
+    return `Risk score: ${riskAssessment.riskScore}/100. Key factors: ${factors}. ${riskAssessment.mitigationRecommendations
+      .slice(0, 2)
+      .join(" ")}`;
   }
 
   private generateSuggestedResponses(
     request: PreExecutionValidationRequest,
     riskAssessment: RiskAssessmentResult,
-    userProfile: UserExperienceProfile
+    userProfile: UserExperienceProfile,
   ): SuggestedResponse[] {
     const responses: SuggestedResponse[] = [];
 
     // Add common responses based on risk level
-    if (riskAssessment.riskLevel === 'LOW') {
+    if (riskAssessment.riskLevel === "LOW") {
       responses.push({
-        text: 'Approved - Low risk operation',
-        type: 'approval',
+        text: "Approved - Low risk operation",
+        type: "approval",
         confidence: 0.9,
         usageFrequency: 0.8,
-        contextRelevance: 0.95
+        contextRelevance: 0.95,
       });
     }
 
     // Add personalized responses from user history
-    for (const savedResponse of Object.entries(userProfile.personalization.savedResponses)) {
+    for (const savedResponse of Object.entries(
+      userProfile.personalization.savedResponses,
+    )) {
       responses.push({
         text: savedResponse[1],
-        type: 'approval', // Would be determined from saved response analysis
+        type: "approval", // Would be determined from saved response analysis
         confidence: 0.7,
         usageFrequency: 0.5,
-        contextRelevance: 0.8
+        contextRelevance: 0.8,
       });
     }
 
-    return responses.sort((a, b) => (b.confidence * b.contextRelevance) - (a.confidence * a.contextRelevance));
+    return responses.sort(
+      (a, b) =>
+        b.confidence * b.contextRelevance - a.confidence * a.contextRelevance,
+    );
   }
 
   private generateAutoCompleteSuggestions(
     request: PreExecutionValidationRequest,
-    userProfile: UserExperienceProfile
+    userProfile: UserExperienceProfile,
   ): string[] {
     const suggestions: string[] = [];
 
     // Add common phrases
-    suggestions.push('I approve this operation');
-    suggestions.push('Please proceed with caution');
-    suggestions.push('I need more information');
+    suggestions.push("I approve this operation");
+    suggestions.push("Please proceed with caution");
+    suggestions.push("I need more information");
 
     // Add personalized suggestions from user history
-    suggestions.push(...Object.keys(userProfile.personalization.savedResponses));
+    suggestions.push(
+      ...Object.keys(userProfile.personalization.savedResponses),
+    );
 
     return suggestions.slice(0, 5); // Limit to top 5
   }
 
   private generateQuickActions(
     riskAssessment: RiskAssessmentResult,
-    userProfile: UserExperienceProfile
+    userProfile: UserExperienceProfile,
   ): QuickAction[] {
     const actions: QuickAction[] = [
       {
-        id: 'quick-approve',
-        label: 'Quick Approve',
-        description: 'Approve this operation',
-        shortcut: 'Ctrl+A',
-        voiceCommand: 'approve',
-        type: 'approve',
-        confidence: riskAssessment.riskLevel === 'LOW' ? 0.9 : 0.6
+        id: "quick-approve",
+        label: "Quick Approve",
+        description: "Approve this operation",
+        shortcut: "Ctrl+A",
+        voiceCommand: "approve",
+        type: "approve",
+        confidence: riskAssessment.riskLevel === "LOW" ? 0.9 : 0.6,
       },
       {
-        id: 'quick-reject',
-        label: 'Reject',
-        description: 'Reject this operation',
-        shortcut: 'Ctrl+R',
-        voiceCommand: 'reject',
-        type: 'reject',
-        confidence: 0.8
-      }
+        id: "quick-reject",
+        label: "Reject",
+        description: "Reject this operation",
+        shortcut: "Ctrl+R",
+        voiceCommand: "reject",
+        type: "reject",
+        confidence: 0.8,
+      },
     ];
 
     // Add expert actions for experienced users
-    if (userProfile.experienceLevel === 'expert') {
+    if (userProfile.experienceLevel === "expert") {
       actions.push({
-        id: 'batch-approve',
-        label: 'Batch Approve',
-        description: 'Approve similar operations automatically',
-        shortcut: 'Ctrl+Shift+A',
-        voiceCommand: 'batch approve',
-        type: 'approve',
-        confidence: 0.85
+        id: "batch-approve",
+        label: "Batch Approve",
+        description: "Approve similar operations automatically",
+        shortcut: "Ctrl+Shift+A",
+        voiceCommand: "batch approve",
+        type: "approve",
+        confidence: 0.85,
       });
     }
 
     return actions;
   }
 
-  private extractLearnedPreferences(userProfile: UserExperienceProfile): Record<string, any> {
+  private extractLearnedPreferences(
+    userProfile: UserExperienceProfile,
+  ): Record<string, any> {
     return {
       preferredVerbosity: userProfile.interactionStyle.verbosity,
-      preferredConfirmationStyle: userProfile.interactionStyle.confirmationStyle,
+      preferredConfirmationStyle:
+        userProfile.interactionStyle.confirmationStyle,
       frequentOperations: userProfile.personalization.favoriteOperations,
-      customShortcuts: userProfile.personalization.customShortcuts
+      customShortcuts: userProfile.personalization.customShortcuts,
     };
   }
 
   private calculateConfidenceScores(
     suggestedResponses: SuggestedResponse[],
     autoCompleteSuggestions: string[],
-    quickActions: QuickAction[]
+    quickActions: QuickAction[],
   ): Record<string, number> {
     return {
-      suggestedResponses: suggestedResponses.reduce((avg, resp) => avg + resp.confidence, 0) / Math.max(suggestedResponses.length, 1),
+      suggestedResponses:
+        suggestedResponses.reduce((avg, resp) => avg + resp.confidence, 0) /
+        Math.max(suggestedResponses.length, 1),
       autoComplete: autoCompleteSuggestions.length > 0 ? 0.8 : 0,
-      quickActions: quickActions.reduce((avg, action) => avg + action.confidence, 0) / Math.max(quickActions.length, 1)
+      quickActions:
+        quickActions.reduce((avg, action) => avg + action.confidence, 0) /
+        Math.max(quickActions.length, 1),
     };
   }
 
-  private generateAriaLabels(validationFlow: OptimizedValidationFlow): Record<string, string> {
+  private generateAriaLabels(
+    validationFlow: OptimizedValidationFlow,
+  ): Record<string, string> {
     const labels: Record<string, string> = {};
 
-    validationFlow.steps.forEach(step => {
+    validationFlow.steps.forEach((step) => {
       labels[step.id] = `${step.title}: ${step.description}`;
     });
 
     return labels;
   }
 
-  private generateAnnouncements(validationFlow: OptimizedValidationFlow): string[] {
+  private generateAnnouncements(
+    validationFlow: OptimizedValidationFlow,
+  ): string[] {
     return [
       `Validation flow with ${validationFlow.steps.length} steps`,
       `Estimated completion time: ${Math.round(validationFlow.estimatedCompletionTime / 1000)} seconds`,
-      `Complexity level: ${validationFlow.complexityLevel}`
+      `Complexity level: ${validationFlow.complexityLevel}`,
     ];
   }
 
   private generateLandmarks(validationFlow: OptimizedValidationFlow): string[] {
-    return ['main', 'navigation', 'complementary'];
+    return ["main", "navigation", "complementary"];
   }
 
-  private generateHeadingStructure(validationFlow: OptimizedValidationFlow): string[] {
-    return ['h1: Validation Process', 'h2: Steps', 'h3: Current Step'];
+  private generateHeadingStructure(
+    validationFlow: OptimizedValidationFlow,
+  ): string[] {
+    return ["h1: Validation Process", "h2: Steps", "h3: Current Step"];
   }
 
   private generateKeyboardShortcuts(
     validationFlow: OptimizedValidationFlow,
-    userProfile: UserExperienceProfile
+    userProfile: UserExperienceProfile,
   ): Record<string, string> {
     const shortcuts: Record<string, string> = {
-      'Tab': 'Next element',
-      'Shift+Tab': 'Previous element',
-      'Enter': 'Activate current element',
-      'Escape': 'Cancel/Go back'
+      Tab: "Next element",
+      "Shift+Tab": "Previous element",
+      Enter: "Activate current element",
+      Escape: "Cancel/Go back",
     };
 
     // Add user's custom shortcuts
@@ -1411,83 +1490,93 @@ export class UserExperienceOptimizer {
   }
 
   private generateTabOrder(validationFlow: OptimizedValidationFlow): string[] {
-    return validationFlow.steps.map(step => step.id);
+    return validationFlow.steps.map((step) => step.id);
   }
 
-  private generateFocusManagement(validationFlow: OptimizedValidationFlow): any {
+  private generateFocusManagement(
+    validationFlow: OptimizedValidationFlow,
+  ): any {
     return {
       initialFocus: validationFlow.steps[0]?.id,
       trapFocus: true,
-      restoreFocus: true
+      restoreFocus: true,
     };
   }
 
-  private generateVoiceCommands(validationFlow: OptimizedValidationFlow): Record<string, string> {
+  private generateVoiceCommands(
+    validationFlow: OptimizedValidationFlow,
+  ): Record<string, string> {
     return {
-      'approve': 'Approve current step',
-      'reject': 'Reject current step',
-      'next': 'Go to next step',
-      'previous': 'Go to previous step',
-      'help': 'Get help for current step',
-      'repeat': 'Repeat current information'
+      approve: "Approve current step",
+      reject: "Reject current step",
+      next: "Go to next step",
+      previous: "Go to previous step",
+      help: "Get help for current step",
+      repeat: "Repeat current information",
     };
   }
 
   private predictNextContent(
     userProfile: UserExperienceProfile,
-    validationFlow: OptimizedValidationFlow
+    validationFlow: OptimizedValidationFlow,
   ): string[] {
     // Predict likely next content based on user patterns
-    return [
-      'approval-confirmation',
-      'risk-details',
-      'help-content'
-    ];
+    return ["approval-confirmation", "risk-details", "help-content"];
   }
 
-  private identifyCacheableResponses(userProfile: UserExperienceProfile): string[] {
+  private identifyCacheableResponses(
+    userProfile: UserExperienceProfile,
+  ): string[] {
     return Object.values(userProfile.personalization.savedResponses);
   }
 
   private precomputeDefaults(
     userProfile: UserExperienceProfile,
-    request: PreExecutionValidationRequest
+    request: PreExecutionValidationRequest,
   ): Record<string, any> {
     return {
-      preferredResponse: userProfile.personalization.quickApprovalPatterns.includes(request.functionName) ? 'approve' : null,
+      preferredResponse:
+        userProfile.personalization.quickApprovalPatterns.includes(
+          request.functionName,
+        )
+          ? "approve"
+          : null,
       verbosity: userProfile.interactionStyle.verbosity,
-      showHelp: userProfile.interactionStyle.helpLevel !== 'none'
+      showHelp: userProfile.interactionStyle.helpLevel !== "none",
     };
   }
 
   private getBasicOptimization(
     request: PreExecutionValidationRequest,
     riskAssessment: RiskAssessmentResult,
-    validationRequirements: ValidationRequirement[]
+    validationRequirements: ValidationRequirement[],
   ): UserExperienceOptimization {
     // Return minimal optimization on failure
     return {
       validationFlow: {
-        steps: [{
-          id: 'basic-confirmation',
-          type: 'confirmation',
-          title: 'Confirm Operation',
-          description: request.naturalLanguageIntent || 'Confirm this operation',
-          required: true,
-          complexity: 2,
-          estimatedTime: 5000
-        }],
+        steps: [
+          {
+            id: "basic-confirmation",
+            type: "confirmation",
+            title: "Confirm Operation",
+            description:
+              request.naturalLanguageIntent || "Confirm this operation",
+            required: true,
+            complexity: 2,
+            estimatedTime: 5000,
+          },
+        ],
         estimatedCompletionTime: 5000,
-        complexityLevel: 'simple',
-        recommendedMode: 'text',
-        skipOptions: []
+        complexityLevel: "simple",
+        recommendedMode: "text",
+        skipOptions: [],
       },
       progressiveDisclosure: {
-        currentLevel: 'standard',
-        availableLevels: ['standard'],
+        currentLevel: "standard",
+        availableLevels: ["standard"],
         autoExpansionTriggers: [],
-        hiddenContentSummary: '',
-        showMoreOptions: false
+        hiddenContentSummary: "",
+        showMoreOptions: false,
       },
       contextualHelp: [],
       intelligentDefaults: {
@@ -1495,69 +1584,74 @@ export class UserExperienceOptimizer {
         autoCompleteSuggestions: [],
         quickActions: [],
         learnedPreferences: {},
-        confidenceScores: {}
+        confidenceScores: {},
       },
       accessibilityEnhancements: {
         screenReaderOptimizations: {
           ariaLabels: {},
           announcements: [],
           landmarks: [],
-          headingStructure: []
+          headingStructure: [],
         },
         keyboardNavigation: {
           shortcuts: {},
           tabOrder: [],
-          focusManagement: {}
+          focusManagement: {},
         },
         visualEnhancements: {
           highContrast: false,
           largeText: false,
           colorBlindSupport: true,
-          reducedMotion: false
+          reducedMotion: false,
         },
         voiceControl: {
           commands: {},
           speechSynthesis: null,
-          speechRecognition: null
-        }
+          speechRecognition: null,
+        },
       },
       performanceOptimizations: {
         preloading: {
           predictedContent: [],
           cacheableResponses: [],
-          precomputedDefaults: {}
+          precomputedDefaults: {},
         },
         rendering: {
           virtualScrolling: false,
           lazyLoading: true,
           componentCaching: false,
-          minimizedReflows: true
+          minimizedReflows: true,
         },
         network: {
           requestBatching: true,
           responseCompression: true,
           connectionPooling: true,
-          offlineSupport: false
-        }
-      }
+          offlineSupport: false,
+        },
+      },
     };
   }
 
   private async updateUserProfile(
     userProfile: UserExperienceProfile,
-    optimization: UserExperienceOptimization
+    optimization: UserExperienceOptimization,
   ): Promise<void> {
     // Update learning metrics based on optimization
     const now = new Date();
-    const timeSinceLastAdaptation = now.getTime() - userProfile.learningMetrics.lastAdaptation.getTime();
+    const timeSinceLastAdaptation =
+      now.getTime() - userProfile.learningMetrics.lastAdaptation.getTime();
 
-    if (timeSinceLastAdaptation > 86400000) { // 24 hours
+    if (timeSinceLastAdaptation > 86400000) {
+      // 24 hours
       // Adapt experience level based on usage patterns
-      if (userProfile.learningMetrics.validationSpeed < 3000 && userProfile.learningMetrics.errorRate < 0.02) {
-        if (userProfile.experienceLevel === 'intermediate') {
-          userProfile.experienceLevel = 'expert';
-        } else if (userProfile.experienceLevel === 'novice') {
-          userProfile.experienceLevel = 'intermediate';
+      if (
+        userProfile.learningMetrics.validationSpeed < 3000 &&
+        userProfile.learningMetrics.errorRate < 0.02
+      ) {
+        if (userProfile.experienceLevel === "intermediate") {
+          userProfile.experienceLevel = "expert";
+        } else if (userProfile.experienceLevel === "novice") {
+          userProfile.experienceLevel = "intermediate";
         }
       }
 
@@ -1571,10 +1665,11 @@ export class UserExperienceOptimizer {
     this.metrics.totalOptimizations++;
 
     // Update rolling average
-    const newAverage = (
-      this.metrics.averageOptimizationTime * (this.metrics.totalOptimizations - 1) +
-      optimizationTime
-    ) / this.metrics.totalOptimizations;
+    const newAverage =
+      (this.metrics.averageOptimizationTime *
+        (this.metrics.totalOptimizations - 1) +
+        optimizationTime) /
+      this.metrics.totalOptimizations;
 
     this.metrics.averageOptimizationTime = newAverage;
   }
@@ -1582,12 +1677,15 @@ export class UserExperienceOptimizer {
   private loadConfiguration() {
     return {
       progressiveDisclosure: {
-        enabled: this.configService.get<boolean>('PARLANT_UX_PROGRESSIVE_DISCLOSURE', true),
-        initialLevel: 'standard' as const,
+        enabled: this.configService.get<boolean>(
+          "PARLANT_UX_PROGRESSIVE_DISCLOSURE",
+          true,
+        ),
+        initialLevel: "standard" as const,
         autoExpand: {
           enabled: true,
           complexityThreshold: 3,
-          riskThreshold: 60
+          riskThreshold: 60,
         },
         levels: {
           minimal: {
@@ -1598,7 +1696,7 @@ export class UserExperienceOptimizer {
             showMitigationRecommendations: false,
             showValidationRequirements: false,
             maxInitialItems: 1,
-            enableShowMore: true
+            enableShowMore: true,
           },
           standard: {
             showSummary: true,
@@ -1608,7 +1706,7 @@ export class UserExperienceOptimizer {
             showMitigationRecommendations: true,
             showValidationRequirements: true,
             maxInitialItems: 3,
-            enableShowMore: true
+            enableShowMore: true,
           },
           expanded: {
             showSummary: true,
@@ -1618,7 +1716,7 @@ export class UserExperienceOptimizer {
             showMitigationRecommendations: true,
             showValidationRequirements: true,
             maxInitialItems: 5,
-            enableShowMore: true
+            enableShowMore: true,
           },
           comprehensive: {
             showSummary: true,
@@ -1628,56 +1726,62 @@ export class UserExperienceOptimizer {
             showMitigationRecommendations: true,
             showValidationRequirements: true,
             maxInitialItems: 10,
-            enableShowMore: false
-          }
-        }
+            enableShowMore: false,
+          },
+        },
       },
       contextualHelp: {
-        enabled: this.configService.get<boolean>('PARLANT_UX_CONTEXTUAL_HELP', true),
+        enabled: this.configService.get<boolean>(
+          "PARLANT_UX_CONTEXTUAL_HELP",
+          true,
+        ),
         deliveryMethods: {
           tooltips: true,
           overlays: true,
           inline: true,
           modal: true,
-          voice: true
+          voice: true,
         },
         triggers: {
           onHover: true,
           onFocus: true,
           onError: true,
           onDelay: true,
-          delayMs: 3000
+          delayMs: 3000,
         },
         contentTypes: {
           quickTips: true,
           detailedExplanations: true,
           examples: true,
           tutorials: true,
-          videos: false // Disabled by default
-        }
+          videos: false, // Disabled by default
+        },
       },
       intelligentDefaults: {
-        enabled: this.configService.get<boolean>('PARLANT_UX_INTELLIGENT_DEFAULTS', true),
+        enabled: this.configService.get<boolean>(
+          "PARLANT_UX_INTELLIGENT_DEFAULTS",
+          true,
+        ),
         learning: {
           enabled: true,
           minSamples: 5,
           confidenceThreshold: 0.7,
-          adaptationRate: 0.1
+          adaptationRate: 0.1,
         },
         suggestionTypes: {
           responses: true,
           confirmations: true,
           mitigations: true,
-          shortcuts: true
+          shortcuts: true,
         },
         contextAwareness: {
           timeOfDay: true,
           dayOfWeek: true,
           userHistory: true,
           operationType: true,
-          riskLevel: true
-        }
-      }
+          riskLevel: true,
+        },
+      },
     };
   }
 
@@ -1687,22 +1791,22 @@ export class UserExperienceOptimizer {
   getMetrics() {
     return {
       ...this.metrics,
-      userProfileCount: this.userProfiles.size
+      userProfileCount: this.userProfiles.size,
     };
   }
 
   /**
    * Health check for user experience optimizer
    */
-  async healthCheck(): Promise<{status: string; metrics: any; config: any}> {
+  async healthCheck(): Promise<{ status: string; metrics: any; config: any }> {
     return {
-      status: 'healthy',
+      status: "healthy",
       metrics: this.getMetrics(),
       config: {
         progressiveDisclosure: this.config.progressiveDisclosure.enabled,
         contextualHelp: this.config.contextualHelp.enabled,
-        intelligentDefaults: this.config.intelligentDefaults.enabled
-      }
+        intelligentDefaults: this.config.intelligentDefaults.enabled,
+      },
     };
   }
 }

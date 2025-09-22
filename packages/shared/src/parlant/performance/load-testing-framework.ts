@@ -12,11 +12,11 @@
  * @created 2025-09-20
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { EventEmitter } from 'events';
-import { Worker, isMainThread, parentPort, workerData } from 'worker_threads';
-import { performance } from 'perf_hooks';
-import { cpus } from 'os';
+import { Injectable, Logger } from "@nestjs/common";
+import { EventEmitter } from "events";
+import { Worker, isMainThread, parentPort, workerData } from "worker_threads";
+import { performance } from "perf_hooks";
+import { cpus } from "os";
 
 // Type guard utilities for error handling
 function isError(error: unknown): error is Error {
@@ -27,19 +27,19 @@ function getErrorMessage(error: unknown): string {
   if (isError(error)) {
     return getErrorMessage(error);
   }
-  if (typeof error === 'string') {
+  if (typeof error === "string") {
     return error;
   }
-  return 'An unknown error occurred';
+  return "An unknown error occurred";
 }
 import {
   WrapperRegistryManagementService,
-  WrapperInfo
-} from '../function-wrapper/core/wrapper-registry-management';
+  WrapperInfo,
+} from "../function-wrapper/core/wrapper-registry-management";
 import {
   ValidationLevel,
-  FunctionCategory
-} from '../function-wrapper/interfaces/wrapper-types';
+  FunctionCategory,
+} from "../function-wrapper/interfaces/wrapper-types";
 
 /**
  * Load Testing Framework Service
@@ -63,14 +63,14 @@ export class LoadTestingFrameworkService {
 
   constructor(
     wrapperRegistry: WrapperRegistryManagementService,
-    config?: Partial<LoadTestingConfiguration>
+    config?: Partial<LoadTestingConfiguration>,
   ) {
     this.wrapperRegistry = wrapperRegistry;
     this.loadTestingConfig = this.createDefaultLoadTestingConfiguration(config);
 
     this.setupEventListeners();
     this.initializeWorkerPool();
-    this.logger.log('Load Testing Framework Service initialized');
+    this.logger.log("Load Testing Framework Service initialized");
   }
 
   /**
@@ -79,7 +79,9 @@ export class LoadTestingFrameworkService {
    * @param testPlan - Load testing execution plan
    * @returns Complete load testing results
    */
-  public async executeLoadTesting(testPlan: LoadTestPlan): Promise<LoadTestResult> {
+  public async executeLoadTesting(
+    testPlan: LoadTestPlan,
+  ): Promise<LoadTestResult> {
     const testId = this.generateTestId();
     const startTime = Date.now();
 
@@ -90,24 +92,33 @@ export class LoadTestingFrameworkService {
       this.validateLoadTestPlan(testPlan);
 
       // Initialize test execution
-      const execution = await this.initializeLoadTestExecution(testId, testPlan);
+      const execution = await this.initializeLoadTestExecution(
+        testId,
+        testPlan,
+      );
       this.activeTests.set(testId, execution);
 
       // Prepare target functions for testing
       const targetFunctions = await this.prepareTargetFunctions(testPlan);
-      this.logger.log(`Prepared ${targetFunctions.length} functions for load testing`);
+      this.logger.log(
+        `Prepared ${targetFunctions.length} functions for load testing`,
+      );
 
       // Execute test phases sequentially
       const phaseResults: LoadTestPhaseResult[] = [];
 
-      for (const [phaseIndex, phase] of Array.from(testPlan.testPhases.entries())) {
-        this.logger.log(`Executing load test phase ${phaseIndex + 1}: ${phase.name}`);
+      for (const [phaseIndex, phase] of Array.from(
+        testPlan.testPhases.entries(),
+      )) {
+        this.logger.log(
+          `Executing load test phase ${phaseIndex + 1}: ${phase.name}`,
+        );
 
         const phaseResult = await this.executeLoadTestPhase(
           testId,
           phase,
           targetFunctions,
-          execution
+          execution,
         );
 
         phaseResults.push(phaseResult);
@@ -117,10 +128,10 @@ export class LoadTestingFrameworkService {
         execution.phaseResults.push(phaseResult);
 
         // Emit progress event
-        this.eventEmitter.emit('load-test-phase-completed', {
+        this.eventEmitter.emit("load-test-phase-completed", {
           testId,
           phaseIndex,
-          phaseResult
+          phaseResult,
         });
 
         // Cool-down between phases
@@ -131,12 +142,14 @@ export class LoadTestingFrameworkService {
 
       // Generate comprehensive analysis
       const responseTimeAnalysis = this.analyzeResponseTimes(phaseResults);
-      const complianceValidation = this.validateSub1000msCompliance(phaseResults);
-      const performanceInsights = this.generatePerformanceInsights(phaseResults);
+      const complianceValidation =
+        this.validateSub1000msCompliance(phaseResults);
+      const performanceInsights =
+        this.generatePerformanceInsights(phaseResults);
       const recommendations = this.generateLoadTestRecommendations(
         phaseResults,
         responseTimeAnalysis,
-        complianceValidation
+        complianceValidation,
       );
 
       // Create final result
@@ -151,7 +164,7 @@ export class LoadTestingFrameworkService {
         recommendations,
         overallMetrics: this.calculateOverallMetrics(phaseResults),
         resourceUtilization: this.analyzeResourceUtilization(execution),
-        completedAt: new Date()
+        completedAt: new Date(),
       };
 
       // Store results for future analysis
@@ -163,14 +176,16 @@ export class LoadTestingFrameworkService {
       this.logger.log(`Load testing completed: ${testId}`);
 
       return result;
-
     } catch (error) {
       this.logger.error(`Load testing failed: ${testId}`, error);
       await this.cleanupTestExecution(testId);
-      throw new LoadTestingError(`Load testing failed: ${getErrorMessage(error)}`, {
-        testId,
-        error: getErrorMessage(error)
-      });
+      throw new LoadTestingError(
+        `Load testing failed: ${getErrorMessage(error)}`,
+        {
+          testId,
+          error: getErrorMessage(error),
+        },
+      );
     }
   }
 
@@ -185,12 +200,14 @@ export class LoadTestingFrameworkService {
   public async executeResponseTimeValidation(
     functionIds: string[],
     targetResponseTime: number = 1000,
-    testConfig: ResponseTimeTestConfig
+    testConfig: ResponseTimeTestConfig,
   ): Promise<ResponseTimeValidationResult> {
     const testId = this.generateTestId();
     const startTime = Date.now();
 
-    this.logger.log(`Starting response time validation: ${testId} for ${functionIds.length} functions`);
+    this.logger.log(
+      `Starting response time validation: ${testId} for ${functionIds.length} functions`,
+    );
 
     try {
       const validationResults: FunctionResponseTimeResult[] = [];
@@ -207,7 +224,7 @@ export class LoadTestingFrameworkService {
           functionId,
           wrapperInfo,
           targetResponseTime,
-          testConfig
+          testConfig,
         );
 
         validationResults.push(functionResult);
@@ -216,11 +233,14 @@ export class LoadTestingFrameworkService {
       // Analyze compliance across all functions
       const complianceAnalysis = this.analyzeResponseTimeCompliance(
         validationResults,
-        targetResponseTime
+        targetResponseTime,
       );
 
       // Generate detailed insights
-      const insights = this.generateResponseTimeInsights(validationResults, targetResponseTime);
+      const insights = this.generateResponseTimeInsights(
+        validationResults,
+        targetResponseTime,
+      );
 
       const result: ResponseTimeValidationResult = {
         testId,
@@ -232,21 +252,23 @@ export class LoadTestingFrameworkService {
         insights,
         recommendations: this.generateResponseTimeRecommendations(
           validationResults,
-          complianceAnalysis
+          complianceAnalysis,
         ),
-        completedAt: new Date()
+        completedAt: new Date(),
       };
 
       this.logger.log(`Response time validation completed: ${testId}`);
 
       return result;
-
     } catch (error) {
       this.logger.error(`Response time validation failed: ${testId}`, error);
-      throw new LoadTestingError(`Response time validation failed: ${getErrorMessage(error)}`, {
-        testId,
-        error: getErrorMessage(error)
-      });
+      throw new LoadTestingError(
+        `Response time validation failed: ${getErrorMessage(error)}`,
+        {
+          testId,
+          error: getErrorMessage(error),
+        },
+      );
     }
   }
 
@@ -257,7 +279,7 @@ export class LoadTestingFrameworkService {
    * @returns Concurrent load testing results
    */
   public async executeConcurrentLoadTesting(
-    concurrentConfig: ConcurrentLoadTestConfig
+    concurrentConfig: ConcurrentLoadTestConfig,
   ): Promise<ConcurrentLoadTestResult> {
     const testId = this.generateTestId();
     const startTime = Date.now();
@@ -274,16 +296,18 @@ export class LoadTestingFrameworkService {
       for (const group of functionGroups) {
         const groupResult = await this.executeConcurrentGroup(
           group,
-          concurrentConfig
+          concurrentConfig,
         );
         groupResults.push(groupResult);
       }
 
       // Analyze cross-function performance interactions
-      const interactionAnalysis = this.analyzeFunctionInteractions(groupResults);
+      const interactionAnalysis =
+        this.analyzeFunctionInteractions(groupResults);
 
       // Validate system-wide performance under concurrent load
-      const systemPerformance = this.analyzeSystemPerformanceUnderLoad(groupResults);
+      const systemPerformance =
+        this.analyzeSystemPerformanceUnderLoad(groupResults);
 
       const result: ConcurrentLoadTestResult = {
         testId,
@@ -294,21 +318,23 @@ export class LoadTestingFrameworkService {
         systemPerformance,
         recommendations: this.generateConcurrentLoadRecommendations(
           interactionAnalysis,
-          systemPerformance
+          systemPerformance,
         ),
-        completedAt: new Date()
+        completedAt: new Date(),
       };
 
       this.logger.log(`Concurrent load testing completed: ${testId}`);
 
       return result;
-
     } catch (error) {
       this.logger.error(`Concurrent load testing failed: ${testId}`, error);
-      throw new LoadTestingError(`Concurrent load testing failed: ${getErrorMessage(error)}`, {
-        testId,
-        error: getErrorMessage(error)
-      });
+      throw new LoadTestingError(
+        `Concurrent load testing failed: ${getErrorMessage(error)}`,
+        {
+          testId,
+          error: getErrorMessage(error),
+        },
+      );
     }
   }
 
@@ -326,14 +352,14 @@ export class LoadTestingFrameworkService {
       const execution = this.activeTests.get(testId);
       if (execution) {
         const currentMetrics = this.collectCurrentMetrics(execution);
-        monitoringStream.emit('metrics', currentMetrics);
+        monitoringStream.emit("metrics", currentMetrics);
       }
     }, this.loadTestingConfig.metricsCollectionInterval);
 
     // Cleanup when test completes
     this.eventEmitter.once(`test-completed-${testId}`, () => {
       clearInterval(metricsCollector);
-      monitoringStream.emit('end');
+      monitoringStream.emit("end");
     });
 
     return monitoringStream as NodeJS.ReadableStream;
@@ -345,30 +371,39 @@ export class LoadTestingFrameworkService {
    * @param testIds - Test identifiers to include in report
    * @returns Comprehensive load testing report
    */
-  public async generateLoadTestingReport(testIds: string[]): Promise<LoadTestingReport> {
-    this.logger.log(`Generating load testing report for ${testIds.length} tests`);
+  public async generateLoadTestingReport(
+    testIds: string[],
+  ): Promise<LoadTestingReport> {
+    this.logger.log(
+      `Generating load testing report for ${testIds.length} tests`,
+    );
 
     try {
-      const includedTests = testIds.map(id => this.testResults.get(id)).filter(Boolean) as LoadTestResult[];
+      const includedTests = testIds
+        .map((id) => this.testResults.get(id))
+        .filter(Boolean) as LoadTestResult[];
 
       if (includedTests.length === 0) {
-        throw new Error('No valid test results found for report generation');
+        throw new Error("No valid test results found for report generation");
       }
 
       // Aggregate metrics across all tests
-      const aggregatedMetrics = this.aggregateTestMetrics(includedTests.map(test => test.testId));
+      const aggregatedMetrics = this.aggregateTestMetrics(
+        includedTests.map((test) => test.testId),
+      );
 
       // Analyze response time trends
       const responseTimeTrends = this.analyzeResponseTimeTrends(includedTests);
 
       // Assess enterprise compliance across all tests
-      const enterpriseCompliance = this.assessEnterpriseComplianceAcrossTests(includedTests);
+      const enterpriseCompliance =
+        this.assessEnterpriseComplianceAcrossTests(includedTests);
 
       // Generate executive summary
       const executiveSummary = this.generateExecutiveSummary(
         includedTests,
         aggregatedMetrics,
-        enterpriseCompliance
+        enterpriseCompliance,
       );
 
       const report: LoadTestingReport = {
@@ -383,17 +418,18 @@ export class LoadTestingFrameworkService {
         recommendations: this.generateComprehensiveLoadTestRecommendations(
           includedTests,
           aggregatedMetrics,
-          enterpriseCompliance
-        )
+          enterpriseCompliance,
+        ),
       };
 
       this.logger.log(`Load testing report generated: ${report.reportId}`);
 
       return report;
-
     } catch (error) {
-      this.logger.error('Failed to generate load testing report', error);
-      throw new LoadTestingError(`Report generation failed: ${getErrorMessage(error)}`);
+      this.logger.error("Failed to generate load testing report", error);
+      throw new LoadTestingError(
+        `Report generation failed: ${getErrorMessage(error)}`,
+      );
     }
   }
 
@@ -402,7 +438,7 @@ export class LoadTestingFrameworkService {
    */
   private async initializeLoadTestExecution(
     testId: string,
-    testPlan: LoadTestPlan
+    testPlan: LoadTestPlan,
   ): Promise<LoadTestExecution> {
     const execution: LoadTestExecution = {
       testId,
@@ -416,15 +452,15 @@ export class LoadTestingFrameworkService {
         totalErrors: 0,
         averageResponseTime: 0,
         currentThroughput: 0,
-        activeConnections: 0
+        activeConnections: 0,
       },
       resourceUsage: {
         cpu: 0,
         memory: 0,
-        network: 0
+        network: 0,
       },
       workers: [],
-      monitoringActive: true
+      monitoringActive: true,
     };
 
     // Start resource monitoring
@@ -436,7 +472,9 @@ export class LoadTestingFrameworkService {
   /**
    * Prepare target functions for load testing based on test plan
    */
-  private async prepareTargetFunctions(testPlan: LoadTestPlan): Promise<LoadTestTarget[]> {
+  private async prepareTargetFunctions(
+    testPlan: LoadTestPlan,
+  ): Promise<LoadTestTarget[]> {
     const targets: LoadTestTarget[] = [];
 
     // Get wrapper information for each target function
@@ -456,7 +494,7 @@ export class LoadTestingFrameworkService {
         weight: target.weight || 1,
         testParameters,
         expectedResponseTime: target.expectedResponseTime || 1000,
-        errorThreshold: target.errorThreshold || 0.01
+        errorThreshold: target.errorThreshold || 0.01,
       });
     }
 
@@ -470,11 +508,13 @@ export class LoadTestingFrameworkService {
     testId: string,
     phase: LoadTestPhase,
     targets: LoadTestTarget[],
-    execution: LoadTestExecution
+    execution: LoadTestExecution,
   ): Promise<LoadTestPhaseResult> {
     const phaseStartTime = Date.now();
 
-    this.logger.log(`Starting load test phase: ${phase.name} with ${phase.concurrentUsers} concurrent users`);
+    this.logger.log(
+      `Starting load test phase: ${phase.name} with ${phase.concurrentUsers} concurrent users`,
+    );
 
     // Initialize phase metrics
     const phaseMetrics: LoadTestPhaseMetrics = {
@@ -483,25 +523,28 @@ export class LoadTestingFrameworkService {
       failedRequests: 0,
       responseTimes: [],
       errors: [],
-      throughputHistory: []
+      throughputHistory: [],
     };
 
     // Calculate request distribution across targets
-    const requestDistribution = this.calculateRequestDistribution(targets, phase);
+    const requestDistribution = this.calculateRequestDistribution(
+      targets,
+      phase,
+    );
 
     // Create worker threads for concurrent execution
     const workers = await this.createLoadTestWorkers(
       testId,
       phase,
       requestDistribution,
-      execution
+      execution,
     );
 
     // Execute load test with workers
     const workerResults = await this.executeLoadTestWithWorkers(
       workers,
       phase,
-      phaseMetrics
+      phaseMetrics,
     );
 
     // Cleanup workers
@@ -513,7 +556,7 @@ export class LoadTestingFrameworkService {
     // Validate response time compliance for this phase
     const responseTimeCompliance = this.validatePhaseResponseTimeCompliance(
       phaseMetrics.responseTimes,
-      1000 // 1 second target
+      1000, // 1 second target
     );
 
     const phaseResult: LoadTestPhaseResult = {
@@ -525,7 +568,9 @@ export class LoadTestingFrameworkService {
       responseTimeCompliance,
       workerResults,
       errors: phaseMetrics.errors,
-      throughputAnalysis: this.analyzeThroughput(phaseMetrics.throughputHistory)
+      throughputAnalysis: this.analyzeThroughput(
+        phaseMetrics.throughputHistory,
+      ),
     };
 
     this.logger.log(`Completed load test phase: ${phase.name}`);
@@ -540,13 +585,21 @@ export class LoadTestingFrameworkService {
     testId: string,
     phase: LoadTestPhase,
     requestDistribution: RequestDistribution[],
-    execution: LoadTestExecution
+    execution: LoadTestExecution,
   ): Promise<LoadTestWorker[]> {
     const workers: LoadTestWorker[] = [];
-    const workerCount = Math.min(phase.concurrentUsers, this.loadTestingConfig.maxWorkers);
+    const workerCount = Math.min(
+      phase.concurrentUsers,
+      this.loadTestingConfig.maxWorkers,
+    );
 
     for (let i = 0; i < workerCount; i++) {
-      const worker = await this.createWorker(testId, phase, requestDistribution, i);
+      const worker = await this.createWorker(
+        testId,
+        phase,
+        requestDistribution,
+        i,
+      );
       workers.push(worker);
       execution.workers.push(worker);
     }
@@ -561,7 +614,7 @@ export class LoadTestingFrameworkService {
     testId: string,
     phase: LoadTestPhase,
     requestDistribution: RequestDistribution[],
-    workerIndex: number
+    workerIndex: number,
   ): Promise<LoadTestWorker> {
     return new Promise((resolve, reject) => {
       // Create worker with load test data
@@ -571,53 +624,59 @@ export class LoadTestingFrameworkService {
           phase,
           requestDistribution,
           workerIndex,
-          isLoadTestWorker: true
-        }
+          isLoadTestWorker: true,
+        },
       });
 
       const loadTestWorker: LoadTestWorker = {
         workerId: `${testId}-worker-${workerIndex}`,
         worker,
-        status: 'initializing',
+        status: "initializing",
         metrics: {
           requestsProcessed: 0,
           errorsEncountered: 0,
           averageResponseTime: 0,
-          lastHeartbeat: new Date()
+          lastHeartbeat: new Date(),
         },
-        startedAt: new Date()
+        startedAt: new Date(),
       };
 
       // Setup worker event handlers
-      worker.on('message', (message) => {
+      worker.on("message", (message) => {
         this.handleWorkerMessage(loadTestWorker, message);
       });
 
-      worker.on('error', (error) => {
+      worker.on("error", (error) => {
         this.logger.error(`Worker error: ${loadTestWorker.workerId}`, error);
-        loadTestWorker.status = 'error';
+        loadTestWorker.status = "error";
         reject(error);
       });
 
-      worker.on('exit', (code) => {
+      worker.on("exit", (code) => {
         if (code !== 0) {
-          this.logger.warn(`Worker exited with code ${code}: ${loadTestWorker.workerId}`);
+          this.logger.warn(
+            `Worker exited with code ${code}: ${loadTestWorker.workerId}`,
+          );
         }
-        loadTestWorker.status = 'completed';
+        loadTestWorker.status = "completed";
       });
 
       // Wait for worker initialization
-      worker.once('message', (message) => {
-        if (message.type === 'initialized') {
-          loadTestWorker.status = 'ready';
+      worker.once("message", (message) => {
+        if (message.type === "initialized") {
+          loadTestWorker.status = "ready";
           resolve(loadTestWorker);
         }
       });
 
       // Timeout for worker initialization
       setTimeout(() => {
-        if (loadTestWorker.status === 'initializing') {
-          reject(new Error(`Worker initialization timeout: ${loadTestWorker.workerId}`));
+        if (loadTestWorker.status === "initializing") {
+          reject(
+            new Error(
+              `Worker initialization timeout: ${loadTestWorker.workerId}`,
+            ),
+          );
         }
       }, 10000);
     });
@@ -629,14 +688,14 @@ export class LoadTestingFrameworkService {
   private async executeLoadTestWithWorkers(
     workers: LoadTestWorker[],
     phase: LoadTestPhase,
-    phaseMetrics: LoadTestPhaseMetrics
+    phaseMetrics: LoadTestPhaseMetrics,
   ): Promise<WorkerResult[]> {
     const workerResults: WorkerResult[] = [];
 
     // Start all workers
-    workers.forEach(worker => {
-      worker.worker.postMessage({ type: 'start-load-test' });
-      worker.status = 'running';
+    workers.forEach((worker) => {
+      worker.worker.postMessage({ type: "start-load-test" });
+      worker.status = "running";
     });
 
     // Monitor workers and collect metrics
@@ -652,7 +711,9 @@ export class LoadTestingFrameworkService {
 
       // Check for early completion
       const completionCheck = setInterval(() => {
-        const allWorkersCompleted = workers.every(w => w.status === 'completed');
+        const allWorkersCompleted = workers.every(
+          (w) => w.status === "completed",
+        );
         if (allWorkersCompleted) {
           clearTimeout(phaseTimeout);
           clearInterval(completionCheck);
@@ -666,14 +727,14 @@ export class LoadTestingFrameworkService {
 
     // Collect final worker results
     for (const worker of workers) {
-      worker.worker.postMessage({ type: 'stop-load-test' });
+      worker.worker.postMessage({ type: "stop-load-test" });
 
       const result: WorkerResult = {
         workerId: worker.workerId,
         requestsProcessed: worker.metrics.requestsProcessed,
         errorsEncountered: worker.metrics.errorsEncountered,
         averageResponseTime: worker.metrics.averageResponseTime,
-        executionTime: Date.now() - worker.startedAt.getTime()
+        executionTime: Date.now() - worker.startedAt.getTime(),
       };
 
       workerResults.push(result);
@@ -687,24 +748,24 @@ export class LoadTestingFrameworkService {
    */
   private handleWorkerMessage(worker: LoadTestWorker, message: any): void {
     switch (message.type) {
-      case 'metrics-update':
+      case "metrics-update":
         worker.metrics = {
           ...worker.metrics,
           ...message.data,
-          lastHeartbeat: new Date()
+          lastHeartbeat: new Date(),
         };
         break;
 
-      case 'request-completed':
+      case "request-completed":
         worker.metrics.requestsProcessed++;
         break;
 
-      case 'request-failed':
+      case "request-failed":
         worker.metrics.errorsEncountered++;
         break;
 
-      case 'worker-completed':
-        worker.status = 'completed';
+      case "worker-completed":
+        worker.status = "completed";
         break;
 
       default:
@@ -715,27 +776,36 @@ export class LoadTestingFrameworkService {
   /**
    * Generate test parameters for load testing
    */
-  private async generateLoadTestParameters(wrapperInfo: WrapperInfo): Promise<any[]> {
+  private async generateLoadTestParameters(
+    wrapperInfo: WrapperInfo,
+  ): Promise<any[]> {
     // Generate realistic test parameters based on function signature
     // This is a mock implementation - real implementation would analyze function signature
-    const baseParameters = ['load-test-param', Math.floor(Math.random() * 1000), { test: true }];
+    const baseParameters = [
+      "load-test-param",
+      Math.floor(Math.random() * 1000),
+      { test: true },
+    ];
 
     // Create variations for load testing
     return Array.from({ length: 10 }, (_, index) =>
-      this.createParameterVariation(baseParameters, index)
+      this.createParameterVariation(baseParameters, index),
     );
   }
 
   /**
    * Create parameter variation for testing diversity
    */
-  private createParameterVariation(baseParameters: any[], variation: number): any[] {
-    return baseParameters.map(param => {
-      if (typeof param === 'string') {
+  private createParameterVariation(
+    baseParameters: any[],
+    variation: number,
+  ): any[] {
+    return baseParameters.map((param) => {
+      if (typeof param === "string") {
         return `${param}-v${variation}`;
-      } else if (typeof param === 'number') {
+      } else if (typeof param === "number") {
         return param + variation;
-      } else if (typeof param === 'object') {
+      } else if (typeof param === "object") {
         return { ...param, variation };
       }
       return param;
@@ -747,16 +817,16 @@ export class LoadTestingFrameworkService {
    */
   private calculateRequestDistribution(
     targets: LoadTestTarget[],
-    phase: LoadTestPhase
+    phase: LoadTestPhase,
   ): RequestDistribution[] {
     const totalWeight = targets.reduce((sum, target) => sum + target.weight, 0);
     const totalRequests = phase.concurrentUsers * phase.requestsPerUser;
 
-    return targets.map(target => ({
+    return targets.map((target) => ({
       functionId: target.functionId,
       requestCount: Math.floor((target.weight / totalWeight) * totalRequests),
       testParameters: target.testParameters || [],
-      expectedResponseTime: target.expectedResponseTime
+      expectedResponseTime: target.expectedResponseTime,
     }));
   }
 
@@ -765,11 +835,11 @@ export class LoadTestingFrameworkService {
    */
   private validateLoadTestPlan(testPlan: LoadTestPlan): void {
     if (!testPlan.targetFunctions || testPlan.targetFunctions.length === 0) {
-      throw new Error('Load test plan must specify target functions');
+      throw new Error("Load test plan must specify target functions");
     }
 
     if (!testPlan.testPhases || testPlan.testPhases.length === 0) {
-      throw new Error('Load test plan must specify test phases');
+      throw new Error("Load test plan must specify test phases");
     }
 
     testPlan.testPhases.forEach((phase, index) => {
@@ -790,10 +860,12 @@ export class LoadTestingFrameworkService {
   /**
    * Analyze response times for compliance validation
    */
-  private analyzeResponseTimes(phaseResults: LoadTestPhaseResult[]): ResponseTimeAnalysis {
+  private analyzeResponseTimes(
+    phaseResults: LoadTestPhaseResult[],
+  ): ResponseTimeAnalysis {
     const allResponseTimes: number[] = [];
 
-    phaseResults.forEach(phase => {
+    phaseResults.forEach((phase) => {
       allResponseTimes.push(...phase.statistics.responseTimes);
     });
 
@@ -808,7 +880,7 @@ export class LoadTestingFrameworkService {
         standardDeviation: 0,
         responseTimeDistribution: {},
         complianceRate: 0,
-        violationCount: 0
+        violationCount: 0,
       };
     }
 
@@ -822,23 +894,30 @@ export class LoadTestingFrameworkService {
       minResponseTime: Math.min(...allResponseTimes),
       maxResponseTime: Math.max(...allResponseTimes),
       standardDeviation: this.calculateStandardDeviation(allResponseTimes),
-      responseTimeDistribution: this.calculateResponseTimeDistribution(allResponseTimes),
-      complianceRate: allResponseTimes.filter(time => time < 1000).length / allResponseTimes.length,
-      violationCount: allResponseTimes.filter(time => time >= 1000).length
+      responseTimeDistribution:
+        this.calculateResponseTimeDistribution(allResponseTimes),
+      complianceRate:
+        allResponseTimes.filter((time) => time < 1000).length /
+        allResponseTimes.length,
+      violationCount: allResponseTimes.filter((time) => time >= 1000).length,
     };
   }
 
   /**
    * Validate sub-1000ms response time compliance
    */
-  private validateSub1000msCompliance(phaseResults: LoadTestPhaseResult[]): ComplianceValidation {
+  private validateSub1000msCompliance(
+    phaseResults: LoadTestPhaseResult[],
+  ): ComplianceValidation {
     const complianceResults: PhaseComplianceResult[] = [];
     let totalRequests = 0;
     let compliantRequests = 0;
 
-    phaseResults.forEach(phase => {
+    phaseResults.forEach((phase) => {
       const phaseTotal = phase.statistics.responseTimes.length;
-      const phaseCompliant = phase.statistics.responseTimes.filter(time => time < 1000).length;
+      const phaseCompliant = phase.statistics.responseTimes.filter(
+        (time) => time < 1000,
+      ).length;
 
       totalRequests += phaseTotal;
       compliantRequests += phaseCompliant;
@@ -849,11 +928,14 @@ export class LoadTestingFrameworkService {
         compliantRequests: phaseCompliant,
         complianceRate: phaseTotal > 0 ? phaseCompliant / phaseTotal : 0,
         violationCount: phaseTotal - phaseCompliant,
-        worstViolation: Math.max(...phase.statistics.responseTimes.filter(time => time >= 1000))
+        worstViolation: Math.max(
+          ...phase.statistics.responseTimes.filter((time) => time >= 1000),
+        ),
       });
     });
 
-    const overallComplianceRate = totalRequests > 0 ? compliantRequests / totalRequests : 0;
+    const overallComplianceRate =
+      totalRequests > 0 ? compliantRequests / totalRequests : 0;
     const meetsEnterpriseStandard = overallComplianceRate >= 0.99; // 99% compliance requirement
 
     return {
@@ -864,7 +946,7 @@ export class LoadTestingFrameworkService {
       violationCount: totalRequests - compliantRequests,
       phaseResults: complianceResults,
       complianceGaps: this.identifyComplianceGaps(complianceResults),
-      remediationPriority: this.assessRemediationPriority(complianceResults)
+      remediationPriority: this.assessRemediationPriority(complianceResults),
     };
   }
 
@@ -875,7 +957,7 @@ export class LoadTestingFrameworkService {
     functionId: string,
     wrapperInfo: WrapperInfo,
     targetResponseTime: number,
-    testConfig: ResponseTimeTestConfig
+    testConfig: ResponseTimeTestConfig,
   ): Promise<FunctionResponseTimeResult> {
     const testParameters = await this.generateLoadTestParameters(wrapperInfo);
     const responseTimes: number[] = [];
@@ -887,7 +969,10 @@ export class LoadTestingFrameworkService {
         const startTime = performance.now();
 
         // Execute function with monitoring (mock execution)
-        await this.executeTestFunction(functionId, testParameters[i % testParameters.length]);
+        await this.executeTestFunction(
+          functionId,
+          testParameters[i % testParameters.length],
+        );
 
         const endTime = performance.now();
         const responseTime = endTime - startTime;
@@ -897,7 +982,6 @@ export class LoadTestingFrameworkService {
         if (testConfig.iterationDelayMs > 0) {
           await this.waitForCooldown(testConfig.iterationDelayMs);
         }
-
       } catch (error) {
         errors.push(getErrorMessage(error));
       }
@@ -911,24 +995,32 @@ export class LoadTestingFrameworkService {
       targetResponseTime,
       testConfiguration: testConfig,
       statistics,
-      complianceRate: responseTimes.filter(time => time < targetResponseTime).length / responseTimes.length,
-      violationCount: responseTimes.filter(time => time >= targetResponseTime).length,
+      complianceRate:
+        responseTimes.filter((time) => time < targetResponseTime).length /
+        responseTimes.length,
+      violationCount: responseTimes.filter((time) => time >= targetResponseTime)
+        .length,
       errorCount: errors.length,
       errors: errors.slice(0, 10), // Limit error samples
       recommendations: this.generateFunctionSpecificRecommendations(
         statistics,
-        targetResponseTime
-      )
+        targetResponseTime,
+      ),
     };
   }
 
   // Utility methods
 
   private calculateMean(values: number[]): number {
-    return values.length > 0 ? values.reduce((sum, val) => sum + val, 0) / values.length : 0;
+    return values.length > 0
+      ? values.reduce((sum, val) => sum + val, 0) / values.length
+      : 0;
   }
 
-  private calculatePercentile(sortedValues: number[], percentile: number): number {
+  private calculatePercentile(
+    sortedValues: number[],
+    percentile: number,
+  ): number {
     if (sortedValues.length === 0) return 0;
     const index = Math.ceil((percentile / 100) * sortedValues.length) - 1;
     return sortedValues[Math.max(0, Math.min(index, sortedValues.length - 1))];
@@ -937,30 +1029,35 @@ export class LoadTestingFrameworkService {
   private calculateStandardDeviation(values: number[]): number {
     if (values.length === 0) return 0;
     const mean = this.calculateMean(values);
-    const squaredDiffs = values.map(value => Math.pow(value - mean, 2));
+    const squaredDiffs = values.map((value) => Math.pow(value - mean, 2));
     return Math.sqrt(this.calculateMean(squaredDiffs));
   }
 
-  private async executeTestFunction(functionId: string, parameters: any[]): Promise<any> {
+  private async executeTestFunction(
+    functionId: string,
+    parameters: any[],
+  ): Promise<any> {
     // Mock function execution - real implementation would call actual wrapped function
     const executionTime = Math.random() * 800 + 100; // 100-900ms baseline
-    await new Promise(resolve => setTimeout(resolve, executionTime));
+    await new Promise((resolve) => setTimeout(resolve, executionTime));
 
     // Simulate occasional errors and timeouts
-    if (Math.random() < 0.005) { // 0.5% error rate
+    if (Math.random() < 0.005) {
+      // 0.5% error rate
       throw new Error(`Simulated error for function ${functionId}`);
     }
 
-    if (Math.random() < 0.002) { // 0.2% timeout rate
+    if (Math.random() < 0.002) {
+      // 0.2% timeout rate
       const timeoutTime = Math.random() * 2000 + 1500; // 1.5-3.5s timeouts
-      await new Promise(resolve => setTimeout(resolve, timeoutTime));
+      await new Promise((resolve) => setTimeout(resolve, timeoutTime));
     }
 
-    return { success: true, executionTime, result: 'load-test-result' };
+    return { success: true, executionTime, result: "load-test-result" };
   }
 
   private async waitForCooldown(milliseconds: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, milliseconds));
+    return new Promise((resolve) => setTimeout(resolve, milliseconds));
   }
 
   private generateTestId(): string {
@@ -976,27 +1073,29 @@ export class LoadTestingFrameworkService {
   }
 
   private setupEventListeners(): void {
-    this.eventEmitter.on('load-test-started', (event) => {
+    this.eventEmitter.on("load-test-started", (event) => {
       this.logger.debug(`Load test started: ${event.testId}`);
     });
 
-    this.eventEmitter.on('load-test-completed', (event) => {
+    this.eventEmitter.on("load-test-completed", (event) => {
       this.logger.debug(`Load test completed: ${event.testId}`);
     });
 
-    this.eventEmitter.on('load-test-failed', (event) => {
+    this.eventEmitter.on("load-test-failed", (event) => {
       this.logger.warn(`Load test failed: ${event.testId} - ${event.error}`);
     });
   }
 
   private initializeWorkerPool(): void {
     const maxWorkers = this.loadTestingConfig.maxWorkers;
-    this.logger.log(`Initializing worker pool with ${maxWorkers} maximum workers`);
+    this.logger.log(
+      `Initializing worker pool with ${maxWorkers} maximum workers`,
+    );
     // Worker pool initialization logic would be implemented here
   }
 
   private createDefaultLoadTestingConfiguration(
-    overrides?: Partial<LoadTestingConfiguration>
+    overrides?: Partial<LoadTestingConfiguration>,
   ): LoadTestingConfiguration {
     return {
       maxWorkers: cpus().length * 2,
@@ -1006,7 +1105,7 @@ export class LoadTestingFrameworkService {
       enableResourceMonitoring: true,
       workerHealthCheckInterval: 5000,
       maxConcurrentTests: 5,
-      ...overrides
+      ...overrides,
     };
   }
 
@@ -1023,15 +1122,20 @@ export class LoadTestingFrameworkService {
       timestamp: new Date(),
       activeConnections: execution.metrics.activeConnections,
       currentThroughput: execution.metrics.currentThroughput,
-      averageResponseTime: execution.metrics.averageResponseTime
+      averageResponseTime: execution.metrics.averageResponseTime,
     };
   }
 
-  private collectWorkerMetrics(workers: LoadTestWorker[], phaseMetrics: LoadTestPhaseMetrics): void {
+  private collectWorkerMetrics(
+    workers: LoadTestWorker[],
+    phaseMetrics: LoadTestPhaseMetrics,
+  ): void {
     // Implementation for collecting metrics from workers
   }
 
-  private calculatePhaseStatistics(phaseMetrics: LoadTestPhaseMetrics): LoadTestPhaseStatistics {
+  private calculatePhaseStatistics(
+    phaseMetrics: LoadTestPhaseMetrics,
+  ): LoadTestPhaseStatistics {
     // Mock implementation
     return {
       totalRequests: phaseMetrics.totalRequests,
@@ -1039,21 +1143,29 @@ export class LoadTestingFrameworkService {
       failedRequests: phaseMetrics.failedRequests,
       responseTimes: phaseMetrics.responseTimes,
       averageResponseTime: this.calculateMean(phaseMetrics.responseTimes),
-      p95ResponseTime: this.calculatePercentile([...phaseMetrics.responseTimes].sort((a, b) => a - b), 95),
+      p95ResponseTime: this.calculatePercentile(
+        [...phaseMetrics.responseTimes].sort((a, b) => a - b),
+        95,
+      ),
       throughput: phaseMetrics.totalRequests / 60, // requests per minute
-      errorRate: phaseMetrics.failedRequests / phaseMetrics.totalRequests
+      errorRate: phaseMetrics.failedRequests / phaseMetrics.totalRequests,
     };
   }
 
-  private validatePhaseResponseTimeCompliance(responseTimes: number[], target: number): PhaseComplianceResult {
-    const compliant = responseTimes.filter(time => time < target).length;
+  private validatePhaseResponseTimeCompliance(
+    responseTimes: number[],
+    target: number,
+  ): PhaseComplianceResult {
+    const compliant = responseTimes.filter((time) => time < target).length;
     return {
-      phaseName: 'current',
+      phaseName: "current",
       totalRequests: responseTimes.length,
       compliantRequests: compliant,
       complianceRate: compliant / responseTimes.length,
       violationCount: responseTimes.length - compliant,
-      worstViolation: Math.max(...responseTimes.filter(time => time >= target))
+      worstViolation: Math.max(
+        ...responseTimes.filter((time) => time >= target),
+      ),
     };
   }
 
@@ -1062,7 +1174,9 @@ export class LoadTestingFrameworkService {
       averageThroughput: this.calculateMean(throughputHistory),
       peakThroughput: Math.max(...throughputHistory),
       minThroughput: Math.min(...throughputHistory),
-      throughputStability: this.calculateStandardDeviation(throughputHistory) / this.calculateMean(throughputHistory)
+      throughputStability:
+        this.calculateStandardDeviation(throughputHistory) /
+        this.calculateMean(throughputHistory),
     };
   }
 
@@ -1078,56 +1192,69 @@ export class LoadTestingFrameworkService {
     }
   }
 
-  private calculateOverallMetrics(phaseResults: LoadTestPhaseResult[]): OverallLoadTestMetrics {
+  private calculateOverallMetrics(
+    phaseResults: LoadTestPhaseResult[],
+  ): OverallLoadTestMetrics {
     // Mock implementation
     return {
-      totalRequests: phaseResults.reduce((sum, phase) => sum + phase.statistics.totalRequests, 0),
-      totalSuccessfulRequests: phaseResults.reduce((sum, phase) => sum + phase.statistics.successfulRequests, 0),
+      totalRequests: phaseResults.reduce(
+        (sum, phase) => sum + phase.statistics.totalRequests,
+        0,
+      ),
+      totalSuccessfulRequests: phaseResults.reduce(
+        (sum, phase) => sum + phase.statistics.successfulRequests,
+        0,
+      ),
       overallSuccessRate: 0.99,
       averageResponseTime: 450,
-      peakThroughput: 1000
+      peakThroughput: 1000,
     };
   }
 
-  private analyzeResourceUtilization(execution: LoadTestExecution): ResourceUtilizationAnalysis {
+  private analyzeResourceUtilization(
+    execution: LoadTestExecution,
+  ): ResourceUtilizationAnalysis {
     // Mock implementation
     return {
       averageCpuUsage: 0.65,
       peakCpuUsage: 0.85,
       averageMemoryUsage: 0.45,
-      peakMemoryUsage: 0.70,
-      networkUtilization: 0.30
+      peakMemoryUsage: 0.7,
+      networkUtilization: 0.3,
     };
   }
 
-  private generatePerformanceInsights(phaseResults: LoadTestPhaseResult[]): PerformanceInsight[] {
+  private generatePerformanceInsights(
+    phaseResults: LoadTestPhaseResult[],
+  ): PerformanceInsight[] {
     // Mock implementation
     return [
       {
-        category: 'response_time',
-        severity: 'info',
-        title: 'Response Time Performance',
-        description: 'Most functions meet sub-1000ms response time requirements',
-        recommendation: 'Continue monitoring for performance regression'
-      }
+        category: "response_time",
+        severity: "info",
+        title: "Response Time Performance",
+        description:
+          "Most functions meet sub-1000ms response time requirements",
+        recommendation: "Continue monitoring for performance regression",
+      },
     ];
   }
 
   private generateLoadTestRecommendations(
     phaseResults: LoadTestPhaseResult[],
     responseTimeAnalysis: ResponseTimeAnalysis,
-    complianceValidation: ComplianceValidation
+    complianceValidation: ComplianceValidation,
   ): LoadTestRecommendation[] {
     // Mock implementation
     return [
       {
-        category: 'performance',
-        priority: 'high',
-        title: 'Optimize Response Time Outliers',
-        description: 'Some functions exceed target response times under load',
-        implementation: 'Implement caching and optimize database queries',
-        expectedImpact: '30-50% improvement in response times'
-      }
+        category: "performance",
+        priority: "high",
+        title: "Optimize Response Time Outliers",
+        description: "Some functions exceed target response times under load",
+        implementation: "Implement caching and optimize database queries",
+        expectedImpact: "30-50% improvement in response times",
+      },
     ];
   }
 
@@ -1138,31 +1265,48 @@ export class LoadTestingFrameworkService {
    */
   private analyzeResponseTimeCompliance(
     validationResults: any[],
-    targetResponseTime: number
+    targetResponseTime: number,
   ): any {
     return {
-      compliantFunctions: validationResults.filter(r => r.averageResponseTime <= targetResponseTime).length,
-      nonCompliantFunctions: validationResults.filter(r => r.averageResponseTime > targetResponseTime).length,
-      overallComplianceRate: validationResults.filter(r => r.averageResponseTime <= targetResponseTime).length / validationResults.length
+      compliantFunctions: validationResults.filter(
+        (r) => r.averageResponseTime <= targetResponseTime,
+      ).length,
+      nonCompliantFunctions: validationResults.filter(
+        (r) => r.averageResponseTime > targetResponseTime,
+      ).length,
+      overallComplianceRate:
+        validationResults.filter(
+          (r) => r.averageResponseTime <= targetResponseTime,
+        ).length / validationResults.length,
     };
   }
 
   /**
    * Generate response time insights
    */
-  private generateResponseTimeInsights(validationResults: any[], targetResponseTime: number): any {
+  private generateResponseTimeInsights(
+    validationResults: any[],
+    targetResponseTime: number,
+  ): any {
     return {
-      insights: ['Response time analysis completed'],
-      recommendations: ['Consider optimization for non-compliant functions']
+      insights: ["Response time analysis completed"],
+      recommendations: ["Consider optimization for non-compliant functions"],
     };
   }
 
   /**
    * Generate response time recommendations
    */
-  private generateResponseTimeRecommendations(complianceAnalysis: any, insights: any): any {
+  private generateResponseTimeRecommendations(
+    complianceAnalysis: any,
+    insights: any,
+  ): any {
     return {
-      recommendations: ['Optimize slow functions', 'Implement caching', 'Review algorithm complexity']
+      recommendations: [
+        "Optimize slow functions",
+        "Implement caching",
+        "Review algorithm complexity",
+      ],
     };
   }
 
@@ -1171,16 +1315,19 @@ export class LoadTestingFrameworkService {
    */
   private prepareFunctionGroups(concurrentConfig: any): any {
     return {
-      groups: ['group1', 'group2', 'group3']
+      groups: ["group1", "group2", "group3"],
     };
   }
 
   /**
    * Execute concurrent group testing
    */
-  private async executeConcurrentGroup(group: any, testConfig: any): Promise<any> {
+  private async executeConcurrentGroup(
+    group: any,
+    testConfig: any,
+  ): Promise<any> {
     return {
-      groupResults: { success: true, responseTime: 200 }
+      groupResults: { success: true, responseTime: 200 },
     };
   }
 
@@ -1189,8 +1336,8 @@ export class LoadTestingFrameworkService {
    */
   private analyzeFunctionInteractions(concurrentResults: any): any {
     return {
-      interactions: ['Function A -> Function B'],
-      dependencies: []
+      interactions: ["Function A -> Function B"],
+      dependencies: [],
     };
   }
 
@@ -1200,7 +1347,7 @@ export class LoadTestingFrameworkService {
   private analyzeSystemPerformanceUnderLoad(concurrentResults: any): any {
     return {
       systemMetrics: { cpuUsage: 70, memoryUsage: 60 },
-      performanceImpact: 'moderate'
+      performanceImpact: "moderate",
     };
   }
 
@@ -1209,10 +1356,13 @@ export class LoadTestingFrameworkService {
    */
   private generateConcurrentLoadRecommendations(
     interactions: any,
-    systemPerformance: any
+    systemPerformance: any,
   ): any {
     return {
-      recommendations: ['Optimize concurrent processing', 'Monitor system resources']
+      recommendations: [
+        "Optimize concurrent processing",
+        "Monitor system resources",
+      ],
     };
   }
 
@@ -1221,7 +1371,7 @@ export class LoadTestingFrameworkService {
    */
   private aggregateTestMetrics(testIds: string[]): any {
     return {
-      aggregatedMetrics: { totalTests: testIds.length, averageSuccess: 95 }
+      aggregatedMetrics: { totalTests: testIds.length, averageSuccess: 95 },
     };
   }
 
@@ -1230,8 +1380,8 @@ export class LoadTestingFrameworkService {
    */
   private analyzeResponseTimeTrends(aggregatedMetrics: any): any {
     return {
-      trends: ['Response times improving over time'],
-      patterns: []
+      trends: ["Response times improving over time"],
+      patterns: [],
     };
   }
 
@@ -1241,7 +1391,7 @@ export class LoadTestingFrameworkService {
   private assessEnterpriseComplianceAcrossTests(aggregatedMetrics: any): any {
     return {
       complianceScore: 95,
-      issues: []
+      issues: [],
     };
   }
 
@@ -1251,11 +1401,11 @@ export class LoadTestingFrameworkService {
   private generateExecutiveSummary(
     trends: any,
     compliance: any,
-    recommendations: any
+    recommendations: any,
   ): any {
     return {
-      summary: 'Load testing results show good performance',
-      keyFindings: ['System performs well under load']
+      summary: "Load testing results show good performance",
+      keyFindings: ["System performs well under load"],
     };
   }
 
@@ -1265,10 +1415,13 @@ export class LoadTestingFrameworkService {
   private generateComprehensiveLoadTestRecommendations(
     trends: any,
     compliance: any,
-    executiveSummary: any
+    executiveSummary: any,
   ): any {
     return {
-      recommendations: ['Continue monitoring', 'Implement suggested optimizations']
+      recommendations: [
+        "Continue monitoring",
+        "Implement suggested optimizations",
+      ],
     };
   }
 
@@ -1277,7 +1430,7 @@ export class LoadTestingFrameworkService {
    */
   private calculateResponseTimeDistribution(responseTimes: number[]): any {
     return {
-      distribution: { p50: 200, p90: 400, p99: 800 }
+      distribution: { p50: 200, p90: 400, p99: 800 },
     };
   }
 
@@ -1286,7 +1439,7 @@ export class LoadTestingFrameworkService {
    */
   private identifyComplianceGaps(complianceAnalysis: any): any {
     return {
-      gaps: ['Some functions exceed target response time']
+      gaps: ["Some functions exceed target response time"],
     };
   }
 
@@ -1295,8 +1448,8 @@ export class LoadTestingFrameworkService {
    */
   private assessRemediationPriority(gaps: any): any {
     return {
-      priority: 'medium',
-      urgency: 'low'
+      priority: "medium",
+      urgency: "low",
     };
   }
 
@@ -1310,7 +1463,7 @@ export class LoadTestingFrameworkService {
     return {
       average: sum / responseTimes.length,
       min: Math.min(...responseTimes),
-      max: Math.max(...responseTimes)
+      max: Math.max(...responseTimes),
     };
   }
 
@@ -1319,10 +1472,10 @@ export class LoadTestingFrameworkService {
    */
   private generateFunctionSpecificRecommendations(
     statistics: any,
-    complianceGaps: any
+    complianceGaps: any,
   ): any {
     return {
-      recommendations: ['Function-specific optimization suggestions']
+      recommendations: ["Function-specific optimization suggestions"],
     };
   }
 
@@ -1338,7 +1491,7 @@ export class LoadTestingError extends Error {
 
   constructor(message: string, metadata: Record<string, any> = {}) {
     super(message);
-    this.name = 'LoadTestingError';
+    this.name = "LoadTestingError";
     this.metadata = metadata;
   }
 }
@@ -1416,7 +1569,7 @@ export interface ResourceUsage {
 export interface LoadTestWorker {
   workerId: string;
   worker: Worker;
-  status: 'initializing' | 'ready' | 'running' | 'completed' | 'error';
+  status: "initializing" | "ready" | "running" | "completed" | "error";
   metrics: WorkerMetrics;
   startedAt: Date;
 }
@@ -1503,7 +1656,7 @@ export interface ComplianceValidation {
   violationCount: number;
   phaseResults: PhaseComplianceResult[];
   complianceGaps: ComplianceGap[];
-  remediationPriority: 'critical' | 'high' | 'medium' | 'low';
+  remediationPriority: "critical" | "high" | "medium" | "low";
 }
 
 export interface PhaseComplianceResult {
@@ -1517,23 +1670,23 @@ export interface PhaseComplianceResult {
 
 export interface ComplianceGap {
   phase: string;
-  gapType: 'response_time' | 'error_rate' | 'throughput';
-  severity: 'critical' | 'high' | 'medium' | 'low';
+  gapType: "response_time" | "error_rate" | "throughput";
+  severity: "critical" | "high" | "medium" | "low";
   description: string;
   impact: string;
 }
 
 export interface PerformanceInsight {
-  category: 'response_time' | 'throughput' | 'error_rate' | 'resource_usage';
-  severity: 'info' | 'warning' | 'error' | 'critical';
+  category: "response_time" | "throughput" | "error_rate" | "resource_usage";
+  severity: "info" | "warning" | "error" | "critical";
   title: string;
   description: string;
   recommendation: string;
 }
 
 export interface LoadTestRecommendation {
-  category: 'performance' | 'scalability' | 'reliability' | 'optimization';
-  priority: 'critical' | 'high' | 'medium' | 'low';
+  category: "performance" | "scalability" | "reliability" | "optimization";
+  priority: "critical" | "high" | "medium" | "low";
   title: string;
   description: string;
   implementation: string;
@@ -1622,15 +1775,15 @@ export interface ResponseTimeComplianceAnalysis {
 }
 
 export interface ResponseTimeInsight {
-  type: 'performance' | 'compliance' | 'optimization';
-  severity: 'info' | 'warning' | 'error';
+  type: "performance" | "compliance" | "optimization";
+  severity: "info" | "warning" | "error";
   title: string;
   description: string;
   affectedFunctions: string[];
 }
 
 export interface ResponseTimeRecommendation {
-  priority: 'critical' | 'high' | 'medium' | 'low';
+  priority: "critical" | "high" | "medium" | "low";
   title: string;
   description: string;
   affectedFunctions: string[];
@@ -1643,7 +1796,7 @@ export interface ConcurrentLoadTestConfig {
   functionsPerGroup: number;
   testDuration: number;
   requestsPerFunction: number;
-  groupExecutionStrategy: 'parallel' | 'staggered' | 'sequential';
+  groupExecutionStrategy: "parallel" | "staggered" | "sequential";
 }
 
 export interface ConcurrentLoadTestResult {
@@ -1676,7 +1829,10 @@ export interface FunctionInteractionAnalysis {
 export interface CrossFunctionImpact {
   sourceFunction: string;
   targetFunction: string;
-  impactType: 'resource_contention' | 'performance_degradation' | 'error_propagation';
+  impactType:
+    | "resource_contention"
+    | "performance_degradation"
+    | "error_propagation";
   impactMagnitude: number;
 }
 
@@ -1695,8 +1851,8 @@ export interface ScalabilityMetrics {
 }
 
 export interface Bottleneck {
-  type: 'cpu' | 'memory' | 'network' | 'database' | 'cache';
-  severity: 'critical' | 'high' | 'medium' | 'low';
+  type: "cpu" | "memory" | "network" | "database" | "cache";
+  severity: "critical" | "high" | "medium" | "low";
   description: string;
   affectedFunctions: string[];
   recommendedActions: string[];
@@ -1710,11 +1866,11 @@ export interface ResourceContentionMetrics {
 }
 
 export interface ConcurrentLoadRecommendation {
-  category: 'isolation' | 'scaling' | 'optimization' | 'architecture';
-  priority: 'critical' | 'high' | 'medium' | 'low';
+  category: "isolation" | "scaling" | "optimization" | "architecture";
+  priority: "critical" | "high" | "medium" | "low";
   title: string;
   description: string;
-  implementationComplexity: 'low' | 'medium' | 'high';
+  implementationComplexity: "low" | "medium" | "high";
   expectedBenefit: string;
 }
 
@@ -1731,8 +1887,8 @@ export interface LoadTestingReport {
 }
 
 export interface ExecutiveSummary {
-  overallPerformanceRating: 'excellent' | 'good' | 'acceptable' | 'poor';
-  complianceStatus: 'compliant' | 'partially_compliant' | 'non_compliant';
+  overallPerformanceRating: "excellent" | "good" | "acceptable" | "poor";
+  complianceStatus: "compliant" | "partially_compliant" | "non_compliant";
   keyFindings: string[];
   criticalIssues: string[];
   businessImpact: string;
@@ -1762,7 +1918,7 @@ export interface ResponseTimeTrend {
     p95ResponseTime: number;
     complianceRate: number;
   }>;
-  trendDirection: 'improving' | 'stable' | 'degrading';
+  trendDirection: "improving" | "stable" | "degrading";
   trendStrength: number;
 }
 
@@ -1803,8 +1959,8 @@ export interface BottleneckAnalysis {
 }
 
 export interface ComprehensiveLoadTestRecommendation {
-  category: 'performance' | 'scalability' | 'reliability' | 'compliance';
-  priority: 'critical' | 'high' | 'medium' | 'low';
+  category: "performance" | "scalability" | "reliability" | "compliance";
+  priority: "critical" | "high" | "medium" | "low";
   title: string;
   description: string;
   businessJustification: string;
@@ -1819,15 +1975,15 @@ if (!isMainThread && workerData?.isLoadTestWorker) {
   // Worker thread implementation for load testing
   // This would contain the actual load testing execution logic
 
-  parentPort?.postMessage({ type: 'initialized' });
+  parentPort?.postMessage({ type: "initialized" });
 
-  parentPort?.on('message', (message) => {
-    if (message.type === 'start-load-test') {
+  parentPort?.on("message", (message) => {
+    if (message.type === "start-load-test") {
       // Execute load testing logic
       executeWorkerLoadTest(workerData);
-    } else if (message.type === 'stop-load-test') {
+    } else if (message.type === "stop-load-test") {
       // Cleanup and send final results
-      parentPort?.postMessage({ type: 'worker-completed' });
+      parentPort?.postMessage({ type: "worker-completed" });
     }
   });
 }
@@ -1843,28 +1999,27 @@ async function executeWorkerLoadTest(data: any) {
       const responseTime = Math.random() * 800 + 100;
 
       parentPort?.postMessage({
-        type: 'request-completed',
-        data: { responseTime }
+        type: "request-completed",
+        data: { responseTime },
       });
 
       // Update metrics periodically
       if (i % 10 === 0) {
         parentPort?.postMessage({
-          type: 'metrics-update',
+          type: "metrics-update",
           data: {
             requestsProcessed: i + 1,
-            averageResponseTime: responseTime
-          }
+            averageResponseTime: responseTime,
+          },
         });
       }
 
       // Small delay between requests
-      await new Promise(resolve => setTimeout(resolve, 50));
-
+      await new Promise((resolve) => setTimeout(resolve, 50));
     } catch (error) {
       parentPort?.postMessage({
-        type: 'request-failed',
-        data: { error: getErrorMessage(error) }
+        type: "request-failed",
+        data: { error: getErrorMessage(error) },
       });
     }
   }

@@ -44,10 +44,28 @@ import {
   ApiBody,
 } from "@nestjs/swagger";
 import { Response } from "express";
-import { ParlantFunctionMonitorService, FunctionPerformanceMetrics } from "./parlant-function-monitor.service";
-import { AlertingService, Alert, NotificationChannel, EscalationPolicy } from "./alerting.service";
-import { DashboardService, DashboardData, DashboardLayout, ReportConfig } from "./dashboard.service";
-import { IncidentResponseService, Incident, IncidentStatus, IncidentPriority } from "./incident-response.service";
+import {
+  ParlantFunctionMonitorService,
+  FunctionPerformanceMetrics,
+} from "./parlant-function-monitor.service";
+import {
+  AlertingService,
+  Alert,
+  NotificationChannel,
+  EscalationPolicy,
+} from "./alerting.service";
+import {
+  DashboardService,
+  DashboardData,
+  DashboardLayout,
+  ReportConfig,
+} from "./dashboard.service";
+import {
+  IncidentResponseService,
+  Incident,
+  IncidentStatus,
+  IncidentPriority,
+} from "./incident-response.service";
 import { MetricsService } from "./metrics.service";
 import { AlertSeverity } from "./types";
 
@@ -121,11 +139,23 @@ export class EnterpriseMonitoringController {
   @Get("dashboard")
   @ApiOperation({
     summary: "Get real-time monitoring dashboard",
-    description: "Retrieve comprehensive real-time monitoring data for the dashboard",
+    description:
+      "Retrieve comprehensive real-time monitoring data for the dashboard",
   })
-  @ApiQuery({ name: "timeRange", required: false, description: "Time range (e.g., '1h', '24h', '7d')" })
-  @ApiQuery({ name: "refresh", required: false, description: "Force refresh data" })
-  @ApiResponse({ status: 200, description: "Dashboard data retrieved successfully" })
+  @ApiQuery({
+    name: "timeRange",
+    required: false,
+    description: "Time range (e.g., '1h', '24h', '7d')",
+  })
+  @ApiQuery({
+    name: "refresh",
+    required: false,
+    description: "Force refresh data",
+  })
+  @ApiResponse({
+    status: 200,
+    description: "Dashboard data retrieved successfully",
+  })
   async getDashboard(
     @Query("timeRange") timeRange = "1h",
     @Query("refresh") refresh = false,
@@ -133,7 +163,8 @@ export class EnterpriseMonitoringController {
     try {
       this.logger.debug("Fetching dashboard data", { timeRange, refresh });
 
-      const dashboardData = await this.dashboardService.getDashboardData(timeRange);
+      const dashboardData =
+        await this.dashboardService.getDashboardData(timeRange);
 
       this.logger.debug("Dashboard data retrieved successfully", {
         timeRange,
@@ -157,14 +188,24 @@ export class EnterpriseMonitoringController {
     description: "Retrieve data for a specific dashboard widget",
   })
   @ApiParam({ name: "widgetId", description: "Widget identifier" })
-  @ApiQuery({ name: "timeRange", required: false, description: "Time range for widget data" })
-  @ApiResponse({ status: 200, description: "Widget data retrieved successfully" })
+  @ApiQuery({
+    name: "timeRange",
+    required: false,
+    description: "Time range for widget data",
+  })
+  @ApiResponse({
+    status: 200,
+    description: "Widget data retrieved successfully",
+  })
   async getWidgetData(
     @Param("widgetId") widgetId: string,
     @Query("timeRange") timeRange = "1h",
   ): Promise<any> {
     try {
-      const widgetData = await this.dashboardService.getWidgetData(widgetId, timeRange);
+      const widgetData = await this.dashboardService.getWidgetData(
+        widgetId,
+        timeRange,
+      );
       return widgetData;
     } catch (error) {
       this.logger.error("Failed to fetch widget data", {
@@ -181,7 +222,10 @@ export class EnterpriseMonitoringController {
     summary: "Get dashboard layouts",
     description: "Retrieve all available dashboard layouts",
   })
-  @ApiResponse({ status: 200, description: "Dashboard layouts retrieved successfully" })
+  @ApiResponse({
+    status: 200,
+    description: "Dashboard layouts retrieved successfully",
+  })
   getDashboardLayouts(): DashboardLayout[] {
     return this.dashboardService.getDashboardLayouts();
   }
@@ -192,8 +236,14 @@ export class EnterpriseMonitoringController {
     description: "Create a new custom dashboard layout",
   })
   @ApiBody({ description: "Dashboard layout configuration" })
-  @ApiResponse({ status: 201, description: "Dashboard layout created successfully" })
-  createDashboardLayout(@Body() layout: DashboardLayout): { success: boolean; layoutId: string } {
+  @ApiResponse({
+    status: 201,
+    description: "Dashboard layout created successfully",
+  })
+  createDashboardLayout(@Body() layout: DashboardLayout): {
+    success: boolean;
+    layoutId: string;
+  } {
     this.dashboardService.createDashboardLayout(layout);
     return { success: true, layoutId: layout.id };
   }
@@ -207,9 +257,20 @@ export class EnterpriseMonitoringController {
     summary: "Get function performance metrics",
     description: "Retrieve performance metrics for all monitored functions",
   })
-  @ApiQuery({ name: "functionId", required: false, description: "Specific function ID" })
-  @ApiQuery({ name: "limit", required: false, description: "Limit number of results" })
-  @ApiResponse({ status: 200, description: "Function metrics retrieved successfully" })
+  @ApiQuery({
+    name: "functionId",
+    required: false,
+    description: "Specific function ID",
+  })
+  @ApiQuery({
+    name: "limit",
+    required: false,
+    description: "Limit number of results",
+  })
+  @ApiResponse({
+    status: 200,
+    description: "Function metrics retrieved successfully",
+  })
   getFunctionMetrics(
     @Query("functionId") functionId?: string,
     @Query("limit", new ParseIntPipe({ optional: true })) limit?: number,
@@ -223,8 +284,15 @@ export class EnterpriseMonitoringController {
     summary: "Get top performing functions",
     description: "Retrieve functions with the best performance metrics",
   })
-  @ApiQuery({ name: "limit", required: false, description: "Number of functions to return" })
-  @ApiResponse({ status: 200, description: "Top performing functions retrieved successfully" })
+  @ApiQuery({
+    name: "limit",
+    required: false,
+    description: "Number of functions to return",
+  })
+  @ApiResponse({
+    status: 200,
+    description: "Top performing functions retrieved successfully",
+  })
   getTopPerformingFunctions(
     @Query("limit", new ParseIntPipe({ optional: true })) limit = 10,
   ): FunctionPerformanceMetrics[] {
@@ -236,8 +304,15 @@ export class EnterpriseMonitoringController {
     summary: "Get slowest functions",
     description: "Retrieve functions with the worst performance metrics",
   })
-  @ApiQuery({ name: "limit", required: false, description: "Number of functions to return" })
-  @ApiResponse({ status: 200, description: "Slowest functions retrieved successfully" })
+  @ApiQuery({
+    name: "limit",
+    required: false,
+    description: "Number of functions to return",
+  })
+  @ApiResponse({
+    status: 200,
+    description: "Slowest functions retrieved successfully",
+  })
   getSlowestFunctions(
     @Query("limit", new ParseIntPipe({ optional: true })) limit = 10,
   ): FunctionPerformanceMetrics[] {
@@ -249,8 +324,15 @@ export class EnterpriseMonitoringController {
     summary: "Get functions with highest error rates",
     description: "Retrieve functions with the highest error rates",
   })
-  @ApiQuery({ name: "limit", required: false, description: "Number of functions to return" })
-  @ApiResponse({ status: 200, description: "Functions with highest error rates retrieved successfully" })
+  @ApiQuery({
+    name: "limit",
+    required: false,
+    description: "Number of functions to return",
+  })
+  @ApiResponse({
+    status: 200,
+    description: "Functions with highest error rates retrieved successfully",
+  })
   getHighestErrorRateFunctions(
     @Query("limit", new ParseIntPipe({ optional: true })) limit = 10,
   ): FunctionPerformanceMetrics[] {
@@ -266,9 +348,21 @@ export class EnterpriseMonitoringController {
     summary: "Get alerts",
     description: "Retrieve alerts with optional filtering",
   })
-  @ApiQuery({ name: "severity", required: false, description: "Filter by severity" })
-  @ApiQuery({ name: "source", required: false, description: "Filter by source" })
-  @ApiQuery({ name: "status", required: false, description: "Filter by status" })
+  @ApiQuery({
+    name: "severity",
+    required: false,
+    description: "Filter by severity",
+  })
+  @ApiQuery({
+    name: "source",
+    required: false,
+    description: "Filter by source",
+  })
+  @ApiQuery({
+    name: "status",
+    required: false,
+    description: "Filter by status",
+  })
   @ApiResponse({ status: 200, description: "Alerts retrieved successfully" })
   getAlerts(
     @Query("severity") severity?: AlertSeverity,
@@ -285,7 +379,9 @@ export class EnterpriseMonitoringController {
   })
   @ApiBody({ description: "Alert creation request" })
   @ApiResponse({ status: 201, description: "Alert triggered successfully" })
-  async triggerAlert(@Body() request: CreateAlertRequest): Promise<{ alertId: string }> {
+  async triggerAlert(
+    @Body() request: CreateAlertRequest,
+  ): Promise<{ alertId: string }> {
     const alertId = await this.alertingService.triggerAlert(
       request.name,
       request.description,
@@ -306,13 +402,22 @@ export class EnterpriseMonitoringController {
     description: "Acknowledge an active alert",
   })
   @ApiParam({ name: "alertId", description: "Alert identifier" })
-  @ApiBody({ description: "Acknowledgment request", schema: { type: "object", properties: { acknowledgerId: { type: "string" } } } })
+  @ApiBody({
+    description: "Acknowledgment request",
+    schema: {
+      type: "object",
+      properties: { acknowledgerId: { type: "string" } },
+    },
+  })
   @ApiResponse({ status: 200, description: "Alert acknowledged successfully" })
   async acknowledgeAlert(
     @Param("alertId") alertId: string,
     @Body("acknowledgerId") acknowledgerId: string,
   ): Promise<{ success: boolean }> {
-    const success = await this.alertingService.acknowledgeAlert(alertId, acknowledgerId);
+    const success = await this.alertingService.acknowledgeAlert(
+      alertId,
+      acknowledgerId,
+    );
     return { success };
   }
 
@@ -322,13 +427,19 @@ export class EnterpriseMonitoringController {
     description: "Resolve an active alert",
   })
   @ApiParam({ name: "alertId", description: "Alert identifier" })
-  @ApiBody({ description: "Resolution request", schema: { type: "object", properties: { resolverId: { type: "string" } } } })
+  @ApiBody({
+    description: "Resolution request",
+    schema: { type: "object", properties: { resolverId: { type: "string" } } },
+  })
   @ApiResponse({ status: 200, description: "Alert resolved successfully" })
   async resolveAlert(
     @Param("alertId") alertId: string,
     @Body("resolverId") resolverId?: string,
   ): Promise<{ success: boolean }> {
-    const success = await this.alertingService.resolveAlert(alertId, resolverId);
+    const success = await this.alertingService.resolveAlert(
+      alertId,
+      resolverId,
+    );
     return { success };
   }
 
@@ -337,10 +448,18 @@ export class EnterpriseMonitoringController {
     summary: "Get alert statistics",
     description: "Retrieve alert statistics and metrics",
   })
-  @ApiQuery({ name: "timeRangeHours", required: false, description: "Time range in hours" })
-  @ApiResponse({ status: 200, description: "Alert statistics retrieved successfully" })
+  @ApiQuery({
+    name: "timeRangeHours",
+    required: false,
+    description: "Time range in hours",
+  })
+  @ApiResponse({
+    status: 200,
+    description: "Alert statistics retrieved successfully",
+  })
   getAlertStatistics(
-    @Query("timeRangeHours", new ParseIntPipe({ optional: true })) timeRangeHours = 24,
+    @Query("timeRangeHours", new ParseIntPipe({ optional: true }))
+    timeRangeHours = 24,
   ) {
     return this.alertingService.getAlertStatistics(timeRangeHours);
   }
@@ -354,10 +473,26 @@ export class EnterpriseMonitoringController {
     summary: "Get incidents",
     description: "Retrieve incidents with optional filtering",
   })
-  @ApiQuery({ name: "priority", required: false, description: "Filter by priority" })
-  @ApiQuery({ name: "severity", required: false, description: "Filter by severity" })
-  @ApiQuery({ name: "status", required: false, description: "Filter by status" })
-  @ApiQuery({ name: "assignedTo", required: false, description: "Filter by assignee" })
+  @ApiQuery({
+    name: "priority",
+    required: false,
+    description: "Filter by priority",
+  })
+  @ApiQuery({
+    name: "severity",
+    required: false,
+    description: "Filter by severity",
+  })
+  @ApiQuery({
+    name: "status",
+    required: false,
+    description: "Filter by status",
+  })
+  @ApiQuery({
+    name: "assignedTo",
+    required: false,
+    description: "Filter by assignee",
+  })
   @ApiResponse({ status: 200, description: "Incidents retrieved successfully" })
   getIncidents(
     @Query("priority") priority?: IncidentPriority,
@@ -365,7 +500,12 @@ export class EnterpriseMonitoringController {
     @Query("status") status?: IncidentStatus,
     @Query("assignedTo") assignedTo?: string,
   ): Incident[] {
-    return this.incidentService.getActiveIncidents({ priority, severity, status, assignedTo });
+    return this.incidentService.getActiveIncidents({
+      priority,
+      severity,
+      status,
+      assignedTo,
+    });
   }
 
   @Post("incidents")
@@ -375,7 +515,9 @@ export class EnterpriseMonitoringController {
   })
   @ApiBody({ description: "Incident creation request" })
   @ApiResponse({ status: 201, description: "Incident created successfully" })
-  async createIncident(@Body() request: CreateIncidentRequest): Promise<{ incidentId: string }> {
+  async createIncident(
+    @Body() request: CreateIncidentRequest,
+  ): Promise<{ incidentId: string }> {
     const incidentId = await this.incidentService.createIncident(
       request.title,
       request.description,
@@ -402,7 +544,10 @@ export class EnterpriseMonitoringController {
       },
     },
   })
-  @ApiResponse({ status: 200, description: "Incident status updated successfully" })
+  @ApiResponse({
+    status: 200,
+    description: "Incident status updated successfully",
+  })
   async updateIncidentStatus(
     @Param("incidentId") incidentId: string,
     @Body() body: { status: IncidentStatus; actor: string; notes?: string },
@@ -432,7 +577,10 @@ export class EnterpriseMonitoringController {
       },
     },
   })
-  @ApiResponse({ status: 200, description: "Remediation action executed successfully" })
+  @ApiResponse({
+    status: 200,
+    description: "Remediation action executed successfully",
+  })
   async executeRemediation(
     @Param("incidentId") incidentId: string,
     @Body() body: { actionId: string; executor?: string },
@@ -450,10 +598,18 @@ export class EnterpriseMonitoringController {
     summary: "Get incident statistics",
     description: "Retrieve incident statistics and metrics",
   })
-  @ApiQuery({ name: "timeRangeHours", required: false, description: "Time range in hours" })
-  @ApiResponse({ status: 200, description: "Incident statistics retrieved successfully" })
+  @ApiQuery({
+    name: "timeRangeHours",
+    required: false,
+    description: "Time range in hours",
+  })
+  @ApiResponse({
+    status: 200,
+    description: "Incident statistics retrieved successfully",
+  })
   getIncidentStatistics(
-    @Query("timeRangeHours", new ParseIntPipe({ optional: true })) timeRangeHours = 24,
+    @Query("timeRangeHours", new ParseIntPipe({ optional: true }))
+    timeRangeHours = 24,
   ) {
     return this.incidentService.getIncidentStatistics(timeRangeHours);
   }
@@ -467,7 +623,10 @@ export class EnterpriseMonitoringController {
     summary: "Get capacity metrics",
     description: "Retrieve current capacity and resource utilization metrics",
   })
-  @ApiResponse({ status: 200, description: "Capacity metrics retrieved successfully" })
+  @ApiResponse({
+    status: 200,
+    description: "Capacity metrics retrieved successfully",
+  })
   getCapacityMetrics(): any {
     return this.parlantMonitor.getCapacityMetrics();
   }
@@ -477,7 +636,10 @@ export class EnterpriseMonitoringController {
     summary: "Get security metrics",
     description: "Retrieve security monitoring metrics",
   })
-  @ApiResponse({ status: 200, description: "Security metrics retrieved successfully" })
+  @ApiResponse({
+    status: 200,
+    description: "Security metrics retrieved successfully",
+  })
   getSecurityMetrics(): any {
     return this.parlantMonitor.getSecurityMetrics();
   }
@@ -491,7 +653,10 @@ export class EnterpriseMonitoringController {
     summary: "Get report configurations",
     description: "Retrieve all report configurations",
   })
-  @ApiResponse({ status: 200, description: "Report configurations retrieved successfully" })
+  @ApiResponse({
+    status: 200,
+    description: "Report configurations retrieved successfully",
+  })
   getReportConfigs(): ReportConfig[] {
     return this.dashboardService.getReportConfigs();
   }
@@ -502,8 +667,14 @@ export class EnterpriseMonitoringController {
     description: "Create a new report configuration",
   })
   @ApiBody({ description: "Report configuration" })
-  @ApiResponse({ status: 201, description: "Report configuration created successfully" })
-  createReportConfig(@Body() config: ReportConfig): { success: boolean; configId: string } {
+  @ApiResponse({
+    status: 201,
+    description: "Report configuration created successfully",
+  })
+  createReportConfig(@Body() config: ReportConfig): {
+    success: boolean;
+    configId: string;
+  } {
     this.dashboardService.createReportConfig(config);
     return { success: true, configId: config.id };
   }
@@ -528,9 +699,20 @@ export class EnterpriseMonitoringController {
     summary: "Get generated reports",
     description: "Retrieve list of generated reports",
   })
-  @ApiQuery({ name: "type", required: false, description: "Filter by report type" })
-  @ApiQuery({ name: "configId", required: false, description: "Filter by configuration ID" })
-  @ApiResponse({ status: 200, description: "Generated reports retrieved successfully" })
+  @ApiQuery({
+    name: "type",
+    required: false,
+    description: "Filter by report type",
+  })
+  @ApiQuery({
+    name: "configId",
+    required: false,
+    description: "Filter by configuration ID",
+  })
+  @ApiResponse({
+    status: 200,
+    description: "Generated reports retrieved successfully",
+  })
   getGeneratedReports(
     @Query("type") type?: string,
     @Query("configId") configId?: string,
@@ -551,10 +733,25 @@ export class EnterpriseMonitoringController {
     summary: "Export dashboard data",
     description: "Export dashboard data in various formats",
   })
-  @ApiQuery({ name: "format", required: false, description: "Export format (csv, json, pdf)" })
-  @ApiQuery({ name: "timeRange", required: false, description: "Time range for data" })
-  @ApiQuery({ name: "sections", required: false, description: "Comma-separated sections to include" })
-  @ApiResponse({ status: 200, description: "Dashboard data exported successfully" })
+  @ApiQuery({
+    name: "format",
+    required: false,
+    description: "Export format (csv, json, pdf)",
+  })
+  @ApiQuery({
+    name: "timeRange",
+    required: false,
+    description: "Time range for data",
+  })
+  @ApiQuery({
+    name: "sections",
+    required: false,
+    description: "Comma-separated sections to include",
+  })
+  @ApiResponse({
+    status: 200,
+    description: "Dashboard data exported successfully",
+  })
   async exportDashboard(
     @Res() res: Response,
     @Query("format") format: "csv" | "json" | "pdf" = "json",
@@ -563,14 +760,18 @@ export class EnterpriseMonitoringController {
   ): Promise<void> {
     try {
       const sectionsArray = sections ? sections.split(",") : undefined;
-      const { data, filename, mimeType } = await this.dashboardService.exportDashboardData(
-        format,
-        timeRange,
-        sectionsArray,
-      );
+      const { data, filename, mimeType } =
+        await this.dashboardService.exportDashboardData(
+          format,
+          timeRange,
+          sectionsArray,
+        );
 
       res.setHeader("Content-Type", mimeType);
-      res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="${filename}"`,
+      );
       res.send(data);
     } catch (error) {
       this.logger.error("Failed to export dashboard data", {
@@ -590,7 +791,10 @@ export class EnterpriseMonitoringController {
     summary: "Export Prometheus metrics",
     description: "Export metrics in Prometheus format",
   })
-  @ApiResponse({ status: 200, description: "Prometheus metrics exported successfully" })
+  @ApiResponse({
+    status: 200,
+    description: "Prometheus metrics exported successfully",
+  })
   getPrometheusMetrics(@Res() res: Response): void {
     try {
       const metrics = this.metricsService.generatePrometheusMetrics();
@@ -600,7 +804,9 @@ export class EnterpriseMonitoringController {
       this.logger.error("Failed to generate Prometheus metrics", {
         error: error instanceof Error ? error.message : String(error),
       });
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).send("# Error generating metrics\n");
+      res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .send("# Error generating metrics\n");
     }
   }
 
@@ -648,7 +854,10 @@ export class EnterpriseMonitoringController {
     summary: "Get system status overview",
     description: "Comprehensive system status overview",
   })
-  @ApiResponse({ status: 200, description: "System status retrieved successfully" })
+  @ApiResponse({
+    status: 200,
+    description: "System status retrieved successfully",
+  })
   async getSystemStatus(): Promise<{
     system: {
       status: string;

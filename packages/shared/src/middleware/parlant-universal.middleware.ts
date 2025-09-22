@@ -31,12 +31,12 @@ import {
   HttpException,
   HttpStatus,
   Inject,
-} from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Request, Response, NextFunction } from 'express';
-import { Cache } from 'cache-manager';
-import { ParlantIntegrationService } from '../services/parlant-integration.service';
+} from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { CACHE_MANAGER } from "@nestjs/cache-manager";
+import { Request, Response, NextFunction } from "express";
+import { Cache } from "cache-manager";
+import { ParlantIntegrationService } from "../services/parlant-integration.service";
 import {
   SecurityLevel,
   ValidationMode,
@@ -45,12 +45,12 @@ import {
   FunctionSecurityLevel,
   RiskLevel,
   ParticipantRole,
-} from '../types/parlant.types';
+} from "../types/parlant.types";
 import {
   ParlantValidationRequest,
   ParlantValidationResponse,
-} from '../types/parlant-integration.types';
-import { ConversationContext } from '../types/conversation-context.types';
+} from "../types/parlant-integration.types";
+import { ConversationContext } from "../types/conversation-context.types";
 
 // Enhanced Request interface with PARLANT context
 interface ParlantEnhancedRequest extends Request {
@@ -78,7 +78,7 @@ interface ConversationalErrorContext {
   conversationalExplanation: string;
   userFriendlyMessage: string;
   suggestedActions: string[];
-  escalationLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  escalationLevel: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
   requiresHumanIntervention: boolean;
 }
 
@@ -89,7 +89,7 @@ interface EndpointAnalysis {
   riskLevel: RiskLevel;
   businessCategory: string;
   requiresValidation: boolean;
-  cacheStrategy: 'NONE' | 'SHORT' | 'MEDIUM' | 'LONG';
+  cacheStrategy: "NONE" | "SHORT" | "MEDIUM" | "LONG";
   complianceFlags: string[];
 }
 
@@ -122,38 +122,33 @@ export class ParlantUniversalMiddleware implements NestMiddleware {
     endpointPatterns: {
       // Critical endpoints requiring explicit validation
       critical: [
-        '/computer-use/**',
-        '/admin/**',
-        '/config/**',
-        '/system/**',
-        '/auth/**',
-        '/**/batch/**',
-        '/**/critical/**',
+        "/computer-use/**",
+        "/admin/**",
+        "/config/**",
+        "/system/**",
+        "/auth/**",
+        "/**/batch/**",
+        "/**/critical/**",
       ],
       // High-risk endpoints requiring conversational validation
       high: [
-        '/data-extraction/**',
-        '/file-management/**',
-        '/workflow-automation/**',
-        '/browser/**',
-        '/**/delete/**',
-        '/**/execute/**',
+        "/data-extraction/**",
+        "/file-management/**",
+        "/workflow-automation/**",
+        "/browser/**",
+        "/**/delete/**",
+        "/**/execute/**",
       ],
       // Medium-risk endpoints with intelligent validation
       medium: [
-        '/metrics/**',
-        '/monitoring/**',
-        '/analytics/**',
-        '/**/search/**',
-        '/**/status/**',
+        "/metrics/**",
+        "/monitoring/**",
+        "/analytics/**",
+        "/**/search/**",
+        "/**/status/**",
       ],
       // Low-risk endpoints with automatic approval
-      low: [
-        '/health/**',
-        '/version/**',
-        '/ping/**',
-        '/**/info/**',
-      ],
+      low: ["/health/**", "/version/**", "/ping/**", "/**/info/**"],
     },
   };
 
@@ -162,8 +157,8 @@ export class ParlantUniversalMiddleware implements NestMiddleware {
     private readonly parlantService: ParlantIntegrationService,
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {
-    this.logger.log('PARLANT Universal Middleware initialized', {
-      version: '1.0.0',
+    this.logger.log("PARLANT Universal Middleware initialized", {
+      version: "1.0.0",
       enabledByDefault: this.universalConfig.enabledByDefault,
       cacheTimeout: this.universalConfig.globalCacheTimeout,
       criticalPatterns: this.universalConfig.endpointPatterns.critical.length,
@@ -175,18 +170,23 @@ export class ParlantUniversalMiddleware implements NestMiddleware {
     const operationId = `parlant-universal-${Date.now()}-${Math.random().toString(36).substring(7)}`;
     const startTime = Date.now();
 
-    this.logger.debug(`[${operationId}] Universal PARLANT middleware initiated`, {
-      operationId,
-      method: req.method,
-      url: req.url,
-      userAgent: req.get('User-Agent'),
-      clientIp: this.getClientIp(req),
-    });
+    this.logger.debug(
+      `[${operationId}] Universal PARLANT middleware initiated`,
+      {
+        operationId,
+        method: req.method,
+        url: req.url,
+        userAgent: req.get("User-Agent"),
+        clientIp: this.getClientIp(req),
+      },
+    );
 
     try {
       // Skip validation for health checks and non-API endpoints
       if (this.shouldSkipValidation(req)) {
-        this.logger.debug(`[${operationId}] Skipping validation for: ${req.url}`);
+        this.logger.debug(
+          `[${operationId}] Skipping validation for: ${req.url}`,
+        );
         return next();
       }
 
@@ -197,7 +197,10 @@ export class ParlantUniversalMiddleware implements NestMiddleware {
       const riskScore = await this.assessRequestRisk(req, endpointAnalysis);
 
       // Determine validation requirements
-      const validationConfig = this.determineValidationConfig(endpointAnalysis, riskScore);
+      const validationConfig = this.determineValidationConfig(
+        endpointAnalysis,
+        riskScore,
+      );
 
       // Initialize PARLANT context
       req.parlantContext = {
@@ -214,7 +217,11 @@ export class ParlantUniversalMiddleware implements NestMiddleware {
 
       if (cachedResult && this.isCacheValid(cachedResult, validationConfig)) {
         this.applyCachedValidation(req, cachedResult);
-        this.recordPerformanceMetric(operationId, Date.now() - startTime, 'cached');
+        this.recordPerformanceMetric(
+          operationId,
+          Date.now() - startTime,
+          "cached",
+        );
         return next();
       }
 
@@ -229,7 +236,11 @@ export class ParlantUniversalMiddleware implements NestMiddleware {
 
       // Cache successful validation
       if (req.parlantContext.validated && validationConfig.cacheable) {
-        await this.cacheValidation(cacheKey, req.parlantContext, validationConfig);
+        await this.cacheValidation(
+          cacheKey,
+          req.parlantContext,
+          validationConfig,
+        );
       }
 
       // Set response headers
@@ -238,7 +249,7 @@ export class ParlantUniversalMiddleware implements NestMiddleware {
       const processingTime = Date.now() - startTime;
       req.parlantContext.processingTime = processingTime;
 
-      this.recordPerformanceMetric(operationId, processingTime, 'validated');
+      this.recordPerformanceMetric(operationId, processingTime, "validated");
 
       this.logger.log(`[${operationId}] Universal validation completed`, {
         operationId,
@@ -250,12 +261,15 @@ export class ParlantUniversalMiddleware implements NestMiddleware {
       });
 
       next();
-
     } catch (error) {
       const processingTime = Date.now() - startTime;
-      const conversationalError = await this.createConversationalError(error, req, operationId);
+      const conversationalError = await this.createConversationalError(
+        error,
+        req,
+        operationId,
+      );
 
-      req.parlantContext = req.parlantContext || {} as any;
+      req.parlantContext = req.parlantContext || ({} as any);
       req.parlantContext!.errorContext = conversationalError;
       req.parlantContext!.processingTime = processingTime;
 
@@ -276,7 +290,9 @@ export class ParlantUniversalMiddleware implements NestMiddleware {
   /**
    * Analyze endpoint characteristics and security requirements
    */
-  private async analyzeEndpoint(req: ParlantEnhancedRequest): Promise<EndpointAnalysis> {
+  private async analyzeEndpoint(
+    req: ParlantEnhancedRequest,
+  ): Promise<EndpointAnalysis> {
     const cacheKey = `endpoint-analysis:${req.method}:${req.route?.path || req.url}`;
     const cached = this.endpointCache.get(cacheKey);
 
@@ -337,27 +353,31 @@ export class ParlantUniversalMiddleware implements NestMiddleware {
     let riskScore = 0;
 
     // Method-based risk
-    if (req.method === 'DELETE') riskScore += 30;
-    else if (req.method === 'POST' || req.method === 'PUT') riskScore += 20;
-    else if (req.method === 'PATCH') riskScore += 15;
+    if (req.method === "DELETE") riskScore += 30;
+    else if (req.method === "POST" || req.method === "PUT") riskScore += 20;
+    else if (req.method === "PATCH") riskScore += 15;
 
     // URL-based risk
     const url = req.url.toLowerCase();
-    if (url.includes('admin')) riskScore += 25;
-    if (url.includes('system')) riskScore += 20;
-    if (url.includes('config')) riskScore += 20;
-    if (url.includes('execute')) riskScore += 25;
-    if (url.includes('batch')) riskScore += 15;
+    if (url.includes("admin")) riskScore += 25;
+    if (url.includes("system")) riskScore += 20;
+    if (url.includes("config")) riskScore += 20;
+    if (url.includes("execute")) riskScore += 25;
+    if (url.includes("batch")) riskScore += 15;
 
     // Body size risk (large payloads)
-    const contentLength = parseInt(req.get('content-length') || '0');
+    const contentLength = parseInt(req.get("content-length") || "0");
     if (contentLength > 1000000) riskScore += 15; // > 1MB
 
     // Convert score to risk level
-    if (riskScore >= this.universalConfig.riskThresholds.critical) return RiskLevel._CRITICAL;
-    if (riskScore >= this.universalConfig.riskThresholds.high) return RiskLevel._HIGH;
-    if (riskScore >= this.universalConfig.riskThresholds.medium) return RiskLevel._MODERATE;
-    if (riskScore >= this.universalConfig.riskThresholds.low) return RiskLevel._LOW;
+    if (riskScore >= this.universalConfig.riskThresholds.critical)
+      return RiskLevel._CRITICAL;
+    if (riskScore >= this.universalConfig.riskThresholds.high)
+      return RiskLevel._HIGH;
+    if (riskScore >= this.universalConfig.riskThresholds.medium)
+      return RiskLevel._MODERATE;
+    if (riskScore >= this.universalConfig.riskThresholds.low)
+      return RiskLevel._LOW;
     return RiskLevel._MINIMAL;
   }
 
@@ -367,17 +387,17 @@ export class ParlantUniversalMiddleware implements NestMiddleware {
   private determineBusinessCategory(req: ParlantEnhancedRequest): string {
     const url = req.url.toLowerCase();
 
-    if (url.includes('computer-use')) return 'COMPUTER_AUTOMATION';
-    if (url.includes('data-extraction')) return 'DATA_PROCESSING';
-    if (url.includes('file-management')) return 'FILE_OPERATIONS';
-    if (url.includes('workflow')) return 'WORKFLOW_AUTOMATION';
-    if (url.includes('browser')) return 'BROWSER_AUTOMATION';
-    if (url.includes('health')) return 'SYSTEM_MONITORING';
-    if (url.includes('metrics')) return 'PERFORMANCE_MONITORING';
-    if (url.includes('auth')) return 'AUTHENTICATION';
-    if (url.includes('admin')) return 'ADMINISTRATION';
+    if (url.includes("computer-use")) return "COMPUTER_AUTOMATION";
+    if (url.includes("data-extraction")) return "DATA_PROCESSING";
+    if (url.includes("file-management")) return "FILE_OPERATIONS";
+    if (url.includes("workflow")) return "WORKFLOW_AUTOMATION";
+    if (url.includes("browser")) return "BROWSER_AUTOMATION";
+    if (url.includes("health")) return "SYSTEM_MONITORING";
+    if (url.includes("metrics")) return "PERFORMANCE_MONITORING";
+    if (url.includes("auth")) return "AUTHENTICATION";
+    if (url.includes("admin")) return "ADMINISTRATION";
 
-    return 'GENERAL_API';
+    return "GENERAL_API";
   }
 
   /**
@@ -388,13 +408,20 @@ export class ParlantUniversalMiddleware implements NestMiddleware {
     const riskLevel = this.classifyRiskLevel(req);
 
     // Always validate critical or high security endpoints
-    if (securityLevel === SecurityLevel._CRITICAL || securityLevel === SecurityLevel._HIGH) {
+    if (
+      securityLevel === SecurityLevel._CRITICAL ||
+      securityLevel === SecurityLevel._HIGH
+    ) {
       return true;
     }
 
     // Validate medium security endpoints with moderate+ risk
-    if (securityLevel === SecurityLevel._MEDIUM &&
-        (riskLevel === RiskLevel._MODERATE || riskLevel === RiskLevel._HIGH || riskLevel === RiskLevel._CRITICAL)) {
+    if (
+      securityLevel === SecurityLevel._MEDIUM &&
+      (riskLevel === RiskLevel._MODERATE ||
+        riskLevel === RiskLevel._HIGH ||
+        riskLevel === RiskLevel._CRITICAL)
+    ) {
       return true;
     }
 
@@ -404,15 +431,17 @@ export class ParlantUniversalMiddleware implements NestMiddleware {
   /**
    * Determine caching strategy based on endpoint characteristics
    */
-  private determineCacheStrategy(req: ParlantEnhancedRequest): 'NONE' | 'SHORT' | 'MEDIUM' | 'LONG' {
-    if (req.method !== 'GET') return 'NONE';
+  private determineCacheStrategy(
+    req: ParlantEnhancedRequest,
+  ): "NONE" | "SHORT" | "MEDIUM" | "LONG" {
+    if (req.method !== "GET") return "NONE";
 
     const url = req.url.toLowerCase();
-    if (url.includes('health') || url.includes('status')) return 'SHORT';
-    if (url.includes('metrics') || url.includes('analytics')) return 'MEDIUM';
-    if (url.includes('config') || url.includes('version')) return 'LONG';
+    if (url.includes("health") || url.includes("status")) return "SHORT";
+    if (url.includes("metrics") || url.includes("analytics")) return "MEDIUM";
+    if (url.includes("config") || url.includes("version")) return "LONG";
 
-    return 'SHORT';
+    return "SHORT";
   }
 
   /**
@@ -422,13 +451,13 @@ export class ParlantUniversalMiddleware implements NestMiddleware {
     const flags: string[] = [];
     const url = req.url.toLowerCase();
 
-    if (url.includes('computer-use')) flags.push('SYSTEM_CONTROL');
-    if (url.includes('admin')) flags.push('ADMINISTRATIVE_ACCESS');
-    if (url.includes('data')) flags.push('DATA_PROCESSING');
-    if (url.includes('file')) flags.push('FILE_ACCESS');
-    if (url.includes('execute')) flags.push('EXECUTION_CONTROL');
-    if (req.method === 'DELETE') flags.push('DATA_DELETION');
-    if (url.includes('batch')) flags.push('BATCH_PROCESSING');
+    if (url.includes("computer-use")) flags.push("SYSTEM_CONTROL");
+    if (url.includes("admin")) flags.push("ADMINISTRATIVE_ACCESS");
+    if (url.includes("data")) flags.push("DATA_PROCESSING");
+    if (url.includes("file")) flags.push("FILE_ACCESS");
+    if (url.includes("execute")) flags.push("EXECUTION_CONTROL");
+    if (req.method === "DELETE") flags.push("DATA_DELETION");
+    if (url.includes("batch")) flags.push("BATCH_PROCESSING");
 
     return flags;
   }
@@ -436,21 +465,34 @@ export class ParlantUniversalMiddleware implements NestMiddleware {
   /**
    * Assess overall request risk score
    */
-  private async assessRequestRisk(req: ParlantEnhancedRequest, analysis: EndpointAnalysis): Promise<number> {
+  private async assessRequestRisk(
+    req: ParlantEnhancedRequest,
+    analysis: EndpointAnalysis,
+  ): Promise<number> {
     let totalRisk = 0;
 
     // Base risk from classification
     switch (analysis.riskLevel) {
-      case RiskLevel._CRITICAL: totalRisk += 40; break;
-      case RiskLevel._HIGH: totalRisk += 30; break;
-      case RiskLevel._MODERATE: totalRisk += 20; break;
-      case RiskLevel._LOW: totalRisk += 10; break;
-      default: totalRisk += 0;
+      case RiskLevel._CRITICAL:
+        totalRisk += 40;
+        break;
+      case RiskLevel._HIGH:
+        totalRisk += 30;
+        break;
+      case RiskLevel._MODERATE:
+        totalRisk += 20;
+        break;
+      case RiskLevel._LOW:
+        totalRisk += 10;
+        break;
+      default:
+        totalRisk += 0;
     }
 
     // User context risk
-    if (!req.user) totalRisk += 25; // Anonymous user
-    else if (!req.user.roles?.includes('ADMIN')) totalRisk += 10;
+    if (!req.user)
+      totalRisk += 25; // Anonymous user
+    else if (!req.user.roles?.includes("ADMIN")) totalRisk += 10;
 
     // Time-based risk (unusual hours)
     const hour = new Date().getHours();
@@ -465,7 +507,10 @@ export class ParlantUniversalMiddleware implements NestMiddleware {
   /**
    * Determine validation configuration based on analysis
    */
-  private determineValidationConfig(analysis: EndpointAnalysis, riskScore: number): any {
+  private determineValidationConfig(
+    analysis: EndpointAnalysis,
+    riskScore: number,
+  ): any {
     let validationMode = ValidationMode._AUTOMATED;
     let approvalLevel = ApprovalLevel._AUTOMATIC;
     let requiresValidation = analysis.requiresValidation;
@@ -538,16 +583,16 @@ export class ParlantUniversalMiddleware implements NestMiddleware {
     const validationRequest: ParlantValidationRequest = {
       operationId,
       functionName: `${req.method} ${req.route?.path || req.url}`,
-      packageName: '@bytebot/universal-middleware',
+      packageName: "@bytebot/universal-middleware",
       description: `Universal PARLANT validation for ${config.businessCategory} operation`,
       parameters: this.sanitizeRequestParameters(req),
       userContext: {
-        userId: req.user?.id || 'anonymous',
+        userId: req.user?.id || "anonymous",
         roles: req.user?.roles || [],
         sessionId: operationId,
         ipAddress: this.getClientIp(req),
         metadata: {
-          userAgent: req.get('User-Agent'),
+          userAgent: req.get("User-Agent"),
           riskScore: req.parlantContext!.riskScore,
           endpointCategory: config.businessCategory,
         },
@@ -557,7 +602,8 @@ export class ParlantUniversalMiddleware implements NestMiddleware {
     };
 
     const startTime = Date.now();
-    const response = await this.parlantService.validateFunctionExecution(validationRequest);
+    const response =
+      await this.parlantService.validateFunctionExecution(validationRequest);
     const validationTime = Date.now() - startTime;
 
     this.logger.debug(`[${operationId}] PARLANT validation completed`, {
@@ -590,44 +636,61 @@ export class ParlantUniversalMiddleware implements NestMiddleware {
     const errorMessage = error instanceof Error ? error.message : String(error);
 
     // Analyze error type and context
-    let escalationLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' = 'MEDIUM';
-    let userFriendlyMessage = 'An unexpected error occurred while processing your request.';
-    let suggestedActions: string[] = ['Please try again later', 'Contact support if the problem persists'];
+    let escalationLevel: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL" = "MEDIUM";
+    let userFriendlyMessage =
+      "An unexpected error occurred while processing your request.";
+    let suggestedActions: string[] = [
+      "Please try again later",
+      "Contact support if the problem persists",
+    ];
     let requiresHumanIntervention = false;
 
     // Categorize error types
-    if (errorMessage.includes('timeout') || errorMessage.includes('TIMEOUT')) {
-      escalationLevel = 'MEDIUM';
-      userFriendlyMessage = 'The validation process timed out. This might be due to high system load.';
+    if (errorMessage.includes("timeout") || errorMessage.includes("TIMEOUT")) {
+      escalationLevel = "MEDIUM";
+      userFriendlyMessage =
+        "The validation process timed out. This might be due to high system load.";
       suggestedActions = [
-        'Try the request again in a few minutes',
-        'If this is urgent, contact an administrator',
-        'Check if there are any system maintenance notices',
+        "Try the request again in a few minutes",
+        "If this is urgent, contact an administrator",
+        "Check if there are any system maintenance notices",
       ];
-    } else if (errorMessage.includes('denied') || errorMessage.includes('forbidden')) {
-      escalationLevel = 'HIGH';
-      userFriendlyMessage = 'Access to this operation requires additional approval or higher privileges.';
+    } else if (
+      errorMessage.includes("denied") ||
+      errorMessage.includes("forbidden")
+    ) {
+      escalationLevel = "HIGH";
+      userFriendlyMessage =
+        "Access to this operation requires additional approval or higher privileges.";
       suggestedActions = [
-        'Ensure you have the necessary permissions',
-        'Request approval from an administrator',
-        'Contact your supervisor if this operation is business-critical',
+        "Ensure you have the necessary permissions",
+        "Request approval from an administrator",
+        "Contact your supervisor if this operation is business-critical",
       ];
       requiresHumanIntervention = true;
-    } else if (errorMessage.includes('validation') || errorMessage.includes('VALIDATION')) {
-      escalationLevel = 'LOW';
-      userFriendlyMessage = 'The system needs to verify this operation through our conversational validation process.';
+    } else if (
+      errorMessage.includes("validation") ||
+      errorMessage.includes("VALIDATION")
+    ) {
+      escalationLevel = "LOW";
+      userFriendlyMessage =
+        "The system needs to verify this operation through our conversational validation process.";
       suggestedActions = [
-        'Respond to any validation prompts that appear',
-        'Ensure your request details are accurate',
-        'Contact support if validation repeatedly fails',
+        "Respond to any validation prompts that appear",
+        "Ensure your request details are accurate",
+        "Contact support if validation repeatedly fails",
       ];
-    } else if (errorMessage.includes('critical') || errorMessage.includes('CRITICAL')) {
-      escalationLevel = 'CRITICAL';
-      userFriendlyMessage = 'A critical system error has occurred. Our team has been notified.';
+    } else if (
+      errorMessage.includes("critical") ||
+      errorMessage.includes("CRITICAL")
+    ) {
+      escalationLevel = "CRITICAL";
+      userFriendlyMessage =
+        "A critical system error has occurred. Our team has been notified.";
       suggestedActions = [
-        'Do not retry this operation immediately',
-        'Contact emergency support if this affects business operations',
-        'Wait for system status updates',
+        "Do not retry this operation immediately",
+        "Contact emergency support if this affects business operations",
+        "Wait for system status updates",
       ];
       requiresHumanIntervention = true;
     }
@@ -642,7 +705,7 @@ Here's what happened:
 - Classification: ${escalationLevel} priority
 
 What you can do:
-${suggestedActions.map(action => `• ${action}`).join('\n')}
+${suggestedActions.map((action) => `• ${action}`).join("\n")}
 
 Technical details have been logged for our development team to investigate and improve the system.
     `.trim();
@@ -660,11 +723,14 @@ Technical details have been logged for our development team to investigate and i
   /**
    * Generate cache key for validation result
    */
-  private async generateCacheKey(req: ParlantEnhancedRequest, config: any): Promise<string> {
-    if (!config.cacheable) return '';
+  private async generateCacheKey(
+    req: ParlantEnhancedRequest,
+    config: any,
+  ): Promise<string> {
+    if (!config.cacheable) return "";
 
     const fingerprint: RequestFingerprint = {
-      userId: req.user?.id || 'anonymous',
+      userId: req.user?.id || "anonymous",
       endpoint: req.route?.path || req.url,
       method: req.method,
       pathParams: req.params || {},
@@ -674,7 +740,7 @@ Technical details have been logged for our development team to investigate and i
 
     // Create hash of fingerprint for cache key
     const fingerprintStr = JSON.stringify(fingerprint);
-    const hash = Buffer.from(fingerprintStr).toString('base64url');
+    const hash = Buffer.from(fingerprintStr).toString("base64url");
 
     return `parlant-validation:${hash}`;
   }
@@ -688,7 +754,9 @@ Technical details have been logged for our development team to investigate and i
     try {
       return await this.cacheManager.get(cacheKey);
     } catch (error) {
-      this.logger.warn('Cache retrieval failed', { error: error instanceof Error ? error.message : String(error) });
+      this.logger.warn("Cache retrieval failed", {
+        error: error instanceof Error ? error.message : String(error),
+      });
       return null;
     }
   }
@@ -696,7 +764,11 @@ Technical details have been logged for our development team to investigate and i
   /**
    * Cache validation result
    */
-  private async cacheValidation(cacheKey: string, context: any, config: any): Promise<void> {
+  private async cacheValidation(
+    cacheKey: string,
+    context: any,
+    config: any,
+  ): Promise<void> {
     if (!cacheKey || !config.cacheable) return;
 
     const cacheData = {
@@ -710,17 +782,22 @@ Technical details have been logged for our development team to investigate and i
       const ttl = this.getCacheTTL(config.cacheStrategy);
       await this.cacheManager.set(cacheKey, cacheData, ttl);
     } catch (error) {
-      this.logger.warn('Cache storage failed', { error: error instanceof Error ? error.message : String(error) });
+      this.logger.warn("Cache storage failed", {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 
   /**
    * Apply cached validation result
    */
-  private applyCachedValidation(req: ParlantEnhancedRequest, cachedResult: any): void {
+  private applyCachedValidation(
+    req: ParlantEnhancedRequest,
+    cachedResult: any,
+  ): void {
     req.parlantContext!.validated = cachedResult.validated;
     req.parlantContext!.conversationId = cachedResult.conversationId;
-    req.parlantContext!.cacheKey = 'HIT';
+    req.parlantContext!.cacheKey = "HIT";
   }
 
   /**
@@ -740,35 +817,45 @@ Technical details have been logged for our development team to investigate and i
    */
   private getCacheTTL(strategy: string): number {
     switch (strategy) {
-      case 'SHORT': return 60000; // 1 minute
-      case 'MEDIUM': return 300000; // 5 minutes
-      case 'LONG': return 1800000; // 30 minutes
-      default: return this.universalConfig.globalCacheTimeout;
+      case "SHORT":
+        return 60000; // 1 minute
+      case "MEDIUM":
+        return 300000; // 5 minutes
+      case "LONG":
+        return 1800000; // 30 minutes
+      default:
+        return this.universalConfig.globalCacheTimeout;
     }
   }
 
   /**
    * Set universal response headers
    */
-  private setUniversalHeaders(req: ParlantEnhancedRequest, res: Response, operationId: string): void {
+  private setUniversalHeaders(
+    req: ParlantEnhancedRequest,
+    res: Response,
+    operationId: string,
+  ): void {
     const headers: Record<string, string> = {
-      'X-Parlant-Universal': 'true',
-      'X-Parlant-Operation-Id': operationId,
-      'X-Parlant-Validated': req.parlantContext?.validated ? 'true' : 'false',
-      'X-Parlant-Security-Level': req.parlantContext?.securityLevel || 'unknown',
-      'X-Parlant-Risk-Score': req.parlantContext?.riskScore?.toString() || '0',
+      "X-Parlant-Universal": "true",
+      "X-Parlant-Operation-Id": operationId,
+      "X-Parlant-Validated": req.parlantContext?.validated ? "true" : "false",
+      "X-Parlant-Security-Level":
+        req.parlantContext?.securityLevel || "unknown",
+      "X-Parlant-Risk-Score": req.parlantContext?.riskScore?.toString() || "0",
     };
 
     if (req.parlantContext?.conversationId) {
-      headers['X-Parlant-Conversation-Id'] = req.parlantContext.conversationId;
+      headers["X-Parlant-Conversation-Id"] = req.parlantContext.conversationId;
     }
 
     if (req.parlantContext?.cacheKey) {
-      headers['X-Parlant-Cache'] = req.parlantContext.cacheKey;
+      headers["X-Parlant-Cache"] = req.parlantContext.cacheKey;
     }
 
     if (req.parlantContext?.processingTime) {
-      headers['X-Parlant-Processing-Time'] = req.parlantContext.processingTime.toString();
+      headers["X-Parlant-Processing-Time"] =
+        req.parlantContext.processingTime.toString();
     }
 
     res.set(headers);
@@ -777,7 +864,11 @@ Technical details have been logged for our development team to investigate and i
   /**
    * Record performance metrics
    */
-  private recordPerformanceMetric(operationId: string, processingTime: number, type: string): void {
+  private recordPerformanceMetric(
+    operationId: string,
+    processingTime: number,
+    type: string,
+  ): void {
     const key = `${type}_processing_times`;
     const metrics = this.performanceMetrics.get(key) || [];
     metrics.push(processingTime);
@@ -790,8 +881,11 @@ Technical details have been logged for our development team to investigate and i
     this.performanceMetrics.set(key, metrics);
 
     // Log performance warnings
-    if (processingTime > 5000 && type === 'validated') {
-      this.logger.warn(`Slow validation detected: ${processingTime}ms`, { operationId, type });
+    if (processingTime > 5000 && type === "validated") {
+      this.logger.warn(`Slow validation detected: ${processingTime}ms`, {
+        operationId,
+        type,
+      });
     }
   }
 
@@ -802,17 +896,25 @@ Technical details have been logged for our development team to investigate and i
     const url = req.url.toLowerCase();
 
     // Skip for health checks
-    if (url.includes('/health') || url.includes('/ping') || url.includes('/version')) {
+    if (
+      url.includes("/health") ||
+      url.includes("/ping") ||
+      url.includes("/version")
+    ) {
       return true;
     }
 
     // Skip for non-API endpoints
-    if (!url.startsWith('/api') && !url.includes('computer-use') && !url.includes('admin')) {
+    if (
+      !url.startsWith("/api") &&
+      !url.includes("computer-use") &&
+      !url.includes("admin")
+    ) {
       return true;
     }
 
     // Skip if explicitly disabled
-    if (req.headers['x-parlant-skip'] === 'true') {
+    if (req.headers["x-parlant-skip"] === "true") {
       return true;
     }
 
@@ -822,11 +924,13 @@ Technical details have been logged for our development team to investigate and i
   /**
    * Sanitize request parameters for validation
    */
-  private sanitizeRequestParameters(req: ParlantEnhancedRequest): Record<string, any> {
+  private sanitizeRequestParameters(
+    req: ParlantEnhancedRequest,
+  ): Record<string, any> {
     const params: Record<string, any> = {
       method: req.method,
       url: req.url,
-      userAgent: req.get('User-Agent'),
+      userAgent: req.get("User-Agent"),
     };
 
     // Add path parameters if available
@@ -837,7 +941,8 @@ Technical details have been logged for our development team to investigate and i
     // Add query parameters (but limit size)
     if (req.query && Object.keys(req.query).length > 0) {
       const queryStr = JSON.stringify(req.query);
-      params.queryParams = queryStr.length > 500 ? '[Large query object]' : req.query;
+      params.queryParams =
+        queryStr.length > 500 ? "[Large query object]" : req.query;
     }
 
     // Add body info (but not actual body content)
@@ -855,10 +960,10 @@ Technical details have been logged for our development team to investigate and i
    */
   private getClientIp(req: Request): string {
     return (
-      req.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-      req.get('x-real-ip') ||
+      req.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      req.get("x-real-ip") ||
       req.socket?.remoteAddress ||
-      'unknown'
+      "unknown"
     );
   }
 
@@ -867,11 +972,11 @@ Technical details have been logged for our development team to investigate and i
    */
   private matchesPattern(url: string, pattern: string): boolean {
     const regexPattern = pattern
-      .replace(/\*\*/g, '.*')  // ** matches any path
-      .replace(/\*/g, '[^/]*') // * matches any segment
-      .replace(/\//g, '\\/');  // escape slashes
+      .replace(/\*\*/g, ".*") // ** matches any path
+      .replace(/\*/g, "[^/]*") // * matches any segment
+      .replace(/\//g, "\\/"); // escape slashes
 
-    const regex = new RegExp(`^${regexPattern}$`, 'i');
+    const regex = new RegExp(`^${regexPattern}$`, "i");
     return regex.test(url);
   }
 
@@ -904,6 +1009,6 @@ Technical details have been logged for our development team to investigate and i
    */
   clearPerformanceMetrics(): void {
     this.performanceMetrics.clear();
-    this.logger.log('Performance metrics cleared');
+    this.logger.log("Performance metrics cleared");
   }
 }

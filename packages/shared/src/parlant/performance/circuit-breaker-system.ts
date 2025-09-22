@@ -17,9 +17,9 @@
  * @created 2025-09-21
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { EventEmitter } from 'events';
-import { performance } from 'perf_hooks';
+import { Injectable, Logger } from "@nestjs/common";
+import { EventEmitter } from "events";
+import { performance } from "perf_hooks";
 
 // Type guards
 function isError(error: unknown): error is Error {
@@ -28,14 +28,14 @@ function isError(error: unknown): error is Error {
 
 function getErrorMessage(error: unknown): string {
   if (isError(error)) return error.message;
-  if (typeof error === 'string') return error;
-  return 'An unknown error occurred';
+  if (typeof error === "string") return error;
+  return "An unknown error occurred";
 }
 
 /**
  * Circuit breaker states
  */
-type CircuitState = 'closed' | 'open' | 'half-open';
+type CircuitState = "closed" | "open" | "half-open";
 
 /**
  * Circuit breaker configuration
@@ -70,7 +70,7 @@ interface CircuitMonitoringConfig {
  */
 interface FallbackConfig {
   enabled: boolean;
-  strategy: 'cache' | 'secondary' | 'default' | 'custom';
+  strategy: "cache" | "secondary" | "default" | "custom";
   cacheEnabled: boolean;
   cacheTtl: number;
   secondaryEndpoints: string[];
@@ -160,16 +160,23 @@ class CircuitBreaker {
   private readonly logger = new Logger(`CircuitBreaker-${this.config.name}`);
   private readonly eventEmitter = new EventEmitter();
 
-  private state: CircuitState = 'closed';
+  private state: CircuitState = "closed";
   private readonly metrics: CircuitMetrics;
-  private readonly callHistory: Array<{ success: boolean; responseTime: number; timestamp: Date }> = [];
+  private readonly callHistory: Array<{
+    success: boolean;
+    responseTime: number;
+    timestamp: Date;
+  }> = [];
   private halfOpenCalls = 0;
   private lastFailureTime?: Date;
   private recoveryTimer?: NodeJS.Timeout;
 
   // Failover management
   private readonly failoverEndpoints: FailoverEndpoint[] = [];
-  private readonly fallbackCache = new Map<string, { data: any; timestamp: Date; ttl: number }>();
+  private readonly fallbackCache = new Map<
+    string,
+    { data: any; timestamp: Date; ttl: number }
+  >();
 
   // Health monitoring
   private healthCheckInterval?: NodeJS.Timeout;
@@ -190,22 +197,25 @@ class CircuitBreaker {
       key?: string;
       timeout?: number;
       retries?: number;
-    } = {}
+    } = {},
   ): Promise<ExecutionResult<T>> {
     const startTime = performance.now();
-    const key = options.key || 'default';
+    const key = options.key || "default";
 
     // Check circuit state
-    if (this.state === 'open') {
+    if (this.state === "open") {
       return this.handleOpenCircuit<T>(key, args, startTime);
     }
 
     // Check half-open state limits
-    if (this.state === 'half-open' && this.halfOpenCalls >= this.config.halfOpenMaxCalls) {
+    if (
+      this.state === "half-open" &&
+      this.halfOpenCalls >= this.config.halfOpenMaxCalls
+    ) {
       return this.handleOpenCircuit<T>(key, args, startTime);
     }
 
-    if (this.state === 'half-open') {
+    if (this.state === "half-open") {
       this.halfOpenCalls++;
     }
 
@@ -218,7 +228,7 @@ class CircuitBreaker {
       this.recordSuccess(responseTime);
 
       // Check if we should transition from half-open to closed
-      if (this.state === 'half-open') {
+      if (this.state === "half-open") {
         this.transitionToClosed();
       }
 
@@ -227,9 +237,8 @@ class CircuitBreaker {
         result,
         responseTime,
         fromFallback: false,
-        circuitState: this.state
+        circuitState: this.state,
       };
-
     } catch (error) {
       const responseTime = performance.now() - startTime;
 
@@ -244,21 +253,27 @@ class CircuitBreaker {
       // Try fallback
       if (this.config.fallback.enabled) {
         try {
-          const fallbackResult = await this.executeFallback<T>(key, args, error);
+          const fallbackResult = await this.executeFallback<T>(
+            key,
+            args,
+            error,
+          );
           return {
             success: true,
             result: fallbackResult,
             responseTime: performance.now() - startTime,
             fromFallback: true,
-            circuitState: this.state
+            circuitState: this.state,
           };
         } catch (fallbackError) {
           return {
             success: false,
-            error: isError(fallbackError) ? fallbackError : new Error(getErrorMessage(fallbackError)),
+            error: isError(fallbackError)
+              ? fallbackError
+              : new Error(getErrorMessage(fallbackError)),
             responseTime: performance.now() - startTime,
             fromFallback: true,
-            circuitState: this.state
+            circuitState: this.state,
           };
         }
       }
@@ -268,7 +283,7 @@ class CircuitBreaker {
         error: isError(error) ? error : new Error(getErrorMessage(error)),
         responseTime,
         fromFallback: false,
-        circuitState: this.state
+        circuitState: this.state,
       };
     }
   }
@@ -285,7 +300,7 @@ class CircuitBreaker {
    * Reset circuit breaker
    */
   reset(): void {
-    this.state = 'closed';
+    this.state = "closed";
     this.halfOpenCalls = 0;
     this.lastFailureTime = undefined;
     this.callHistory.length = 0;
@@ -296,7 +311,7 @@ class CircuitBreaker {
     }
 
     this.logger.log(`Circuit breaker ${this.config.name} reset`);
-    this.eventEmitter.emit('circuit-reset', { name: this.config.name });
+    this.eventEmitter.emit("circuit-reset", { name: this.config.name });
   }
 
   /**
@@ -327,33 +342,38 @@ class CircuitBreaker {
       isHealthy: true,
       responseTime: 0,
       errorCount: 0,
-      successCount: 0
+      successCount: 0,
     });
 
     // Sort by priority (higher priority first)
     this.failoverEndpoints.sort((a, b) => b.priority - a.priority);
 
-    this.logger.log(`Added failover endpoint: ${endpoint} (priority: ${priority})`);
+    this.logger.log(
+      `Added failover endpoint: ${endpoint} (priority: ${priority})`,
+    );
   }
 
   // Private methods
 
-  private async executeWithTimeout<T>(fn: () => Promise<T>, timeout?: number): Promise<T> {
+  private async executeWithTimeout<T>(
+    fn: () => Promise<T>,
+    timeout?: number,
+  ): Promise<T> {
     if (!timeout) {
       return fn();
     }
 
     return new Promise((resolve, reject) => {
       const timer = setTimeout(() => {
-        reject(new Error('Execution timeout'));
+        reject(new Error("Execution timeout"));
       }, timeout);
 
       fn()
-        .then(result => {
+        .then((result) => {
           clearTimeout(timer);
           resolve(result);
         })
-        .catch(error => {
+        .catch((error) => {
           clearTimeout(timer);
           reject(error);
         });
@@ -363,62 +383,72 @@ class CircuitBreaker {
   private async handleOpenCircuit<T>(
     key: string,
     args: any[],
-    startTime: number
+    startTime: number,
   ): Promise<ExecutionResult<T>> {
     this.metrics.rejectedCalls++;
 
     if (this.config.fallback.enabled) {
       try {
-        const fallbackResult = await this.executeFallback<T>(key, args, new Error('Circuit breaker open'));
+        const fallbackResult = await this.executeFallback<T>(
+          key,
+          args,
+          new Error("Circuit breaker open"),
+        );
         return {
           success: true,
           result: fallbackResult,
           responseTime: performance.now() - startTime,
           fromFallback: true,
-          circuitState: this.state
+          circuitState: this.state,
         };
       } catch (fallbackError) {
         return {
           success: false,
-          error: isError(fallbackError) ? fallbackError : new Error(getErrorMessage(fallbackError)),
+          error: isError(fallbackError)
+            ? fallbackError
+            : new Error(getErrorMessage(fallbackError)),
           responseTime: performance.now() - startTime,
           fromFallback: true,
-          circuitState: this.state
+          circuitState: this.state,
         };
       }
     }
 
     return {
       success: false,
-      error: new Error('Circuit breaker is open'),
+      error: new Error("Circuit breaker is open"),
       responseTime: performance.now() - startTime,
       fromFallback: false,
-      circuitState: this.state
+      circuitState: this.state,
     };
   }
 
-  private async executeFallback<T>(key: string, args: any[], error: unknown): Promise<T> {
+  private async executeFallback<T>(
+    key: string,
+    args: any[],
+    error: unknown,
+  ): Promise<T> {
     switch (this.config.fallback.strategy) {
-      case 'cache':
+      case "cache":
         return this.executeCacheFallback<T>(key);
 
-      case 'secondary':
+      case "secondary":
         return this.executeSecondaryFallback<T>(args);
 
-      case 'default':
+      case "default":
         return this.config.fallback.defaultResponse;
 
-      case 'custom':
+      case "custom":
         if (this.config.fallback.customFallback) {
           return this.config.fallback.customFallback(
             isError(error) ? error : new Error(getErrorMessage(error)),
-            args
+            args,
           );
         }
-        throw new Error('Custom fallback not configured');
+        throw new Error("Custom fallback not configured");
 
       default:
-        throw new Error('Invalid fallback strategy');
+        throw new Error("Invalid fallback strategy");
     }
   }
 
@@ -426,7 +456,7 @@ class CircuitBreaker {
     const cached = this.fallbackCache.get(key);
 
     if (!cached) {
-      throw new Error('No cached fallback available');
+      throw new Error("No cached fallback available");
     }
 
     const now = Date.now();
@@ -434,17 +464,19 @@ class CircuitBreaker {
 
     if (age > cached.ttl) {
       this.fallbackCache.delete(key);
-      throw new Error('Cached fallback expired');
+      throw new Error("Cached fallback expired");
     }
 
     return cached.data;
   }
 
   private async executeSecondaryFallback<T>(args: any[]): Promise<T> {
-    const healthyEndpoints = this.failoverEndpoints.filter(ep => ep.isHealthy);
+    const healthyEndpoints = this.failoverEndpoints.filter(
+      (ep) => ep.isHealthy,
+    );
 
     if (healthyEndpoints.length === 0) {
-      throw new Error('No healthy failover endpoints available');
+      throw new Error("No healthy failover endpoints available");
     }
 
     // Try endpoints in priority order
@@ -461,15 +493,18 @@ class CircuitBreaker {
       }
     }
 
-    throw new Error('All failover endpoints failed');
+    throw new Error("All failover endpoints failed");
   }
 
-  private async callFailoverEndpoint<T>(endpoint: FailoverEndpoint, args: any[]): Promise<T> {
+  private async callFailoverEndpoint<T>(
+    endpoint: FailoverEndpoint,
+    args: any[],
+  ): Promise<T> {
     const startTime = performance.now();
 
     // Implement actual HTTP call to failover endpoint
     // This is a placeholder implementation
-    await new Promise(resolve => setTimeout(resolve, Math.random() * 100));
+    await new Promise((resolve) => setTimeout(resolve, Math.random() * 100));
 
     endpoint.responseTime = performance.now() - startTime;
 
@@ -477,12 +512,17 @@ class CircuitBreaker {
     return {} as T;
   }
 
-  private updateEndpointHealth(endpoint: FailoverEndpoint, success: boolean): void {
+  private updateEndpointHealth(
+    endpoint: FailoverEndpoint,
+    success: boolean,
+  ): void {
     const totalCalls = endpoint.successCount + endpoint.errorCount;
     const successRate = totalCalls > 0 ? endpoint.successCount / totalCalls : 1;
 
     endpoint.healthScore = successRate;
-    endpoint.isHealthy = successRate >= 0.7 && endpoint.responseTime < this.config.slowCallDurationThreshold;
+    endpoint.isHealthy =
+      successRate >= 0.7 &&
+      endpoint.responseTime < this.config.slowCallDurationThreshold;
     endpoint.lastHealthCheck = new Date();
   }
 
@@ -493,7 +533,7 @@ class CircuitBreaker {
     this.callHistory.push({
       success: true,
       responseTime,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     if (responseTime > this.config.slowCallDurationThreshold) {
@@ -512,13 +552,15 @@ class CircuitBreaker {
     this.callHistory.push({
       success: false,
       responseTime,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     this.cleanupCallHistory();
     this.updateAverageResponseTime(responseTime);
 
-    this.logger.error(`Circuit breaker ${this.config.name} recorded failure: ${getErrorMessage(error)}`);
+    this.logger.error(
+      `Circuit breaker ${this.config.name} recorded failure: ${getErrorMessage(error)}`,
+    );
   }
 
   private shouldOpenCircuit(): boolean {
@@ -527,51 +569,65 @@ class CircuitBreaker {
     }
 
     const recentCalls = this.getRecentCalls();
-    const failureRate = recentCalls.filter(call => !call.success).length / recentCalls.length;
+    const failureRate =
+      recentCalls.filter((call) => !call.success).length / recentCalls.length;
 
     return failureRate >= this.config.errorThresholdPercentage / 100;
   }
 
   private transitionToOpen(): void {
     const previousState = this.state;
-    this.state = 'open';
+    this.state = "open";
     this.halfOpenCalls = 0;
     this.metrics.failoverCount++;
 
-    this.recordStateTransition(previousState, 'open', 'Error threshold exceeded');
+    this.recordStateTransition(
+      previousState,
+      "open",
+      "Error threshold exceeded",
+    );
 
     // Schedule recovery attempt
     this.scheduleRecovery();
 
     this.logger.warn(`Circuit breaker ${this.config.name} opened`);
-    this.eventEmitter.emit('circuit-opened', { name: this.config.name, metrics: this.metrics });
+    this.eventEmitter.emit("circuit-opened", {
+      name: this.config.name,
+      metrics: this.metrics,
+    });
   }
 
   private transitionToHalfOpen(): void {
     const previousState = this.state;
-    this.state = 'half-open';
+    this.state = "half-open";
     this.halfOpenCalls = 0;
     this.metrics.recoveryAttempts++;
 
-    this.recordStateTransition(previousState, 'half-open', 'Recovery timeout elapsed');
+    this.recordStateTransition(
+      previousState,
+      "half-open",
+      "Recovery timeout elapsed",
+    );
 
-    this.logger.log(`Circuit breaker ${this.config.name} transitioned to half-open`);
-    this.eventEmitter.emit('circuit-half-open', { name: this.config.name });
+    this.logger.log(
+      `Circuit breaker ${this.config.name} transitioned to half-open`,
+    );
+    this.eventEmitter.emit("circuit-half-open", { name: this.config.name });
   }
 
   private transitionToClosed(): void {
     const previousState = this.state;
-    this.state = 'closed';
+    this.state = "closed";
     this.halfOpenCalls = 0;
 
-    if (previousState === 'half-open') {
+    if (previousState === "half-open") {
       this.metrics.lastRecoveryTime = new Date();
     }
 
-    this.recordStateTransition(previousState, 'closed', 'Recovery successful');
+    this.recordStateTransition(previousState, "closed", "Recovery successful");
 
     this.logger.log(`Circuit breaker ${this.config.name} closed`);
-    this.eventEmitter.emit('circuit-closed', { name: this.config.name });
+    this.eventEmitter.emit("circuit-closed", { name: this.config.name });
   }
 
   private scheduleRecovery(): void {
@@ -584,14 +640,20 @@ class CircuitBreaker {
     }, this.config.recoveryTimeout);
   }
 
-  private getRecentCalls(): Array<{ success: boolean; responseTime: number; timestamp: Date }> {
+  private getRecentCalls(): Array<{
+    success: boolean;
+    responseTime: number;
+    timestamp: Date;
+  }> {
     const cutoff = Date.now() - this.config.timeWindow;
-    return this.callHistory.filter(call => call.timestamp.getTime() > cutoff);
+    return this.callHistory.filter((call) => call.timestamp.getTime() > cutoff);
   }
 
   private cleanupCallHistory(): void {
     const cutoff = Date.now() - this.config.timeWindow;
-    const startIndex = this.callHistory.findIndex(call => call.timestamp.getTime() > cutoff);
+    const startIndex = this.callHistory.findIndex(
+      (call) => call.timestamp.getTime() > cutoff,
+    );
 
     if (startIndex > 0) {
       this.callHistory.splice(0, startIndex);
@@ -607,8 +669,10 @@ class CircuitBreaker {
     const recentCalls = this.getRecentCalls();
 
     if (recentCalls.length > 0) {
-      const failures = recentCalls.filter(call => !call.success).length;
-      const slowCalls = recentCalls.filter(call => call.responseTime > this.config.slowCallDurationThreshold).length;
+      const failures = recentCalls.filter((call) => !call.success).length;
+      const slowCalls = recentCalls.filter(
+        (call) => call.responseTime > this.config.slowCallDurationThreshold,
+      ).length;
 
       this.metrics.errorRate = failures / recentCalls.length;
       this.metrics.slowCallRate = slowCalls / recentCalls.length;
@@ -626,13 +690,18 @@ class CircuitBreaker {
     // Calculate recovery success rate
     if (this.metrics.recoveryAttempts > 0) {
       const successfulRecoveries = this.metrics.stateTransitions.filter(
-        t => t.toState === 'closed' && t.fromState === 'half-open'
+        (t) => t.toState === "closed" && t.fromState === "half-open",
       ).length;
-      this.metrics.recoverySuccessRate = successfulRecoveries / this.metrics.recoveryAttempts;
+      this.metrics.recoverySuccessRate =
+        successfulRecoveries / this.metrics.recoveryAttempts;
     }
   }
 
-  private recordStateTransition(fromState: CircuitState, toState: CircuitState, reason: string): void {
+  private recordStateTransition(
+    fromState: CircuitState,
+    toState: CircuitState,
+    reason: string,
+  ): void {
     const transition: StateTransition = {
       fromState,
       toState,
@@ -641,8 +710,8 @@ class CircuitBreaker {
       metrics: {
         errorRate: this.metrics.errorRate,
         responseTime: this.metrics.averageResponseTime,
-        callVolume: this.callHistory.length
-      }
+        callVolume: this.callHistory.length,
+      },
     };
 
     this.metrics.stateTransitions.push(transition);
@@ -656,7 +725,7 @@ class CircuitBreaker {
   private initializeMetrics(): CircuitMetrics {
     return {
       name: this.config.name,
-      state: 'closed',
+      state: "closed",
       totalCalls: 0,
       successfulCalls: 0,
       failedCalls: 0,
@@ -669,7 +738,7 @@ class CircuitBreaker {
       uptime: 0,
       failoverCount: 0,
       recoveryAttempts: 0,
-      recoverySuccessRate: 1.0
+      recoverySuccessRate: 1.0,
     };
   }
 
@@ -694,24 +763,26 @@ class CircuitBreaker {
     }
   }
 
-  private async checkEndpointHealth(endpoint: FailoverEndpoint): Promise<HealthCheckResult> {
+  private async checkEndpointHealth(
+    endpoint: FailoverEndpoint,
+  ): Promise<HealthCheckResult> {
     const startTime = performance.now();
 
     try {
       // Implement actual health check - this is a placeholder
-      await new Promise(resolve => setTimeout(resolve, Math.random() * 50));
+      await new Promise((resolve) => setTimeout(resolve, Math.random() * 50));
 
       return {
         healthy: true,
         responseTime: performance.now() - startTime,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
     } catch (error) {
       return {
         healthy: false,
         responseTime: performance.now() - startTime,
         error: isError(error) ? error : new Error(getErrorMessage(error)),
-        timestamp: new Date()
+        timestamp: new Date(),
       };
     }
   }
@@ -752,7 +823,10 @@ export class CircuitBreakerSystem {
   /**
    * Create or get circuit breaker
    */
-  getCircuitBreaker(name: string, config?: Partial<CircuitBreakerConfig>): CircuitBreaker {
+  getCircuitBreaker(
+    name: string,
+    config?: Partial<CircuitBreakerConfig>,
+  ): CircuitBreaker {
     if (this.circuitBreakers.has(name)) {
       return this.circuitBreakers.get(name)!;
     }
@@ -772,16 +846,16 @@ export class CircuitBreakerSystem {
         metricsWindow: 60000,
         healthCheckInterval: 30000,
         alertingEnabled: true,
-        detailedLogging: false
+        detailedLogging: false,
       },
       fallback: {
         enabled: true,
-        strategy: 'secondary',
+        strategy: "secondary",
         cacheEnabled: true,
         cacheTtl: 300000,
         secondaryEndpoints: [],
-        defaultResponse: null
-      }
+        defaultResponse: null,
+      },
     };
 
     const finalConfig = { ...defaultConfig, ...config };
@@ -823,28 +897,32 @@ export class CircuitBreakerSystem {
 
     for (const metrics of allMetrics.values()) {
       if (metrics.stateTransitions.length > 0) {
-        const lastTransition = metrics.stateTransitions[metrics.stateTransitions.length - 1];
+        const lastTransition =
+          metrics.stateTransitions[metrics.stateTransitions.length - 1];
         // Assuming failover time is measured in state transitions
         totalFailoverTime += 50; // Placeholder - implement actual failover time tracking
       }
 
       totalRecoverySuccessRate += metrics.recoverySuccessRate;
 
-      if (metrics.state === 'closed') {
+      if (metrics.state === "closed") {
         availableCircuits++;
       }
     }
 
-    const avgFailoverTime = allMetrics.size > 0 ? totalFailoverTime / allMetrics.size : 0;
-    const avgRecoverySuccessRate = allMetrics.size > 0 ? totalRecoverySuccessRate / allMetrics.size : 1;
-    const systemAvailability = allMetrics.size > 0 ? availableCircuits / allMetrics.size : 1;
+    const avgFailoverTime =
+      allMetrics.size > 0 ? totalFailoverTime / allMetrics.size : 0;
+    const avgRecoverySuccessRate =
+      allMetrics.size > 0 ? totalRecoverySuccessRate / allMetrics.size : 1;
+    const systemAvailability =
+      allMetrics.size > 0 ? availableCircuits / allMetrics.size : 1;
 
     return {
       failoverTime: avgFailoverTime <= 100, // <100ms
       recoveryDetection: true, // <30 seconds - implement actual measurement
       falsePositiveRate: true, // <1% - implement false positive tracking
       systemAvailability: systemAvailability >= 0.9999, // >99.99%
-      recoverySuccessRate: avgRecoverySuccessRate >= 0.95 // >95%
+      recoverySuccessRate: avgRecoverySuccessRate >= 0.95, // >95%
     };
   }
 
@@ -855,7 +933,7 @@ export class CircuitBreakerSystem {
     for (const circuit of this.circuitBreakers.values()) {
       circuit.reset();
     }
-    this.logger.log('All circuit breakers reset');
+    this.logger.log("All circuit breakers reset");
   }
 
   /**
@@ -875,5 +953,5 @@ export {
   CircuitBreakerConfig,
   CircuitMetrics,
   ExecutionResult,
-  CircuitState
+  CircuitState,
 };
