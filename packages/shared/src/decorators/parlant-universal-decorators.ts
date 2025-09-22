@@ -1213,7 +1213,7 @@ function generateBusinessValidationConfig(
     cacheable: businessConfig.impactLevel !== "CRITICAL",
     requiresReason: businessConfig.impactLevel !== "LOW",
     customRules: businessConfig.businessRules.map((rule, index) => ({
-      id: `business_rule_${index}_${rule.name.replace(/\s+/g, '_').toLowerCase()}`,
+      id: `business_rule_${index}_${rule.name.replace(/\s+/g, "_").toLowerCase()}`,
       name: rule.name,
       type: ValidationRuleType._BUSINESS_LOGIC,
       config: {
@@ -1360,14 +1360,8 @@ export function getAllParlantUniversalMetadata(
     performance: reflector.get(PARLANT_PERFORMANCE_KEY, target),
     emergency: reflector.get(PARLANT_EMERGENCY_KEY, target),
     audit: reflector.get(PARLANT_AUDIT_KEY, target),
-    endpointAnalysis: reflector.get(
-      PARLANT_ENDPOINT_ANALYSIS_KEY,
-      target,
-    ),
-    configOverride: reflector.get(
-      PARLANT_CONFIGURATION_OVERRIDE_KEY,
-      target,
-    ),
+    endpointAnalysis: reflector.get(PARLANT_ENDPOINT_ANALYSIS_KEY, target),
+    configOverride: reflector.get(PARLANT_CONFIGURATION_OVERRIDE_KEY, target),
   };
 }
 

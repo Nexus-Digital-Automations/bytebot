@@ -190,7 +190,7 @@ export class EnterpriseTrafficManagerService {
         optimizations,
         applicationResults,
         effectivenessMetrics,
-        recommendedActions: await this.trafficOptimizer.generateRecommendedActions(effectivenessMetrics)
+        recommendedActions: await this.trafficOptimizer.generateRecommendations(effectivenessMetrics)
       };
 
     } catch (error) {
@@ -1185,7 +1185,7 @@ class TrafficOptimizationEngine {
     };
   }
 
-  async generateRecommendedActions(metrics: any): Promise<any> {
+  async generateRecommendations(metrics: any): Promise<any> {
     return [];
   }
 

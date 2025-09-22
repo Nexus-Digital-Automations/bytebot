@@ -1,17 +1,21 @@
 /**
- * PARLANT Phase 1 Performance Monitoring System
+ * PARLANT Enterprise Performance Monitoring & Analytics System
  *
- * Comprehensive performance monitoring, optimization, and alerting system for
- * PARLANT database function wrapping with enterprise-grade performance analytics
- * and sub-1000ms P95 response time targets.
+ * Comprehensive enterprise-grade monitoring system with advanced analytics,
+ * predictive insights, SLA monitoring, and automated optimization for
+ * PARLANT database function wrapping with ML-powered performance analytics.
  *
- * Main Features:
+ * Enterprise Features:
  * - Real-time performance monitoring and metrics collection
+ * - ML-powered predictive analytics and anomaly detection
+ * - Enterprise dashboard with WebSocket real-time updates
+ * - SLA monitoring with automated escalation and compliance tracking
  * - Advanced cache performance analysis and optimization
  * - Intelligent alerting and threshold management
  * - Performance analytics and trending analysis
  * - Regression detection and prevention
  * - Automated response coordination and optimization
+ * - Comprehensive reporting and audit capabilities
  *
  * Performance Targets:
  * - P95 response times under 1000ms for all wrapped functions
@@ -20,9 +24,11 @@
  * - PARLANT communication latency under 200ms
  * - Memory usage optimization and leak detection
  * - Throughput optimization for concurrent operations
+ * - SLA compliance above 99.5% for all tiers
+ * - Predictive breach prevention with 95% accuracy
  *
- * @fileoverview PARLANT performance monitoring system main exports
- * @version 1.0.0
+ * @fileoverview PARLANT enterprise monitoring system main exports
+ * @version 2.0.0
  * @author Performance Monitoring Agent
  */
 
@@ -136,6 +142,64 @@ export {
   type PerformanceBudget,
   type DeploymentInfo,
 } from "./regression-detector";
+
+// Enterprise Dashboard System
+export {
+  EnterpriseDashboard,
+  enterpriseDashboard,
+  startEnterpriseDashboard,
+  type EnterpriseDashboardConfig,
+  type DashboardWidget,
+  type DashboardLayout,
+  type DashboardSnapshot,
+  type DashboardExportRequest,
+  type DashboardSession,
+} from "./enterprise-dashboard";
+
+// ML-Powered Predictive Analytics
+export {
+  PredictiveAnalyticsEngine,
+  predictiveAnalyticsEngine,
+  startPredictiveAnalytics,
+  type PredictiveAnalyticsConfig,
+  type TimeSeriesPoint,
+  type PredictionResult,
+  type AnomalyDetection,
+  type CapacityPrediction,
+  type PerformanceForecast,
+  type PatternDetection,
+  type ModelPerformance,
+} from "./predictive-analytics";
+
+// Enterprise SLA Monitoring
+export {
+  SLAMonitor,
+  slaMonitor,
+  startSLAMonitoring,
+  type SLAMonitorConfig,
+  type SLAObjective,
+  type SLATier,
+  type CustomerSLA,
+  type SLACompliance,
+  type SLABreach,
+  type SLAPrediction,
+  type EscalationRule,
+  type EscalationAction,
+  type SLAReportConfig,
+} from "./sla-monitor";
+
+// Comprehensive Enterprise Monitoring System
+export {
+  ComprehensiveMonitoringSystem,
+  comprehensiveMonitoringSystem,
+  startComprehensiveMonitoring,
+  setupParlantMonitoring,
+  type ComprehensiveMonitoringConfig,
+  type SystemHealthStatus,
+  type ComprehensiveReport,
+  type OptimizationRecommendation,
+  type AlertCorrelation,
+} from "./comprehensive-monitoring-system";
 
 /**
  * Integrated Performance Monitoring System

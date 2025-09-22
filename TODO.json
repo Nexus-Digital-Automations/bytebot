@@ -2457,12 +2457,24 @@
       "updated_at": "2025-09-21T22:54:08.941Z"
     },
     {
-      "status": "pending",
+      "status": "in_progress",
       "created_at": "2025-09-21T22:44:05.387Z",
       "title": "Eliminate ALL 191 TS2304 Cannot find name errors through systematic name resolution",
       "description": "CRITICAL MISSION: Systematically resolve all TS2304 Cannot find name errors through: 1) Get high-density TS2304 files with npx tsc --noEmit analysis, 2) Categorize missing imports vs missing declarations, 3) Add systematic imports from correct modules, 4) Fix module path resolution issues, 5) Add missing type declarations, 6) Resolve namespace/module conflicts. SUCCESS CRITERIA: Eliminate 50+ TS2304 errors minimum (25% reduction target), establish clean import/declaration patterns, resolve all name resolution cascades, create systematic module boundary clarity. Deploy multiple concurrent agents for comprehensive systematic resolution.",
       "category": "error",
-      "id": "error_1758494645387_t1bcdecbbk"
+      "id": "error_1758494645387_t1bcdecbbk",
+      "assigned_agent": "dev_session_1758515387360_1_general_b1d04fd4",
+      "started_at": "2025-09-22T04:31:00.427Z",
+      "claimed_by": "dev_session_1758515387360_1_general_b1d04fd4",
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758515387360_1_general_b1d04fd4",
+          "role": "primary",
+          "assignedAt": "2025-09-22T04:31:00.427Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        }
+      ]
     },
     {
       "status": "completed",
@@ -2508,7 +2520,25 @@
       "title": "Agent 1: Fix Performance & Audit Services TS2551 Errors",
       "description": "Resolve 15 property access errors in performance-audit-compliance and query-optimization services. Focus on method name corrections: generateComplianceOverview->generateComplianceReport, analyzePerformanceCompliance->checkPerformanceCompliance",
       "category": "error",
-      "id": "error_1758494914306_24zeqyfrac8i"
+      "id": "error_1758494914306_24zeqyfrac8i",
+      "assigned_agent": null,
+      "started_at": null,
+      "claimed_by": null,
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758515817018_1_general_8e104795",
+          "role": "primary",
+          "assignedAt": "2025-09-22T04:45:20.461Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        },
+        {
+          "agent": "dev_session_1758515817018_1_general_8e104795",
+          "action": "auto_unassign_stale",
+          "timestamp": "2025-09-22T05:21:54.204Z",
+          "reason": "Agent became stale (inactive >30 minutes)"
+        }
+      ]
     },
     {
       "status": "pending",
@@ -2516,7 +2546,25 @@
       "title": "Agent 5: Fix Enterprise Integration TS2551 Errors",
       "description": "Resolve 6 property access errors in enterprise-sso-integration, conversational-session-manager, and conversational-mfa-workflows services. Fix property access and type assertions",
       "category": "error",
-      "id": "error_1758494933707_rgebvmh03tl"
+      "id": "error_1758494933707_rgebvmh03tl",
+      "assigned_agent": null,
+      "started_at": null,
+      "claimed_by": null,
+      "agent_assignment_history": [
+        {
+          "agentId": "dev_session_1758515817018_1_general_8e104795",
+          "role": "primary",
+          "assignedAt": "2025-09-22T04:54:25.176Z",
+          "reassignReason": null,
+          "claimPriority": "normal"
+        },
+        {
+          "agent": "dev_session_1758515817018_1_general_8e104795",
+          "action": "auto_unassign_stale",
+          "timestamp": "2025-09-22T05:21:54.204Z",
+          "reason": "Agent became stale (inactive >30 minutes)"
+        }
+      ]
     }
   ],
   "agents": {},

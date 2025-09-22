@@ -585,7 +585,7 @@ export class ParlantConversationalValidationEngine {
       validationMode: request.validationMode,
       conversationFlow,
       contextualInsights: await this.generateContextualInsights(request),
-      recommendedActions: await this.generateRecommendedActions(request),
+      recommendedActions: await this.generateRecommendations(request),
       performanceMetrics: this.performanceMetrics,
       nextSteps: approved ? await this.generateNextSteps(request) : [],
       suggestedAlternatives: approved
@@ -642,7 +642,7 @@ export class ParlantConversationalValidationEngine {
       validationMode: request.validationMode,
       conversationFlow,
       contextualInsights: await this.generateContextualInsights(request),
-      recommendedActions: await this.generateRecommendedActions(request),
+      recommendedActions: await this.generateRecommendations(request),
       performanceMetrics: this.performanceMetrics,
       nextSteps: approved ? await this.generateNextSteps(request) : [],
       suggestedAlternatives: approved
@@ -696,7 +696,7 @@ export class ParlantConversationalValidationEngine {
       validationMode: request.validationMode,
       conversationFlow,
       contextualInsights: await this.generateContextualInsights(request),
-      recommendedActions: await this.generateRecommendedActions(request),
+      recommendedActions: await this.generateRecommendations(request),
       performanceMetrics: this.performanceMetrics,
       nextSteps: approved ? await this.generateNextSteps(request) : [],
       suggestedAlternatives: approved
@@ -1453,7 +1453,7 @@ export class ParlantConversationalValidationEngine {
     ];
   }
 
-  private async generateRecommendedActions(
+  private async generateRecommendations(
     _request: ConversationalValidationRequest,
   ): Promise<RecommendedAction[]> {
     return [

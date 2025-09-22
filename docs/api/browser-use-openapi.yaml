@@ -1,0 +1,1768 @@
+openapi: 3.0.3
+info:
+  title: Bytebot Browser-Use API
+  version: 2.0.0
+  description: |
+    Comprehensive REST API for browser automation integration with the browser-use framework.
+
+    ## Overview
+    The Bytebot Browser-Use API provides enterprise-grade browser control, session management,
+    and data extraction capabilities with 100% local-only deployment architecture compliance.
+
+    ## Architecture Features
+    - **Local-only deployment**: Docker Compose compatible, no cloud dependencies
+    - **Enterprise security**: JWT authentication and role-based access control
+    - **Comprehensive validation**: Request validation and response transformation
+    - **Real-time monitoring**: Health checks, performance metrics, and system diagnostics
+    - **Audit logging**: Complete audit trail and error tracking
+    - **Circuit breaker patterns**: Reliability and fault tolerance
+    - **Rate limiting**: Protection against abuse and resource exhaustion
+
+    ## API Categories
+    1. **Browser Task Management** - Create, execute, monitor, and manage browser automation tasks
+    2. **Session Management** - Full lifecycle management of browser sessions with advanced monitoring
+    3. **Browser Operations** - Screenshots, DOM manipulation, navigation, and form automation
+    4. **Data Processing** - Extract, transform, and export structured data from web pages
+    5. **Real-time Monitoring** - Health checks, performance metrics, and system diagnostics
+    6. **Results Management** - Comprehensive results retrieval, export, and audit trail
+
+    ## Authentication
+    All endpoints require JWT authentication with appropriate role-based permissions.
+
+    ## Rate Limiting
+    API endpoints are rate-limited to prevent abuse. Limits vary by endpoint and user role.
+
+    ## Local-only Architecture
+    This API is designed for local deployment only and includes no cloud dependencies.
+    All data processing, storage, and browser automation occurs locally within your infrastructure.
+
+  contact:
+    name: Bytebot Development Team
+    url: https://github.com/yourusername/bytebot
+    email: support@bytebot.dev
+  license:
+    name: MIT License
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+  - url: http://localhost:8080
+    description: Local production server (Docker)
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: browser-use
+    description: Browser automation endpoints
+  - name: tasks
+    description: Browser task management
+  - name: sessions
+    description: Browser session management
+  - name: screenshots
+    description: Screenshot capture and retrieval
+  - name: dom
+    description: DOM interaction and manipulation
+  - name: forms
+    description: Form automation
+  - name: data
+    description: Data extraction and processing
+  - name: monitoring
+    description: Health checks and monitoring
+  - name: results
+    description: Results and export management
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    # Base Response Types
+    BaseResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: Response timestamp
+        correlationId:
+          type: string
+          description: Unique request correlation ID
+
+    ErrorResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            statusCode:
+              type: integer
+              description: HTTP status code
+            message:
+              type: string
+              description: Error message
+            _error:
+              type: string
+              description: Detailed error information
+            path:
+              type: string
+              description: Request path that generated the error
+
+    # Task Management
+    CreateBrowserTaskDto:
+      type: object
+      required:
+        - name
+        - type
+        - steps
+      properties:
+        name:
+          type: string
+          description: Human-readable task name
+          example: "Extract product data from e-commerce site"
+        description:
+          type: string
+          description: Detailed task description
+          example: "Navigate to product pages and extract title, price, and availability"
+        type:
+          type: string
+          enum: ['navigation', 'data_extraction', 'form_filling', 'testing', 'monitoring']
+          description: Type of browser automation task
+        steps:
+          type: array
+          description: Ordered list of automation steps
+          items:
+            $ref: '#/components/schemas/TaskStep'
+        startUrl:
+          type: string
+          format: uri
+          description: Initial URL to navigate to
+          example: "https://example.com/products"
+        timeout:
+          type: integer
+          description: Task timeout in milliseconds
+          example: 300000
+          default: 300000
+        constraints:
+          $ref: '#/components/schemas/TaskConstraints'
+        configuration:
+          $ref: '#/components/schemas/TaskConfiguration'
+
+    TaskStep:
+      type: object
+      required:
+        - id
+        - type
+        - action
+      properties:
+        id:
+          type: string
+          description: Unique step identifier
+        name:
+          type: string
+          description: Human-readable step name
+        type:
+          type: string
+          enum: ['navigate', 'click', 'type', 'wait', 'extract', 'screenshot', 'form_fill']
+        action:
+          type: object
+          description: Step-specific action parameters
+        optional:
+          type: boolean
+          default: false
+        retryCount:
+          type: integer
+          default: 3
+        timeout:
+          type: integer
+          description: Step timeout in milliseconds
+          default: 30000
+
+    TaskConstraints:
+      type: object
+      properties:
+        allowedDomains:
+          type: array
+          items:
+            type: string
+          description: List of allowed domains for navigation
+        maxExecutionTime:
+          type: integer
+          description: Maximum execution time in milliseconds
+        maxMemoryUsage:
+          type: integer
+          description: Maximum memory usage in MB
+        headless:
+          type: boolean
+          default: true
+          description: Run browser in headless mode
+
+    TaskConfiguration:
+      type: object
+      properties:
+        browserSettings:
+          $ref: '#/components/schemas/BrowserSettings'
+        screenshotOptions:
+          $ref: '#/components/schemas/ScreenshotOptions'
+        dataExtractionRules:
+          type: object
+          description: Custom data extraction rules
+
+    BrowserSettings:
+      type: object
+      properties:
+        viewport:
+          $ref: '#/components/schemas/Viewport'
+        userAgent:
+          type: string
+        headless:
+          type: boolean
+          default: true
+        disableImages:
+          type: boolean
+          default: false
+        disableJavaScript:
+          type: boolean
+          default: false
+
+    Viewport:
+      type: object
+      properties:
+        width:
+          type: integer
+          default: 1920
+        height:
+          type: integer
+          default: 1080
+
+    ScreenshotOptions:
+      type: object
+      properties:
+        fullPage:
+          type: boolean
+          default: false
+        quality:
+          type: integer
+          minimum: 0
+          maximum: 100
+          default: 80
+        format:
+          type: string
+          enum: ['png', 'jpeg']
+          default: 'png'
+
+    BrowserTaskResponseDto:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            taskId:
+              type: string
+              description: Unique task identifier
+            name:
+              type: string
+              description: Task name
+            status:
+              type: string
+              enum: ['pending', 'running', 'completed', 'failed', 'cancelled']
+            progress:
+              $ref: '#/components/schemas/TaskProgress'
+            startedAt:
+              type: string
+              format: date-time
+            completedAt:
+              type: string
+              format: date-time
+            executionTimeMs:
+              type: integer
+            sessionId:
+              type: string
+              description: Associated browser session ID
+            configuration:
+              type: object
+              description: Task configuration
+
+    TaskProgress:
+      type: object
+      properties:
+        currentStep:
+          type: integer
+        totalSteps:
+          type: integer
+        completedSteps:
+          type: integer
+        failedSteps:
+          type: integer
+        percentComplete:
+          type: number
+          format: float
+        estimatedTimeRemaining:
+          type: integer
+          description: Estimated time remaining in milliseconds
+
+    BrowserTaskListResponseDto:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            tasks:
+              type: array
+              items:
+                $ref: '#/components/schemas/BrowserTaskResponseDto'
+            pagination:
+              $ref: '#/components/schemas/PaginationInfo'
+            filters:
+              type: object
+              description: Applied filters
+
+    PaginationInfo:
+      type: object
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+        pages:
+          type: integer
+
+    # Session Management
+    CreateBrowserSessionDto:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: Human-readable session name
+        configuration:
+          $ref: '#/components/schemas/BrowserSettings'
+        persistent:
+          type: boolean
+          default: false
+          description: Whether session should persist across restarts
+        timeout:
+          type: integer
+          description: Session timeout in milliseconds
+          default: 1800000
+
+    BrowserSessionResponseDto:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            sessionId:
+              type: string
+              description: Unique session identifier
+            name:
+              type: string
+            status:
+              type: string
+              enum: ['active', 'idle', 'closed', 'error']
+            createdAt:
+              type: string
+              format: date-time
+            lastActivity:
+              type: string
+              format: date-time
+            configuration:
+              $ref: '#/components/schemas/BrowserSettings'
+            currentUrl:
+              type: string
+              description: Current page URL
+            performance:
+              $ref: '#/components/schemas/SessionPerformance'
+
+    SessionPerformance:
+      type: object
+      properties:
+        memoryUsageMB:
+          type: number
+        cpuUsagePercent:
+          type: number
+        pageLoadTimeMs:
+          type: integer
+        activeConnections:
+          type: integer
+
+    BrowserSessionListResponseDto:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            sessions:
+              type: array
+              items:
+                $ref: '#/components/schemas/BrowserSessionResponseDto'
+
+    # Screenshot Management
+    CaptureScreenshotDto:
+      type: object
+      properties:
+        selector:
+          type: string
+          description: CSS selector for element screenshot
+        fullPage:
+          type: boolean
+          default: false
+        options:
+          $ref: '#/components/schemas/ScreenshotOptions'
+
+    ScreenshotResponseDto:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            screenshotId:
+              type: string
+            sessionId:
+              type: string
+            imageData:
+              type: string
+              format: base64
+              description: Base64 encoded image data
+            metadata:
+              $ref: '#/components/schemas/ScreenshotMetadata'
+
+    ScreenshotMetadata:
+      type: object
+      properties:
+        width:
+          type: integer
+        height:
+          type: integer
+        format:
+          type: string
+        fileSize:
+          type: integer
+        capturedAt:
+          type: string
+          format: date-time
+        url:
+          type: string
+          description: URL when screenshot was taken
+
+    # DOM Interaction
+    BrowserNavigateDto:
+      type: object
+      required:
+        - url
+      properties:
+        url:
+          type: string
+          format: uri
+        waitForSelector:
+          type: string
+          description: CSS selector to wait for after navigation
+        timeout:
+          type: integer
+          default: 30000
+
+    BrowserClickDto:
+      type: object
+      properties:
+        selector:
+          type: string
+          description: CSS selector for element to click
+        coordinates:
+          $ref: '#/components/schemas/Coordinates'
+        button:
+          type: string
+          enum: ['left', 'right', 'middle']
+          default: 'left'
+        clickCount:
+          type: integer
+          default: 1
+        delay:
+          type: integer
+          description: Delay between clicks in milliseconds
+
+    Coordinates:
+      type: object
+      required:
+        - x
+        - y
+      properties:
+        x:
+          type: number
+        y:
+          type: number
+
+    BrowserTypeDto:
+      type: object
+      required:
+        - selector
+        - text
+      properties:
+        selector:
+          type: string
+          description: CSS selector for input element
+        text:
+          type: string
+          description: Text to type
+        delay:
+          type: integer
+          description: Delay between keystrokes in milliseconds
+          default: 0
+        clear:
+          type: boolean
+          description: Clear existing text before typing
+          default: true
+
+    BrowserScrollDto:
+      type: object
+      properties:
+        direction:
+          type: string
+          enum: ['up', 'down', 'left', 'right']
+        amount:
+          type: integer
+          description: Scroll amount in pixels
+        selector:
+          type: string
+          description: Element selector to scroll within
+
+    BrowserElementResponseDto:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            elementInfo:
+              $ref: '#/components/schemas/ElementInfo'
+            actionResult:
+              type: object
+              description: Result of the performed action
+
+    ElementInfo:
+      type: object
+      properties:
+        tagName:
+          type: string
+        attributes:
+          type: object
+        text:
+          type: string
+        visible:
+          type: boolean
+        position:
+          $ref: '#/components/schemas/Coordinates'
+        size:
+          $ref: '#/components/schemas/Size'
+
+    Size:
+      type: object
+      properties:
+        width:
+          type: number
+        height:
+          type: number
+
+    BrowserStateResponseDto:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            currentUrl:
+              type: string
+            title:
+              type: string
+            readyState:
+              type: string
+            screenshot:
+              type: string
+              format: base64
+              description: Optional screenshot data
+            elements:
+              type: array
+              items:
+                $ref: '#/components/schemas/ElementInfo'
+            performance:
+              $ref: '#/components/schemas/PagePerformance'
+
+    PagePerformance:
+      type: object
+      properties:
+        loadTime:
+          type: integer
+        domContentLoaded:
+          type: integer
+        firstContentfulPaint:
+          type: integer
+        networkRequests:
+          type: integer
+
+    # Form Automation
+    FillFormDto:
+      type: object
+      required:
+        - formSelector
+        - fields
+      properties:
+        formSelector:
+          type: string
+          description: CSS selector for the form
+        fields:
+          type: array
+          items:
+            $ref: '#/components/schemas/FormField'
+        validateBefore:
+          type: boolean
+          default: true
+
+    FormField:
+      type: object
+      required:
+        - selector
+        - value
+      properties:
+        selector:
+          type: string
+        value:
+          type: string
+        type:
+          type: string
+          enum: ['text', 'email', 'password', 'select', 'checkbox', 'radio']
+
+    SubmitFormDto:
+      type: object
+      required:
+        - formSelector
+      properties:
+        formSelector:
+          type: string
+        submitSelector:
+          type: string
+          description: CSS selector for submit button
+        waitForNavigation:
+          type: boolean
+          default: true
+
+    FormValidationResponseDto:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            formValid:
+              type: boolean
+            validationErrors:
+              type: array
+              items:
+                $ref: '#/components/schemas/ValidationError'
+            fieldsProcessed:
+              type: integer
+
+    ValidationError:
+      type: object
+      properties:
+        field:
+          type: string
+        message:
+          type: string
+        value:
+          type: string
+
+    # Data Extraction
+    ExtractDataDto:
+      type: object
+      required:
+        - rules
+      properties:
+        rules:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExtractionRule'
+        format:
+          type: string
+          enum: ['json', 'csv', 'xml']
+          default: 'json'
+
+    ExtractionRule:
+      type: object
+      required:
+        - name
+        - selector
+      properties:
+        name:
+          type: string
+          description: Name for the extracted data field
+        selector:
+          type: string
+          description: CSS selector for data extraction
+        attribute:
+          type: string
+          description: HTML attribute to extract (default: text content)
+        transform:
+          type: string
+          description: Data transformation rule
+        multiple:
+          type: boolean
+          default: false
+          description: Extract multiple matches
+
+    DataExtractionResponseDto:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            extractedData:
+              type: object
+              description: Extracted data organized by rule names
+            metadata:
+              $ref: '#/components/schemas/ExtractionMetadata'
+
+    ExtractionMetadata:
+      type: object
+      properties:
+        rulesProcessed:
+          type: integer
+        dataPointsExtracted:
+          type: integer
+        extractionTime:
+          type: integer
+        sourceUrl:
+          type: string
+
+    # Monitoring
+    BrowserMonitoringResponseDto:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            serviceHealth:
+              $ref: '#/components/schemas/ServiceHealth'
+            activeSessions:
+              type: integer
+            runningTasks:
+              type: integer
+            systemResources:
+              $ref: '#/components/schemas/SystemResources'
+
+    ServiceHealth:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: ['healthy', 'degraded', 'unhealthy']
+        uptime:
+          type: integer
+          description: Service uptime in seconds
+        version:
+          type: string
+
+    SystemResources:
+      type: object
+      properties:
+        memoryUsagePercent:
+          type: number
+        cpuUsagePercent:
+          type: number
+        diskUsagePercent:
+          type: number
+        availableMemoryMB:
+          type: number
+
+    TaskStatusResponseDto:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            taskId:
+              type: string
+            status:
+              type: string
+              enum: ['pending', 'running', 'completed', 'failed', 'cancelled']
+            progress:
+              $ref: '#/components/schemas/TaskProgress'
+            currentStep:
+              type: string
+            logs:
+              type: array
+              items:
+                $ref: '#/components/schemas/TaskLogEntry'
+
+    TaskLogEntry:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        level:
+          type: string
+          enum: ['debug', 'info', 'warn', 'error']
+        message:
+          type: string
+        context:
+          type: object
+
+    # Results Management
+    ExportResultsDto:
+      type: object
+      required:
+        - format
+      properties:
+        format:
+          type: string
+          enum: ['JSON', 'CSV', 'XLSX', 'PDF', 'HTML']
+        includeScreenshots:
+          type: boolean
+          default: false
+        includeLogs:
+          type: boolean
+          default: true
+
+    BrowserResultsResponseDto:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            taskId:
+              type: string
+            status:
+              type: string
+              enum: ['SUCCESS', 'FAILED', 'PARTIAL']
+            taskName:
+              type: string
+            startedAt:
+              type: string
+              format: date-time
+            executionTimeMs:
+              type: integer
+            executionSteps:
+              type: array
+              items:
+                $ref: '#/components/schemas/ExecutionStep'
+            extractedData:
+              type: array
+              items:
+                type: object
+            screenshots:
+              type: array
+              items:
+                $ref: '#/components/schemas/ScreenshotInfo'
+            performanceMetrics:
+              $ref: '#/components/schemas/PerformanceMetrics'
+            exportInfo:
+              $ref: '#/components/schemas/ExportInfo'
+
+    ExecutionStep:
+      type: object
+      properties:
+        stepId:
+          type: string
+        name:
+          type: string
+        status:
+          type: string
+          enum: ['completed', 'failed', 'skipped']
+        executionTimeMs:
+          type: integer
+        output:
+          type: object
+
+    ScreenshotInfo:
+      type: object
+      properties:
+        screenshotId:
+          type: string
+        filename:
+          type: string
+        capturedAt:
+          type: string
+          format: date-time
+        step:
+          type: string
+
+    PerformanceMetrics:
+      type: object
+      properties:
+        totalExecutionTimeMs:
+          type: integer
+        averageStepTimeMs:
+          type: number
+        sessionStartupTimeMs:
+          type: integer
+        memoryUsage:
+          $ref: '#/components/schemas/MemoryUsage'
+        cpuUsage:
+          $ref: '#/components/schemas/CpuUsage'
+        networkActivity:
+          $ref: '#/components/schemas/NetworkActivity'
+
+    MemoryUsage:
+      type: object
+      properties:
+        peakMemoryMB:
+          type: number
+        averageMemoryMB:
+          type: number
+
+    CpuUsage:
+      type: object
+      properties:
+        peakCpuPercent:
+          type: number
+        averageCpuPercent:
+          type: number
+
+    NetworkActivity:
+      type: object
+      properties:
+        totalRequests:
+          type: integer
+        totalDataTransferred:
+          type: integer
+
+    ExportInfo:
+      type: object
+      properties:
+        format:
+          type: string
+        filename:
+          type: string
+        fileSize:
+          type: integer
+        exportedAt:
+          type: string
+          format: date-time
+        downloadUrl:
+          type: string
+
+paths:
+  # Task Management Endpoints
+  /api/v1/browser-use/tasks:
+    post:
+      tags: [tasks]
+      summary: Create and execute browser automation task
+      description: Create a new browser automation task and start execution with specified parameters and constraints.
+      operationId: createBrowserTask
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBrowserTaskDto'
+            example:
+              name: "Extract product data"
+              description: "Navigate to product pages and extract title, price, and availability"
+              type: "data_extraction"
+              startUrl: "https://example.com/products"
+              steps:
+                - id: "step1"
+                  name: "Navigate to products page"
+                  type: "navigate"
+                  action:
+                    url: "https://example.com/products"
+                - id: "step2"
+                  name: "Extract product titles"
+                  type: "extract"
+                  action:
+                    selector: ".product-title"
+                    attribute: "text"
+      responses:
+        '201':
+          description: Browser task created and started successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrowserTaskResponseDto'
+        '400':
+          description: Invalid task parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+    get:
+      tags: [tasks]
+      summary: List all browser automation tasks
+      description: Retrieve a list of all browser automation tasks with filtering and pagination options.
+      operationId: listBrowserTasks
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [pending, running, completed, failed, cancelled]
+          description: Filter tasks by status
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 1
+          description: Page number for pagination
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+          description: Number of results per page
+      responses:
+        '200':
+          description: List of browser tasks retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrowserTaskListResponseDto'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/browser-use/tasks/{taskId}:
+    get:
+      tags: [tasks]
+      summary: Get browser task details
+      description: Retrieve detailed information about a specific browser automation task.
+      operationId: getBrowserTask
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Unique identifier of the browser task
+      responses:
+        '200':
+          description: Browser task details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrowserTaskResponseDto'
+        '404':
+          description: Browser task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    put:
+      tags: [tasks]
+      summary: Update browser task
+      description: Update parameters or configuration of an existing browser automation task.
+      operationId: updateBrowserTask
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                configuration:
+                  type: object
+      responses:
+        '200':
+          description: Browser task updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrowserTaskResponseDto'
+        '404':
+          description: Browser task not found
+
+    delete:
+      tags: [tasks]
+      summary: Delete browser task
+      description: Delete a browser automation task and all associated data.
+      operationId: deleteBrowserTask
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Browser task deleted successfully
+        '404':
+          description: Browser task not found
+
+  /api/v1/browser-use/tasks/{taskId}/start:
+    post:
+      tags: [tasks]
+      summary: Start browser task execution
+      description: Start execution of a previously created browser automation task.
+      operationId: startBrowserTask
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Browser task started successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrowserTaskResponseDto'
+        '409':
+          description: Task already running
+
+  /api/v1/browser-use/tasks/{taskId}/stop:
+    post:
+      tags: [tasks]
+      summary: Stop browser task execution
+      description: Stop execution of a running browser automation task.
+      operationId: stopBrowserTask
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Browser task stopped successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrowserTaskResponseDto'
+
+  # Session Management Endpoints
+  /api/v1/browser-use/sessions:
+    post:
+      tags: [sessions]
+      summary: Create browser session
+      description: Create a new browser session with specified configuration and profile settings.
+      operationId: createBrowserSession
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBrowserSessionDto'
+            example:
+              name: "E-commerce automation session"
+              configuration:
+                viewport:
+                  width: 1920
+                  height: 1080
+                headless: true
+                userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+      responses:
+        '201':
+          description: Browser session created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrowserSessionResponseDto'
+        '400':
+          description: Invalid session parameters
+
+    get:
+      tags: [sessions]
+      summary: List active browser sessions
+      description: Retrieve a list of all active browser sessions with their status and activity information.
+      operationId: listBrowserSessions
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: active
+          in: query
+          required: false
+          schema:
+            type: boolean
+          description: Filter by active status
+      responses:
+        '200':
+          description: List of browser sessions retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrowserSessionListResponseDto'
+
+    delete:
+      tags: [sessions]
+      summary: Close all browser sessions
+      description: Close all active browser sessions and cleanup all resources.
+      operationId: closeAllBrowserSessions
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: All browser sessions closed successfully
+
+  /api/v1/browser-use/sessions/{sessionId}:
+    get:
+      tags: [sessions]
+      summary: Get browser session details
+      description: Retrieve detailed information about a specific browser session.
+      operationId: getBrowserSession
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Browser session details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrowserSessionResponseDto'
+        '404':
+          description: Browser session not found
+
+    delete:
+      tags: [sessions]
+      summary: Close browser session
+      description: Close a specific browser session and cleanup all associated resources.
+      operationId: closeBrowserSession
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Browser session closed successfully
+        '404':
+          description: Browser session not found
+
+  # Screenshot Endpoints
+  /api/v1/browser-use/sessions/{sessionId}/screenshot:
+    post:
+      tags: [screenshots]
+      summary: Capture screenshot
+      description: Capture a screenshot of the current browser state in the specified session.
+      operationId: captureScreenshot
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CaptureScreenshotDto'
+            example:
+              fullPage: true
+              options:
+                quality: 90
+                format: "png"
+      responses:
+        '201':
+          description: Screenshot captured successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScreenshotResponseDto'
+        '404':
+          description: Browser session not found
+
+  /api/v1/browser-use/screenshots/{screenshotId}:
+    get:
+      tags: [screenshots]
+      summary: Get screenshot
+      description: Retrieve a specific screenshot by its identifier.
+      operationId: getScreenshot
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: screenshotId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Screenshot retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScreenshotResponseDto'
+        '404':
+          description: Screenshot not found
+
+  # DOM Interaction Endpoints
+  /api/v1/browser-use/sessions/{sessionId}/navigate:
+    post:
+      tags: [dom]
+      summary: Navigate to URL
+      description: Navigate the browser session to a specific URL.
+      operationId: navigateToUrl
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BrowserNavigateDto'
+            example:
+              url: "https://example.com/products"
+              waitForSelector: ".product-list"
+              timeout: 30000
+      responses:
+        '200':
+          description: Navigation completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrowserStateResponseDto'
+
+  /api/v1/browser-use/sessions/{sessionId}/click:
+    post:
+      tags: [dom]
+      summary: Click element
+      description: Click on a DOM element identified by selector or coordinates.
+      operationId: clickElement
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BrowserClickDto'
+            example:
+              selector: ".add-to-cart-button"
+              button: "left"
+              clickCount: 1
+      responses:
+        '200':
+          description: Element clicked successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrowserElementResponseDto'
+
+  /api/v1/browser-use/sessions/{sessionId}/type:
+    post:
+      tags: [dom]
+      summary: Type text
+      description: Type text into an input element identified by selector.
+      operationId: typeText
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BrowserTypeDto'
+            example:
+              selector: "#search-input"
+              text: "product name"
+              clear: true
+              delay: 50
+      responses:
+        '200':
+          description: Text typed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrowserElementResponseDto'
+
+  /api/v1/browser-use/sessions/{sessionId}/scroll:
+    post:
+      tags: [dom]
+      summary: Scroll page
+      description: Scroll the page in the specified direction and amount.
+      operationId: scrollPage
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BrowserScrollDto'
+            example:
+              direction: "down"
+              amount: 500
+      responses:
+        '200':
+          description: Page scrolled successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrowserStateResponseDto'
+
+  /api/v1/browser-use/sessions/{sessionId}/state:
+    get:
+      tags: [dom]
+      summary: Get browser state
+      description: Retrieve the current state of the browser session including DOM elements and page information.
+      operationId: getBrowserState
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: includeScreenshot
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Browser state retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrowserStateResponseDto'
+
+  # Form Automation Endpoints
+  /api/v1/browser-use/sessions/{sessionId}/forms/fill:
+    post:
+      tags: [forms]
+      summary: Fill form
+      description: Automatically fill a form with provided field data.
+      operationId: fillForm
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FillFormDto'
+            example:
+              formSelector: "#contact-form"
+              fields:
+                - selector: "#name"
+                  value: "John Doe"
+                  type: "text"
+                - selector: "#email"
+                  value: "john@example.com"
+                  type: "email"
+              validateBefore: true
+      responses:
+        '200':
+          description: Form filled successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FormValidationResponseDto'
+
+  /api/v1/browser-use/sessions/{sessionId}/forms/submit:
+    post:
+      tags: [forms]
+      summary: Submit form
+      description: Submit a form after validation and optional filling.
+      operationId: submitForm
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmitFormDto'
+            example:
+              formSelector: "#contact-form"
+              submitSelector: "#submit-button"
+              waitForNavigation: true
+      responses:
+        '200':
+          description: Form submitted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrowserStateResponseDto'
+
+  # Data Extraction Endpoints
+  /api/v1/browser-use/sessions/{sessionId}/extract:
+    post:
+      tags: [data]
+      summary: Extract structured data
+      description: Extract structured data from the current page based on specified selectors or AI queries.
+      operationId: extractData
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExtractDataDto'
+            example:
+              rules:
+                - name: "product_titles"
+                  selector: ".product-title"
+                  attribute: "text"
+                  multiple: true
+                - name: "product_prices"
+                  selector: ".price"
+                  attribute: "text"
+                  multiple: true
+              format: "json"
+      responses:
+        '200':
+          description: Data extracted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataExtractionResponseDto'
+
+  # Monitoring Endpoints
+  /api/v1/browser-use/monitoring/health:
+    get:
+      tags: [monitoring]
+      summary: Get browser-use service health
+      description: Check the health status of the browser-use service and all active sessions.
+      operationId: getServiceHealth
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Service health status retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrowserMonitoringResponseDto'
+
+  /api/v1/browser-use/monitoring/tasks/{taskId}/status:
+    get:
+      tags: [monitoring]
+      summary: Get task execution status
+      description: Get real-time status and progress information for a specific browser task.
+      operationId: getTaskStatus
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Task status retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskStatusResponseDto'
+
+  # Results Management Endpoints
+  /api/v1/browser-use/results/{taskId}:
+    get:
+      tags: [results]
+      summary: Get task results
+      description: Retrieve the results and outputs from a completed browser automation task.
+      operationId: getTaskResults
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Task results retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrowserResultsResponseDto'
+
+  /api/v1/browser-use/results/{taskId}/export:
+    post:
+      tags: [results]
+      summary: Export task results
+      description: Export task results in various formats (JSON, CSV, PDF) for download or storage.
+      operationId: exportTaskResults
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExportResultsDto'
+            example:
+              format: "JSON"
+              includeScreenshots: true
+              includeLogs: true
+      responses:
+        '200':
+          description: Results exported successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrowserResultsResponseDto'
+
+components:
+  responses:
+    Unauthorized:
+      description: Authentication required - JWT token missing or invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            statusCode: 401
+            message: "Unauthorized"
+            _error: "JWT token invalid"
+            timestamp: "2024-01-15T10:30:00Z"
+            path: "/api/v1/browser-use/tasks"
+
+    Forbidden:
+      description: Access forbidden - insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            statusCode: 403
+            message: "Forbidden"
+            _error: "Insufficient role permissions"
+            timestamp: "2024-01-15T10:30:00Z"
+            path: "/api/v1/browser-use/tasks"
+
+    RateLimitExceeded:
+      description: Rate limit exceeded - too many requests
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/ErrorResponse'
+              - type: object
+                properties:
+                  retryAfter:
+                    type: integer
+                    description: Seconds to wait before retry
+          example:
+            statusCode: 429
+            message: "Rate limit exceeded"
+            retryAfter: 60
+            timestamp: "2024-01-15T10:30:00Z"
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/ErrorResponse'
+              - type: object
+                properties:
+                  correlationId:
+                    type: string
+                    description: Request correlation ID for troubleshooting
+          example:
+            statusCode: 500
+            message: "Internal server error"
+            _error: "Browser session initialization failed"
+            timestamp: "2024-01-15T10:30:00Z"
+            correlationId: "corr_1705316100_abc123"
+
+    ServiceUnavailable:
+      description: Service unavailable - circuit breaker open
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/ErrorResponse'
+              - type: object
+                properties:
+                  retryAfter:
+                    type: integer
+                    description: Seconds to wait before retry
+          example:
+            statusCode: 503
+            message: "Service temporarily unavailable"
+            retryAfter: 30
+            timestamp: "2024-01-15T10:30:00Z"

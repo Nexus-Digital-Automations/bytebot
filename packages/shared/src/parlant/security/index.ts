@@ -1,14 +1,76 @@
 /**
- * PARLANT Phase 1 Security Context Propagation - Module Index
+ * PARLANT Enterprise Security Framework - Comprehensive Module Index
  *
- * Comprehensive security context propagation system that provides enterprise-grade
- * security controls with zero-trust architecture, multi-factor authentication,
- * and real-time threat detection capabilities.
+ * Military-grade security and compliance framework for PARLANT Bytebot middleware
+ * Supporting SOC2, GDPR, HIPAA, PCI-DSS compliance with zero-trust architecture,
+ * immutable audit trails, and enterprise-grade threat detection.
  *
- * @module ParlantSecurityContextPropagation
- * @version 1.0.0
- * @author PARLANT Phase 1 Security Context Propagation Team
+ * @module ParlantEnterpriseSecurityFramework
+ * @version 2.0.0
+ * @author PARLANT Enterprise Security Team (8 Concurrent Specialists)
  */
+
+// ===========================
+// ENTERPRISE COMPLIANCE FRAMEWORKS
+// ===========================
+
+// SOC2 Type II Compliance
+export * from './compliance/soc2-compliance-engine';
+export * from './compliance/gdpr-compliance-engine';
+export * from './compliance/hipaa-compliance-engine';
+export * from './compliance/pci-dss-compliance-engine';
+
+// ===========================
+// ZERO-TRUST ARCHITECTURE
+// ===========================
+
+export * from './zero-trust/zero-trust-orchestrator';
+export * from './zero-trust/continuous-verification';
+export * from './zero-trust/adaptive-authentication';
+
+// ===========================
+// IMMUTABLE AUDIT SYSTEM
+// ===========================
+
+export * from './audit/immutable-audit-trail';
+export * from './audit/cryptographic-integrity';
+export * from './audit/blockchain-audit-chain';
+
+// ===========================
+// ENTERPRISE THREAT DETECTION
+// ===========================
+
+export * from './threat-detection/ml-behavioral-analytics';
+export * from './threat-detection/predictive-threat-modeling';
+export * from './threat-detection/automated-incident-response';
+
+// ===========================
+// CONVERSATIONAL SECURITY
+// ===========================
+
+export * from './conversational/nlp-security-validator';
+export * from './conversational/context-aware-validation';
+export * from './conversational/prompt-injection-protection';
+
+// ===========================
+// SECURITY OPERATIONS CENTER
+// ===========================
+
+export * from './soc/real-time-dashboard';
+export * from './soc/automated-alerting';
+export * from './soc/incident-orchestration';
+
+// ===========================
+// ENTERPRISE INTEGRATIONS
+// ===========================
+
+export * from './integration/siem-connectors';
+export * from './integration/identity-providers';
+export * from './integration/vulnerability-scanners';
+
+// ===========================
+// EXISTING SECURITY CONTEXT PROPAGATION
+// ===========================
 
 // Core Security Context Management
 export { ParlantSecurityContextManager } from "./context-manager.service";
@@ -454,3 +516,116 @@ export const PARLANT_SECURITY_CONSTANTS = {
     ANALYTICS_QUERY_FAILED: "QUERY_EXECUTION_ERROR",
   },
 } as const;
+
+// ===========================
+// ENTERPRISE SECURITY FRAMEWORK CONTROLLER
+// ===========================
+
+export { ParlantEnterpriseSecurityController } from './enterprise-security-controller';
+
+// ===========================
+// COMPLIANCE FRAMEWORK INTEGRATION
+// ===========================
+
+export interface EnterpriseComplianceConfig {
+  /** SOC2 Type II Configuration */
+  soc2: {
+    enabled: boolean;
+    trustServiceCriteria: string[];
+    auditFrequency: 'quarterly' | 'annual';
+    evidenceRetention: number;
+  };
+
+  /** GDPR Configuration */
+  gdpr: {
+    enabled: boolean;
+    dataSubjectRights: boolean;
+    consentManagement: boolean;
+    dataMinimization: boolean;
+    rightToBeForgotten: boolean;
+  };
+
+  /** HIPAA Configuration */
+  hipaa: {
+    enabled: boolean;
+    administrativeSafeguards: boolean;
+    physicalSafeguards: boolean;
+    technicalSafeguards: boolean;
+    businessAssociateAgreements: boolean;
+  };
+
+  /** PCI DSS Configuration */
+  pciDss: {
+    enabled: boolean;
+    cardholderDataProtection: boolean;
+    vulnerabilityManagement: boolean;
+    strongAccessControls: boolean;
+    networkSecurity: boolean;
+  };
+}
+
+/**
+ * Default Enterprise Compliance Configuration
+ */
+export const DEFAULT_ENTERPRISE_COMPLIANCE_CONFIG: EnterpriseComplianceConfig = {
+  soc2: {
+    enabled: true,
+    trustServiceCriteria: ['security', 'availability', 'processing_integrity', 'confidentiality', 'privacy'],
+    auditFrequency: 'annual',
+    evidenceRetention: 31536000000 // 1 year
+  },
+  gdpr: {
+    enabled: true,
+    dataSubjectRights: true,
+    consentManagement: true,
+    dataMinimization: true,
+    rightToBeForgotten: true
+  },
+  hipaa: {
+    enabled: true,
+    administrativeSafeguards: true,
+    physicalSafeguards: true,
+    technicalSafeguards: true,
+    businessAssociateAgreements: true
+  },
+  pciDss: {
+    enabled: true,
+    cardholderDataProtection: true,
+    vulnerabilityManagement: true,
+    strongAccessControls: true,
+    networkSecurity: true
+  }
+};
+
+/**
+ * Enterprise Security Framework Metrics
+ */
+export interface EnterpriseSecurityMetrics {
+  threatDetectionAccuracy: number;
+  complianceScore: number;
+  auditTrailIntegrity: number;
+  zeroTrustCoverage: number;
+  incidentResponseTime: number;
+  vulnerabilityRemediationTime: number;
+}
+
+/**
+ * Security Framework Status
+ */
+export type SecurityFrameworkStatus = 'initializing' | 'active' | 'degraded' | 'maintenance' | 'error';
+
+/**
+ * Enterprise Security Framework Version and Metadata
+ */
+export const PARLANT_ENTERPRISE_SECURITY_VERSION = '2.0.0';
+export const SUPPORTED_COMPLIANCE_STANDARDS = ['SOC2_TYPE_II', 'GDPR', 'HIPAA', 'PCI_DSS', 'ISO_27001', 'NIST_CSF'] as const;
+export const SECURITY_CAPABILITIES = [
+  'ZERO_TRUST_ARCHITECTURE',
+  'IMMUTABLE_AUDIT_TRAILS',
+  'ML_THREAT_DETECTION',
+  'CONVERSATIONAL_SECURITY',
+  'REAL_TIME_COMPLIANCE',
+  'AUTOMATED_INCIDENT_RESPONSE',
+  'ENTERPRISE_INTEGRATIONS',
+  'CRYPTOGRAPHIC_INTEGRITY'
+] as const;

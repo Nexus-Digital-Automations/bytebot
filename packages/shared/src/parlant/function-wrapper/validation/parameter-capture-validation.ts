@@ -207,7 +207,7 @@ export class ParameterCaptureValidationService {
       dataClassificationLevel: this.determineOverallDataClassification(parameters),
       conversationPrompts: this.generateConversationPrompts(parameters, functionName, userContext),
       riskAssessment: this.assessParameterRisks(parameters, functionName),
-      recommendedActions: this.generateRecommendedActions(parameters, functionName, userContext)
+      recommendedActions: this.generateRecommendations(parameters, functionName, userContext)
     };
 
     return summary;
@@ -842,7 +842,7 @@ export class ParameterCaptureValidationService {
    * @param userContext - User context
    * @returns Recommended actions
    */
-  private generateRecommendedActions(
+  private generateRecommendations(
     parameters: readonly CapturedParameter[],
     functionName: string,
     userContext: UserContext

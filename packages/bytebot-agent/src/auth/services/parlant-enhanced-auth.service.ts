@@ -794,10 +794,7 @@ export class ParlantEnhancedAuthService {
       riskScore: Math.min(riskScore, 1.0),
       riskLevel,
       riskFactors,
-      recommendedActions: this.generateRecommendedActions(
-        riskScore,
-        riskFactors,
-      ),
+      recommendedActions: this.generateRecommendations(riskScore, riskFactors),
       conversationalValidationRequired:
         riskScore >= this.RISK_THRESHOLD_CONVERSATION,
       mfaRequired: riskScore >= this.RISK_THRESHOLD_MFA,
@@ -871,10 +868,7 @@ export class ParlantEnhancedAuthService {
       riskScore: Math.min(riskScore, 1.0),
       riskLevel: finalRiskLevel,
       riskFactors,
-      recommendedActions: this.generateRecommendedActions(
-        riskScore,
-        riskFactors,
-      ),
+      recommendedActions: this.generateRecommendations(riskScore, riskFactors),
       conversationalValidationRequired:
         riskScore >= this.RISK_THRESHOLD_CONVERSATION,
       mfaRequired: riskScore >= this.RISK_THRESHOLD_MFA,
@@ -1502,7 +1496,7 @@ export class ParlantEnhancedAuthService {
     return 'LOW' as RiskLevel;
   }
 
-  private generateRecommendedActions(
+  private generateRecommendations(
     riskScore: number,
     riskFactors: RiskFactor[],
   ): RecommendedSecurityAction[] {

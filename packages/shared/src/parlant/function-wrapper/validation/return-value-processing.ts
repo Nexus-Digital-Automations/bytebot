@@ -654,7 +654,7 @@ export class ReturnValueProcessingService {
       securityRelevant: analysis.securityRisk !== SecurityRiskLevel.LOW,
       businessImpact,
       conversationPrompts: this.generateConversationPrompts(analysis, businessImpact),
-      recommendedActions: this.generateRecommendedActions(analysis, businessImpact, userContext),
+      recommendedActions: this.generateRecommendations(analysis, businessImpact, userContext),
       nextSteps: this.generateNextSteps(null, analysis, functionName)
     };
   }
@@ -766,7 +766,7 @@ export class ReturnValueProcessingService {
    * @param userContext - User context
    * @returns Recommended actions
    */
-  private generateRecommendedActions(
+  private generateRecommendations(
     analysis: ReturnValueAnalysis,
     businessImpact: ReturnValueBusinessImpact,
     userContext: UserContext

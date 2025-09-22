@@ -1872,18 +1872,18 @@ export class ParlantEnterpriseGatewayOrchestratorService implements OnModuleInit
     performanceMetrics: OrchestrationPerformanceMetrics
   ): Promise<QualityAssessment> {
     const qualityScore = pipelineResult.success ?
-      Math.min(90, performanceMetrics.overallPerformance.performanceScore) :
-      Math.max(40, performanceMetrics.overallPerformance.performanceScore - 20);
+      Math.min(90, performanceMetrics.overallPerformance.performanceGrade) :
+      Math.max(40, performanceMetrics.overallPerformance.performanceGrade - 20);
 
     return {
       overallQualityScore: qualityScore,
       qualityDimensions: [
         {
           dimensionName: "Performance",
-          score: performanceMetrics.overallPerformance.performanceScore,
+          score: performanceMetrics.overallPerformance.performanceGrade,
           weight: 0.4,
           assessment: "Good performance metrics achieved",
-          meetsCriteria: performanceMetrics.overallPerformance.performanceScore >= 70,
+          meetsCriteria: performanceMetrics.overallPerformance.performanceGrade >= 70,
         },
         {
           dimensionName: "Reliability",
