@@ -48,6 +48,7 @@ import {
 import { ComputerUseService } from './computer-use.service';
 import { AsyncJobService } from './async-job.service';
 import { EnhancedAsyncJobService } from './enhanced-async-job.service';
+import { ComprehensiveJobOrchestratorService } from './services/comprehensive-job-orchestrator.service';
 import { ComputerActionValidationPipe } from './dto/computer-action-validation.pipe';
 import { BatchJobValidationPipe } from './pipes/batch-job-validation.pipe';
 import { ComputerActionDto } from './dto/computer-action.dto';
@@ -229,6 +230,7 @@ export class ComputerUseController {
     private readonly computerUseService: ComputerUseService,
     private readonly asyncJobService: AsyncJobService,
     private readonly enhancedAsyncJobService: EnhancedAsyncJobService,
+    private readonly comprehensiveJobOrchestrator: ComprehensiveJobOrchestratorService,
   ) {}
 
   // ===== ENHANCED ASYNC ENDPOINTS - ENTERPRISE BATCH & ANALYTICS =====
@@ -796,6 +798,420 @@ export class ComputerUseController {
 
       throw new HttpException(
         `Failed to cancel batch: ${errorMessage}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  // ===== COMPREHENSIVE JOB MANAGEMENT ENDPOINTS =====
+
+  /**
+   * Submit computer action using comprehensive job management system
+   *
+   * Enterprise-grade job submission with advanced monitoring, error recovery,
+   * and comprehensive result management. Uses the new comprehensive orchestrator
+   * for superior performance and reliability.
+   */
+  @Post('comprehensive/submit')
+  @OperatorOrAdmin()
+  @ForVersion(SUPPORTED_API_VERSIONS.V1)
+  @ApiOperation({
+    summary: 'Submit job via comprehensive management system',
+    description: 'Submit computer action using the new comprehensive job management system with enhanced monitoring and error recovery',
+    operationId: 'submitComprehensiveJob',
+  })
+  @ApiResponse({
+    status: 202,
+    description: 'Job submitted successfully via comprehensive system',
+  })
+  @ParlantCritical(
+    'Submit computer automation job via comprehensive enterprise job management system',
+    {
+      securityLevel: SecurityLevel.CRITICAL,
+      validationMode: ValidationMode.EXPLICIT,
+      businessCategory: 'COMPREHENSIVE_JOB_SUBMISSION',
+      complianceFlags: ['ENTERPRISE_JOB_SYSTEM', 'ADVANCED_MONITORING'],
+      requiredRoles: ['OPERATOR', 'ADMIN'],
+    },
+  )
+  async submitComprehensiveJob(
+    @Body(new ComputerActionValidationPipe()) params: ComputerActionDto,
+    @CurrentUser() user: ByteBotdUser,
+  ): Promise<{ jobId: string; submittedAt: string; estimatedCompletionMs?: number }> {
+    const operationId = `comprehensive_submit_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const startTime = Date.now();
+
+    try {
+      this.logger.log(
+        `[${operationId}] Comprehensive job submission: ${params.action}`,
+        {
+          operationId,
+          action: params.action,
+          userId: user.id,
+          username: user.username,
+        },
+      );
+
+      // Submit job via comprehensive orchestrator
+      const jobId = await this.comprehensiveJobOrchestrator.submitJob(
+        params.action,
+        params,
+        {
+          userId: user.id,
+          username: user.username,
+          operationId,
+          source: 'comprehensive-api',
+        },
+      );
+
+      const processingTime = Date.now() - startTime;
+      this.logger.log(
+        `[${operationId}] Comprehensive job submitted: ${jobId} (${processingTime}ms)`,
+        {
+          operationId,
+          jobId,
+          action: params.action,
+          processingTime,
+          userId: user.id,
+        },
+      );
+
+      return {
+        jobId,
+        submittedAt: new Date().toISOString(),
+        estimatedCompletionMs: 5000, // Default estimate
+      };
+    } catch (error: unknown) {
+      const processingTime = Date.now() - startTime;
+      const errorMessage = getErrorMessage(error);
+
+      this.logger.error(
+        `[${operationId}] Comprehensive job submission failed: ${errorMessage} (${processingTime}ms)`,
+        getErrorStack(error),
+        {
+          operationId,
+          action: params.action,
+          processingTime,
+          userId: user.id,
+        },
+      );
+
+      throw new HttpException(
+        `Failed to submit comprehensive job: ${errorMessage}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  /**
+   * Get comprehensive job status with detailed monitoring information
+   */
+  @Get('comprehensive/jobs/:jobId/status')
+  @OperatorOrAdmin()
+  @ForVersion(SUPPORTED_API_VERSIONS.V1)
+  @ApiOperation({
+    summary: 'Get comprehensive job status',
+    description: 'Retrieve detailed status information from comprehensive job management system',
+    operationId: 'getComprehensiveJobStatus',
+  })
+  @ApiParam({
+    name: 'jobId',
+    description: 'Job identifier from comprehensive system',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Comprehensive job status retrieved',
+  })
+  @ParlantValidated({
+    intent: 'Retrieve comprehensive job status with detailed monitoring information',
+    securityLevel: SecurityLevel.MEDIUM,
+    validationMode: ValidationMode.AUTOMATIC,
+    businessCategory: 'COMPREHENSIVE_JOB_MONITORING',
+    complianceFlags: ['ENTERPRISE_MONITORING', 'JOB_TRACKING'],
+  })
+  async getComprehensiveJobStatus(
+    @Param('jobId') jobId: string,
+    @CurrentUser() user: ByteBotdUser,
+  ): Promise<any> {
+    const operationId = `comprehensive_status_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const startTime = Date.now();
+
+    try {
+      this.logger.log(`[${operationId}] Comprehensive status request: ${jobId}`, {
+        operationId,
+        jobId,
+        userId: user.id,
+      });
+
+      const status = await this.comprehensiveJobOrchestrator.getJobStatus(jobId);
+
+      const processingTime = Date.now() - startTime;
+      this.logger.log(
+        `[${operationId}] Comprehensive status retrieved: ${status.status} (${processingTime}ms)`,
+        {
+          operationId,
+          jobId,
+          status: status.status,
+          processingTime,
+        },
+      );
+
+      return status;
+    } catch (error: unknown) {
+      const processingTime = Date.now() - startTime;
+      const errorMessage = getErrorMessage(error);
+
+      this.logger.error(
+        `[${operationId}] Comprehensive status retrieval failed: ${errorMessage} (${processingTime}ms)`,
+        getErrorStack(error),
+        {
+          operationId,
+          jobId,
+          processingTime,
+        },
+      );
+
+      if (errorMessage.includes('not found')) {
+        throw new HttpException(
+          `Job not found: ${jobId}`,
+          HttpStatus.NOT_FOUND,
+        );
+      }
+
+      throw new HttpException(
+        `Failed to retrieve comprehensive job status: ${errorMessage}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  /**
+   * Get comprehensive job result with enhanced metadata
+   */
+  @Get('comprehensive/jobs/:jobId/result')
+  @OperatorOrAdmin()
+  @ForVersion(SUPPORTED_API_VERSIONS.V1)
+  @ApiOperation({
+    summary: 'Get comprehensive job result',
+    description: 'Retrieve job result with enhanced metadata from comprehensive system',
+    operationId: 'getComprehensiveJobResult',
+  })
+  @ApiParam({
+    name: 'jobId',
+    description: 'Job identifier from comprehensive system',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Comprehensive job result retrieved',
+  })
+  @ParlantValidated({
+    intent: 'Retrieve comprehensive job execution results with enhanced metadata',
+    securityLevel: SecurityLevel.MEDIUM,
+    validationMode: ValidationMode.CONVERSATIONAL,
+    businessCategory: 'COMPREHENSIVE_RESULT_RETRIEVAL',
+    complianceFlags: ['RESULT_ACCESS', 'ENHANCED_METADATA'],
+  })
+  async getComprehensiveJobResult(
+    @Param('jobId') jobId: string,
+    @CurrentUser() user: ByteBotdUser,
+  ): Promise<any> {
+    const operationId = `comprehensive_result_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const startTime = Date.now();
+
+    try {
+      this.logger.log(`[${operationId}] Comprehensive result request: ${jobId}`, {
+        operationId,
+        jobId,
+        userId: user.id,
+      });
+
+      const result = await this.comprehensiveJobOrchestrator.getJobResult(jobId);
+
+      const processingTime = Date.now() - startTime;
+      this.logger.log(
+        `[${operationId}] Comprehensive result retrieved (${processingTime}ms)`,
+        {
+          operationId,
+          jobId,
+          status: result.status,
+          processingTime,
+        },
+      );
+
+      return result;
+    } catch (error: unknown) {
+      const processingTime = Date.now() - startTime;
+      const errorMessage = getErrorMessage(error);
+
+      this.logger.error(
+        `[${operationId}] Comprehensive result retrieval failed: ${errorMessage} (${processingTime}ms)`,
+        getErrorStack(error),
+        {
+          operationId,
+          jobId,
+          processingTime,
+        },
+      );
+
+      if (errorMessage.includes('not found')) {
+        throw new HttpException(
+          `Job not found: ${jobId}`,
+          HttpStatus.NOT_FOUND,
+        );
+      }
+
+      if (errorMessage.includes('not completed')) {
+        throw new HttpException(
+          `Job not completed: ${jobId}`,
+          HttpStatus.CONFLICT,
+        );
+      }
+
+      throw new HttpException(
+        `Failed to retrieve comprehensive job result: ${errorMessage}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  /**
+   * Cancel comprehensive job with enhanced cleanup
+   */
+  @Delete('comprehensive/jobs/:jobId')
+  @OperatorOrAdmin()
+  @ForVersion(SUPPORTED_API_VERSIONS.V1)
+  @ApiOperation({
+    summary: 'Cancel comprehensive job',
+    description: 'Cancel job with enhanced cleanup via comprehensive system',
+    operationId: 'cancelComprehensiveJob',
+  })
+  @ApiParam({
+    name: 'jobId',
+    description: 'Job identifier from comprehensive system',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Job cancellation processed',
+  })
+  async cancelComprehensiveJob(
+    @Param('jobId') jobId: string,
+    @CurrentUser() user: ByteBotdUser,
+  ): Promise<{ cancelled: boolean; message: string; jobId: string }> {
+    const operationId = `comprehensive_cancel_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const startTime = Date.now();
+
+    try {
+      this.logger.log(`[${operationId}] Comprehensive cancel request: ${jobId}`, {
+        operationId,
+        jobId,
+        userId: user.id,
+      });
+
+      const cancelled = await this.comprehensiveJobOrchestrator.cancelJob(jobId);
+
+      const processingTime = Date.now() - startTime;
+      const message = cancelled
+        ? 'Job cancelled successfully with comprehensive cleanup'
+        : 'Job could not be cancelled (may be completed or not found)';
+
+      this.logger.log(
+        `[${operationId}] Comprehensive cancel result: ${cancelled} (${processingTime}ms)`,
+        {
+          operationId,
+          jobId,
+          cancelled,
+          processingTime,
+        },
+      );
+
+      return {
+        cancelled,
+        message,
+        jobId,
+      };
+    } catch (error: unknown) {
+      const processingTime = Date.now() - startTime;
+      const errorMessage = getErrorMessage(error);
+
+      this.logger.error(
+        `[${operationId}] Comprehensive cancel failed: ${errorMessage} (${processingTime}ms)`,
+        getErrorStack(error),
+        {
+          operationId,
+          jobId,
+          processingTime,
+        },
+      );
+
+      throw new HttpException(
+        `Failed to cancel comprehensive job: ${errorMessage}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  /**
+   * Get comprehensive system health and performance metrics
+   */
+  @Get('comprehensive/system/health')
+  @OperatorOrAdmin()
+  @ForVersion(SUPPORTED_API_VERSIONS.V1)
+  @ApiOperation({
+    summary: 'Get comprehensive system health',
+    description: 'Retrieve comprehensive job management system health and performance metrics',
+    operationId: 'getComprehensiveSystemHealth',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'System health metrics retrieved',
+  })
+  @ParlantValidated({
+    intent: 'Retrieve comprehensive job management system health and performance metrics',
+    securityLevel: SecurityLevel.LOW,
+    validationMode: ValidationMode.AUTOMATIC,
+    businessCategory: 'SYSTEM_HEALTH_MONITORING',
+    complianceFlags: ['SYSTEM_MONITORING', 'PERFORMANCE_METRICS'],
+  })
+  async getComprehensiveSystemHealth(
+    @CurrentUser() user: ByteBotdUser,
+  ): Promise<any> {
+    const operationId = `comprehensive_health_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const startTime = Date.now();
+
+    try {
+      this.logger.log(`[${operationId}] Comprehensive health check request`, {
+        operationId,
+        userId: user.id,
+      });
+
+      const health = await this.comprehensiveJobOrchestrator.getSystemHealth();
+
+      const processingTime = Date.now() - startTime;
+      this.logger.log(
+        `[${operationId}] Comprehensive health retrieved (${processingTime}ms)`,
+        {
+          operationId,
+          processingTime,
+          systemStatus: health.status,
+        },
+      );
+
+      return health;
+    } catch (error: unknown) {
+      const processingTime = Date.now() - startTime;
+      const errorMessage = getErrorMessage(error);
+
+      this.logger.error(
+        `[${operationId}] Comprehensive health check failed: ${errorMessage} (${processingTime}ms)`,
+        getErrorStack(error),
+        {
+          operationId,
+          processingTime,
+        },
+      );
+
+      throw new HttpException(
+        `Failed to retrieve comprehensive system health: ${errorMessage}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

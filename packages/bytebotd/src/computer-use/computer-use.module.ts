@@ -17,6 +17,7 @@ import { JobCancellationController } from './controllers/job-cancellation-contro
 import { BackgroundJobWorkerService } from './workers/background-job-worker.service';
 import { JobManagementService } from './job-management.service';
 import { JobCancellationTimeoutService } from './services/job-cancellation-timeout.service';
+import { ComprehensiveJobManagementModule } from './comprehensive-job-management.module';
 import { NutModule } from '../nut/nut.module';
 import { CacheModule } from '../cache/cache.module';
 import { MetricsModule } from '../metrics/metrics.module';
@@ -24,6 +25,7 @@ import { SecurityModule } from '../common/security/security.module';
 
 @Module({
   imports: [
+    ComprehensiveJobManagementModule, // Import comprehensive job management system
     NutModule,
     CacheModule, // Import cache service for result caching
     MetricsModule, // Import metrics service for performance monitoring
