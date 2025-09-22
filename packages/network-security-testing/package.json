@@ -1,0 +1,90 @@
+{
+  "name": "@bytebot/network-security-testing",
+  "version": "1.0.0",
+  "description": "Comprehensive network security testing and validation framework",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "start": "node dist/cli.js",
+    "scan": "node dist/cli.js scan",
+    "monitor": "node dist/cli.js monitor",
+    "validate": "node dist/cli.js validate"
+  },
+  "keywords": [
+    "network-security",
+    "vulnerability-scanning",
+    "firewall-testing",
+    "intrusion-detection",
+    "ssl-tls-testing",
+    "network-monitoring",
+    "security-assessment",
+    "penetration-testing"
+  ],
+  "author": "ByteBot Security Team",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "commander": "^9.4.1",
+    "axios": "^1.5.0",
+    "ws": "^8.14.2",
+    "node-nmap": "^5.0.0",
+    "ssl-checker": "^2.0.7",
+    "express": "^4.18.2",
+    "socket.io": "^4.7.2",
+    "winston": "^3.10.0",
+    "node-cron": "^3.0.2",
+    "dotenv": "^16.3.1",
+    "joi": "^17.9.2",
+    "lodash": "^4.17.21",
+    "moment": "^2.29.4",
+    "uuid": "^9.0.0",
+    "bcrypt": "^5.1.1",
+    "jsonwebtoken": "^9.0.2",
+    "helmet": "^7.0.0",
+    "cors": "^2.8.5",
+    "rate-limiter-flexible": "^2.4.2",
+    "ping": "^0.4.4",
+    "traceroute": "^1.0.0",
+    "whois": "^2.13.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.5.0",
+    "@types/express": "^4.17.17",
+    "@types/ws": "^8.5.5",
+    "@types/lodash": "^4.14.195",
+    "@types/uuid": "^9.0.2",
+    "@types/bcrypt": "^5.0.0",
+    "@types/jsonwebtoken": "^9.0.2",
+    "@types/cors": "^2.8.13",
+    "@types/jest": "^29.5.3",
+    "typescript": "^5.1.6",
+    "jest": "^29.6.1",
+    "ts-jest": "^29.1.1",
+    "@typescript-eslint/eslint-plugin": "^6.2.1",
+    "@typescript-eslint/parser": "^6.2.1",
+    "eslint": "^8.46.0"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "roots": ["<rootDir>/src", "<rootDir>/tests"],
+    "testMatch": ["**/__tests__/**/*.ts", "**/?(*.)+(spec|test).ts"],
+    "collectCoverageFrom": [
+      "src/**/*.ts",
+      "!src/**/*.d.ts",
+      "!src/cli.ts"
+    ],
+    "coverageDirectory": "coverage",
+    "coverageReporters": ["text", "lcov", "html"]
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}

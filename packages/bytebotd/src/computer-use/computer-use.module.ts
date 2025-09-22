@@ -20,6 +20,7 @@ import { JobCancellationTimeoutService } from './services/job-cancellation-timeo
 import { ComprehensiveJobLifecycleService } from './services/comprehensive-job-lifecycle.service';
 import { AdvancedStatusPollingService } from './services/advanced-status-polling.service';
 import { ComprehensiveJobOrchestratorService } from './services/comprehensive-job-orchestrator.service';
+import { EnhancedJobMonitoringGateway } from './gateways/enhanced-job-monitoring.gateway';
 import { ComprehensiveJobManagementModule } from './comprehensive-job-management.module';
 import { NutModule } from '../nut/nut.module';
 import { CacheModule } from '../cache/cache.module';
@@ -58,6 +59,7 @@ import { SecurityModule } from '../common/security/security.module';
     ComprehensiveJobLifecycleService, // Complete job lifecycle management with cancellation
     AdvancedStatusPollingService, // Advanced status polling with progress tracking
     ComprehensiveJobOrchestratorService, // Central orchestrator for all job operations
+    EnhancedJobMonitoringGateway, // Enhanced WebSocket gateway for comprehensive monitoring
   ],
   exports: [
     ComputerUseService,
@@ -74,6 +76,7 @@ import { SecurityModule } from '../common/security/security.module';
     ComprehensiveJobLifecycleService, // Export job lifecycle management
     AdvancedStatusPollingService, // Export status polling service
     ComprehensiveJobOrchestratorService, // Export central orchestrator
+    EnhancedJobMonitoringGateway, // Export enhanced monitoring gateway
   ],
 })
 export class ComputerUseModule {}

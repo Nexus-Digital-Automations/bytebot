@@ -1,0 +1,28 @@
+{
+  "timestamp": "2025-09-22T16:21:07.913Z",
+  "services": {
+    "database": {
+      "status": "ready",
+      "url": "postgresql://postgres:test@localhost:5432/bytebot_test?schema=public"
+    },
+    "redis": {
+      "status": "ready",
+      "url": "redis://localhost:6379/15"
+    },
+    "webserver": {
+      "status": "ready",
+      "port": 0
+    }
+  },
+  "directories": {
+    "temp": "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/tmp/test-workspace",
+    "logs": "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/tmp/test-logs",
+    "coverage": "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/coverage-workspace",
+    "artifacts": "/Users/jeremyparker/Desktop/Claude Coding Projects/AIgent/bytebot/test-artifacts"
+  },
+  "environment": {
+    "NODE_ENV": "test",
+    "DATABASE_URL": "postgresql://postgres:test@localhost:5432/bytebot_test?schema=public",
+    "REDIS_URL": "redis://localhost:6379/15"
+  }
+}

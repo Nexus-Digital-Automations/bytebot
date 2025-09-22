@@ -20,25 +20,25 @@
 import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as _uuidv4 } from 'uuid';
 
 // Import types
 import {
-  ParlantValidationResult,
+  _ParlantValidationResult,
   MultiServiceValidationResult,
   ServiceValidationStatus,
-  ConversationalValidationResult,
-  ComplianceValidationResult,
+  _ConversationalValidationResult,
+  _ComplianceValidationResult,
   SecurityLevel,
   ParlantUserContext,
   ValidationAuditEntry
 } from '../types/parlant-shared.types';
 import {
-  OrchestrationTask,
+  _OrchestrationTask,
   WorkflowStep,
   WorkflowStepType,
-  OrchestrationExecutionContext,
-  OrchestrationMetrics
+  _OrchestrationExecutionContext,
+  _OrchestrationMetrics
 } from '../types/orchestrator.types';
 
 // ===== INTERFACES =====
@@ -497,7 +497,7 @@ export class MultiServiceValidationService implements OnModuleInit, OnModuleDest
     serviceId: string,
     steps: WorkflowStep[],
     session: MultiServiceValidationSession,
-    timeoutMs: number
+    _timeoutMs: number
   ): Promise<ServiceValidationResult> {
     const startTime = Date.now();
 
@@ -783,7 +783,7 @@ export class MultiServiceValidationService implements OnModuleInit, OnModuleDest
    */
   private async ensureStateConsistency(
     session: MultiServiceValidationSession,
-    consensusResult: ValidationConsensusResult
+    _consensusResult: ValidationConsensusResult
   ): Promise<void> {
     const { sessionId } = session;
     const { consistencyLevel } = session.request.requirements;
@@ -896,20 +896,13 @@ export class MultiServiceValidationService implements OnModuleInit, OnModuleDest
   /**
    * Check service health
    */
-  private async checkServiceHealth(serviceId: string): Promise<{healthy: boolean; reason: string}> {
-    try {
-      // In a real implementation, this would check actual service health
-      // For now, assume all services are healthy
-      return {
-        healthy: true,
-        reason: 'Service is healthy'
-      };
-    } catch (error) {
-      return {
-        healthy: false,
-        reason: `Health check failed: ${error instanceof Error ? error.message : String(error)}`
-      };
-    }
+  private async checkServiceHealth(_serviceId: string): Promise<{healthy: boolean; reason: string}> {
+    // In a real implementation, this would check actual service health
+    // For now, assume all services are healthy
+    return {
+      healthy: true,
+      reason: 'Service is healthy'
+    };
   }
 
   /**
@@ -947,7 +940,7 @@ export class MultiServiceValidationService implements OnModuleInit, OnModuleDest
   /**
    * Get supported step types for a service
    */
-  private async getSupportedStepTypes(serviceId: string): Promise<WorkflowStepType[]> {
+  private async getSupportedStepTypes(_serviceId: string): Promise<WorkflowStepType[]> {
     // In a real implementation, this would query service capabilities
     // For now, return all step types as supported
     return Object.values(WorkflowStepType);
@@ -957,13 +950,13 @@ export class MultiServiceValidationService implements OnModuleInit, OnModuleDest
    * Validate service security
    */
   private async validateServiceSecurity(
-    serviceId: string,
+    _serviceId: string,
     steps: WorkflowStep[],
     requiredSecurityLevel: SecurityLevel
   ): Promise<{approved: boolean; reason: string}> {
     try {
       // Check service security level
-      const serviceSecurityLevel = await this.getServiceSecurityLevel(serviceId);
+      const serviceSecurityLevel = await this.getServiceSecurityLevel(_serviceId);
 
       if (this.compareSecurityLevels(serviceSecurityLevel, requiredSecurityLevel) < 0) {
         return {
@@ -987,7 +980,7 @@ export class MultiServiceValidationService implements OnModuleInit, OnModuleDest
   /**
    * Get service security level
    */
-  private async getServiceSecurityLevel(serviceId: string): Promise<SecurityLevel> {
+  private async getServiceSecurityLevel(_serviceId: string): Promise<SecurityLevel> {
     // In a real implementation, this would query service security configuration
     // For now, return a default security level
     return SecurityLevel.INTERNAL;

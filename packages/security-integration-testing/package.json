@@ -1,0 +1,90 @@
+{
+  "name": "@bytebot/security-integration-testing",
+  "version": "1.0.0",
+  "description": "Comprehensive Security Integration Testing Framework for PARLANT Bytebot Middleware",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "test:e2e": "jest --testPathPattern=e2e",
+    "test:integration": "jest --testPathPattern=integration",
+    "test:security": "jest --testPathPattern=security",
+    "test:regression": "jest --testPathPattern=regression",
+    "test:performance": "jest --testPathPattern=performance",
+    "lint": "eslint src/**/*.ts",
+    "security:scan": "npm audit && semgrep --config=p/security-audit src/",
+    "security:test-all": "npm run test:security && npm run test:e2e && npm run test:integration",
+    "security:report": "node dist/reporting/generate-security-report.js",
+    "clean": "rm -rf dist coverage"
+  },
+  "dependencies": {
+    "@types/jest": "^29.5.12",
+    "jest": "^29.7.0",
+    "puppeteer": "^21.11.0",
+    "axios": "^1.7.7",
+    "ws": "^8.17.1",
+    "jsonwebtoken": "^9.0.2",
+    "crypto": "^1.0.1",
+    "helmet": "^7.1.0",
+    "express": "^4.19.2",
+    "cors": "^2.8.5",
+    "uuid": "^10.0.0",
+    "lodash": "^4.17.21",
+    "moment": "^2.30.1",
+    "joi": "^17.13.3",
+    "bcrypt": "^5.1.1",
+    "rate-limiter-flexible": "^5.0.3",
+    "winston": "^3.14.2",
+    "pino": "^9.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.15",
+    "@types/express": "^4.17.21",
+    "@types/cors": "^2.8.17",
+    "@types/uuid": "^10.0.0",
+    "@types/lodash": "^4.17.7",
+    "@types/bcrypt": "^5.0.2",
+    "@types/jsonwebtoken": "^9.0.6",
+    "@types/ws": "^8.5.12",
+    "typescript": "^5.5.4",
+    "eslint": "^9.9.0",
+    "@typescript-eslint/eslint-plugin": "^8.1.0",
+    "@typescript-eslint/parser": "^8.1.0",
+    "jest-environment-node": "^29.7.0",
+    "ts-jest": "^29.2.4",
+    "semgrep": "^1.45.0"
+  },
+  "keywords": [
+    "security",
+    "integration-testing",
+    "e2e-testing",
+    "security-testing",
+    "bytebot",
+    "parlant",
+    "middleware",
+    "regression-testing",
+    "performance-testing"
+  ],
+  "author": "Bytebot Security Team",
+  "license": "MIT",
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "roots": ["<rootDir>/src"],
+    "testMatch": [
+      "**/__tests__/**/*.test.ts",
+      "**/tests/**/*.test.ts"
+    ],
+    "collectCoverageFrom": [
+      "src/**/*.ts",
+      "!src/**/*.d.ts",
+      "!src/**/__tests__/**",
+      "!src/**/tests/**"
+    ],
+    "coverageDirectory": "coverage",
+    "coverageReporters": ["text", "lcov", "html"],
+    "setupFilesAfterEnv": ["<rootDir>/src/test-setup.ts"]
+  }
+}

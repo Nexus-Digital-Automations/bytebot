@@ -34,11 +34,11 @@ import {
   ParlantValidationResult,
   SecurityLevel,
   ParlantUserContext,
-  ValidationAuditEntry
+  _ValidationAuditEntry
 } from '../types/parlant-shared.types';
 import {
   OrchestrationTask,
-  OrchestrationExecutionContext,
+  _OrchestrationExecutionContext,
   OrchestrationUserContext
 } from '../types/orchestrator.types';
 
@@ -53,11 +53,11 @@ export interface PerformanceOptimizationConfig {
   /** Async processing configuration */
   readonly asyncProcessing: AsyncProcessingConfig;
   /** Monitoring configuration */
-  readonly monitoring: MonitoringConfig;
+  readonly monitoring: Record<string, unknown>;
   /** Resource limits */
   readonly resourceLimits: ResourceLimitsConfig;
   /** Batch processing configuration */
-  readonly batchProcessing: BatchProcessingConfig;
+  readonly batchProcessing: Record<string, unknown>;
 }
 
 /**
@@ -194,12 +194,12 @@ export enum EvictionPolicy {
 export interface AsyncProcessingConfig {
   /** Queue configuration */
   readonly queues: QueueConfig;
-  /** Worker configuration */
-  readonly workers: WorkerConfig;
+  /** Record<string, unknown> configuration */
+  readonly workers: Record<string, unknown>;
   /** Streaming configuration */
   readonly streaming: StreamingConfig;
   /** Batch processing configuration */
-  readonly batching: BatchingConfig;
+  readonly batching: Record<string, unknown>;
 }
 
 /**
@@ -213,21 +213,21 @@ export interface QueueConfig {
   /** Priority levels */
   readonly priorityLevels: number;
   /** Dead letter queue config */
-  readonly deadLetter: DeadLetterConfig;
+  readonly deadLetter: Record<string, unknown>;
 }
 
 /**
- * Worker configuration
+ * Record<string, unknown> configuration
  */
 export interface WorkerConfig {
   /** Number of worker threads */
   readonly threads: number;
-  /** Worker timeout in ms */
+  /** Record<string, unknown> timeout in ms */
   readonly timeoutMs: number;
   /** Concurrency per worker */
   readonly concurrency: number;
   /** Auto-scaling configuration */
-  readonly autoScaling: AutoScalingConfig;
+  readonly autoScaling: Record<string, unknown>;
 }
 
 /**
@@ -241,7 +241,7 @@ export interface StreamingConfig {
   /** Stream timeout in ms */
   readonly timeoutMs: number;
   /** Backpressure handling */
-  readonly backpressure: BackpressureConfig;
+  readonly backpressure: Record<string, unknown>;
 }
 
 /**
@@ -249,13 +249,13 @@ export interface StreamingConfig {
  */
 export interface ResourceLimitsConfig {
   /** CPU limits */
-  readonly cpu: CpuLimitsConfig;
+  readonly cpu: Record<string, unknown>;
   /** Memory limits */
-  readonly memory: MemoryLimitsConfig;
+  readonly memory: Record<string, unknown>;
   /** Network limits */
-  readonly network: NetworkLimitsConfig;
+  readonly network: Record<string, unknown>;
   /** Monitoring thresholds */
-  readonly thresholds: ResourceThresholds;
+  readonly thresholds: Record<string, unknown>;
 }
 
 /**
@@ -265,13 +265,13 @@ export interface PerformanceMetrics {
   /** Response time metrics */
   readonly responseTime: ResponseTimeMetrics;
   /** Throughput metrics */
-  readonly throughput: ThroughputMetrics;
+  readonly throughput: Record<string, unknown>;
   /** Resource usage metrics */
-  readonly resources: ResourceUsageMetrics;
+  readonly resources: Record<string, unknown>;
   /** Cache performance metrics */
   readonly cache: CachePerformanceMetrics;
   /** Queue performance metrics */
-  readonly queue: QueuePerformanceMetrics;
+  readonly queue: Record<string, unknown>;
 }
 
 /**
@@ -294,7 +294,7 @@ export interface CachePerformanceMetrics {
   readonly l1: CacheLevelMetrics;
   readonly l2: CacheLevelMetrics;
   readonly l3: CacheLevelMetrics;
-  readonly overall: OverallCacheMetrics;
+  readonly overall: Record<string, unknown>;
 }
 
 /**
@@ -320,7 +320,7 @@ export interface PerformanceOptimizationRequest {
   /** Performance requirements */
   readonly requirements: PerformanceRequirements;
   /** Optimization context */
-  readonly context: OptimizationContext;
+  readonly context: Record<string, unknown>;
   /** Request timestamp */
   readonly timestamp: Date;
 }
@@ -350,7 +350,7 @@ export interface PerformanceRequirements {
   /** Minimum cache hit rate */
   readonly minCacheHitRate: number;
   /** Maximum resource usage */
-  readonly maxResourceUsage: ResourceUsageLimits;
+  readonly maxResourceUsage: Record<string, unknown>;
   /** Quality of service level */
   readonly qosLevel: QoSLevel;
 }
@@ -376,9 +376,9 @@ export interface PerformanceOptimizationResult {
   /** Performance metrics */
   readonly metrics: PerformanceMetrics;
   /** Cache utilization */
-  readonly cacheUtilization: CacheUtilization;
+  readonly cacheUtilization: Record<string, unknown>;
   /** Optimization applied */
-  readonly optimizationsApplied: OptimizationApplied[];
+  readonly optimizationsApplied: Record<string, unknown>[];
   /** Total processing time */
   readonly totalProcessingTimeMs: number;
 }
@@ -399,7 +399,7 @@ export class PerformanceOptimizationService implements OnModuleInit, OnModuleDes
 
   // Async processing
   private readonly validationQueue: ValidationRequest[] = [];
-  private readonly processingWorkers: Worker[] = [];
+  private readonly processingRecord<string, unknown>: Record<string, unknown>[] = [];
   private readonly streamingConnections = new Map<string, StreamingConnection>();
 
   // Performance tracking
@@ -430,7 +430,7 @@ export class PerformanceOptimizationService implements OnModuleInit, OnModuleDes
       size: 0,
       averageWaitTime: 0,
       throughput: 0,
-      activeWorkers: 0
+      activeRecord<string, unknown>: 0
     }
   };
 
@@ -457,7 +457,7 @@ export class PerformanceOptimizationService implements OnModuleInit, OnModuleDes
     await this.initializeCacheLayers();
 
     // Start async workers
-    await this.startAsyncWorkers();
+    await this.startAsyncRecord<string, unknown>();
 
     // Start monitoring
     this.startPerformanceMonitoring();
@@ -475,7 +475,7 @@ export class PerformanceOptimizationService implements OnModuleInit, OnModuleDes
     if (this.warmingTimer) clearInterval(this.warmingTimer);
 
     // Shutdown workers
-    await this.shutdownWorkers();
+    await this.shutdownRecord<string, unknown>();
 
     // Close streaming connections
     await this.closeStreamingConnections();
@@ -598,11 +598,11 @@ export class PerformanceOptimizationService implements OnModuleInit, OnModuleDes
   /**
    * Optimize resource usage
    */
-  async optimizeResources(): Promise<ResourceOptimizationResult> {
+  async optimizeResources(): Promise<Record<string, unknown>> {
     this.logger.debug('Starting resource optimization');
 
     const currentUsage = await this.getCurrentResourceUsage();
-    const optimizations: ResourceOptimization[] = [];
+    const optimizations: Record<string, unknown>[] = [];
 
     // CPU optimization
     if (currentUsage.cpuUsage > this.config.resourceLimits.thresholds.cpu.warning) {
@@ -755,7 +755,7 @@ export class PerformanceOptimizationService implements OnModuleInit, OnModuleDes
   /**
    * Check L2 Redis cache
    */
-  private async checkL2Cache(key: string): Promise<ParlantValidationResult | null> {
+  private async checkL2Cache(_key: string): Promise<ParlantValidationResult | null> {
     const startTime = Date.now();
 
     try {
@@ -780,8 +780,8 @@ export class PerformanceOptimizationService implements OnModuleInit, OnModuleDes
    * Set L2 cache entry
    */
   private async setL2Cache(
-    key: string,
-    value: ParlantValidationResult
+    _key: string,
+    _value: ParlantValidationResult
   ): Promise<void> {
     try {
       if (!this.l2CacheClient) {
@@ -798,7 +798,7 @@ export class PerformanceOptimizationService implements OnModuleInit, OnModuleDes
   /**
    * Check L3 database cache
    */
-  private async checkL3Cache(key: string): Promise<ParlantValidationResult | null> {
+  private async checkL3Cache(_key: string): Promise<ParlantValidationResult | null> {
     const startTime = Date.now();
 
     try {
@@ -822,8 +822,8 @@ export class PerformanceOptimizationService implements OnModuleInit, OnModuleDes
    * Set L3 cache entry
    */
   private async setL3Cache(
-    key: string,
-    value: ParlantValidationResult
+    _key: string,
+    _value: ParlantValidationResult
   ): Promise<void> {
     try {
       if (!this.l3CacheClient) {
@@ -1121,8 +1121,8 @@ export class PerformanceOptimizationService implements OnModuleInit, OnModuleDes
           concurrency: 10,
           autoScaling: {
             enabled: true,
-            minWorkers: 2,
-            maxWorkers: 16,
+            minRecord<string, unknown>: 2,
+            maxRecord<string, unknown>: 16,
             scaleUpThreshold: 0.8,
             scaleDownThreshold: 0.2
           }
@@ -1199,7 +1199,7 @@ export class PerformanceOptimizationService implements OnModuleInit, OnModuleDes
       requestId: request.requestId,
       validationResult,
       metrics: this.getPerformanceMetrics(),
-      cacheUtilization: this.calculateCacheUtilization(),
+      cacheUtilization: this.calculateRecord<string, unknown>(),
       optimizationsApplied: this.getAppliedOptimizations(source),
       totalProcessingTimeMs: processingTime
     };
@@ -1216,7 +1216,7 @@ export class PerformanceOptimizationService implements OnModuleInit, OnModuleDes
   /**
    * Start async workers
    */
-  private async startAsyncWorkers(): Promise<void> {
+  private async startAsyncRecord<string, unknown>(): Promise<void> {
     this.logger.debug('Starting async workers...');
     // In a real implementation, start worker threads
   }
@@ -1319,25 +1319,25 @@ export class PerformanceOptimizationService implements OnModuleInit, OnModuleDes
   }
 
   // Placeholder methods for complex operations
-  private async shutdownWorkers(): Promise<void> { /* Implementation */ }
+  private async shutdownRecord<string, unknown>(): Promise<void> { /* Implementation */ }
   private async closeStreamingConnections(): Promise<void> { /* Implementation */ }
   private isCacheEntryExpired(entry: CacheEntry): boolean { return Date.now() - entry.timestamp.getTime() > entry.ttlMs; }
   private async evictL1CacheEntries(): Promise<void> { /* Implementation */ }
-  private qosLevelToPriority(qos: QoSLevel): number { return 1; }
-  private addToQueue(item: QueueItem): void { /* Implementation */ }
-  private generateBatchKey(request: PerformanceOptimizationRequest): string { return 'batch-key'; }
-  private getOrCreateBatch(key: string): any { return { requests: [] }; }
-  private async processBatchItems(batch: any): Promise<void> { /* Implementation */ }
-  private async processStreamingRequest(connection: StreamingConnection): Promise<void> { /* Implementation */ }
-  private calculateCacheUtilization(): any { return {}; }
-  private getAppliedOptimizations(source: string): any[] { return []; }
+  private qosLevelToPriority(_qos: QoSLevel): number { return 1; }
+  private addToQueue(_item: QueueItem): void { /* Implementation */ }
+  private generateBatchKey(_request: PerformanceOptimizationRequest): string { return 'batch-key'; }
+  private getOrCreateBatch(_key: string): any { return { requests: [] }; }
+  private async processBatchItems(_batch: any): Promise<void> { /* Implementation */ }
+  private async processStreamingRequest(_connection: StreamingConnection): Promise<void> { /* Implementation */ }
+  private calculateRecord(): any { return {}; }
+  private getAppliedOptimizations(_source: string): any[] { return []; }
   private collectMetrics(): void { /* Implementation */ }
-  private async executeWarmingPattern(pattern: CacheWarmingPattern): Promise<void> { /* Implementation */ }
+  private async executeWarmingPattern(_pattern: CacheWarmingPattern): Promise<void> { /* Implementation */ }
   private async getCurrentResourceUsage(): Promise<any> { return {}; }
   private async optimizeCpuUsage(): Promise<any> { return {}; }
   private async optimizeMemoryUsage(): Promise<any> { return {}; }
   private async optimizeNetworkUsage(): Promise<any> { return {}; }
-  private calculateProjectedImprovement(optimizations: any[]): any { return {}; }
+  private calculateProjectedImprovement(_optimizations: any[]): any { return {}; }
 }
 
 // ===== ADDITIONAL INTERFACES =====

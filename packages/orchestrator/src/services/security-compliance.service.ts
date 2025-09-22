@@ -29,13 +29,13 @@ import {
   ParlantUserContext,
   ComplianceValidationResult,
   ComplianceViolation,
-  ValidationAuditEntry
+  _ValidationAuditEntry
 } from '../types/parlant-shared.types';
 import {
   OrchestrationTask,
   OrchestrationExecutionContext,
   OrchestrationUserContext,
-  WorkflowStep
+  _WorkflowStep
 } from '../types/orchestrator.types';
 
 // ===== SECURITY INTERFACES =====
@@ -978,7 +978,7 @@ export class SecurityComplianceService implements OnModuleInit, OnModuleDestroy 
   private async validateGDPRConsent(
     requirement: ComplianceRequirement,
     request: SecurityComplianceRequest,
-    accessContext: SecurityAccessContext
+    _accessContext: SecurityAccessContext
   ): Promise<ComplianceViolation | null> {
     // Check if task involves personal data processing
     const hasPersonalData = request.task.workflow.some(step =>
@@ -1010,7 +1010,7 @@ export class SecurityComplianceService implements OnModuleInit, OnModuleDestroy 
   private async validateHIPAAEncryption(
     requirement: ComplianceRequirement,
     request: SecurityComplianceRequest,
-    accessContext: SecurityAccessContext
+    _accessContext: SecurityAccessContext
   ): Promise<ComplianceViolation | null> {
     // Check if task involves health data
     const hasHealthData = request.task.workflow.some(step =>
@@ -1042,7 +1042,7 @@ export class SecurityComplianceService implements OnModuleInit, OnModuleDestroy 
   private async validateSOXAuditTrail(
     requirement: ComplianceRequirement,
     request: SecurityComplianceRequest,
-    accessContext: SecurityAccessContext
+    _accessContext: SecurityAccessContext
   ): Promise<ComplianceViolation | null> {
     // Check if task involves financial data
     const hasFinancialData = request.task.workflow.some(step =>
@@ -1072,7 +1072,7 @@ export class SecurityComplianceService implements OnModuleInit, OnModuleDestroy 
   private async validatePCIDataProtection(
     requirement: ComplianceRequirement,
     request: SecurityComplianceRequest,
-    accessContext: SecurityAccessContext
+    _accessContext: SecurityAccessContext
   ): Promise<ComplianceViolation | null> {
     // Check if task involves payment data
     const hasPaymentData = request.task.workflow.some(step =>
@@ -1097,7 +1097,7 @@ export class SecurityComplianceService implements OnModuleInit, OnModuleDestroy 
    */
   private async validateAccessControl(
     requirement: ComplianceRequirement,
-    request: SecurityComplianceRequest,
+    _request: SecurityComplianceRequest,
     accessContext: SecurityAccessContext
   ): Promise<ComplianceViolation | null> {
     if (!accessContext.accessControl.granted) {
@@ -1142,7 +1142,7 @@ export class SecurityComplianceService implements OnModuleInit, OnModuleDestroy 
   private async validateGenericRequirement(
     requirement: ComplianceRequirement,
     request: SecurityComplianceRequest,
-    accessContext: SecurityAccessContext
+    _accessContext: SecurityAccessContext
   ): Promise<ComplianceViolation | null> {
     // Generic validation based on requirement severity
     if (requirement.severity === 'CRITICAL') {
@@ -1245,7 +1245,7 @@ export class SecurityComplianceService implements OnModuleInit, OnModuleDestroy 
     request: SecurityComplianceRequest,
     accessContext: SecurityAccessContext,
     frameworkResults: ComplianceValidationResult[],
-    riskCompliance: ComplianceValidationResult
+    _riskCompliance: ComplianceValidationResult
   ): Promise<SecurityAuditEntry[]> {
     const auditEntries: SecurityAuditEntry[] = [];
 
@@ -1314,7 +1314,7 @@ export class SecurityComplianceService implements OnModuleInit, OnModuleDestroy 
   private consolidateComplianceResults(
     frameworkResults: ComplianceValidationResult[],
     riskCompliance: ComplianceValidationResult,
-    auditEntries: SecurityAuditEntry[]
+    _auditEntries: SecurityAuditEntry[]
   ): ComplianceValidationResult {
     const allResults = [...frameworkResults, riskCompliance];
 

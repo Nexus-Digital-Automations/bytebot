@@ -49,6 +49,7 @@ import { ComputerUseService } from './computer-use.service';
 import { AsyncJobService } from './async-job.service';
 import { EnhancedAsyncJobService } from './enhanced-async-job.service';
 import { ComprehensiveJobOrchestratorService } from './services/comprehensive-job-orchestrator.service';
+import { AdvancedStatusPollingService } from './services/advanced-status-polling.service';
 import { ComputerActionValidationPipe } from './dto/computer-action-validation.pipe';
 import { BatchJobValidationPipe } from './pipes/batch-job-validation.pipe';
 import { ComputerActionDto } from './dto/computer-action.dto';
@@ -231,6 +232,7 @@ export class ComputerUseController {
     private readonly asyncJobService: AsyncJobService,
     private readonly enhancedAsyncJobService: EnhancedAsyncJobService,
     private readonly comprehensiveJobOrchestrator: ComprehensiveJobOrchestratorService,
+    private readonly statusPollingService: AdvancedStatusPollingService,
   ) {}
 
   // ===== ENHANCED ASYNC ENDPOINTS - ENTERPRISE BATCH & ANALYTICS =====
@@ -1327,13 +1329,29 @@ export class ComputerUseController {
         },
       );
 
-      // Submit job to async service
-      const jobResponse = await this.asyncJobService.submitJob(
+      // Use comprehensive orchestrator for enhanced job handling
+      const executionContext = {
+        userId: user.id,
+        username: user.username,
+        sessionId: operationId,
+        ipAddress: '127.0.0.1', // Would be extracted from request in real implementation
+        userAgent: 'Bytebot-Client/1.0',
+        metadata: {
+          userRole: user.role,
+          operationId,
+          ...metadata,
+        },
+      };
+
+      // Submit job to comprehensive orchestrator
+      const jobId = await this.comprehensiveJobOrchestrator.submitJob(
+        (actionParams as ComputerActionDto).action,
         actionParams as ComputerActionDto,
+        executionContext,
         {
-          priority: priority as JobPriority,
-          timeout: timeout as number,
-          useCache: useCache as boolean,
+          priority: priority as any,
+          enableCaching: useCache as boolean,
+          customTimeout: timeout as number,
           metadata: {
             ...metadata,
             userId: user.id,
@@ -1342,6 +1360,13 @@ export class ComputerUseController {
           },
         },
       );
+
+      // Create job response in expected format
+      const jobResponse = {
+        jobId,
+        status: 'pending' as any,
+        submittedAt: new Date().toISOString(),
+      };
 
       const processingTime = Date.now() - startTime;
       this.logger.log(
@@ -1457,7 +1482,8 @@ export class ComputerUseController {
         username: user.username,
       });
 
-      const jobStatus = await this.asyncJobService.getJobStatus(jobId);
+      // Use comprehensive orchestrator for enhanced status tracking
+      const jobStatus = await this.comprehensiveJobOrchestrator.getJobStatus(jobId, user.id);
 
       const processingTime = Date.now() - startTime;
       this.logger.log(
@@ -1574,7 +1600,8 @@ export class ComputerUseController {
         username: user.username,
       });
 
-      const jobResult = await this.asyncJobService.getJobResult(jobId);
+      // Use comprehensive orchestrator for enhanced result retrieval
+      const jobResult = await this.comprehensiveJobOrchestrator.getJobResult(jobId, user.id);
 
       const processingTime = Date.now() - startTime;
 
@@ -1990,5 +2017,272 @@ export class ComputerUseController {
       action: 'screenshot',
     };
     return this.action(screenshotAction, user);
+  }
+
+  // ===== ENHANCED ASYNC JOB MANAGEMENT ENDPOINTS =====
+
+  /**
+   * Cancel a running or queued job
+   */
+  @Delete('async/:jobId')
+  @ApiOperation({
+    summary: 'Cancel async job',
+    description: 'Cancel a running or queued async job with enhanced cleanup',
+  })
+  @ApiParam({ name: 'jobId', description: 'Job ID to cancel' })
+  @ApiResponse({ status: 200, description: 'Job cancelled successfully' })
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard, EnterpriseRateLimitGuard)
+  @OperatorOrAdmin()
+  @ForVersion(SUPPORTED_API_VERSIONS.V1)
+  async cancelJob(
+    @Param('jobId') jobId: string,
+    @Body() options: { reason?: string; graceful?: boolean } = {},
+    @CurrentUser() user: ByteBotdUser,
+  ): Promise<{ success: boolean; message: string }> {
+    const operationId = `cancel_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const startTime = Date.now();
+
+    try {
+      this.logger.log(`[${operationId}] Cancelling job: ${jobId}`, {
+        operationId,
+        jobId,
+        userId: user.id,
+        reason: options.reason
+      });
+
+      const success = await this.comprehensiveJobOrchestrator.cancelJob(
+        jobId,
+        user.id,
+        {
+          reason: options.reason || 'Cancelled by user',
+          graceful: options.graceful ?? true,
+          stopDependents: false
+        }
+      );
+
+      const processingTime = Date.now() - startTime;
+
+      this.logger.log(`[${operationId}] Job cancellation ${success ? 'successful' : 'failed'} (${processingTime}ms)`, {
+        operationId,
+        jobId,
+        success,
+        processingTime
+      });
+
+      return {
+        success,
+        message: success ? 'Job cancelled successfully' : 'Failed to cancel job'
+      };
+
+    } catch (error) {
+      const processingTime = Date.now() - startTime;
+      const errorMessage = error instanceof Error ? error.message : String(error);
+
+      this.logger.error(`[${operationId}] Job cancellation failed: ${errorMessage} (${processingTime}ms)`, {
+        operationId,
+        jobId,
+        error: errorMessage,
+        processingTime
+      });
+
+      throw new HttpException(
+        `Failed to cancel job: ${errorMessage}`,
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+
+  /**
+   * Get system health and performance metrics
+   */
+  @Get('system/health')
+  @ApiOperation({
+    summary: 'Get system health',
+    description: 'Get comprehensive system health and performance metrics',
+  })
+  @ApiResponse({ status: 200, description: 'System health retrieved successfully' })
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard, EnterpriseRateLimitGuard)
+  @OperatorOrAdmin()
+  @ForVersion(SUPPORTED_API_VERSIONS.V1)
+  async getSystemHealth(
+    @CurrentUser() user: ByteBotdUser,
+  ): Promise<any> {
+    const operationId = `health_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const startTime = Date.now();
+
+    try {
+      this.logger.log(`[${operationId}] System health request`, {
+        operationId,
+        userId: user.id
+      });
+
+      const health = await this.comprehensiveJobOrchestrator.getSystemHealth();
+      const processingTime = Date.now() - startTime;
+
+      this.logger.log(`[${operationId}] System health retrieved (${processingTime}ms)`, {
+        operationId,
+        status: health.status,
+        activeJobs: health.activeJobs,
+        processingTime
+      });
+
+      return health;
+
+    } catch (error) {
+      const processingTime = Date.now() - startTime;
+      const errorMessage = error instanceof Error ? error.message : String(error);
+
+      this.logger.error(`[${operationId}] System health retrieval failed: ${errorMessage} (${processingTime}ms)`, {
+        operationId,
+        error: errorMessage,
+        processingTime
+      });
+
+      throw new HttpException(
+        `Failed to retrieve system health: ${errorMessage}`,
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+
+  /**
+   * Start status polling for a job
+   */
+  @Post('async/:jobId/polling')
+  @ApiOperation({
+    summary: 'Start job status polling',
+    description: 'Start intelligent status polling for real-time job updates',
+  })
+  @ApiParam({ name: 'jobId', description: 'Job ID to start polling for' })
+  @ApiResponse({ status: 200, description: 'Polling started successfully' })
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard, EnterpriseRateLimitGuard)
+  @OperatorOrAdmin()
+  @ForVersion(SUPPORTED_API_VERSIONS.V1)
+  async startJobPolling(
+    @Param('jobId') jobId: string,
+    @Body() options: {
+      clientId?: string;
+      customInterval?: number;
+      filters?: {
+        includeProgress?: boolean;
+        includePerformanceMetrics?: boolean;
+        includeErrorDetails?: boolean;
+      };
+    } = {},
+    @CurrentUser() user: ByteBotdUser,
+  ): Promise<{ success: boolean; message: string }> {
+    const operationId = `polling_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const startTime = Date.now();
+
+    try {
+      this.logger.log(`[${operationId}] Starting polling for job: ${jobId}`, {
+        operationId,
+        jobId,
+        userId: user.id,
+        clientId: options.clientId
+      });
+
+      await this.statusPollingService.startPolling(jobId, user.id, {
+        clientId: options.clientId || operationId,
+        customInterval: options.customInterval,
+        filters: options.filters
+      });
+
+      const processingTime = Date.now() - startTime;
+
+      this.logger.log(`[${operationId}] Polling started successfully (${processingTime}ms)`, {
+        operationId,
+        jobId,
+        processingTime
+      });
+
+      return {
+        success: true,
+        message: 'Job polling started successfully'
+      };
+
+    } catch (error) {
+      const processingTime = Date.now() - startTime;
+      const errorMessage = error instanceof Error ? error.message : String(error);
+
+      this.logger.error(`[${operationId}] Failed to start polling: ${errorMessage} (${processingTime}ms)`, {
+        operationId,
+        jobId,
+        error: errorMessage,
+        processingTime
+      });
+
+      throw new HttpException(
+        `Failed to start polling: ${errorMessage}`,
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+
+  /**
+   * Stop status polling for a job
+   */
+  @Delete('async/:jobId/polling')
+  @ApiOperation({
+    summary: 'Stop job status polling',
+    description: 'Stop status polling for a specific job',
+  })
+  @ApiParam({ name: 'jobId', description: 'Job ID to stop polling for' })
+  @ApiResponse({ status: 200, description: 'Polling stopped successfully' })
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard, EnterpriseRateLimitGuard)
+  @OperatorOrAdmin()
+  @ForVersion(SUPPORTED_API_VERSIONS.V1)
+  async stopJobPolling(
+    @Param('jobId') jobId: string,
+    @Body() options: { clientId?: string } = {},
+    @CurrentUser() user: ByteBotdUser,
+  ): Promise<{ success: boolean; message: string }> {
+    const operationId = `stop_polling_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const startTime = Date.now();
+
+    try {
+      this.logger.log(`[${operationId}] Stopping polling for job: ${jobId}`, {
+        operationId,
+        jobId,
+        userId: user.id,
+        clientId: options.clientId
+      });
+
+      const pollerId = `${jobId}:${user.id}:${options.clientId || 'default'}`;
+      await this.statusPollingService.stopPolling(pollerId);
+
+      const processingTime = Date.now() - startTime;
+
+      this.logger.log(`[${operationId}] Polling stopped successfully (${processingTime}ms)`, {
+        operationId,
+        jobId,
+        processingTime
+      });
+
+      return {
+        success: true,
+        message: 'Job polling stopped successfully'
+      };
+
+    } catch (error) {
+      const processingTime = Date.now() - startTime;
+      const errorMessage = error instanceof Error ? error.message : String(error);
+
+      this.logger.error(`[${operationId}] Failed to stop polling: ${errorMessage} (${processingTime}ms)`, {
+        operationId,
+        jobId,
+        error: errorMessage,
+        processingTime
+      });
+
+      throw new HttpException(
+        `Failed to stop polling: ${errorMessage}`,
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
   }
 }

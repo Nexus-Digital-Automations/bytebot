@@ -30,6 +30,7 @@ import {
   createEnvironmentConfig,
 } from '../../shared/src/modules/parlant-auth.module';
 import { HighPerformanceParlantModule } from '../../../../src/modules/high-performance-parlant.module';
+import { RateLimitingModule } from './security/rate-limiting/rate-limiting.module';
 
 @Module({
   imports: [
@@ -112,6 +113,7 @@ import { HighPerformanceParlantModule } from '../../../../src/modules/high-perfo
       inject: [ConfigService],
     }),
     SecurityModule, // Enterprise security framework for BytebotD
+    RateLimitingModule, // Comprehensive API rate limiting and DDoS protection framework
     AuthModule, // JWT authentication and RBAC authorization
     ErrorHandlingModule, // Comprehensive error handling and recovery system
     ComputerUseModule,
