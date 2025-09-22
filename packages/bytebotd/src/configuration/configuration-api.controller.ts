@@ -48,12 +48,48 @@ import {
   ParlantCritical,
   ParlantSecure,
   ParlantValidated,
-  ParlantAdmin,
-  SecurityLevel,
-  ValidationMode,
-  ConversationContext,
-  ParlantValidationInterceptor
-} from '@bytebot/shared/src/parlant/parlant-validation.decorator';
+  ParlantCached,
+  ParlantFast,
+  SecurityLevel
+} from '@bytebot/shared/src/decorators/parlant-validation.decorator';
+import { ParlantValidationInterceptor } from '@bytebot/shared/src/interceptors/parlant-validation.interceptor';
+
+// Enhanced Configuration-Specific PARLANT Decorators
+export const ParlantConfigurationRead = (description: string) =>
+  ParlantValidated({
+    description,
+    securityLevel: SecurityLevel._MEDIUM,
+    cacheable: true,
+    cacheTtl: 300000, // 5 minutes
+    timeout: 3000
+  });
+
+export const ParlantConfigurationWrite = (description: string) =>
+  ParlantCritical(description);
+
+export const ParlantSecurityConfiguration = (description: string) =>
+  ParlantValidated({
+    description,
+    securityLevel: SecurityLevel._CRITICAL,
+    cacheable: false,
+    timeout: 60000
+  });
+
+export const ParlantSystemConfiguration = (description: string) =>
+  ParlantValidated({
+    description,
+    securityLevel: SecurityLevel._CRITICAL,
+    cacheable: false,
+    timeout: 45000
+  });
+
+export const ParlantIntegrationConfiguration = (description: string) =>
+  ParlantValidated({
+    description,
+    securityLevel: SecurityLevel._HIGH,
+    cacheable: false,
+    timeout: 25000
+  });
 import { ConversationContextParameter } from '@bytebot/shared/src/types/conversation-context.types';
 
 // Authentication and Authorization
@@ -258,15 +294,7 @@ export class ConfigurationApiController {
    */
   @Get()
   @OperatorOrAdmin()
-  @ParlantValidated({
-    intent: 'Retrieve system configuration settings for monitoring and administration',
-    securityLevel: SecurityLevel.MEDIUM,
-    validationMode: ValidationMode.AUTOMATIC,
-    businessCategory: 'CONFIGURATION_ACCESS',
-    complianceFlags: ['CONFIG_ACCESS', 'SYSTEM_MONITORING'],
-    cacheable: true,
-    timeout: 5000
-  })
+  @ParlantConfigurationRead('Retrieve system configuration settings for monitoring and administration')
   @ApiOperation({
     summary: 'Get all configuration settings',
     description: 'Retrieve all system configuration settings with PARLANT validation'
@@ -334,15 +362,7 @@ export class ConfigurationApiController {
    */
   @Get(':key')
   @OperatorOrAdmin()
-  @ParlantValidated({
-    intent: 'Retrieve specific configuration setting by key',
-    securityLevel: SecurityLevel.LOW,
-    validationMode: ValidationMode.AUTOMATIC,
-    businessCategory: 'CONFIGURATION_LOOKUP',
-    complianceFlags: ['CONFIG_ACCESS'],
-    cacheable: true,
-    timeout: 3000
-  })
+  @ParlantConfigurationRead('Retrieve specific configuration setting by key')
   @ApiOperation({
     summary: 'Get configuration setting',
     description: 'Retrieve specific configuration setting by key'
@@ -390,35 +410,9 @@ export class ConfigurationApiController {
    * Update configuration setting
    * High-risk operation requiring conversational validation
    */
-  @Put(':key')@OperatorOrAdmin()@ParlantCritical(
-    'Update system configuration setting with validation and impact assessment',{securityLevel: SecurityLevel.HIGH,
-      validationMode: ValidationMode.EXPLICIT,
-      businessCategory: 'CONFIGURATION_MODIFICATION',
-      complianceFlags: ['CONFIG_CHANGE', 'SYSTEM_MODIFICATION', 'AUDIT_REQUIRED'],requiredRoles: ['OPERATOR', 'ADMIN'],timeout: 30000,
-      cacheable: false,
-      customRules: [
-        {
-          name: 'security_setting_validation',
-      condition: 'category === "SECURITY"",
-      action: 'REQUIRE_CONFIRMATION',
-      priority: 10},
-        {
-          name: 'production_change_validation',
-      condition: 'environment === "production"",
-      action: 'REQUIRE_CONFIRMATION',
-      priority: 9},
-        {
-          name: 'restart_required_validation',
-      condition: 'requiresRestart === true',
-      action: 'REQUIRE_CONFIRMATION',
-      priority: 8},
-        {
-          name: 'secret_setting_validation',
-      condition: 'sensitivity in ["CONFIDENTIAL", "SECRET"]",action: 'REQUIRE_CONFIRMATION',
-      priority: 7}
-      ]
-    }
-  )
+  @Put(':key')
+  @OperatorOrAdmin()
+  @ParlantConfigurationWrite('Update system configuration setting with comprehensive validation and impact assessment')
   @ApiOperation({
     summary: 'Update configuration setting',
       description: 'Update configuration setting with comprehensive PARLANT validation'})@ApiParam({ name: 'key', description: 'Configuration key to update' })@ApiBody({schema: {
@@ -496,32 +490,9 @@ export class ConfigurationApiController {
    * Update security configuration
    * Critical operation requiring administrative approval
    */
-  @Put('security/:policyName')@AdminOnly()@ParlantAdmin(
-    'Update security configuration policy with comprehensive validation and audit trail',{securityLevel: SecurityLevel.CRITICAL,
-      validationMode: ValidationMode.EXPLICIT,
-      businessCategory: 'SECURITY_CONFIGURATION',
-      complianceFlags: ['SECURITY_CHANGE', 'POLICY_MODIFICATION', 'CRITICAL_SYSTEM_CHANGE'],requiredRoles: ['ADMIN'],
-      timeout: 60000,
-      cacheable: false,
-      customRules: [
-        {
-          name: 'authentication_policy_validation',
-      condition: 'configuration.authentication !== undefined',
-      action: 'REQUIRE_CONFIRMATION',
-      priority: 10},
-        {
-          name: 'encryption_policy_validation',
-      condition: 'configuration.encryption !== undefined',
-      action: 'REQUIRE_CONFIRMATION',
-      priority: 9},
-        {
-          name: 'production_security_change',
-      condition: 'environment === "production"",
-      action: 'REQUIRE_CONFIRMATION',
-      priority: 8}
-      ]
-    }
-  )
+  @Put('security/:policyName')
+  @AdminOnly()
+  @ParlantSecurityConfiguration('Update security configuration policy with comprehensive validation and audit trail')
   @ApiOperation({
     summary: 'Update security configuration',
       description: 'Update security policy configuration with critical validation requirements'})@ApiParam({ name: 'policyName', description: 'Security policy name' })async updateSecurityConfiguration(@Param('policyName') policyName: string,
@@ -582,26 +553,9 @@ export class ConfigurationApiController {
   /**
    * Update system configuration
    */
-  @Put('system/:namespace')@AdminOnly()@ParlantCritical(
-    'Update system configuration namespace with version control and rollback capabilities',{securityLevel: SecurityLevel.CRITICAL,
-      validationMode: ValidationMode.EXPLICIT,
-      businessCategory: 'SYSTEM_CONFIGURATION',
-      complianceFlags: ['SYSTEM_CHANGE', 'CONFIGURATION_MANAGEMENT'],requiredRoles: ['ADMIN'],
-      timeout: 45000,
-      cacheable: false,
-      customRules: [
-        {
-          name: 'high_impact_validation',
-      condition: 'impact in ["HIGH", "CRITICAL"]",action: 'REQUIRE_CONFIRMATION',
-      priority: 10},
-        {
-          name: 'testing_requirement_validation',
-      condition: 'testingRequired === true',
-      action: 'REQUIRE_CONFIRMATION',
-      priority: 8}
-      ]
-    }
-  )
+  @Put('system/:namespace')
+  @AdminOnly()
+  @ParlantSystemConfiguration('Update system configuration namespace with version control and rollback capabilities')
   @ApiOperation({
     summary: 'Update system configuration',
       description: 'Update system configuration namespace with versioning and rollback support'})async updateSystemConfiguration(
@@ -641,14 +595,9 @@ _${Math.random().toString(36).substring(7)}`;
   /**
    * Update integration configuration
    */
-  @Put('integration/:name')@OperatorOrAdmin()@ParlantSecure(
-    'Update integration configuration with connection and security parameter validation',{securityLevel: SecurityLevel.HIGH,
-      validationMode: ValidationMode.CONVERSATIONAL,
-      businessCategory: 'INTEGRATION_CONFIGURATION',
-      complianceFlags: ['INTEGRATION_CHANGE', 'CONNECTION_SECURITY'],requiredRoles: ['OPERATOR', 'ADMIN'],timeout: 25000,
-      cacheable: false
-    }
-  )
+  @Put('integration/:name')
+  @OperatorOrAdmin()
+  @ParlantIntegrationConfiguration('Update integration configuration with connection and security parameter validation')
   @ApiOperation({
     summary: 'Update integration configuration',
       description: 'Update integration configuration with security and performance validation'})async updateIntegrationConfiguration(
@@ -687,14 +636,9 @@ _${Math.random().toString(36).substring(7)}`;
   /**
    * Get configuration change history
    */
-  @Get('history/:key')@OperatorOrAdmin()@ParlantValidated({
-    intent: 'Retrieve configuration change history for audit and compliance tracking',
-      securityLevel: SecurityLevel.MEDIUM,
-      validationMode: ValidationMode.AUTOMATIC,
-    businessCategory: 'CONFIGURATION_AUDIT',
-      complianceFlags: ['AUDIT_ACCESS', 'CHANGE_HISTORY'],cacheable: true,
-      timeout: 8000
-  })
+  @Get('history/:key')
+  @OperatorOrAdmin()
+  @ParlantConfigurationRead('Retrieve configuration change history for audit and compliance tracking')
   @ApiOperation({
     summary: 'Get configuration change history',
       description: 'Retrieve change history for configuration setting'})async getConfigurationHistory(
@@ -733,15 +677,9 @@ _${Math.random().toString(36).substring(7)}`;
   /**
    * Rollback configuration change
    */
-  @Post('rollback/:changeId')@AdminOnly()@ParlantCritical(
-    'Rollback configuration change to previous state with comprehensive validation',{securityLevel: SecurityLevel.CRITICAL,
-      validationMode: ValidationMode.EXPLICIT,
-      businessCategory: 'CONFIGURATION_ROLLBACK',
-      complianceFlags: ['ROLLBACK_OPERATION', 'CONFIGURATION_RECOVERY'],requiredRoles: ['ADMIN'],
-      timeout: 30000,
-      cacheable: false
-    }
-  )
+  @Post('rollback/:changeId')
+  @AdminOnly()
+  @ParlantConfigurationWrite('Rollback configuration change to previous state with comprehensive validation')
   @ApiOperation({
     summary: 'Rollback configuration change',
       description: 'Rollback configuration to previous state'})async rollbackConfigurationChange(

@@ -194,7 +194,7 @@ export class QualityGateFrameworkService {
   validateAllGates(): Record<string, QualityGateConfigValidation> {
     const results: Record<string, QualityGateConfigValidation> = {};
 
-    for (const [gateId, gate] of this.gates) {
+    for (const [gateId, gate] of this.gatesMap) {
       results[gateId] = gate.validateConfig();
     }
 
