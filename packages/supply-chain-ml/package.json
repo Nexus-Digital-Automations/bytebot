@@ -1,0 +1,67 @@
+{
+  "name": "@bytebot/supply-chain-ml",
+  "version": "1.0.0",
+  "description": "Machine Learning models and predictive analytics for supply chain optimization",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "typecheck": "tsc --noEmit",
+    "train:models": "node dist/scripts/train-models.js",
+    "validate:models": "node dist/scripts/validate-models.js"
+  },
+  "dependencies": {
+    "@nestjs/common": "^10.0.0",
+    "@nestjs/core": "^10.0.0",
+    "@nestjs/platform-express": "^10.0.0",
+    "@nestjs/typeorm": "^10.0.0",
+    "@nestjs/jwt": "^10.0.0",
+    "@nestjs/schedule": "^4.0.0",
+    "@tensorflow/tfjs-node": "^4.10.0",
+    "@tensorflow/tfjs": "^4.10.0",
+    "ml-regression": "^6.0.0",
+    "ml-matrix": "^6.10.0",
+    "simple-statistics": "^7.8.0",
+    "mathjs": "^11.0.0",
+    "lodash": "^4.17.21",
+    "moment": "^2.29.4",
+    "csv-parser": "^3.0.0",
+    "json2csv": "^6.0.0",
+    "class-transformer": "^0.5.0",
+    "class-validator": "^0.14.0",
+    "rxjs": "^7.8.0",
+    "reflect-metadata": "^0.1.13"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/jest": "^29.0.0",
+    "@types/lodash": "^4.14.0",
+    "typescript": "^5.0.0",
+    "jest": "^29.0.0",
+    "ts-jest": "^29.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.0.0"
+  },
+  "peerDependencies": {
+    "@bytebot/shared": "*",
+    "@bytebot/supply-chain-analytics": "*"
+  },
+  "keywords": [
+    "machine-learning",
+    "demand-forecasting",
+    "predictive-analytics",
+    "supply-chain",
+    "tensorflow",
+    "nestjs",
+    "typescript"
+  ],
+  "author": "AIgent Development Team",
+  "license": "UNLICENSED",
+  "private": true
+}
