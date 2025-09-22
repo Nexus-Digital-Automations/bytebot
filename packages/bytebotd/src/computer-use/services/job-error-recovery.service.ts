@@ -55,15 +55,37 @@ import {
  * Comprehensive error classification for intelligent recovery
  */
 export enum ErrorCategory {
-  TRANSIENT = 'transient',           // Temporary issues (network, resource)PERMANENT = 'permanent',           // Non-recoverable errors (logic, validation)NETWORK = 'network',               // Network connectivity issuesSYSTEM = 'system',                 // System resource exhaustionUSER = 'user',                     // User input or permission errorsTIMEOUT = 'timeout',               // Execution timeout errorsSECURITY = 'security',             // Security violationsDEPENDENCY = 'dependency',         // External service failuresRESOURCE = 'resource',             // Resource allocation failuresBUSINESS_LOGIC = 'business_logic', // Business rule violations}/**
+  TRANSIENT = 'transient',           // Temporary issues (network, resource)
+  PERMANENT = 'permanent',           // Non-recoverable errors (logic, validation)
+  NETWORK = 'network',               // Network connectivity issues
+  SYSTEM = 'system',                 // System resource exhaustion
+  USER = 'user',                     // User input or permission errors
+  TIMEOUT = 'timeout',               // Execution timeout errors
+  SECURITY = 'security',             // Security violations
+  DEPENDENCY = 'dependency',         // External service failures
+  RESOURCE = 'resource',             // Resource allocation failures
+  BUSINESS_LOGIC = 'business_logic', // Business rule violations
+}/**
  * Recovery strategy types based on error analysis
  */
 export enum RecoveryStrategy {
-  IMMEDIATE_RETRY = 'immediate_retry',         // Retry immediatelyDELAYED_RETRY = 'delayed_retry',             // Retry with exponential backoffALTERNATIVE_WORKER = 'alternative_worker',   // Try different worker/resourceJOB_SPLITTING = 'job_splitting',             // Break job into smaller partsMANUAL_REVIEW = 'manual_review',             // Require human interventionDEAD_LETTER = 'dead_letter',                 // Move to dead letter queueCIRCUIT_BREAKER = 'circuit_breaker',         // Activate circuit breakerESCALATION = 'escalation',                   // Escalate to administratorsRESOURCE_SCALING = 'resource_scaling',       // Scale resourcesCONFIGURATION_UPDATE = 'configuration_update', // Update configuration}/**
+  IMMEDIATE_RETRY = 'immediate_retry',         // Retry immediately
+  DELAYED_RETRY = 'delayed_retry',             // Retry with exponential backoff
+  ALTERNATIVE_WORKER = 'alternative_worker',   // Try different worker/resource
+  JOB_SPLITTING = 'job_splitting',             // Break job into smaller parts
+  MANUAL_REVIEW = 'manual_review',             // Require human intervention
+  DEAD_LETTER = 'dead_letter',                 // Move to dead letter queue
+  CIRCUIT_BREAKER = 'circuit_breaker',         // Activate circuit breaker
+  ESCALATION = 'escalation',                   // Escalate to administrators
+  RESOURCE_SCALING = 'resource_scaling',       // Scale resources
+  CONFIGURATION_UPDATE = 'configuration_update', // Update configuration
+}/**
  * Circuit breaker states for cascading failure prevention
  */
 export enum CircuitBreakerState {
-  CLOSED = 'closed',       // Normal operationOPEN = 'open',           // Failing fastHALF_OPEN = 'half_open', // Testing recovery
+  CLOSED = 'closed',       // Normal operation
+  OPEN = 'open',           // Failing fast
+  HALF_OPEN = 'half_open', // Testing recovery
 }
 
 /**
@@ -405,7 +427,8 @@ export class RetryManager {
         const maxDelay = this.config.get<number>('ERROR_RECOVERY_MAX_RETRY_DELAY', 60000);
 
         const jitterPercent = this.config.get<number>('ERROR_RECOVERY_JITTER_PERCENT', 10);
-    // Exponential backoffconst exponentialDelay = Math.min(base * Math.pow(multiplier, retryCount), maxDelay);
+    // Exponential backoff
+    const exponentialDelay = Math.min(base * Math.pow(multiplier, retryCount), maxDelay);
 
     // Add jitter to prevent thundering herd
     const jitterRange = exponentialDelay * (jitterPercent / 100);
@@ -497,7 +520,8 @@ export class RetryManager {
       if (circuitBreaker.failureCount >= circuitBreaker.failureThreshold) {
         circuitBreaker.state = CircuitBreakerState.OPEN;
         this.logger.warn(`Circuit breaker ${circuitBreakerKey} opened`);
-    // Schedule half-open transitionsetTimeout(() => {
+        // Schedule half-open transition
+        setTimeout(() => {
           if (circuitBreaker.state === CircuitBreakerState.OPEN) {
             circuitBreaker.state = CircuitBreakerState.HALF_OPEN;
             circuitBreaker.halfOpenCalls = 0;
@@ -617,7 +641,13 @@ export class FailureAnalyzer {
   private generateErrorSignature(error: JobError): string {
     const components = [
       error.code,
-      error.message.split(' ').slice(0, 5).join(' '), // First 5 wordsObject.keys(error.context || {}).sort().join(','),];return Buffer.from(components.join('|')).toString('base64').substring(0, 16);}/**
+      error.message.split(' ').slice(0, 5).join(' '), // First 5 words
+      Object.keys(error.context || {}).sort().join(','),
+    ];
+    return Buffer.from(components.join('|')).toString('base64').substring(0, 16);
+  }
+
+  /**
    * Update error pattern tracking
    */
   private updateErrorPattern(
@@ -694,14 +724,17 @@ export class FailureAnalyzer {
         .map(attempt => attempt.strategy);
 
       if (failedStrategies.length > 0) {
-        factors.push(`Failed recovery strategies: ${failedStrategies.join(`, ')}`);
+        factors.push(`Failed recovery strategies: ${failedStrategies.join(', ')}`);
       }
     }
 
     // Timing factors
     const currentHour = new Date().getHours();
     if (currentHour >= 9 && currentHour <= 17) {
-      factors.push('Failure occurred during peak business hours');}return factors;
+      factors.push('Failure occurred during peak business hours');
+    }
+
+    return factors;
   }
 
   /**
