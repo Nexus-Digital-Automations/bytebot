@@ -65,6 +65,66 @@ interface PermissionTest {
   conversationalValidation: boolean;
 }
 
+// ===== UTILITY FUNCTIONS =====
+
+function createTestUserWithRole(roleId: string): TestUser {
+  const role = testRoles.find(r => r.id === roleId);
+  if (!role) {
+    throw new Error(`Test role ${roleId} not found`);
+  }
+
+  return {
+    id: SecurityTestUtils.generateRandomData(8),
+    username: `testuser_${roleId}_${SecurityTestUtils.generateRandomData(4)}`,
+    roles: [roleId],
+    permissions: role.permissions,
+    securityClearance: getDefaultSecurityClearance(roleId)
+  };
+}
+
+function createTestUserWithSecurityClearance(clearance: SecurityClearanceLevel): TestUser {
+  const roleId = getRoleForSecurityClearance(clearance);
+  const user = createTestUserWithRole(roleId);
+  user.securityClearance = clearance;
+  return user;
+}
+
+function getDefaultSecurityClearance(roleId: string): SecurityClearanceLevel {
+  const clearanceMap: Record<string, SecurityClearanceLevel> = {
+    'guest': SecurityClearanceLevel.PUBLIC,
+    'user': SecurityClearanceLevel.INTERNAL,
+    'moderator': SecurityClearanceLevel.CONFIDENTIAL,
+    'admin': SecurityClearanceLevel.SECRET,
+    'superadmin': SecurityClearanceLevel.CLASSIFIED
+  };
+
+  return clearanceMap[roleId] || SecurityClearanceLevel.PUBLIC;
+}
+
+function getRoleForSecurityClearance(clearance: SecurityClearanceLevel): string {
+  const roleMap: Record<SecurityClearanceLevel, string> = {
+    [SecurityClearanceLevel.PUBLIC]: 'guest',
+    [SecurityClearanceLevel.INTERNAL]: 'user',
+    [SecurityClearanceLevel.CONFIDENTIAL]: 'moderator',
+    [SecurityClearanceLevel.SECRET]: 'admin',
+    [SecurityClearanceLevel.CLASSIFIED]: 'superadmin'
+  };
+
+  return roleMap[clearance] || 'guest';
+}
+
+function canAccessSecurityLevel(userClearance: SecurityClearanceLevel, resourceLevel: SecurityClearanceLevel): boolean {
+  const clearanceLevels = {
+    [SecurityClearanceLevel.PUBLIC]: 1,
+    [SecurityClearanceLevel.INTERNAL]: 2,
+    [SecurityClearanceLevel.CONFIDENTIAL]: 3,
+    [SecurityClearanceLevel.SECRET]: 4,
+    [SecurityClearanceLevel.CLASSIFIED]: 5
+  };
+
+  return clearanceLevels[userClearance] >= clearanceLevels[resourceLevel];
+}
+
 describe('RBAC Authorization Testing Suite', () => {
   let app: INestApplication;
   let securityFramework: SecurityTestFramework;
@@ -183,7 +243,7 @@ describe('RBAC Authorization Testing Suite', () => {
         async () => {
           for (const role of testRoles) {
             for (const permissionTest of permissionTests) {
-              const user = this.createTestUserWithRole(role.id);
+              const user = createTestUserWithRole(role.id);
               const token = securityFramework.generateTestJWT(user);
 
               const response = await request(app.getHttpServer())
@@ -209,7 +269,7 @@ describe('RBAC Authorization Testing Suite', () => {
         SecurityTestType.AUTHORIZATION,
         async () => {
           // Higher level roles should inherit lower level permissions
-          const adminUser = this.createTestUserWithRole('admin');
+          const adminUser = createTestUserWithRole('admin');
           const userPermissions = testRoles.find(r => r.id === 'user')?.permissions || [];
 
           for (const permission of userPermissions) {
@@ -231,7 +291,7 @@ describe('RBAC Authorization Testing Suite', () => {
         SecurityTestType.AUTHORIZATION,
         async () => {
           // Regular user trying to access admin endpoints
-          const regularUser = this.createTestUserWithRole('user');
+          const regularUser = createTestUserWithRole('user');
           const token = securityFramework.generateTestJWT(regularUser);
 
           const adminEndpoints = [
@@ -260,8 +320,8 @@ describe('RBAC Authorization Testing Suite', () => {
         'Horizontal Privilege Escalation Prevention',
         SecurityTestType.AUTHORIZATION,
         async () => {
-          const user1 = this.createTestUserWithRole('user');
-          const user2 = this.createTestUserWithRole('user');
+          const user1 = createTestUserWithRole('user');
+          const user2 = createTestUserWithRole('user');
 
           const token1 = securityFramework.generateTestJWT(user1);
 
@@ -281,7 +341,7 @@ describe('RBAC Authorization Testing Suite', () => {
         'Vertical Privilege Escalation Prevention',
         SecurityTestType.AUTHORIZATION,
         async () => {
-          const regularUser = this.createTestUserWithRole('user');
+          const regularUser = createTestUserWithRole('user');
 
           // Attempt to modify role through API manipulation
           const manipulatedPayload = {
@@ -307,7 +367,7 @@ describe('RBAC Authorization Testing Suite', () => {
         'Role Modification Restriction Validation',
         SecurityTestType.AUTHORIZATION,
         async () => {
-          const moderator = this.createTestUserWithRole('moderator');
+          const moderator = createTestUserWithRole('moderator');
           const token = securityFramework.generateTestJWT(moderator);
 
           // Moderator trying to modify their own role to admin
@@ -330,7 +390,7 @@ describe('RBAC Authorization Testing Suite', () => {
         'PARLANT Conversational Approval Validation',
         SecurityTestType.AUTHORIZATION,
         async () => {
-          const admin = this.createTestUserWithRole('admin');
+          const admin = createTestUserWithRole('admin');
           const token = securityFramework.generateTestJWT(admin);
 
           // Sensitive operation requiring conversational validation
@@ -360,7 +420,7 @@ describe('RBAC Authorization Testing Suite', () => {
         'Conversational Validation Bypass Prevention',
         SecurityTestType.AUTHORIZATION,
         async () => {
-          const admin = this.createTestUserWithRole('admin');
+          const admin = createTestUserWithRole('admin');
           const token = securityFramework.generateTestJWT(admin);
 
           // Attempt to bypass conversational validation
@@ -392,12 +452,12 @@ describe('RBAC Authorization Testing Suite', () => {
           const clearanceLevels = Object.values(SecurityClearanceLevel);
 
           for (const level of clearanceLevels) {
-            const user = this.createTestUserWithSecurityClearance(level);
+            const user = createTestUserWithSecurityClearance(level);
             const token = securityFramework.generateTestJWT(user);
 
             // Test access to resources at different security levels
             for (const permissionTest of permissionTests) {
-              if (this.canAccessSecurityLevel(level, permissionTest.securityLevel)) {
+              if (canAccessSecurityLevel(level, permissionTest.securityLevel)) {
                 // Should have access based on clearance level
                 const response = await request(app.getHttpServer())
                   [permissionTest.method.toLowerCase()](permissionTest.endpoint)
@@ -425,7 +485,7 @@ describe('RBAC Authorization Testing Suite', () => {
         'Multi-Factor Authorization Validation',
         SecurityTestType.AUTHORIZATION,
         async () => {
-          const superAdmin = this.createTestUserWithRole('superadmin');
+          const superAdmin = createTestUserWithRole('superadmin');
           const token = securityFramework.generateTestJWT(superAdmin);
 
           // Critical operation requiring multi-factor authorization
@@ -457,7 +517,7 @@ describe('RBAC Authorization Testing Suite', () => {
         'RBAC Authorization Audit Trail',
         SecurityTestType.AUTHORIZATION,
         async () => {
-          const admin = this.createTestUserWithRole('admin');
+          const admin = createTestUserWithRole('admin');
           const token = securityFramework.generateTestJWT(admin);
 
           // Perform administrative action
@@ -501,63 +561,4 @@ describe('RBAC Authorization Testing Suite', () => {
     });
   });
 
-  // ===== PRIVATE UTILITY METHODS =====
-
-  private createTestUserWithRole(roleId: string): TestUser {
-    const role = testRoles.find(r => r.id === roleId);
-    if (!role) {
-      throw new Error(`Test role ${roleId} not found`);
-    }
-
-    return {
-      id: SecurityTestUtils.generateRandomData(8),
-      username: `testuser_${roleId}_${SecurityTestUtils.generateRandomData(4)}`,
-      roles: [roleId],
-      permissions: role.permissions,
-      securityClearance: this.getDefaultSecurityClearance(roleId)
-    };
-  }
-
-  private createTestUserWithSecurityClearance(clearance: SecurityClearanceLevel): TestUser {
-    const roleId = this.getRoleForSecurityClearance(clearance);
-    const user = this.createTestUserWithRole(roleId);
-    user.securityClearance = clearance;
-    return user;
-  }
-
-  private getDefaultSecurityClearance(roleId: string): SecurityClearanceLevel {
-    const clearanceMap: Record<string, SecurityClearanceLevel> = {
-      'guest': SecurityClearanceLevel.PUBLIC,
-      'user': SecurityClearanceLevel.INTERNAL,
-      'moderator': SecurityClearanceLevel.CONFIDENTIAL,
-      'admin': SecurityClearanceLevel.SECRET,
-      'superadmin': SecurityClearanceLevel.CLASSIFIED
-    };
-
-    return clearanceMap[roleId] || SecurityClearanceLevel.PUBLIC;
-  }
-
-  private getRoleForSecurityClearance(clearance: SecurityClearanceLevel): string {
-    const roleMap: Record<SecurityClearanceLevel, string> = {
-      [SecurityClearanceLevel.PUBLIC]: 'guest',
-      [SecurityClearanceLevel.INTERNAL]: 'user',
-      [SecurityClearanceLevel.CONFIDENTIAL]: 'moderator',
-      [SecurityClearanceLevel.SECRET]: 'admin',
-      [SecurityClearanceLevel.CLASSIFIED]: 'superadmin'
-    };
-
-    return roleMap[clearance] || 'guest';
-  }
-
-  private canAccessSecurityLevel(userClearance: SecurityClearanceLevel, resourceLevel: SecurityClearanceLevel): boolean {
-    const clearanceLevels = {
-      [SecurityClearanceLevel.PUBLIC]: 1,
-      [SecurityClearanceLevel.INTERNAL]: 2,
-      [SecurityClearanceLevel.CONFIDENTIAL]: 3,
-      [SecurityClearanceLevel.SECRET]: 4,
-      [SecurityClearanceLevel.CLASSIFIED]: 5
-    };
-
-    return clearanceLevels[userClearance] >= clearanceLevels[resourceLevel];
-  }
 });
