@@ -1,0 +1,870 @@
+# Local Deployment Operational Runbooks
+
+## Overview
+
+This comprehensive runbook provides step-by-step operational procedures for managing Bytebot APIs in local deployments. All procedures are designed for 100% local operation with no cloud dependencies, ensuring complete operational control.
+
+## Daily Operations
+
+### Morning Health Check Routine
+
+#### System Status Verification
+```bash
+#!/bin/bash
+# daily-health-check.sh
+
+echo "=== Bytebot Local Deployment Health Check ==="
+echo "Date: $(date)"
+echo ""
+
+# 1. Check system resources
+echo "1. System Resources:"
+echo "   CPU Usage: $(top -bn1 | grep "Cpu(s)" | awk '{print $2}' | cut -d'%' -f1)%"
+echo "   Memory: $(free -h | awk 'NR==2{printf "%.1f%%", $3*100/$2}')"
+echo "   Disk: $(df -h / | awk 'NR==2{print $5}')"
+echo ""
+
+# 2. Check service status
+echo "2. Service Status:"
+services=("bytebot-api" "postgres" "redis" "prometheus" "grafana")
+for service in "${services[@]}"; do
+    if systemctl is-active --quiet $service; then
+        echo "   ✓ $service: Running"
+    else
+        echo "   ✗ $service: Not running"
+    fi
+done
+echo ""
+
+# 3. Check API health
+echo "3. API Health:"
+api_health=$(curl -s http://localhost:3000/api/v1/health | jq -r '.data.status' 2>/dev/null || echo "unreachable")
+echo "   API Status: $api_health"
+echo ""
+
+# 4. Check database connectivity
+echo "4. Database Status:"
+if psql -h localhost -U bytebot -d bytebot -c "SELECT 1;" >/dev/null 2>&1; then
+    echo "   ✓ PostgreSQL: Connected"
+else
+    echo "   ✗ PostgreSQL: Connection failed"
+fi
+echo ""
+
+# 5. Check disk space for critical paths
+echo "5. Storage Status:"
+critical_paths=("/data" "/data/logs" "/data/backups")
+for path in "${critical_paths[@]}"; do
+    if [ -d "$path" ]; then
+        usage=$(df -h "$path" | awk 'NR==2{print $5}' | cut -d'%' -f1)
+        if [ "$usage" -gt 80 ]; then
+            echo "   ⚠ $path: ${usage}% (Warning: >80%)"
+        else
+            echo "   ✓ $path: ${usage}%"
+        fi
+    else
+        echo "   ✗ $path: Directory not found"
+    fi
+done
+echo ""
+
+# 6. Check log errors from last 24 hours
+echo "6. Recent Errors:"
+error_count=$(grep -c "ERROR" /data/logs/application/app.log 2>/dev/null || echo "0")
+echo "   Errors in last 24h: $error_count"
+echo ""
+
+echo "=== Health Check Complete ==="
+```
+
+#### Daily Maintenance Tasks
+```bash
+#!/bin/bash
+# daily-maintenance.sh
+
+echo "Starting daily maintenance tasks..."
+
+# 1. Clean up old log files (keep 30 days)
+find /data/logs -name "*.log" -mtime +30 -delete
+echo "✓ Cleaned old log files"
+
+# 2. Clean up temporary files
+find /tmp -name "*bytebot*" -mtime +1 -delete
+echo "✓ Cleaned temporary files"
+
+# 3. Update database statistics
+psql -h localhost -U bytebot -d bytebot -c "ANALYZE;" >/dev/null 2>&1
+echo "✓ Updated database statistics"
+
+# 4. Check backup integrity
+if [ -f "/data/backups/latest/postgres.sql.gz" ]; then
+    if gunzip -t "/data/backups/latest/postgres.sql.gz" 2>/dev/null; then
+        echo "✓ Backup integrity verified"
+    else
+        echo "⚠ Backup integrity check failed"
+    fi
+fi
+
+# 5. Restart services if needed (based on uptime)
+uptime_days=$(awk '{print int($1/86400)}' /proc/uptime)
+if [ "$uptime_days" -gt 30 ]; then
+    echo "⚠ System uptime >30 days, consider maintenance restart"
+fi
+
+echo "Daily maintenance complete"
+```
+
+### Evening Backup Routine
+
+#### Automated Backup Script
+```bash
+#!/bin/bash
+# evening-backup.sh
+
+set -euo pipefail
+
+BACKUP_DIR="/data/backups/$(date +%Y%m%d)"
+LOG_FILE="/data/logs/backup.log"
+
+echo "$(date): Starting evening backup" >> "$LOG_FILE"
+
+# Create backup directory
+mkdir -p "$BACKUP_DIR"
+
+# 1. Database backup
+echo "$(date): Backing up database" >> "$LOG_FILE"
+pg_dump -h localhost -U bytebot -d bytebot | gzip > "$BACKUP_DIR/postgres.sql.gz"
+
+# 2. Application data backup
+echo "$(date): Backing up application data" >> "$LOG_FILE"
+tar -czf "$BACKUP_DIR/app-data.tar.gz" \
+    --exclude="*.log" \
+    --exclude="*.tmp" \
+    /data/uploads /data/agents /data/sessions
+
+# 3. Configuration backup
+echo "$(date): Backing up configuration" >> "$LOG_FILE"
+tar -czf "$BACKUP_DIR/config.tar.gz" \
+    config/ secrets/ docker-compose.yml .env
+
+# 4. Verify backup integrity
+echo "$(date): Verifying backup integrity" >> "$LOG_FILE"
+for file in "$BACKUP_DIR"/*.gz; do
+    if ! gunzip -t "$file" 2>/dev/null; then
+        echo "$(date): ERROR: Backup verification failed for $file" >> "$LOG_FILE"
+        exit 1
+    fi
+done
+
+# 5. Clean old backups (keep 7 days)
+find /data/backups -type d -name "????????" -mtime +7 -exec rm -rf {} \;
+
+# 6. Update latest symlink
+ln -sfn "$BACKUP_DIR" /data/backups/latest
+
+echo "$(date): Backup completed successfully" >> "$LOG_FILE"
+```
+
+## Incident Response Procedures
+
+### Service Down Response
+
+#### API Service Down
+```bash
+#!/bin/bash
+# incident-api-down.sh
+
+echo "=== API SERVICE DOWN INCIDENT RESPONSE ==="
+
+# 1. Immediate assessment
+echo "1. Checking API status..."
+API_STATUS=$(curl -s -w "%{http_code}" -o /dev/null http://localhost:3000/health || echo "000")
+echo "   HTTP Status: $API_STATUS"
+
+if [ "$API_STATUS" != "200" ]; then
+    echo "2. Checking API process..."
+    if pgrep -f "node.*api" >/dev/null; then
+        echo "   Process running but not responding"
+        echo "   Collecting logs..."
+        tail -100 /data/logs/application/app.log > "/tmp/api-incident-$(date +%s).log"
+
+        echo "   Attempting graceful restart..."
+        pkill -TERM -f "node.*api"
+        sleep 10
+    else
+        echo "   Process not running"
+    fi
+
+    echo "3. Starting API service..."
+    systemctl start bytebot-api
+
+    echo "4. Waiting for recovery..."
+    for i in {1..30}; do
+        sleep 2
+        if curl -s http://localhost:3000/health >/dev/null 2>&1; then
+            echo "   ✓ API service recovered"
+            break
+        fi
+        echo "   Waiting... ($i/30)"
+    done
+fi
+
+echo "5. Final status check..."
+curl -s http://localhost:3000/api/v1/health | jq .
+```
+
+#### Database Connection Issues
+```bash
+#!/bin/bash
+# incident-database-down.sh
+
+echo "=== DATABASE CONNECTION INCIDENT RESPONSE ==="
+
+# 1. Check PostgreSQL service
+echo "1. Checking PostgreSQL service..."
+if systemctl is-active --quiet postgresql; then
+    echo "   ✓ PostgreSQL service is running"
+else
+    echo "   ✗ PostgreSQL service is down"
+    echo "   Starting PostgreSQL..."
+    systemctl start postgresql
+    sleep 5
+fi
+
+# 2. Test connection
+echo "2. Testing database connection..."
+if psql -h localhost -U bytebot -d bytebot -c "SELECT 1;" >/dev/null 2>&1; then
+    echo "   ✓ Database connection successful"
+else
+    echo "   ✗ Database connection failed"
+
+    # 3. Check logs
+    echo "3. Checking PostgreSQL logs..."
+    tail -50 /var/log/postgresql/postgresql-*.log
+
+    # 4. Check connections
+    echo "4. Checking active connections..."
+    psql -h localhost -U postgres -c "SELECT count(*) as active_connections FROM pg_stat_activity WHERE state = 'active';" 2>/dev/null || echo "Cannot connect to check connections"
+
+    # 5. Recovery actions
+    echo "5. Attempting recovery..."
+
+    # Restart PostgreSQL
+    systemctl restart postgresql
+    sleep 10
+
+    # Test again
+    if psql -h localhost -U bytebot -d bytebot -c "SELECT 1;" >/dev/null 2>&1; then
+        echo "   ✓ Database recovered after restart"
+    else
+        echo "   ✗ Database still not responding - manual intervention required"
+        echo "   Check disk space, permissions, and configuration"
+    fi
+fi
+```
+
+### Performance Issues
+
+#### High CPU Usage Response
+```bash
+#!/bin/bash
+# incident-high-cpu.sh
+
+echo "=== HIGH CPU USAGE INCIDENT RESPONSE ==="
+
+# 1. Identify top processes
+echo "1. Top CPU consuming processes:"
+ps auxf --sort=-%cpu | head -20
+
+# 2. Check API performance
+echo "2. API performance check:"
+for i in {1..5}; do
+    response_time=$(curl -w "%{time_total}" -s -o /dev/null http://localhost:3000/health)
+    echo "   Response time: ${response_time}s"
+    sleep 1
+done
+
+# 3. Check for runaway agents
+echo "3. Checking agent processes:"
+ps aux | grep -E "(agent|bytebot)" | grep -v grep
+
+# 4. Check database performance
+echo "4. Database performance:"
+psql -h localhost -U bytebot -d bytebot -c "
+SELECT
+    query,
+    calls,
+    total_time,
+    mean_time,
+    rows
+FROM pg_stat_statements
+ORDER BY mean_time DESC
+LIMIT 10;" 2>/dev/null || echo "pg_stat_statements not available"
+
+# 5. Mitigation actions
+echo "5. Mitigation actions:"
+echo "   - Consider restarting high-CPU processes"
+echo "   - Check for infinite loops in agent code"
+echo "   - Review recent task assignments"
+echo "   - Consider temporary rate limiting"
+```
+
+#### Memory Issues Response
+```bash
+#!/bin/bash
+# incident-high-memory.sh
+
+echo "=== HIGH MEMORY USAGE INCIDENT RESPONSE ==="
+
+# 1. Memory overview
+echo "1. Memory usage overview:"
+free -h
+echo ""
+ps aux --sort=-%mem | head -10
+
+# 2. Check for memory leaks
+echo "2. Checking Node.js memory usage:"
+if pgrep -f "node" >/dev/null; then
+    for pid in $(pgrep -f "node"); do
+        echo "   PID $pid: $(ps -p $pid -o pid,vsz,rss,comm --no-headers)"
+    done
+fi
+
+# 3. Clear caches if needed
+echo "3. System cache status:"
+echo "   Cached: $(free -h | awk 'NR==2{print $6}')"
+if [ "$(free | awk 'NR==2{print $3*100/$2}')" -gt 90 ]; then
+    echo "   Clearing system caches..."
+    sync
+    echo 3 > /proc/sys/vm/drop_caches
+fi
+
+# 4. Check swap usage
+echo "4. Swap usage:"
+swapon --show
+
+# 5. Application-specific cleanup
+echo "5. Application cleanup:"
+echo "   - Clearing expired sessions"
+find /data/sessions -name "*.json" -mtime +1 -delete 2>/dev/null || true
+
+echo "   - Clearing temporary uploads"
+find /data/uploads/temp -name "*" -mtime +1 -delete 2>/dev/null || true
+```
+
+## Maintenance Procedures
+
+### Database Maintenance
+
+#### Weekly Database Maintenance
+```bash
+#!/bin/bash
+# weekly-db-maintenance.sh
+
+echo "=== WEEKLY DATABASE MAINTENANCE ==="
+
+# 1. Create maintenance backup
+echo "1. Creating maintenance backup..."
+pg_dump -h localhost -U bytebot -d bytebot > "/data/backups/maintenance-$(date +%Y%m%d).sql"
+
+# 2. Update statistics
+echo "2. Updating database statistics..."
+psql -h localhost -U bytebot -d bytebot -c "ANALYZE VERBOSE;"
+
+# 3. Vacuum databases
+echo "3. Vacuuming database..."
+psql -h localhost -U bytebot -d bytebot -c "VACUUM VERBOSE;"
+
+# 4. Reindex if needed
+echo "4. Checking for bloated indexes..."
+psql -h localhost -U bytebot -d bytebot -c "
+SELECT
+    schemaname,
+    tablename,
+    indexname,
+    pg_size_pretty(pg_relation_size(indexrelid)) as size
+FROM pg_stat_user_indexes
+ORDER BY pg_relation_size(indexrelid) DESC
+LIMIT 10;"
+
+# 5. Check database size
+echo "5. Database size information:"
+psql -h localhost -U bytebot -d bytebot -c "
+SELECT
+    pg_size_pretty(pg_database_size(current_database())) as database_size,
+    pg_size_pretty(pg_total_relation_size('users')) as users_table_size,
+    pg_size_pretty(pg_total_relation_size('tasks')) as tasks_table_size,
+    pg_size_pretty(pg_total_relation_size('chat_history')) as chat_table_size;"
+
+echo "Weekly database maintenance complete"
+```
+
+#### Database Cleanup Procedures
+```bash
+#!/bin/bash
+# database-cleanup.sh
+
+echo "=== DATABASE CLEANUP PROCEDURES ==="
+
+# 1. Clean old chat history (older than 90 days)
+echo "1. Cleaning old chat history..."
+DELETED_CHAT=$(psql -h localhost -U bytebot -d bytebot -t -c "
+DELETE FROM chat_history
+WHERE created_at < NOW() - INTERVAL '90 days';
+SELECT ROW_COUNT();")
+echo "   Deleted $DELETED_CHAT old chat records"
+
+# 2. Clean expired sessions
+echo "2. Cleaning expired sessions..."
+DELETED_SESSIONS=$(psql -h localhost -U bytebot -d bytebot -t -c "
+DELETE FROM sessions
+WHERE expires_at < NOW();
+SELECT ROW_COUNT();")
+echo "   Deleted $DELETED_SESSIONS expired sessions"
+
+# 3. Clean old audit logs (older than 365 days)
+echo "3. Cleaning old audit logs..."
+DELETED_AUDIT=$(psql -h localhost -U bytebot -d bytebot -t -c "
+DELETE FROM audit_logs
+WHERE created_at < NOW() - INTERVAL '365 days';
+SELECT ROW_COUNT();")
+echo "   Deleted $DELETED_AUDIT old audit records"
+
+# 4. Clean orphaned files
+echo "4. Cleaning orphaned file records..."
+DELETED_FILES=$(psql -h localhost -U bytebot -d bytebot -t -c "
+DELETE FROM files
+WHERE created_at < NOW() - INTERVAL '180 days'
+AND id NOT IN (
+    SELECT DISTINCT file_id FROM task_files WHERE file_id IS NOT NULL
+);
+SELECT ROW_COUNT();")
+echo "   Deleted $DELETED_FILES orphaned file records"
+
+# 5. Vacuum after cleanup
+echo "5. Running vacuum after cleanup..."
+psql -h localhost -U bytebot -d bytebot -c "VACUUM ANALYZE;"
+
+echo "Database cleanup complete"
+```
+
+### File System Maintenance
+
+#### Storage Cleanup Procedures
+```bash
+#!/bin/bash
+# storage-cleanup.sh
+
+echo "=== STORAGE CLEANUP PROCEDURES ==="
+
+# 1. Clean temporary files
+echo "1. Cleaning temporary files..."
+find /tmp -name "*bytebot*" -mtime +1 -delete
+find /data/temp -name "*" -mtime +1 -delete 2>/dev/null || true
+echo "   ✓ Temporary files cleaned"
+
+# 2. Clean old log files
+echo "2. Managing log files..."
+# Compress logs older than 7 days
+find /data/logs -name "*.log" -mtime +7 ! -name "*.gz" -exec gzip {} \;
+# Delete compressed logs older than 30 days
+find /data/logs -name "*.log.gz" -mtime +30 -delete
+echo "   ✓ Log files managed"
+
+# 3. Clean old backups
+echo "3. Cleaning old backups..."
+# Keep daily backups for 7 days
+find /data/backups -type d -name "????????" -mtime +7 -exec rm -rf {} \;
+# Keep weekly backups for 4 weeks
+find /data/backups -name "*weekly*" -mtime +28 -delete
+echo "   ✓ Old backups cleaned"
+
+# 4. Clean orphaned uploads
+echo "4. Checking for orphaned uploads..."
+ORPHANED_COUNT=0
+while IFS= read -r -d '' file; do
+    filename=$(basename "$file")
+    # Check if file exists in database
+    EXISTS=$(psql -h localhost -U bytebot -d bytebot -t -c "
+    SELECT COUNT(*) FROM files WHERE filename = '$filename';" 2>/dev/null | tr -d ' ')
+
+    if [ "$EXISTS" = "0" ]; then
+        echo "   Orphaned file: $file"
+        # Uncomment to actually delete
+        # rm "$file"
+        ((ORPHANED_COUNT++))
+    fi
+done < <(find /data/uploads -type f -print0)
+echo "   Found $ORPHANED_COUNT orphaned files"
+
+# 5. Check disk space
+echo "5. Disk space summary:"
+df -h /data
+
+echo "Storage cleanup complete"
+```
+
+### Security Maintenance
+
+#### Security Audit Procedures
+```bash
+#!/bin/bash
+# security-audit.sh
+
+echo "=== SECURITY AUDIT PROCEDURES ==="
+
+# 1. Check file permissions
+echo "1. Checking critical file permissions..."
+declare -A expected_perms=(
+    ["/data"]="755"
+    ["/data/uploads"]="755"
+    ["/data/logs"]="755"
+    ["secrets/"]="700"
+    ["secrets/jwt/private.pem"]="600"
+    ["secrets/ssl/server.key"]="600"
+)
+
+for path in "${!expected_perms[@]}"; do
+    if [ -e "$path" ]; then
+        actual_perm=$(stat -c "%a" "$path")
+        expected_perm="${expected_perms[$path]}"
+        if [ "$actual_perm" = "$expected_perm" ]; then
+            echo "   ✓ $path: $actual_perm"
+        else
+            echo "   ⚠ $path: $actual_perm (expected: $expected_perm)"
+        fi
+    else
+        echo "   ✗ $path: Not found"
+    fi
+done
+
+# 2. Check for failed authentication attempts
+echo "2. Checking authentication logs..."
+FAILED_ATTEMPTS=$(grep -c "auth_failed" /data/logs/security/security.log 2>/dev/null || echo "0")
+echo "   Failed authentication attempts in last 24h: $FAILED_ATTEMPTS"
+
+# 3. Check for security violations
+echo "3. Checking security violations..."
+VIOLATIONS=$(grep -c "security_violation" /data/logs/security/security.log 2>/dev/null || echo "0")
+echo "   Security violations in last 24h: $VIOLATIONS"
+
+# 4. Check SSL certificate expiry
+echo "4. Checking SSL certificate..."
+if [ -f "secrets/ssl/server.crt" ]; then
+    CERT_EXPIRY=$(openssl x509 -in secrets/ssl/server.crt -noout -enddate | cut -d= -f2)
+    CERT_EXPIRY_EPOCH=$(date -d "$CERT_EXPIRY" +%s)
+    CURRENT_EPOCH=$(date +%s)
+    DAYS_TO_EXPIRY=$(( (CERT_EXPIRY_EPOCH - CURRENT_EPOCH) / 86400 ))
+
+    if [ $DAYS_TO_EXPIRY -lt 30 ]; then
+        echo "   ⚠ SSL certificate expires in $DAYS_TO_EXPIRY days"
+    else
+        echo "   ✓ SSL certificate valid for $DAYS_TO_EXPIRY days"
+    fi
+fi
+
+# 5. Check for weak passwords (simplified check)
+echo "5. Checking password policies..."
+WEAK_PASSWORDS=$(psql -h localhost -U bytebot -d bytebot -t -c "
+SELECT COUNT(*) FROM users
+WHERE LENGTH(password_hash) < 50;")
+echo "   Users with potentially weak passwords: $WEAK_PASSWORDS"
+
+echo "Security audit complete"
+```
+
+### System Updates
+
+#### Local System Update Procedure
+```bash
+#!/bin/bash
+# system-update.sh
+
+echo "=== LOCAL SYSTEM UPDATE PROCEDURE ==="
+
+# 1. Pre-update backup
+echo "1. Creating pre-update backup..."
+./scripts/backup.sh
+
+# 2. Update package lists
+echo "2. Updating package lists..."
+sudo apt update
+
+# 3. List available updates
+echo "3. Available updates:"
+sudo apt list --upgradable
+
+# 4. Apply security updates
+echo "4. Applying security updates..."
+sudo unattended-upgrades -d
+
+# 5. Update Node.js dependencies
+echo "5. Checking Node.js dependencies..."
+npm audit
+npm audit fix --force
+
+# 6. Update Docker images
+echo "6. Updating Docker images..."
+docker-compose pull
+docker image prune -f
+
+# 7. Restart services
+echo "7. Restarting services..."
+sudo systemctl restart postgresql redis-server
+docker-compose restart
+
+# 8. Verify system health
+echo "8. Verifying system health..."
+sleep 30
+./scripts/health-check.sh
+
+echo "System update complete"
+```
+
+## Recovery Procedures
+
+### Disaster Recovery
+
+#### Complete System Recovery
+```bash
+#!/bin/bash
+# disaster-recovery.sh
+
+set -euo pipefail
+
+echo "=== DISASTER RECOVERY PROCEDURE ==="
+
+BACKUP_SOURCE="/data/backups/latest"
+RECOVERY_LOG="/tmp/recovery-$(date +%s).log"
+
+exec 1> >(tee -a "$RECOVERY_LOG")
+exec 2>&1
+
+# 1. Verify backup integrity
+echo "1. Verifying backup integrity..."
+if [ ! -d "$BACKUP_SOURCE" ]; then
+    echo "ERROR: Backup source not found: $BACKUP_SOURCE"
+    exit 1
+fi
+
+for backup_file in "$BACKUP_SOURCE"/*.gz; do
+    if ! gunzip -t "$backup_file" 2>/dev/null; then
+        echo "ERROR: Corrupted backup file: $backup_file"
+        exit 1
+    fi
+done
+echo "   ✓ All backup files verified"
+
+# 2. Stop all services
+echo "2. Stopping all services..."
+systemctl stop bytebot-api postgresql redis-server grafana prometheus
+
+# 3. Restore database
+echo "3. Restoring database..."
+# Drop and recreate database
+sudo -u postgres psql -c "DROP DATABASE IF EXISTS bytebot;"
+sudo -u postgres psql -c "CREATE DATABASE bytebot OWNER bytebot;"
+
+# Restore from backup
+gunzip -c "$BACKUP_SOURCE/postgres.sql.gz" | psql -h localhost -U bytebot -d bytebot
+echo "   ✓ Database restored"
+
+# 4. Restore application data
+echo "4. Restoring application data..."
+rm -rf /data/uploads /data/agents /data/sessions
+tar -xzf "$BACKUP_SOURCE/app-data.tar.gz" -C /
+echo "   ✓ Application data restored"
+
+# 5. Restore configuration
+echo "5. Restoring configuration..."
+tar -xzf "$BACKUP_SOURCE/config.tar.gz" -C /
+echo "   ✓ Configuration restored"
+
+# 6. Set proper permissions
+echo "6. Setting permissions..."
+chown -R bytebot:bytebot /data
+chmod -R 755 /data
+chmod -R 700 secrets/
+chmod 600 secrets/*/*.key secrets/*/*.pem
+echo "   ✓ Permissions set"
+
+# 7. Start services
+echo "7. Starting services..."
+systemctl start postgresql redis-server
+sleep 10
+systemctl start bytebot-api grafana prometheus
+
+# 8. Verify recovery
+echo "8. Verifying recovery..."
+sleep 30
+
+# Check database
+if psql -h localhost -U bytebot -d bytebot -c "SELECT COUNT(*) FROM users;" >/dev/null 2>&1; then
+    echo "   ✓ Database functional"
+else
+    echo "   ✗ Database check failed"
+fi
+
+# Check API
+if curl -s http://localhost:3000/health >/dev/null 2>&1; then
+    echo "   ✓ API functional"
+else
+    echo "   ✗ API check failed"
+fi
+
+echo "=== DISASTER RECOVERY COMPLETE ==="
+echo "Recovery log saved to: $RECOVERY_LOG"
+```
+
+### Partial Recovery Procedures
+
+#### Database-Only Recovery
+```bash
+#!/bin/bash
+# recover-database.sh
+
+echo "=== DATABASE RECOVERY PROCEDURE ==="
+
+BACKUP_FILE="/data/backups/latest/postgres.sql.gz"
+
+# 1. Verify backup exists
+if [ ! -f "$BACKUP_FILE" ]; then
+    echo "ERROR: Database backup not found: $BACKUP_FILE"
+    exit 1
+fi
+
+# 2. Stop API service
+echo "Stopping API service..."
+systemctl stop bytebot-api
+
+# 3. Create recovery backup
+echo "Creating recovery backup..."
+pg_dump -h localhost -U bytebot -d bytebot > "/tmp/pre-recovery-$(date +%s).sql"
+
+# 4. Restore database
+echo "Restoring database..."
+gunzip -c "$BACKUP_FILE" | psql -h localhost -U bytebot -d bytebot
+
+# 5. Verify restoration
+echo "Verifying database restoration..."
+psql -h localhost -U bytebot -d bytebot -c "SELECT COUNT(*) FROM users;"
+
+# 6. Restart API service
+echo "Restarting API service..."
+systemctl start bytebot-api
+
+echo "Database recovery complete"
+```
+
+#### File System Recovery
+```bash
+#!/bin/bash
+# recover-filesystem.sh
+
+echo "=== FILE SYSTEM RECOVERY PROCEDURE ==="
+
+BACKUP_FILE="/data/backups/latest/app-data.tar.gz"
+
+# 1. Verify backup exists
+if [ ! -f "$BACKUP_FILE" ]; then
+    echo "ERROR: File system backup not found: $BACKUP_FILE"
+    exit 1
+fi
+
+# 2. Stop API service
+echo "Stopping API service..."
+systemctl stop bytebot-api
+
+# 3. Backup current state
+echo "Backing up current state..."
+tar -czf "/tmp/current-state-$(date +%s).tar.gz" /data/uploads /data/agents /data/sessions
+
+# 4. Restore files
+echo "Restoring files..."
+tar -xzf "$BACKUP_FILE" -C /
+
+# 5. Set permissions
+echo "Setting permissions..."
+chown -R bytebot:bytebot /data
+chmod -R 755 /data
+
+# 6. Restart API service
+echo "Restarting API service..."
+systemctl start bytebot-api
+
+echo "File system recovery complete"
+```
+
+## Monitoring and Alerting Procedures
+
+### Alert Response Workflows
+
+#### High Error Rate Alert
+```bash
+#!/bin/bash
+# alert-high-error-rate.sh
+
+echo "=== HIGH ERROR RATE ALERT RESPONSE ==="
+
+# 1. Collect immediate metrics
+echo "1. Collecting error metrics..."
+ERROR_RATE=$(curl -s "http://localhost:9090/api/v1/query?query=rate(http_requests_total{status=~'5..'}[5m])" | jq -r '.data.result[0].value[1]' 2>/dev/null || echo "0")
+echo "   Current error rate: $ERROR_RATE requests/second"
+
+# 2. Check recent logs
+echo "2. Recent error logs:"
+tail -50 /data/logs/errors/error.log | grep "$(date '+%Y-%m-%d')"
+
+# 3. Check system resources
+echo "3. System resources:"
+echo "   CPU: $(top -bn1 | grep "Cpu(s)" | awk '{print $2}')"
+echo "   Memory: $(free -h | awk 'NR==2{printf "%.1f%%", $3*100/$2}')"
+
+# 4. Mitigation actions
+echo "4. Automatic mitigation:"
+if (( $(echo "$ERROR_RATE > 0.1" | bc -l) )); then
+    echo "   Restarting API service due to high error rate..."
+    systemctl restart bytebot-api
+fi
+
+echo "High error rate response complete"
+```
+
+### Performance Monitoring
+
+#### Performance Baseline Collection
+```bash
+#!/bin/bash
+# collect-performance-baseline.sh
+
+echo "=== COLLECTING PERFORMANCE BASELINE ==="
+
+BASELINE_FILE="/data/monitoring/baseline-$(date +%Y%m%d).json"
+mkdir -p /data/monitoring
+
+# Collect metrics
+METRICS=$(curl -s http://localhost:3000/api/v1/metrics | grep -E "(http_request_duration|memory_usage|cpu_usage)")
+
+# System metrics
+SYSTEM_METRICS=$(cat <<EOF
+{
+  "timestamp": "$(date -Iseconds)",
+  "system": {
+    "cpu_usage": $(top -bn1 | grep "Cpu(s)" | awk '{print $2}' | cut -d'%' -f1),
+    "memory_usage": $(free | awk 'NR==2{printf "%.1f", $3*100/$2}'),
+    "disk_usage": $(df / | awk 'NR==2{print $5}' | cut -d'%' -f1),
+    "load_average": [$(uptime | awk -F'load average:' '{print $2}' | sed 's/,//g')]
+  },
+  "database": {
+    "connections": $(psql -h localhost -U bytebot -d bytebot -t -c "SELECT count(*) FROM pg_stat_activity;" 2>/dev/null | tr -d ' ' || echo "0"),
+    "size_mb": $(psql -h localhost -U bytebot -d bytebot -t -c "SELECT pg_size_pretty(pg_database_size('bytebot'));" 2>/dev/null | tr -d ' ' || echo "0")
+  }
+}
+EOF
+)
+
+echo "$SYSTEM_METRICS" > "$BASELINE_FILE"
+echo "Performance baseline saved to: $BASELINE_FILE"
+```
+
+This comprehensive operational runbook ensures smooth day-to-day operations of local Bytebot deployments with well-defined procedures for maintenance, incident response, and recovery scenarios.

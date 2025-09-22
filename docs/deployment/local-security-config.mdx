@@ -1,0 +1,1298 @@
+# Local Security Configuration Guide
+
+## Overview
+
+This guide provides comprehensive security configuration for Bytebot APIs in local deployments. It covers file-based secrets management, local authentication, SSL/TLS setup, and security hardening—all designed for 100% local operation with no cloud dependencies.
+
+## Security Architecture
+
+### Local Security Model
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Local Security Stack                     │
+├─────────────────────────────────────────────────────────────┤
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐         │
+│  │    Local    │  │    File     │  │   Local     │         │
+│  │    Auth     │  │   Secrets   │  │    SSL      │         │
+│  └─────────────┘  └─────────────┘  └─────────────┘         │
+│         │                 │                 │              │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐         │
+│  │  Session    │  │  API Token  │  │  Network    │         │
+│  │  Storage    │  │  Management │  │  Security   │         │
+│  └─────────────┘  └─────────────┘  └─────────────┘         │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Security Principles
+- **Zero Trust**: Verify every request and connection
+- **Least Privilege**: Minimal permissions for all components
+- **Defense in Depth**: Multiple security layers
+- **Local Control**: All security controls remain local
+- **Audit Trail**: Comprehensive logging of security events
+
+## File-Based Secrets Management
+
+### Secrets Directory Structure
+```
+secrets/
+├── api-keys/
+│   ├── openai.key          # AI service API keys
+│   ├── anthropic.key       # Alternative AI service keys
+│   └── .gitignore          # Exclude from version control
+├── database/
+│   ├── postgres.env        # Database credentials
+│   ├── redis.env           # Cache credentials
+│   └── encryption.key      # Database encryption key
+├── jwt/
+│   ├── private.pem         # JWT signing private key
+│   ├── public.pem          # JWT verification public key
+│   └── refresh.key         # Refresh token secret
+├── ssl/
+│   ├── server.crt          # SSL certificate
+│   ├── server.key          # SSL private key
+│   ├── ca.crt              # Certificate Authority
+│   └── dhparam.pem         # Diffie-Hellman parameters
+└── app/
+    ├── session.key         # Session encryption key
+    ├── cookie.key          # Cookie signing key
+    └── csrf.key            # CSRF protection key
+```
+
+### Secrets Management Script (scripts/setup-secrets.sh)
+```bash
+#!/bin/bash
+set -euo pipefail
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+echo -e "${GREEN}Setting up local secrets management...${NC}"
+
+# Create secrets directory structure
+echo "Creating secrets directory structure..."
+mkdir -p secrets/{api-keys,database,jwt,ssl,app}
+
+# Set proper permissions
+chmod 700 secrets/
+chmod 700 secrets/*
+
+# Generate JWT keys
+echo "Generating JWT key pair..."
+openssl genrsa -out secrets/jwt/private.pem 2048
+openssl rsa -in secrets/jwt/private.pem -pubout -out secrets/jwt/public.pem
+chmod 600 secrets/jwt/private.pem
+chmod 644 secrets/jwt/public.pem
+
+# Generate random secrets
+echo "Generating application secrets..."
+openssl rand -base64 32 > secrets/jwt/refresh.key
+openssl rand -base64 32 > secrets/app/session.key
+openssl rand -base64 32 > secrets/app/cookie.key
+openssl rand -base64 32 > secrets/app/csrf.key
+openssl rand -base64 32 > secrets/database/encryption.key
+
+# Set permissions for secret files
+chmod 600 secrets/jwt/refresh.key
+chmod 600 secrets/app/*
+chmod 600 secrets/database/encryption.key
+
+# Generate SSL certificates for local development
+echo "Generating SSL certificates for local development..."
+./scripts/generate-ssl-certs.sh
+
+# Create environment files
+echo "Creating database environment files..."
+cat > secrets/database/postgres.env << EOF
+POSTGRES_DB=bytebot
+POSTGRES_USER=bytebot
+POSTGRES_PASSWORD=$(openssl rand -base64 32)
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5432
+EOF
+
+cat > secrets/database/redis.env << EOF
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=$(openssl rand -base64 32)
+REDIS_DB=0
+EOF
+
+chmod 600 secrets/database/*.env
+
+# Create .gitignore for secrets
+cat > secrets/.gitignore << EOF
+# Ignore all secret files
+*
+!.gitignore
+!README.md
+EOF
+
+# Create secrets README
+cat > secrets/README.md << EOF
+# Secrets Directory
+
+This directory contains all sensitive configuration for local Bytebot deployment.
+
+## Security Notice
+- Never commit actual secret values to version control
+- Ensure proper file permissions (600 for files, 700 for directories)
+- Rotate secrets regularly
+- Back up secrets securely
+
+## Structure
+- api-keys/: External service API keys
+- database/: Database connection credentials
+- jwt/: JSON Web Token signing keys
+- ssl/: SSL/TLS certificates and keys
+- app/: Application-specific secrets
+
+## Maintenance
+- Run \`scripts/rotate-secrets.sh\` to rotate application secrets
+- Run \`scripts/check-secrets.sh\` to verify secret integrity
+- Update SSL certificates before expiration
+EOF
+
+echo -e "${GREEN}Secrets setup completed!${NC}"
+echo -e "${YELLOW}Remember to:${NC}"
+echo "1. Add your AI service API keys to secrets/api-keys/"
+echo "2. Update database passwords if needed"
+echo "3. Configure your application to use these secrets"
+echo "4. Set up regular secret rotation"
+```
+
+### SSL Certificate Generation (scripts/generate-ssl-certs.sh)
+```bash
+#!/bin/bash
+set -euo pipefail
+
+DOMAIN="localhost"
+CERT_DIR="secrets/ssl"
+DAYS=365
+
+echo "Generating SSL certificates for local development..."
+
+# Create certificate authority
+openssl req -new -x509 -days $DAYS -nodes \
+    -out "$CERT_DIR/ca.crt" \
+    -keyout "$CERT_DIR/ca.key" \
+    -subj "/C=US/ST=Local/L=Development/O=Bytebot/OU=Development/CN=Bytebot-CA"
+
+# Create server private key
+openssl genrsa -out "$CERT_DIR/server.key" 2048
+
+# Create certificate signing request
+openssl req -new -key "$CERT_DIR/server.key" \
+    -out "$CERT_DIR/server.csr" \
+    -subj "/C=US/ST=Local/L=Development/O=Bytebot/OU=Development/CN=$DOMAIN"
+
+# Create certificate extensions
+cat > "$CERT_DIR/server.ext" << EOF
+authorityKeyIdentifier=keyid,issuer
+basicConstraints=CA:FALSE
+keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
+subjectAltName = @alt_names
+
+[alt_names]
+DNS.1 = localhost
+DNS.2 = *.localhost
+IP.1 = 127.0.0.1
+IP.2 = ::1
+EOF
+
+# Sign the certificate
+openssl x509 -req -in "$CERT_DIR/server.csr" \
+    -CA "$CERT_DIR/ca.crt" \
+    -CAkey "$CERT_DIR/ca.key" \
+    -CAcreateserial \
+    -out "$CERT_DIR/server.crt" \
+    -days $DAYS \
+    -extensions v3_req \
+    -extfile "$CERT_DIR/server.ext"
+
+# Generate DH parameters for enhanced security
+openssl dhparam -out "$CERT_DIR/dhparam.pem" 2048
+
+# Set proper permissions
+chmod 600 "$CERT_DIR/server.key" "$CERT_DIR/ca.key"
+chmod 644 "$CERT_DIR/server.crt" "$CERT_DIR/ca.crt"
+chmod 644 "$CERT_DIR/dhparam.pem"
+
+# Clean up temporary files
+rm "$CERT_DIR/server.csr" "$CERT_DIR/server.ext"
+
+echo "SSL certificates generated successfully!"
+echo "Certificate: $CERT_DIR/server.crt"
+echo "Private Key: $CERT_DIR/server.key"
+echo "CA Certificate: $CERT_DIR/ca.crt"
+```
+
+### Secrets Loading Module (src/config/secrets.js)
+```javascript
+const fs = require('fs');
+const path = require('path');
+const crypto = require('crypto');
+
+class SecretsManager {
+    constructor(secretsPath = './secrets') {
+        this.secretsPath = secretsPath;
+        this.cache = new Map();
+        this.validateSecretsDirectory();
+    }
+
+    validateSecretsDirectory() {
+        if (!fs.existsSync(this.secretsPath)) {
+            throw new Error(`Secrets directory not found: ${this.secretsPath}`);
+        }
+
+        // Check directory permissions
+        const stats = fs.statSync(this.secretsPath);
+        const mode = (stats.mode & parseInt('777', 8)).toString(8);
+        if (mode !== '700') {
+            console.warn(`Warning: Secrets directory permissions should be 700, current: ${mode}`);
+        }
+    }
+
+    loadSecret(category, name) {
+        const cacheKey = `${category}:${name}`;
+
+        if (this.cache.has(cacheKey)) {
+            return this.cache.get(cacheKey);
+        }
+
+        const secretPath = path.join(this.secretsPath, category, name);
+
+        if (!fs.existsSync(secretPath)) {
+            throw new Error(`Secret not found: ${secretPath}`);
+        }
+
+        // Check file permissions
+        const stats = fs.statSync(secretPath);
+        const mode = (stats.mode & parseInt('777', 8)).toString(8);
+        if (mode !== '600' && !name.endsWith('.pem') && !name.endsWith('.crt')) {
+            console.warn(`Warning: Secret file permissions should be 600, current: ${mode} for ${secretPath}`);
+        }
+
+        const secret = fs.readFileSync(secretPath, 'utf8').trim();
+        this.cache.set(cacheKey, secret);
+
+        return secret;
+    }
+
+    loadKeyPair(category, privateName, publicName) {
+        return {
+            private: this.loadSecret(category, privateName),
+            public: this.loadSecret(category, publicName)
+        };
+    }
+
+    loadEnvFile(category, filename) {
+        const envPath = path.join(this.secretsPath, category, filename);
+
+        if (!fs.existsSync(envPath)) {
+            throw new Error(`Environment file not found: ${envPath}`);
+        }
+
+        const envContent = fs.readFileSync(envPath, 'utf8');
+        const envVars = {};
+
+        envContent.split('\n').forEach(line => {
+            const trimmed = line.trim();
+            if (trimmed && !trimmed.startsWith('#')) {
+                const [key, ...valueParts] = trimmed.split('=');
+                if (key && valueParts.length > 0) {
+                    envVars[key.trim()] = valueParts.join('=').trim();
+                }
+            }
+        });
+
+        return envVars;
+    }
+
+    generateSecret(length = 32) {
+        return crypto.randomBytes(length).toString('base64');
+    }
+
+    rotateSecret(category, name) {
+        const newSecret = this.generateSecret();
+        const secretPath = path.join(this.secretsPath, category, name);
+
+        // Backup existing secret
+        if (fs.existsSync(secretPath)) {
+            const backupPath = `${secretPath}.backup.${Date.now()}`;
+            fs.copyFileSync(secretPath, backupPath);
+        }
+
+        // Write new secret
+        fs.writeFileSync(secretPath, newSecret, { mode: 0o600 });
+
+        // Update cache
+        const cacheKey = `${category}:${name}`;
+        this.cache.set(cacheKey, newSecret);
+
+        return newSecret;
+    }
+
+    clearCache() {
+        this.cache.clear();
+    }
+
+    validateSecrets() {
+        const requiredSecrets = [
+            ['jwt', 'private.pem'],
+            ['jwt', 'public.pem'],
+            ['jwt', 'refresh.key'],
+            ['app', 'session.key'],
+            ['app', 'cookie.key'],
+            ['app', 'csrf.key'],
+            ['ssl', 'server.crt'],
+            ['ssl', 'server.key']
+        ];
+
+        const missing = [];
+
+        for (const [category, name] of requiredSecrets) {
+            const secretPath = path.join(this.secretsPath, category, name);
+            if (!fs.existsSync(secretPath)) {
+                missing.push(`${category}/${name}`);
+            }
+        }
+
+        if (missing.length > 0) {
+            throw new Error(`Missing required secrets: ${missing.join(', ')}`);
+        }
+
+        return true;
+    }
+}
+
+module.exports = SecretsManager;
+```
+
+## Authentication & Authorization
+
+### JWT Authentication Implementation (src/auth/jwt.js)
+```javascript
+const jwt = require('jsonwebtoken');
+const SecretsManager = require('../config/secrets');
+
+class JWTManager {
+    constructor() {
+        this.secrets = new SecretsManager();
+        this.privateKey = this.secrets.loadSecret('jwt', 'private.pem');
+        this.publicKey = this.secrets.loadSecret('jwt', 'public.pem');
+        this.refreshSecret = this.secrets.loadSecret('jwt', 'refresh.key');
+
+        this.accessTokenExpiry = process.env.JWT_ACCESS_EXPIRY || '15m';
+        this.refreshTokenExpiry = process.env.JWT_REFRESH_EXPIRY || '7d';
+    }
+
+    generateTokenPair(payload) {
+        const accessToken = jwt.sign(
+            {
+                ...payload,
+                type: 'access'
+            },
+            this.privateKey,
+            {
+                algorithm: 'RS256',
+                expiresIn: this.accessTokenExpiry,
+                issuer: 'bytebot-api',
+                audience: 'bytebot-client'
+            }
+        );
+
+        const refreshToken = jwt.sign(
+            {
+                userId: payload.userId,
+                type: 'refresh',
+                jti: require('crypto').randomUUID()
+            },
+            this.refreshSecret,
+            {
+                algorithm: 'HS256',
+                expiresIn: this.refreshTokenExpiry,
+                issuer: 'bytebot-api',
+                audience: 'bytebot-client'
+            }
+        );
+
+        return { accessToken, refreshToken };
+    }
+
+    verifyAccessToken(token) {
+        try {
+            return jwt.verify(token, this.publicKey, {
+                algorithms: ['RS256'],
+                issuer: 'bytebot-api',
+                audience: 'bytebot-client'
+            });
+        } catch (error) {
+            throw new Error(`Invalid access token: ${error.message}`);
+        }
+    }
+
+    verifyRefreshToken(token) {
+        try {
+            return jwt.verify(token, this.refreshSecret, {
+                algorithms: ['HS256'],
+                issuer: 'bytebot-api',
+                audience: 'bytebot-client'
+            });
+        } catch (error) {
+            throw new Error(`Invalid refresh token: ${error.message}`);
+        }
+    }
+
+    refreshTokens(refreshToken) {
+        const decoded = this.verifyRefreshToken(refreshToken);
+
+        if (decoded.type !== 'refresh') {
+            throw new Error('Invalid token type');
+        }
+
+        // In production, check if refresh token is blacklisted
+        // const isBlacklisted = await this.checkBlacklist(decoded.jti);
+        // if (isBlacklisted) throw new Error('Token has been revoked');
+
+        const payload = {
+            userId: decoded.userId,
+            // Add other necessary claims
+        };
+
+        return this.generateTokenPair(payload);
+    }
+
+    extractTokenFromHeader(authHeader) {
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            throw new Error('Invalid authorization header');
+        }
+
+        return authHeader.substring(7);
+    }
+}
+
+module.exports = JWTManager;
+```
+
+### Authentication Middleware (src/middleware/auth.js)
+```javascript
+const JWTManager = require('../auth/jwt');
+const rateLimit = require('express-rate-limit');
+
+class AuthMiddleware {
+    constructor() {
+        this.jwtManager = new JWTManager();
+        this.setupRateLimiting();
+    }
+
+    setupRateLimiting() {
+        this.loginLimiter = rateLimit({
+            windowMs: 15 * 60 * 1000, // 15 minutes
+            max: 5, // limit each IP to 5 requests per windowMs
+            message: 'Too many login attempts, please try again later',
+            standardHeaders: true,
+            legacyHeaders: false,
+            keyGenerator: (req) => {
+                return req.ip + ':' + (req.body.email || req.body.username || 'unknown');
+            }
+        });
+
+        this.apiLimiter = rateLimit({
+            windowMs: 15 * 60 * 1000, // 15 minutes
+            max: 100, // limit each IP to 100 requests per windowMs
+            message: 'Too many API requests, please try again later',
+            standardHeaders: true,
+            legacyHeaders: false
+        });
+    }
+
+    authenticate() {
+        return async (req, res, next) => {
+            try {
+                const authHeader = req.headers.authorization;
+                const token = this.jwtManager.extractTokenFromHeader(authHeader);
+                const decoded = this.jwtManager.verifyAccessToken(token);
+
+                // Verify token type
+                if (decoded.type !== 'access') {
+                    return res.status(401).json({ error: 'Invalid token type' });
+                }
+
+                // Add user info to request
+                req.user = {
+                    id: decoded.userId,
+                    role: decoded.role,
+                    permissions: decoded.permissions || []
+                };
+
+                // Log authentication event
+                this.logAuthEvent(req, 'token_verified', decoded.userId);
+
+                next();
+            } catch (error) {
+                this.logAuthEvent(req, 'auth_failed', null, error.message);
+                res.status(401).json({ error: 'Authentication failed' });
+            }
+        };
+    }
+
+    authorize(requiredRoles = [], requiredPermissions = []) {
+        return (req, res, next) => {
+            if (!req.user) {
+                return res.status(401).json({ error: 'Authentication required' });
+            }
+
+            // Check role-based access
+            if (requiredRoles.length > 0 && !requiredRoles.includes(req.user.role)) {
+                this.logAuthEvent(req, 'access_denied', req.user.id, `Role ${req.user.role} not in ${requiredRoles}`);
+                return res.status(403).json({ error: 'Insufficient permissions' });
+            }
+
+            // Check permission-based access
+            if (requiredPermissions.length > 0) {
+                const hasPermission = requiredPermissions.some(permission =>
+                    req.user.permissions.includes(permission)
+                );
+
+                if (!hasPermission) {
+                    this.logAuthEvent(req, 'access_denied', req.user.id, `Missing permissions: ${requiredPermissions}`);
+                    return res.status(403).json({ error: 'Insufficient permissions' });
+                }
+            }
+
+            this.logAuthEvent(req, 'access_granted', req.user.id);
+            next();
+        };
+    }
+
+    csrfProtection() {
+        const csrf = require('csurf');
+        const SecretsManager = require('../config/secrets');
+        const secrets = new SecretsManager();
+
+        return csrf({
+            cookie: {
+                key: '_csrf',
+                secure: process.env.NODE_ENV === 'production',
+                httpOnly: true,
+                sameSite: 'strict'
+            },
+            secret: secrets.loadSecret('app', 'csrf.key')
+        });
+    }
+
+    logAuthEvent(req, event, userId = null, details = null) {
+        const logEntry = {
+            timestamp: new Date().toISOString(),
+            event,
+            userId,
+            ip: req.ip,
+            userAgent: req.get('User-Agent'),
+            path: req.path,
+            method: req.method,
+            details
+        };
+
+        // In production, send to secure logging system
+        console.log('[AUTH]', JSON.stringify(logEntry));
+    }
+}
+
+module.exports = AuthMiddleware;
+```
+
+## Session Management
+
+### Secure Session Configuration (src/config/session.js)
+```javascript
+const session = require('express-session');
+const MongoStore = require('connect-mongo'); // For MongoDB session store
+const FileStore = require('session-file-store')(session); // For file-based sessions
+const SecretsManager = require('./secrets');
+
+class SessionManager {
+    constructor(storeType = 'file') {
+        this.secrets = new SecretsManager();
+        this.storeType = storeType;
+        this.sessionSecret = this.secrets.loadSecret('app', 'session.key');
+        this.cookieSecret = this.secrets.loadSecret('app', 'cookie.key');
+    }
+
+    createSessionConfig() {
+        const baseConfig = {
+            secret: this.sessionSecret,
+            name: 'bytebot.sid',
+            resave: false,
+            saveUninitialized: false,
+            rolling: true,
+            cookie: {
+                secure: process.env.NODE_ENV === 'production',
+                httpOnly: true,
+                maxAge: 24 * 60 * 60 * 1000, // 24 hours
+                sameSite: 'strict'
+            }
+        };
+
+        // Configure session store
+        switch (this.storeType) {
+            case 'file':
+                baseConfig.store = new FileStore({
+                    path: './data/sessions',
+                    encrypt: true,
+                    secret: this.cookieSecret,
+                    ttl: 86400, // 1 day in seconds
+                    retries: 3,
+                    factor: 2,
+                    minTimeout: 1000,
+                    maxTimeout: 5000
+                });
+                break;
+
+            case 'database':
+                // Implement database session store if needed
+                break;
+
+            default:
+                // Use memory store (not recommended for production)
+                console.warn('Using memory store for sessions - not recommended for production');
+                break;
+        }
+
+        return baseConfig;
+    }
+
+    setupSessionCleanup() {
+        // Clean up expired sessions every hour
+        setInterval(() => {
+            if (this.storeType === 'file') {
+                this.cleanupExpiredSessions();
+            }
+        }, 60 * 60 * 1000);
+    }
+
+    cleanupExpiredSessions() {
+        const fs = require('fs');
+        const path = require('path');
+        const sessionsDir = './data/sessions';
+
+        if (!fs.existsSync(sessionsDir)) {
+            return;
+        }
+
+        const now = Date.now();
+        const files = fs.readdirSync(sessionsDir);
+
+        files.forEach(file => {
+            const filePath = path.join(sessionsDir, file);
+            const stats = fs.statSync(filePath);
+            const age = now - stats.mtime.getTime();
+
+            // Remove sessions older than 24 hours
+            if (age > 24 * 60 * 60 * 1000) {
+                fs.unlinkSync(filePath);
+            }
+        });
+    }
+}
+
+module.exports = SessionManager;
+```
+
+## API Security
+
+### Input Validation & Sanitization (src/middleware/validation.js)
+```javascript
+const { body, param, query, validationResult } = require('express-validator');
+const DOMPurify = require('isomorphic-dompurify');
+const helmet = require('helmet');
+
+class ValidationMiddleware {
+    constructor() {
+        this.setupHelmet();
+    }
+
+    setupHelmet() {
+        this.helmetConfig = helmet({
+            contentSecurityPolicy: {
+                directives: {
+                    defaultSrc: ["'self'"],
+                    styleSrc: ["'self'", "'unsafe-inline'"],
+                    scriptSrc: ["'self'"],
+                    imgSrc: ["'self'", "data:", "https:"],
+                    connectSrc: ["'self'"],
+                    fontSrc: ["'self'"],
+                    objectSrc: ["'none'"],
+                    mediaSrc: ["'self'"],
+                    frameSrc: ["'none'"]
+                }
+            },
+            crossOriginEmbedderPolicy: false,
+            hsts: {
+                maxAge: 31536000,
+                includeSubDomains: true,
+                preload: true
+            }
+        });
+    }
+
+    validateRequest() {
+        return (req, res, next) => {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({
+                    error: 'Validation failed',
+                    details: errors.array()
+                });
+            }
+            next();
+        };
+    }
+
+    sanitizeInput() {
+        return (req, res, next) => {
+            // Sanitize string inputs
+            this.sanitizeObject(req.body);
+            this.sanitizeObject(req.query);
+            this.sanitizeObject(req.params);
+
+            next();
+        };
+    }
+
+    sanitizeObject(obj) {
+        for (const key in obj) {
+            if (typeof obj[key] === 'string') {
+                obj[key] = DOMPurify.sanitize(obj[key], {
+                    ALLOWED_TAGS: [],
+                    ALLOWED_ATTR: []
+                });
+            } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+                this.sanitizeObject(obj[key]);
+            }
+        }
+    }
+
+    // Common validation rules
+    userValidation = {
+        register: [
+            body('username')
+                .isLength({ min: 3, max: 30 })
+                .matches(/^[a-zA-Z0-9_-]+$/)
+                .withMessage('Username must be 3-30 characters, alphanumeric, underscore, or hyphen only'),
+            body('email')
+                .isEmail()
+                .normalizeEmail()
+                .withMessage('Valid email required'),
+            body('password')
+                .isLength({ min: 8 })
+                .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/)
+                .withMessage('Password must be at least 8 characters with uppercase, lowercase, number, and special character')
+        ],
+        login: [
+            body('email').isEmail().normalizeEmail(),
+            body('password').notEmpty()
+        ]
+    };
+
+    taskValidation = {
+        create: [
+            body('title')
+                .isLength({ min: 1, max: 500 })
+                .trim()
+                .withMessage('Title must be 1-500 characters'),
+            body('description')
+                .optional()
+                .isLength({ max: 5000 })
+                .trim(),
+            body('priority')
+                .optional()
+                .isInt({ min: 1, max: 10 })
+                .withMessage('Priority must be between 1 and 10')
+        ]
+    };
+
+    fileValidation = {
+        upload: [
+            // File validation handled by multer middleware
+            body('description')
+                .optional()
+                .isLength({ max: 1000 })
+                .trim()
+        ]
+    };
+}
+
+module.exports = ValidationMiddleware;
+```
+
+### File Upload Security (src/middleware/upload.js)
+```javascript
+const multer = require('multer');
+const path = require('path');
+const crypto = require('crypto');
+const fs = require('fs');
+
+class SecureFileUpload {
+    constructor() {
+        this.uploadDir = './data/uploads';
+        this.maxFileSize = 10 * 1024 * 1024; // 10MB
+        this.allowedMimeTypes = [
+            'image/jpeg',
+            'image/png',
+            'image/gif',
+            'application/pdf',
+            'text/plain',
+            'application/json'
+        ];
+
+        this.ensureUploadDir();
+        this.setupStorage();
+    }
+
+    ensureUploadDir() {
+        if (!fs.existsSync(this.uploadDir)) {
+            fs.mkdirSync(this.uploadDir, { recursive: true, mode: 0o755 });
+        }
+    }
+
+    setupStorage() {
+        this.storage = multer.diskStorage({
+            destination: (req, file, cb) => {
+                // Create user-specific subdirectory
+                const userDir = path.join(this.uploadDir, String(req.user?.id || 'anonymous'));
+                if (!fs.existsSync(userDir)) {
+                    fs.mkdirSync(userDir, { recursive: true, mode: 0o755 });
+                }
+                cb(null, userDir);
+            },
+            filename: (req, file, cb) => {
+                // Generate secure filename
+                const ext = path.extname(file.originalname);
+                const hash = crypto.randomBytes(16).toString('hex');
+                const timestamp = Date.now();
+                const filename = `${timestamp}-${hash}${ext}`;
+                cb(null, filename);
+            }
+        });
+    }
+
+    fileFilter(req, file, cb) {
+        // Check MIME type
+        if (!this.allowedMimeTypes.includes(file.mimetype)) {
+            return cb(new Error(`File type ${file.mimetype} not allowed`), false);
+        }
+
+        // Additional security checks
+        const ext = path.extname(file.originalname).toLowerCase();
+        const allowedExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.pdf', '.txt', '.json'];
+
+        if (!allowedExtensions.includes(ext)) {
+            return cb(new Error(`File extension ${ext} not allowed`), false);
+        }
+
+        cb(null, true);
+    }
+
+    createUploadMiddleware(fieldName = 'file', maxFiles = 1) {
+        const upload = multer({
+            storage: this.storage,
+            fileFilter: this.fileFilter.bind(this),
+            limits: {
+                fileSize: this.maxFileSize,
+                files: maxFiles
+            }
+        });
+
+        return (req, res, next) => {
+            const uploadHandler = maxFiles === 1 ? upload.single(fieldName) : upload.array(fieldName, maxFiles);
+
+            uploadHandler(req, res, (err) => {
+                if (err instanceof multer.MulterError) {
+                    if (err.code === 'LIMIT_FILE_SIZE') {
+                        return res.status(400).json({ error: 'File too large' });
+                    }
+                    if (err.code === 'LIMIT_FILE_COUNT') {
+                        return res.status(400).json({ error: 'Too many files' });
+                    }
+                    return res.status(400).json({ error: err.message });
+                } else if (err) {
+                    return res.status(400).json({ error: err.message });
+                }
+
+                // Virus scan placeholder (implement with ClamAV or similar)
+                if (req.file || req.files) {
+                    this.scanFiles(req.file ? [req.file] : req.files)
+                        .then(() => next())
+                        .catch(scanErr => {
+                            // Clean up uploaded files
+                            this.cleanupFiles(req.file ? [req.file] : req.files);
+                            res.status(400).json({ error: 'File security scan failed' });
+                        });
+                } else {
+                    next();
+                }
+            });
+        };
+    }
+
+    async scanFiles(files) {
+        // Implement virus scanning here
+        // For now, just basic file validation
+        for (const file of files) {
+            await this.validateFileContent(file);
+        }
+    }
+
+    async validateFileContent(file) {
+        return new Promise((resolve, reject) => {
+            // Basic file header validation
+            const buffer = Buffer.alloc(512);
+            const fd = fs.openSync(file.path, 'r');
+
+            try {
+                fs.readSync(fd, buffer, 0, 512, 0);
+                fs.closeSync(fd);
+
+                // Check for common malicious patterns
+                const content = buffer.toString('hex');
+                const maliciousPatterns = [
+                    '4d5a', // PE executable
+                    '7f454c46', // ELF executable
+                    '213c617263683e' // Archive header
+                ];
+
+                for (const pattern of maliciousPatterns) {
+                    if (content.includes(pattern)) {
+                        reject(new Error('Potentially malicious file detected'));
+                        return;
+                    }
+                }
+
+                resolve();
+            } catch (err) {
+                fs.closeSync(fd);
+                reject(err);
+            }
+        });
+    }
+
+    cleanupFiles(files) {
+        files.forEach(file => {
+            if (fs.existsSync(file.path)) {
+                fs.unlinkSync(file.path);
+            }
+        });
+    }
+}
+
+module.exports = SecureFileUpload;
+```
+
+## Network Security
+
+### HTTPS Configuration (src/config/https.js)
+```javascript
+const https = require('https');
+const fs = require('fs');
+const SecretsManager = require('./secrets');
+
+class HTTPSConfig {
+    constructor() {
+        this.secrets = new SecretsManager();
+        this.loadSSLCredentials();
+    }
+
+    loadSSLCredentials() {
+        try {
+            this.sslOptions = {
+                key: this.secrets.loadSecret('ssl', 'server.key'),
+                cert: this.secrets.loadSecret('ssl', 'server.crt'),
+                ca: this.secrets.loadSecret('ssl', 'ca.crt'),
+                dhparam: this.secrets.loadSecret('ssl', 'dhparam.pem'),
+
+                // Security options
+                secureProtocol: 'TLSv1_2_method',
+                ciphers: [
+                    'ECDHE-RSA-AES128-GCM-SHA256',
+                    'ECDHE-RSA-AES256-GCM-SHA384',
+                    'ECDHE-RSA-AES128-SHA256',
+                    'ECDHE-RSA-AES256-SHA384'
+                ].join(':'),
+                honorCipherOrder: true,
+                secureOptions: require('constants').SSL_OP_NO_SSLv3 | require('constants').SSL_OP_NO_TLSv1
+            };
+        } catch (error) {
+            console.error('Failed to load SSL credentials:', error.message);
+            throw error;
+        }
+    }
+
+    createServer(app) {
+        return https.createServer(this.sslOptions, app);
+    }
+
+    enforceHTTPS() {
+        return (req, res, next) => {
+            if (!req.secure && req.get('x-forwarded-proto') !== 'https') {
+                return res.redirect(`https://${req.get('host')}${req.url}`);
+            }
+            next();
+        };
+    }
+}
+
+module.exports = HTTPSConfig;
+```
+
+### Network Security Middleware (src/middleware/security.js)
+```javascript
+const rateLimit = require('express-rate-limit');
+const slowDown = require('express-slow-down');
+
+class NetworkSecurity {
+    constructor() {
+        this.setupRateLimiting();
+        this.setupSlowDown();
+    }
+
+    setupRateLimiting() {
+        // General API rate limiting
+        this.generalLimiter = rateLimit({
+            windowMs: 15 * 60 * 1000, // 15 minutes
+            max: 100, // limit each IP to 100 requests per windowMs
+            message: 'Too many requests from this IP',
+            standardHeaders: true,
+            legacyHeaders: false,
+            keyGenerator: (req) => req.ip
+        });
+
+        // Strict rate limiting for authentication endpoints
+        this.authLimiter = rateLimit({
+            windowMs: 15 * 60 * 1000,
+            max: 5,
+            message: 'Too many authentication attempts',
+            skipSuccessfulRequests: true
+        });
+
+        // API-specific rate limiting
+        this.apiLimiter = rateLimit({
+            windowMs: 1 * 60 * 1000, // 1 minute
+            max: 30,
+            message: 'API rate limit exceeded'
+        });
+    }
+
+    setupSlowDown() {
+        this.speedLimiter = slowDown({
+            windowMs: 15 * 60 * 1000, // 15 minutes
+            delayAfter: 50, // allow 50 requests per 15 minutes at full speed
+            delayMs: 500 // add 500ms of delay per request after delayAfter
+        });
+    }
+
+    ipWhitelist(allowedIPs = ['127.0.0.1', '::1']) {
+        return (req, res, next) => {
+            const clientIP = req.ip || req.connection.remoteAddress;
+
+            if (!allowedIPs.includes(clientIP)) {
+                return res.status(403).json({ error: 'IP not whitelisted' });
+            }
+
+            next();
+        };
+    }
+
+    requestSizeLimit(maxSize = '10mb') {
+        return require('express').json({ limit: maxSize });
+    }
+
+    preventBruteForce() {
+        const ExpressBrute = require('express-brute');
+        const MemoryStore = require('express-brute/lib/MemoryStore');
+
+        const store = new MemoryStore();
+
+        return new ExpressBrute(store, {
+            freeRetries: 3,
+            minWait: 5 * 60 * 1000, // 5 minutes
+            maxWait: 60 * 60 * 1000, // 1 hour
+            failCallback: (req, res, next, nextValidRequestDate) => {
+                res.status(429).json({
+                    error: 'Too many failed attempts',
+                    nextValidRequestDate
+                });
+            }
+        });
+    }
+}
+
+module.exports = NetworkSecurity;
+```
+
+## Security Monitoring & Logging
+
+### Security Audit Logger (src/security/audit.js)
+```javascript
+const fs = require('fs');
+const path = require('path');
+const crypto = require('crypto');
+
+class SecurityAuditLogger {
+    constructor() {
+        this.logDir = './data/logs/security';
+        this.ensureLogDir();
+        this.setupLogRotation();
+    }
+
+    ensureLogDir() {
+        if (!fs.existsSync(this.logDir)) {
+            fs.mkdirSync(this.logDir, { recursive: true, mode: 0o755 });
+        }
+    }
+
+    log(event, details = {}) {
+        const logEntry = {
+            timestamp: new Date().toISOString(),
+            event,
+            details,
+            hash: this.generateHash(event, details)
+        };
+
+        const logFile = path.join(this.logDir, `security-${this.getDateString()}.log`);
+        const logLine = JSON.stringify(logEntry) + '\n';
+
+        fs.appendFileSync(logFile, logLine, { mode: 0o644 });
+    }
+
+    generateHash(event, details) {
+        const data = JSON.stringify({ event, details, timestamp: Date.now() });
+        return crypto.createHash('sha256').update(data).digest('hex');
+    }
+
+    getDateString() {
+        return new Date().toISOString().split('T')[0];
+    }
+
+    setupLogRotation() {
+        // Rotate logs daily at midnight
+        const now = new Date();
+        const midnight = new Date();
+        midnight.setHours(24, 0, 0, 0);
+
+        const msUntilMidnight = midnight.getTime() - now.getTime();
+
+        setTimeout(() => {
+            this.rotateLogs();
+            // Set up daily rotation
+            setInterval(() => this.rotateLogs(), 24 * 60 * 60 * 1000);
+        }, msUntilMidnight);
+    }
+
+    rotateLogs() {
+        const files = fs.readdirSync(this.logDir);
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+        files.forEach(file => {
+            const filePath = path.join(this.logDir, file);
+            const stats = fs.statSync(filePath);
+
+            if (stats.birthtime < thirtyDaysAgo) {
+                // Archive old logs
+                const archiveDir = path.join(this.logDir, 'archive');
+                if (!fs.existsSync(archiveDir)) {
+                    fs.mkdirSync(archiveDir, { mode: 0o755 });
+                }
+
+                const archivePath = path.join(archiveDir, file);
+                fs.renameSync(filePath, archivePath);
+
+                // Compress archived logs
+                const zlib = require('zlib');
+                const gzip = zlib.createGzip();
+                const source = fs.createReadStream(archivePath);
+                const destination = fs.createWriteStream(`${archivePath}.gz`);
+
+                source.pipe(gzip).pipe(destination);
+
+                destination.on('close', () => {
+                    fs.unlinkSync(archivePath);
+                });
+            }
+        });
+    }
+
+    // Security event types
+    logAuthEvent(userId, event, details = {}) {
+        this.log('AUTH_EVENT', { userId, event, ...details });
+    }
+
+    logAccessEvent(userId, resource, action, success = true) {
+        this.log('ACCESS_EVENT', { userId, resource, action, success });
+    }
+
+    logSecurityViolation(type, details = {}) {
+        this.log('SECURITY_VIOLATION', { type, ...details });
+    }
+
+    logSystemEvent(event, details = {}) {
+        this.log('SYSTEM_EVENT', { event, ...details });
+    }
+}
+
+module.exports = SecurityAuditLogger;
+```
+
+## Security Hardening Checklist
+
+### Production Security Checklist
+```markdown
+## Pre-Deployment Security Checklist
+
+### Secrets Management
+- [ ] All secrets stored in secure files with proper permissions (600)
+- [ ] No hardcoded secrets in source code
+- [ ] JWT keys properly generated and secured
+- [ ] Database credentials use strong passwords
+- [ ] API keys stored securely and access-controlled
+
+### Authentication & Authorization
+- [ ] Strong password policy enforced
+- [ ] JWT tokens use asymmetric signing
+- [ ] Refresh token rotation implemented
+- [ ] Session management configured securely
+- [ ] Role-based access control implemented
+
+### Network Security
+- [ ] HTTPS enforced for all connections
+- [ ] Strong SSL/TLS configuration
+- [ ] Rate limiting configured for all endpoints
+- [ ] CORS properly configured
+- [ ] Security headers implemented (Helmet.js)
+
+### Input Validation
+- [ ] All inputs validated and sanitized
+- [ ] File upload restrictions in place
+- [ ] SQL injection protection implemented
+- [ ] XSS protection enabled
+- [ ] CSRF protection configured
+
+### Monitoring & Logging
+- [ ] Security audit logging enabled
+- [ ] Failed authentication attempts logged
+- [ ] Suspicious activity detection in place
+- [ ] Log rotation configured
+- [ ] Security alerts configured
+
+### Infrastructure
+- [ ] File permissions properly set
+- [ ] Database access restricted
+- [ ] Unnecessary services disabled
+- [ ] Regular security updates applied
+- [ ] Backup and recovery procedures tested
+```
+
+This comprehensive local security configuration ensures robust protection for Bytebot APIs while maintaining complete local control and avoiding cloud dependencies. The implementation focuses on defense-in-depth security principles with multiple layers of protection.

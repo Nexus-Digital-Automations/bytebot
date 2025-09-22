@@ -1,0 +1,1563 @@
+# Local Monitoring Setup Guide
+
+## Overview
+
+This guide provides comprehensive instructions for setting up local monitoring and observability for Bytebot APIs. The monitoring stack operates entirely locally with file-based logging, local metrics collection, and self-hosted dashboards—maintaining complete independence from cloud services.
+
+## Local Monitoring Architecture
+
+### Monitoring Stack Components
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Local Monitoring Stack                   │
+├─────────────────────────────────────────────────────────────┤
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐         │
+│  │  Prometheus │  │   Grafana   │  │    Loki     │         │
+│  │  (Metrics)  │  │ (Dashboard) │  │   (Logs)    │         │
+│  └─────────────┘  └─────────────┘  └─────────────┘         │
+│         │                 │                 │              │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐         │
+│  │ Node Exporter│  │   Alertmanager│  │  Log Files │       │
+│  │  (System)   │  │  (Alerts)   │  │ (Storage)   │         │
+│  └─────────────┘  └─────────────┘  └─────────────┘         │
+└─────────────────────────────────────────────────────────────┘
+                          │
+                          │ (Local only)
+                          ▼
+                  ┌─────────────┐
+                  │Local Storage│
+                  │ (Files/DB)  │
+                  └─────────────┘
+```
+
+### Monitoring Layers
+1. **Application Metrics**: Custom metrics from Bytebot APIs
+2. **System Metrics**: CPU, memory, disk, network usage
+3. **Database Metrics**: Query performance, connection pools
+4. **Security Metrics**: Authentication events, security violations
+5. **Business Metrics**: User activity, task completion rates
+
+## Prometheus Configuration
+
+### Local Prometheus Setup (config/prometheus/prometheus.yml)
+```yaml
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'bytebot-local'
+    replica: 'prometheus-1'
+
+# Rule files for alerting
+rule_files:
+  - "rules/*.yml"
+
+# Scrape configurations
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+    scrape_interval: 5s
+    metrics_path: '/metrics'
+
+  # Bytebot API metrics
+  - job_name: 'bytebot-api'
+    static_configs:
+      - targets: ['localhost:3000']
+    metrics_path: '/metrics'
+    scrape_interval: 5s
+    scrape_timeout: 3s
+
+  # Bytebot Agent metrics
+  - job_name: 'bytebot-agents'
+    static_configs:
+      - targets: ['localhost:3001']
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+
+  # System metrics (Node Exporter)
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['localhost:9100']
+    scrape_interval: 15s
+
+  # Database metrics (PostgreSQL)
+  - job_name: 'postgres-exporter'
+    static_configs:
+      - targets: ['localhost:9187']
+    scrape_interval: 30s
+
+  # Redis metrics
+  - job_name: 'redis-exporter'
+    static_configs:
+      - targets: ['localhost:9121']
+    scrape_interval: 30s
+
+  # File-based service discovery for dynamic services
+  - job_name: 'file-sd'
+    file_sd_configs:
+      - files:
+          - 'targets/*.json'
+        refresh_interval: 30s
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - localhost:9093
+
+# Storage configuration
+storage:
+  tsdb:
+    path: '/prometheus'
+    retention.time: '15d'
+    retention.size: '10GB'
+    wal-compression: true
+    no-lockfile: true
+```
+
+### Prometheus Alert Rules (config/prometheus/rules/bytebot-alerts.yml)
+```yaml
+groups:
+  - name: bytebot-api
+    rules:
+      # High error rate
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is {{ $value }} for {{ $labels.job }}"
+
+      # High response time
+      - alert: HighResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 1.0
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High response time detected"
+          description: "95th percentile response time is {{ $value }}s"
+
+      # Service down
+      - alert: ServiceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Service is down"
+          description: "{{ $labels.job }} has been down for more than 1 minute"
+
+  - name: system-alerts
+    rules:
+      # High CPU usage
+      - alert: HighCPUUsage
+        expr: 100 - (avg by (instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage"
+          description: "CPU usage is {{ $value }}% on {{ $labels.instance }}"
+
+      # High memory usage
+      - alert: HighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage"
+          description: "Memory usage is {{ $value }}% on {{ $labels.instance }}"
+
+      # Low disk space
+      - alert: LowDiskSpace
+        expr: (1 - (node_filesystem_avail_bytes / node_filesystem_size_bytes)) * 100 > 90
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Low disk space"
+          description: "Disk usage is {{ $value }}% on {{ $labels.instance }}"
+
+  - name: database-alerts
+    rules:
+      # Too many connections
+      - alert: TooManyConnections
+        expr: pg_stat_database_numbackends / pg_settings_max_connections * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Too many database connections"
+          description: "Database connection usage is {{ $value }}%"
+
+      # Slow queries
+      - alert: SlowQueries
+        expr: rate(pg_stat_statements_mean_time_seconds[5m]) > 1.0
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Slow database queries detected"
+          description: "Average query time is {{ $value }}s"
+```
+
+## Application Metrics Implementation
+
+### Metrics Collection Module (src/monitoring/metrics.js)
+```javascript
+const prometheus = require('prom-client');
+
+class MetricsCollector {
+    constructor() {
+        this.register = prometheus.register;
+        this.setupDefaultMetrics();
+        this.setupCustomMetrics();
+    }
+
+    setupDefaultMetrics() {
+        // Collect default Node.js metrics
+        prometheus.collectDefaultMetrics({
+            timeout: 10000,
+            register: this.register,
+            prefix: 'bytebot_'
+        });
+    }
+
+    setupCustomMetrics() {
+        // HTTP request metrics
+        this.httpRequestDuration = new prometheus.Histogram({
+            name: 'http_request_duration_seconds',
+            help: 'HTTP request duration in seconds',
+            labelNames: ['method', 'route', 'status_code'],
+            buckets: [0.1, 0.3, 0.5, 0.7, 1, 3, 5, 7, 10]
+        });
+
+        this.httpRequestTotal = new prometheus.Counter({
+            name: 'http_requests_total',
+            help: 'Total number of HTTP requests',
+            labelNames: ['method', 'route', 'status_code']
+        });
+
+        // Task metrics
+        this.taskCreated = new prometheus.Counter({
+            name: 'tasks_created_total',
+            help: 'Total number of tasks created',
+            labelNames: ['user_id', 'type']
+        });
+
+        this.taskCompleted = new prometheus.Counter({
+            name: 'tasks_completed_total',
+            help: 'Total number of tasks completed',
+            labelNames: ['user_id', 'type', 'status']
+        });
+
+        this.taskDuration = new prometheus.Histogram({
+            name: 'task_duration_seconds',
+            help: 'Task completion duration in seconds',
+            labelNames: ['type', 'status'],
+            buckets: [1, 5, 10, 30, 60, 300, 600, 1800, 3600]
+        });
+
+        this.activeTasks = new prometheus.Gauge({
+            name: 'active_tasks',
+            help: 'Number of currently active tasks',
+            labelNames: ['type']
+        });
+
+        // Agent metrics
+        this.agentCount = new prometheus.Gauge({
+            name: 'agents_count',
+            help: 'Number of agents by status',
+            labelNames: ['status']
+        });
+
+        this.agentMessages = new prometheus.Counter({
+            name: 'agent_messages_total',
+            help: 'Total number of agent messages',
+            labelNames: ['agent_id', 'type']
+        });
+
+        // Database metrics
+        this.dbConnectionsActive = new prometheus.Gauge({
+            name: 'database_connections_active',
+            help: 'Number of active database connections'
+        });
+
+        this.dbQueryDuration = new prometheus.Histogram({
+            name: 'database_query_duration_seconds',
+            help: 'Database query duration in seconds',
+            labelNames: ['operation', 'table'],
+            buckets: [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1, 5]
+        });
+
+        // Security metrics
+        this.authAttempts = new prometheus.Counter({
+            name: 'auth_attempts_total',
+            help: 'Total authentication attempts',
+            labelNames: ['type', 'success']
+        });
+
+        this.securityViolations = new prometheus.Counter({
+            name: 'security_violations_total',
+            help: 'Total security violations',
+            labelNames: ['type', 'severity']
+        });
+
+        // Business metrics
+        this.userSessions = new prometheus.Gauge({
+            name: 'user_sessions_active',
+            help: 'Number of active user sessions'
+        });
+
+        this.apiUsage = new prometheus.Counter({
+            name: 'api_usage_total',
+            help: 'Total API usage by endpoint',
+            labelNames: ['endpoint', 'user_id']
+        });
+
+        // Register all metrics
+        this.register.registerMetric(this.httpRequestDuration);
+        this.register.registerMetric(this.httpRequestTotal);
+        this.register.registerMetric(this.taskCreated);
+        this.register.registerMetric(this.taskCompleted);
+        this.register.registerMetric(this.taskDuration);
+        this.register.registerMetric(this.activeTasks);
+        this.register.registerMetric(this.agentCount);
+        this.register.registerMetric(this.agentMessages);
+        this.register.registerMetric(this.dbConnectionsActive);
+        this.register.registerMetric(this.dbQueryDuration);
+        this.register.registerMetric(this.authAttempts);
+        this.register.registerMetric(this.securityViolations);
+        this.register.registerMetric(this.userSessions);
+        this.register.registerMetric(this.apiUsage);
+    }
+
+    // HTTP middleware for automatic request tracking
+    createHttpMiddleware() {
+        return (req, res, next) => {
+            const start = Date.now();
+
+            // Track request start
+            const labels = {
+                method: req.method,
+                route: req.route?.path || req.path,
+            };
+
+            res.on('finish', () => {
+                const duration = (Date.now() - start) / 1000;
+                const statusCode = res.statusCode.toString();
+
+                // Record metrics
+                this.httpRequestDuration
+                    .labels(labels.method, labels.route, statusCode)
+                    .observe(duration);
+
+                this.httpRequestTotal
+                    .labels(labels.method, labels.route, statusCode)
+                    .inc();
+
+                // Track API usage
+                if (req.user?.id) {
+                    this.apiUsage
+                        .labels(labels.route, req.user.id.toString())
+                        .inc();
+                }
+            });
+
+            next();
+        };
+    }
+
+    // Task tracking methods
+    trackTaskCreated(userId, type) {
+        this.taskCreated.labels(userId.toString(), type).inc();
+        this.updateActiveTasksCount();
+    }
+
+    trackTaskCompleted(userId, type, status, startTime) {
+        this.taskCompleted.labels(userId.toString(), type, status).inc();
+
+        if (startTime) {
+            const duration = (Date.now() - startTime) / 1000;
+            this.taskDuration.labels(type, status).observe(duration);
+        }
+
+        this.updateActiveTasksCount();
+    }
+
+    updateActiveTasksCount() {
+        // This would typically query the database
+        // For now, implement as needed by your application
+    }
+
+    // Agent tracking methods
+    updateAgentCount(status, count) {
+        this.agentCount.labels(status).set(count);
+    }
+
+    trackAgentMessage(agentId, type) {
+        this.agentMessages.labels(agentId, type).inc();
+    }
+
+    // Database tracking methods
+    trackDbConnection(active) {
+        this.dbConnectionsActive.set(active);
+    }
+
+    trackDbQuery(operation, table, startTime) {
+        const duration = (Date.now() - startTime) / 1000;
+        this.dbQueryDuration.labels(operation, table).observe(duration);
+    }
+
+    // Security tracking methods
+    trackAuthAttempt(type, success) {
+        this.authAttempts.labels(type, success ? 'true' : 'false').inc();
+    }
+
+    trackSecurityViolation(type, severity) {
+        this.securityViolations.labels(type, severity).inc();
+    }
+
+    // Session tracking
+    updateUserSessions(count) {
+        this.userSessions.set(count);
+    }
+
+    // Metrics endpoint
+    getMetrics() {
+        return this.register.metrics();
+    }
+
+    // Health check for monitoring
+    getHealthMetrics() {
+        return {
+            status: 'healthy',
+            timestamp: new Date().toISOString(),
+            metrics_collected: this.register.getMetricsAsArray().length,
+            uptime: process.uptime()
+        };
+    }
+}
+
+module.exports = MetricsCollector;
+```
+
+## Grafana Dashboard Configuration
+
+### Grafana Provisioning (config/grafana/provisioning/dashboards/dashboard.yml)
+```yaml
+apiVersion: 1
+
+providers:
+  - name: 'Bytebot Dashboards'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards
+```
+
+### Main Bytebot Dashboard (config/grafana/provisioning/dashboards/bytebot-overview.json)
+```json
+{
+  "dashboard": {
+    "id": null,
+    "title": "Bytebot Overview",
+    "tags": ["bytebot", "overview"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "HTTP Request Rate",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "rate(http_requests_total[5m])",
+            "legendFormat": "Requests/sec"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 50},
+                {"color": "red", "value": 100}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 6, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "Response Time (95th percentile)",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))",
+            "legendFormat": "95th percentile"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 0.5},
+                {"color": "red", "value": 1.0}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 6, "x": 6, "y": 0}
+      },
+      {
+        "id": 3,
+        "title": "Active Tasks",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(active_tasks)",
+            "legendFormat": "Active Tasks"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 50},
+                {"color": "red", "value": 100}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 6, "x": 12, "y": 0}
+      },
+      {
+        "id": 4,
+        "title": "System CPU Usage",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "100 - (avg(irate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)",
+            "legendFormat": "CPU %"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 70},
+                {"color": "red", "value": 90}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 6, "x": 18, "y": 0}
+      },
+      {
+        "id": 5,
+        "title": "HTTP Requests by Status Code",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "rate(http_requests_total[5m])",
+            "legendFormat": "{{status_code}}"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "fillOpacity": 0.1
+            }
+          }
+        },
+        "gridPos": {"h": 9, "w": 12, "x": 0, "y": 8}
+      },
+      {
+        "id": 6,
+        "title": "Memory Usage",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100",
+            "legendFormat": "Memory Usage %"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100
+          }
+        },
+        "gridPos": {"h": 9, "w": 12, "x": 12, "y": 8}
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "refresh": "5s"
+  }
+}
+```
+
+## File-Based Logging System
+
+### Structured Logging Module (src/monitoring/logger.js)
+```javascript
+const winston = require('winston');
+const path = require('path');
+const fs = require('fs');
+
+class StructuredLogger {
+    constructor() {
+        this.logDir = './data/logs';
+        this.ensureLogDir();
+        this.setupLoggers();
+    }
+
+    ensureLogDir() {
+        const dirs = [
+            this.logDir,
+            path.join(this.logDir, 'application'),
+            path.join(this.logDir, 'security'),
+            path.join(this.logDir, 'performance'),
+            path.join(this.logDir, 'errors'),
+            path.join(this.logDir, 'access')
+        ];
+
+        dirs.forEach(dir => {
+            if (!fs.existsSync(dir)) {
+                fs.mkdirSync(dir, { recursive: true, mode: 0o755 });
+            }
+        });
+    }
+
+    setupLoggers() {
+        // Custom format for structured logging
+        const logFormat = winston.format.combine(
+            winston.format.timestamp(),
+            winston.format.errors({ stack: true }),
+            winston.format.json(),
+            winston.format.printf(({ timestamp, level, message, ...meta }) => {
+                return JSON.stringify({
+                    timestamp,
+                    level,
+                    message,
+                    ...meta
+                });
+            })
+        );
+
+        // Application logger
+        this.appLogger = winston.createLogger({
+            level: process.env.LOG_LEVEL || 'info',
+            format: logFormat,
+            transports: [
+                new winston.transports.File({
+                    filename: path.join(this.logDir, 'application', 'app.log'),
+                    maxsize: 10 * 1024 * 1024, // 10MB
+                    maxFiles: 5,
+                    tailable: true
+                }),
+                new winston.transports.File({
+                    filename: path.join(this.logDir, 'errors', 'error.log'),
+                    level: 'error',
+                    maxsize: 10 * 1024 * 1024,
+                    maxFiles: 10,
+                    tailable: true
+                })
+            ]
+        });
+
+        // Security logger
+        this.securityLogger = winston.createLogger({
+            level: 'info',
+            format: logFormat,
+            transports: [
+                new winston.transports.File({
+                    filename: path.join(this.logDir, 'security', 'security.log'),
+                    maxsize: 50 * 1024 * 1024, // 50MB
+                    maxFiles: 20,
+                    tailable: true
+                })
+            ]
+        });
+
+        // Performance logger
+        this.performanceLogger = winston.createLogger({
+            level: 'info',
+            format: logFormat,
+            transports: [
+                new winston.transports.File({
+                    filename: path.join(this.logDir, 'performance', 'performance.log'),
+                    maxsize: 25 * 1024 * 1024, // 25MB
+                    maxFiles: 10,
+                    tailable: true
+                })
+            ]
+        });
+
+        // Access logger
+        this.accessLogger = winston.createLogger({
+            level: 'info',
+            format: logFormat,
+            transports: [
+                new winston.transports.File({
+                    filename: path.join(this.logDir, 'access', 'access.log'),
+                    maxsize: 100 * 1024 * 1024, // 100MB
+                    maxFiles: 15,
+                    tailable: true
+                })
+            ]
+        });
+
+        // Add console output in development
+        if (process.env.NODE_ENV !== 'production') {
+            const consoleTransport = new winston.transports.Console({
+                format: winston.format.combine(
+                    winston.format.colorize(),
+                    winston.format.simple()
+                )
+            });
+
+            this.appLogger.add(consoleTransport);
+        }
+    }
+
+    // Application logging methods
+    info(message, meta = {}) {
+        this.appLogger.info(message, meta);
+    }
+
+    error(message, error = null, meta = {}) {
+        const errorMeta = error ? { error: error.stack, ...meta } : meta;
+        this.appLogger.error(message, errorMeta);
+    }
+
+    warn(message, meta = {}) {
+        this.appLogger.warn(message, meta);
+    }
+
+    debug(message, meta = {}) {
+        this.appLogger.debug(message, meta);
+    }
+
+    // Security logging
+    logSecurityEvent(event, details = {}) {
+        this.securityLogger.info('Security event', {
+            event,
+            ...details,
+            timestamp: new Date().toISOString()
+        });
+    }
+
+    // Performance logging
+    logPerformance(operation, duration, details = {}) {
+        this.performanceLogger.info('Performance metric', {
+            operation,
+            duration,
+            ...details,
+            timestamp: new Date().toISOString()
+        });
+    }
+
+    // Access logging
+    logAccess(req, res, responseTime) {
+        this.accessLogger.info('HTTP access', {
+            method: req.method,
+            url: req.url,
+            statusCode: res.statusCode,
+            responseTime,
+            userAgent: req.get('User-Agent'),
+            ip: req.ip,
+            userId: req.user?.id,
+            timestamp: new Date().toISOString()
+        });
+    }
+
+    // Express middleware for access logging
+    createAccessMiddleware() {
+        return (req, res, next) => {
+            const start = Date.now();
+
+            res.on('finish', () => {
+                const responseTime = Date.now() - start;
+                this.logAccess(req, res, responseTime);
+            });
+
+            next();
+        };
+    }
+
+    // Log aggregation for monitoring
+    async getLogStats(hours = 24) {
+        const cutoff = new Date(Date.now() - hours * 60 * 60 * 1000);
+
+        // This is a simplified implementation
+        // In production, you might use log parsing tools
+        const stats = {
+            errors: await this.countLogsByLevel('error', cutoff),
+            warnings: await this.countLogsByLevel('warn', cutoff),
+            requests: await this.countAccessLogs(cutoff),
+            securityEvents: await this.countSecurityEvents(cutoff)
+        };
+
+        return stats;
+    }
+
+    async countLogsByLevel(level, since) {
+        // Implement log file parsing for metrics
+        // This is a placeholder implementation
+        return 0;
+    }
+
+    async countAccessLogs(since) {
+        // Implement access log counting
+        return 0;
+    }
+
+    async countSecurityEvents(since) {
+        // Implement security event counting
+        return 0;
+    }
+}
+
+module.exports = StructuredLogger;
+```
+
+## Local Alerting System
+
+### Alert Manager Configuration (config/alertmanager/alertmanager.yml)
+```yaml
+global:
+  smtp_smarthost: 'localhost:587'
+  smtp_from: 'alerts@bytebot.local'
+
+route:
+  group_by: ['alertname']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 1h
+  receiver: 'web.hook'
+
+receivers:
+  - name: 'web.hook'
+    webhook_configs:
+      - url: 'http://localhost:3000/webhooks/alerts'
+        send_resolved: true
+
+  - name: 'email-alerts'
+    email_configs:
+      - to: 'admin@localhost'
+        subject: 'Bytebot Alert: {{ .GroupLabels.alertname }}'
+        body: |
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          {{ end }}
+
+  - name: 'file-alerts'
+    webhook_configs:
+      - url: 'file:///data/alerts/alerts.log'
+        send_resolved: true
+
+inhibit_rules:
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'instance']
+```
+
+### Local Alert Handler (src/monitoring/alerts.js)
+```javascript
+const fs = require('fs');
+const path = require('path');
+
+class LocalAlertHandler {
+    constructor() {
+        this.alertsDir = './data/alerts';
+        this.ensureAlertsDir();
+        this.setupAlertHandlers();
+    }
+
+    ensureAlertsDir() {
+        if (!fs.existsSync(this.alertsDir)) {
+            fs.mkdirSync(this.alertsDir, { recursive: true, mode: 0o755 });
+        }
+    }
+
+    setupAlertHandlers() {
+        this.activeAlerts = new Map();
+        this.alertHistory = [];
+    }
+
+    processAlert(alert) {
+        const alertKey = `${alert.labels.alertname}-${alert.labels.instance}`;
+
+        if (alert.status === 'firing') {
+            this.handleFiringAlert(alertKey, alert);
+        } else if (alert.status === 'resolved') {
+            this.handleResolvedAlert(alertKey, alert);
+        }
+
+        this.logAlert(alert);
+        this.updateAlertMetrics(alert);
+    }
+
+    handleFiringAlert(alertKey, alert) {
+        if (!this.activeAlerts.has(alertKey)) {
+            this.activeAlerts.set(alertKey, {
+                alert,
+                startTime: new Date(),
+                escalationLevel: 0
+            });
+
+            this.sendNotification(alert, 'FIRING');
+            this.scheduleEscalation(alertKey);
+        }
+    }
+
+    handleResolvedAlert(alertKey, alert) {
+        if (this.activeAlerts.has(alertKey)) {
+            const activeAlert = this.activeAlerts.get(alertKey);
+            const duration = new Date() - activeAlert.startTime;
+
+            this.activeAlerts.delete(alertKey);
+            this.sendNotification(alert, 'RESOLVED', { duration });
+
+            // Add to history
+            this.alertHistory.push({
+                alert,
+                startTime: activeAlert.startTime,
+                endTime: new Date(),
+                duration,
+                escalationLevel: activeAlert.escalationLevel
+            });
+        }
+    }
+
+    sendNotification(alert, status, metadata = {}) {
+        const notification = {
+            timestamp: new Date().toISOString(),
+            status,
+            alert: alert.labels.alertname,
+            severity: alert.labels.severity,
+            instance: alert.labels.instance,
+            description: alert.annotations.description,
+            ...metadata
+        };
+
+        // File-based notification
+        this.writeNotificationToFile(notification);
+
+        // Console notification (for development)
+        if (process.env.NODE_ENV !== 'production') {
+            console.log(`[ALERT] ${status}: ${alert.labels.alertname} - ${alert.annotations.summary}`);
+        }
+
+        // Webhook notification (if configured)
+        this.sendWebhookNotification(notification);
+    }
+
+    writeNotificationToFile(notification) {
+        const filename = path.join(this.alertsDir, `alerts-${this.getDateString()}.log`);
+        const logLine = JSON.stringify(notification) + '\n';
+        fs.appendFileSync(filename, logLine, { mode: 0o644 });
+    }
+
+    sendWebhookNotification(notification) {
+        const webhookUrl = process.env.ALERT_WEBHOOK_URL;
+        if (!webhookUrl) return;
+
+        // Implement webhook sending logic
+        const https = require('https');
+        const url = require('url');
+
+        const postData = JSON.stringify(notification);
+        const parsedUrl = url.parse(webhookUrl);
+
+        const options = {
+            hostname: parsedUrl.hostname,
+            port: parsedUrl.port || 443,
+            path: parsedUrl.path,
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Content-Length': Buffer.byteLength(postData)
+            }
+        };
+
+        const req = https.request(options, (res) => {
+            // Handle response
+        });
+
+        req.on('error', (e) => {
+            console.error('Alert webhook error:', e);
+        });
+
+        req.write(postData);
+        req.end();
+    }
+
+    scheduleEscalation(alertKey) {
+        setTimeout(() => {
+            if (this.activeAlerts.has(alertKey)) {
+                const activeAlert = this.activeAlerts.get(alertKey);
+                activeAlert.escalationLevel++;
+
+                if (activeAlert.escalationLevel <= 3) {
+                    this.sendNotification(
+                        activeAlert.alert,
+                        'ESCALATION',
+                        { level: activeAlert.escalationLevel }
+                    );
+                    this.scheduleEscalation(alertKey);
+                }
+            }
+        }, 15 * 60 * 1000); // Escalate every 15 minutes
+    }
+
+    logAlert(alert) {
+        const logEntry = {
+            timestamp: new Date().toISOString(),
+            alertname: alert.labels.alertname,
+            status: alert.status,
+            severity: alert.labels.severity,
+            instance: alert.labels.instance,
+            annotations: alert.annotations
+        };
+
+        const filename = path.join(this.alertsDir, 'alert-log.jsonl');
+        const logLine = JSON.stringify(logEntry) + '\n';
+        fs.appendFileSync(filename, logLine, { mode: 0o644 });
+    }
+
+    updateAlertMetrics(alert) {
+        // Update Prometheus metrics for alerting
+        // This would integrate with your metrics collector
+    }
+
+    getActiveAlerts() {
+        return Array.from(this.activeAlerts.values()).map(item => ({
+            alert: item.alert,
+            startTime: item.startTime,
+            duration: new Date() - item.startTime,
+            escalationLevel: item.escalationLevel
+        }));
+    }
+
+    getAlertHistory(hours = 24) {
+        const cutoff = new Date(Date.now() - hours * 60 * 60 * 1000);
+        return this.alertHistory.filter(item => item.startTime >= cutoff);
+    }
+
+    getDateString() {
+        return new Date().toISOString().split('T')[0];
+    }
+
+    // Health check endpoint
+    getAlertingHealth() {
+        return {
+            status: 'healthy',
+            activeAlerts: this.activeAlerts.size,
+            historicalAlerts: this.alertHistory.length,
+            lastProcessed: new Date().toISOString()
+        };
+    }
+}
+
+module.exports = LocalAlertHandler;
+```
+
+## Performance Monitoring
+
+### Performance Tracking Module (src/monitoring/performance.js)
+```javascript
+const EventEmitter = require('events');
+
+class PerformanceMonitor extends EventEmitter {
+    constructor() {
+        super();
+        this.trackers = new Map();
+        this.benchmarks = new Map();
+        this.setupSystemMonitoring();
+    }
+
+    // Track operation performance
+    startTimer(operationId, metadata = {}) {
+        const timer = {
+            startTime: process.hrtime.bigint(),
+            startMemory: process.memoryUsage(),
+            metadata
+        };
+
+        this.trackers.set(operationId, timer);
+        return operationId;
+    }
+
+    endTimer(operationId) {
+        const timer = this.trackers.get(operationId);
+        if (!timer) {
+            throw new Error(`No timer found for operation: ${operationId}`);
+        }
+
+        const endTime = process.hrtime.bigint();
+        const endMemory = process.memoryUsage();
+
+        const duration = Number(endTime - timer.startTime) / 1000000; // Convert to milliseconds
+        const memoryDelta = {
+            rss: endMemory.rss - timer.startMemory.rss,
+            heapUsed: endMemory.heapUsed - timer.startMemory.heapUsed,
+            heapTotal: endMemory.heapTotal - timer.startMemory.heapTotal,
+            external: endMemory.external - timer.startMemory.external
+        };
+
+        const result = {
+            operationId,
+            duration,
+            memoryDelta,
+            metadata: timer.metadata,
+            timestamp: new Date().toISOString()
+        };
+
+        this.trackers.delete(operationId);
+        this.emit('performance', result);
+
+        return result;
+    }
+
+    // Benchmark specific operations
+    benchmark(name, operation, iterations = 1) {
+        return new Promise(async (resolve) => {
+            const results = [];
+
+            for (let i = 0; i < iterations; i++) {
+                const operationId = `${name}-${i}`;
+                this.startTimer(operationId, { benchmark: name, iteration: i });
+
+                try {
+                    await operation();
+                } catch (error) {
+                    console.error(`Benchmark error in ${name}:`, error);
+                }
+
+                const result = this.endTimer(operationId);
+                results.push(result);
+            }
+
+            const benchmark = this.analyzeBenchmark(name, results);
+            this.benchmarks.set(name, benchmark);
+
+            resolve(benchmark);
+        });
+    }
+
+    analyzeBenchmark(name, results) {
+        const durations = results.map(r => r.duration);
+        const memoryUsages = results.map(r => r.memoryDelta.heapUsed);
+
+        return {
+            name,
+            iterations: results.length,
+            duration: {
+                min: Math.min(...durations),
+                max: Math.max(...durations),
+                avg: durations.reduce((a, b) => a + b, 0) / durations.length,
+                median: this.median(durations),
+                p95: this.percentile(durations, 95),
+                p99: this.percentile(durations, 99)
+            },
+            memory: {
+                min: Math.min(...memoryUsages),
+                max: Math.max(...memoryUsages),
+                avg: memoryUsages.reduce((a, b) => a + b, 0) / memoryUsages.length
+            },
+            timestamp: new Date().toISOString()
+        };
+    }
+
+    median(values) {
+        const sorted = values.slice().sort((a, b) => a - b);
+        const middle = Math.floor(sorted.length / 2);
+        return sorted.length % 2 === 0
+            ? (sorted[middle - 1] + sorted[middle]) / 2
+            : sorted[middle];
+    }
+
+    percentile(values, p) {
+        const sorted = values.slice().sort((a, b) => a - b);
+        const index = Math.ceil((p / 100) * sorted.length) - 1;
+        return sorted[index];
+    }
+
+    setupSystemMonitoring() {
+        // Monitor system performance every 30 seconds
+        setInterval(() => {
+            const systemMetrics = {
+                timestamp: new Date().toISOString(),
+                memory: process.memoryUsage(),
+                cpu: process.cpuUsage(),
+                uptime: process.uptime(),
+                loadAverage: require('os').loadavg(),
+                freeMemory: require('os').freemem(),
+                totalMemory: require('os').totalmem()
+            };
+
+            this.emit('systemMetrics', systemMetrics);
+        }, 30000);
+    }
+
+    // Get performance report
+    getPerformanceReport() {
+        return {
+            activetrackers: this.trackers.size,
+            benchmarks: Array.from(this.benchmarks.values()),
+            systemHealth: {
+                memory: process.memoryUsage(),
+                uptime: process.uptime(),
+                loadAverage: require('os').loadavg()
+            }
+        };
+    }
+
+    // Express middleware for automatic request performance tracking
+    createMiddleware() {
+        return (req, res, next) => {
+            const operationId = `${req.method}-${req.path}-${Date.now()}`;
+
+            this.startTimer(operationId, {
+                method: req.method,
+                path: req.path,
+                userAgent: req.get('User-Agent'),
+                contentLength: req.get('Content-Length')
+            });
+
+            res.on('finish', () => {
+                try {
+                    const result = this.endTimer(operationId);
+
+                    // Log slow requests
+                    if (result.duration > 1000) { // 1 second
+                        console.warn(`Slow request detected: ${req.method} ${req.path} - ${result.duration}ms`);
+                    }
+                } catch (error) {
+                    // Timer might have been cleaned up
+                }
+            });
+
+            next();
+        };
+    }
+}
+
+module.exports = PerformanceMonitor;
+```
+
+## Health Check System
+
+### Comprehensive Health Monitoring (src/monitoring/health.js)
+```javascript
+class HealthMonitor {
+    constructor() {
+        this.checks = new Map();
+        this.registerDefaultChecks();
+    }
+
+    registerDefaultChecks() {
+        // Database health check
+        this.registerCheck('database', async () => {
+            // Implement database connectivity check
+            const start = Date.now();
+            try {
+                // Example database query
+                await this.queryDatabase('SELECT 1');
+                return {
+                    status: 'healthy',
+                    responseTime: Date.now() - start,
+                    message: 'Database connection successful'
+                };
+            } catch (error) {
+                return {
+                    status: 'unhealthy',
+                    responseTime: Date.now() - start,
+                    message: error.message
+                };
+            }
+        });
+
+        // Memory health check
+        this.registerCheck('memory', async () => {
+            const usage = process.memoryUsage();
+            const heapUsedPercent = (usage.heapUsed / usage.heapTotal) * 100;
+
+            return {
+                status: heapUsedPercent < 90 ? 'healthy' : 'unhealthy',
+                heapUsedPercent: Math.round(heapUsedPercent),
+                heapUsed: Math.round(usage.heapUsed / 1024 / 1024),
+                heapTotal: Math.round(usage.heapTotal / 1024 / 1024),
+                message: `Heap usage: ${Math.round(heapUsedPercent)}%`
+            };
+        });
+
+        // Disk space health check
+        this.registerCheck('disk', async () => {
+            const fs = require('fs');
+            const stats = fs.statSync('./');
+            // This is simplified - in production use proper disk space checking
+            return {
+                status: 'healthy',
+                message: 'Disk space check passed'
+            };
+        });
+
+        // External API health check
+        this.registerCheck('external-apis', async () => {
+            const checks = [];
+
+            // Check AI API connectivity
+            if (process.env.OPENAI_API_KEY) {
+                try {
+                    // Implement API connectivity check
+                    checks.push({ service: 'OpenAI', status: 'healthy' });
+                } catch (error) {
+                    checks.push({ service: 'OpenAI', status: 'unhealthy', error: error.message });
+                }
+            }
+
+            const allHealthy = checks.every(check => check.status === 'healthy');
+            return {
+                status: allHealthy ? 'healthy' : 'degraded',
+                services: checks,
+                message: `${checks.length} external services checked`
+            };
+        });
+    }
+
+    registerCheck(name, checkFunction) {
+        this.checks.set(name, checkFunction);
+    }
+
+    async runCheck(name) {
+        const checkFunction = this.checks.get(name);
+        if (!checkFunction) {
+            throw new Error(`Health check not found: ${name}`);
+        }
+
+        const start = Date.now();
+        try {
+            const result = await Promise.race([
+                checkFunction(),
+                new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error('Health check timeout')), 5000)
+                )
+            ]);
+
+            return {
+                name,
+                ...result,
+                duration: Date.now() - start,
+                timestamp: new Date().toISOString()
+            };
+        } catch (error) {
+            return {
+                name,
+                status: 'unhealthy',
+                message: error.message,
+                duration: Date.now() - start,
+                timestamp: new Date().toISOString()
+            };
+        }
+    }
+
+    async runAllChecks() {
+        const results = await Promise.all(
+            Array.from(this.checks.keys()).map(name => this.runCheck(name))
+        );
+
+        const overallStatus = results.every(r => r.status === 'healthy')
+            ? 'healthy'
+            : results.some(r => r.status === 'unhealthy')
+            ? 'unhealthy'
+            : 'degraded';
+
+        return {
+            status: overallStatus,
+            timestamp: new Date().toISOString(),
+            checks: results,
+            summary: {
+                total: results.length,
+                healthy: results.filter(r => r.status === 'healthy').length,
+                unhealthy: results.filter(r => r.status === 'unhealthy').length,
+                degraded: results.filter(r => r.status === 'degraded').length
+            }
+        };
+    }
+
+    // Express health endpoint
+    createHealthEndpoint() {
+        return async (req, res) => {
+            try {
+                const results = await this.runAllChecks();
+                const statusCode = results.status === 'healthy' ? 200 : 503;
+                res.status(statusCode).json(results);
+            } catch (error) {
+                res.status(500).json({
+                    status: 'error',
+                    message: error.message,
+                    timestamp: new Date().toISOString()
+                });
+            }
+        };
+    }
+
+    async queryDatabase(query) {
+        // Implement actual database query
+        // This is a placeholder
+        return Promise.resolve();
+    }
+}
+
+module.exports = HealthMonitor;
+```
+
+## Deployment Script
+
+### Complete Monitoring Setup Script (scripts/setup-monitoring.sh)
+```bash
+#!/bin/bash
+set -euo pipefail
+
+echo "Setting up local monitoring stack for Bytebot..."
+
+# Create monitoring directories
+echo "Creating monitoring directories..."
+mkdir -p data/logs/{application,security,performance,errors,access}
+mkdir -p data/prometheus
+mkdir -p data/grafana
+mkdir -p data/loki
+mkdir -p data/alerts
+mkdir -p config/{prometheus,grafana,loki,alertmanager}
+mkdir -p config/grafana/provisioning/{dashboards,datasources}
+
+# Set proper permissions
+chmod -R 755 data/
+chmod -R 755 config/
+
+# Download and setup Prometheus
+echo "Setting up Prometheus..."
+if ! command -v prometheus &> /dev/null; then
+    echo "Installing Prometheus..."
+    wget -O /tmp/prometheus.tar.gz https://github.com/prometheus/prometheus/releases/download/v2.45.0/prometheus-2.45.0.linux-amd64.tar.gz
+    tar -xzf /tmp/prometheus.tar.gz -C /tmp/
+    sudo mv /tmp/prometheus-2.45.0.linux-amd64/prometheus /usr/local/bin/
+    sudo mv /tmp/prometheus-2.45.0.linux-amd64/promtool /usr/local/bin/
+    rm -rf /tmp/prometheus*
+fi
+
+# Download and setup Node Exporter
+echo "Setting up Node Exporter..."
+if ! command -v node_exporter &> /dev/null; then
+    echo "Installing Node Exporter..."
+    wget -O /tmp/node_exporter.tar.gz https://github.com/prometheus/node_exporter/releases/download/v1.6.0/node_exporter-1.6.0.linux-amd64.tar.gz
+    tar -xzf /tmp/node_exporter.tar.gz -C /tmp/
+    sudo mv /tmp/node_exporter-1.6.0.linux-amd64/node_exporter /usr/local/bin/
+    rm -rf /tmp/node_exporter*
+fi
+
+# Create systemd services
+echo "Creating systemd services..."
+
+# Prometheus service
+sudo tee /etc/systemd/system/prometheus.service > /dev/null <<EOF
+[Unit]
+Description=Prometheus Server
+After=network.target
+
+[Service]
+User=prometheus
+Group=prometheus
+Type=simple
+ExecStart=/usr/local/bin/prometheus \\
+    --config.file=/etc/prometheus/prometheus.yml \\
+    --storage.tsdb.path=/var/lib/prometheus \\
+    --web.console.templates=/etc/prometheus/consoles \\
+    --web.console.libraries=/etc/prometheus/console_libraries \\
+    --web.listen-address=0.0.0.0:9090 \\
+    --web.enable-lifecycle
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# Node Exporter service
+sudo tee /etc/systemd/system/node_exporter.service > /dev/null <<EOF
+[Unit]
+Description=Node Exporter
+After=network.target
+
+[Service]
+User=node_exporter
+Group=node_exporter
+Type=simple
+ExecStart=/usr/local/bin/node_exporter
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# Create users
+sudo useradd --no-create-home --shell /bin/false prometheus || true
+sudo useradd --no-create-home --shell /bin/false node_exporter || true
+
+# Create directories
+sudo mkdir -p /etc/prometheus
+sudo mkdir -p /var/lib/prometheus
+sudo chown prometheus:prometheus /etc/prometheus
+sudo chown prometheus:prometheus /var/lib/prometheus
+
+# Copy configuration
+sudo cp config/prometheus/prometheus.yml /etc/prometheus/
+sudo chown prometheus:prometheus /etc/prometheus/prometheus.yml
+
+# Enable and start services
+sudo systemctl daemon-reload
+sudo systemctl enable prometheus node_exporter
+sudo systemctl start prometheus node_exporter
+
+echo "Monitoring stack setup complete!"
+echo "Access points:"
+echo "- Prometheus: http://localhost:9090"
+echo "- Grafana: http://localhost:3002 (if running via Docker Compose)"
+echo "- Node Exporter: http://localhost:9100/metrics"
+
+echo "To complete setup:"
+echo "1. Start your Bytebot application"
+echo "2. Run Docker Compose for full stack: docker-compose up -d"
+echo "3. Import Grafana dashboards from config/grafana/provisioning/dashboards/"
+```
+
+This comprehensive local monitoring setup provides enterprise-grade observability while maintaining complete local control. The system includes metrics collection, logging, alerting, and performance monitoring—all operating without any cloud dependencies.

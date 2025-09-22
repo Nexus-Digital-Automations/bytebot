@@ -1,0 +1,763 @@
+# Local Deployment API Documentation
+
+## Overview
+
+This documentation covers the Bytebot API endpoints specifically configured for local deployment scenarios. All endpoints are designed to work with localhost networking, local authentication, and file-based storage—maintaining complete independence from cloud services.
+
+## Base Configuration
+
+### Local API Base URL
+```
+# Development
+http://localhost:3000/api/v1
+
+# Production with SSL
+https://localhost:3000/api/v1
+
+# Local network access
+http://192.168.1.100:3000/api/v1
+```
+
+### Local Authentication
+- **JWT Tokens**: Signed locally with RSA keys stored in `secrets/jwt/`
+- **Session Storage**: File-based sessions in `data/sessions/`
+- **No External OAuth**: Self-contained authentication system
+
+## Core API Endpoints
+
+### Authentication Endpoints
+
+#### POST /auth/register
+Register a new user in the local system.
+
+**Local Configuration:**
+- User data stored in local database (SQLite/PostgreSQL)
+- Password hashing performed locally
+- No external validation services
+
+```http
+POST /api/v1/auth/register
+Content-Type: application/json
+
+{
+  "username": "john_doe",
+  "email": "john@localhost",
+  "password": "SecurePassword123!",
+  "firstName": "John",
+  "lastName": "Doe"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "user": {
+      "id": "user_123",
+      "username": "john_doe",
+      "email": "john@localhost",
+      "role": "user",
+      "createdAt": "2024-09-22T10:00:00.000Z"
+    },
+    "tokens": {
+      "accessToken": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...",
+      "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+      "expiresIn": 900
+    }
+  }
+}
+```
+
+#### POST /auth/login
+Authenticate with local credentials.
+
+```http
+POST /api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "john@localhost",
+  "password": "SecurePassword123!"
+}
+```
+
+**Local Features:**
+- Credentials verified against local database
+- JWT tokens signed with local RSA keys
+- Session data stored in local files
+- No external authentication services
+
+#### POST /auth/refresh
+Refresh access tokens using local refresh token.
+
+```http
+POST /api/v1/auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+### User Management
+
+#### GET /users/profile
+Get current user profile from local storage.
+
+```http
+GET /api/v1/users/profile
+Authorization: Bearer <access_token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "user_123",
+    "username": "john_doe",
+    "email": "john@localhost",
+    "profile": {
+      "firstName": "John",
+      "lastName": "Doe",
+      "preferences": {
+        "theme": "dark",
+        "language": "en"
+      }
+    },
+    "settings": {
+      "localStoragePath": "/data/users/user_123",
+      "backupEnabled": true
+    }
+  }
+}
+```
+
+#### PUT /users/profile
+Update user profile in local database.
+
+```http
+PUT /api/v1/users/profile
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+{
+  "firstName": "John",
+  "lastName": "Smith",
+  "preferences": {
+    "theme": "light",
+    "language": "en"
+  }
+}
+```
+
+### Agent Management
+
+#### GET /agents
+List all agents for the current user.
+
+```http
+GET /api/v1/agents
+Authorization: Bearer <access_token>
+```
+
+**Local Features:**
+- Agent data retrieved from local database
+- Agent workspace paths point to local file system
+- No cloud-based agent services
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "agents": [
+      {
+        "id": "agent_abc123",
+        "name": "Research Assistant",
+        "type": "research",
+        "status": "active",
+        "config": {
+          "localWorkspace": "/data/agents/agent_abc123",
+          "capabilities": ["web_search", "document_analysis"],
+          "resourceLimits": {
+            "maxMemory": "1GB",
+            "maxDiskSpace": "5GB"
+          }
+        },
+        "createdAt": "2024-09-22T10:00:00.000Z",
+        "lastActivity": "2024-09-22T11:30:00.000Z"
+      }
+    ],
+    "pagination": {
+      "total": 1,
+      "page": 1,
+      "limit": 10
+    }
+  }
+}
+```
+
+#### POST /agents
+Create a new agent in local environment.
+
+```http
+POST /api/v1/agents
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+{
+  "name": "Development Assistant",
+  "type": "development",
+  "config": {
+    "capabilities": ["code_analysis", "file_operations"],
+    "localWorkspace": "/data/agents/custom_workspace",
+    "resourceLimits": {
+      "maxMemory": "2GB",
+      "maxDiskSpace": "10GB"
+    }
+  }
+}
+```
+
+**Local Configuration:**
+- Agent workspace created in local file system
+- Agent process spawned locally
+- Configuration stored in local database
+
+#### GET /agents/{agentId}/status
+Get real-time status of local agent.
+
+```http
+GET /api/v1/agents/agent_abc123/status
+Authorization: Bearer <access_token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "agent_abc123",
+    "status": "active",
+    "health": "healthy",
+    "performance": {
+      "cpu_usage": 15.2,
+      "memory_usage": 256.7,
+      "disk_usage": 1024.5
+    },
+    "localInfo": {
+      "workspacePath": "/data/agents/agent_abc123",
+      "logFile": "/data/logs/agent_abc123.log",
+      "processId": 12345,
+      "uptime": 3600
+    },
+    "lastActivity": "2024-09-22T11:45:00.000Z"
+  }
+}
+```
+
+### Task Management
+
+#### GET /tasks
+List tasks stored in local database.
+
+```http
+GET /api/v1/tasks?status=pending&limit=20&offset=0
+Authorization: Bearer <access_token>
+```
+
+**Local Query Parameters:**
+- `localPath`: Filter by local file path
+- `agentId`: Filter by local agent ID
+- `backupStatus`: Filter by local backup status
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "tasks": [
+      {
+        "id": "task_xyz789",
+        "title": "Analyze Local Documents",
+        "description": "Process documents in /data/uploads/documents/",
+        "status": "pending",
+        "priority": 5,
+        "agentId": "agent_abc123",
+        "localInfo": {
+          "workingDirectory": "/data/tasks/task_xyz789",
+          "inputFiles": ["/data/uploads/doc1.pdf", "/data/uploads/doc2.txt"],
+          "outputPath": "/data/results/task_xyz789"
+        },
+        "createdAt": "2024-09-22T11:00:00.000Z",
+        "estimatedCompletion": "2024-09-22T12:00:00.000Z"
+      }
+    ],
+    "pagination": {
+      "total": 1,
+      "page": 1,
+      "limit": 20
+    }
+  }
+}
+```
+
+#### POST /tasks
+Create a new task with local file references.
+
+```http
+POST /api/v1/tasks
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+{
+  "title": "Process Local Files",
+  "description": "Analyze files in the specified local directory",
+  "type": "file_analysis",
+  "priority": 7,
+  "agentId": "agent_abc123",
+  "config": {
+    "inputPath": "/data/uploads/batch_001/",
+    "outputPath": "/data/results/analysis_001/",
+    "processSubdirectories": true,
+    "fileTypes": [".pdf", ".txt", ".md"],
+    "localOnly": true
+  }
+}
+```
+
+### File Management
+
+#### GET /files
+List files in local storage.
+
+```http
+GET /api/v1/files?path=/data/uploads&type=document
+Authorization: Bearer <access_token>
+```
+
+**Local Query Parameters:**
+- `path`: Local file system path
+- `recursive`: Include subdirectories
+- `mimeType`: Filter by MIME type
+- `sizeRange`: Filter by file size
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "files": [
+      {
+        "id": "file_def456",
+        "filename": "report.pdf",
+        "originalName": "Monthly Report.pdf",
+        "mimeType": "application/pdf",
+        "size": 2048576,
+        "localPath": "/data/uploads/user_123/report.pdf",
+        "metadata": {
+          "uploadedAt": "2024-09-22T10:30:00.000Z",
+          "checksum": "sha256:a1b2c3d4e5f6...",
+          "backupStatus": "backed_up",
+          "permissions": "644"
+        }
+      }
+    ],
+    "summary": {
+      "totalFiles": 1,
+      "totalSize": 2048576,
+      "basePath": "/data/uploads"
+    }
+  }
+}
+```
+
+#### POST /files/upload
+Upload files to local storage.
+
+```http
+POST /api/v1/files/upload
+Authorization: Bearer <access_token>
+Content-Type: multipart/form-data
+
+# Form data with file and metadata
+```
+
+**Local Upload Features:**
+- Files stored in local file system
+- Automatic virus scanning (if configured)
+- Local backup integration
+- File permissions management
+
+#### GET /files/{fileId}/download
+Download files from local storage.
+
+```http
+GET /api/v1/files/file_def456/download
+Authorization: Bearer <access_token>
+```
+
+**Local Download Features:**
+- Direct file system access
+- Stream large files efficiently
+- Access control based on local permissions
+- Audit logging to local files
+
+### Chat and Conversations
+
+#### GET /chat/conversations
+List chat conversations stored locally.
+
+```http
+GET /api/v1/chat/conversations?limit=10
+Authorization: Bearer <access_token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "conversations": [
+      {
+        "id": "conv_ghi789",
+        "title": "Project Planning Discussion",
+        "agentId": "agent_abc123",
+        "messageCount": 25,
+        "localInfo": {
+          "storagePath": "/data/conversations/conv_ghi789.json",
+          "backupPath": "/data/backups/conversations/conv_ghi789_backup.json",
+          "indexed": true
+        },
+        "createdAt": "2024-09-22T09:00:00.000Z",
+        "lastMessage": "2024-09-22T11:45:00.000Z"
+      }
+    ]
+  }
+}
+```
+
+#### POST /chat/conversations/{conversationId}/messages
+Send message in local chat system.
+
+```http
+POST /api/v1/chat/conversations/conv_ghi789/messages
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+{
+  "content": "Can you analyze the files in /data/projects/current/?",
+  "type": "user",
+  "attachments": [
+    {
+      "type": "file_reference",
+      "localPath": "/data/projects/current/requirements.md"
+    }
+  ]
+}
+```
+
+**Local Message Features:**
+- Messages stored in local database
+- File attachments reference local paths
+- No external API dependencies (except AI services)
+- Local conversation indexing for search
+
+### System Health and Monitoring
+
+#### GET /health
+Get local system health status.
+
+```http
+GET /api/v1/health
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "status": "healthy",
+    "timestamp": "2024-09-22T12:00:00.000Z",
+    "checks": [
+      {
+        "name": "database",
+        "status": "healthy",
+        "responseTime": 5,
+        "details": {
+          "type": "postgresql",
+          "host": "localhost",
+          "connectionPool": {
+            "active": 3,
+            "idle": 7,
+            "total": 10
+          }
+        }
+      },
+      {
+        "name": "storage",
+        "status": "healthy",
+        "details": {
+          "diskSpace": {
+            "total": "500GB",
+            "used": "150GB",
+            "available": "350GB",
+            "usagePercent": 30
+          },
+          "paths": {
+            "data": "/data",
+            "logs": "/data/logs",
+            "backups": "/data/backups"
+          }
+        }
+      },
+      {
+        "name": "agents",
+        "status": "healthy",
+        "details": {
+          "total": 3,
+          "active": 2,
+          "idle": 1,
+          "errors": 0
+        }
+      }
+    ]
+  }
+}
+```
+
+#### GET /metrics
+Get local Prometheus metrics.
+
+```http
+GET /api/v1/metrics
+```
+
+**Local Metrics Include:**
+- HTTP request metrics
+- Database query performance
+- File system usage
+- Agent performance
+- Memory and CPU usage
+- Task completion rates
+
+### Local Configuration
+
+#### GET /config/local
+Get local deployment configuration.
+
+```http
+GET /api/v1/config/local
+Authorization: Bearer <access_token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "deployment": {
+      "type": "local",
+      "environment": "production",
+      "dataPath": "/data",
+      "logsPath": "/data/logs",
+      "backupsPath": "/data/backups"
+    },
+    "database": {
+      "type": "postgresql",
+      "host": "localhost",
+      "port": 5432,
+      "name": "bytebot"
+    },
+    "storage": {
+      "type": "local_filesystem",
+      "uploads": "/data/uploads",
+      "workspace": "/data/agents",
+      "maxFileSize": "100MB",
+      "allowedTypes": [".pdf", ".txt", ".md", ".json", ".csv"]
+    },
+    "security": {
+      "authType": "local_jwt",
+      "sessionStorage": "file",
+      "encryptionEnabled": true,
+      "backupEncryption": true
+    },
+    "features": {
+      "localOnly": true,
+      "cloudIntegration": false,
+      "externalAPIs": ["openai", "anthropic"],
+      "localAI": false
+    }
+  }
+}
+```
+
+## Local Development Integration
+
+### Development Server Configuration
+
+#### Environment Variables
+```bash
+# Local API Configuration
+NODE_ENV=development
+PORT=3000
+HOST=localhost
+
+# Local Database
+DATABASE_URL=postgresql://bytebot:password@localhost:5432/bytebot
+# Or for SQLite
+DATABASE_URL=sqlite:./data/sqlite/bytebot.db
+
+# Local Storage
+DATA_PATH=/data
+UPLOADS_PATH=/data/uploads
+LOGS_PATH=/data/logs
+
+# Local Security
+JWT_PRIVATE_KEY_PATH=./secrets/jwt/private.pem
+JWT_PUBLIC_KEY_PATH=./secrets/jwt/public.pem
+SESSION_SECRET_PATH=./secrets/app/session.key
+
+# AI Services (only external dependency)
+OPENAI_API_KEY_PATH=./secrets/api-keys/openai.key
+
+# Local Monitoring
+PROMETHEUS_ENABLED=true
+METRICS_PORT=9464
+HEALTH_CHECK_ENABLED=true
+```
+
+#### Local Testing Configuration
+```javascript
+// test/setup/local-config.js
+const testConfig = {
+  database: {
+    type: 'sqlite',
+    path: './test/data/test.db'
+  },
+  storage: {
+    uploads: './test/data/uploads',
+    workspace: './test/data/workspace'
+  },
+  auth: {
+    jwtSecret: 'test-secret',
+    sessionStore: 'memory'
+  },
+  agents: {
+    maxConcurrent: 2,
+    timeout: 5000
+  }
+};
+```
+
+### Local API Client Examples
+
+#### JavaScript/Node.js Client
+```javascript
+class LocalBytebotClient {
+  constructor(baseUrl = 'http://localhost:3000/api/v1') {
+    this.baseUrl = baseUrl;
+    this.token = null;
+  }
+
+  async login(email, password) {
+    const response = await fetch(`${this.baseUrl}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+
+    const data = await response.json();
+    if (data.success) {
+      this.token = data.data.tokens.accessToken;
+    }
+    return data;
+  }
+
+  async uploadFile(filePath, localPath) {
+    const formData = new FormData();
+    formData.append('file', fs.createReadStream(filePath));
+    formData.append('localPath', localPath);
+
+    const response = await fetch(`${this.baseUrl}/files/upload`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${this.token}` },
+      body: formData
+    });
+
+    return response.json();
+  }
+
+  async createLocalTask(title, config) {
+    const response = await fetch(`${this.baseUrl}/tasks`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.token}`
+      },
+      body: JSON.stringify({ title, ...config })
+    });
+
+    return response.json();
+  }
+}
+```
+
+#### Python Client
+```python
+import requests
+import json
+from pathlib import Path
+
+class LocalBytebotClient:
+    def __init__(self, base_url="http://localhost:3000/api/v1"):
+        self.base_url = base_url
+        self.token = None
+
+    def login(self, email, password):
+        response = requests.post(
+            f"{self.base_url}/auth/login",
+            json={"email": email, "password": password}
+        )
+
+        data = response.json()
+        if data.get("success"):
+            self.token = data["data"]["tokens"]["accessToken"]
+        return data
+
+    def upload_file(self, file_path, local_path=None):
+        files = {"file": open(file_path, "rb")}
+        data = {"localPath": local_path} if local_path else {}
+
+        response = requests.post(
+            f"{self.base_url}/files/upload",
+            files=files,
+            data=data,
+            headers={"Authorization": f"Bearer {self.token}"}
+        )
+
+        return response.json()
+
+    def get_local_health(self):
+        response = requests.get(f"{self.base_url}/health")
+        return response.json()
+```
+
+## Local Security Considerations
+
+### API Security Features
+- **Local JWT Validation**: Tokens verified with local RSA keys
+- **File System Access Control**: Restricted to configured local paths
+- **Input Validation**: All inputs sanitized locally
+- **Rate Limiting**: Configured for local deployment scenarios
+- **Audit Logging**: All API calls logged to local files
+
+### Local Network Security
+- **Localhost Binding**: Services bound to local interfaces only
+- **SSL/TLS**: Local certificate management
+- **Firewall Rules**: Restrict external access
+- **CORS Configuration**: Configured for local origins
+
+This API documentation ensures that all Bytebot functionality is accessible through well-defined endpoints while maintaining complete local operation and security.
