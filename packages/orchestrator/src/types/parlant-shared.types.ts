@@ -135,6 +135,11 @@ export enum SecurityLevel {
   _MEDIUM = "medium",
   _HIGH = "high",
   _CRITICAL = "critical",
+  // Additional security levels used in orchestrator
+  INTERNAL = "internal",
+  CONFIDENTIAL = "confidential",
+  RESTRICTED = "restricted",
+  CLASSIFIED = "classified"
 }
 
 export class ParlantIntegrationError extends Error {
@@ -160,4 +165,130 @@ export class ParlantTimeoutError extends ParlantIntegrationError {
     super(message, "TIMEOUT_ERROR", details);
     this.name = "ParlantTimeoutError";
   }
+}
+
+// Additional types for comprehensive validation support
+export interface ParlantValidationResult {
+  /** Whether validation passed */
+  success: boolean;
+  /** Validation response */
+  response?: ParlantValidationResponse;
+  /** Validation error if failed */
+  error?: string;
+  /** Validation time in milliseconds */
+  validationTimeMs: number;
+  /** Additional metadata */
+  metadata?: Record<string, unknown>;
+}
+
+export interface MultiServiceValidationResult {
+  /** Overall validation status */
+  overallStatus: ServiceValidationStatus;
+  /** Individual service results */
+  serviceResults: Map<string, ServiceValidationResult>;
+  /** Validation summary */
+  summary: string;
+  /** Total validation time */
+  totalTimeMs: number;
+}
+
+export enum ServiceValidationStatus {
+  SUCCESS = "success",
+  PARTIAL_SUCCESS = "partial_success",
+  FAILURE = "failure",
+  TIMEOUT = "timeout",
+  ERROR = "error"
+}
+
+export interface ServiceValidationResult {
+  /** Service name */
+  serviceName: string;
+  /** Validation status */
+  status: ServiceValidationStatus;
+  /** Validation details */
+  details: string;
+  /** Time taken */
+  timeMs: number;
+}
+
+export interface ConversationalValidationResult {
+  /** Validation outcome */
+  approved: boolean;
+  /** Conversation transcript */
+  conversationTranscript: string;
+  /** User interactions */
+  userInteractions: number;
+  /** Validation confidence */
+  confidence: number;
+  /** Duration of conversation */
+  conversationDurationMs: number;
+}
+
+export interface ComplianceValidationResult {
+  /** Compliance status */
+  compliant: boolean;
+  /** Violations found */
+  violations: ComplianceViolation[];
+  /** Compliance score */
+  score: number;
+  /** Remediation steps */
+  remediation: string[];
+}
+
+export interface ComplianceViolation {
+  /** Violation type */
+  type: string;
+  /** Severity level */
+  severity: "low" | "medium" | "high" | "critical";
+  /** Description */
+  description: string;
+  /** Affected component */
+  component: string;
+}
+
+export interface OrchestrationMetrics {
+  /** Performance metrics */
+  performance: PerformanceMetrics;
+  /** Resource utilization */
+  resources: ResourceMetrics;
+  /** Quality metrics */
+  quality: QualityMetrics;
+}
+
+export interface PerformanceMetrics {
+  /** Response time in ms */
+  responseTime: number;
+  /** Throughput per second */
+  throughput: number;
+  /** Error rate percentage */
+  errorRate: number;
+}
+
+export interface ResourceMetrics {
+  /** CPU usage percentage */
+  cpuUsage: number;
+  /** Memory usage in MB */
+  memoryUsage: number;
+  /** Network I/O in bytes */
+  networkIO: number;
+}
+
+export interface QualityMetrics {
+  /** Success rate percentage */
+  successRate: number;
+  /** Validation accuracy */
+  validationAccuracy: number;
+  /** User satisfaction score */
+  userSatisfaction: number;
+}
+
+export interface PerformanceImpactAssessment {
+  /** Impact level */
+  impactLevel: "minimal" | "low" | "medium" | "high" | "critical";
+  /** Affected components */
+  affectedComponents: string[];
+  /** Performance degradation percentage */
+  degradationPercent: number;
+  /** Mitigation strategies */
+  mitigationStrategies: string[];
 }

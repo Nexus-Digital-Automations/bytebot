@@ -32,7 +32,13 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import * as winston from 'winston';
+// Optional winston import - fallback to console if not available
+let winston: any;
+try {
+  winston = require('winston');
+} catch {
+  winston = null;
+}
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as crypto from 'crypto';
@@ -179,7 +185,7 @@ export interface EventAggregation {
 @Injectable()
 export class EnhancedAuditLoggerService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(EnhancedAuditLoggerService.name);
-  private winstonLogger: winston.Logger | null = null;
+  private winstonLogger: any | null = null;
   private config: EnhancedAuditLoggerConfig | null = null;
   private eventEmitter: EventEmitter2;
   private isInitialized = false;
@@ -686,16 +692,16 @@ export class EnhancedAuditLoggerService implements OnModuleInit, OnModuleDestroy
    * Initialize Winston logger with enhanced transports
    */
   private async initializeWinstonLogger(): Promise<void> {
-    const loggerTransports: winston.transport[] = [];
+    const loggerTransports: any[] = [];
 
     // Console transport for development
     if (this.configService.get<string>('NODE_ENV') !== 'production') {
       loggerTransports.push(
-        new winston.transports.Console({
+        winston ? new winston.transports.Console({
           format: winston.format.combine(
             winston.format.colorize(),
             winston.format.timestamp(),
-            winston.format.printf((info) => {
+            winston.format.printf((info: any) => {
               const { timestamp, level, message, ...meta } = info;
               return `${timestamp} [${level}]: ${message} ${
                 Object.keys(meta).length ? JSON.stringify(meta) : ''
@@ -1944,7 +1950,10 @@ export class EnhancedAuditLoggerService implements OnModuleInit, OnModuleDestroy
       throw new Error('Encryption key required');
     }
     
-    const cipher = crypto.createCipher(encryption.algorithm, encryption.keyId);
+    // Use createCipheriv instead of deprecated createCipher
+    const key = crypto.scryptSync(encryption.keyId, 'salt', 32);
+    const iv = crypto.randomBytes(16);
+    const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
     let encrypted = cipher.update(data, 'utf8', 'hex');
     encrypted += cipher.final('hex');
     return encrypted;

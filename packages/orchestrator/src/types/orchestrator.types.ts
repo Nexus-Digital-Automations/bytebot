@@ -47,6 +47,8 @@ export interface OrchestrationTask {
   readonly complianceRequirements: ComplianceRequirements;
   /** Task metadata */
   readonly metadata: OrchestrationMetadata;
+  /** Estimated duration in milliseconds */
+  readonly estimatedDurationMs: number;
 }
 
 export enum OrchestrationPriority {
@@ -309,6 +311,12 @@ export interface OrchestrationExecutionContext {
   readonly errorContext?: OrchestrationError;
   /** Parlant conversation tracking */
   readonly conversationTracking: ConversationTracking;
+  /** Validation results */
+  validationResults?: any;
+  /** Step validation results */
+  stepValidationResults?: any;
+  /** Post execution validation */
+  postExecutionValidation?: any;
 }
 
 export interface OrchestrationState {

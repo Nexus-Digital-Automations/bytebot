@@ -349,8 +349,8 @@ interface PerformanceRequirements {
  * based on intelligent analysis of method signatures, parameters, and context.
  */
 export function ParlantAuto(config: ParlantAutoConfig = {}): MethodDecorator {
-  return function (
-    target: Record<string, unknown>,
+  return function <T>(
+    target: any,
     propertyKey: string | symbol,
     descriptor: PropertyDescriptor,
   ) {
@@ -410,8 +410,8 @@ export function ParlantAuto(config: ParlantAutoConfig = {}): MethodDecorator {
 export function ParlantUniversal(
   config: Partial<ParlantUniversalConfig>,
 ): MethodDecorator {
-  return function (
-    target: Record<string, unknown>,
+  return function <T>(
+    target: any,
     propertyKey: string | symbol,
     descriptor: PropertyDescriptor,
   ) {
@@ -482,8 +482,8 @@ export function ParlantUniversal(
 export function ParlantAdaptive(
   config: ParlantAdaptiveConfig,
 ): MethodDecorator {
-  return function (
-    target: Record<string, unknown>,
+  return function <T>(
+    target: any,
     propertyKey: string | symbol,
     descriptor: PropertyDescriptor,
   ) {
@@ -525,8 +525,8 @@ export function ParlantAdaptive(
 export function ParlantBusiness(
   config: ParlantBusinessConfig,
 ): MethodDecorator {
-  return function (
-    target: Record<string, unknown>,
+  return function <T>(
+    target: any,
     propertyKey: string | symbol,
     descriptor: PropertyDescriptor,
   ) {

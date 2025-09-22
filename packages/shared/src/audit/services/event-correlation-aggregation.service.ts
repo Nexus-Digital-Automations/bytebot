@@ -340,6 +340,21 @@ export class EventCorrelationAggregationService implements OnModuleInit, OnModul
     private readonly configService: ConfigService,
     private readonly eventEmitter: EventEmitter2,
   ) {
+    // Initialize required properties
+    this.correlationConfig = {
+      enabled: true,
+      windowSize: 5000,
+      maxEvents: 1000,
+      rules: [],
+    };
+
+    this.aggregationConfig = {
+      enabled: true,
+      windowSize: 10000,
+      maxAggregations: 500,
+      metrics: [],
+    };
+
     this.initializeConfiguration();
   }
 

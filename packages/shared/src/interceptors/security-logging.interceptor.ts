@@ -16,6 +16,9 @@ import { Observable } from "rxjs";
 import { tap, catchError } from "rxjs/operators";
 import { throwError } from "rxjs";
 
+// Export both SecurityLoggingInterceptor and AuditLoggingInterceptor for compatibility
+export const AuditLoggingInterceptor = SecurityLoggingInterceptor;
+
 @Injectable()
 export class SecurityLoggingInterceptor implements NestInterceptor {
   private readonly logger = new Logger(SecurityLoggingInterceptor.name);
