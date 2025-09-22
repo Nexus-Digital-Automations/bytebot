@@ -1,0 +1,130 @@
+{
+  "name": "@bytebot/test-generators",
+  "version": "1.0.0",
+  "description": "Automated test generation from API specifications with intelligent test case creation",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./generators": {
+      "types": "./dist/generators/index.d.ts",
+      "default": "./dist/generators/index.js"
+    },
+    "./parsers": {
+      "types": "./dist/parsers/index.d.ts",
+      "default": "./dist/parsers/index.js"
+    },
+    "./templates": {
+      "types": "./dist/templates/index.d.ts",
+      "default": "./dist/templates/index.js"
+    },
+    "./validators": {
+      "types": "./dist/validators/index.d.ts",
+      "default": "./dist/validators/index.js"
+    }
+  },
+  "private": true,
+  "license": "UNLICENSED",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "tsc -p tsconfig.build.json --watch",
+    "test": "jest --config jest.config.js",
+    "test:unit": "jest --config jest.config.js --testPathPattern=unit",
+    "test:integration": "jest --config jest.config.js --testPathPattern=integration",
+    "test:coverage": "jest --config jest.config.js --coverage",
+    "test:watch": "jest --config jest.config.js --watch",
+    "test:ci": "jest --config jest.config.js --coverage --ci --watchAll=false",
+    "lint": "eslint \"src/**/*.ts\" --fix",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "generate:from-openapi": "ts-node src/cli/generate-from-openapi.ts",
+    "generate:from-swagger": "ts-node src/cli/generate-from-swagger.ts",
+    "generate:contracts": "ts-node src/cli/generate-contracts.ts",
+    "generate:load-tests": "ts-node src/cli/generate-load-tests.ts",
+    "validate:specs": "ts-node src/cli/validate-specs.ts",
+    "docs:generate": "typedoc src --out docs --excludePrivate"
+  },
+  "dependencies": {
+    "@bytebot/shared": "workspace:*",
+    "@bytebot/integration-testing": "workspace:*",
+    "@nestjs/common": "^11.1.6",
+    "@nestjs/core": "^11.1.6",
+    "@nestjs/config": "^4.0.2",
+    "axios": "^1.7.7",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.2",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1",
+    "uuid": "^12.0.0",
+    "jsonschema": "^1.4.1",
+    "swagger-parser": "^10.0.3",
+    "openapi-types": "^12.1.3",
+    "handlebars": "^4.7.8",
+    "faker": "^5.5.3",
+    "@faker-js/faker": "^9.3.0",
+    "ajv": "^8.17.1",
+    "yaml": "^2.5.1",
+    "json-schema-faker": "^0.5.6",
+    "mustache": "^4.2.0",
+    "lodash": "^4.17.21",
+    "winston": "^3.14.2",
+    "pino": "^9.4.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/node": "^22.18.1",
+    "@types/uuid": "^10.0.0",
+    "@types/lodash": "^4.17.7",
+    "@types/faker": "^5.5.8",
+    "@types/mustache": "^4.2.5",
+    "@types/handlebars": "^4.1.0",
+    "typescript": "^5.9.2",
+    "eslint": "^9.35.0",
+    "prettier": "^3.6.2",
+    "jest": "^30.1.3",
+    "ts-jest": "^29.4.1",
+    "ts-node": "^10.9.2",
+    "typescript-eslint": "^8.20.0",
+    "jest-environment-node": "^30.1.2",
+    "supertest": "^7.1.4",
+    "typedoc": "^0.26.11"
+  },
+  "keywords": [
+    "test-generation",
+    "api-testing",
+    "openapi",
+    "swagger",
+    "automated-testing",
+    "contract-testing",
+    "load-testing",
+    "test-automation",
+    "bytebot",
+    "nestjs",
+    "enterprise"
+  ],
+  "author": "Bytebot Engineering Team",
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "roots": ["<rootDir>/src"],
+    "testMatch": [
+      "**/__tests__/**/*.test.ts",
+      "**/tests/**/*.test.ts",
+      "**/*.spec.ts"
+    ],
+    "collectCoverageFrom": [
+      "src/**/*.ts",
+      "!src/**/*.d.ts",
+      "!src/**/__tests__/**",
+      "!src/**/tests/**",
+      "!src/cli/**"
+    ],
+    "coverageDirectory": "coverage",
+    "coverageReporters": ["text", "lcov", "html", "json"],
+    "setupFilesAfterEnv": ["<rootDir>/src/test-setup.ts"],
+    "testTimeout": 30000,
+    "maxConcurrency": 5
+  }
+}
