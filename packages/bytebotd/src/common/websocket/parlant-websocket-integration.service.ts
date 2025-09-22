@@ -507,8 +507,9 @@ _${Math.random().toString(36).substring(7)}`,
 
     // Create Parlant streaming options
     const parlantStreamingOptions: ParlantStreamingOptions = {
-  enableConversationalUpdates: message.payload.streamingOptions.enableProgressUpdates,
-      conversationStyle: 'technical', // Default, could be user preferenceupdateFrequency: 'real_time',
+      enableConversationalUpdates: message.payload.streamingOptions.enableProgressUpdates,
+      conversationStyle: 'technical', // Default, could be user preference
+      updateFrequency: 'real_time',
       includeReasoning: true,
       includeAlternatives: true,
     

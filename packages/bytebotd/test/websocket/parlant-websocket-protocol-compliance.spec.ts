@@ -495,7 +495,7 @@ class ProtocolComplianceTestClient extends EventEmitter {
         passed: false,
         duration: performance.now() - testStartTime,
         details: { error: String(error) },
-        violations: [{ type: 'TEST_EXECUTION_ERROR', description: String(error), timestamp: Date.now() }],
+        violations: [{ type: 'TEST_EXECUTION_ERROR', description: String(error), timestamp: Date.now(), severity: 'HIGH' }],
       };
     }
   }
@@ -544,7 +544,7 @@ class ProtocolComplianceTestClient extends EventEmitter {
           pingDataSize: pingData.length,
           pongDataSize: pongData?.length || 0,
         },
-        violations: pongReceived ? [] : [{ type: 'PING_PONG_FAILURE', description: 'Pong not received', timestamp: Date.now() }],
+        violations: pongReceived ? [] : [{ type: 'PING_PONG_FAILURE', description: 'Pong not received', timestamp: Date.now(), severity: 'MEDIUM' }],
       };
 
     } catch (error) {
@@ -553,7 +553,7 @@ class ProtocolComplianceTestClient extends EventEmitter {
         passed: false,
         duration: performance.now() - testStartTime,
         details: { error: String(error) },
-        violations: [{ type: 'PING_PONG_ERROR', description: String(error), timestamp: Date.now() }],
+        violations: [{ type: 'PING_PONG_ERROR', description: String(error), timestamp: Date.now(), severity: 'HIGH' }],
       };
     }
   }
@@ -608,7 +608,7 @@ class ProtocolComplianceTestClient extends EventEmitter {
           averageDeliveryTime: successfulDeliveries.reduce((sum, result) => sum + (result.sendTime || 0), 0) / successfulDeliveries.length,
           averageAckTime: successfulDeliveries.reduce((sum, result) => sum + (result.acknowledgmentTime || 0), 0) / successfulDeliveries.length,
         },
-        violations: deliverySuccessRate < 0.95 ? [{ type: 'DELIVERY_GUARANTEE_FAILURE', description: `Only ${(deliverySuccessRate * 100).toFixed(1)}% delivery success rate`, timestamp: Date.now() }] : [],
+        violations: deliverySuccessRate < 0.95 ? [{ type: 'DELIVERY_GUARANTEE_FAILURE', description: `Only ${(deliverySuccessRate * 100).toFixed(1)}% delivery success rate`, timestamp: Date.now(), severity: 'HIGH' }] : [],
       };
 
     } catch (error) {
@@ -617,7 +617,7 @@ class ProtocolComplianceTestClient extends EventEmitter {
         passed: false,
         duration: performance.now() - testStartTime,
         details: { error: String(error) },
-        violations: [{ type: 'DELIVERY_TEST_ERROR', description: String(error), timestamp: Date.now() }],
+        violations: [{ type: 'DELIVERY_TEST_ERROR', description: String(error), timestamp: Date.now(), severity: 'HIGH' }],
       };
     }
   }
@@ -665,7 +665,7 @@ class ProtocolComplianceTestClient extends EventEmitter {
         passed: false,
         duration: performance.now() - testStartTime,
         details: { error: String(error) },
-        violations: [{ type: 'ERROR_HANDLING_FAILURE', description: String(error), timestamp: Date.now() }],
+        violations: [{ type: 'ERROR_HANDLING_FAILURE', description: String(error), timestamp: Date.now(), severity: 'HIGH' }],
       };
     }
   }
@@ -699,7 +699,7 @@ class ProtocolComplianceTestClient extends EventEmitter {
           connectionStable,
           stateHistory: this.connectionStateHistory.slice(-5), // Last 5 states
         },
-        violations: connectionStable ? [] : [{ type: 'CONNECTION_INSTABILITY', description: 'Connection state changed unexpectedly', timestamp: Date.now() }],
+        violations: connectionStable ? [] : [{ type: 'CONNECTION_INSTABILITY', description: 'Connection state changed unexpectedly', timestamp: Date.now(), severity: 'MEDIUM' }],
       };
 
     } catch (error) {
@@ -708,7 +708,7 @@ class ProtocolComplianceTestClient extends EventEmitter {
         passed: false,
         duration: performance.now() - testStartTime,
         details: { error: String(error) },
-        violations: [{ type: 'LIFECYCLE_TEST_ERROR', description: String(error), timestamp: Date.now() }],
+        violations: [{ type: 'LIFECYCLE_TEST_ERROR', description: String(error), timestamp: Date.now(), severity: 'HIGH' }],
       };
     }
   }

@@ -37,6 +37,12 @@ import {
   ConversationState
 } from '../interfaces/wrapper-types';
 
+// Import types needed for PARLANT integration
+import {
+  ParlantValidationResponse,
+  SecurityLevel
+} from '../../monitoring/parlant-integration.service';
+
 /**
  * Core signature-preserving wrapper implementation
  * Maintains exact function signatures while adding PARLANT validation
