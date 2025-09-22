@@ -17,6 +17,17 @@ import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';i
   LoopExecutionInfoDto
 } from './dto/workflow-response.dto';
 
+interface WorkflowExecutionContext {
+  executionId: string;
+  workflow: WorkflowDto;
+  variables: Record<string, unknown>;
+  stepResults: Map<string, StepExecutionResultDto>;
+  statistics: WorkflowExecutionStatsDto;
+  startTime: number;
+  status: WorkflowExecutionStatus;
+  progress: WorkflowExecutionProgressDto;
+}
+
 /**
  * Workflow Automation Service
  *
@@ -55,12 +66,24 @@ export class WorkflowAutomationService {
       // Validate workflow before execution
       const validation = await this.validateWorkflow(execution.workflow);
       if (!validation.isValid) {
-        throw new Error(`Workflow validation failed: ${validation.errors?.join(`, ')}`);}// Initialize execution context
-      const executionContext = this.initializeExecutionContext(execution, executionId);
+        throw new Error(`Workflow validation failed: ${validation.errors?.join(', ')}`);
+      }
+
+      // Initialize execution context
+      const executionContext: WorkflowExecutionContext = this.initializeExecutionContext(execution, executionId);
       this.activeExecutions.set(executionId, executionContext);
 
       // Execute workflow based on execution mode
-      const result = await this.executeWorkflowSteps(executionContext);
+      const result: {
+        status: WorkflowExecutionStatus;
+        progress: WorkflowExecutionProgressDto;
+        stepResults: StepExecutionResultDto[];
+        statistics: WorkflowExecutionStatsDto;
+        outputData: Record<string, unknown>;
+        errorMessage?: string;
+        errorDetails?: { code: string; message: string; details?: Record<string, unknown> };
+        warnings?: string[];
+      } = await this.executeWorkflowSteps(executionContext);
 
       const endTime = Date.now();
       const durationMs = endTime - startTime;
@@ -88,7 +111,9 @@ export class WorkflowAutomationService {
 
       this.activeExecutions.delete(executionId);
 
-      this.logger.log(`[${executionId}] Workflow execution completed: ${result.status} (${durationMs}ms)`, {executionId,status: result.status,
+      this.logger.log(`[${executionId}] Workflow execution completed: ${result.status} (${durationMs}ms)`, {
+        executionId,
+        status: result.status,
         durationMs,
         completedSteps: result.progress.completedSteps,
         failedSteps: result.progress.failedSteps
@@ -163,14 +188,17 @@ export class WorkflowAutomationService {
   /**
    * Get workflow execution status
    */
-  async getExecutionStatus(executionId: string): Promise<Partial<WorkflowExecutionResponseDto>> {
+  getExecutionStatus(executionId: string): Partial<WorkflowExecutionResponseDto> {
     const execution = this.activeExecutions.get(executionId);
     if (!execution) {
-      throw new HttpException('Execution not found', HttpStatus.NOT_FOUND);}return {
+      throw new HttpException('Execution not found', HttpStatus.NOT_FOUND);
+    }
+
+    return {
       executionId,
-      status: execution.status,
-      progress: execution.progress,
-      stepResults: execution.stepResults.filter((r: any) => r.status !== StepExecutionStatus.PENDING)
+      status: execution.status as WorkflowExecutionStatus,
+      progress: execution.progress as WorkflowExecutionProgressDto,
+      stepResults: Array.from(execution.stepResults.values()).filter((r: StepExecutionResultDto) => r.status !== StepExecutionStatus.PENDING)
     };
   }
 
@@ -669,47 +697,58 @@ export class WorkflowAutomationService {
 
   // Placeholder implementations for specific step types
 
-  private async executeNavigation(config: any): Promise<any> {
-    this.logger.log('Executing navigation step', config);return { navigated: true, url: config.url };}
+  private executeNavigation(config: { url: string }): { navigated: boolean; url: string } {
+    this.logger.log('Executing navigation step', config);
+    return { navigated: true, url: config.url };
+  }
 
-  private async executeWait(config: any): Promise<any> {
+  private async executeWait(config: { duration?: number }): Promise<{ waited: number }> {
     const duration = config.duration || 1000;
     await new Promise(resolve => setTimeout(resolve, duration));
     return { waited: duration };
   }
 
-  private async executeNotification(config: any): Promise<any> {
-    this.logger.log('Sending notification', config);return { notificationSent: true, message: config.message };}
+  private executeNotification(config: { message: string }): { notificationSent: boolean; message: string } {
+    this.logger.log('Sending notification', config);
+    return { notificationSent: true, message: config.message };
+  }
 
-  private async executeApiCall(config: any): Promise<any> {
-    this.logger.log('Making API call', config);return { apiCallMade: true, endpoint: config.url };}
+  private executeApiCall(config: { url: string }): { apiCallMade: boolean; endpoint: string } {
+    this.logger.log('Making API call', config);
+    return { apiCallMade: true, endpoint: config.url };
+  }
 
-  private async executeFileOperation(config: any): Promise<any> {
-    this.logger.log('Executing file operation', config);return { fileOperationCompleted: true, operation: config.operation };}
+  private executeFileOperation(config: { operation: string }): { fileOperationCompleted: boolean; operation: string } {
+    this.logger.log('Executing file operation', config);
+    return { fileOperationCompleted: true, operation: config.operation };
+  }
 
-  private async executeCustomScript(config: any, variables: Record<string, any>): Promise<any> {
+  private executeCustomScript(config: Record<string, unknown>, variables: Record<string, unknown>): { scriptExecuted: boolean; variables: Record<string, unknown> } {
     this.logger.log('Executing custom script', config);
     return { scriptExecuted: true, variables };
   }
 
-  private async handleStepError(step: WorkflowStepDto, context: any, stepResult: StepExecutionResultDto, error: Error): Promise<void> {
+  private handleStepError(step: WorkflowStepDto, context: WorkflowExecutionContext, stepResult: StepExecutionResultDto, error: Error): void {
     // Implement retry logic, fallback steps, etc.
     this.logger.error(`Step ${step.id} failed: ${error.message}`);
   }
 
-  private async applyDataTransformation(transformation: any, context: any): Promise<void> {
+  private applyDataTransformation(transformation: Record<string, unknown>, context: WorkflowExecutionContext): void {
     // Implement data transformation logic
-    this.logger.log('Applying data transformation', transformation);}private validateStepConfiguration(step: WorkflowStepDto, errors: string[], warnings: string[]): Promise<void> {
+    this.logger.log('Applying data transformation', transformation);
+  }
+
+  private validateStepConfiguration(step: WorkflowStepDto, errors: string[], warnings: string[]): Promise<void> {
     // Validate step-specific configuration
     return Promise.resolve();
   }
 
-  private validateDependencies(steps: WorkflowStepDto[]): any {
+  private validateDependencies(steps: WorkflowStepDto[]): { hasCircularDependencies: boolean; unreachableSteps: string[] } {
     // Check for circular dependencies
     return { hasCircularDependencies: false, unreachableSteps: [] };
   }
 
-  private generateRecommendations(workflow: WorkflowDto, stats: Record<string, any>): string[] {
+  private generateRecommendations(workflow: WorkflowDto, stats: { stepsWithErrorHandling: number; totalSteps: number }): string[] {
     const recommendations: string[] = [];
 
     if (stats.stepsWithErrorHandling < stats.totalSteps * 0.8) {

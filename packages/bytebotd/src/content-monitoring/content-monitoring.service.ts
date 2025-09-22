@@ -860,8 +860,15 @@ class MonitorInstance {
 
     switch (this.config.type) {
       case MonitoringType.TEXT_CHANGE:
-        return `Sample text content - ${timestamp} - Value: ${randomValue}`;case MonitoringType.ELEMENT_CHANGE:return `<div class="monitor-element">Content ${randomValue}</div>";case MonitoringType.PAGE_CHANGE:
-        return `Full page content simulation - ${timestamp} - Random: ${randomValue}`;default:return `Generic content simulation - ${timestamp} - Value: ${randomValue}`;}}
+        return `Sample text content - ${timestamp} - Value: ${randomValue}`;
+      case MonitoringType.ELEMENT_CHANGE:
+        return `<div class="monitor-element">Content ${randomValue}</div>`;
+      case MonitoringType.PAGE_CHANGE:
+        return `Full page content simulation - ${timestamp} - Random: ${randomValue}`;
+      default:
+        return `Generic content simulation - ${timestamp} - Value: ${randomValue}`;
+    }
+  }
 
   private scheduleNextCheck(): void {
     if (this.intervalId) {

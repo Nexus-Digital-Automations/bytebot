@@ -121,13 +121,42 @@ export const keyInfoMap: Record<number, KeyInfo> = {
   [UiohookKey.F24]: {
     name: 'F24',isPrintable: false,},
   [UiohookKey.Semicolon]: {
-    name: 'Semicolon',isPrintable: true,string: ';',shiftString: ':',},[UiohookKey.Equal]: {
-    name: 'Equal',isPrintable: true,string: '=',shiftString: '+',},[UiohookKey.Comma]: {
-    name: 'Comma',isPrintable: true,string: ',',shiftString: '"",},
+    name: 'Semicolon',
+    isPrintable: true,
+    string: ';',
+    shiftString: ':',
+  },
+  [UiohookKey.Equal]: {
+    name: 'Equal',
+    isPrintable: true,
+    string: '=',
+    shiftString: '+',
+  },
+  [UiohookKey.Comma]: {
+    name: 'Comma',
+    isPrintable: true,
+    string: ',',
+    shiftString: '<',
+  },
   [UiohookKey.Minus]: {
-    name: 'Minus',isPrintable: true,string: '-',shiftString: '',},[UiohookKey.Period]: {
-    name: 'Period',isPrintable: true,string: '.',shiftString: '>',},[UiohookKey.Slash]: {
-    name: 'Slash',isPrintable: true,string: '/',shiftString: '?',},[UiohookKey.Backquote]: {
+    name: 'Minus',
+    isPrintable: true,
+    string: '-',
+    shiftString: '_',
+  },
+  [UiohookKey.Period]: {
+    name: 'Period',
+    isPrintable: true,
+    string: '.',
+    shiftString: '>',
+  },
+  [UiohookKey.Slash]: {
+    name: 'Slash',
+    isPrintable: true,
+    string: '/',
+    shiftString: '?',
+  },
+  [UiohookKey.Backquote]: {
     name: 'Grave',isPrintable: true,string: '``,shiftString: '~',},[UiohookKey.BracketLeft]: {
     name: 'LeftBracket',isPrintable: true,string: '[',shiftString: '{',},[UiohookKey.BracketRight]: {
     name: 'RightBracket',isPrintable: true,string: ']',shiftString: '}',},[UiohookKey.Backslash]: {

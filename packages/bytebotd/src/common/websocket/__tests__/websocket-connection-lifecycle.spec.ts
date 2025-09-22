@@ -816,10 +816,10 @@ class ConnectionPoolManager extends EventEmitter {
       this.setupClientEventHandlers(client);
 
       connectionPromises.push(
-        client.connect().catch(error => {
-  this.poolMetrics.failedConnections++;
-          this.emit('connectionFailed', { clientId, error 
-});}));
+        client.connect().catch((error: unknown) => {
+          this.poolMetrics.failedConnections++;
+          this.emit('connectionFailed', { clientId, error: error instanceof Error ? error : new Error(String(error)) });
+        }));
     }
 
     await Promise.allSettled(connectionPromises);
@@ -1141,16 +1141,17 @@ describe('WebSocket Connection Lifecycle Management Testing Suite', () => {
 
 
     it('should handle connection timeout gracefully', async () => {
-// Use invalid URL to trigger timeoutconst client = new ConnectionLifecycleTestClient('ws://invalid-host:9999', 'timeout_test_client', connectionTimeout: 1000,});
+      // Use invalid URL to trigger timeout
+      const client = new ConnectionLifecycleTestClient('ws://invalid-host:9999', 'timeout_test_client', {
+        connectionTimeout: 1000,
+      });
 
       let connectionError: Error | null = null;
       try {
-  await client.connect();
-      
-} catch (error) {
-  connectionError = error as Error;
-      
-}
+        await client.connect();
+      } catch (error) {
+        connectionError = error instanceof Error ? error : new Error(String(error));
+      }
 
   expect(connectionError).not.toBeNull();
       expect(client.getState()).toBe(ConnectionState.ERROR);
@@ -1199,7 +1200,7 @@ describe('WebSocket Connection Lifecycle Management Testing Suite', () => {
 
       const stateTransitions: Array<{ from: ConnectionState; to: ConnectionState }> = [];
 
-      client.on(ConnectionLifecycleEvent.STATE_TRANSITION, (data) => {
+      client.on(ConnectionLifecycleEvent.STATE_TRANSITION, (data: { from: ConnectionState; to: ConnectionState }) => {
         stateTransitions.push({ from: data.from, to: data.to });
       });
 
@@ -1739,9 +1740,9 @@ ms`,
 
 
 
-    it('should monitor connection health and stability', async () => {
-
-  const stats = conversationalService.getServerStatistics();// Validate server statistics include connection lifecycle metrics
+    it('should monitor connection health and stability', () => {
+      // Validate server statistics include connection lifecycle metrics
+      const stats = conversationalService.getServerStatistics();
       expect(stats).toHaveProperty('server');
 expect(stats).toHaveProperty('performance');
 expect(stats).toHaveProperty('sessions');

@@ -332,9 +332,9 @@ import {
         },
         categories: { type: 'array', items: { type: 'string' } }}}
   })
-  async getWorkflowTemplates(
+  getWorkflowTemplates(
     @Query('category') category?: string,
-  ): Promise<{
+  ): {
     templates: {
       id: string;
       name: string;
@@ -397,7 +397,7 @@ import {
         },
         executionModes: { type: 'array', items: { type: 'string' } }}}
   })
-  async getStepTypes(): Promise<{
+  getStepTypes(): {
     stepTypes: {
       type: WorkflowStepType;
       name: string;

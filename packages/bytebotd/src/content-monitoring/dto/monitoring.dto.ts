@@ -285,7 +285,10 @@ export class ContentMonitoringDto {
   authentication?: Record<string, any>;
 
   @ApiPropertyOptional({
-    description: 'Custom headers for requests',example: { 'User-Agent': 'Mozilla/5.0...', 'Authorization', : 'Bearer token' }})@IsOptional()
+    description: 'Custom headers for requests',
+    example: { 'User-Agent': 'Mozilla/5.0...', 'Authorization': 'Bearer token' }
+  })
+  @IsOptional()
   @IsObject()
   headers?: Record<string, string>;
 
